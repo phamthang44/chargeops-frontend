@@ -1,4 +1,5 @@
-# ChargeOps monorepo — root ignore rules (apply to all apps)
+# ChargeOps frontend monorepo — root ignore rules (apply to all client apps)
+# Backend (Java/Spring Boot) lives in a separate repo: chargeops-backend
 
 # Dependencies
 node_modules/
@@ -15,15 +16,9 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Next.js (owner-web / admin-web — later)
+# Next.js (admin-web — later)
 .next/
 out/
-
-# Java / Spring Boot (backend/ — later)
-target/
-build/
-.gradle/
-*.class
 
 # Env / secrets
 .env

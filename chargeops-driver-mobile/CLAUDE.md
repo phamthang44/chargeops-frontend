@@ -37,19 +37,38 @@ EV charging station booking & management platform (final-year project). This is 
 **Never hardcode colors, spacing, radii, or font sizes.** Import from `@/theme`
 (`colors`, `spacing`, `radius`, `typography`). The token values mirror the shared design system at
 [`../DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md) — that file is the source of truth for the whole platform.
+Font sizes use the `fontSizes` scale (`display` 28 · `title` 24 · `heading` 18 · `body` 14 ·
+`caption` 12) with matching `lineHeights` — use `fontSizes.display`/`lineHeights.display` for big
+screen headlines (splash, auth), not raw numbers.
+
+## Third rule: all UI strings go through i18n
+**Never hardcode user-facing text.** Use `react-i18next`: `const { t } = useTranslation();` then
+`t('namespace.key')`. Strings live in `src/i18n/locales/{vi,en}.json`, namespaced by screen/area
+(`welcome.title`, `common.terms`, `nav.*`). Default language is **Vietnamese (`vi`)**; `en` is supported
+and the device locale is auto-detected on launch (fallback `vi`). Add every new key to **both** locale files.
+- **All screens + navigation titles are migrated** — follow the existing pattern; don't reintroduce literals.
+- **Pinned versions:** `i18next@24` + `react-i18next@15` (newer majors break Metro's resolver — do not upgrade).
+- **Navigation titles** (`BottomTabs`, `RootNavigator`) call `t()` inside the component so they re-render on language change.
+- **Service-layer errors** are language-agnostic: `authService` throws stable **codes** (`EMAIL_EXISTS`,
+  `INVALID_CREDENTIALS`, `INVALID_OTP`); screens map them with `authErrorMessage(t, e)` (`@/i18n/authErrors`)
+  → `auth.errors.<CODE>`. Follow this pattern for future services.
+- **Language switch:** `<LanguageSwitcher />` (`@/components`) calls `i18n.changeLanguage(...)`. It's on the
+  Welcome screen (pre-login) and Profile (post-login). Choice is in-memory only — **persistence
+  (e.g. expo-secure-store) is a future step** so it resets to the device locale on relaunch.
 
 ## Folder structure
 ```
 src/
   screens/      # one component per screen (see screen list below)
-  components/   # reusable UI — AppButton, Card (add Badge, Chip, etc. here)
+  components/   # reusable UI — AppButton, Card, TextField, PasswordField, PhoneField, Checkbox, OtpInput, LanguageSwitcher
   navigation/   # RootNavigator (stack), BottomTabs (5 tabs), types.ts (param lists)
   services/     # DATA LAYER — stationService, bookingService, authService (mock now, REST later)
   mock/         # fake data — stations.mock.ts, bookings.mock.ts, users.mock.ts
   context/      # AuthContext (in-memory session + signIn/signOut, useAuth hook)
+  i18n/         # i18next config + locales/{vi,en}.json (UI strings)
   theme/        # design tokens — colors, spacing, typography, index (barrel)
   types/        # domain types mirroring the DB schema
-App.tsx         # SafeAreaProvider > AuthProvider > RootNavigator
+App.tsx         # imports '@/i18n' (init) > SafeAreaProvider > AuthProvider > RootNavigator
 ```
 
 ## Navigation map

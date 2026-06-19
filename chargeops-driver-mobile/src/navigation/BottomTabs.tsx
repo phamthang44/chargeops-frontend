@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useTranslation } from 'react-i18next';
 
 import { colors, fontSizes } from '@/theme';
 import { BookingHistoryScreen } from '@/screens/BookingHistoryScreen';
@@ -13,6 +14,8 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 /** Bottom tabs (5): Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ. */
 export function BottomTabs() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -27,7 +30,9 @@ export function BottomTabs() {
         name="StationList"
         component={StationListScreen}
         options={{
-          title: 'Tìm trạm',
+          title: t('nav.stationList'),
+          // Screen draws its own app bar (ChargeOps + TÀI XẾ); hide the default tab header.
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
         }}
       />
@@ -35,7 +40,7 @@ export function BottomTabs() {
         name="Map"
         component={MapScreen}
         options={{
-          title: 'Bản đồ',
+          title: t('nav.map'),
           tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
         }}
       />
@@ -43,7 +48,7 @@ export function BottomTabs() {
         name="Bookings"
         component={BookingsScreen}
         options={{
-          title: 'Đặt chỗ',
+          title: t('nav.bookings'),
           tabBarIcon: ({ color, size }) => <Ionicons name="bookmark-outline" size={size} color={color} />,
         }}
       />
@@ -51,7 +56,7 @@ export function BottomTabs() {
         name="BookingHistory"
         component={BookingHistoryScreen}
         options={{
-          title: 'Lịch sử',
+          title: t('nav.history'),
           tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />,
         }}
       />
@@ -59,7 +64,7 @@ export function BottomTabs() {
         name="Profile"
         component={ProfileScreen}
         options={{
-          title: 'Hồ sơ',
+          title: t('nav.profile'),
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
         }}
       />

@@ -1,40 +1,54 @@
-# ChargeOps
+# ChargeOps — Frontend
 
 EV charging station booking & management platform for Vietnam — BSc (Hons) Computing Final Year
 Project. ChargeOps connects independent EV charging station owners with EV drivers: drivers discover
 stations, pre-book time slots, pay upfront, and check in by QR; owners manage stations, chargers,
 slots and pricing; admins approve stations, provision chargers, and monitor the platform.
 
-This is a **monorepo** — all client apps, the backend, design assets, and documentation live here.
+This repository is the **frontend monorepo** — it holds all the client apps plus the shared design
+system, design assets, and project documents. **The backend lives in a separate repository.**
 
-## Structure
+## Repositories
+
+ChargeOps is split into two repos:
+
+| Repo | Contents | Stack |
+|---|---|---|
+| **`chargeops-frontend`** (this repo) | Driver / owner / admin client apps + shared design system | React Native (Expo), React/Next.js |
+| **`chargeops-backend`** (separate) | REST API, business logic, database, auth | Java 17 + Spring Boot 3.x, PostgreSQL + PostGIS |
+
+The clients talk to the backend **only over REST**. During development the client service layer
+returns mock data; pointing it at the real `chargeops-backend` API later does not change any UI.
+
+## Structure (this repo)
 
 ```
-chargeops/
+chargeops-frontend/
   chargeops-driver-mobile/   # Driver app — Expo / React Native (active)
-  chargeops-owner-web/       # Station-owner app — planned
+  chargeops-owner-web/       # Station-owner app — planned (per SRS this is a mobile app)
   chargeops-admin-web/       # Admin panel — Next.js, planned
-  backend/                   # Spring Boot REST API + PostgreSQL — planned
   designs/                   # Visily screen exports (visual reference)
   documents/                 # SRS and project documents
   DESIGN_SYSTEM.md           # Shared design tokens & component vocabulary (source of truth)
 ```
 
-Each app is **self-contained** (its own `package.json` / `node_modules`). Shared visual rules live in
+Each app is **self-contained** (its own `package.json` / `node_modules`) — a single git repo at this
+root tracks them all (no per-app `.git`). Shared visual rules live in
 [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md); the authoritative behavior spec is the SRS in
 [`documents/`](documents/).
 
 ## Tech stack (per SRS)
 
-| Part | Stack |
-|---|---|
-| Driver & Owner clients | React Native (Expo) — mobile (iOS/Android) |
-| Admin client | React / Next.js — web |
-| Backend | Java 17 + Spring Boot 3.x, layered (Controller → Service → Repository) |
-| Database | PostgreSQL + PostGIS |
-| Auth | JWT access + refresh tokens, role-based (DRIVER / OWNER / ADMIN) |
-| Payments | VNPay / MoMo / ZaloPay (sandbox only) |
-| Maps | Google Maps API (OpenStreetMap fallback) |
+| Part | Stack | Repo |
+|---|---|---|
+| Driver client | React Native (Expo) — mobile (iOS/Android) | this repo |
+| Owner client | React Native (Expo) — mobile (per SRS) | this repo |
+| Admin client | React / Next.js — web | this repo |
+| Backend API | Java 17 + Spring Boot 3.x, layered (Controller → Service → Repository) | `chargeops-backend` |
+| Database | PostgreSQL + PostGIS | `chargeops-backend` |
+| Auth | JWT access + refresh tokens, role-based (DRIVER / OWNER / ADMIN) | `chargeops-backend` |
+| Payments | VNPay / MoMo / ZaloPay (sandbox only) | `chargeops-backend` |
+| Maps | Google Maps API (OpenStreetMap fallback) | clients |
 
 ## Driver app — getting started
 
@@ -47,9 +61,11 @@ npm install
 npm start          # scan the QR in Expo Go (SDK 54)
 ```
 
-Architecture rule across all clients: **UI never calls data directly — everything flows through a
-service layer** (mock now, real REST later), and **styling uses design tokens only** (no hardcoded
-colors/spacing).
+Architecture rules across all clients:
+- **UI never calls data directly** — everything flows through a service layer (mock now, real
+  `chargeops-backend` REST later); swapping the implementation does not change any UI.
+- **Styling uses design tokens only** (no hardcoded colors/spacing/font sizes).
+- **All user-facing text goes through i18n** (Vietnamese default, English supported).
 
 ## Author
 

@@ -86,11 +86,14 @@ Compact sans-serif (system default: SF Pro / Roboto).
 
 | Role | Size | Weight | Used for |
 |---|---|---|---|
+| `display` | 28 | bold (700) | large screen headlines (splash, auth screens) |
 | `title` | 24 | bold (700) | screen titles ("Chào mừng trở lại", "Bản đồ") |
 | `heading` | 18 | semibold (600) | section headers, list item names |
 | `body` | 14 | regular/medium | body, addresses, labels |
 | `caption` | 12 | regular | metadata, tab labels, badge text, helper text |
 
+- Each font size has a matching `lineHeights` token (`display` 36 · `title` 32 · `heading` 24 ·
+  `body` 20 · `caption` 16). **Never hardcode `fontSize`/`lineHeight`** — always use a token.
 - **Prices** are rendered in `primaryDark` green, semibold (e.g. `3.850đ/kWh`, `45.000đ`).
 - KPI numbers are oversized + bold (dashboard stats).
 
@@ -123,12 +126,21 @@ Line icons (Ionicons-style), ~24px, inherit text/accent color. Lightning bolt �
 
 ---
 
-## 9. Localization & formatting
+## 9. Localization & formatting (i18n)
 
-- **UI language: Vietnamese.** Code and comments in English.
+- **Default UI language: Vietnamese (`vi`).** English (`en`) is a supported secondary language.
+  Code, identifiers, and comments stay in English.
+- **All user-facing strings go through i18n** (`react-i18next`) — never hardcode display strings in
+  screens/components. Use the `useTranslation()` hook and `t('namespace.key')`.
+- Keys are namespaced by screen/area (`welcome.title`, `common.terms`). Every key must exist in **both**
+  locale files. Add new strings to all locales together.
+- The app detects the device locale on launch and falls back to `vi` if unsupported. Runtime switch:
+  `i18n.changeLanguage('en')`.
 - Currency: Vietnamese đồng, grouped with `.` thousands separators — `3.850đ`, `45.000đ`, `1.250k`.
 - Phone: `+84` country prefix default.
 - Dates/times: 24h (`14:00 - 15:00`), Vietnamese weekday abbreviations (`Th 2`…`Th 7`, CN).
+- Implementation per app: an `src/i18n/` module (i18next config + `locales/{vi,en}.json`), initialized
+  once in `App.tsx`. See the driver app's `CLAUDE.md` for the concrete setup.
 
 ---
 

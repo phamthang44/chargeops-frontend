@@ -2,11 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, OtpInput } from '@/components';
 import { useAuth } from '@/context/AuthContext';
+import { authErrorMessage } from '@/i18n/authErrors';
 import type { RootStackParamList } from '@/navigation/types';
 import { resendOtp, verifyOtp } from '@/services/authService';
 import { colors, fontSizes, fontWeights, lineHeights, spacing } from '@/theme';
@@ -30,6 +32,7 @@ function maskTarget(channel: 'phone' | 'email', target: string): string {
 export function OtpVerificationScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
+  const { t } = useTranslation();
   const { signIn } = useAuth();
 
   const [code, setCode] = useState('');
@@ -50,7 +53,7 @@ export function OtpVerificationScreen() {
       const session = await verifyOtp(params.target, code);
       signIn(session);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Xác minh thất bại.');
+      setError(authErrorMessage(t, e));
     } finally {
       setSubmitting(false);
     }
@@ -70,40 +73,43 @@ export function OtpVerificationScreen() {
         <Pressable onPress={() => navigation.goBack()} style={styles.headerBtn} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={colors.textStrong} />
         </Pressable>
-        <Text style={styles.headerTitle}>Xác minh OTP</Text>
+        <Text style={styles.headerTitle}>{t('otp.headerTitle')}</Text>
         <View style={styles.headerBtn} />
       </View>
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.body}>
-          <Text style={styles.title}>Nhập mã xác minh</Text>
+          <Text style={styles.title}>{t('otp.title')}</Text>
           <Text style={styles.subtitle}>
-            Chúng tôi đã gửi mã gồm 6 chữ số đến {params.channel === 'phone' ? 'số' : 'email'}{' '}
-            <Text style={styles.target}>{maskTarget(params.channel, params.target)}</Text>.
+            <Trans
+              i18nKey={params.channel === 'phone' ? 'otp.sentToPhone' : 'otp.sentToEmail'}
+              values={{ target: maskTarget(params.channel, params.target) }}
+              components={[<Text key="t" style={styles.target} />]}
+            />
           </Text>
 
           <OtpInput value={code} onChangeText={setCode} length={6} error={!!error} />
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <View style={styles.resendRow}>
-            <Text style={styles.resendText}>Không nhận được mã? </Text>
+            <Text style={styles.resendText}>{t('otp.noCode')}</Text>
             {cooldown > 0 ? (
-              <Text style={styles.resendMuted}>Gửi lại sau {cooldown}s</Text>
+              <Text style={styles.resendMuted}>{t('otp.resendIn', { seconds: cooldown })}</Text>
             ) : (
               <Pressable onPress={handleResend} hitSlop={6}>
-                <Text style={styles.resendLink}>Gửi lại mã</Text>
+                <Text style={styles.resendLink}>{t('otp.resend')}</Text>
               </Pressable>
             )}
           </View>
 
           <Pressable onPress={() => navigation.goBack()} hitSlop={6}>
-            <Text style={styles.changeLink}>Đổi số điện thoại</Text>
+            <Text style={styles.changeLink}>{t('otp.changeNumber')}</Text>
           </Pressable>
         </View>
 
         <View style={styles.footer}>
           <AppButton
-            label="Xác minh"
+            label={t('otp.cta')}
             onPress={handleVerify}
             loading={submitting}
             disabled={code.length !== 6 || submitting}
@@ -129,7 +135,7 @@ const styles = StyleSheet.create({
   headerBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
   body: { flex: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing.lg },
-  title: { fontSize: 26, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: 34 },
+  title: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: lineHeights.display },
   subtitle: { fontSize: fontSizes.body, color: colors.textMuted, lineHeight: lineHeights.body },
   target: { color: colors.textStrong, fontWeight: fontWeights.semibold },
   error: { fontSize: fontSizes.caption, color: colors.error },

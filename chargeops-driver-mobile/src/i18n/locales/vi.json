@@ -1,0 +1,193 @@
+{
+  "common": {
+    "terms": "Điều khoản dịch vụ",
+    "privacy": "Chính sách bảo mật",
+    "continue": "Tiếp tục",
+    "loading": "Đang tải…",
+    "language": "Ngôn ngữ"
+  },
+  "nav": {
+    "stationList": "Tìm trạm",
+    "map": "Bản đồ",
+    "bookings": "Đặt chỗ",
+    "history": "Lịch sử",
+    "profile": "Hồ sơ",
+    "stationDetail": "Chi tiết trạm",
+    "slotPicker": "Chọn khung giờ",
+    "qrCheckIn": "Quét QR Check-in"
+  },
+  "auth": {
+    "errors": {
+      "EMAIL_EXISTS": "Email đã tồn tại. Vui lòng dùng email khác hoặc đăng nhập.",
+      "INVALID_OTP": "Mã xác minh không đúng. Vui lòng thử lại.",
+      "INVALID_CREDENTIALS": "Email hoặc mật khẩu không đúng.",
+      "GENERIC": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    }
+  },
+  "settings": {
+    "open": "Cài đặt",
+    "title": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "appearance": "Giao diện",
+    "appearanceOptions": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    },
+    "more": "Khác",
+    "notifications": "Thông báo",
+    "help": "Trợ giúp & hỗ trợ",
+    "about": "Giới thiệu",
+    "comingSoon": "Sắp ra mắt"
+  },
+  "welcome": {
+    "title": "Sạc xe dễ dàng",
+    "subtitle": "Giải pháp quản lý và đặt chỗ\ntrạm sạc xe điện thông minh tại\nViệt Nam.",
+    "features": {
+      "fast": "SẠC NHANH\nCHÓNG",
+      "find": "TÌM TRẠM\nGẦN NHẤT",
+      "pay": "THANH TOÁN\nTIỆN LỢI"
+    },
+    "coverage": "Phủ sóng hơn 1000+ trạm sạc toàn quốc",
+    "cta": "Đăng nhập / Đăng ký",
+    "agreePrefix": "Bằng cách tiếp tục, bạn đồng ý với ",
+    "and": " & "
+  },
+  "login": {
+    "headerTitle": "Đăng nhập",
+    "title": "Chào mừng trở lại",
+    "subtitle": "Đăng nhập bằng email và mật khẩu để tiếp tục sử dụng dịch vụ sạc xe điện thông minh.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "forgot": "Quên mật khẩu?",
+    "securityNote": "Thông tin của bạn được bảo mật tuyệt đối theo tiêu chuẩn mã hóa AES-256.",
+    "cta": "Đăng nhập",
+    "noAccount": "Chưa có tài khoản? ",
+    "signUp": "Đăng ký"
+  },
+  "register": {
+    "headerTitle": "Đăng ký",
+    "title": "Tạo tài khoản tài xế",
+    "subtitle": "Đăng ký để tìm trạm, đặt chỗ và thanh toán phiên sạc dễ dàng.",
+    "nameLabel": "Họ và tên",
+    "namePlaceholder": "Nguyễn Văn An",
+    "emailLabel": "Email",
+    "emailPlaceholder": "example@email.com",
+    "phoneLabel": "Số điện thoại",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "Ít nhất 8 ký tự",
+    "confirmLabel": "Xác nhận mật khẩu",
+    "confirmPlaceholder": "Nhập lại mật khẩu",
+    "agreePrefix": "Tôi đồng ý với ",
+    "agreeMid": " và ",
+    "agreeSuffix": " của ChargeOps.",
+    "cta": "Đăng ký",
+    "hasAccount": "Đã có tài khoản? ",
+    "signIn": "Đăng nhập",
+    "errors": {
+      "name": "Vui lòng nhập họ tên hợp lệ.",
+      "email": "Email không hợp lệ.",
+      "phone": "Số điện thoại không hợp lệ.",
+      "password": "Mật khẩu cần ít nhất 8 ký tự.",
+      "confirm": "Mật khẩu xác nhận không khớp."
+    }
+  },
+  "otp": {
+    "headerTitle": "Xác minh OTP",
+    "title": "Nhập mã xác minh",
+    "sentToPhone": "Chúng tôi đã gửi mã gồm 6 chữ số đến số <0>{{target}}</0>.",
+    "sentToEmail": "Chúng tôi đã gửi mã gồm 6 chữ số đến email <0>{{target}}</0>.",
+    "noCode": "Không nhận được mã? ",
+    "resendIn": "Gửi lại sau {{seconds}}s",
+    "resend": "Gửi lại mã",
+    "changeNumber": "Đổi số điện thoại",
+    "cta": "Xác minh"
+  },
+  "stationList": {
+    "title": "Tìm trạm",
+    "role": "TÀI XẾ",
+    "searchPlaceholder": "Tìm trạm sạc, địa chỉ…",
+    "loaded": "Đã tải {{count}} trạm sạc từ service layer (mock).",
+    "ports": "Còn {{available}}/{{total}} cổng",
+    "full": "Hết chỗ",
+    "nearby": "Trạm sạc gần bạn",
+    "updated": "Cập nhật {{minutes}} phút trước",
+    "eta": "{{minutes}} phút lái xe",
+    "directions": "Chỉ đường",
+    "viewDetail": "Xem chi tiết",
+    "empty": "Không tìm thấy trạm sạc phù hợp.",
+    "filters": {
+      "all": "Tất cả",
+      "dc": "Sạc nhanh (DC)",
+      "open": "Đang mở",
+      "cheap": "Giá rẻ"
+    },
+    "promoTitle": "Ưu đãi hôm nay",
+    "promoBody": "Giảm 20% phí sạc tại các trạm chọn lọc từ 22h – 6h sáng."
+  },
+  "map": {
+    "title": "Bản đồ",
+    "placeholder": "Màn hình bản đồ trạm sạc (placeholder)",
+    "body": "Bản đồ Google Maps sẽ hiển thị ở đây."
+  },
+  "bookings": {
+    "title": "Đặt chỗ",
+    "placeholder": "Lượt đặt chỗ sắp tới / đang hoạt động (placeholder)",
+    "active": "Có {{count}} lượt đặt chỗ đang hoạt động (mock)."
+  },
+  "history": {
+    "title": "Lịch sử",
+    "placeholder": "Màn hình lịch sử đặt chỗ (placeholder)",
+    "loaded": "Đã tải {{count}} lượt đặt chỗ (mock)."
+  },
+  "profile": {
+    "title": "Hồ sơ",
+    "placeholder": "Màn hình hồ sơ người dùng (placeholder)",
+    "role": "Vai trò: {{role}}",
+    "signOut": "Đăng xuất",
+    "notSignedIn": "Chưa đăng nhập."
+  },
+  "stationDetail": {
+    "title": "Chi tiết trạm",
+    "placeholder": "Màn hình chi tiết trạm (placeholder)",
+    "cta": "Chọn khung giờ",
+    "open": "Đang mở cửa",
+    "closed": "Đã đóng cửa",
+    "reviews": "{{count}} đánh giá",
+    "amenitiesTitle": "Tiện ích",
+    "amenities": {
+      "wifi": "Wifi miễn phí",
+      "food": "Cafe & Ăn",
+      "parking": "Đỗ xe rộng",
+      "security": "An ninh 24/7",
+      "restroom": "WC sạch sẽ"
+    },
+    "refundTitle": "Chính sách hoàn tiền",
+    "refundLine1": "Hoàn 100% nếu hủy trước 60 phút.",
+    "refundLine2": "Hoàn 50% nếu hủy trong khoảng 30–60 phút.",
+    "refundLine3": "Không hoàn tiền nếu hủy dưới 30 phút hoặc không đến.",
+    "chargerList": "Danh sách bộ sạc",
+    "chargerCount": "{{available}}/{{total}} đang trống",
+    "descriptionTitle": "Mô tả trạm",
+    "priceFrom": "Giá từ",
+    "status": {
+      "AVAILABLE": "Sẵn sàng",
+      "IN_USE": "Đang sạc",
+      "DISABLED": "Tạm khóa",
+      "MAINTENANCE": "Bảo trì"
+    }
+  },
+  "slotPicker": {
+    "title": "Chọn khung giờ",
+    "placeholder": "Màn hình chọn khung giờ (placeholder)",
+    "notChosen": "(chưa chọn)",
+    "cta": "Tiếp tục thanh toán"
+  },
+  "qrCheckIn": {
+    "title": "Quét QR Check-in",
+    "placeholder": "Màn hình quét QR (placeholder)",
+    "none": "(chưa có)"
+  }
+}

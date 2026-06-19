@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ import type { Booking } from '@/types';
  * Placeholder: reads bookings via the service layer and shows active count.
  */
 export function BookingsScreen() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,14 +37,14 @@ export function BookingsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.content}>
-        <Text style={styles.title}>Đặt chỗ</Text>
-        <Text style={styles.subtitle}>Lượt đặt chỗ sắp tới / đang hoạt động (placeholder)</Text>
+        <Text style={styles.title}>{t('bookings.title')}</Text>
+        <Text style={styles.subtitle}>{t('bookings.placeholder')}</Text>
 
         <Card>
           {loading ? (
             <ActivityIndicator color={colors.primary} />
           ) : (
-            <Text style={styles.body}>Có {activeCount} lượt đặt chỗ đang hoạt động (mock).</Text>
+            <Text style={styles.body}>{t('bookings.active', { count: activeCount })}</Text>
           )}
         </Card>
       </View>

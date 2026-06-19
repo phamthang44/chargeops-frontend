@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, Checkbox, PasswordField, PhoneField, TextField } from '@/components';
+import { authErrorMessage } from '@/i18n/authErrors';
 import type { RootStackParamList } from '@/navigation/types';
 import { register } from '@/services/authService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -25,6 +27,7 @@ interface FieldErrors {
 /** Driver registration form (name, email, +84 phone, password). role is fixed to DRIVER. */
 export function RegisterScreen() {
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -38,12 +41,12 @@ export function RegisterScreen() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    if (name.trim().length < 2) next.name = 'Vui lòng nhập họ tên hợp lệ.';
-    if (!EMAIL_RE.test(email)) next.email = 'Email không hợp lệ.';
+    if (name.trim().length < 2) next.name = t('register.errors.name');
+    if (!EMAIL_RE.test(email)) next.email = t('register.errors.email');
     const localPhone = phone.replace(/\s/g, '');
-    if (localPhone.length < 9 || localPhone.length > 10) next.phone = 'Số điện thoại không hợp lệ.';
-    if (password.length < 8) next.password = 'Mật khẩu cần ít nhất 8 ký tự.';
-    if (confirm !== password) next.confirm = 'Mật khẩu xác nhận không khớp.';
+    if (localPhone.length < 9 || localPhone.length > 10) next.phone = t('register.errors.phone');
+    if (password.length < 8) next.password = t('register.errors.password');
+    if (confirm !== password) next.confirm = t('register.errors.confirm');
     return next;
   }
 
@@ -69,7 +72,7 @@ export function RegisterScreen() {
       const { channel, target } = await register({ name: name.trim(), email: email.trim(), phone: fullPhone, password });
       navigation.navigate('OtpVerification', { channel, target });
     } catch (e) {
-      setFormError(e instanceof Error ? e.message : 'Đăng ký thất bại.');
+      setFormError(authErrorMessage(t, e));
     } finally {
       setSubmitting(false);
     }
@@ -81,59 +84,59 @@ export function RegisterScreen() {
         <Pressable onPress={() => navigation.goBack()} style={styles.headerBtn} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={colors.textStrong} />
         </Pressable>
-        <Text style={styles.headerTitle}>Đăng ký</Text>
+        <Text style={styles.headerTitle}>{t('register.headerTitle')}</Text>
         <View style={styles.headerBtn} />
       </View>
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Tạo tài khoản tài xế</Text>
-          <Text style={styles.subtitle}>Đăng ký để tìm trạm, đặt chỗ và thanh toán phiên sạc dễ dàng.</Text>
+          <Text style={styles.title}>{t('register.title')}</Text>
+          <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
 
           <View style={styles.form}>
             <TextField
-              label="Họ và tên"
+              label={t('register.nameLabel')}
               leftIcon="person-outline"
               value={name}
               onChangeText={setName}
-              placeholder="Nguyễn Văn An"
+              placeholder={t('register.namePlaceholder')}
               error={errors.name}
             />
             <TextField
-              label="Email"
+              label={t('register.emailLabel')}
               leftIcon="mail-outline"
               value={email}
               onChangeText={setEmail}
-              placeholder="example@email.com"
+              placeholder={t('register.emailPlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               error={errors.email}
             />
-            <PhoneField label="Số điện thoại" value={phone} onChangeText={setPhone} error={errors.phone} />
+            <PhoneField label={t('register.phoneLabel')} value={phone} onChangeText={setPhone} error={errors.phone} />
             <PasswordField
-              label="Mật khẩu"
+              label={t('register.passwordLabel')}
               leftIcon="lock-closed-outline"
               value={password}
               onChangeText={setPassword}
-              placeholder="Ít nhất 8 ký tự"
+              placeholder={t('register.passwordPlaceholder')}
               error={errors.password}
             />
             <PasswordField
-              label="Xác nhận mật khẩu"
+              label={t('register.confirmLabel')}
               leftIcon="lock-closed-outline"
               value={confirm}
               onChangeText={setConfirm}
-              placeholder="Nhập lại mật khẩu"
+              placeholder={t('register.confirmPlaceholder')}
               error={errors.confirm}
             />
 
             <Checkbox checked={agreed} onChange={setAgreed}>
-              {'Tôi đồng ý với '}
-              <Text style={styles.link}>Điều khoản dịch vụ</Text>
-              {' và '}
-              <Text style={styles.link}>Chính sách bảo mật</Text>
-              {' của ChargeOps.'}
+              {t('register.agreePrefix')}
+              <Text style={styles.link}>{t('common.terms')}</Text>
+              {t('register.agreeMid')}
+              <Text style={styles.link}>{t('common.privacy')}</Text>
+              {t('register.agreeSuffix')}
             </Checkbox>
 
             {formError ? <Text style={styles.formError}>{formError}</Text> : null}
@@ -141,11 +144,11 @@ export function RegisterScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <AppButton label="Đăng ký" onPress={handleRegister} loading={submitting} disabled={!canSubmit} style={styles.cta} />
+          <AppButton label={t('register.cta')} onPress={handleRegister} loading={submitting} disabled={!canSubmit} style={styles.cta} />
           <Pressable onPress={() => navigation.navigate('Login')} hitSlop={6}>
             <Text style={styles.switchText}>
-              {'Đã có tài khoản? '}
-              <Text style={styles.switchLink}>Đăng nhập</Text>
+              {t('register.hasAccount')}
+              <Text style={styles.switchLink}>{t('register.signIn')}</Text>
             </Text>
           </Pressable>
         </View>
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
   headerBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
   body: { paddingHorizontal: spacing.xl, paddingTop: spacing.xl, paddingBottom: spacing.lg, gap: spacing.lg },
-  title: { fontSize: 26, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: 34 },
+  title: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: lineHeights.display },
   subtitle: { fontSize: fontSizes.body, color: colors.textMuted, lineHeight: lineHeights.body },
   form: { gap: spacing.lg },
   link: { color: colors.primary, fontWeight: fontWeights.medium },

@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors, fontWeights } from '@/theme';
@@ -25,6 +26,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  */
 export function RootNavigator() {
   const { session } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <NavigationContainer>
@@ -42,17 +44,18 @@ export function RootNavigator() {
             <Stack.Screen
               name="StationDetail"
               component={StationDetailScreen}
-              options={{ title: 'Chi tiết trạm' }}
+              // Header hidden: the screen draws its own glass back button over the hero image.
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="SlotPicker"
               component={SlotPickerScreen}
-              options={{ title: 'Chọn khung giờ' }}
+              options={{ title: t('nav.slotPicker') }}
             />
             <Stack.Screen
               name="QRCheckIn"
               component={QRCheckInScreen}
-              options={{ title: 'Quét QR Check-in' }}
+              options={{ title: t('nav.qrCheckIn') }}
             />
           </>
         ) : (

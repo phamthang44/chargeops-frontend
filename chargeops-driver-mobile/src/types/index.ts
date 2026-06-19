@@ -6,6 +6,9 @@ export type ConnectorType = 'CCS2' | 'CHADEMO' | 'TYPE2' | 'GBT';
 
 export type ChargerStatus = 'AVAILABLE' | 'IN_USE' | 'DISABLED' | 'MAINTENANCE';
 
+/** Station amenities (mapped to an icon + i18n label in the UI). */
+export type Amenity = 'wifi' | 'food' | 'parking' | 'security' | 'restroom';
+
 export type BookingStatus =
   | 'PENDING'
   | 'CONFIRMED'
@@ -29,6 +32,10 @@ export interface Station {
   totalChargers: number;
   rating?: number; // average rating, e.g. 4.8 (shown in station list/detail)
   reviewCount?: number; // number of ratings, optional
+  isOpen?: boolean; // derived open/closed state (vs operatingHours)
+  hasFastCharging?: boolean; // has at least one DC charger (for list filtering)
+  minRatePerKwh?: number; // cheapest đ/kWh rate label (info only, "Giá từ")
+  amenities?: Amenity[]; // shown on the station detail screen
 }
 
 export interface Charger {
@@ -39,6 +46,7 @@ export interface Charger {
   powerKw: number;
   chargerType: 'AC' | 'DC';
   status: ChargerStatus;
+  ratePerKwh?: number; // informational đ/kWh rate label (NEVER used to compute price)
 }
 
 export interface Slot {

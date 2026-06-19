@@ -7,6 +7,7 @@ export const fontSizes = {
   body: 14,
   heading: 18,
   title: 24,
+  display: 28, // large screen headlines (splash, auth)
 } as const;
 
 export const fontWeights = {
@@ -21,6 +22,7 @@ export const lineHeights = {
   body: 20,
   heading: 24,
   title: 32,
+  display: 36,
 } as const;
 
 export const typography = {

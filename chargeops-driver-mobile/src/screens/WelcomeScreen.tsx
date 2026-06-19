@@ -1,23 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton } from '@/components';
+import { AppButton, SettingsModal } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
 
 const FEATURES = [
-  { icon: 'flash' as const, label: 'SẠC NHANH\nCHÓNG' },
-  { icon: 'location' as const, label: 'TÌM TRẠM\nGẦN NHẤT' },
-  { icon: 'card' as const, label: 'THANH TOÁN\nTIỆN LỢI' },
+  { icon: 'flash' as const, key: 'fast' as const },
+  { icon: 'location' as const, key: 'find' as const },
+  { icon: 'card' as const, key: 'pay' as const },
 ] as const;
 
 export function WelcomeScreen() {
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -26,16 +30,27 @@ export function WelcomeScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
+        {/* Settings (language, appearance, …) — available before login */}
+        <View style={styles.topBar}>
+          <Pressable
+            style={styles.settingsBtn}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.open')}
+            onPress={() => setSettingsOpen(true)}
+          >
+            <Ionicons name="settings-outline" size={22} color={colors.textBody} />
+          </Pressable>
+        </View>
+
         {/* App logo */}
         <View style={styles.logoBox}>
           <Ionicons name="flash" size={40} color={colors.textInverse} />
         </View>
 
         {/* Headline */}
-        <Text style={styles.title}>Sạc xe dễ dàng</Text>
-        <Text style={styles.subtitle}>
-          Giải pháp quản lý và đặt chỗ{'\n'}trạm sạc xe điện thông minh tại{'\n'}Việt Nam.
-        </Text>
+        <Text style={styles.title}>{t('welcome.title')}</Text>
+        <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>
 
         {/* Accent line */}
         <View style={styles.accent} />
@@ -43,11 +58,11 @@ export function WelcomeScreen() {
         {/* Feature chips */}
         <View style={styles.features}>
           {FEATURES.map((f) => (
-            <View key={f.label} style={styles.featureItem}>
+            <View key={f.key} style={styles.featureItem}>
               <View style={styles.featureIconBox}>
                 <Ionicons name={f.icon} size={20} color={colors.primary} />
               </View>
-              <Text style={styles.featureLabel}>{f.label}</Text>
+              <Text style={styles.featureLabel}>{t(`welcome.features.${f.key}`)}</Text>
             </View>
           ))}
         </View>
@@ -58,7 +73,7 @@ export function WelcomeScreen() {
             <Ionicons name="business-outline" size={56} color="rgba(255,255,255,0.25)" />
           </View>
           <View style={styles.imageCaptionRow}>
-            <Text style={styles.imageCaption}>Phủ sóng hơn 1000+ trạm sạc toàn quốc</Text>
+            <Text style={styles.imageCaption}>{t('welcome.coverage')}</Text>
           </View>
         </View>
       </ScrollView>
@@ -66,21 +81,23 @@ export function WelcomeScreen() {
       {/* Fixed footer */}
       <View style={styles.footer}>
         <AppButton
-          label="Đăng nhập / Đăng ký"
+          label={t('welcome.cta')}
           onPress={() => navigation.navigate('Login')}
           style={styles.ctaButton}
         />
         <Text style={styles.footerNote}>
-          {'Bằng cách tiếp tục, bạn đồng ý với '}
-          <Pressable>
-            <Text style={styles.footerLink}>Điều khoản dịch vụ</Text>
-          </Pressable>
-          {' & '}
-          <Pressable>
-            <Text style={styles.footerLink}>Chính sách bảo mật</Text>
-          </Pressable>
+          {t('welcome.agreePrefix')}
+          <Text style={styles.footerLink} onPress={() => {}}>
+            {t('common.terms')}
+          </Text>
+          {t('welcome.and')}
+          <Text style={styles.footerLink} onPress={() => {}}>
+            {t('common.privacy')}
+          </Text>
         </Text>
       </View>
+
+      <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -97,6 +114,21 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
 
+  // Top bar (settings entry)
+  topBar: {
+    alignSelf: 'stretch',
+    alignItems: 'flex-end',
+    marginBottom: spacing.lg,
+  },
+  settingsBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   // Logo
   logoBox: {
     width: 72,
@@ -110,11 +142,11 @@ const styles = StyleSheet.create({
 
   // Headline
   title: {
-    fontSize: 28,
+    fontSize: fontSizes.display,
     fontWeight: fontWeights.bold,
     color: colors.textStrong,
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: lineHeights.display,
     marginBottom: spacing.sm,
   },
   subtitle: {

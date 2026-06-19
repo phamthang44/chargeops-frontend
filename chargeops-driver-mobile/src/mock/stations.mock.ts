@@ -19,6 +19,10 @@ export const stationsMock: Station[] = [
     totalChargers: 4,
     rating: 4.9,
     reviewCount: 128,
+    isOpen: true,
+    hasFastCharging: true,
+    minRatePerKwh: 3850,
+    amenities: ['wifi', 'food', 'parking', 'security', 'restroom'],
   },
   {
     id: 'st-002',
@@ -34,6 +38,10 @@ export const stationsMock: Station[] = [
     totalChargers: 3,
     rating: 4.7,
     reviewCount: 86,
+    isOpen: true,
+    hasFastCharging: false, // AC-only station (so the DC filter excludes it)
+    minRatePerKwh: 3500,
+    amenities: ['wifi', 'parking', 'security'],
   },
   {
     id: 'st-003',
@@ -49,6 +57,10 @@ export const stationsMock: Station[] = [
     totalChargers: 2,
     rating: 4.5,
     reviewCount: 54,
+    isOpen: true,
+    hasFastCharging: true,
+    minRatePerKwh: 3200,
+    amenities: ['wifi', 'food', 'parking'],
   },
   {
     id: 'st-004',
@@ -64,26 +76,30 @@ export const stationsMock: Station[] = [
     totalChargers: 2,
     rating: 4.2,
     reviewCount: 31,
+    isOpen: false,
+    hasFastCharging: true,
+    minRatePerKwh: 4200,
+    amenities: ['parking', 'security', 'restroom'],
   },
 ];
 
 /** Chargers grouped by stationId. */
 export const chargersMock: Charger[] = [
   // st-001
-  { id: 'ch-101', stationId: 'st-001', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 120, chargerType: 'DC', status: 'AVAILABLE' },
-  { id: 'ch-102', stationId: 'st-001', name: 'Sạc Nhanh DC-02', connectorType: 'CHADEMO', powerKw: 60, chargerType: 'DC', status: 'AVAILABLE' },
-  { id: 'ch-103', stationId: 'st-001', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'IN_USE' },
-  { id: 'ch-104', stationId: 'st-001', name: 'Sạc Thường AC-02', connectorType: 'TYPE2', powerKw: 11, chargerType: 'AC', status: 'AVAILABLE' },
+  { id: 'ch-101', stationId: 'st-001', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 120, chargerType: 'DC', status: 'AVAILABLE', ratePerKwh: 4200 },
+  { id: 'ch-102', stationId: 'st-001', name: 'Sạc Nhanh DC-02', connectorType: 'CHADEMO', powerKw: 60, chargerType: 'DC', status: 'AVAILABLE', ratePerKwh: 3850 },
+  { id: 'ch-103', stationId: 'st-001', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'IN_USE', ratePerKwh: 3500 },
+  { id: 'ch-104', stationId: 'st-001', name: 'Sạc Thường AC-02', connectorType: 'TYPE2', powerKw: 11, chargerType: 'AC', status: 'AVAILABLE', ratePerKwh: 3500 },
   // st-002
-  { id: 'ch-201', stationId: 'st-002', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 90, chargerType: 'DC', status: 'AVAILABLE' },
-  { id: 'ch-202', stationId: 'st-002', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'IN_USE' },
-  { id: 'ch-203', stationId: 'st-002', name: 'Sạc Thường AC-02', connectorType: 'GBT', powerKw: 7, chargerType: 'AC', status: 'MAINTENANCE' },
+  { id: 'ch-201', stationId: 'st-002', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'AVAILABLE', ratePerKwh: 3500 },
+  { id: 'ch-202', stationId: 'st-002', name: 'Sạc Thường AC-02', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'IN_USE', ratePerKwh: 3500 },
+  { id: 'ch-203', stationId: 'st-002', name: 'Sạc Thường AC-03', connectorType: 'GBT', powerKw: 7, chargerType: 'AC', status: 'MAINTENANCE', ratePerKwh: 3000 },
   // st-003
-  { id: 'ch-301', stationId: 'st-003', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 150, chargerType: 'DC', status: 'AVAILABLE' },
-  { id: 'ch-302', stationId: 'st-003', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'AVAILABLE' },
+  { id: 'ch-301', stationId: 'st-003', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 150, chargerType: 'DC', status: 'AVAILABLE', ratePerKwh: 4200 },
+  { id: 'ch-302', stationId: 'st-003', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 22, chargerType: 'AC', status: 'AVAILABLE', ratePerKwh: 3200 },
   // st-004
-  { id: 'ch-401', stationId: 'st-004', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 120, chargerType: 'DC', status: 'DISABLED' },
-  { id: 'ch-402', stationId: 'st-004', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 11, chargerType: 'AC', status: 'MAINTENANCE' },
+  { id: 'ch-401', stationId: 'st-004', name: 'Sạc Nhanh DC-01', connectorType: 'CCS2', powerKw: 120, chargerType: 'DC', status: 'DISABLED', ratePerKwh: 4200 },
+  { id: 'ch-402', stationId: 'st-004', name: 'Sạc Thường AC-01', connectorType: 'TYPE2', powerKw: 11, chargerType: 'AC', status: 'MAINTENANCE', ratePerKwh: 3500 },
 ];
 
 /** Slots grouped by chargerId (fixed snapshot prices in VND). */

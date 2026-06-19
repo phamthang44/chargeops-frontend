@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,6 +10,7 @@ import type { Booking } from '@/types';
 
 /** Placeholder booking history screen — reads from the service layer. */
 export function BookingHistoryScreen() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,14 +30,14 @@ export function BookingHistoryScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.content}>
-        <Text style={styles.title}>Lịch sử</Text>
-        <Text style={styles.subtitle}>Màn hình lịch sử đặt chỗ (placeholder)</Text>
+        <Text style={styles.title}>{t('history.title')}</Text>
+        <Text style={styles.subtitle}>{t('history.placeholder')}</Text>
 
         <Card>
           {loading ? (
             <ActivityIndicator color={colors.primary} />
           ) : (
-            <Text style={styles.body}>Đã tải {bookings.length} lượt đặt chỗ (mock).</Text>
+            <Text style={styles.body}>{t('history.loaded', { count: bookings.length })}</Text>
           )}
         </Card>
       </View>

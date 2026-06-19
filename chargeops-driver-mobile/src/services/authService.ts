@@ -16,9 +16,15 @@ function simulateNetwork<T>(data: T, delayMs = 350): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
 }
 
-function rejectNetwork(message: string, delayMs = 350): Promise<never> {
-  return new Promise((_, reject) => setTimeout(() => reject(new Error(message)), delayMs));
+/**
+ * Reject with a stable error CODE (not a localized message). The UI maps the code
+ * to a translated string via `auth.errors.<CODE>`. Keeps the data layer language-agnostic.
+ */
+function rejectNetwork(code: AuthErrorCode, delayMs = 350): Promise<never> {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error(code)), delayMs));
 }
+
+export type AuthErrorCode = 'EMAIL_EXISTS' | 'INVALID_OTP' | 'INVALID_CREDENTIALS' | 'GENERIC';
 
 /** The mock OTP code accepted by verifyOtp. Real backend sends a random code. */
 export const MOCK_OTP_CODE = '123456';
@@ -34,7 +40,7 @@ export type OtpChannel = 'phone' | 'email';
 export async function register(req: RegisterRequest): Promise<{ channel: OtpChannel; target: string }> {
   const exists = usersMock.some((u) => u.email.toLowerCase() === req.email.trim().toLowerCase());
   if (exists) {
-    return rejectNetwork('Email đã tồn tại. Vui lòng dùng email khác hoặc đăng nhập.');
+    return rejectNetwork('EMAIL_EXISTS');
   }
   return simulateNetwork({ channel: 'phone', target: req.phone });
 }
@@ -46,7 +52,7 @@ export async function register(req: RegisterRequest): Promise<{ channel: OtpChan
  */
 export async function verifyOtp(target: string, code: string): Promise<AuthSession> {
   if (code !== MOCK_OTP_CODE) {
-    return rejectNetwork('Mã xác minh không đúng. Vui lòng thử lại.');
+    return rejectNetwork('INVALID_OTP');
   }
   const newUser: User = {
     id: `usr-${Date.now()}`,
@@ -75,7 +81,7 @@ export async function resendOtp(_target: string): Promise<void> {
 export async function login(req: LoginRequest): Promise<AuthSession> {
   const user = usersMock.find((u) => u.email.toLowerCase() === req.email.trim().toLowerCase());
   if (!user) {
-    return rejectNetwork('Email hoặc mật khẩu không đúng.');
+    return rejectNetwork('INVALID_CREDENTIALS');
   }
   return simulateNetwork(makeMockSession(user));
 }

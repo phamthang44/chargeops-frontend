@@ -6,6 +6,10 @@ export type AppearanceMode = 'light' | 'dark' | 'system';
 interface PreferencesContextValue {
   appearance: AppearanceMode;
   setAppearance: (mode: AppearanceMode) => void;
+  /** IDs of stations the driver has saved/favorited. */
+  favorites: string[];
+  toggleFavorite: (stationId: string) => void;
+  isFavorite: (stationId: string) => boolean;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
@@ -18,10 +22,18 @@ const PreferencesContext = createContext<PreferencesContextValue | undefined>(un
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [appearance, setAppearance] = useState<AppearanceMode>('system');
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const value = useMemo<PreferencesContextValue>(
-    () => ({ appearance, setAppearance }),
-    [appearance],
+    () => ({
+      appearance,
+      setAppearance,
+      favorites,
+      toggleFavorite: (id) =>
+        setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id])),
+      isFavorite: (id) => favorites.includes(id),
+    }),
+    [appearance, favorites],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

@@ -65,6 +65,16 @@ export interface Booking {
   checkedInAt?: string;
 }
 
+/** A driver review for a station (display only; submission not yet specified). */
+export interface Review {
+  id: string;
+  stationId: string;
+  authorName: string;
+  rating: number; // 1..5
+  comment: string;
+  createdAt: string; // ISO datetime
+}
+
 // --- Auth / account (mirrors the SRS `User` entity; see FR01, BR-ACC) ---
 
 export type UserRole = 'DRIVER' | 'OWNER' | 'ADMIN';

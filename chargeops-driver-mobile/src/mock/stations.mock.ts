@@ -1,4 +1,4 @@
-import type { Charger, Slot, Station } from '@/types';
+import type { Charger, Review, Slot, Station } from '@/types';
 
 /**
  * Mock stations with realistic Vietnamese data (HCMC District 1 & 3).
@@ -110,4 +110,14 @@ export const slotsMock: Slot[] = [
   { id: 'sl-2001', chargerId: 'ch-201', startAt: '2026-06-18T08:00:00+07:00', endAt: '2026-06-18T09:00:00+07:00', price: 75000, status: 'AVAILABLE' },
   { id: 'sl-2002', chargerId: 'ch-201', startAt: '2026-06-18T09:00:00+07:00', endAt: '2026-06-18T10:00:00+07:00', price: 75000, status: 'DISABLED' },
   { id: 'sl-3001', chargerId: 'ch-301', startAt: '2026-06-18T08:00:00+07:00', endAt: '2026-06-18T09:00:00+07:00', price: 120000, status: 'AVAILABLE' },
+];
+
+/** Reviews grouped by stationId (display only). */
+export const reviewsMock: Review[] = [
+  { id: 'rv-001', stationId: 'st-001', authorName: 'Nguyễn Văn An', rating: 5, comment: 'Trạm sạc nhanh, sạch sẽ, nhân viên thân thiện. Sẽ quay lại.', createdAt: '2026-06-15T14:30:00+07:00' },
+  { id: 'rv-002', stationId: 'st-001', authorName: 'Trần Thị Bình', rating: 4, comment: 'Vị trí thuận tiện trong trung tâm thương mại, giá hơi cao một chút.', createdAt: '2026-06-12T09:10:00+07:00' },
+  { id: 'rv-003', stationId: 'st-001', authorName: 'Lê Minh Châu', rating: 5, comment: 'Có chỗ ngồi chờ và cafe, rất tiện khi sạc.', createdAt: '2026-06-08T18:45:00+07:00' },
+  { id: 'rv-004', stationId: 'st-002', authorName: 'Phạm Quốc Đạt', rating: 5, comment: 'Mở cửa 24/7, đỗ xe rộng rãi. Rất hài lòng.', createdAt: '2026-06-14T22:05:00+07:00' },
+  { id: 'rv-005', stationId: 'st-002', authorName: 'Võ Thị Hà', rating: 4, comment: 'Chủ yếu là sạc AC nên hơi chậm, nhưng ổn cho qua đêm.', createdAt: '2026-06-10T07:30:00+07:00' },
+  { id: 'rv-006', stationId: 'st-003', authorName: 'Đỗ Hoàng Long', rating: 4, comment: 'Trạm ngoài trời, view đẹp cạnh Hồ Con Rùa.', createdAt: '2026-06-11T16:20:00+07:00' },
 ];

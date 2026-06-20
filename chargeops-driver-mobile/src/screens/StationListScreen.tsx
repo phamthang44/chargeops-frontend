@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Card, StatusBadge } from '@/components';
+import { BottomSheet, Card, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getNearbyStations } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -22,40 +22,87 @@ import type { Station } from '@/types';
 import { formatRate } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type FilterKey = 'all' | 'dc' | 'open' | 'cheap';
-const FILTERS: FilterKey[] = ['all', 'dc', 'open', 'cheap'];
+type FilterKey = 'all' | 'dc' | 'open';
+type SortKey = 'nearest' | 'cheapest' | 'rating' | 'available';
+
+const FILTERS: FilterKey[] = ['all', 'dc', 'open'];
+const SORTS: { key: SortKey; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: 'nearest', icon: 'navigate-outline' },
+  { key: 'cheapest', icon: 'pricetag-outline' },
+  { key: 'rating', icon: 'star-outline' },
+  { key: 'available', icon: 'flash-outline' },
+];
 
 /** Rough city-driving ETA from distance (~3 min per km). */
 function etaMinutes(distanceKm?: number): number {
   return Math.max(1, Math.round((distanceKm ?? 0) * 3));
 }
 
+/** Greyed-out placeholder card shown while the list loads. */
+function SkeletonCard() {
+  return (
+    <Card style={styles.card}>
+      <View style={styles.cardTop}>
+        <View style={[styles.thumb, styles.skel]} />
+        <View style={styles.cardBody}>
+          <View style={[styles.skel, styles.skelLine, { width: '70%' }]} />
+          <View style={[styles.skel, styles.skelLine, { width: '90%' }]} />
+          <View style={[styles.skel, styles.skelLine, { width: '50%' }]} />
+          <View style={[styles.skel, styles.skelBadge]} />
+        </View>
+      </View>
+    </Card>
+  );
+}
+
 /**
  * "Tìm trạm" tab — home / discovery list.
- * Visily list layout enriched with map-app patterns: live availability,
- * distance + ETA, and a per-card "Chỉ đường" quick action.
- * Loads stations via the service layer (getNearbyStations()).
+ * Floating Liquid Glass filter bar over the list, pull-to-refresh, skeleton
+ * loading, sort & notifications sheets, and rich station cards.
  */
 export function StationListScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [sort, setSort] = useState<SortKey>('nearest');
+  const [sortOpen, setSortOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await getNearbyStations();
+      setStations(data);
+      setError(false);
+    } catch {
+      setError(true);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
-    getNearbyStations().then((data) => {
-      if (active) {
-        setStations(data);
-        setLoading(false);
-      }
+    setLoading(true);
+    load().finally(() => {
+      if (active) setLoading(false);
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [load]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    load().finally(() => setRefreshing(false));
+  }, [load]);
+
+  const retry = useCallback(() => {
+    setLoading(true);
+    load().finally(() => setLoading(false));
+  }, [load]);
 
   const visible = useMemo(() => {
     let list = stations;
@@ -67,15 +114,18 @@ export function StationListScreen() {
     }
     if (filter === 'dc') list = list.filter((s) => s.hasFastCharging);
     if (filter === 'open') list = list.filter((s) => s.isOpen);
-    if (filter === 'cheap') {
-      list = [...list].sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
-    }
-    return list;
-  }, [stations, query, filter]);
+
+    const sorted = [...list];
+    if (sort === 'nearest') sorted.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+    if (sort === 'cheapest') sorted.sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
+    if (sort === 'rating') sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    if (sort === 'available') sorted.sort((a, b) => b.availableChargers - a.availableChargers);
+    return sorted;
+  }, [stations, query, filter, sort]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Top app bar: brand + role label */}
+      {/* Top app bar */}
       <View style={styles.appBar}>
         <View style={styles.brandRow}>
           <View style={styles.logo}>
@@ -86,12 +136,12 @@ export function StationListScreen() {
             <Text style={styles.role}>{t('stationList.role')}</Text>
           </View>
         </View>
-        <Pressable style={styles.iconBtn} hitSlop={8}>
+        <Pressable style={styles.iconBtn} hitSlop={8} onPress={() => setNotifOpen(true)}>
           <Ionicons name="notifications-outline" size={22} color={colors.textBody} />
         </Pressable>
       </View>
 
-      {/* Search bar */}
+      {/* Search bar (filter/tune icon opens the sort sheet) */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={colors.textMuted} />
@@ -103,9 +153,9 @@ export function StationListScreen() {
             onChangeText={setQuery}
             returnKeyType="search"
           />
-          <View style={styles.filterIconBtn}>
+          <Pressable style={styles.filterIconBtn} hitSlop={6} onPress={() => setSortOpen(true)}>
             <Ionicons name="options-outline" size={18} color={colors.primary} />
-          </View>
+          </Pressable>
         </View>
       </View>
 
@@ -132,118 +182,175 @@ export function StationListScreen() {
         })}
       </ScrollView>
 
-      <ScrollView style={styles.list} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Section header */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
-          <View style={styles.updatedRow}>
-            <Ionicons name="time-outline" size={13} color={colors.textMuted} />
-            <Text style={styles.updated}>{t('stationList.updated', { minutes: 2 })}</Text>
+      <ScrollView
+        style={styles.list}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+        }
+      >
+        {error && !loading ? (
+          <View style={styles.stateBox}>
+            <Ionicons name="cloud-offline-outline" size={40} color={colors.textMuted} />
+            <Text style={styles.stateText}>{t('stationList.error')}</Text>
+            <Pressable style={styles.retryBtn} onPress={retry}>
+              <Ionicons name="refresh" size={16} color={colors.textInverse} />
+              <Text style={styles.retryText}>{t('stationList.retry')}</Text>
+            </Pressable>
           </View>
-        </View>
-
-        {loading ? (
-          <ActivityIndicator color={colors.primary} style={styles.loader} />
-        ) : visible.length === 0 ? (
-          <Text style={styles.empty}>{t('stationList.empty')}</Text>
         ) : (
-          visible.map((station) => {
-            const full = station.availableChargers === 0;
-            return (
-              <Pressable
-                key={station.id}
-                onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
-              >
-                <Card style={styles.card}>
-                  <View style={styles.cardTop}>
-                    <View style={styles.thumb}>
-                      <Ionicons name="flash" size={26} color={colors.primaryDark} />
-                    </View>
-                    <View style={styles.cardBody}>
-                      <View style={styles.nameRow}>
-                        <Text style={styles.stationName} numberOfLines={1}>
-                          {station.name}
-                        </Text>
-                        {station.rating !== undefined && (
-                          <View style={styles.ratingPill}>
-                            <Ionicons name="star" size={12} color={colors.warning} />
-                            <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
-                          </View>
-                        )}
-                      </View>
+          <>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
+                <View style={styles.updatedRow}>
+                  <Ionicons name="time-outline" size={13} color={colors.textMuted} />
+                  <Text style={styles.updated}>{t('stationList.updated', { minutes: 2 })}</Text>
+                </View>
+              </View>
 
-                      <View style={styles.addressRow}>
-                        <Ionicons name="location-outline" size={13} color={colors.textMuted} />
-                        <Text style={styles.address} numberOfLines={1}>
-                          {station.address}
-                        </Text>
-                      </View>
-
-                      <View style={styles.metaRow}>
-                        {station.minRatePerKwh !== undefined && (
-                          <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
-                        )}
-                        {station.distanceKm !== undefined && (
-                          <>
-                            <Text style={styles.metaDot}>·</Text>
-                            <Ionicons name="navigate-outline" size={12} color={colors.textMuted} />
-                            <Text style={styles.meta}>
-                              {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
-                            </Text>
-                          </>
-                        )}
-                      </View>
-
-                      <StatusBadge
-                        style={styles.availability}
-                        variant={full ? 'error' : 'success'}
-                        dot
-                        label={
-                          full
-                            ? t('stationList.full')
-                            : t('stationList.ports', {
-                                available: station.availableChargers,
-                                total: station.totalChargers,
-                              })
-                        }
-                      />
-                    </View>
-                  </View>
-
-                  {/* Card actions */}
-                  <View style={styles.cardActions}>
+              {loading ? (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : visible.length === 0 ? (
+                <View style={styles.stateBox}>
+                  <Ionicons name="search-outline" size={40} color={colors.textMuted} />
+                  <Text style={styles.stateText}>{t('stationList.empty')}</Text>
+                </View>
+              ) : (
+                visible.map((station) => {
+                  const full = station.availableChargers === 0;
+                  return (
                     <Pressable
-                      style={styles.directionsBtn}
-                      hitSlop={6}
-                      onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}
+                      key={station.id}
+                      onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
                     >
-                      <Ionicons name="navigate-outline" size={16} color={colors.primary} />
-                      <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
-                    </Pressable>
-                    <View style={styles.viewDetail}>
-                      <Text style={styles.viewDetailText}>{t('stationList.viewDetail')}</Text>
-                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                    </View>
-                  </View>
-                </Card>
-              </Pressable>
-            );
-          })
-        )}
+                      <Card style={styles.card}>
+                        <View style={styles.cardTop}>
+                          <View style={styles.thumb}>
+                            <Ionicons name="flash" size={26} color={colors.primaryDark} />
+                          </View>
+                          <View style={styles.cardBody}>
+                            <View style={styles.nameRow}>
+                              <Text style={styles.stationName} numberOfLines={1}>
+                                {station.name}
+                              </Text>
+                              {station.rating !== undefined && (
+                                <View style={styles.ratingPill}>
+                                  <Ionicons name="star" size={12} color={colors.warning} />
+                                  <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
+                                </View>
+                              )}
+                            </View>
 
-        {/* Promo card */}
-        {!loading && (
-          <View style={styles.promo}>
-            <View style={styles.promoIcon}>
-              <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
-            </View>
-            <View style={styles.promoBody}>
-              <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
-              <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
-            </View>
-          </View>
-        )}
+                            <View style={styles.addressRow}>
+                              <Ionicons name="location-outline" size={13} color={colors.textMuted} />
+                              <Text style={styles.address} numberOfLines={1}>
+                                {station.address}
+                              </Text>
+                            </View>
+
+                            <View style={styles.metaRow}>
+                              {station.minRatePerKwh !== undefined && (
+                                <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
+                              )}
+                              {station.distanceKm !== undefined && (
+                                <>
+                                  <Text style={styles.metaDot}>·</Text>
+                                  <Ionicons name="navigate-outline" size={12} color={colors.textMuted} />
+                                  <Text style={styles.meta}>
+                                    {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
+                                  </Text>
+                                </>
+                              )}
+                            </View>
+
+                            <StatusBadge
+                              style={styles.availability}
+                              variant={full ? 'error' : 'success'}
+                              dot
+                              label={
+                                full
+                                  ? t('stationList.full')
+                                  : t('stationList.ports', {
+                                      available: station.availableChargers,
+                                      total: station.totalChargers,
+                                    })
+                              }
+                            />
+                          </View>
+                        </View>
+
+                        <View style={styles.cardActions}>
+                          <Pressable
+                            style={styles.directionsBtn}
+                            hitSlop={6}
+                            onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}
+                          >
+                            <Ionicons name="navigate-outline" size={16} color={colors.primary} />
+                            <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
+                          </Pressable>
+                          <View style={styles.viewDetail}>
+                            <Text style={styles.viewDetailText}>{t('stationList.viewDetail')}</Text>
+                            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                          </View>
+                        </View>
+                      </Card>
+                    </Pressable>
+                  );
+                })
+              )}
+
+              {!loading && (
+                <View style={styles.promo}>
+                  <View style={styles.promoIcon}>
+                    <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
+                  </View>
+                  <View style={styles.promoBody}>
+                    <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
+                    <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
+                  </View>
+                </View>
+              )}
+            </>
+          )}
       </ScrollView>
+
+      {/* Sort sheet */}
+      <BottomSheet visible={sortOpen} onClose={() => setSortOpen(false)} title={t('stationList.sortTitle')}>
+        {SORTS.map(({ key, icon }) => {
+          const active = sort === key;
+          return (
+            <Pressable
+              key={key}
+              style={[styles.sortRow, active && styles.sortRowActive]}
+              onPress={() => {
+                setSort(key);
+                setSortOpen(false);
+              }}
+            >
+              <View style={[styles.sortIcon, active && styles.sortIconActive]}>
+                <Ionicons name={icon} size={18} color={active ? colors.primary : colors.textMuted} />
+              </View>
+              <Text style={[styles.sortLabel, active && styles.sortLabelActive]}>
+                {t(`stationList.sort.${key}`)}
+              </Text>
+              {active && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
+            </Pressable>
+          );
+        })}
+      </BottomSheet>
+
+      {/* Notifications sheet (empty for now) */}
+      <BottomSheet visible={notifOpen} onClose={() => setNotifOpen(false)} title={t('stationList.notificationsTitle')}>
+        <View style={styles.notifEmpty}>
+          <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
+          <Text style={styles.stateText}>{t('stationList.notificationsEmpty')}</Text>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -331,8 +438,26 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   updatedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   updated: { fontSize: fontSizes.caption, color: colors.textMuted },
-  loader: { marginTop: spacing.xl },
-  empty: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl },
+
+  // Empty / error / notifications states
+  stateBox: { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xxl },
+  stateText: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center' },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  retryText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textInverse },
+  notifEmpty: { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xl },
+
+  // Skeleton
+  skel: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
+  skelLine: { height: 12, borderRadius: radius.sm, marginBottom: spacing.sm },
+  skelBadge: { height: 20, width: 110, borderRadius: radius.full, marginTop: spacing.xs },
 
   card: { gap: spacing.md },
   cardTop: { flexDirection: 'row', gap: spacing.md },
@@ -360,7 +485,7 @@ const styles = StyleSheet.create({
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   address: { flex: 1, fontSize: fontSizes.body, color: colors.textMuted },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
-  price: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primaryDark },
+  price: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
   metaDot: { color: colors.textMuted },
   meta: { fontSize: fontSizes.caption, color: colors.textMuted },
   availability: { marginTop: spacing.xs },
@@ -398,4 +523,26 @@ const styles = StyleSheet.create({
   promoBody: { flex: 1, gap: spacing.xs },
   promoTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
   promoText: { fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
+
+  // Sort sheet rows
+  sortRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
+  },
+  sortRowActive: { backgroundColor: colors.primarySoft },
+  sortIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sortIconActive: { backgroundColor: colors.surface },
+  sortLabel: { flex: 1, fontSize: fontSizes.body, color: colors.textBody },
+  sortLabelActive: { color: colors.textStrong, fontWeight: fontWeights.semibold },
 });

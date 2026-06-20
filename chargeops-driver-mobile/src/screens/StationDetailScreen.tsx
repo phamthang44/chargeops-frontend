@@ -3,15 +3,26 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppButton, StatusBadge, type BadgeVariant } from '@/components';
+import { AppButton, GlassButton, GlassSurface, StarRating, StatusBadge, type BadgeVariant } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { getChargersByStation, getStationById } from '@/services/stationService';
+import { getChargersByStation, getReviewsByStation, getStationById } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { Amenity, Charger, ChargerStatus, Station } from '@/types';
-import { formatRate } from '@/utils/format';
+import type { Amenity, Charger, ChargerStatus, Review, Station } from '@/types';
+import { formatDate, formatRate } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'StationDetail'>;
 type Route = RouteProp<RootStackParamList, 'StationDetail'>;
@@ -31,32 +42,41 @@ const STATUS_VARIANT: Record<ChargerStatus, BadgeVariant> = {
   MAINTENANCE: 'warning',
 };
 
+// Decorative gallery slides (real photo gallery comes later).
+const GALLERY: (keyof typeof Ionicons.glyphMap)[] = ['flash', 'business-outline', 'car-outline'];
+
 const HERO_HEIGHT = 240;
 
 /**
  * Station detail — step 2 of the booking flow.
- * Visily content (rating, amenities, refund policy, charger list, price summary)
- * wrapped in a hero-overlap layout with a floating glass back button.
+ * Swipeable hero gallery + glass back/favorite, amenities, refund policy,
+ * charger list, location map snippet, reviews, and a gated booking CTA.
  */
 export function StationDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const { isFavorite, toggleFavorite } = usePreferences();
 
   const [station, setStation] = useState<Station | null>(null);
   const [chargers, setChargers] = useState<Charger[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     let active = true;
     Promise.all([
       getStationById(params.stationId),
       getChargersByStation(params.stationId),
-    ]).then(([s, c]) => {
+      getReviewsByStation(params.stationId),
+    ]).then(([s, c, r]) => {
       if (active) {
         setStation(s);
         setChargers(c);
+        setReviews(r);
         setLoading(false);
       }
     });
@@ -65,15 +85,24 @@ export function StationDetailScreen() {
     };
   }, [params.stationId]);
 
+  const fav = isFavorite(params.stationId);
+
+  const onGalleryScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setSlide(Math.round(e.nativeEvent.contentOffset.x / width));
+  };
+
   // Floating glass buttons (over the hero) — shared by loading & loaded states.
   const floatingHeader = (
     <View style={[styles.floatingHeader, { top: insets.top + spacing.sm }]} pointerEvents="box-none">
-      <Pressable style={styles.glassBtn} hitSlop={8} onPress={() => navigation.goBack()}>
+      <GlassButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={22} color={colors.textInverse} />
-      </Pressable>
-      <Pressable style={styles.glassBtn} hitSlop={8}>
-        <Ionicons name="heart-outline" size={22} color={colors.textInverse} />
-      </Pressable>
+      </GlassButton>
+      <GlassButton
+        accessibilityLabel={t(fav ? 'stationDetail.saved' : 'stationDetail.save')}
+        onPress={() => toggleFavorite(params.stationId)}
+      >
+        <Ionicons name={fav ? 'heart' : 'heart-outline'} size={22} color={fav ? colors.error : colors.textInverse} />
+      </GlassButton>
     </View>
   );
 
@@ -87,19 +116,29 @@ export function StationDetailScreen() {
     );
   }
 
+  const unavailable = !station.isOpen || station.availableChargers === 0;
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
-      >
-        {/* Hero banner (branded; image gallery comes later) */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* Swipeable hero gallery */}
         <View style={styles.hero}>
-          <Ionicons name="flash" size={72} color={colors.textInverse} style={styles.heroIcon} />
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={onGalleryScroll}
+          >
+            {GALLERY.map((icon, i) => (
+              <View key={i} style={[styles.slide, { width }]}>
+                <Ionicons name={icon} size={72} color={colors.textInverse} style={styles.heroIcon} />
+              </View>
+            ))}
+          </ScrollView>
           <View style={styles.dots}>
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
+            {GALLERY.map((_, i) => (
+              <View key={i} style={[styles.dot, i === slide && styles.dotActive]} />
+            ))}
           </View>
         </View>
 
@@ -196,6 +235,62 @@ export function StationDetailScreen() {
             ))}
           </View>
 
+          {/* Location / map snippet */}
+          <Text style={styles.sectionTitle}>{t('stationDetail.locationTitle')}</Text>
+          <Pressable style={styles.mapCard} onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}>
+            <View style={styles.mapCanvas}>
+              <Ionicons name="location" size={28} color={colors.primary} />
+            </View>
+            <View style={styles.mapFooter}>
+              <Ionicons name="map-outline" size={16} color={colors.primary} />
+              <Text style={styles.mapFooterText}>{t('stationDetail.openMap')}</Text>
+              <View style={styles.flex1} />
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+            </View>
+          </Pressable>
+
+          {/* Reviews */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('stationDetail.reviewsTitle')}</Text>
+            {reviews.length > 0 && (
+              <Pressable hitSlop={6}>
+                <Text style={styles.viewAll}>{t('stationDetail.viewAll')}</Text>
+              </Pressable>
+            )}
+          </View>
+          {reviews.length === 0 ? (
+            <Text style={styles.metaMuted}>{t('stationDetail.noReviews')}</Text>
+          ) : (
+            <View style={styles.reviewList}>
+              {station.rating !== undefined && (
+                <View style={styles.ratingSummary}>
+                  <Text style={styles.ratingBig}>{station.rating.toFixed(1)}</Text>
+                  <View style={styles.flex1}>
+                    <StarRating rating={station.rating} size={16} />
+                    {station.reviewCount !== undefined && (
+                      <Text style={styles.metaMuted}>{t('stationDetail.reviews', { count: station.reviewCount })}</Text>
+                    )}
+                  </View>
+                </View>
+              )}
+              {reviews.slice(0, 2).map((r) => (
+                <View key={r.id} style={styles.reviewRow}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>{r.authorName.charAt(0)}</Text>
+                  </View>
+                  <View style={styles.flex1}>
+                    <View style={styles.reviewHead}>
+                      <Text style={styles.reviewName}>{r.authorName}</Text>
+                      <Text style={styles.metaMuted}>{formatDate(r.createdAt)}</Text>
+                    </View>
+                    <StarRating rating={r.rating} size={12} />
+                    <Text style={styles.reviewComment}>{r.comment}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+
           {/* Description */}
           {station.description && (
             <View style={styles.descBlock}>
@@ -208,37 +303,45 @@ export function StationDetailScreen() {
 
       {floatingHeader}
 
-      {/* Sticky bottom CTA with price summary */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}>
-        {station.minRatePerKwh !== undefined && (
-          <View style={styles.priceBlock}>
-            <Text style={styles.priceLabel}>{t('stationDetail.priceFrom')}</Text>
-            <Text style={styles.priceValue}>{formatRate(station.minRatePerKwh)}</Text>
-          </View>
+      {/* Sticky bottom CTA with price summary; gated when unavailable */}
+      <GlassSurface
+        glassEffectStyle="regular"
+        style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}
+      >
+        {unavailable && (
+          <Text style={styles.gateHint}>
+            {station.isOpen ? t('stationDetail.fullHint') : t('stationDetail.closedHint')}
+          </Text>
         )}
-        <AppButton
-          style={styles.cta}
-          label={t('stationDetail.cta')}
-          onPress={() => navigation.navigate('SlotPicker', { stationId: params.stationId })}
-        />
-      </View>
+        <View style={styles.bottomRow}>
+          {station.minRatePerKwh !== undefined && (
+            <View style={styles.priceBlock}>
+              <Text style={styles.priceLabel}>{t('stationDetail.priceFrom')}</Text>
+              <Text style={styles.priceValue}>{formatRate(station.minRatePerKwh)}</Text>
+            </View>
+          )}
+          <AppButton
+            style={styles.cta}
+            label={t('stationDetail.cta')}
+            disabled={unavailable}
+            onPress={() => navigation.navigate('SlotPicker', { stationId: params.stationId })}
+          />
+        </View>
+      </GlassSurface>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  flex1: { flex: 1 },
 
-  hero: {
-    height: HERO_HEIGHT,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  hero: { height: HERO_HEIGHT, backgroundColor: colors.primary },
+  slide: { height: HERO_HEIGHT, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   heroIcon: { opacity: 0.9 },
-  dots: { position: 'absolute', bottom: spacing.xl, flexDirection: 'row', gap: spacing.sm },
+  dots: { position: 'absolute', bottom: spacing.xl, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: spacing.sm },
   dot: { width: 7, height: 7, borderRadius: radius.full, backgroundColor: colors.surface, opacity: 0.5 },
-  dotActive: { opacity: 1 },
+  dotActive: { opacity: 1, width: 18 },
 
   centerLoader: { position: 'absolute', top: '60%', alignSelf: 'center' },
 
@@ -249,15 +352,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  glassBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
-    backgroundColor: colors.overlay,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   sheet: {
     marginTop: -spacing.xl,
     backgroundColor: colors.surface,
@@ -301,9 +395,10 @@ const styles = StyleSheet.create({
   refundTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
   refundLine: { fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
 
-  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   sectionMeta: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
+  viewAll: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
 
   chargerList: { gap: spacing.sm, marginTop: -spacing.sm },
   chargerRow: {
@@ -328,7 +423,37 @@ const styles = StyleSheet.create({
   chargerName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
   chargerMeta: { fontSize: fontSizes.caption, color: colors.textMuted },
   chargerRight: { alignItems: 'flex-end', gap: spacing.xs },
-  chargerRate: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.primaryDark },
+  chargerRate: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textStrong },
+
+  // Map snippet
+  mapCard: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    marginTop: -spacing.sm,
+  },
+  mapCanvas: { height: 120, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  mapFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md },
+  mapFooterText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
+
+  // Reviews
+  reviewList: { gap: spacing.md, marginTop: -spacing.sm },
+  ratingSummary: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  ratingBig: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong },
+  reviewRow: { flexDirection: 'row', gap: spacing.md },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
+  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reviewName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
+  reviewComment: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body, marginTop: spacing.xs },
 
   descBlock: { gap: spacing.sm },
   desc: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body },
@@ -338,17 +463,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
+    gap: spacing.sm,
   },
+  gateHint: { fontSize: fontSizes.caption, color: colors.error, textAlign: 'center' },
+  bottomRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   priceBlock: { gap: 2 },
   priceLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
-  priceValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.primaryDark },
+  priceValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   cta: { flex: 1 },
 });

@@ -1,5 +1,5 @@
-import { chargersMock, slotsMock, stationsMock } from '@/mock/stations.mock';
-import type { Charger, Slot, Station } from '@/types';
+import { chargersMock, reviewsMock, slotsMock, stationsMock } from '@/mock/stations.mock';
+import type { Charger, Review, Slot, Station } from '@/types';
 
 /**
  * Station data layer.
@@ -38,4 +38,10 @@ export async function getSlotsByCharger(chargerId: string): Promise<Slot[]> {
   // NOW: return mock. LATER: GET /chargers/:chargerId/slots
   const slots = slotsMock.filter((s) => s.chargerId === chargerId);
   return simulateNetwork(slots);
+}
+
+export async function getReviewsByStation(stationId: string): Promise<Review[]> {
+  // NOW: return mock. LATER: GET /stations/:stationId/reviews
+  const reviews = reviewsMock.filter((r) => r.stationId === stationId);
+  return simulateNetwork(reviews);
 }

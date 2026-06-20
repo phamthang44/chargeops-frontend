@@ -4,7 +4,8 @@
     "privacy": "Chính sách bảo mật",
     "continue": "Tiếp tục",
     "loading": "Đang tải…",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "back": "Quay lại"
   },
   "nav": {
     "stationList": "Tìm trạm",
@@ -121,9 +122,19 @@
     "filters": {
       "all": "Tất cả",
       "dc": "Sạc nhanh (DC)",
-      "open": "Đang mở",
-      "cheap": "Giá rẻ"
+      "open": "Đang mở"
     },
+    "sortTitle": "Sắp xếp",
+    "sort": {
+      "nearest": "Gần nhất",
+      "cheapest": "Giá rẻ nhất",
+      "rating": "Đánh giá cao",
+      "available": "Còn nhiều chỗ"
+    },
+    "error": "Không thể tải danh sách trạm sạc.",
+    "retry": "Thử lại",
+    "notificationsTitle": "Thông báo",
+    "notificationsEmpty": "Bạn chưa có thông báo nào.",
     "promoTitle": "Ưu đãi hôm nay",
     "promoBody": "Giảm 20% phí sạc tại các trạm chọn lọc từ 22h – 6h sáng."
   },
@@ -172,6 +183,15 @@
     "chargerCount": "{{available}}/{{total}} đang trống",
     "descriptionTitle": "Mô tả trạm",
     "priceFrom": "Giá từ",
+    "locationTitle": "Vị trí",
+    "openMap": "Mở bản đồ",
+    "reviewsTitle": "Đánh giá",
+    "viewAll": "Xem tất cả",
+    "noReviews": "Chưa có đánh giá nào.",
+    "closedHint": "Trạm hiện đang đóng cửa.",
+    "fullHint": "Trạm hiện đã hết chỗ.",
+    "save": "Lưu trạm",
+    "saved": "Đã lưu trạm",
     "status": {
       "AVAILABLE": "Sẵn sàng",
       "IN_USE": "Đang sạc",

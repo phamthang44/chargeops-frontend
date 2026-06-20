@@ -4,7 +4,8 @@
     "privacy": "Privacy Policy",
     "continue": "Continue",
     "loading": "Loading…",
-    "language": "Language"
+    "language": "Language",
+    "back": "Back"
   },
   "nav": {
     "stationList": "Stations",
@@ -121,9 +122,19 @@
     "filters": {
       "all": "All",
       "dc": "Fast (DC)",
-      "open": "Open now",
-      "cheap": "Cheapest"
+      "open": "Open now"
     },
+    "sortTitle": "Sort by",
+    "sort": {
+      "nearest": "Nearest",
+      "cheapest": "Cheapest",
+      "rating": "Top rated",
+      "available": "Most available"
+    },
+    "error": "Couldn't load charging stations.",
+    "retry": "Retry",
+    "notificationsTitle": "Notifications",
+    "notificationsEmpty": "You have no notifications yet.",
     "promoTitle": "Today's offer",
     "promoBody": "20% off charging at selected stations from 10pm – 6am."
   },
@@ -172,6 +183,15 @@
     "chargerCount": "{{available}}/{{total}} available",
     "descriptionTitle": "About this station",
     "priceFrom": "From",
+    "locationTitle": "Location",
+    "openMap": "Open map",
+    "reviewsTitle": "Reviews",
+    "viewAll": "View all",
+    "noReviews": "No reviews yet.",
+    "closedHint": "This station is currently closed.",
+    "fullHint": "This station is currently full.",
+    "save": "Save station",
+    "saved": "Station saved",
     "status": {
       "AVAILABLE": "Available",
       "IN_USE": "Charging",

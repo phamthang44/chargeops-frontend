@@ -28,3 +28,9 @@ export function formatDate(iso: string): string {
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
+
+/** Format an ISO datetime as a 24h time label, e.g. "08:00". */
+export function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}

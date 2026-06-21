@@ -180,6 +180,8 @@
     "refundLine2": "Hoàn 50% nếu hủy trong khoảng 30–60 phút.",
     "refundLine3": "Không hoàn tiền nếu hủy dưới 30 phút hoặc không đến.",
     "chargerList": "Danh sách bộ sạc",
+    "selectCharger": "Chọn bộ sạc",
+    "selectChargerHint": "Vui lòng chọn bộ sạc để tiếp tục",
     "chargerCount": "{{available}}/{{total}} đang trống",
     "descriptionTitle": "Mô tả trạm",
     "priceFrom": "Giá từ",
@@ -201,9 +203,28 @@
   },
   "slotPicker": {
     "title": "Chọn khung giờ",
-    "placeholder": "Màn hình chọn khung giờ (placeholder)",
-    "notChosen": "(chưa chọn)",
-    "cta": "Tiếp tục thanh toán"
+    "cta": "Tiếp tục thanh toán",
+    "selectDate": "Chọn ngày sạc",
+    "monthYear": "Tháng {{month}}, {{year}}",
+    "weekdays": ["CN", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7"],
+    "availableSlots": "Khung giờ trống",
+    "legendAvailable": "Có thể đặt",
+    "legendMine": "Của bạn",
+    "legendBooked": "Đã đặt",
+    "until": "Đến {{time}}",
+    "status": {
+      "AVAILABLE": "Có thể đặt",
+      "OCCUPIED": "Người khác đã đặt",
+      "UNAVAILABLE": "Bảo trì",
+      "MINE": "Lượt đặt của bạn"
+    },
+    "chargerStatusActive": "Đang hoạt động",
+    "refundTitle": "Chính sách hoàn tiền",
+    "refundBody": "Hoàn 100% nếu hủy trước 30 phút. Hoàn 50% nếu hủy trong vòng 30 phút trước giờ bắt đầu.",
+    "selectHint": "Vui lòng chọn một khung giờ để tiếp tục",
+    "selectedCount": "Đã chọn {{count}} khung giờ",
+    "total": "Tổng cộng",
+    "empty": "Không có khung giờ nào cho ngày này."
   },
   "qrCheckIn": {
     "title": "Quét QR Check-in",

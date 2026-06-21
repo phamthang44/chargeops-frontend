@@ -180,6 +180,8 @@
     "refundLine2": "50% refund if cancelled within 30–60 minutes.",
     "refundLine3": "No refund if cancelled under 30 minutes or no-show.",
     "chargerList": "Chargers",
+    "selectCharger": "Choose a charger",
+    "selectChargerHint": "Please choose a charger to continue",
     "chargerCount": "{{available}}/{{total}} available",
     "descriptionTitle": "About this station",
     "priceFrom": "From",
@@ -201,9 +203,28 @@
   },
   "slotPicker": {
     "title": "Choose a time slot",
-    "placeholder": "Time-slot picker screen (placeholder)",
-    "notChosen": "(not chosen)",
-    "cta": "Continue to payment"
+    "cta": "Continue to payment",
+    "selectDate": "Choose a date",
+    "monthYear": "{{month}}/{{year}}",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "availableSlots": "Available slots",
+    "legendAvailable": "Available",
+    "legendMine": "Yours",
+    "legendBooked": "Occupied",
+    "until": "Until {{time}}",
+    "status": {
+      "AVAILABLE": "Available",
+      "OCCUPIED": "Occupied",
+      "UNAVAILABLE": "Unavailable",
+      "MINE": "Your booking"
+    },
+    "chargerStatusActive": "Active",
+    "refundTitle": "Refund policy",
+    "refundBody": "100% refund if cancelled more than 30 minutes ahead. 50% refund within 30 minutes before the start time.",
+    "selectHint": "Please choose a time slot to continue",
+    "selectedCount": "{{count}} slot(s) selected",
+    "total": "Total",
+    "empty": "No slots available for this date."
   },
   "qrCheckIn": {
     "title": "QR Check-in",

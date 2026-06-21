@@ -36,6 +36,8 @@ export function RootNavigator() {
           headerTintColor: colors.primary,
           headerTitleStyle: { color: colors.textStrong, fontWeight: fontWeights.semibold },
           contentStyle: { backgroundColor: colors.background },
+          // Chevron-only back button (no previous-screen title text).
+          headerBackButtonDisplayMode: 'minimal',
         }}
       >
         {session ? (
@@ -50,7 +52,8 @@ export function RootNavigator() {
             <Stack.Screen
               name="SlotPicker"
               component={SlotPickerScreen}
-              options={{ title: t('nav.slotPicker') }}
+              // Custom in-screen header (own back button) for reliable touch handling.
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="QRCheckIn"

@@ -105,10 +105,10 @@ export const chargersMock: Charger[] = [
 /** Slots grouped by chargerId (fixed snapshot prices in VND). */
 export const slotsMock: Slot[] = [
   { id: 'sl-1001', chargerId: 'ch-101', startAt: '2026-06-18T08:00:00+07:00', endAt: '2026-06-18T09:00:00+07:00', price: 90000, status: 'AVAILABLE' },
-  { id: 'sl-1002', chargerId: 'ch-101', startAt: '2026-06-18T09:00:00+07:00', endAt: '2026-06-18T10:00:00+07:00', price: 90000, status: 'BOOKED' },
-  { id: 'sl-1003', chargerId: 'ch-101', startAt: '2026-06-18T10:00:00+07:00', endAt: '2026-06-18T11:00:00+07:00', price: 90000, status: 'AVAILABLE' },
+  { id: 'sl-1002', chargerId: 'ch-101', startAt: '2026-06-18T09:00:00+07:00', endAt: '2026-06-18T10:00:00+07:00', price: 90000, status: 'OCCUPIED' },
+  { id: 'sl-1003', chargerId: 'ch-101', startAt: '2026-06-18T10:00:00+07:00', endAt: '2026-06-18T11:00:00+07:00', price: 90000, status: 'MINE' },
   { id: 'sl-2001', chargerId: 'ch-201', startAt: '2026-06-18T08:00:00+07:00', endAt: '2026-06-18T09:00:00+07:00', price: 75000, status: 'AVAILABLE' },
-  { id: 'sl-2002', chargerId: 'ch-201', startAt: '2026-06-18T09:00:00+07:00', endAt: '2026-06-18T10:00:00+07:00', price: 75000, status: 'DISABLED' },
+  { id: 'sl-2002', chargerId: 'ch-201', startAt: '2026-06-18T09:00:00+07:00', endAt: '2026-06-18T10:00:00+07:00', price: 75000, status: 'UNAVAILABLE' },
   { id: 'sl-3001', chargerId: 'ch-301', startAt: '2026-06-18T08:00:00+07:00', endAt: '2026-06-18T09:00:00+07:00', price: 120000, status: 'AVAILABLE' },
 ];
 

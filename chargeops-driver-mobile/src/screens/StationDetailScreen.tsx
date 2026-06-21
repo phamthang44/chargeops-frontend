@@ -65,6 +65,7 @@ export function StationDetailScreen() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [slide, setSlide] = useState(0);
+  const [selectedChargerId, setSelectedChargerId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -77,6 +78,8 @@ export function StationDetailScreen() {
         setStation(s);
         setChargers(c);
         setReviews(r);
+        // Pre-select the first available charger so the CTA is ready.
+        setSelectedChargerId(c.find((ch) => ch.status === 'AVAILABLE')?.id ?? null);
         setLoading(false);
       }
     });
@@ -117,6 +120,14 @@ export function StationDetailScreen() {
   }
 
   const unavailable = !station.isOpen || station.availableChargers === 0;
+  const canBook = !unavailable && !!selectedChargerId;
+  const gateHint = !station.isOpen
+    ? t('stationDetail.closedHint')
+    : station.availableChargers === 0
+      ? t('stationDetail.fullHint')
+      : !selectedChargerId
+        ? t('stationDetail.selectChargerHint')
+        : null;
 
   return (
     <View style={styles.container}>
@@ -203,9 +214,9 @@ export function StationDetailScreen() {
             </View>
           </View>
 
-          {/* Charger list */}
+          {/* Charger selection */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('stationDetail.chargerList')}</Text>
+            <Text style={styles.sectionTitle}>{t('stationDetail.selectCharger')}</Text>
             <Text style={styles.sectionMeta}>
               {t('stationDetail.chargerCount', {
                 available: station.availableChargers,
@@ -214,25 +225,45 @@ export function StationDetailScreen() {
             </Text>
           </View>
           <View style={styles.chargerList}>
-            {chargers.map((c) => (
-              <View key={c.id} style={styles.chargerRow}>
-                <View style={styles.chargerIcon}>
-                  <Ionicons name="flash" size={22} color={colors.textMuted} />
-                </View>
-                <View style={styles.chargerBody}>
-                  <Text style={styles.chargerName}>{c.name}</Text>
-                  <Text style={styles.chargerMeta}>
-                    {c.connectorType} · {c.powerKw} kW
-                  </Text>
-                </View>
-                <View style={styles.chargerRight}>
-                  <StatusBadge variant={STATUS_VARIANT[c.status]} label={t(`stationDetail.status.${c.status}`)} />
-                  {c.ratePerKwh !== undefined && (
-                    <Text style={styles.chargerRate}>{formatRate(c.ratePerKwh)}</Text>
+            {chargers.map((c) => {
+              const selectable = c.status === 'AVAILABLE';
+              const isSel = selectedChargerId === c.id;
+              return (
+                <Pressable
+                  key={c.id}
+                  disabled={!selectable}
+                  onPress={() => setSelectedChargerId(c.id)}
+                  style={[
+                    styles.chargerRow,
+                    isSel && styles.chargerRowSelected,
+                    !selectable && styles.chargerRowDisabled,
+                  ]}
+                >
+                  <View style={styles.chargerIcon}>
+                    <Ionicons name="flash" size={22} color={colors.textMuted} />
+                  </View>
+                  <View style={styles.chargerBody}>
+                    <Text style={styles.chargerName}>{c.name}</Text>
+                    <Text style={styles.chargerMeta}>
+                      {c.connectorType} · {c.powerKw} kW
+                    </Text>
+                  </View>
+                  <View style={styles.chargerRight}>
+                    <StatusBadge variant={STATUS_VARIANT[c.status]} label={t(`stationDetail.status.${c.status}`)} />
+                    {c.ratePerKwh !== undefined && (
+                      <Text style={styles.chargerRate}>{formatRate(c.ratePerKwh)}</Text>
+                    )}
+                  </View>
+                  {selectable && (
+                    <Ionicons
+                      name={isSel ? 'checkmark-circle' : 'ellipse-outline'}
+                      size={22}
+                      color={isSel ? colors.primary : colors.border}
+                    />
                   )}
-                </View>
-              </View>
-            ))}
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Location / map snippet */}
@@ -308,11 +339,7 @@ export function StationDetailScreen() {
         glassEffectStyle="regular"
         style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}
       >
-        {unavailable && (
-          <Text style={styles.gateHint}>
-            {station.isOpen ? t('stationDetail.fullHint') : t('stationDetail.closedHint')}
-          </Text>
-        )}
+        {gateHint && <Text style={styles.gateHint}>{gateHint}</Text>}
         <View style={styles.bottomRow}>
           {station.minRatePerKwh !== undefined && (
             <View style={styles.priceBlock}>
@@ -323,8 +350,13 @@ export function StationDetailScreen() {
           <AppButton
             style={styles.cta}
             label={t('stationDetail.cta')}
-            disabled={unavailable}
-            onPress={() => navigation.navigate('SlotPicker', { stationId: params.stationId })}
+            disabled={!canBook}
+            onPress={() =>
+              navigation.navigate('SlotPicker', {
+                stationId: params.stationId,
+                chargerId: selectedChargerId ?? undefined,
+              })
+            }
           />
         </View>
       </GlassSurface>
@@ -411,6 +443,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: spacing.md,
   },
+  chargerRowSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  chargerRowDisabled: { opacity: 0.6 },
   chargerIcon: {
     width: 44,
     height: 44,

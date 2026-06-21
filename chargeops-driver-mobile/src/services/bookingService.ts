@@ -1,5 +1,6 @@
 import { bookingsMock } from '@/mock/bookings.mock';
-import type { Booking } from '@/types';
+import type { Booking, CreateBookingRequest, Slot } from '@/types';
+import { generateDaySlots } from '@/utils/slots';
 
 /**
  * Booking data layer.
@@ -21,5 +22,22 @@ export async function getBookingHistory(): Promise<Booking[]> {
 export async function getBookingById(id: string): Promise<Booking | null> {
   // NOW: return mock. LATER: GET /bookings/:id
   const booking = bookingsMock.find((b) => b.id === id) ?? null;
+  return simulateNetwork(booking);
+}
+
+export async function getAvailableSlots(chargerId: string, dateISO: string): Promise<Slot[]> {
+  // NOW: frontend-generated grid (see utils/slots).
+  // LATER: GET /chargers/:chargerId/availability?date=  and merge onto the grid.
+  return simulateNetwork(generateDaySlots(chargerId, new Date(dateISO)));
+}
+
+export async function createBooking(req: CreateBookingRequest): Promise<Booking> {
+  // NOW: fake a PENDING booking. LATER: POST /bookings with the slots payload (req).
+  const first = req.slots[0];
+  const booking: Booking = {
+    id: `bk-${Date.now()}`,
+    slotId: first ? `${req.chargerId}-${first.startAt}` : '',
+    status: 'PENDING',
+  };
   return simulateNetwork(booking);
 }

@@ -49,13 +49,22 @@ export interface Charger {
   ratePerKwh?: number; // informational đ/kWh rate label (NEVER used to compute price)
 }
 
+/**
+ * Slot availability from the current driver's perspective:
+ * - AVAILABLE   = bookable (Có thể đặt)
+ * - OCCUPIED    = booked by someone else (Người khác đã đặt)
+ * - UNAVAILABLE = maintenance / offline (Bảo trì)
+ * - MINE        = already booked by this driver (Lượt đặt của bạn)
+ */
+export type SlotStatus = 'AVAILABLE' | 'OCCUPIED' | 'UNAVAILABLE' | 'MINE';
+
 export interface Slot {
   id: string;
   chargerId: string;
   startAt: string; // ISO datetime
   endAt: string;
   price: number; // FIXED slot price (VND), already snapshotted — display as-is
-  status: 'AVAILABLE' | 'BOOKED' | 'DISABLED';
+  status: SlotStatus;
 }
 
 export interface Booking {
@@ -63,6 +72,24 @@ export interface Booking {
   slotId: string;
   status: BookingStatus;
   checkedInAt?: string;
+}
+
+/** One chosen time slot in a booking request (ISO timestamps + fixed price). */
+export interface BookingSlotInput {
+  startAt: string;
+  endAt: string;
+  price: number;
+}
+
+/**
+ * Payload sent to the backend to create a booking.
+ * The frontend generates the slot grid; the chosen slots' ISO timestamps travel here.
+ * Multiple slots may be selected in one booking.
+ */
+export interface CreateBookingRequest {
+  chargerId: string;
+  slots: BookingSlotInput[];
+  totalPrice: number; // sum of the selected slot prices (VND)
 }
 
 /** A driver review for a station (display only; submission not yet specified). */

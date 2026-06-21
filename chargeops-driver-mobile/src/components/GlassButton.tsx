@@ -12,15 +12,27 @@ interface GlassButtonProps {
   children: ReactNode;
   size?: number;
   accessibilityLabel?: string;
+  glassEffectStyle?: 'clear' | 'regular';
+  /** Solid background used when Liquid Glass is unavailable. Default suits over-image use. */
+  fallbackColor?: string;
   style?: StyleProp<ViewStyle>;
 }
 
 /**
  * Circular icon button that uses the native iOS 26 Liquid Glass effect when
- * available, and falls back to a translucent dark circle elsewhere (older iOS,
- * Android). Designed to float over imagery (e.g. the station detail hero).
+ * available, and falls back to a solid translucent circle otherwise.
+ * Defaults suit floating over imagery (dark fallback); pass `fallbackColor`
+ * (e.g. a light tint) and a darker icon to use it on a light header.
  */
-export function GlassButton({ onPress, children, size = 44, accessibilityLabel, style }: GlassButtonProps) {
+export function GlassButton({
+  onPress,
+  children,
+  size = 44,
+  accessibilityLabel,
+  glassEffectStyle = 'clear',
+  fallbackColor = colors.overlay,
+  style,
+}: GlassButtonProps) {
   const shape = { width: size, height: size, borderRadius: size / 2 };
 
   return (
@@ -32,11 +44,11 @@ export function GlassButton({ onPress, children, size = 44, accessibilityLabel, 
       style={style}
     >
       {LIQUID_GLASS ? (
-        <GlassView style={[styles.center, shape]} glassEffectStyle="clear" isInteractive>
+        <GlassView style={[styles.center, shape]} glassEffectStyle={glassEffectStyle} isInteractive>
           {children}
         </GlassView>
       ) : (
-        <View style={[styles.center, styles.fallback, shape]}>{children}</View>
+        <View style={[styles.center, shape, { backgroundColor: fallbackColor }]}>{children}</View>
       )}
     </Pressable>
   );
@@ -44,5 +56,4 @@ export function GlassButton({ onPress, children, size = 44, accessibilityLabel, 
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  fallback: { backgroundColor: colors.overlay },
 });

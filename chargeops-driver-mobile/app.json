@@ -23,7 +23,13 @@
     },
     "plugins": [
       "expo-font",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "ChargeOps cần quyền truy cập camera để quét mã QR trên trụ sạc khi check-in."
+        }
+      ]
     ]
   }
 }

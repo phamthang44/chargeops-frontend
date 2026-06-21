@@ -57,6 +57,8 @@ export function BottomTabs() {
         component={BookingHistoryScreen}
         options={{
           title: t('nav.history'),
+          // Screen draws its own header (logo + TÀI XẾ + segmented tabs).
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />,
         }}
       />

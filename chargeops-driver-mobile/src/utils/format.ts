@@ -34,3 +34,27 @@ export function formatTime(iso: string): string {
   const d = new Date(iso);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
+
+/** Format a start/end ISO pair as a 24h time range, e.g. "14:00 - 15:00". */
+export function formatTimeRange(startIso: string, endIso: string): string {
+  return `${formatTime(startIso)} - ${formatTime(endIso)}`;
+}
+
+/** Format an ISO datetime as a short day/month, e.g. "20/06". */
+export function formatDayMonth(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * Format a millisecond duration as a HH:MM:SS countdown, e.g. "00:14:28".
+ * Negative values clamp to "00:00:00".
+ */
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}

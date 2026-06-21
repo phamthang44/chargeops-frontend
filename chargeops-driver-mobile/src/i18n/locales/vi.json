@@ -39,7 +39,24 @@
     "notifications": "Thông báo",
     "help": "Trợ giúp & hỗ trợ",
     "about": "Giới thiệu",
-    "comingSoon": "Sắp ra mắt"
+    "comingSoon": "Sắp ra mắt",
+    "demo": "Demo (giả lập)",
+    "demoHint": "Chọn kết quả giả lập để minh họa các trạng thái thanh toán & đặt chỗ.",
+    "demoPayment": "Kết quả thanh toán",
+    "demoBooking": "Kết quả tạo đặt chỗ",
+    "simPayment": {
+      "SUCCESS": "Thành công",
+      "FAILED": "Thất bại",
+      "CANCELLED": "Hủy",
+      "TIMEOUT": "Hết giờ",
+      "RANDOM": "Ngẫu nhiên"
+    },
+    "simBooking": {
+      "SUCCESS": "Thành công",
+      "SLOT_TAKEN": "Trùng chỗ",
+      "NETWORK_ERROR": "Lỗi mạng",
+      "RANDOM": "Ngẫu nhiên"
+    }
   },
   "welcome": {
     "title": "Sạc xe dễ dàng",
@@ -149,9 +166,18 @@
     "active": "Có {{count}} lượt đặt chỗ đang hoạt động (mock)."
   },
   "history": {
-    "title": "Lịch sử",
-    "placeholder": "Màn hình lịch sử đặt chỗ (placeholder)",
-    "loaded": "Đã tải {{count}} lượt đặt chỗ (mock)."
+    "title": "Lịch sử đặt chỗ",
+    "role": "TÀI XẾ",
+    "tabUpcoming": "Sắp tới",
+    "tabUpcomingCount": "Sắp tới ({{count}})",
+    "tabCompleted": "Đã hoàn thành",
+    "code": "Mã: {{code}}",
+    "total": "TỔNG THANH TOÁN",
+    "checkIn": "Check-in",
+    "viewDetail": "Xem chi tiết",
+    "emptyUpcoming": "Bạn chưa có lượt đặt chỗ sắp tới.",
+    "emptyCompleted": "Chưa có lịch sử đặt chỗ.",
+    "error": "Không thể tải lịch sử đặt chỗ."
   },
   "profile": {
     "title": "Hồ sơ",
@@ -226,9 +252,160 @@
     "total": "Tổng cộng",
     "empty": "Không có khung giờ nào cho ngày này."
   },
+  "bookingStatus": {
+    "PENDING": "Chờ xác nhận",
+    "CONFIRMED": "Đã xác nhận",
+    "CHECKED_IN": "Đã check-in",
+    "COMPLETED": "Hoàn thành",
+    "CANCELLED": "Đã hủy",
+    "NO_SHOW": "Không đến",
+    "UPCOMING": "Sắp tới"
+  },
+  "payment": {
+    "title": "Phương thức thanh toán",
+    "MOMO": "Ví MoMo",
+    "VISA": "Thẻ Quốc tế (Visa/Master)",
+    "ZALOPAY": "Ví ZaloPay",
+    "ATM": "Thẻ ATM Nội địa",
+    "WALLET": "Ví ChargeOps",
+    "paidVia": "Thanh toán qua {{method}}"
+  },
+  "bookingConfirm": {
+    "title": "Xác nhận đặt chỗ",
+    "bookingId": "ID: #{{code}}",
+    "detailTitle": "Chi tiết đặt chỗ",
+    "date": "NGÀY",
+    "time": "THỜI GIAN",
+    "charger": "THIẾT BỊ SẠC",
+    "chargerValue": "{{name}} - {{power}}kW (Cổng {{connector}})",
+    "invoiceTitle": "Chi tiết hóa đơn",
+    "chargingFee": "Phí sạc ({{count}} giờ)",
+    "serviceFee": "Phí dịch vụ",
+    "total": "Tổng cộng",
+    "refundTitle": "Chính sách hoàn tiền",
+    "refund1": "Hoàn 100% nếu hủy trước 2 tiếng.",
+    "refund2": "Hoàn 50% nếu hủy trong vòng 1-2 tiếng.",
+    "refund3": "Không hỗ trợ hoàn tiền nếu hủy dưới 30 phút.",
+    "totalToPay": "TỔNG THANH TOÁN",
+    "secure": "Thanh toán bảo mật",
+    "cta": "Thanh toán và đặt chỗ"
+  },
+  "paymentProcessing": {
+    "title": "Đang xử lý thanh toán",
+    "subtitle": "Đang kết nối tới {{method}}. Vui lòng không đóng ứng dụng.",
+    "amount": "Số tiền thanh toán",
+    "step": "Đang chờ xác nhận từ cổng thanh toán…",
+    "secure": "Giao dịch được mã hóa và bảo mật",
+    "retry": "Thử lại",
+    "cancel": "Hủy giao dịch",
+    "home": "Quay lại Trang chủ",
+    "FAILED": {
+      "title": "Thanh toán thất bại",
+      "body": "Giao dịch bị từ chối hoặc số dư không đủ. Vui lòng thử lại hoặc chọn phương thức khác."
+    },
+    "TIMEOUT": {
+      "title": "Hết thời gian chờ",
+      "body": "Cổng thanh toán không phản hồi. Đặt chỗ vẫn đang chờ — vui lòng thử lại."
+    },
+    "CANCELLED": {
+      "title": "Đã hủy thanh toán",
+      "body": "Bạn đã hủy giao dịch. Lượt đặt chỗ chưa được xác nhận."
+    }
+  },
+  "booking": {
+    "errors": {
+      "SLOT_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.",
+      "NETWORK_ERROR": "Không có kết nối mạng. Vui lòng kiểm tra và thử lại.",
+      "GENERIC": "Không thể tạo lượt đặt chỗ. Vui lòng thử lại."
+    }
+  },
+  "bookingSuccess": {
+    "title": "Đặt chỗ thành công!",
+    "code": "Mã booking: {{code}}",
+    "txTitle": "CHI TIẾT GIAO DỊCH",
+    "paid": "Đã thanh toán",
+    "station": "Trạm sạc",
+    "charger": "Thiết bị",
+    "time": "Thời gian",
+    "total": "Tổng cộng",
+    "checkInTitle": "Hướng dẫn Check-in",
+    "step1": "Có mặt tại trạm trước 5 phút so với giờ đặt chỗ.",
+    "step2": "Mở ứng dụng, chọn \"Quét QR\" và quét mã trên trụ sạc.",
+    "step3": "Kết nối súng sạc và bắt đầu phiên sạc từ ứng dụng.",
+    "viewDetail": "Xem chi tiết đặt chỗ",
+    "home": "Quay lại Trang chủ",
+    "refundNote": "Áp dụng chính sách hoàn tiền 100% nếu hủy trước 30 phút."
+  },
+  "bookingDetail": {
+    "title": "Chi tiết đặt chỗ",
+    "role": "TÀI XẾ",
+    "code": "MÃ ĐẶT CHỖ",
+    "countdownTitle": "Thời gian chờ Check-in còn lại",
+    "countdownNote": "Vui lòng có mặt đúng giờ và quét mã QR trên trụ sạc để bắt đầu phiên. Đặt chỗ sẽ tự động hủy nếu bạn trễ quá 15 phút.",
+    "stationTitle": "Thông tin trạm sạc",
+    "charger": "TRỤ SẠC",
+    "connector": "LOẠI ĐẦU SẠC",
+    "date": "NGÀY SẠC",
+    "slot": "KHUNG GIỜ",
+    "paymentTitle": "Chi tiết thanh toán",
+    "chargingFee": "Phí sạc dự kiến ({{count}}h)",
+    "serviceFee": "Phí dịch vụ",
+    "total": "Tổng cộng",
+    "refundTitle": "Chính sách hoàn tiền",
+    "refundBody": "Nếu bạn hủy bây giờ (trước khi bắt đầu sạc 30 phút), bạn sẽ được hoàn 100% số tiền vào Ví ChargeOps ({{amount}}).",
+    "cta": "Quét QR để Check-in",
+    "cancel": "Hủy đặt chỗ",
+    "cancelTitle": "Hủy đặt chỗ",
+    "cancelMessage": "Bạn có chắc muốn hủy lượt đặt chỗ này? Hành động này không thể hoàn tác.",
+    "cancelConfirm": "Xác nhận hủy",
+    "cancelDismiss": "Giữ lại đặt chỗ",
+    "notFound": "Không tìm thấy lượt đặt chỗ.",
+    "completedNote": "Lượt đặt chỗ đã kết thúc.",
+    "checkedInNote": "Bạn đã check-in lúc {{time}}."
+  },
   "qrCheckIn": {
     "title": "Quét QR Check-in",
-    "placeholder": "Màn hình quét QR (placeholder)",
-    "none": "(chưa có)"
+    "scanHint": "Đưa mã QR trên trụ sạc vào khung hình để check-in.",
+    "simulate": "Quét mã (Giả lập)",
+    "scanning": "Đang quét…",
+    "permissionTitle": "Cần quyền truy cập camera",
+    "permissionBody": "ChargeOps cần dùng camera để quét mã QR trên trụ sạc khi check-in.",
+    "allow": "Cho phép truy cập camera",
+    "openSettings": "Mở Cài đặt",
+    "successTitle": "Check-in thành công!",
+    "chargerCode": "Mã định danh bộ sạc: {{code}}",
+    "station": "Trạm sạc",
+    "connector": "Cổng sạc",
+    "time": "Thời gian đặt",
+    "startCharging": "Bắt đầu sạc ngay",
+    "autoStop": "Sạc sẽ tự động ngắt khi đầy pin",
+    "close": "Đóng"
+  },
+  "chargingSession": {
+    "headerTitle": "Đang sạc - {{station}}",
+    "role": "TÀI XẾ",
+    "charging": "ĐANG SẠC",
+    "full": "ĐÃ ĐẦY",
+    "rangeLeft": "~{{km}} km còn lại",
+    "currentStatus": "Trạng thái dòng điện",
+    "currentStatusValue": "Ổn định (DC Fast Charge)",
+    "active": "Active",
+    "power": "CÔNG SUẤT",
+    "temperature": "NHIỆT ĐỘ",
+    "timeTitle": "Thông tin thời gian",
+    "elapsed": "Thời gian đã sạc",
+    "startedAt": "Bắt đầu lúc {{time}}",
+    "estEnd": "Thời gian dự kiến kết thúc",
+    "estEndValue": "{{time}} (Còn {{minutes}} phút)",
+    "estEndNote": "Dựa trên công suất hiện tại",
+    "controlTitle": "Điều khiển phần cứng",
+    "locked": "Locked",
+    "controlDisabledTitle": "Điều khiển bị vô hiệu hóa",
+    "controlDisabledBody": "Để đảm bảo an toàn, các nút điều khiển vật lý chỉ có thể thao tác trực tiếp tại trụ sạc hoặc sau khi phiên sạc kết thúc.",
+    "stop": "DỪNG",
+    "unlock": "MỞ KHÓA CẤP",
+    "autoNote": "Hệ thống sẽ tự động ngắt dòng điện khi đạt mức 100% hoặc khi hết khung giờ đã đặt chỗ.",
+    "finish": "Kết thúc phiên sạc",
+    "finishFull": "Hoàn tất phiên sạc"
   }
 }

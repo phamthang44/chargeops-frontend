@@ -44,8 +44,9 @@ screen headlines (splash, auth), not raw numbers.
 ## Third rule: all UI strings go through i18n
 **Never hardcode user-facing text.** Use `react-i18next`: `const { t } = useTranslation();` then
 `t('namespace.key')`. Strings live in `src/i18n/locales/{vi,en}.json`, namespaced by screen/area
-(`welcome.title`, `common.terms`, `nav.*`). Default language is **Vietnamese (`vi`)**; `en` is supported
-and the device locale is auto-detected on launch (fallback `vi`). Add every new key to **both** locale files.
+(`welcome.title`, `common.terms`, `nav.*`). The app **always boots in Vietnamese (`vi`)** — the device
+locale is intentionally ignored on launch (ChargeOps is built for Vietnamese drivers); `en` is supported
+and the user can switch at runtime via `<LanguageSwitcher />`. Add every new key to **both** locale files.
 - **All screens + navigation titles are migrated** — follow the existing pattern; don't reintroduce literals.
 - **Pinned versions:** `i18next@24` + `react-i18next@15` (newer majors break Metro's resolver — do not upgrade).
 - **Navigation titles** (`BottomTabs`, `RootNavigator`) call `t()` inside the component so they re-render on language change.

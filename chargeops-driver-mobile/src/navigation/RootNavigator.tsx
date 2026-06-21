@@ -1,10 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors, fontWeights } from '@/theme';
+import { BookingConfirmationScreen } from '@/screens/BookingConfirmationScreen';
+import { BookingDetailScreen } from '@/screens/BookingDetailScreen';
+import { BookingSuccessScreen } from '@/screens/BookingSuccessScreen';
+import { ChargingSessionScreen } from '@/screens/ChargingSessionScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
+import { PaymentProcessingScreen } from '@/screens/PaymentProcessingScreen';
 import { OtpVerificationScreen } from '@/screens/OtpVerificationScreen';
 import { QRCheckInScreen } from '@/screens/QRCheckInScreen';
 import { RegisterScreen } from '@/screens/RegisterScreen';
@@ -26,7 +30,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  */
 export function RootNavigator() {
   const { session } = useAuth();
-  const { t } = useTranslation();
 
   return (
     <NavigationContainer>
@@ -56,9 +59,40 @@ export function RootNavigator() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="BookingConfirmation"
+              component={BookingConfirmationScreen}
+              // Custom in-screen header (own back button), matching SlotPicker.
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="PaymentProcessing"
+              component={PaymentProcessingScreen}
+              // Blocking "waiting for payment" state; no back/swipe mid-transaction.
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="BookingSuccess"
+              component={BookingSuccessScreen}
+              // Full-screen success state; no back button (can't undo a payment).
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="BookingDetail"
+              component={BookingDetailScreen}
+              // Custom in-screen header drawn over the station hero image.
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="QRCheckIn"
               component={QRCheckInScreen}
-              options={{ title: t('nav.qrCheckIn') }}
+              // Full-screen dark scanner; custom in-screen close button.
+              options={{ headerShown: false, presentation: 'modal' }}
+            />
+            <Stack.Screen
+              name="ChargingSession"
+              component={ChargingSessionScreen}
+              // Custom in-screen header; no swipe-back (session is in progress).
+              options={{ headerShown: false, gestureEnabled: false }}
             />
           </>
         ) : (

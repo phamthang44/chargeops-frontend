@@ -1,4 +1,3 @@
-import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -8,9 +7,10 @@ import vi from './locales/vi.json';
 /**
  * App i18n setup.
  *
- * UI language defaults to Vietnamese (the primary audience). The app reads the
- * device locale on launch; if it is a supported language we use it, otherwise we
- * fall back to Vietnamese. Switch at runtime with `i18n.changeLanguage('en')`.
+ * UI language ALWAYS starts in Vietnamese — ChargeOps is built for Vietnamese
+ * drivers, so we intentionally ignore the device locale on launch (a phone set
+ * to English still opens in Vietnamese). English is still supported and the user
+ * can switch at runtime via <LanguageSwitcher /> (`i18n.changeLanguage('en')`).
  *
  * Convention: keys are namespaced by screen/area (e.g. `welcome.title`,
  * `common.terms`). Add new strings to BOTH locale files in `./locales`.
@@ -25,16 +25,9 @@ export const resources = {
   en: { translation: en },
 } as const;
 
-function resolveInitialLanguage(): SupportedLanguage {
-  const device = getLocales()[0]?.languageCode;
-  return SUPPORTED_LANGUAGES.includes(device as SupportedLanguage)
-    ? (device as SupportedLanguage)
-    : DEFAULT_LANGUAGE;
-}
-
 i18n.use(initReactI18next).init({
   resources,
-  lng: resolveInitialLanguage(),
+  lng: DEFAULT_LANGUAGE, // always boot in Vietnamese, regardless of device locale
   fallbackLng: DEFAULT_LANGUAGE,
   interpolation: { escapeValue: false }, // React already escapes
   returnNull: false,

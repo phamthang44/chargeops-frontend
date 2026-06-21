@@ -39,7 +39,24 @@
     "notifications": "Notifications",
     "help": "Help & support",
     "about": "About",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "demo": "Demo (simulation)",
+    "demoHint": "Force a simulated outcome to showcase the payment & booking states.",
+    "demoPayment": "Payment outcome",
+    "demoBooking": "Booking-creation outcome",
+    "simPayment": {
+      "SUCCESS": "Success",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled",
+      "TIMEOUT": "Timeout",
+      "RANDOM": "Random"
+    },
+    "simBooking": {
+      "SUCCESS": "Success",
+      "SLOT_TAKEN": "Slot taken",
+      "NETWORK_ERROR": "Network error",
+      "RANDOM": "Random"
+    }
   },
   "welcome": {
     "title": "Charge with ease",
@@ -149,9 +166,18 @@
     "active": "You have {{count}} active bookings (mock)."
   },
   "history": {
-    "title": "History",
-    "placeholder": "Booking history screen (placeholder)",
-    "loaded": "Loaded {{count}} bookings (mock)."
+    "title": "Booking history",
+    "role": "DRIVER",
+    "tabUpcoming": "Upcoming",
+    "tabUpcomingCount": "Upcoming ({{count}})",
+    "tabCompleted": "Completed",
+    "code": "Code: {{code}}",
+    "total": "TOTAL PAID",
+    "checkIn": "Check-in",
+    "viewDetail": "View details",
+    "emptyUpcoming": "You have no upcoming bookings.",
+    "emptyCompleted": "No booking history yet.",
+    "error": "Couldn't load booking history."
   },
   "profile": {
     "title": "Profile",
@@ -226,9 +252,160 @@
     "total": "Total",
     "empty": "No slots available for this date."
   },
+  "bookingStatus": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "CHECKED_IN": "Checked in",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "NO_SHOW": "No-show",
+    "UPCOMING": "Upcoming"
+  },
+  "payment": {
+    "title": "Payment method",
+    "MOMO": "MoMo Wallet",
+    "VISA": "International card (Visa/Master)",
+    "ZALOPAY": "ZaloPay Wallet",
+    "ATM": "Domestic ATM card",
+    "WALLET": "ChargeOps Wallet",
+    "paidVia": "Paid via {{method}}"
+  },
+  "bookingConfirm": {
+    "title": "Confirm booking",
+    "bookingId": "ID: #{{code}}",
+    "detailTitle": "Booking details",
+    "date": "DATE",
+    "time": "TIME",
+    "charger": "CHARGER",
+    "chargerValue": "{{name}} - {{power}}kW ({{connector}} port)",
+    "invoiceTitle": "Invoice",
+    "chargingFee": "Charging fee ({{count}}h)",
+    "serviceFee": "Service fee",
+    "total": "Total",
+    "refundTitle": "Refund policy",
+    "refund1": "100% refund if cancelled more than 2 hours ahead.",
+    "refund2": "50% refund if cancelled within 1–2 hours.",
+    "refund3": "No refund if cancelled under 30 minutes.",
+    "totalToPay": "TOTAL TO PAY",
+    "secure": "Secure payment",
+    "cta": "Pay and book"
+  },
+  "paymentProcessing": {
+    "title": "Processing payment",
+    "subtitle": "Connecting to {{method}}. Please don't close the app.",
+    "amount": "Amount",
+    "step": "Waiting for confirmation from the payment gateway…",
+    "secure": "Your transaction is encrypted and secure",
+    "retry": "Try again",
+    "cancel": "Cancel transaction",
+    "home": "Back to home",
+    "FAILED": {
+      "title": "Payment failed",
+      "body": "The transaction was declined or funds were insufficient. Try again or choose another method."
+    },
+    "TIMEOUT": {
+      "title": "Request timed out",
+      "body": "The payment gateway didn't respond. Your booking is still pending — please try again."
+    },
+    "CANCELLED": {
+      "title": "Payment cancelled",
+      "body": "You cancelled the transaction. The booking was not confirmed."
+    }
+  },
+  "booking": {
+    "errors": {
+      "SLOT_TAKEN": "Sorry, this slot was just booked by someone else. Please pick another time.",
+      "NETWORK_ERROR": "No network connection. Please check and try again.",
+      "GENERIC": "Couldn't create the booking. Please try again."
+    }
+  },
+  "bookingSuccess": {
+    "title": "Booking confirmed!",
+    "code": "Booking code: {{code}}",
+    "txTitle": "TRANSACTION DETAILS",
+    "paid": "Paid",
+    "station": "Station",
+    "charger": "Charger",
+    "time": "Time",
+    "total": "Total",
+    "checkInTitle": "Check-in guide",
+    "step1": "Arrive at the station 5 minutes before your slot.",
+    "step2": "Open the app, tap \"Scan QR\" and scan the code on the charger.",
+    "step3": "Plug in the connector and start the session from the app.",
+    "viewDetail": "View booking details",
+    "home": "Back to home",
+    "refundNote": "100% refund policy applies if cancelled more than 30 minutes ahead."
+  },
+  "bookingDetail": {
+    "title": "Booking details",
+    "role": "DRIVER",
+    "code": "BOOKING CODE",
+    "countdownTitle": "Check-in window remaining",
+    "countdownNote": "Please arrive on time and scan the QR code on the charger to start your session. The booking auto-cancels if you are more than 15 minutes late.",
+    "stationTitle": "Station info",
+    "charger": "CHARGER",
+    "connector": "CONNECTOR",
+    "date": "DATE",
+    "slot": "TIME SLOT",
+    "paymentTitle": "Payment details",
+    "chargingFee": "Est. charging fee ({{count}}h)",
+    "serviceFee": "Service fee",
+    "total": "Total",
+    "refundTitle": "Refund policy",
+    "refundBody": "If you cancel now (more than 30 minutes before charging starts), you'll be refunded 100% to your ChargeOps Wallet ({{amount}}).",
+    "cta": "Scan QR to check in",
+    "cancel": "Cancel booking",
+    "cancelTitle": "Cancel booking",
+    "cancelMessage": "Are you sure you want to cancel this booking? This action cannot be undone.",
+    "cancelConfirm": "Confirm cancellation",
+    "cancelDismiss": "Keep booking",
+    "notFound": "Booking not found.",
+    "completedNote": "This booking has ended.",
+    "checkedInNote": "You checked in at {{time}}."
+  },
   "qrCheckIn": {
     "title": "QR Check-in",
-    "placeholder": "QR scan screen (placeholder)",
-    "none": "(none)"
+    "scanHint": "Position the QR code on the charger within the frame to check in.",
+    "simulate": "Scan code (Simulated)",
+    "scanning": "Scanning…",
+    "permissionTitle": "Camera access needed",
+    "permissionBody": "ChargeOps uses the camera to scan the QR code on the charger when you check in.",
+    "allow": "Allow camera access",
+    "openSettings": "Open Settings",
+    "successTitle": "Check-in successful!",
+    "chargerCode": "Charger ID: {{code}}",
+    "station": "Station",
+    "connector": "Connector",
+    "time": "Booked time",
+    "startCharging": "Start charging now",
+    "autoStop": "Charging stops automatically when full",
+    "close": "Close"
+  },
+  "chargingSession": {
+    "headerTitle": "Charging - {{station}}",
+    "role": "DRIVER",
+    "charging": "CHARGING",
+    "full": "FULL",
+    "rangeLeft": "~{{km}} km left",
+    "currentStatus": "Current status",
+    "currentStatusValue": "Stable (DC Fast Charge)",
+    "active": "Active",
+    "power": "POWER",
+    "temperature": "TEMPERATURE",
+    "timeTitle": "Time info",
+    "elapsed": "Time charged",
+    "startedAt": "Started at {{time}}",
+    "estEnd": "Estimated finish",
+    "estEndValue": "{{time}} ({{minutes}} min left)",
+    "estEndNote": "Based on current power",
+    "controlTitle": "Hardware controls",
+    "locked": "Locked",
+    "controlDisabledTitle": "Controls disabled",
+    "controlDisabledBody": "For safety, physical controls can only be operated at the charger directly or after the session ends.",
+    "stop": "STOP",
+    "unlock": "UNLOCK",
+    "autoNote": "The system automatically stops the current when it reaches 100% or when your booked slot ends.",
+    "finish": "End charging session",
+    "finishFull": "Complete session"
   }
 }

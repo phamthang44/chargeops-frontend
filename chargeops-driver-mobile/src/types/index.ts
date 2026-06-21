@@ -67,11 +67,40 @@ export interface Slot {
   status: SlotStatus;
 }
 
+/** Payment methods offered on the booking-confirmation screen. */
+export type PaymentMethod = 'MOMO' | 'VISA' | 'ZALOPAY' | 'ATM' | 'WALLET';
+
+/**
+ * A booking, denormalized for display.
+ * The booking snapshots the station/charger/slot details at creation time so the
+ * history & detail screens never need to re-join against live station data.
+ */
 export interface Booking {
   id: string;
-  slotId: string;
+  code: string; // human-facing booking code, e.g. "CHG-8829"
+  // Station snapshot
+  stationId: string;
+  stationName: string;
+  stationAddress: string;
+  stationImageUrl?: string;
+  // Charger snapshot
+  chargerId: string;
+  chargerName: string;
+  connectorType: ConnectorType;
+  powerKw: number;
+  // Time window (earliest slot start -> latest slot end)
+  startAt: string; // ISO datetime
+  endAt: string; // ISO datetime
+  slotCount: number; // number of hourly slots booked (= duration in hours)
+  // Pricing (VND, snapshotted)
+  chargingFee: number; // sum of the chosen slot prices
+  serviceFee: number; // flat platform fee
+  totalPrice: number; // chargingFee + serviceFee
+  paymentMethod: PaymentMethod;
+  // Lifecycle
   status: BookingStatus;
   checkedInAt?: string;
+  createdAt: string; // ISO datetime
 }
 
 /** One chosen time slot in a booking request (ISO timestamps + fixed price). */
@@ -84,12 +113,14 @@ export interface BookingSlotInput {
 /**
  * Payload sent to the backend to create a booking.
  * The frontend generates the slot grid; the chosen slots' ISO timestamps travel here.
- * Multiple slots may be selected in one booking.
+ * Multiple slots may be selected in one booking. Pricing is derived server-side
+ * from the snapshotted slot prices — the client never sends a total it computed itself.
  */
 export interface CreateBookingRequest {
+  stationId: string;
   chargerId: string;
   slots: BookingSlotInput[];
-  totalPrice: number; // sum of the selected slot prices (VND)
+  paymentMethod: PaymentMethod;
 }
 
 /** A driver review for a station (display only; submission not yet specified). */

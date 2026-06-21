@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, GlassButton, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { createBooking, getAvailableSlots } from '@/services/bookingService';
+import { getAvailableSlots } from '@/services/bookingService';
 import { getChargersByStation, getStationById } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Charger, Slot, Station } from '@/types';
@@ -37,7 +37,6 @@ export function SlotPickerScreen() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(true);
   const [selected, setSelected] = useState<Slot[]>([]);
-  const [submitting, setSubmitting] = useState(false);
 
   // Load station + resolve which charger to book.
   useEffect(() => {
@@ -88,19 +87,14 @@ export function SlotPickerScreen() {
   );
   const totalPrice = useMemo(() => selected.reduce((sum, s) => sum + s.price, 0), [selected]);
 
-  async function handleContinue() {
+  function handleContinue() {
     if (selected.length === 0 || !charger) return;
-    setSubmitting(true);
-    try {
-      const booking = await createBooking({
-        chargerId: charger.id,
-        slots: sortedSelected.map((s) => ({ startAt: s.startAt, endAt: s.endAt, price: s.price })),
-        totalPrice,
-      });
-      navigation.navigate('QRCheckIn', { bookingId: booking.id });
-    } finally {
-      setSubmitting(false);
-    }
+    // Defer creating the booking to the confirmation step (after payment).
+    navigation.navigate('BookingConfirmation', {
+      stationId: params.stationId,
+      chargerId: charger.id,
+      slots: sortedSelected.map((s) => ({ startAt: s.startAt, endAt: s.endAt, price: s.price })),
+    });
   }
 
   const monthLabel = t('slotPicker.monthYear', {
@@ -309,7 +303,6 @@ export function SlotPickerScreen() {
         <AppButton
           label={t('slotPicker.cta')}
           disabled={selected.length === 0}
-          loading={submitting}
           onPress={handleContinue}
         />
       </View>

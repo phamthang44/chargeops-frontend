@@ -101,6 +101,7 @@ export interface Booking {
   status: BookingStatus;
   checkedInAt?: string;
   createdAt: string; // ISO datetime
+  refundAmount?: number; // VND credited back when CANCELLED (per FR08 refund tiers)
 }
 
 /** One chosen time slot in a booking request (ISO timestamps + fixed price). */

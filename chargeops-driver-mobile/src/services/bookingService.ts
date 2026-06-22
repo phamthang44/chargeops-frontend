@@ -36,6 +36,43 @@ export interface PaymentResult {
 /** Flat platform fee added on top of the snapshotted slot prices (VND). */
 export const SERVICE_FEE = 5000;
 
+/** Refund tier per FR08 / BR-PAY (SRS v4_3). */
+export type RefundTier = 'FULL' | 'PARTIAL' | 'NONE';
+
+export interface RefundBreakdown {
+  tier: RefundTier;
+  percent: number; // 100 | 50 | 0
+  refundAmount: number; // VND credited back
+  feeAmount: number; // VND withheld (totalPrice - refundAmount)
+  minutesBefore: number; // whole minutes before slot start (negative once started)
+}
+
+/**
+ * Compute the refund for cancelling a booking, based on time remaining before
+ * the slot start at the moment of cancellation (FR08):
+ *   - 60+ min before start  -> 100% (FULL)
+ *   - 15–60 min before start -> 50%  (PARTIAL)
+ *   - < 15 min, or no-show   -> 0%   (NONE)
+ * Pure function — same input always yields the same breakdown.
+ */
+export function computeRefund(booking: Booking, now: number = Date.now()): RefundBreakdown {
+  const minutesBefore = Math.floor((new Date(booking.startAt).getTime() - now) / 60_000);
+  let percent: number;
+  let tier: RefundTier;
+  if (minutesBefore >= 60) {
+    percent = 100;
+    tier = 'FULL';
+  } else if (minutesBefore >= 15) {
+    percent = 50;
+    tier = 'PARTIAL';
+  } else {
+    percent = 0;
+    tier = 'NONE';
+  }
+  const refundAmount = Math.round((booking.totalPrice * percent) / 100);
+  return { tier, percent, refundAmount, feeAmount: booking.totalPrice - refundAmount, minutesBefore };
+}
+
 // In-memory store (newest first). Seeded from the mock once at module load.
 const store: Booking[] = [...bookingsMock];
 
@@ -135,9 +172,14 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
 }
 
 export async function cancelBooking(id: string): Promise<Booking | null> {
-  // NOW: flip the status in the store. LATER: POST /bookings/:id/cancel
+  // NOW: compute the refund (FR08 tiers) for paid bookings, store it, flip the
+  // status. A still-unpaid (PENDING) booking refunds nothing — no money moved.
+  // LATER: POST /bookings/:id/cancel -> backend computes + disburses the refund.
   const booking = store.find((b) => b.id === id);
-  if (booking) booking.status = 'CANCELLED';
+  if (booking) {
+    booking.refundAmount = booking.status === 'CONFIRMED' ? computeRefund(booking).refundAmount : 0;
+    booking.status = 'CANCELLED';
+  }
   return simulateNetwork(booking ?? null);
 }
 

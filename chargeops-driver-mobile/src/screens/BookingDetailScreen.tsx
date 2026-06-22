@@ -3,12 +3,12 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, GlassButton, StatusBadge, type BadgeVariant } from '@/components';
+import { AppButton, CancelBookingSheet, GlassButton, StatusBadge, type BadgeVariant } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { cancelBooking, getBookingById } from '@/services/bookingService';
+import { getBookingById } from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
 import { formatCountdown, formatDate, formatTime, formatTimeRange, formatVnd } from '@/utils/format';
@@ -43,7 +43,7 @@ export function BookingDetailScreen() {
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
-  const [cancelling, setCancelling] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -67,25 +67,6 @@ export function BookingDetailScreen() {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [isActive]);
-
-  function confirmCancel() {
-    Alert.alert(t('bookingDetail.cancelTitle'), t('bookingDetail.cancelMessage'), [
-      { text: t('bookingDetail.cancelDismiss'), style: 'cancel' },
-      {
-        text: t('bookingDetail.cancelConfirm'),
-        style: 'destructive',
-        onPress: async () => {
-          setCancelling(true);
-          try {
-            const updated = await cancelBooking(params.bookingId);
-            setBooking(updated);
-          } finally {
-            setCancelling(false);
-          }
-        },
-      },
-    ]);
-  }
 
   if (loading) {
     return (
@@ -146,11 +127,7 @@ export function BookingDetailScreen() {
         ) : (
           <View style={styles.infoNote}>
             <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
-            <Text style={styles.infoNoteText}>
-              {booking.status === 'CHECKED_IN' && booking.checkedInAt
-                ? t('bookingDetail.checkedInNote', { time: formatTime(booking.checkedInAt) })
-                : t('bookingDetail.completedNote')}
-            </Text>
+            <Text style={styles.infoNoteText}>{statusNote(booking, t)}</Text>
           </View>
         )}
 
@@ -231,9 +208,7 @@ export function BookingDetailScreen() {
               <Ionicons name="alert-circle-outline" size={18} color={colors.error} />
               <Text style={styles.refundTitle}>{t('bookingDetail.refundTitle')}</Text>
             </View>
-            <Text style={styles.refundText}>
-              {t('bookingDetail.refundBody', { amount: formatVnd(booking.totalPrice) })}
-            </Text>
+            <Text style={styles.refundText}>{t('bookingDetail.refundBody')}</Text>
           </View>
         )}
       </ScrollView>
@@ -248,13 +223,37 @@ export function BookingDetailScreen() {
           <AppButton
             label={t('bookingDetail.cancel')}
             variant="secondary"
-            loading={cancelling}
-            onPress={confirmCancel}
+            onPress={() => setShowCancel(true)}
           />
         </View>
       )}
+
+      {isActive && (
+        <CancelBookingSheet
+          visible={showCancel}
+          booking={booking}
+          onClose={() => setShowCancel(false)}
+          onConfirmed={(updated) => {
+            setBooking(updated);
+            setShowCancel(false);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
+}
+
+/** Status note for non-active bookings (checked-in / completed / cancelled). */
+function statusNote(booking: Booking, t: (k: string, o?: Record<string, unknown>) => string): string {
+  if (booking.status === 'CHECKED_IN' && booking.checkedInAt) {
+    return t('bookingDetail.checkedInNote', { time: formatTime(booking.checkedInAt) });
+  }
+  if (booking.status === 'CANCELLED') {
+    return booking.refundAmount && booking.refundAmount > 0
+      ? t('bookingDetail.refundedNote', { amount: formatVnd(booking.refundAmount) })
+      : t('bookingDetail.noRefundNote');
+  }
+  return t('bookingDetail.completedNote');
 }
 
 function Header({ onBack }: { onBack: () => void }) {

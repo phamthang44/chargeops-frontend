@@ -158,7 +158,13 @@
   "map": {
     "title": "Map",
     "placeholder": "Charging-station map screen (placeholder)",
-    "body": "The Google Maps view will appear here."
+    "body": "The Google Maps view will appear here.",
+    "legend": {
+      "available": "Available",
+      "busy": "Almost full",
+      "full": "Full",
+      "closed": "Closed"
+    }
   },
   "bookings": {
     "title": "Bookings",

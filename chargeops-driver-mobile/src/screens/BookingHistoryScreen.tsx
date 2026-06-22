@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { StatusBadge, type BadgeVariant } from '@/components';
+import { EmptyState, StatusBadge, type BadgeVariant } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBookingHistory } from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -105,7 +105,7 @@ export function BookingHistoryScreen() {
         <ActivityIndicator color={colors.primary} style={styles.loader} />
       ) : list.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="calendar-outline" size={40} color={colors.textMuted} />
+          <EmptyState variant="bookings" />
           <Text style={styles.emptyText}>
             {tab === 'upcoming' ? t('history.emptyUpcoming') : t('history.emptyCompleted')}
           </Text>

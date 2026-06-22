@@ -6,17 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, SettingsModal } from '@/components';
+import { AppButton, BrandMark, FeatureArt, SettingsModal, type FeatureName } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
 
-const FEATURES = [
-  { icon: 'flash' as const, key: 'fast' as const },
-  { icon: 'location' as const, key: 'find' as const },
-  { icon: 'card' as const, key: 'pay' as const },
-] as const;
+const FEATURES: { art: FeatureName; key: 'fast' | 'find' | 'pay' }[] = [
+  { art: 'charging', key: 'fast' },
+  { art: 'find', key: 'find' },
+  { art: 'pay', key: 'pay' },
+];
 
 export function WelcomeScreen() {
   const navigation = useNavigation<Nav>();
@@ -44,9 +44,7 @@ export function WelcomeScreen() {
         </View>
 
         {/* App logo */}
-        <View style={styles.logoBox}>
-          <Ionicons name="flash" size={40} color={colors.textInverse} />
-        </View>
+        <BrandMark size={76} style={styles.logo} />
 
         {/* Headline */}
         <Text style={styles.title}>{t('welcome.title')}</Text>
@@ -59,9 +57,7 @@ export function WelcomeScreen() {
         <View style={styles.features}>
           {FEATURES.map((f) => (
             <View key={f.key} style={styles.featureItem}>
-              <View style={styles.featureIconBox}>
-                <Ionicons name={f.icon} size={20} color={colors.primary} />
-              </View>
+              <FeatureArt name={f.art} size={68} />
               <Text style={styles.featureLabel}>{t(`welcome.features.${f.key}`)}</Text>
             </View>
           ))}
@@ -130,13 +126,7 @@ const styles = StyleSheet.create({
   },
 
   // Logo
-  logoBox: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.lg,
-    backgroundColor: colors.textStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
+  logo: {
     marginBottom: spacing.xl,
   },
 
@@ -177,15 +167,7 @@ const styles = StyleSheet.create({
   featureItem: {
     flex: 1,
     alignItems: 'center',
-    gap: spacing.sm,
-  },
-  featureIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: spacing.xs,
   },
   featureLabel: {
     fontSize: fontSizes.caption,

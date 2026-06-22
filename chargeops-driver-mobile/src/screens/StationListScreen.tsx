@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BottomSheet, Card, StatusBadge } from '@/components';
+import { BottomSheet, Card, EmptyState, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getNearbyStations } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -217,7 +217,7 @@ export function StationListScreen() {
                 </>
               ) : visible.length === 0 ? (
                 <View style={styles.stateBox}>
-                  <Ionicons name="search-outline" size={40} color={colors.textMuted} />
+                  <EmptyState variant="search" />
                   <Text style={styles.stateText}>{t('stationList.empty')}</Text>
                 </View>
               ) : (
@@ -347,7 +347,7 @@ export function StationListScreen() {
       {/* Notifications sheet (empty for now) */}
       <BottomSheet visible={notifOpen} onClose={() => setNotifOpen(false)} title={t('stationList.notificationsTitle')}>
         <View style={styles.notifEmpty}>
-          <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
+          <EmptyState variant="notifications" />
           <Text style={styles.stateText}>{t('stationList.notificationsEmpty')}</Text>
         </View>
       </BottomSheet>

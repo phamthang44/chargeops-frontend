@@ -158,7 +158,13 @@
   "map": {
     "title": "Bản đồ",
     "placeholder": "Màn hình bản đồ trạm sạc (placeholder)",
-    "body": "Bản đồ Google Maps sẽ hiển thị ở đây."
+    "body": "Bản đồ Google Maps sẽ hiển thị ở đây.",
+    "legend": {
+      "available": "Còn chỗ",
+      "busy": "Sắp đầy",
+      "full": "Hết chỗ",
+      "closed": "Đóng cửa"
+    }
   },
   "bookings": {
     "title": "Đặt chỗ",

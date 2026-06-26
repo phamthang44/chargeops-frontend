@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: #111827;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* Liquid-glass surface — carried over from the app's iOS-26 aesthetic. */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    border: 1px solid rgba(229, 231, 235, 0.7);
+  }
+
+  .glass-dark {
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .container-x {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3
+      text-sm font-semibold text-white shadow-glass transition
+      hover:-translate-y-0.5 hover:bg-primary-dark active:translate-y-0 active:scale-[0.99];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30
+      bg-white px-5 py-3 text-sm font-semibold text-primary-dark transition
+      hover:border-primary/60 hover:bg-primary-soft/40;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-medium;
+  }
+
+  /* Emphasis text with the brand gradient. */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #10b981 0%, #059669 60%, #34d399 100%);
+  }
+}
+
+@layer utilities {
+  /* Subtle dotted/grid backdrop for hero + dark bands. */
+  .bg-grid {
+    background-image: radial-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .bg-grid-light {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Scroll-reveal (see components/Reveal.tsx). */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float 9s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-float,
+  .animate-float-slow {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

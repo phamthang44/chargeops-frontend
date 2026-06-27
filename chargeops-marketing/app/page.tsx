@@ -7,6 +7,7 @@ import { WaitlistForm } from "@/components/WaitlistForm";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { QrDownload } from "@/components/QrDownload";
 import { Reveal } from "@/components/Reveal";
+import { BackToTop } from "@/components/BackToTop";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -22,8 +23,11 @@ import {
 export default function Home() {
   return (
     <>
+      <a href="#top" className="skip-link">
+        Bỏ qua tới nội dung
+      </a>
       <SiteHeader />
-      <main>
+      <main id="top" tabIndex={-1}>
         <Hero />
         <ConnectorStrip />
         <Problem />
@@ -35,6 +39,7 @@ export default function Home() {
         <DownloadCta />
       </main>
       <SiteFooter />
+      <BackToTop />
       <JsonLd />
     </>
   );

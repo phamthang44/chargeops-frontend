@@ -16,6 +16,53 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@layer base {
+  /* Tailwind v3 preflight resets buttons to cursor:default — restore pointer
+     on anything interactive. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+
+  /* Consistent, on-brand keyboard focus ring across the whole site. */
+  :focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Anchored sections start below the 64px sticky header. */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* The skip-link moves focus here, but we don't want a ring around the page. */
+  main:focus {
+    outline: none;
+  }
+}
+
+/* Skip-to-content link — visible only when focused. */
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  border-radius: 0.75rem;
+  background: #111827;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
 @layer components {
   /* Liquid-glass surface — carried over from the app's iOS-26 aesthetic. */
   .glass {

@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     title: "ChargeOps — Đặt chỗ trạm sạc xe điện tại Việt Nam",
     description:
       "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán trong vài chạm.",
-    images: [{ url: "/screens/home.jpg", width: 1200, height: 630, alt: "ChargeOps" }],
+    images: [{ url: "/screens/app-home.png", width: 1200, height: 630, alt: "ChargeOps" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "ChargeOps — Đặt chỗ trạm sạc xe điện",
     description: "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán dễ dàng.",
-    images: ["/screens/home.jpg"],
+    images: ["/screens/app-home.png"],
   },
   icons: { icon: "/icon.svg" },
 };

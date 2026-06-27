@@ -95,7 +95,7 @@ function Hero() {
         <Reveal delay={120} className="relative flex justify-center lg:justify-end">
           <div className="relative">
             <PhoneFrame
-              src="/screens/home.jpg"
+              src="/screens/app-home.png"
               alt="Màn hình tìm trạm sạc ChargeOps"
               priority
               float
@@ -176,7 +176,7 @@ function Problem() {
     <section className="py-20 sm:py-24">
       <div className="container-x grid items-center gap-12 lg:grid-cols-2">
         <Reveal className="order-2 flex justify-center lg:order-1">
-          <PhoneFrame src="/screens/slot-picker.jpg" alt="Chọn khung giờ sạc" />
+          <PhoneFrame src="/screens/app-map.png" alt="Bản đồ trạm sạc quanh bạn" />
         </Reveal>
         <Reveal delay={80} className="order-1 lg:order-2">
           <span className="pill bg-danger/10 text-danger">Vấn đề thường gặp</span>
@@ -216,19 +216,19 @@ function HowItWorks() {
       n: "1",
       title: "Tìm trạm gần bạn",
       desc: "Lọc theo sạc nhanh DC, giá, hoặc trạm đang mở. Xem đánh giá và tiện ích.",
-      img: "/screens/home.jpg",
+      img: "/screens/app-home.png",
     },
     {
       n: "2",
-      title: "Đặt khung giờ",
-      desc: "Chọn ngày, khung giờ và trụ sạc. Giá hiển thị cố định cho mỗi khung.",
-      img: "/screens/slot-picker.jpg",
+      title: "Đặt chỗ & giữ khung giờ",
+      desc: "Chọn trạm và giữ khung giờ trước với giá cố định. Theo dõi các lượt đặt sắp tới.",
+      img: "/screens/app-bookings.png",
     },
     {
       n: "3",
-      title: "Check-in & sạc",
-      desc: "Quét QR tại trạm để bắt đầu. Theo dõi phiên sạc và thanh toán trong app.",
-      img: "/screens/qr.jpg",
+      title: "Check-in & xem lịch sử",
+      desc: "Quét QR tại trạm để bắt đầu sạc, rồi xem lại toàn bộ lịch sử chuyến sạc.",
+      img: "/screens/app-history.png",
     },
   ];
   return (

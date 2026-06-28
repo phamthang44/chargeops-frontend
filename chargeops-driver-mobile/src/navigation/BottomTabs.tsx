@@ -41,6 +41,8 @@ export function BottomTabs() {
         component={MapScreen}
         options={{
           title: t('nav.map'),
+          // Screen draws its own app bar (AppHeader); hide the default tab header.
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
         }}
       />
@@ -49,6 +51,8 @@ export function BottomTabs() {
         component={BookingsScreen}
         options={{
           title: t('nav.bookings'),
+          // Screen draws its own app bar (AppHeader); hide the default tab header.
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="bookmark-outline" size={size} color={color} />,
         }}
       />
@@ -67,6 +71,8 @@ export function BottomTabs() {
         component={ProfileScreen}
         options={{
           title: t('nav.profile'),
+          // Screen draws its own app bar (AppHeader); hide the default tab header.
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
         }}
       />

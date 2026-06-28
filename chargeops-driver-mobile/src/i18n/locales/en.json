@@ -5,7 +5,8 @@
     "continue": "Continue",
     "loading": "Loading…",
     "language": "Language",
-    "back": "Back"
+    "back": "Back",
+    "role": "DRIVER"
   },
   "nav": {
     "stationList": "Stations",
@@ -157,6 +158,10 @@
   },
   "map": {
     "title": "Map",
+    "searchPlaceholder": "Search nearby stations",
+    "portsFree": "{{count}} ports free",
+    "viewDetail": "View details",
+    "noResults": "No stations match your search.",
     "placeholder": "Charging-station map screen (placeholder)",
     "body": "The Google Maps view will appear here.",
     "legend": {
@@ -166,23 +171,43 @@
       "closed": "Closed"
     }
   },
+  "bookingCard": {
+    "code": "Code: {{code}}",
+    "total": "TOTAL PAID"
+  },
   "bookings": {
     "title": "Bookings",
-    "placeholder": "Upcoming / active bookings (placeholder)",
-    "active": "You have {{count}} active bookings (mock)."
+    "role": "DRIVER",
+    "tabUpcoming": "Upcoming",
+    "tabUpcomingCount": "Upcoming ({{count}})",
+    "tabCharging": "Charging",
+    "tabChargingCount": "Charging ({{count}})",
+    "actionPay": "Pay",
+    "actionCheckIn": "Check-in",
+    "actionCharging": "Charging",
+    "emptyUpcoming": "You have no upcoming bookings.",
+    "emptyCharging": "No charging session in progress.",
+    "nextSession": "NEXT SESSION",
+    "untilCheckIn": "until check-in",
+    "readyNow": "Ready",
+    "readyToCheckIn": "It's time — check in now",
+    "checkInNow": "Check in now",
+    "liveCharging": "CHARGING"
   },
   "history": {
     "title": "Booking history",
     "role": "DRIVER",
-    "tabUpcoming": "Upcoming",
-    "tabUpcomingCount": "Upcoming ({{count}})",
-    "tabCompleted": "Completed",
-    "code": "Code: {{code}}",
-    "total": "TOTAL PAID",
-    "checkIn": "Check-in",
-    "viewDetail": "View details",
-    "emptyUpcoming": "You have no upcoming bookings.",
-    "emptyCompleted": "No booking history yet.",
+    "statSessions": "Sessions",
+    "statHours": "Hours",
+    "statSpent": "Spent",
+    "filter": {
+      "all": "All",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "monthGroup": "{{monthName}} {{year}}",
+    "empty": "No booking history yet.",
+    "emptyFiltered": "No matching bookings.",
     "error": "Couldn't load booking history."
   },
   "profile": {

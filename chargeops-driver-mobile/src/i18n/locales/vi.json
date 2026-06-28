@@ -5,7 +5,8 @@
     "continue": "Tiếp tục",
     "loading": "Đang tải…",
     "language": "Ngôn ngữ",
-    "back": "Quay lại"
+    "back": "Quay lại",
+    "role": "TÀI XẾ"
   },
   "nav": {
     "stationList": "Tìm trạm",
@@ -157,6 +158,10 @@
   },
   "map": {
     "title": "Bản đồ",
+    "searchPlaceholder": "Tìm trạm sạc gần bạn",
+    "portsFree": "{{count}} cổng trống",
+    "viewDetail": "Xem chi tiết",
+    "noResults": "Không tìm thấy trạm phù hợp.",
     "placeholder": "Màn hình bản đồ trạm sạc (placeholder)",
     "body": "Bản đồ Google Maps sẽ hiển thị ở đây.",
     "legend": {
@@ -166,23 +171,43 @@
       "closed": "Đóng cửa"
     }
   },
+  "bookingCard": {
+    "code": "Mã: {{code}}",
+    "total": "TỔNG THANH TOÁN"
+  },
   "bookings": {
     "title": "Đặt chỗ",
-    "placeholder": "Lượt đặt chỗ sắp tới / đang hoạt động (placeholder)",
-    "active": "Có {{count}} lượt đặt chỗ đang hoạt động (mock)."
+    "role": "TÀI XẾ",
+    "tabUpcoming": "Sắp tới",
+    "tabUpcomingCount": "Sắp tới ({{count}})",
+    "tabCharging": "Đang sạc",
+    "tabChargingCount": "Đang sạc ({{count}})",
+    "actionPay": "Thanh toán",
+    "actionCheckIn": "Check-in",
+    "actionCharging": "Đang sạc",
+    "emptyUpcoming": "Bạn chưa có lượt đặt chỗ sắp tới.",
+    "emptyCharging": "Không có phiên sạc nào đang diễn ra.",
+    "nextSession": "PHIÊN SẠC TIẾP THEO",
+    "untilCheckIn": "đến giờ check-in",
+    "readyNow": "Sẵn sàng",
+    "readyToCheckIn": "Đã đến giờ — check-in ngay",
+    "checkInNow": "Check-in ngay",
+    "liveCharging": "ĐANG SẠC"
   },
   "history": {
     "title": "Lịch sử đặt chỗ",
     "role": "TÀI XẾ",
-    "tabUpcoming": "Sắp tới",
-    "tabUpcomingCount": "Sắp tới ({{count}})",
-    "tabCompleted": "Đã hoàn thành",
-    "code": "Mã: {{code}}",
-    "total": "TỔNG THANH TOÁN",
-    "checkIn": "Check-in",
-    "viewDetail": "Xem chi tiết",
-    "emptyUpcoming": "Bạn chưa có lượt đặt chỗ sắp tới.",
-    "emptyCompleted": "Chưa có lịch sử đặt chỗ.",
+    "statSessions": "Lượt sạc",
+    "statHours": "Giờ sạc",
+    "statSpent": "Đã chi",
+    "filter": {
+      "all": "Tất cả",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "monthGroup": "Tháng {{month}}, {{year}}",
+    "empty": "Chưa có lịch sử đặt chỗ.",
+    "emptyFiltered": "Không có lượt nào phù hợp.",
     "error": "Không thể tải lịch sử đặt chỗ."
   },
   "profile": {

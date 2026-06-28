@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, Card, LanguageSwitcher } from '@/components';
+import { AppButton, AppHeader, Card, LanguageSwitcher } from '@/components';
 import { useAuth } from '@/context/AuthContext';
 import { colors, fontSizes, fontWeights, spacing } from '@/theme';
 
@@ -12,11 +12,9 @@ export function ProfileScreen() {
   const { session, signOut } = useAuth();
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader title={t('profile.title')} />
       <View style={styles.content}>
-        <Text style={styles.title}>{t('profile.title')}</Text>
-        <Text style={styles.subtitle}>{t('profile.placeholder')}</Text>
-
         <Card style={styles.card}>
           {session ? (
             <>
@@ -43,9 +41,7 @@ export function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1, padding: spacing.lg, gap: spacing.lg },
-  title: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: colors.textStrong },
-  subtitle: { fontSize: fontSizes.body, color: colors.textMuted },
+  content: { flex: 1, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, gap: spacing.lg },
   card: { gap: spacing.xs },
   name: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
   body: { fontSize: fontSizes.body, color: colors.textBody },

@@ -1,5 +1,7 @@
 /** Reusable UI components barrel. Usage: import { AppButton, Card } from '@/components'; */
 export { AppButton } from './AppButton';
+export { AppHeader } from './AppHeader';
+export { BookingCard } from './BookingCard';
 export { BottomSheet } from './BottomSheet';
 export { BrandMark, Logo } from './brand/Logo';
 export { CancelBookingSheet } from './CancelBookingSheet';
@@ -11,6 +13,7 @@ export { Checkbox } from './Checkbox';
 export { GlassButton } from './GlassButton';
 export { GlassSurface } from './GlassSurface';
 export { LanguageSwitcher } from './LanguageSwitcher';
+export { LiveDot } from './LiveDot';
 export { OtpInput } from './OtpInput';
 export { PasswordField } from './PasswordField';
 export { PhoneField } from './PhoneField';

@@ -28,7 +28,9 @@ export function LoginScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const canSubmit = EMAIL_RE.test(email) && password.length >= 8 && !submitting;
+  // Login accepts any non-empty password — the 8-char minimum is a registration rule,
+  // not a login one (the backend validates credentials regardless of length).
+  const canSubmit = EMAIL_RE.test(email) && password.length > 0 && !submitting;
 
   async function handleLogin() {
     setFormError(null);

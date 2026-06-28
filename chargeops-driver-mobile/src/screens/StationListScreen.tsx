@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BottomSheet, Card, EmptyState, StatusBadge } from '@/components';
+import { AppHeader, BottomSheet, Card, EmptyState, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getNearbyStations } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -125,21 +125,16 @@ export function StationListScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Top app bar */}
-      <View style={styles.appBar}>
-        <View style={styles.brandRow}>
-          <View style={styles.logo}>
-            <Ionicons name="flash" size={20} color={colors.textInverse} />
-          </View>
-          <View>
-            <Text style={styles.brand}>ChargeOps</Text>
-            <Text style={styles.role}>{t('stationList.role')}</Text>
-          </View>
-        </View>
-        <Pressable style={styles.iconBtn} hitSlop={8} onPress={() => setNotifOpen(true)}>
-          <Ionicons name="notifications-outline" size={22} color={colors.textBody} />
-        </Pressable>
-      </View>
+      {/* Top app bar — brand wordmark + driver role + notifications */}
+      <AppHeader
+        title="Charge"
+        accent="Ops"
+        trailing={
+          <Pressable style={styles.iconBtn} hitSlop={8} onPress={() => setNotifOpen(true)}>
+            <Ionicons name="notifications-outline" size={22} color={colors.textBody} />
+          </Pressable>
+        }
+      />
 
       {/* Search bar (filter/tune icon opens the sort sheet) */}
       <View style={styles.searchWrap}>
@@ -358,30 +353,6 @@ export function StationListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
-  appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
-  },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  logo: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brand: {
-    fontSize: fontSizes.heading,
-    fontWeight: fontWeights.bold,
-    color: colors.textStrong,
-    lineHeight: lineHeights.heading,
-  },
-  role: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textMuted, letterSpacing: 1 },
   iconBtn: {
     width: 40,
     height: 40,

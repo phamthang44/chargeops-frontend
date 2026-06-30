@@ -85,6 +85,45 @@ export const ChevronRightIcon = (p: SVGProps<SVGSVGElement>) => (
   </Line>
 );
 
+export const BuildingIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <rect x="4" y="2" width="16" height="20" rx="2" />
+    <path d="M9 22v-4h6v4M9 6h.01M15 6h.01M9 10h.01M15 10h.01M9 14h.01M15 14h.01" />
+  </Line>
+);
+
+export const PlugIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M12 22v-5" />
+    <path d="M7 17h10a1 1 0 0 0 1-1v-2a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4v2a1 1 0 0 0 1 1Z" />
+    <path d="M9 10V6M15 10V6M9 6V3m6 3V3" />
+  </Line>
+);
+
+export const CarIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M5 17h14a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2l-2-4H7L5 10a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2Z" />
+    <circle cx="7.5" cy="17" r="1.5" />
+    <circle cx="16.5" cy="17" r="1.5" />
+  </Line>
+);
+
+export const CoffeeIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M17 8h1a3 3 0 0 1 0 6h-1" />
+    <path d="M3 8h14v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8Z" />
+    <path d="M6 2v3M10 2v3M14 2v3" />
+  </Line>
+);
+
+export const ACPlugIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M12 22v-5" />
+    <path d="M7 17h10a1 1 0 0 0 1-1v-2a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4v2a1 1 0 0 0 1 1Z" />
+    <path d="M9 10V3m6 7V3" />
+  </Line>
+);
+
 /* --- Brand glyphs (monochrome, inherit color) --- */
 export const AppleGlyph = (p: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true" {...p}>

@@ -1,19 +1,24 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 
 const NAV = [
-  { id: "cach-hoat-dong", label: "Cách hoạt động" },
-  { id: "tinh-nang", label: "Tính năng" },
-  { id: "tram-sac", label: "Trạm sạc" },
-  { id: "doi-tac", label: "Dành cho chủ trạm" },
+  { id: "cach-hoat-dong", label: "Cách hoạt động", href: "/#cach-hoat-dong" },
+  { id: "tinh-nang", label: "Tính năng", href: "/#tinh-nang" },
+  { id: "tram-sac", label: "Trạm sạc", href: "/tram-sac" },
+  { id: "doi-tac", label: "Dành cho chủ trạm", href: "/#doi-tac" },
 ];
 
 export function SiteHeader() {
+  const pathname = usePathname();
   const [active, setActive] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const onStations = pathname.startsWith("/tram-sac");
 
   // Shadow once the page is scrolled.
   useEffect(() => {
@@ -23,7 +28,8 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Scroll-spy: highlight the nav item for the section currently in view.
+  // Scroll-spy: highlight the nav item for the section currently in view
+  // (only the landing page has these sections).
   useEffect(() => {
     const ids = [...NAV.map((n) => n.id), "tai-ung-dung"];
     const els = ids
@@ -36,55 +42,53 @@ export function SiteHeader() {
           if (entry.isIntersecting) setActive(entry.target.id);
         }
       },
-      // Narrow band near the top third → one section "active" at a time.
       { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [pathname]);
+
+  const isActive = (id: string) =>
+    onStations ? id === "tram-sac" : active === id;
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-shadow ${
-        scrolled ? "shadow-card" : ""
-      }`}
+      className={`sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-card" : ""}`}
     >
       <div className="glass">
         <div className="container-x flex h-16 items-center justify-between">
-          <a href="#top" aria-label="ChargeOps trang chủ" className="rounded-lg">
+          <Link href="/" aria-label="ChargeOps trang chủ" className="rounded-lg">
             <Logo />
-          </a>
+          </Link>
 
           {/* Desktop nav */}
           <nav className="hidden items-center gap-7 md:flex" aria-label="Chính">
             {NAV.map((item) => {
-              const isActive = active === item.id;
+              const act = isActive(item.id);
               return (
-                <a
+                <Link
                   key={item.id}
-                  href={`#${item.id}`}
-                  aria-current={isActive ? "true" : undefined}
+                  href={item.href}
+                  aria-current={act ? "true" : undefined}
                   className={`relative py-1 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-primary-dark"
-                      : "text-ink-body hover:text-primary-dark"
+                    act ? "text-primary-dark" : "text-ink-body hover:text-primary-dark"
                   }`}
                 >
                   {item.label}
                   <span
                     className={`absolute -bottom-0.5 left-0 h-0.5 rounded-full bg-primary transition-all duration-300 ${
-                      isActive ? "w-full" : "w-0"
+                      act ? "w-full" : "w-0"
                     }`}
                   />
-                </a>
+                </Link>
               );
             })}
           </nav>
 
           <div className="flex items-center gap-2">
-            <a href="#tai-ung-dung" className="btn-primary hidden sm:inline-flex">
+            <Link href="/#tai-ung-dung" className="btn-primary hidden sm:inline-flex">
               Tải ứng dụng
-            </a>
+            </Link>
 
             {/* Mobile menu toggle */}
             <button
@@ -93,7 +97,7 @@ export function SiteHeader() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Đóng menu" : "Mở menu"}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink-strong transition hover:border-primary/40 md:hidden"
+              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-line bg-white text-ink-strong transition hover:border-primary/40 md:hidden"
             >
               <Burger open={open} />
             </button>
@@ -109,27 +113,23 @@ export function SiteHeader() {
         >
           <nav className="container-x flex flex-col gap-1 py-3" aria-label="Di động">
             {NAV.map((item) => (
-              <a
+              <Link
                 key={item.id}
-                href={`#${item.id}`}
+                href={item.href}
                 onClick={() => setOpen(false)}
-                aria-current={active === item.id ? "true" : undefined}
+                aria-current={isActive(item.id) ? "true" : undefined}
                 className={`rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                  active === item.id
+                  isActive(item.id)
                     ? "bg-primary-soft text-primary-dark"
                     : "text-ink-body hover:bg-surface-alt"
                 }`}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="#tai-ung-dung"
-              onClick={() => setOpen(false)}
-              className="btn-primary mt-2"
-            >
+            <Link href="/#tai-ung-dung" onClick={() => setOpen(false)} className="btn-primary mt-2">
               Tải ứng dụng
-            </a>
+            </Link>
           </nav>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Logo } from "./Logo";
+import { BoltIcon } from "./Icons";
 
 export function SiteFooter() {
   return (
@@ -40,7 +41,7 @@ export function SiteFooter() {
       <div className="border-t border-line">
         <div className="container-x flex flex-col items-center justify-between gap-2 py-5 text-xs text-ink-muted sm:flex-row">
           <p>© {new Date().getFullYear()} ChargeOps. Đồ án tốt nghiệp.</p>
-          <p>Made in Vietnam ⚡</p>
+          <p className="inline-flex items-center gap-1">Made in Vietnam <BoltIcon className="h-3.5 w-3.5" /></p>
         </div>
       </div>
     </footer>

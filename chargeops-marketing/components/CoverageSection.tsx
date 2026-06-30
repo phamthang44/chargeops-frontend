@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CITIES, STATIONS } from "./stations";
+import { BoltIcon, ACPlugIcon } from "./Icons";
 
 /**
  * Public, read-only station coverage — the "bridge" that lets a web visitor
@@ -70,8 +72,8 @@ export function CoverageSection() {
                   {s.district}, {s.city}
                 </p>
                 <div className="mt-4 flex items-center gap-2">
-                  <span className="pill bg-surface-alt text-ink-body">
-                    {s.fast ? "⚡ Sạc nhanh DC" : "Sạc thường AC"}
+                  <span className="pill inline-flex items-center gap-1 bg-surface-alt text-ink-body">
+                    {s.fast ? <><BoltIcon className="h-3.5 w-3.5" /> Sạc nhanh DC</> : <><ACPlugIcon className="h-3.5 w-3.5" /> Sạc thường AC</>}
                   </span>
                   <span className="text-sm font-semibold text-primary-dark">
                     {s.pricePerKwh}/kWh
@@ -82,13 +84,18 @@ export function CoverageSection() {
           })}
         </div>
 
-        <p className="mt-8 text-sm text-ink-muted">
-          Dữ liệu hiển thị mang tính minh hoạ.{" "}
-          <a href="#tai-ung-dung" className="font-semibold text-primary-dark">
-            Tải ứng dụng
-          </a>{" "}
-          để xem trạm sạc theo thời gian thực và đặt chỗ.
-        </p>
+        <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <Link
+            href="/tram-sac"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-white px-5 py-2.5 text-sm font-semibold text-primary-dark transition hover:border-primary/60 hover:bg-primary-soft/40"
+          >
+            Xem tất cả trạm sạc <span aria-hidden>›</span>
+          </Link>
+          <p className="text-sm text-ink-muted">
+            Dữ liệu hiển thị mang tính minh hoạ. Mở ứng dụng để xem theo thời
+            gian thực và đặt chỗ.
+          </p>
+        </div>
       </div>
     </section>
   );

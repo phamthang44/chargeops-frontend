@@ -1,0 +1,66 @@
+/**
+ * REST implementation of every service — thin mappings onto the (future)
+ * chargeops-backend Spring Boot API. Endpoint paths are the proposed contract;
+ * adjust here (and only here) if the backend names them differently.
+ * Scoping (owner sees own stations only) is enforced server-side via the
+ * Keycloak token — the client never passes an owner id.
+ */
+import type { HttpClient } from '../http';
+import type { Services } from '../services';
+
+export function createRestServices(http: HttpClient): Services {
+  return {
+    dashboard: {
+      owner: () => http.get('/dashboard/owner'),
+      admin: () => http.get('/dashboard/admin'),
+    },
+
+    bookings: {
+      list: (params = {}) => http.get('/bookings', params),
+      get: (id) => http.get(`/bookings/${id}`),
+      summary: () => http.get('/bookings/summary'),
+      cancel: (id) => http.post(`/bookings/${id}/cancel`),
+    },
+
+    chargers: {
+      list: (stationId) => http.get('/chargers', { stationId }),
+      update: (id, patch) => http.patch(`/chargers/${id}`, patch),
+      provision: (input) => http.post('/admin/chargers', input),
+    },
+
+    stations: {
+      mine: () => http.get('/stations/mine'),
+      register: (input) => http.post('/stations', input),
+      approvals: () => http.get('/admin/stations/approvals'),
+      approve: (id) => http.post(`/admin/stations/${id}/approve`),
+      reject: (id, reason) => http.post(`/admin/stations/${id}/reject`, { reason }),
+    },
+
+    transactions: {
+      list: (params = {}) => http.get('/transactions', params),
+    },
+
+    licenses: {
+      mine: () => http.get('/licenses/mine'),
+      list: () => http.get('/admin/licenses'),
+      recordRenewal: (stationId) => http.post(`/admin/licenses/${stationId}/renew`),
+    },
+
+    users: {
+      list: (params = {}) => http.get('/admin/users', params),
+      setStatus: (id, status) => http.patch(`/admin/users/${id}/status`, { status }),
+    },
+
+    pricing: {
+      get: () => http.get('/pricing'),
+      save: (config) => http.put('/pricing', config),
+    },
+
+    policies: {
+      docs: () => http.get('/policies'),
+      save: (doc) => (doc.id ? http.patch(`/policies/${doc.id}`, doc) : http.post('/policies', doc)),
+      remove: (id) => http.delete(`/policies/${id}`),
+      ask: (question) => http.post('/assistant/ask', { question }),
+    },
+  };
+}

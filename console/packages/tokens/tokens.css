@@ -1,0 +1,83 @@
+/*
+ * ChargeOps Console — shared design tokens (Tailwind v4 theme).
+ * Source of truth: design-console/ChargeOps Console.dc.html
+ * Imported by every app AFTER `@import "tailwindcss";`.
+ */
+@theme {
+  /* Brand (admin / platform) — indigo */
+  --color-brand: #5b54e8;
+  --color-brand-strong: #4a44d6;
+  --color-brand-soft: #eceafe;
+  --color-brand-faint: #f7f7fd;
+  --color-brand-line: #e7e6fb;
+  --color-brand-tint: #c8c5f6;
+
+  /* Owner accent — emerald */
+  --color-owner: #12a150;
+  --color-owner-strong: #0e8a43;
+  --color-owner-deep: #0c7a3e;
+  --color-owner-soft: #eafaf1;
+  --color-owner-border: #c5ead4;
+  --color-owner-tint: #d6f3e1;
+
+  /* Status */
+  --color-good: #0d8a5a;
+  --color-good-soft: #e3f4ec;
+  --color-good-deep: #0d7a4f;
+  --color-warn: #9a6b16;
+  --color-warn-deep: #7a5612;
+  --color-warn-soft: #fdf8ec;
+  --color-warn-border: #f0e3c0;
+  --color-warn-pill: #fdf2dc;
+  --color-bad: #c0392b;
+  --color-bad-strong: #a82f23;
+  --color-bad-deep: #a8392c;
+  --color-bad-soft: #fdf3f2;
+  --color-bad-border: #f3d0cd;
+  --color-alert: #e5484d;
+
+  /* Neutrals (text) */
+  --color-ink: #16171a;
+  --color-body: #43464d;
+  --color-muted: #62656e;
+  --color-faint: #9499a3;
+  --color-ghost: #a9adb6;
+  --color-disabled: #b3b6bd;
+
+  /* Neutrals (lines & surfaces) */
+  --color-line: #e6e8ec;
+  --color-line-2: #e9ebef;
+  --color-line-3: #eef0f2;
+  --color-hairline: #f3f4f6;
+  --color-canvas: #f6f7f9;
+  --color-surface-2: #fbfbfc;
+  --color-chip: #f1f2f4;
+  --color-night: #0e0f13;
+
+  /* Typography */
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Radii used across the design */
+  --radius-ctl: 9px;   /* buttons, inputs, chips   */
+  --radius-card: 12px; /* cards, tables            */
+  --radius-panel: 14px;/* modals, big panels       */
+}
+
+/* ---- Global base (matches the .dc.html body/scrollbar rules) ---- */
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #d6d9df; border-radius: 6px; border: 2px solid #f6f7f9; }
+::-webkit-scrollbar-thumb:hover { background: #c2c6cf; }
+input:focus, select:focus, textarea:focus { outline: none; }
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes spin360 { to { transform: rotate(360deg) } }
+@keyframes popIn { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: none } }
+@keyframes drawerIn { from { transform: translateX(100%) } to { transform: none } }
+@keyframes slideIn { from { transform: translateX(-100%) } to { transform: none } }

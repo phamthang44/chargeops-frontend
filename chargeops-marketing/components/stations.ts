@@ -122,7 +122,7 @@ export const STATIONS: CoverageStation[] = [
     rating: 4.5,
     reviewCount: 67,
     description:
-      "Trạm sạc nhanh tại Lotte Center Hà Nội. Hiện đang đầy chỗ — đặt trước trong ứng dụng để giữ khung giờ.",
+      "Trạm sạc nhanh tại Lotte Center Hà Nội. Hiện đang đầy chỗ, đặt trước trong ứng dụng để giữ khung giờ.",
   },
   {
     id: "s6",

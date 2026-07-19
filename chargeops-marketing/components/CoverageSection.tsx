@@ -22,8 +22,7 @@ export function CoverageSection() {
     <section id="tram-sac" className="bg-surface-alt py-20 sm:py-24">
       <div className="container-x">
         <div className="max-w-2xl">
-          <span className="pill bg-primary-soft text-primary-dark">Độ phủ</span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             ChargeOps có mặt gần bạn
           </h2>
           <p className="mt-3 text-ink-body">

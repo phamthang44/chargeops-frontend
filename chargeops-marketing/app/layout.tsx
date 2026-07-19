@@ -13,7 +13,7 @@ const SITE_URL = "https://chargeops.vn";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ChargeOps — Đặt chỗ trạm sạc xe điện tại Việt Nam",
+    default: "ChargeOps · Đặt chỗ trạm sạc xe điện tại Việt Nam",
     template: "%s · ChargeOps",
   },
   description:
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     url: SITE_URL,
     siteName: "ChargeOps",
-    title: "ChargeOps — Đặt chỗ trạm sạc xe điện tại Việt Nam",
+    title: "ChargeOps · Đặt chỗ trạm sạc xe điện tại Việt Nam",
     description:
       "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán trong vài chạm.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ChargeOps — Đặt chỗ trạm sạc xe điện",
+    title: "ChargeOps · Đặt chỗ trạm sạc xe điện",
     description: "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán dễ dàng.",
   },
   icons: { icon: "/icon.svg", apple: "/apple-icon" },

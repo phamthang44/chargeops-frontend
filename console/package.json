@@ -1,0 +1,15 @@
+{
+  "name": "chargeops-console",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:portal": "npm run dev --workspace apps/portal",
+    "dev:owner": "npm run dev --workspace apps/owner",
+    "dev:admin": "npm run dev --workspace apps/admin",
+    "build": "npm run build --workspaces --if-present"
+  }
+}

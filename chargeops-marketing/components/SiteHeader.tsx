@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 
 const NAV = [
@@ -17,15 +17,21 @@ export function SiteHeader() {
   const [active, setActive] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const onStations = pathname.startsWith("/tram-sac");
 
-  // Shadow once the page is scrolled.
+  // Shadow once the page is scrolled — driven by a top sentinel leaving the
+  // viewport (IntersectionObserver) rather than a scroll listener.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setScrolled(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   // Scroll-spy: highlight the nav item for the section currently in view
@@ -52,9 +58,11 @@ export function SiteHeader() {
     onStations ? id === "tram-sac" : active === id;
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-card" : ""}`}
-    >
+    <>
+      <div ref={sentinelRef} aria-hidden className="h-px w-full" />
+      <header
+        className={`sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-card" : ""}`}
+      >
       <div className="glass">
         <div className="container-x flex h-16 items-center justify-between">
           <Link href="/" aria-label="ChargeOps trang chủ" className="rounded-lg">
@@ -133,7 +141,8 @@ export function SiteHeader() {
           </nav>
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
 

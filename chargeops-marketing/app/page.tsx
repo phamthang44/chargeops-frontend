@@ -52,20 +52,20 @@ function Hero() {
       {/* layered backdrop */}
       <div className="pointer-events-none absolute inset-0 bg-soft-radial" />
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-primary-light/20 blur-3xl" />
+      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-primary-light/10 blur-3xl" />
 
       <div className="container-x relative grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-2">
         <Reveal>
           <span className="pill bg-primary-soft text-primary-dark">
             <BoltIcon className="h-3.5 w-3.5" /> Sạc xe điện thông minh
           </span>
-          <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-ink-strong sm:text-[3.25rem]">
+          <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-balance text-ink-strong sm:text-[3.25rem]">
             Đặt chỗ trạm sạc <span className="text-gradient">trước khi bạn đến</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-body">
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-pretty text-ink-body">
             Không còn cảnh đến nơi trạm đã đầy. Tìm trạm gần bạn, giữ khung giờ,
-            check-in bằng QR và thanh toán — tất cả trong một ứng dụng.
+            check-in bằng QR và thanh toán, tất cả trong một ứng dụng.
           </p>
 
           <div className="mt-7 flex items-center gap-3">
@@ -179,8 +179,7 @@ function Problem() {
           <PhoneFrame src="/screens/app-map.png" alt="Bản đồ trạm sạc quanh bạn" />
         </Reveal>
         <Reveal delay={80} className="order-1 lg:order-2">
-          <span className="pill bg-danger/10 text-danger">Vấn đề thường gặp</span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             Đến nơi mới biết trạm đã đầy?
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-body">
@@ -192,7 +191,7 @@ function Problem() {
           <ul className="mt-6 space-y-3">
             {[
               "Xem khung giờ trống theo thời gian thực",
-              "Giá cố định cho mỗi khung giờ — không bất ngờ",
+              "Giá cố định cho mỗi khung giờ, không bất ngờ",
               "Huỷ linh hoạt với chính sách hoàn tiền rõ ràng",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-ink-body">
@@ -236,7 +235,7 @@ function HowItWorks() {
       <div className="container-x">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="pill bg-primary-soft text-primary-dark">Cách hoạt động</span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             Sạc xe chỉ với 3 bước
           </h2>
         </Reveal>
@@ -273,8 +272,7 @@ function Features() {
     <section id="tinh-nang" className="py-20 sm:py-24">
       <div className="container-x">
         <Reveal className="max-w-2xl">
-          <span className="pill bg-primary-soft text-primary-dark">Tính năng</span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             Mọi thứ bạn cần để sạc xe yên tâm
           </h2>
         </Reveal>
@@ -330,13 +328,12 @@ function OwnerBand() {
       <div className="pointer-events-none absolute inset-0 bg-surface-alt" />
       <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
         <Reveal>
-          <span className="pill bg-primary-soft text-primary-dark">Dành cho chủ trạm</span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             Sở hữu trụ sạc? Tăng doanh thu cùng ChargeOps
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-body">
             Đăng ký trụ sạc, đặt giá theo khung giờ, quản lý đặt chỗ và theo dõi
-            doanh thu — tất cả qua bảng điều khiển dành cho chủ trạm.
+            doanh thu, tất cả qua bảng điều khiển dành cho chủ trạm.
           </p>
           <ul className="mt-6 space-y-3">
             {[
@@ -383,9 +380,9 @@ function DownloadCta() {
       <div className="container-x">
         <Reveal className="relative mx-auto max-w-4xl overflow-hidden rounded-card bg-ink-strong px-6 py-14 text-center shadow-glass sm:px-14">
           <div className="pointer-events-none absolute inset-0 bg-grid-light opacity-50" />
-          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/30 blur-3xl" />
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
           <div className="relative">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-balance text-white sm:text-4xl">
               Sẵn sàng cho chuyến đi không lo hết chỗ?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/80">

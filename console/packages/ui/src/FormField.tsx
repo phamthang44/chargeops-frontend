@@ -1,0 +1,55 @@
+import type { ReactNode } from 'react';
+
+export interface FormFieldProps {
+  /** Mono uppercase label above the control. */
+  label: string;
+  /** Helper text under the control. */
+  hint?: string;
+  error?: boolean;
+  children: ReactNode;
+}
+
+export function FormField({ label, hint, error, children }: FormFieldProps) {
+  return (
+    <div>
+      <div className="mb-[7px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint">
+        {label}
+      </div>
+      {children}
+      {hint && (
+        <div className={`mt-[6px] text-[11px] leading-[1.5] ${error ? 'text-bad' : 'text-faint'}`}>
+          {hint}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Standard text input matching the design (10px radius, focus ring by accent). */
+export function TextInput({
+  value,
+  onChange,
+  placeholder,
+  invalid,
+  mono,
+  accent = 'owner',
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  invalid?: boolean;
+  mono?: boolean;
+  accent?: 'owner' | 'brand';
+}) {
+  const ring = accent === 'owner' ? 'focus:border-owner' : 'focus:border-brand';
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`w-full rounded-[10px] border px-[13px] py-[11px] text-[13.5px] ${
+        mono ? 'font-mono' : ''
+      } ${invalid ? 'border-bad' : 'border-line'} ${ring}`}
+    />
+  );
+}

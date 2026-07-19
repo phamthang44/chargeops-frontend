@@ -6,12 +6,12 @@ import { StoreBadges } from "@/components/StoreBadges";
 import { STATIONS } from "@/components/stations";
 
 export const metadata: Metadata = {
-  title: "Trạm sạc xe điện ChargeOps — Tìm trạm gần bạn",
+  title: "Trạm sạc xe điện ChargeOps · Tìm trạm gần bạn",
   description:
     "Danh sách trạm sạc xe điện ChargeOps tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Xem độ trống, giá đ/kWh và chuẩn sạc, rồi đặt chỗ trong ứng dụng.",
   alternates: { canonical: "/tram-sac" },
   openGraph: {
-    title: "Trạm sạc xe điện ChargeOps — Tìm trạm gần bạn",
+    title: "Trạm sạc xe điện ChargeOps · Tìm trạm gần bạn",
     description:
       "Tìm trạm sạc xe điện gần bạn: độ trống, giá và chuẩn sạc. Đặt chỗ trong ứng dụng ChargeOps.",
     url: "/tram-sac",
@@ -36,7 +36,7 @@ export default function StationsPage() {
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-ink-body">
               Tìm trạm sạc gần bạn tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Xem độ
-              trống, giá và chuẩn sạc — rồi giữ khung giờ trong ứng dụng.
+              trống, giá và chuẩn sạc, rồi giữ khung giờ trong ứng dụng.
             </p>
           </div>
         </section>

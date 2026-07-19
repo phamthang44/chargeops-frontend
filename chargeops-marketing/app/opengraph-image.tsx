@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "ChargeOps — EV charging, reserved.";
+export const alt = "ChargeOps · EV charging, reserved.";
 
 const BOLT = "M58 8 L30 55 L49 55 L44 92 L73 43 L54 43 Z";
 
@@ -48,7 +48,7 @@ export default function OpengraphImage() {
             EV charging, reserved.
           </div>
           <div style={{ marginTop: 18, fontSize: 32, color: "rgba(255,255,255,0.9)" }}>
-            Find, book &amp; charge — Vietnam
+            Find, book &amp; charge · Vietnam
           </div>
         </div>
 

@@ -29,7 +29,7 @@ export async function generateMetadata({
   const station = getStationBySlug(slug);
   if (!station) return { title: "Không tìm thấy trạm sạc" };
 
-  const title = `${station.name} — Trạm sạc xe điện ${station.district}`;
+  const title = `${station.name} · Trạm sạc xe điện ${station.district}`;
   const description = `${station.name} tại ${station.address}. ${
     station.fast ? "Sạc nhanh DC" : "Sạc thường AC"
   }, giá ${station.pricePerKwh}/kWh, chuẩn ${station.connectors.join(", ")}. Đặt chỗ trong ứng dụng ChargeOps.`;

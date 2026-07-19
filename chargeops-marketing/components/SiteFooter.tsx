@@ -16,24 +16,23 @@ export function SiteFooter() {
         <FooterCol
           title="Sản phẩm"
           links={[
-            { label: "Cách hoạt động", href: "#cach-hoat-dong" },
-            { label: "Tính năng", href: "#tinh-nang" },
-            { label: "Trạm sạc", href: "#tram-sac" },
-            { label: "Tải ứng dụng", href: "#tai-ung-dung" },
+            { label: "Cách hoạt động", href: "/#cach-hoat-dong" },
+            { label: "Tính năng", href: "/#tinh-nang" },
+            { label: "Trạm sạc", href: "/tram-sac" },
+            { label: "Tải ứng dụng", href: "/#tai-ung-dung" },
           ]}
         />
         <FooterCol
           title="Đối tác"
           links={[
-            { label: "Dành cho chủ trạm", href: "#doi-tac" },
-            { label: "Đăng ký trạm", href: "#doi-tac" },
+            { label: "Dành cho chủ trạm", href: "/#doi-tac" },
+            { label: "Đăng ký trạm", href: "/#doi-tac" },
           ]}
         />
         <FooterCol
           title="Liên hệ"
           links={[
             { label: "phamthang3564@gmail.com", href: "mailto:phamthang3564@gmail.com" },
-            { label: "Chính sách bảo mật", href: "#" },
           ]}
         />
       </div>

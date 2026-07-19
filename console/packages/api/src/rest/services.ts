@@ -38,6 +38,7 @@ export function createRestServices(http: HttpClient): Services {
 
     transactions: {
       list: (params = {}) => http.get('/transactions', params),
+      summary: () => http.get('/transactions/summary'),
     },
 
     licenses: {

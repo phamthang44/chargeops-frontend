@@ -170,6 +170,29 @@ export interface Transaction {
   date: string;
 }
 
+export interface MethodBreakdown {
+  method: PaymentMethod;
+  totalVnd: number;
+  pct: number;
+}
+
+export interface DailyRevenuePoint {
+  /** Day-of-month label. */
+  day: number;
+  vnd: number;
+}
+
+export interface TransactionSummary {
+  grossVnd: number;
+  refundedVnd: number;
+  netVnd: number;
+  avgVnd: number;
+  payCount: number;
+  refundCount: number;
+  methodBreakdown: MethodBreakdown[];
+  dailyTrend: DailyRevenuePoint[];
+}
+
 /* ---------- pricing & hours (FR11) ---------- */
 
 /** One day's operating window. open/close are "HH:mm"; ignored when closed. */

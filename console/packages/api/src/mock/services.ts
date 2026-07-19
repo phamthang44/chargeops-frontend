@@ -5,7 +5,7 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { Booking, BookingStatus, BookingSummary, Charger, Station } from '../types';
+import type { Booking, BookingStatus, BookingSummary, Charger, PaymentMethod, Station } from '../types';
 import { buildMockDb } from './seed';
 
 const delay = (ms = 250 + Math.random() * 250) => new Promise((r) => setTimeout(r, ms));
@@ -20,6 +20,15 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     scope.ownerView
       ? db.bookings.filter((b) => db.ownerStationIds.includes(b.stationId))
       : db.bookings;
+
+  /** Transactions scoped the same way (owner ⇒ own stations only). */
+  const scopedTx = () =>
+    scope.ownerView
+      ? db.transactions.filter((t) => {
+          const b = db.bookings.find((x) => x.id === t.bookingId);
+          return b && db.ownerStationIds.includes(b.stationId);
+        })
+      : db.transactions;
 
   return {
     dashboard: {
@@ -211,15 +220,50 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     transactions: {
       async list(params = {}) {
         await delay();
-        const { type = 'all', page = 0, pageSize = 12 } = params;
-        let rows = scope.ownerView
-          ? db.transactions.filter((t) => {
-              const b = db.bookings.find((x) => x.id === t.bookingId);
-              return b && db.ownerStationIds.includes(b.stationId);
-            })
-          : db.transactions;
+        const { type = 'all', method = 'all', page = 0, pageSize = 12 } = params;
+        let rows = scopedTx();
         if (type !== 'all') rows = rows.filter((t) => t.type === type);
+        if (method !== 'all') rows = rows.filter((t) => t.method === method);
         return { items: rows.slice(page * pageSize, (page + 1) * pageSize), total: rows.length, page, pageSize };
+      },
+      async summary() {
+        await delay();
+        const rows = scopedTx();
+        const payments = rows.filter((t) => t.type === 'payment');
+        const refunds = rows.filter((t) => t.type === 'refund');
+        const grossVnd = payments.reduce((s, t) => s + t.amountVnd, 0);
+        const refundedVnd = refunds.reduce((s, t) => s + Math.abs(t.amountVnd), 0);
+
+        // payment split by method
+        const methods: PaymentMethod[] = ['VNPAY', 'MOMO', 'ATM'];
+        const methodBreakdown = methods
+          .map((m) => {
+            const totalVnd = payments.filter((t) => t.method === m).reduce((s, t) => s + t.amountVnd, 0);
+            return { method: m, totalVnd, pct: grossVnd ? Math.round((totalVnd / grossVnd) * 100) : 0 };
+          })
+          .filter((m) => m.totalVnd > 0);
+
+        // last 11 days of net revenue
+        const byDay = new Map<number, number>();
+        for (const t of rows) {
+          const day = Number(t.date.slice(8, 10));
+          byDay.set(day, (byDay.get(day) ?? 0) + t.amountVnd);
+        }
+        const dailyTrend = [...byDay.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .slice(-11)
+          .map(([day, vnd]) => ({ day, vnd }));
+
+        return {
+          grossVnd,
+          refundedVnd,
+          netVnd: grossVnd - refundedVnd,
+          avgVnd: payments.length ? Math.round(grossVnd / payments.length) : 0,
+          payCount: payments.length,
+          refundCount: refunds.length,
+          methodBreakdown,
+          dailyTrend,
+        };
       },
     },
 

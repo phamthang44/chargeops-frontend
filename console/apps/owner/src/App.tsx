@@ -22,6 +22,9 @@ import { Stations } from './pages/Stations';
 import { Bookings } from './pages/Bookings';
 import { Chargers } from './pages/Chargers';
 import { Pricing } from './pages/Pricing';
+import { License } from './pages/License';
+import { Assistant } from './pages/Assistant';
+import { Revenue } from './pages/Revenue';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -30,6 +33,9 @@ const PAGES: Record<string, ComponentType> = {
   bookings: Bookings,
   chargers: Chargers,
   pricing: Pricing,
+  revenue: Revenue,
+  license: License,
+  assistant: Assistant,
 };
 
 const PORTAL_URL = import.meta.env.VITE_PORTAL_URL ?? 'http://localhost:5170';

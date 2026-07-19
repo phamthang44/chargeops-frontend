@@ -15,11 +15,13 @@ import type {
   License,
   OwnerDashboard,
   Page,
+  PaymentMethod,
   PolicyDoc,
   PricingConfig,
   Station,
   StationRegistration,
   Transaction,
+  TransactionSummary,
   TransactionType,
   UserAccount,
   UserStatus,
@@ -57,7 +59,13 @@ export interface StationService {
 }
 
 export interface TransactionService {
-  list(params?: { type?: TransactionType | 'all'; page?: number; pageSize?: number }): Promise<Page<Transaction>>;
+  list(params?: {
+    type?: TransactionType | 'all';
+    method?: PaymentMethod | 'all';
+    page?: number;
+    pageSize?: number;
+  }): Promise<Page<Transaction>>;
+  summary(): Promise<TransactionSummary>;
 }
 
 export interface LicenseService {

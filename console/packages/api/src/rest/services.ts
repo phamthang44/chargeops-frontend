@@ -15,6 +15,10 @@ export function createRestServices(http: HttpClient): Services {
       admin: () => http.get('/dashboard/admin'),
     },
 
+    analytics: {
+      overview: () => http.get('/admin/analytics/overview'),
+    },
+
     bookings: {
       list: (params = {}) => http.get('/bookings', params),
       get: (id) => http.get(`/bookings/${id}`),

@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApiProvider, createServices } from '@chargeops/api';
@@ -14,9 +15,31 @@ import {
   IconPlusCircle,
   IconShield,
   IconUsers,
+  ToastProvider,
   type ShellNavItem,
 } from '@chargeops/ui';
 import { Dashboard } from './pages/Dashboard';
+import { Approvals } from './pages/Approvals';
+import { Provisioning } from './pages/Provisioning';
+import { Users } from './pages/Users';
+import { Licenses } from './pages/Licenses';
+import { Analytics } from './pages/Analytics';
+import { PolicyKB } from './pages/PolicyKB';
+import { Bookings } from './pages/Bookings';
+import { Transactions } from './pages/Transactions';
+
+/** Screens with a real implementation (others fall back to ComingSoon). */
+const PAGES: Record<string, ComponentType> = {
+  dashboard: Dashboard,
+  approvals: Approvals,
+  provisioning: Provisioning,
+  bookings: Bookings,
+  transactions: Transactions,
+  licenses: Licenses,
+  users: Users,
+  analytics: Analytics,
+  kb: PolicyKB,
+};
 
 const PORTAL_URL = import.meta.env.VITE_PORTAL_URL ?? 'http://localhost:5170';
 
@@ -53,10 +76,16 @@ function Shell() {
     >
       <Routes>
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {NAV.filter((n) => n.key !== 'dashboard').map((n) => (
-          <Route key={n.key} path={`/${n.key}`} element={<ComingSoon title={n.title} />} />
-        ))}
+        {NAV.map((n) => {
+          const Page = PAGES[n.key];
+          return (
+            <Route
+              key={n.key}
+              path={`/${n.key}`}
+              element={Page ? <Page /> : <ComingSoon title={n.title} />}
+            />
+          );
+        })}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AppShell>
@@ -79,9 +108,11 @@ export function App() {
         <RequireRole role="platform_admin">
           <ApiProvider services={services}>
             <QueryClientProvider client={queryClient}>
-              <BrowserRouter>
-                <Shell />
-              </BrowserRouter>
+              <ToastProvider>
+                <BrowserRouter>
+                  <Shell />
+                </BrowserRouter>
+              </ToastProvider>
             </QueryClientProvider>
           </ApiProvider>
         </RequireRole>

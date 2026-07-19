@@ -5,6 +5,7 @@
  */
 import type {
   AdminDashboard,
+  AnalyticsOverview,
   AssistantAnswer,
   Booking,
   BookingListParams,
@@ -30,6 +31,10 @@ import type {
 export interface DashboardService {
   owner(): Promise<OwnerDashboard>;
   admin(): Promise<AdminDashboard>;
+}
+
+export interface AnalyticsService {
+  overview(): Promise<AnalyticsOverview>;
 }
 
 export interface BookingService {
@@ -98,6 +103,7 @@ export interface PolicyService {
 
 export interface Services {
   dashboard: DashboardService;
+  analytics: AnalyticsService;
   bookings: BookingService;
   chargers: ChargerService;
   stations: StationService;

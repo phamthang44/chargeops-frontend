@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@chargeops/api';
-import { Card, IconPlusCircle, PageHeader, Skeleton } from '@chargeops/ui';
+import { Button, Card, IconPlusCircle, PageHeader, Skeleton } from '@chargeops/ui';
 import { StationSummary } from '../features/stations/StationSummary';
 import { StationCard } from '../features/stations/StationCard';
 import { RegisterStationModal } from '../features/stations/RegisterStationModal';
@@ -21,13 +21,9 @@ export function Stations() {
         title="Trạm của tôi"
         subtitle="Đăng ký trạm mới và theo dõi trạng thái duyệt."
         action={
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-[7px] rounded-ctl bg-owner px-[15px] py-[9px] text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(18,161,80,.3)] hover:bg-owner-strong"
-          >
-            <IconPlusCircle size={16} strokeWidth={2} />
+          <Button accent="owner" icon={<IconPlusCircle size={16} strokeWidth={2} />} onClick={() => setModalOpen(true)}>
             Đăng ký trạm mới
-          </button>
+          </Button>
         }
       />
 

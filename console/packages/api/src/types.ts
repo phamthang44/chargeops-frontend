@@ -55,10 +55,15 @@ export interface Booking {
   status: BookingStatus;
 }
 
+/** Which field a booking search matches against. */
+export type BookingSearchField = 'all' | 'id' | 'driver' | 'charger' | 'station';
+
 export interface BookingListParams {
   /** Owner console is implicitly scoped server-side by token; admin sees all. */
   status?: BookingStatus | 'all';
   search?: string;
+  /** Restrict the search to one field (default: all). */
+  searchIn?: BookingSearchField;
   page?: number;
   pageSize?: number;
 }

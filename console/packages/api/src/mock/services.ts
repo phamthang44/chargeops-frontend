@@ -132,14 +132,26 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     bookings: {
       async list(params = {}) {
         await delay();
-        const { status = 'all', search = '', page = 0, pageSize = 10 } = params;
+        const { status = 'all', search = '', searchIn = 'all', page = 0, pageSize = 10 } = params;
         const q = search.trim().toLowerCase();
         let rows = scopedBookings();
         if (status !== 'all') rows = rows.filter((b) => b.status === status);
         if (q) {
-          rows = rows.filter((b) =>
-            [b.id, b.driverName, b.chargerId, b.stationName].some((f) => f.toLowerCase().includes(q)),
-          );
+          const fieldsOf = (b: Booking): string[] => {
+            switch (searchIn) {
+              case 'id':
+                return [b.id];
+              case 'driver':
+                return [b.driverName];
+              case 'charger':
+                return [b.chargerId];
+              case 'station':
+                return [b.stationName];
+              default:
+                return [b.id, b.driverName, b.chargerId, b.stationName];
+            }
+          };
+          rows = rows.filter((b) => fieldsOf(b).some((f) => f.toLowerCase().includes(q)));
         }
         return { items: rows.slice(page * pageSize, (page + 1) * pageSize), total: rows.length, page, pageSize };
       },

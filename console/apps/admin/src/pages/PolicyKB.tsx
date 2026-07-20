@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, useApi, type PolicyDoc } from '@chargeops/api';
-import { Card, EmptyState, IconPlusCircle, PageHeader, SearchInput, Skeleton, useToast } from '@chargeops/ui';
+import { Button, Card, EmptyState, IconPlusCircle, PageHeader, SearchInput, Skeleton, useToast } from '@chargeops/ui';
 import { DocModal } from '../features/kb/DocModal';
 
 /** FR15 — admin CRUD over the policy knowledge base that powers the RAG assistant. */
@@ -62,13 +62,9 @@ export function PolicyKB() {
         title="Kho chính sách"
         subtitle="Nguồn tri thức cho trợ lý chính sách (RAG)."
         action={
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-[7px] rounded-ctl bg-brand px-[15px] py-[9px] text-[13px] font-semibold text-white hover:bg-brand-strong"
-          >
-            <IconPlusCircle size={16} strokeWidth={2} />
+          <Button icon={<IconPlusCircle size={16} strokeWidth={2} />} onClick={openCreate}>
             Thêm tài liệu
-          </button>
+          </Button>
         }
       />
 
@@ -86,11 +82,11 @@ export function PolicyKB() {
               <div className="mb-[11px] flex gap-[9px]">
                 <div className="flex-1 rounded-[9px] border border-line-3 px-[11px] py-[9px] text-center">
                   <div className="text-[18px] font-bold text-brand">{all.length}</div>
-                  <div className="font-mono text-[9.5px] text-faint">TÀI LIỆU</div>
+                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">TÀI LIỆU</div>
                 </div>
                 <div className="flex-1 rounded-[9px] border border-line-3 px-[11px] py-[9px] text-center">
                   <div className="text-[18px] font-bold">{categories.length}</div>
-                  <div className="font-mono text-[9.5px] text-faint">DANH MỤC</div>
+                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">DANH MỤC</div>
                 </div>
               </div>
               <div className="flex items-center gap-[7px] rounded-lg bg-good-soft px-2.5 py-2 text-[11px] font-medium text-good-deep">
@@ -99,7 +95,7 @@ export function PolicyKB() {
               </div>
             </Card>
             <Card className="p-[9px]">
-              <div className="px-[9px] pb-[5px] pt-[7px] font-mono text-[9px] font-semibold tracking-[0.06em] text-ghost">
+              <div className="px-[9px] pb-[5px] pt-[7px] text-[9px] font-semibold uppercase tracking-[0.07em] text-ghost">
                 DANH MỤC
               </div>
               <CatItem label="Tất cả" count={all.length} active={category === 'all'} onClick={() => setCategory('all')} />
@@ -135,7 +131,7 @@ export function PolicyKB() {
                           <span className="rounded-full bg-line-3 px-[9px] py-0.5 text-[10px] font-semibold text-muted">
                             {d.category}
                           </span>
-                          <span className="font-mono text-[10.5px] text-ghost">cập nhật {formatDateVn(d.updatedAt)}</span>
+                          <span className="text-[10.5px] text-ghost">cập nhật {formatDateVn(d.updatedAt)}</span>
                         </div>
                         <div className="text-[13px] leading-[1.55]">{d.content}</div>
                       </div>

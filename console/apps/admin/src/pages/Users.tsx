@@ -103,7 +103,7 @@ export function Users() {
               <div className="overflow-x-auto">
                 <div className="min-w-[560px]">
                   <div
-                    className="grid bg-surface-2 px-4 py-[11px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint"
+                    className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                     style={{ gridTemplateColumns: '1.6fr 1fr 0.8fr 0.8fr 1fr' }}
                   >
                     <span>TÀI KHOẢN</span>
@@ -150,7 +150,7 @@ function RoleBadge({ role }: { role: UserRole }) {
   const c = USER_ROLE_BADGE[role];
   return (
     <span
-      className="inline-block rounded-[6px] px-[9px] py-[3px] font-mono text-[10px] font-semibold tracking-[0.04em]"
+      className="inline-block rounded-[6px] px-[9px] py-[3px] text-[10px] font-semibold uppercase tracking-[0.06em]"
       style={{ background: c.bg, color: c.fg }}
     >
       {role}

@@ -43,7 +43,7 @@ export function ChargerTable({
   return (
     <div className="min-w-[760px]">
       <div
-        className="grid bg-surface-2 px-4 py-[11px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint"
+        className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
         style={{ gridTemplateColumns: GRID }}
       >
         <span>MÃ</span>

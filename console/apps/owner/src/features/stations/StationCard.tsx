@@ -55,7 +55,7 @@ export function StationCard({ station }: { station: Station }) {
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[9px] border border-line-3 p-2.5">
-      <div className="font-mono text-[9px] font-semibold text-faint">{label}</div>
+      <div className="text-[9px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
       <div className="mt-[3px] text-[17px] font-bold">{value}</div>
     </div>
   );

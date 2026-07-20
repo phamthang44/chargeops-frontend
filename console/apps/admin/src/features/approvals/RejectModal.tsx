@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FormField, Modal } from '@chargeops/ui';
+import { Button, FormField, Modal } from '@chargeops/ui';
 
 export interface RejectModalProps {
   open: boolean;
@@ -46,19 +46,12 @@ export function RejectModal({ open, stationName, pending, onClose, onConfirm }: 
         />
       </FormField>
       <div className="mt-[18px] flex gap-2.5">
-        <button
-          onClick={close}
-          className="flex-1 rounded-[9px] border border-line py-[11px] text-[13px] font-semibold text-body hover:bg-canvas"
-        >
+        <Button variant="secondary" className="flex-1" onClick={close}>
           Hủy
-        </button>
-        <button
-          onClick={submit}
-          disabled={pending}
-          className="flex-1 rounded-[9px] bg-bad py-[11px] text-[13px] font-semibold text-white hover:bg-bad-strong disabled:opacity-60"
-        >
+        </Button>
+        <Button variant="danger" className="flex-1" onClick={submit} disabled={pending}>
           {pending ? 'Đang xử lý…' : 'Xác nhận từ chối'}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

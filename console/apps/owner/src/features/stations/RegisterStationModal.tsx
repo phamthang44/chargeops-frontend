@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi, type StationRegistration } from '@chargeops/api';
-import { FormField, IconHome, Modal, TextInput, useToast } from '@chargeops/ui';
+import { Button, FormField, IconHome, Modal, Select, TextInput, useToast } from '@chargeops/ui';
 
 const CITIES = ['Hà Nội', 'TP.HCM', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng'];
+const CITY_OPTIONS = CITIES.map((c) => ({ value: c, label: c }));
 
 const EMPTY: StationRegistration = { name: '', city: 'Hà Nội', address: '', plannedChargers: 4 };
 
@@ -98,15 +99,12 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
         <div className="flex gap-[11px]">
           <div className="flex-[1.4]">
             <FormField label="THÀNH PHỐ">
-              <select
+              <Select
                 value={form.city}
-                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-                className="w-full cursor-pointer rounded-[10px] border border-line bg-white px-[13px] py-[11px] text-[13px] font-medium"
-              >
-                {CITIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(city) => setForm((f) => ({ ...f, city }))}
+                options={CITY_OPTIONS}
+                accent="owner"
+              />
             </FormField>
           </div>
           <div className="flex-[0.8]">
@@ -131,19 +129,12 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
       </div>
 
       <div className="mt-[22px] flex gap-[11px]">
-        <button
-          onClick={close}
-          className="flex-1 rounded-[10px] border border-line py-3 text-[13px] font-semibold text-body hover:bg-canvas"
-        >
+        <Button variant="secondary" size="lg" className="flex-1" onClick={close}>
           Hủy bỏ
-        </button>
-        <button
-          onClick={submit}
-          disabled={mutation.isPending}
-          className="flex flex-[1.4] items-center justify-center gap-[7px] rounded-[10px] bg-owner py-3 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(18,161,80,.35)] hover:bg-owner-strong disabled:opacity-60"
-        >
+        </Button>
+        <Button accent="owner" size="lg" className="flex-[1.4]" onClick={submit} disabled={mutation.isPending}>
           {mutation.isPending ? 'Đang gửi…' : 'Gửi đăng ký'}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

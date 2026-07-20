@@ -28,7 +28,7 @@ export function BaseConfigStep({ slotDurationMin, basePriceVnd, onSlot, onBasePr
           </div>
         </div>
 
-        <div className="mb-[9px] font-mono text-[10px] font-semibold tracking-[0.06em] text-faint">
+        <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
           THỜI LƯỢNG MỘT SLOT
         </div>
         <div className="mb-[18px] flex gap-[5px] rounded-[11px] bg-[#f1f3f5] p-1">
@@ -48,7 +48,7 @@ export function BaseConfigStep({ slotDurationMin, basePriceVnd, onSlot, onBasePr
           })}
         </div>
 
-        <div className="mb-[9px] font-mono text-[10px] font-semibold tracking-[0.06em] text-faint">
+        <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
           GIÁ SẠC MẶC ĐỊNH
         </div>
         <div className="flex h-[50px] items-center gap-[11px] rounded-[11px] border border-line px-3.5">

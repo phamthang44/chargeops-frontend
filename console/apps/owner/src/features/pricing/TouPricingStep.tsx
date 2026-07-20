@@ -67,7 +67,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
                         <span className="font-mono text-[11px] font-medium text-faint"> /kWh</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono text-[8.5px] font-semibold tracking-[0.04em] text-faint">
+                        <div className="text-[8.5px] font-semibold uppercase tracking-[0.06em] text-faint">
                           SO VỚI GIÁ GỐC
                         </div>
                         <div

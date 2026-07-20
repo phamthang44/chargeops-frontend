@@ -78,7 +78,7 @@ export function Assistant() {
                   {m.text}
                 </div>
                 {m.sources && m.sources.length > 0 && (
-                  <div className="pl-1 font-mono text-[10.5px] text-faint">
+                  <div className="pl-1 text-[10.5px] text-faint">
                     Nguồn: {m.sources.join(', ')}
                   </div>
                 )}

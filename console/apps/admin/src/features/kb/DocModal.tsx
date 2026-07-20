@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { PolicyDoc } from '@chargeops/api';
-import { FormField, Modal } from '@chargeops/ui';
+import { Button, FormField, Modal, Select } from '@chargeops/ui';
 
 const CATEGORIES = ['Hủy & hoàn tiền', 'Check-in', 'Thanh toán', 'Giá', 'Trụ sạc', 'Tài khoản'];
+const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c, label: c }));
 
 export interface DocModalProps {
   open: boolean;
@@ -43,15 +44,7 @@ export function DocModal({ open, doc, pending, onClose, onSave }: DocModalProps)
       </div>
       <div className="flex flex-col gap-[13px]">
         <FormField label="DANH MỤC">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full cursor-pointer rounded-[9px] border border-line bg-white px-[11px] py-[9px] text-[13px] font-medium"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+          <Select value={category} onChange={setCategory} options={CATEGORY_OPTIONS} />
         </FormField>
         <FormField label="NỘI DUNG CHÍNH SÁCH" error={err} hint={err ? 'Vui lòng nhập nội dung chính sách.' : undefined}>
           <textarea
@@ -65,16 +58,12 @@ export function DocModal({ open, doc, pending, onClose, onSave }: DocModalProps)
         </FormField>
       </div>
       <div className="mt-5 flex gap-2.5">
-        <button onClick={onClose} className="flex-1 rounded-[9px] border border-line py-[11px] text-[13px] font-semibold text-body hover:bg-canvas">
+        <Button variant="secondary" className="flex-1" onClick={onClose}>
           Hủy
-        </button>
-        <button
-          onClick={submit}
-          disabled={pending}
-          className="flex-1 rounded-[9px] bg-brand py-[11px] text-[13px] font-semibold text-white hover:bg-brand-strong disabled:opacity-60"
-        >
+        </Button>
+        <Button className="flex-1" onClick={submit} disabled={pending}>
           {pending ? 'Đang lưu…' : 'Lưu & tái tạo'}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

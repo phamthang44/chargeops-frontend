@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { TouDays, TouRule } from '@chargeops/api';
-import { FormField, IconClock, Modal, TextInput } from '@chargeops/ui';
+import { Button, FormField, IconClock, Modal, Select, TextInput } from '@chargeops/ui';
 
-const DAY_OPTS: { value: TouDays; label: string }[] = [
+const DAY_OPTS = [
   { value: 'daily', label: 'Mỗi ngày' },
   { value: 'weekdays', label: 'T2–T6' },
   { value: 'weekends', label: 'T7–CN' },
@@ -73,17 +73,12 @@ export function AddRuleModal({ open, onClose, onAdd }: AddRuleModalProps) {
         <div className="flex gap-[11px]">
           <div className="flex-1">
             <FormField label="NGÀY ÁP DỤNG">
-              <select
+              <Select
                 value={days}
-                onChange={(e) => setDays(e.target.value as TouDays)}
-                className="w-full cursor-pointer rounded-[9px] border border-line bg-white px-[11px] py-[9px] text-[13px] font-medium"
-              >
-                {DAY_OPTS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setDays(v as TouDays)}
+                options={DAY_OPTS}
+                accent="owner"
+              />
             </FormField>
           </div>
           <div className="flex-1">
@@ -118,18 +113,12 @@ export function AddRuleModal({ open, onClose, onAdd }: AddRuleModalProps) {
       </div>
 
       <div className="mt-5 flex gap-2.5">
-        <button
-          onClick={close}
-          className="flex-1 rounded-[10px] border border-line py-3 text-[13px] font-semibold text-body hover:bg-canvas"
-        >
+        <Button variant="secondary" size="lg" className="flex-1" onClick={close}>
           Hủy bỏ
-        </button>
-        <button
-          onClick={submit}
-          className="flex-1 rounded-[10px] bg-owner py-3 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(18,161,80,.35)] hover:bg-owner-strong"
-        >
+        </Button>
+        <Button accent="owner" size="lg" className="flex-1" onClick={submit}>
           Lưu khung giờ
-        </button>
+        </Button>
       </div>
     </Modal>
   );

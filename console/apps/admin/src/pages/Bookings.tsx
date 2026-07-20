@@ -6,6 +6,7 @@ import {
   formatVnd,
   useApi,
   type Booking,
+  type BookingSearchField,
   type BookingStatus,
 } from '@chargeops/api';
 import {
@@ -16,10 +17,19 @@ import {
   PageHeader,
   Pagination,
   SearchInput,
+  Select,
   Skeleton,
   StatusPill,
   type FilterTab,
 } from '@chargeops/ui';
+
+const SEARCH_FIELDS = [
+  { value: 'all', label: 'Tất cả trường' },
+  { value: 'id', label: 'Mã đặt chỗ' },
+  { value: 'station', label: 'Trạm' },
+  { value: 'driver', label: 'Tài xế' },
+  { value: 'charger', label: 'Trụ sạc' },
+];
 
 const PAGE_SIZE = 10;
 type FilterKey = BookingStatus | 'all';
@@ -30,12 +40,13 @@ export function Bookings() {
   const api = useApi();
   const [filter, setFilter] = useState<FilterKey>('all');
   const [search, setSearch] = useState('');
+  const [searchIn, setSearchIn] = useState<BookingSearchField>('all');
   const [page, setPage] = useState(0);
 
   const summaryQuery = useQuery({ queryKey: ['bookings', 'summary'], queryFn: () => api.bookings.summary() });
   const listQuery = useQuery({
-    queryKey: ['bookings', 'list', { filter, search, page }],
-    queryFn: () => api.bookings.list({ status: filter, search, page, pageSize: PAGE_SIZE }),
+    queryKey: ['bookings', 'list', { filter, search, searchIn, page }],
+    queryFn: () => api.bookings.list({ status: filter, search, searchIn, page, pageSize: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
 
@@ -56,8 +67,6 @@ export function Bookings() {
 
   const data = listQuery.data;
   const total = data?.total ?? 0;
-  const from = total === 0 ? 0 : page * PAGE_SIZE + 1;
-  const to = Math.min((page + 1) * PAGE_SIZE, total);
   const s = summaryQuery.data;
 
   return (
@@ -77,8 +86,15 @@ export function Bookings() {
         <SearchInput
           value={search}
           onChange={(v) => resetTo(() => setSearch(v))}
-          placeholder="Lọc theo mã, trạm, trụ…"
+          placeholder="Lọc theo mã, trạm, tài xế, trụ…"
           className="max-w-[320px] min-w-[200px] flex-1"
+        />
+        <Select
+          value={searchIn}
+          onChange={(v) => resetTo(() => setSearchIn(v as BookingSearchField))}
+          options={SEARCH_FIELDS}
+          className="w-[142px]"
+          aria-label="Tìm trong trường"
         />
       </div>
       <div className="mb-3.5">
@@ -97,7 +113,7 @@ export function Bookings() {
             <div className="overflow-x-auto">
               <div className="min-w-[820px]">
                 <div
-                  className="grid bg-surface-2 px-4 py-[11px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint"
+                  className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>MÃ</span>
@@ -115,13 +131,7 @@ export function Bookings() {
                 )}
               </div>
             </div>
-            <Pagination
-              label={`Hiển thị ${from}–${to} / ${total}`}
-              canPrev={page > 0}
-              canNext={to < total}
-              onPrev={() => setPage((p) => Math.max(0, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-            />
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
           </>
         )}
       </Card>

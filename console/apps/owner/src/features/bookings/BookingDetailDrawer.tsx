@@ -9,7 +9,7 @@ import {
   useApi,
   type Booking,
 } from '@chargeops/api';
-import { Drawer, StatusPill, useToast } from '@chargeops/ui';
+import { Button, Drawer, StatusPill, useToast } from '@chargeops/ui';
 
 /** A booking may be cancelled only while pending or confirmed (POL-02). */
 function canCancel(b: Booking): boolean {
@@ -52,24 +52,25 @@ export function BookingDetailDrawer({
       }
       footer={
         <>
-          <button className="flex-1 rounded-[9px] border border-line py-[11px] text-[12.5px] font-semibold text-body hover:bg-canvas">
+          <Button variant="secondary" className="flex-1">
             Liên hệ khách
-          </button>
+          </Button>
           {canCancel(booking) && (
-            <button
+            <Button
+              variant="danger-soft"
+              className="flex-1"
               onClick={() => cancel.mutate(booking.id)}
               disabled={cancel.isPending}
-              className="flex-1 rounded-[9px] border border-bad-border bg-bad-soft py-[11px] text-[12.5px] font-semibold text-bad hover:brightness-95 disabled:opacity-60"
             >
               {cancel.isPending ? 'Đang hủy…' : 'Hủy thay khách'}
-            </button>
+            </Button>
           )}
         </>
       }
     >
       {/* time window */}
       <div className="rounded-card border border-line-3 bg-surface-2 p-4">
-        <div className="mb-3 font-mono text-[10px] font-semibold text-faint">
+        <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
           KHOẢNG THỜI GIAN · LIÊN TỤC
         </div>
         <div className="flex items-center gap-3">
@@ -108,7 +109,7 @@ export function BookingDetailDrawer({
       {/* price snapshot */}
       <div className="rounded-card border border-line-3 p-4">
         <div className="mb-[11px] flex items-center justify-between">
-          <div className="font-mono text-[10px] font-semibold text-faint">GIÁ CỐ ĐỊNH (SNAPSHOT)</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">GIÁ CỐ ĐỊNH (SNAPSHOT)</div>
           <span className="rounded-full bg-warn-pill px-2 py-0.5 text-[10px] font-medium text-warn">
             đã khóa khi đặt
           </span>
@@ -142,7 +143,7 @@ export function BookingDetailDrawer({
       ) : (
         canCancel(booking) && (
           <div className="rounded-card border border-line-3 p-4">
-            <div className="mb-[9px] font-mono text-[10px] font-semibold text-faint">
+            <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
               CHÍNH SÁCH HOÀN TIỀN (BR-PAY-03)
             </div>
             <div className="flex flex-col gap-1.5 text-[12px] font-medium text-body">
@@ -160,7 +161,7 @@ export function BookingDetailDrawer({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <div className="mb-[5px] font-mono text-[10px] font-semibold text-faint">{label}</div>
+      <div className="mb-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
       {children}
     </div>
   );

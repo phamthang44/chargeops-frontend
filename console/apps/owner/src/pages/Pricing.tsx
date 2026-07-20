@@ -6,7 +6,7 @@ import {
   type PricingConfig,
   type TouRule,
 } from '@chargeops/api';
-import { Card, PageHeader, Skeleton, useToast } from '@chargeops/ui';
+import { Button, Card, PageHeader, Skeleton, useToast } from '@chargeops/ui';
 import { BaseConfigStep } from '../features/pricing/BaseConfigStep';
 import { OperatingHoursStep } from '../features/pricing/OperatingHoursStep';
 import { TouPricingStep } from '../features/pricing/TouPricingStep';
@@ -95,19 +95,12 @@ export function Pricing() {
           <AvailabilityStep rules={draft.availability} onChange={patchAvailability} />
 
           <div className="flex justify-end gap-[11px] pb-1.5 pt-0.5">
-            <button
-              onClick={() => data && setDraft(data)}
-              className="rounded-[11px] border border-line px-6 py-3 text-[13px] font-semibold text-body hover:bg-canvas"
-            >
+            <Button variant="secondary" size="lg" onClick={() => data && setDraft(data)}>
               Hủy bỏ
-            </button>
-            <button
-              onClick={() => draft && save.mutate(draft)}
-              disabled={save.isPending}
-              className="rounded-[11px] bg-owner px-7 py-3 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(18,161,80,.35)] hover:bg-owner-strong disabled:opacity-60"
-            >
+            </Button>
+            <Button accent="owner" size="lg" onClick={() => draft && save.mutate(draft)} disabled={save.isPending}>
               {save.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

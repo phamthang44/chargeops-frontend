@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { IconX } from './icons';
 
 export interface DrawerProps {
@@ -13,8 +13,15 @@ export interface DrawerProps {
   children: ReactNode;
 }
 
-/** Right-side slide-over drawer (booking detail, etc.). */
+/** Right-side slide-over drawer (booking detail, etc.). Escape closes. */
 export function Drawer({ open, onClose, title, width = '460px', footer, children }: DrawerProps) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <>

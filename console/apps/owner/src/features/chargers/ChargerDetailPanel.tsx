@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Charger, ChargerStatus } from '@chargeops/api';
-import { Card, IconBolt, IconClock, IconLock, IconX, QrGlyph } from '@chargeops/ui';
+import { Button, Card, IconBolt, IconClock, IconLock, IconX, QrGlyph } from '@chargeops/ui';
 import { CHARGER_PILL, OWNER_CYCLE } from './chargerStatus';
 
 export interface ChargerDetailPanelProps {
@@ -32,7 +32,7 @@ export function ChargerDetailPanel({
     <Card className="p-[18px]">
       <div className="mb-1.5 flex items-start justify-between">
         <div>
-          <div className="font-mono text-[10px] font-semibold tracking-[0.05em] text-owner">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-owner">
             CHỈNH SỬA TRỤ SẠC
           </div>
           <div className="mt-1 text-[17px] font-bold">{charger.name}</div>
@@ -143,13 +143,16 @@ export function ChargerDetailPanel({
         </button>
       </div>
 
-      <button
+      <Button
+        accent="owner"
+        size="lg"
+        fullWidth
+        className="mt-4"
         onClick={() => onSave(charger.id, { name: name.trim() || charger.name, status })}
         disabled={saving}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-[11px] bg-owner py-3 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(18,161,80,.35)] hover:bg-owner-strong disabled:opacity-60"
       >
         {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
-      </button>
+      </Button>
     </Card>
   );
 }
@@ -186,7 +189,7 @@ function SectionTitleInline({ icon, children }: { icon: ReactNode; children: Rea
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-[7px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint">
+    <div className="mb-[7px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
       {children}
     </div>
   );
@@ -195,7 +198,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
 function LockedSpec({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1">
-      <div className="mb-1.5 font-mono text-[10px] font-semibold text-faint">{label}</div>
+      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
       <div className="rounded-[10px] border border-line-3 bg-[#f7f8fa] px-3 py-2.5 text-[12.5px] font-semibold text-body">
         {value}
       </div>
@@ -206,7 +209,7 @@ function LockedSpec({ label, value }: { label: string; value: string }) {
 function PerfStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[10px] border border-line-3 p-[11px]">
-      <div className="font-mono text-[9px] font-semibold text-faint">{label}</div>
+      <div className="text-[9px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
       <div className="mt-[3px] text-[17px] font-bold">{value}</div>
     </div>
   );

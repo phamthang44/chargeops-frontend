@@ -58,8 +58,6 @@ export function Transactions() {
   const s = summaryQuery.data;
   const data = listQuery.data;
   const total = data?.total ?? 0;
-  const fromN = total === 0 ? 0 : page * PAGE_SIZE + 1;
-  const toN = Math.min((page + 1) * PAGE_SIZE, total);
 
   return (
     <>
@@ -115,7 +113,7 @@ export function Transactions() {
             <div className="overflow-x-auto">
               <div className="min-w-[720px]">
                 <div
-                  className="grid bg-surface-2 px-4 py-[11px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint"
+                  className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>MÃ GD</span>
@@ -133,13 +131,7 @@ export function Transactions() {
                 )}
               </div>
             </div>
-            <Pagination
-              label={`Hiển thị ${fromN}–${toN} / ${total}`}
-              canPrev={page > 0}
-              canNext={toN < total}
-              onPrev={() => setPage((p) => Math.max(0, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-            />
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
           </>
         )}
       </Card>

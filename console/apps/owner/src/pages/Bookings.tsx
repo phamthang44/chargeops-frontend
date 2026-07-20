@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { BOOKING_STATUS, useApi, type Booking, type BookingStatus } from '@chargeops/api';
+import {
+  BOOKING_STATUS,
+  useApi,
+  type Booking,
+  type BookingSearchField,
+  type BookingStatus,
+} from '@chargeops/api';
 import {
   Card,
   FilterTabs,
@@ -25,14 +31,15 @@ export function Bookings() {
 
   const [filter, setFilter] = useState<FilterKey>('all');
   const [search, setSearch] = useState('');
+  const [searchIn, setSearchIn] = useState<BookingSearchField>('all');
   const [range, setRange] = useState<BookingRange>('all');
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Booking | null>(null);
 
   const summaryQuery = useQuery({ queryKey: ['bookings', 'summary'], queryFn: () => api.bookings.summary() });
   const listQuery = useQuery({
-    queryKey: ['bookings', 'list', { filter, search, page }],
-    queryFn: () => api.bookings.list({ status: filter, search, page, pageSize: PAGE_SIZE }),
+    queryKey: ['bookings', 'list', { filter, search, searchIn, page }],
+    queryFn: () => api.bookings.list({ status: filter, search, searchIn, page, pageSize: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
 
@@ -54,8 +61,6 @@ export function Bookings() {
 
   const data = listQuery.data;
   const total = data?.total ?? 0;
-  const from = total === 0 ? 0 : page * PAGE_SIZE + 1;
-  const to = Math.min((page + 1) * PAGE_SIZE, total);
 
   return (
     <>
@@ -66,6 +71,8 @@ export function Bookings() {
       <BookingToolbar
         search={search}
         onSearch={(v) => resetTo(() => setSearch(v))}
+        searchIn={searchIn}
+        onSearchIn={(f) => resetTo(() => setSearchIn(f))}
         range={range}
         onRange={setRange}
         onExport={() => toast('Đang xuất CSV… (demo)', 'info')}
@@ -91,13 +98,7 @@ export function Bookings() {
             <div className="p-3 md:hidden">
               <BookingCards rows={data.items} onOpen={setSelected} />
             </div>
-            <Pagination
-              label={`Hiển thị ${from}–${to} / ${total}`}
-              canPrev={page > 0}
-              canNext={to < total}
-              onPrev={() => setPage((p) => Math.max(0, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-            />
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
           </>
         )}
       </Card>

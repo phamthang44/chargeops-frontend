@@ -75,7 +75,7 @@ export function Licenses() {
                   className="rounded-[11px] border bg-white px-[15px] py-[13px] text-left"
                   style={{ borderColor: on ? '#c2c6cf' : '#e9ebef', borderLeft: `3px solid ${s.accent}` }}
                 >
-                  <div className="font-mono text-[10px] font-semibold tracking-[0.04em] text-faint">{s.label}</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-faint">{s.label}</div>
                   <div className="mt-[5px] text-[22px] font-bold" style={{ color: s.accent }}>
                     {s.value}
                   </div>
@@ -150,7 +150,7 @@ export function Licenses() {
             <div className="overflow-x-auto">
               <div className="min-w-[720px]">
                 <div
-                  className="grid bg-surface-2 px-4 py-[11px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint"
+                  className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                   style={{ gridTemplateColumns: '0.8fr 1.3fr 1.1fr 0.7fr 1fr 1fr 0.9fr 0.9fr' }}
                 >
                   <span>MÃ</span>

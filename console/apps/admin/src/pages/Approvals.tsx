@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, useApi, type Station } from '@chargeops/api';
-import { Card, IconClipboardCheck, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
+import { Button, Card, IconClipboardCheck, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
 import { RejectModal } from '../features/approvals/RejectModal';
 
 /** FR12 — admin reviews pending station registrations, approve or reject. */
@@ -65,7 +65,7 @@ export function Approvals() {
             <div className="overflow-x-auto">
               <div className="min-w-[520px]">
                 <div
-                  className="grid bg-surface-2 px-3.5 py-[11px] font-mono text-[9.5px] font-semibold text-faint"
+                  className="grid bg-surface-2 px-3.5 py-[11px] text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint"
                   style={{ gridTemplateColumns: '0.9fr 1.5fr 1.4fr 1fr 0.6fr' }}
                 >
                   <span>MÃ</span>
@@ -131,7 +131,7 @@ function ApprovalDetail({
   return (
     <Card className="p-[17px]">
       <div className="mb-1 flex items-center justify-between">
-        <div className="font-mono text-[10px] text-faint">XÉT DUYỆT · {station.id}</div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">XÉT DUYỆT · {station.id}</div>
         <StatusPill tone="warn" label="Chờ duyệt" />
       </div>
       <div className="mt-1.5 text-[17px] font-bold">{station.name}</div>
@@ -149,19 +149,12 @@ function ApprovalDetail({
         Hồ sơ &amp; hình ảnh
       </div>
       <div className="flex flex-col gap-[9px]">
-        <button
-          onClick={onApprove}
-          disabled={approving}
-          className="rounded-[9px] bg-brand py-[11px] text-[13px] font-semibold text-white hover:bg-brand-strong disabled:opacity-60"
-        >
+        <Button fullWidth onClick={onApprove} disabled={approving}>
           {approving ? 'Đang duyệt…' : 'Duyệt → đặt HOẠT ĐỘNG'}
-        </button>
-        <button
-          onClick={onReject}
-          className="rounded-[9px] border border-bad-border bg-bad-soft py-[11px] text-[13px] font-semibold text-bad hover:brightness-95"
-        >
+        </Button>
+        <Button variant="danger-soft" fullWidth onClick={onReject}>
           Từ chối (cần lý do)
-        </button>
+        </Button>
       </div>
     </Card>
   );

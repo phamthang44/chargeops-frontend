@@ -55,8 +55,6 @@ export function Revenue() {
   const s = summaryQuery.data;
   const data = listQuery.data;
   const total = data?.total ?? 0;
-  const from = total === 0 ? 0 : page * PAGE_SIZE + 1;
-  const to = Math.min((page + 1) * PAGE_SIZE, total);
 
   return (
     <>
@@ -104,13 +102,7 @@ export function Revenue() {
             <div className="p-3 md:hidden">
               <TxCards rows={data.items} />
             </div>
-            <Pagination
-              label={`Hiển thị ${from}–${to} / ${total}`}
-              canPrev={page > 0}
-              canNext={to < total}
-              onPrev={() => setPage((p) => Math.max(0, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-            />
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
           </>
         )}
       </Card>

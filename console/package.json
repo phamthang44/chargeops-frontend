@@ -7,9 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:portal": "npm run dev --workspace apps/portal",
-    "dev:owner": "npm run dev --workspace apps/owner",
-    "dev:admin": "npm run dev --workspace apps/admin",
+    "dev": "npm run dev --workspace apps/web",
     "build": "npm run build --workspaces --if-present"
   }
 }

@@ -12,7 +12,7 @@ export interface FormFieldProps {
 export function FormField({ label, hint, error, children }: FormFieldProps) {
   return (
     <div>
-      <div className="mb-[7px] font-mono text-[10px] font-semibold tracking-[0.05em] text-faint">
+      <div className="mb-[7px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
         {label}
       </div>
       {children}
@@ -41,13 +41,16 @@ export function TextInput({
   mono?: boolean;
   accent?: 'owner' | 'brand';
 }) {
-  const ring = accent === 'owner' ? 'focus:border-owner' : 'focus:border-brand';
+  const ring =
+    accent === 'owner'
+      ? 'focus:border-owner focus:ring-owner/15'
+      : 'focus:border-brand focus:ring-brand/15';
   return (
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full rounded-[10px] border px-[13px] py-[11px] text-[13.5px] ${
+      className={`w-full rounded-[10px] border px-[13px] py-[11px] text-[13.5px] transition focus:ring-2 ${
         mono ? 'font-mono' : ''
       } ${invalid ? 'border-bad' : 'border-line'} ${ring}`}
     />

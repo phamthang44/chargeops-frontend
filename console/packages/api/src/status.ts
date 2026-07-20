@@ -43,3 +43,10 @@ export const USER_STATUS: Record<UserStatus, StatusMeta> = {
   active: { label: 'Hoạt động', tone: 'good' },
   suspended: { label: 'Tạm khóa', tone: 'bad' },
 };
+
+/** Role badge colours (mono chips). */
+export const USER_ROLE_BADGE: Record<'DRIVER' | 'OWNER' | 'ADMIN', { bg: string; fg: string }> = {
+  DRIVER: { bg: '#eef0f2', fg: '#43464d' },
+  OWNER: { bg: '#eafaf1', fg: '#0c7a3e' },
+  ADMIN: { bg: '#16171a', fg: '#ffffff' },
+};

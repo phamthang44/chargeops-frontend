@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 export interface ModalProps {
   open: boolean;
@@ -8,8 +8,15 @@ export interface ModalProps {
   children: ReactNode;
 }
 
-/** Centered modal: dimmed overlay (click to close) + popIn panel. */
+/** Centered modal: dimmed overlay (click or Escape closes) + popIn panel. */
 export function Modal({ open, onClose, maxWidth = 460, children }: ModalProps) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <div

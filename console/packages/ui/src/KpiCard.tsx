@@ -12,7 +12,7 @@ export interface KpiCardProps {
 export function KpiCard({ label, value, suffix, delta, deltaClass = 'text-faint' }: KpiCardProps) {
   return (
     <Card className="px-4 py-[15px]">
-      <div className="font-mono text-[10.5px] font-semibold tracking-[0.04em] text-faint">
+      <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
         {label}
       </div>
       <div className="mt-[7px] text-[27px] font-bold tracking-[-0.02em]">

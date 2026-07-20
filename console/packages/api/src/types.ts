@@ -55,10 +55,15 @@ export interface Booking {
   status: BookingStatus;
 }
 
+/** Which field a booking search matches against. */
+export type BookingSearchField = 'all' | 'id' | 'driver' | 'charger' | 'station';
+
 export interface BookingListParams {
   /** Owner console is implicitly scoped server-side by token; admin sees all. */
   status?: BookingStatus | 'all';
   search?: string;
+  /** Restrict the search to one field (default: all). */
+  searchIn?: BookingSearchField;
   page?: number;
   pageSize?: number;
 }
@@ -264,6 +269,23 @@ export interface OwnerDashboard {
   };
   chargers: Pick<Charger, 'id' | 'name' | 'status' | 'utilizationPct'>[];
   upcomingBookings: { id: string; startTime: string; driverName: string }[];
+}
+
+export interface AnalyticsKpi {
+  label: string;
+  value: string;
+  delta: string;
+  deltaPositive: boolean;
+}
+
+export interface AnalyticsOverview {
+  kpis: AnalyticsKpi[];
+  /** 12 monthly revenue points (oldest first). */
+  revenueTrend: { month: string; vnd: number }[];
+  topStations: { name: string; revenueVnd: number; pct: number }[];
+  /** Average sessions per hour of day, 0..23. */
+  peakHours: { hour: number; sessions: number }[];
+  connectorMix: { connector: ConnectorType; pct: number }[];
 }
 
 export interface AdminDashboard {

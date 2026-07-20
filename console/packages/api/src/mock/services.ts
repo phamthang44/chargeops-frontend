@@ -92,17 +92,66 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
     },
 
+    analytics: {
+      async overview() {
+        await delay();
+        const months = ['T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
+        const base = 42_000_000;
+        return {
+          kpis: [
+            { label: 'DOANH THU 12TH', value: '₫742tr', delta: '+18% so với kỳ trước', deltaPositive: true },
+            { label: 'TỔNG ĐẶT CHỖ', value: '18.240', delta: '+2.140 lượt', deltaPositive: true },
+            { label: 'TRẠM HOẠT ĐỘNG', value: '24', delta: '+2 tuần này', deltaPositive: true },
+            { label: 'TỶ LỆ LẤP ĐẦY', value: '71%', delta: '+4 điểm', deltaPositive: true },
+            { label: 'HỦY / NO-SHOW', value: '6,2%', delta: '-0,8 điểm', deltaPositive: true },
+          ],
+          revenueTrend: months.map((m, i) => ({ month: m, vnd: Math.round(base * (1 + i * 0.08 + (i % 3) * 0.02)) })),
+          topStations: [
+            { name: 'Trạm Cầu Giấy', revenueVnd: 15_800_000, pct: 100 },
+            { name: 'Trạm Hà Đông', revenueVnd: 12_400_000, pct: 78 },
+            { name: 'Trạm Thanh Xuân', revenueVnd: 9_100_000, pct: 58 },
+            { name: 'Trạm Long Biên', revenueVnd: 7_600_000, pct: 48 },
+            { name: 'Trạm Đống Đa', revenueVnd: 5_200_000, pct: 33 },
+          ],
+          peakHours: Array.from({ length: 24 }, (_, h) => {
+            // twin peaks around 8h and 18h
+            const morning = Math.exp(-((h - 8) ** 2) / 6);
+            const evening = Math.exp(-((h - 18) ** 2) / 5) * 1.2;
+            return { hour: h, sessions: Math.round((morning + evening) * 40) };
+          }),
+          connectorMix: [
+            { connector: 'CCS2', pct: 48 },
+            { connector: 'CHAdeMO', pct: 24 },
+            { connector: 'Type2AC', pct: 20 },
+            { connector: 'GBT', pct: 8 },
+          ],
+        };
+      },
+    },
+
     bookings: {
       async list(params = {}) {
         await delay();
-        const { status = 'all', search = '', page = 0, pageSize = 10 } = params;
+        const { status = 'all', search = '', searchIn = 'all', page = 0, pageSize = 10 } = params;
         const q = search.trim().toLowerCase();
         let rows = scopedBookings();
         if (status !== 'all') rows = rows.filter((b) => b.status === status);
         if (q) {
-          rows = rows.filter((b) =>
-            [b.id, b.driverName, b.chargerId, b.stationName].some((f) => f.toLowerCase().includes(q)),
-          );
+          const fieldsOf = (b: Booking): string[] => {
+            switch (searchIn) {
+              case 'id':
+                return [b.id];
+              case 'driver':
+                return [b.driverName];
+              case 'charger':
+                return [b.chargerId];
+              case 'station':
+                return [b.stationName];
+              default:
+                return [b.id, b.driverName, b.chargerId, b.stationName];
+            }
+          };
+          rows = rows.filter((b) => fieldsOf(b).some((f) => f.toLowerCase().includes(q)));
         }
         return { items: rows.slice(page * pageSize, (page + 1) * pageSize), total: rows.length, page, pageSize };
       },

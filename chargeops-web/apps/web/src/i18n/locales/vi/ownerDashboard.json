@@ -1,0 +1,38 @@
+{
+  "title": "Tổng quan",
+  "subtitle": "{{station}} · {{date}}",
+  "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+  "license": {
+    "active": "ĐANG HOẠT ĐỘNG",
+    "expiring": "SẮP HẾT HẠN",
+    "expired": "ĐÃ HẾT HẠN",
+    "label": "Giấy phép: {{status}}",
+    "detail": "· hết hạn {{date}} · còn {{days}} ngày",
+    "renewalSoon": "Gia hạn sắp tới"
+  },
+  "kpi": {
+    "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+    "bookingsDelta": "+{{count}} so với hôm qua",
+    "revenueToday": "DOANH THU HÔM NAY",
+    "revenueDelta": "+{{percent}}% so với hôm qua",
+    "chargersOnline": "TRỤ ONLINE",
+    "allOnline": "Tất cả trụ đang online",
+    "avgUtilization": "SỬ DỤNG TRUNG BÌNH",
+    "utilizationDelta": "+{{points}} điểm so với tuần trước"
+  },
+  "charger": {
+    "maintenance": "Bảo trì",
+    "offline": "Offline"
+  },
+  "chart": {
+    "title": "Doanh thu & đặt chỗ · 14 ngày",
+    "revenue": "Doanh thu",
+    "bookings": "Đặt chỗ"
+  },
+  "panel": {
+    "chargers": "Trụ sạc",
+    "manageLink": "Quản lý →",
+    "upcomingBookings": "Đặt chỗ sắp tới",
+    "allLink": "Tất cả →"
+  }
+}

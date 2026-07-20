@@ -1,0 +1,38 @@
+{
+  "title": "Overview",
+  "subtitle": "{{station}} · {{date}}",
+  "loadError": "Could not load overview data: {{message}}",
+  "license": {
+    "active": "ACTIVE",
+    "expiring": "EXPIRING SOON",
+    "expired": "EXPIRED",
+    "label": "License: {{status}}",
+    "detail": "· expires {{date}} · {{days}} days left",
+    "renewalSoon": "Renewal coming up"
+  },
+  "kpi": {
+    "bookingsToday": "BOOKINGS TODAY",
+    "bookingsDelta": "+{{count}} vs. yesterday",
+    "revenueToday": "REVENUE TODAY",
+    "revenueDelta": "+{{percent}}% vs. yesterday",
+    "chargersOnline": "CHARGERS ONLINE",
+    "allOnline": "All chargers online",
+    "avgUtilization": "AVG. UTILIZATION",
+    "utilizationDelta": "+{{points}} pts vs. last week"
+  },
+  "charger": {
+    "maintenance": "Maintenance",
+    "offline": "Offline"
+  },
+  "chart": {
+    "title": "Revenue & bookings · 14 days",
+    "revenue": "Revenue",
+    "bookings": "Bookings"
+  },
+  "panel": {
+    "chargers": "Chargers",
+    "manageLink": "Manage →",
+    "upcomingBookings": "Upcoming bookings",
+    "allLink": "See all →"
+  }
+}

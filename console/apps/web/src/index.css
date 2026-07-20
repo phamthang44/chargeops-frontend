@@ -3,6 +3,6 @@
 @source "../../../packages/ui/src";
 @source "../../../packages/auth/src";
 
-/* Owner console uses the emerald accent for keyboard focus + selection. */
+/* Emerald accent for keyboard focus + selection (owner is the primary user). */
 :root { --focus-ring: #12a150; }
 ::selection { background: rgba(18, 161, 80, 0.16); }

@@ -20,7 +20,36 @@ import {
   type ReactNode,
 } from 'react';
 
-export type Role = 'station_owner' | 'platform_admin';
+export type Role = 'platform_admin' | 'station_owner' | 'station_staff' | 'driver';
+
+/**
+ * Keycloak realm roles → the app's canonical Role. In real mode, read
+ * `realm_access.roles` off the decoded access token and map through this.
+ * Unknown/extra realm roles are ignored.
+ */
+const REALM_ROLE_MAP: Record<string, Role> = {
+  ADMIN: 'platform_admin',
+  OWNER: 'station_owner',
+  STATION_STAFF: 'station_staff',
+  DRIVER: 'driver',
+};
+
+export function rolesFromRealm(realmRoles: string[]): Role[] {
+  return realmRoles.map((r) => REALM_ROLE_MAP[r]).filter((r): r is Role => Boolean(r));
+}
+
+/**
+ * Precedence ladder for post-login routing. A token may carry several roles
+ * (an owner who is also staff, etc.) — route to the highest-privilege console.
+ * The path is only a destination; access is still enforced by <RequireRole>
+ * on the client and by the backend on every REST call.
+ */
+export function resolveHome(roles: Role[]): string {
+  if (roles.includes('platform_admin')) return '/admin';
+  if (roles.includes('station_owner')) return '/owner';
+  if (roles.includes('station_staff')) return '/staff';
+  return '/driver-notice'; // driver-only or no console role
+}
 
 export interface AuthUser {
   name: string;

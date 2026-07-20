@@ -1,5 +1,5 @@
 {
-  "name": "chargeops-console",
+  "name": "chargeops-web",
   "private": true,
   "version": "0.0.1",
   "workspaces": [

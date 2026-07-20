@@ -25,7 +25,7 @@ returns mock data; pointing it at the real `chargeops-backend` API later does no
 ```
 chargeops-frontend/
   chargeops-driver-mobile/   # Driver app — Expo / React Native (active)
-  console/                   # Operator console monorepo — portal + owner + admin (Vite/React, active)
+  chargeops-web/             # Operator web console — single role-routed app (Vite/React, active)
   chargeops-marketing/       # Marketing site — Next.js (active)
   design-console/            # Interactive console design (.dc.html, source of the console UI)
   designs/                   # Visily screen exports (visual reference)
@@ -34,9 +34,9 @@ chargeops-frontend/
 ```
 
 Each top-level app is **self-contained** (its own `package.json` / `node_modules`) — a single git
-repo at this root tracks them all (no per-app `.git`). The operator console is itself an
-npm-workspaces monorepo of three separately deployable apps sharing UI/auth/token packages — see
-[`console/README.md`](console/README.md). Shared visual rules live in
+repo at this root tracks them all (no per-app `.git`). The operator web console is itself an
+npm-workspaces monorepo — one app (`apps/web`) with role-based routing, sharing UI/auth/token/api
+packages — see [`chargeops-web/README.md`](chargeops-web/README.md). Shared visual rules live in
 [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md); the authoritative behavior spec is the SRS in
 [`documents/`](documents/).
 

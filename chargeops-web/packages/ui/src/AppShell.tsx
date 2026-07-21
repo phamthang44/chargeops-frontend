@@ -111,7 +111,7 @@ export function AppShell({
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ animation: 'fadeIn .25s ease' }}>
       {/* ===== TOP BAR ===== */}
-      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line-2 bg-surface px-4">
+      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line-2 bg-surface px-5 md:px-7">
         <div className="flex min-w-0 items-center gap-[13px]">
           <button
             onClick={() => setDrawerOpen((v) => !v)}

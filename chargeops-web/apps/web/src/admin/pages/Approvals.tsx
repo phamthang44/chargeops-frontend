@@ -82,10 +82,10 @@ export function Approvals() {
                     <div
                       key={s.id}
                       onClick={() => setSelectedId(s.id)}
-                      className="grid cursor-pointer items-center border-b border-hairline px-3.5 py-3 text-[12px] font-medium hover:bg-[#fafaff]"
+                      className="grid cursor-pointer items-center border-b border-hairline px-3.5 py-3 text-[12px] font-medium hover:bg-row-hover"
                       style={{
                         gridTemplateColumns: '0.9fr 1.5fr 1.4fr 1fr 0.6fr',
-                        background: on ? '#fafaff' : undefined,
+                        background: on ? 'var(--color-row-hover)' : undefined,
                         borderLeft: `3px solid ${on ? '#5b54e8' : 'transparent'}`,
                       }}
                     >

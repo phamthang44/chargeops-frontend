@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { formatDateVn, formatVndCompact, useApi, type OwnerDashboard } from '@chargeops/api';
 import {
+  Banner,
   Card,
-  IconShield,
   KpiCard,
   PageHeader,
   SidePanel,
@@ -62,16 +62,12 @@ function DashboardBody({ data }: { data: OwnerDashboard }) {
   return (
     <>
       {/* License banner (BR-STA-01: expiry hides the station from drivers) */}
-      <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3.5 rounded-[11px] border border-warn-border bg-warn-soft px-4 py-[13px]">
-        <div className="flex items-center gap-[11px]">
-          <IconShield size={18} className="shrink-0 text-warn" />
-          <span className="text-[13px] font-medium text-warn-deep">
-            <b className="font-bold">{t('license.label', { status: licenseStatusLabel })}</b>{' '}
-            {t('license.detail', { date: formatDateVn(license.expiryDate), days: license.daysLeft })}
-          </span>
-        </div>
-        <StatusPill tone="warn" label={t('license.renewalSoon')} />
-      </div>
+      <Banner
+        status="warning"
+        title={t('license.label', { status: licenseStatusLabel })}
+        description={t('license.detail', { date: formatDateVn(license.expiryDate), days: license.daysLeft })}
+        action={<StatusPill tone="warn" label={t('license.renewalSoon')} />}
+      />
 
       {/* KPI row */}
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">

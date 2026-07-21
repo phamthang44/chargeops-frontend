@@ -10,7 +10,7 @@ export interface MetricCardProps {
 export function MetricCard({ label, value, sub, accent }: MetricCardProps) {
   return (
     <div
-      className="rounded-[11px] border border-line-2 bg-white px-[13px] py-3"
+      className="rounded-[11px] border border-line-2 bg-surface px-[13px] py-3"
       style={{ borderLeft: `3px solid ${accent}` }}
     >
       <div className="text-[9.5px] font-semibold uppercase tracking-[0.06em] text-faint">{label}</div>

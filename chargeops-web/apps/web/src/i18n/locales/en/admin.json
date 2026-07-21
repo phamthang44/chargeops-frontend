@@ -55,6 +55,20 @@
       }
     }
   },
+  "search": {
+    "groups": {
+      "tickets": "Support",
+      "bookings": "Bookings",
+      "users": "Users"
+    }
+  },
+  "notifications": {
+    "empty": "No new notifications.",
+    "pendingStations": "{{count}} station registrations pending",
+    "expiringLicenses": "{{count}} licenses expiring · {{days}} days left",
+    "expiredLicenses": "{{count}} licenses expired",
+    "reportedFaults": "{{count}} reported charger faults"
+  },
   "rejectModal": {
     "title": "Reject Station Registration",
     "subtitle": "The reason will be sent to the station owner of {{name}} on the registration status screen.",

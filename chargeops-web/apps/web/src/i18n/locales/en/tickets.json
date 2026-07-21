@@ -20,6 +20,9 @@
   },
   "detail": {
     "back": "Ticket list",
+    "context": {
+      "reporter": "Reporter"
+    },
     "loadError": "Could not load ticket: {{message}}",
     "thread": "Conversation",
     "threadHint": "oldest first · append-only",

@@ -52,6 +52,22 @@
       }
     }
   },
+  "search": {
+    "groups": {
+      "tickets": "Hỗ trợ",
+      "bookings": "Đặt chỗ",
+      "chargers": "Trụ sạc",
+      "stations": "Trạm"
+    }
+  },
+  "notifications": {
+    "empty": "Không có thông báo mới.",
+    "openTickets": "{{count}} ticket đang chờ xử lý",
+    "license": {
+      "expiring": "Giấy phép sắp hết hạn · còn {{days}} ngày",
+      "expired": "Giấy phép đã hết hạn"
+    }
+  },
   "assistant": {
     "title": "Trợ lý chính sách",
     "subtitle": "Tra cứu quy định hủy, check-in, thanh toán.",

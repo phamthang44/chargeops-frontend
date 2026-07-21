@@ -15,7 +15,7 @@ export function StationSummary({ stations }: { stations: Station[] }) {
       <MetricCard label={t('stations.summary.total')} value={String(stations.length)} accent="#5b54e8" />
       <MetricCard label={t('stations.summary.active')} value={String(active.length)} accent="#12a150" />
       <MetricCard label={t('stations.summary.pending')} value={String(pending)} accent="#9a6b16" />
-      <MetricCard label={t('stations.summary.online')} value={`${online}/${chargers}`} accent="#16171a" />
+      <MetricCard label={t('stations.summary.online')} value={`${online}/${chargers}`} accent="var(--color-ink)" />
     </div>
   );
 }

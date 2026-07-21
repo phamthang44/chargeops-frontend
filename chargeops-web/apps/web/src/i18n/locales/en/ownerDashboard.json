@@ -7,7 +7,7 @@
     "expiring": "EXPIRING SOON",
     "expired": "EXPIRED",
     "label": "License: {{status}}",
-    "detail": "· expires {{date}} · {{days}} days left",
+    "detail": "Expires {{date}} · {{days}} days left",
     "renewalSoon": "Renewal coming up"
   },
   "kpi": {

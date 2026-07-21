@@ -11,11 +11,11 @@ export function DriverNotice() {
     <div
       className="flex min-h-screen items-center justify-center p-8"
       style={{
-        background: 'radial-gradient(120% 120% at 50% 0%, #f0f1fb 0%, #f6f7f9 46%)',
+        background: 'radial-gradient(120% 120% at 50% 0%, var(--color-brand-faint) 0%, var(--color-canvas) 46%)',
         animation: 'fadeIn .3s ease',
       }}
     >
-      <div className="w-full max-w-[440px] rounded-panel border border-line bg-white p-8 text-center shadow-[0_8px_24px_rgba(16,17,26,.06)]">
+      <div className="w-full max-w-[440px] rounded-panel border border-line bg-surface p-8 text-center shadow-[0_8px_24px_rgba(16,17,26,.06)]">
         <span className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-[13px] bg-brand">
           <IconBolt size={24} strokeWidth={2.2} className="text-white" />
         </span>

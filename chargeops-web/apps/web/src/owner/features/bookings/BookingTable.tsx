@@ -52,7 +52,7 @@ export function BookingTable({
             <div
               key={b.id}
               onClick={() => onOpen(b)}
-              className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-[#fafaff]"
+              className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-row-hover"
               style={{ gridTemplateColumns: GRID }}
             >
               <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>

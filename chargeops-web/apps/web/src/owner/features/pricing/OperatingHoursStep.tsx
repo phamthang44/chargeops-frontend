@@ -27,7 +27,7 @@ export function OperatingHoursStep({ hours, onToggleDay, onSet247 }: OperatingHo
           </button>
         }
       />
-      <div className="rounded-panel border border-line-2 bg-white px-5 pb-4 pt-2">
+      <div className="rounded-panel border border-line-2 bg-surface px-5 pb-4 pt-2">
         {hours.map((h) => (
           <div
             key={h.day}
@@ -37,13 +37,13 @@ export function OperatingHoursStep({ hours, onToggleDay, onSet247 }: OperatingHo
             <span className="text-[13px] font-semibold text-body">{t(`pricing.days.${h.day}`)}</span>
             <span
               className="rounded-[9px] border border-line px-2.5 py-[7px] text-center font-mono text-[12.5px] font-medium"
-              style={{ background: h.open24 ? '#fff' : '#f7f8fa', color: h.open24 ? '#16171a' : '#9499a3' }}
+              style={{ background: h.open24 ? 'var(--color-surface)' : 'var(--color-chip)', color: h.open24 ? 'var(--color-ink)' : 'var(--color-faint)' }}
             >
               {h.open24 ? h.open : '—'}
             </span>
             <span
               className="rounded-[9px] border border-line px-2.5 py-[7px] text-center font-mono text-[12.5px] font-medium"
-              style={{ background: h.open24 ? '#fff' : '#f7f8fa', color: h.open24 ? '#16171a' : '#9499a3' }}
+              style={{ background: h.open24 ? 'var(--color-surface)' : 'var(--color-chip)', color: h.open24 ? 'var(--color-ink)' : 'var(--color-faint)' }}
             >
               {h.open24 ? h.close : '—'}
             </span>

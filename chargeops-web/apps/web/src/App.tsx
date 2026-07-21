@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthGate, AuthProvider, type Role } from '@chargeops/auth';
 import { ToastProvider } from '@chargeops/ui';
 import { RoleRouter } from './RoleRouter';
-import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeProvider } from './theme';
 
 /**
  * ChargeOps operator console — one app, one origin, one Keycloak client.
@@ -32,17 +32,18 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <AuthProvider mockUser={pickMockUser()}>
-      <AuthGate>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <BrowserRouter>
-              <RoleRouter />
-              <LanguageSwitcher />
-            </BrowserRouter>
-          </ToastProvider>
-        </QueryClientProvider>
-      </AuthGate>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider mockUser={pickMockUser()}>
+        <AuthGate>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <BrowserRouter>
+                <RoleRouter />
+              </BrowserRouter>
+            </ToastProvider>
+          </QueryClientProvider>
+        </AuthGate>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

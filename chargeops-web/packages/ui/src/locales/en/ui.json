@@ -1,8 +1,14 @@
 {
   "menu": "Menu",
+  "avatarMenu": {
+    "settings": "Settings",
+    "logout": "Logout"
+  },
   "search": {
     "placeholder": "Search bookings, chargers, stations…",
-    "clear": "Clear search"
+    "clear": "Clear search",
+    "loading": "Searching…",
+    "empty": "No results found."
   },
   "brand": {
     "switchPortal": "Switch portal"

@@ -78,7 +78,7 @@ export function Licenses() {
                 <button
                   key={s.key}
                   onClick={() => setFilter(s.key)}
-                  className="rounded-[11px] border bg-white px-[15px] py-[13px] text-left"
+                  className="rounded-[11px] border bg-surface px-[15px] py-[13px] text-left"
                   style={{ borderColor: on ? '#c2c6cf' : '#e9ebef', borderLeft: `3px solid ${s.accent}` }}
                 >
                   <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-faint">{s.label}</div>

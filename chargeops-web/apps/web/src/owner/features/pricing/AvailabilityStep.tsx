@@ -15,7 +15,7 @@ export function AvailabilityStep({ rules, onChange }: AvailabilityStepProps) {
   return (
     <div>
       <StepHeader n={4} title={t('pricing.steps.step4.title')} />
-      <div className="rounded-panel border border-line-2 bg-white px-5 pb-[18px] pt-1.5">
+      <div className="rounded-panel border border-line-2 bg-surface px-5 pb-[18px] pt-1.5">
         <Row
           title={t('pricing.steps.step4.lockTitle')}
           desc={t('pricing.steps.step4.lockDesc')}
@@ -44,7 +44,7 @@ export function AvailabilityStep({ rules, onChange }: AvailabilityStepProps) {
           </span>
           <div>
             <div className="text-[12.5px] font-semibold text-owner-deep">{t('pricing.steps.step4.validConfig')}</div>
-            <div className="text-[11.5px] text-[#3f6b4f]">
+            <div className="text-[11.5px] text-owner-deep">
               {t('pricing.steps.step4.validConfigHelp')}
             </div>
           </div>

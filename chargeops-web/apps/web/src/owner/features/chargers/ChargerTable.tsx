@@ -65,10 +65,10 @@ export function ChargerTable({
           <div
             key={c.id}
             onClick={() => onSelect(c)}
-            className="grid cursor-pointer items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium hover:bg-[#fafaff]"
+            className="grid cursor-pointer items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium hover:bg-row-hover"
             style={{
               gridTemplateColumns: GRID,
-              background: selected ? '#fafaff' : undefined,
+              background: selected ? 'var(--color-row-hover)' : undefined,
               borderLeft: `3px solid ${selected ? '#12a150' : 'transparent'}`,
             }}
           >
@@ -91,7 +91,7 @@ export function ChargerTable({
               ) : (
                 <span
                   onClick={() => startEdit(c)}
-                  className="cursor-text border-b border-dashed border-[#c8cad0] pb-px font-semibold hover:border-brand"
+                  className="cursor-text border-b border-dashed border-ghost pb-px font-semibold hover:border-brand"
                 >
                   {c.name}
                 </span>

@@ -60,7 +60,7 @@ export function BookingToolbar({
       <SegmentedControl segments={ranges} active={range} onChange={onRange} />
       <button
         onClick={onExport}
-        className="ml-auto flex items-center gap-[7px] rounded-ctl border border-line bg-white px-[13px] py-2 text-[12.5px] font-semibold text-body transition hover:border-[#c9ccd4] hover:bg-canvas"
+        className="ml-auto flex items-center gap-[7px] rounded-ctl border border-line bg-surface px-[13px] py-2 text-[12.5px] font-semibold text-body transition hover:border-line-hover hover:bg-canvas"
       >
         <IconCard size={14} strokeWidth={1.9} />
         {t('bookings.exportCsv')}

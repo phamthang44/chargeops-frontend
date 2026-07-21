@@ -143,7 +143,7 @@ export function Transactions() {
 
 function Row({ tx }: { tx: Transaction }) {
   const { t } = useTranslation('admin');
-  const color = tx.type === 'refund' ? '#c0392b' : '#0d8a5a';
+  const color = tx.type === 'refund' ? 'var(--color-bad)' : 'var(--color-good)';
   return (
     <div
       className="grid items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium"

@@ -1,11 +1,11 @@
 import type { ChargerStatus } from '@chargeops/api';
 
-/** Concrete pill colours for the clickable charger-status control (owner: 3 states). */
+/** Concrete pill colours (CSS var refs) for the clickable charger-status control (owner: 3 states). */
 export const CHARGER_PILL: Record<ChargerStatus, { bg: string; fg: string; label: string }> = {
-  available: { bg: '#eafaf1', fg: '#0c7a3e', label: 'Sẵn sàng' },
-  maintenance: { bg: '#fdf8ec', fg: '#9a6b16', label: 'Bảo trì' },
-  offline: { bg: '#fdf3f2', fg: '#c0392b', label: 'Offline' },
-  unclaimed: { bg: '#eef0f2', fg: '#62656e', label: 'Chưa gán' },
+  available: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', label: 'Sẵn sàng' },
+  maintenance: { bg: 'var(--color-warn-soft)', fg: 'var(--color-warn-deep)', label: 'Bảo trì' },
+  offline: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Offline' },
+  unclaimed: { bg: 'var(--color-chip)', fg: 'var(--color-muted)', label: 'Chưa gán' },
 };
 
 /** Owner may cycle only these three operational states. */
@@ -18,6 +18,6 @@ export function nextStatus(current: ChargerStatus): ChargerStatus {
 
 /** Utilization bar colour: green while in use, grey when idle/down. */
 export function utilColor(c: { status: ChargerStatus; utilizationPct: number }): string {
-  if (c.status !== 'available' || c.utilizationPct === 0) return '#d6d9df';
-  return c.utilizationPct >= 80 ? '#0d8a5a' : '#12a150';
+  if (c.status !== 'available' || c.utilizationPct === 0) return 'var(--color-disabled)';
+  return c.utilizationPct >= 80 ? 'var(--color-good-deep)' : 'var(--color-owner)';
 }

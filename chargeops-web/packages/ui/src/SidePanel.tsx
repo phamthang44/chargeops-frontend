@@ -29,7 +29,7 @@ export function SidePanel({
   tone = 'white',
 }: SidePanelProps) {
   const toneClass =
-    tone === 'warn' ? 'border-warn-border bg-warn-soft' : 'border-line-2 bg-white';
+    tone === 'warn' ? 'border-warn-border bg-warn-soft' : 'border-line-2 bg-surface';
   return (
     <div className={`rounded-card border p-[15px] ${toneClass}`}>
       <div className="mb-[11px] flex items-center justify-between">

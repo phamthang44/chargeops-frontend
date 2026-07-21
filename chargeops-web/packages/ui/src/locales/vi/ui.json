@@ -1,8 +1,14 @@
 {
   "menu": "Menu",
+  "avatarMenu": {
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất"
+  },
   "search": {
     "placeholder": "Tìm đặt chỗ, trụ, trạm…",
-    "clear": "Xóa tìm kiếm"
+    "clear": "Xóa tìm kiếm",
+    "loading": "Đang tìm…",
+    "empty": "Không tìm thấy kết quả."
   },
   "brand": {
     "switchPortal": "Đổi cổng"

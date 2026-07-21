@@ -10,7 +10,7 @@ export function BookingSummaryStrip({ summary }: { summary: BookingSummary }) {
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">
       <MetricCard label={t('bookings.metrics.totalBookings')} value={String(summary.total)} accent="#5b54e8" />
       <MetricCard label={t('bookings.metrics.activeBookings')} value={String(active)} sub={t('bookings.metrics.activeSub')} accent="#12a150" />
-      <MetricCard label={t('bookings.metrics.completed')} value={String(summary.byStatus.completed)} accent="#16171a" />
+      <MetricCard label={t('bookings.metrics.completed')} value={String(summary.byStatus.completed)} accent="var(--color-ink)" />
       <MetricCard label={t('bookings.metrics.cancelled')} value={String(summary.byStatus.cancelled)} accent="#c0392b" />
       <MetricCard label={t('bookings.metrics.grossRevenue')} value={formatVndCompact(summary.grossVnd)} sub={t('bookings.metrics.revenueSub')} accent="#0d8a5a" />
     </div>

@@ -7,7 +7,7 @@ const GRID = '1fr 1fr 0.8fr 0.9fr 1fr 0.9fr';
 
 /** Payment green, refund red — signed amount shown with the type colour. */
 function typeColor(t: Transaction) {
-  return t.type === 'refund' ? '#c0392b' : '#0d8a5a';
+  return t.type === 'refund' ? 'var(--color-bad)' : 'var(--color-good)';
 }
 
 /** Desktop transactions table. */

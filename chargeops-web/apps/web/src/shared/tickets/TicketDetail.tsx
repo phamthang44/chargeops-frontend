@@ -11,10 +11,14 @@ import {
   type TicketStatus,
 } from '@chargeops/api';
 import {
+  Avatar,
   Button,
   Card,
+  ChatComposer,
+  HoverCard,
   IconArrowLeft,
   IconCalendar,
+  IconPhone,
   IconPin,
   IconSend,
   IconUsers,
@@ -128,9 +132,31 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
                   <IconCalendar size={12} strokeWidth={2.2} /> {tk.bookingId}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-1 text-[11px] font-medium text-muted">
-                <IconUsers size={12} strokeWidth={2.2} /> {tk.reporterName}
-              </span>
+              <HoverCard
+                trigger={
+                  <span className="inline-flex cursor-default items-center gap-1 rounded-full bg-chip px-2.5 py-1 text-[11px] font-medium text-muted">
+                    <IconUsers size={12} strokeWidth={2.2} /> {tk.reporterName}
+                  </span>
+                }
+              >
+                <div className="flex items-center gap-2.5">
+                  <Avatar name={tk.reporterName} size="sm" tone="neutral" />
+                  <div className="min-w-0">
+                    <div className="truncate text-[12.5px] font-semibold text-ink">{tk.reporterName}</div>
+                    <div className="text-[11px] text-faint">{t('detail.context.reporter')}</div>
+                  </div>
+                </div>
+                {tk.reporterPhone && (
+                  <div className="mt-2.5 flex items-center gap-1.5 border-t border-hairline pt-2.5 text-[12px] text-body">
+                    <IconPhone size={13} className="text-faint" /> {tk.reporterPhone}
+                  </div>
+                )}
+                {tk.stationName && (
+                  <div className={`mt-1.5 flex items-center gap-1.5 text-[12px] text-body ${tk.reporterPhone ? '' : 'border-t border-hairline pt-2.5'}`}>
+                    <IconPin size={13} className="text-faint" /> {tk.stationName}
+                  </div>
+                )}
+              </HoverCard>
             </div>
           </div>
           <Select
@@ -185,23 +211,26 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
           )}
         </div>
 
-        <div className="flex items-center gap-2 border-t border-hairline p-3">
-          <textarea
+        <div className="border-t border-hairline p-3">
+          <ChatComposer
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={setDraft}
+            onSubmit={() => reply.mutate(draft.trim())}
             placeholder={t('detail.composerPlaceholder')}
-            rows={1}
-            className="h-9 flex-1 resize-none rounded-[8px] border border-line px-3 py-2 text-[13px] leading-tight focus:border-owner focus:outline-none focus:ring-2 focus:ring-owner/15"
-          />
-          <Button
+            disabled={reply.isPending}
             accent={accent}
-            size="md"
-            icon={<IconSend size={14} strokeWidth={2.2} />}
-            disabled={!draft.trim() || reply.isPending}
-            onClick={() => reply.mutate(draft.trim())}
-          >
-            {reply.isPending ? t('detail.sending') : t('detail.send')}
-          </Button>
+            actions={
+              <Button
+                accent={accent}
+                size="md"
+                icon={<IconSend size={14} strokeWidth={2.2} />}
+                disabled={!draft.trim() || reply.isPending}
+                onClick={() => reply.mutate(draft.trim())}
+              >
+                {reply.isPending ? t('detail.sending') : t('detail.send')}
+              </Button>
+            }
+          />
         </div>
       </Card>
     </>
@@ -214,14 +243,17 @@ function MessageBubble({ message, accent }: { message: TicketMessage; accent: 'b
     ? accent === 'owner'
       ? 'bg-owner-soft border-owner-border'
       : 'bg-brand-soft border-brand-line'
-    : 'bg-white border-line';
+    : 'bg-surface border-line';
   return (
-    <div className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-      <div className="mb-1 text-[10.5px] text-faint">
-        {message.authorName} · {formatDateVn(message.createdAt)} {formatTimeVn(message.createdAt)}
-      </div>
-      <div className={`max-w-[78%] rounded-[10px] border px-[11px] py-2 text-[12.5px] leading-[1.45] text-ink ${bubbleClass}`}>
-        {message.body}
+    <div className={`flex items-end gap-2 ${mine ? 'flex-row-reverse' : 'flex-row'}`}>
+      <Avatar name={message.authorName} size="sm" tone={mine ? accent : 'neutral'} />
+      <div className={`flex max-w-[74%] flex-col ${mine ? 'items-end' : 'items-start'}`}>
+        <div className="mb-1 text-[10.5px] text-faint">
+          {message.authorName} · {formatDateVn(message.createdAt)} {formatTimeVn(message.createdAt)}
+        </div>
+        <div className={`rounded-[10px] border px-[11px] py-2 text-[12.5px] leading-[1.45] text-ink ${bubbleClass}`}>
+          {message.body}
+        </div>
       </div>
     </div>
   );

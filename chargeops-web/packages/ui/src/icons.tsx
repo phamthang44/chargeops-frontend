@@ -132,6 +132,7 @@ export const IconSearch = make(
   </>,
 );
 export const IconChevronDown = make(<polyline points="6 9 12 15 18 9" />);
+export const IconCheck = make(<polyline points="20 6 9 17 4 12" />);
 export const IconArrowRight = make(
   <>
     <line x1="5" y1="12" x2="19" y2="12" />
@@ -179,5 +180,78 @@ export const IconSend = make(
   <>
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </>,
+);
+export const IconDots = make(
+  <>
+    <circle cx="12" cy="5" r="1.4" />
+    <circle cx="12" cy="12" r="1.4" />
+    <circle cx="12" cy="19" r="1.4" />
+  </>,
+);
+export const IconSettings = make(
+  <>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+  </>,
+);
+export const IconLogout = make(
+  <>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </>,
+);
+export const IconPhone = make(
+  <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.9a16 16 0 0 0 6 6l1.4-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.9 2.1Z" />,
+);
+export const IconGlobe = make(
+  <>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+  </>,
+);
+export const IconMoon = make(
+  <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />,
+);
+export const IconInfoCircle = make(
+  <>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="11" x2="12" y2="16.5" />
+    <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none" />
+  </>,
+);
+export const IconCheckCircle = make(
+  <>
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="8 12.5 10.8 15.3 16 9.5" />
+  </>,
+);
+export const IconAlertTriangle = make(
+  <>
+    <path d="M12 3.5 22 20H2Z" />
+    <line x1="12" y1="10" x2="12" y2="14.5" />
+    <circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none" />
+  </>,
+);
+export const IconAlertCircle = make(
+  <>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="7.5" x2="12" y2="13" />
+    <circle cx="12" cy="16.3" r="0.9" fill="currentColor" stroke="none" />
+  </>,
+);
+export const IconSun = make(
+  <>
+    <circle cx="12" cy="12" r="4.5" />
+    <line x1="12" y1="1.5" x2="12" y2="4" />
+    <line x1="12" y1="20" x2="12" y2="22.5" />
+    <line x1="4.2" y1="4.2" x2="5.9" y2="5.9" />
+    <line x1="18.1" y1="18.1" x2="19.8" y2="19.8" />
+    <line x1="1.5" y1="12" x2="4" y2="12" />
+    <line x1="20" y1="12" x2="22.5" y2="12" />
+    <line x1="4.2" y1="19.8" x2="5.9" y2="18.1" />
+    <line x1="18.1" y1="5.9" x2="19.8" y2="4.2" />
   </>,
 );

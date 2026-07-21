@@ -53,7 +53,7 @@ export function ChargerDetailPanel({
         {t('chargers.panel.identityGroup')}
       </SectionTitle>
       <FieldLabel>{t('chargers.panel.chargerId')}</FieldLabel>
-      <div className="mb-[5px] flex items-center gap-2 rounded-[10px] border border-line-3 bg-[#f7f8fa] px-[13px] py-[11px]">
+      <div className="mb-[5px] flex items-center gap-2 rounded-[10px] border border-line-3 bg-chip px-[13px] py-[11px]">
         <span className="flex-1 font-mono text-[13px] font-semibold text-body">{charger.id}</span>
         <IconLock size={14} className="text-disabled" />
       </div>
@@ -103,9 +103,9 @@ export function ChargerDetailPanel({
               onClick={() => setStatus(s)}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border-[1.5px] px-1 py-2.5 text-[12px] font-semibold transition"
               style={{
-                borderColor: on ? pill.fg : '#e6e8ec',
-                background: on ? pill.bg : '#fff',
-                color: on ? pill.fg : '#62656e',
+                borderColor: on ? pill.fg : 'var(--color-line)',
+                background: on ? pill.bg : 'var(--color-surface)',
+                color: on ? pill.fg : 'var(--color-muted)',
               }}
             >
               <span className="h-[7px] w-[7px] rounded-full" style={{ background: pill.fg }} />
@@ -128,7 +128,7 @@ export function ChargerDetailPanel({
 
       {/* QR */}
       <div className="mt-[18px] flex items-center gap-[13px] rounded-card border border-line-3 bg-surface-2 p-3.5">
-        <span className="flex h-[74px] w-[74px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-white">
+        <span className="flex h-[74px] w-[74px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
           <QrGlyph size={56} />
         </span>
         <div className="min-w-0 flex-1">
@@ -201,7 +201,7 @@ function LockedSpec({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1">
       <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
-      <div className="rounded-[10px] border border-line-3 bg-[#f7f8fa] px-3 py-2.5 text-[12.5px] font-semibold text-body">
+      <div className="rounded-[10px] border border-line-3 bg-chip px-3 py-2.5 text-[12.5px] font-semibold text-body">
         {value}
       </div>
     </div>

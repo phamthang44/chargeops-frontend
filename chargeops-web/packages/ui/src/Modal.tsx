@@ -26,7 +26,7 @@ export function Modal({ open, onClose, maxWidth = 460, children }: ModalProps) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full rounded-panel bg-white p-[22px]"
+        className="w-full rounded-panel bg-surface p-[22px]"
         style={{ maxWidth, animation: 'popIn .18s ease' }}
       >
         {children}

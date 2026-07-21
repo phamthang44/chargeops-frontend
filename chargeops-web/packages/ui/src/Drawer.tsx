@@ -33,7 +33,7 @@ export function Drawer({ open, onClose, title, width = '460px', footer, children
         style={{ animation: 'fadeIn .15s ease' }}
       />
       <div
-        className="fixed inset-y-0 right-0 z-41 flex max-w-[100vw] flex-col bg-white shadow-[-8px_0_30px_rgba(0,0,0,.12)]"
+        className="fixed inset-y-0 right-0 z-41 flex max-w-[100vw] flex-col bg-surface shadow-[-8px_0_30px_rgba(0,0,0,.12)]"
         style={{ width, animation: 'drawerIn .22s cubic-bezier(.2,.7,.2,1)' }}
       >
         <div className="flex items-center justify-between border-b border-line-3 px-[18px] py-4">

@@ -36,7 +36,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
           <div
             key={tk.id}
             onClick={() => onOpen(tk)}
-            className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-[#fafaff]"
+            className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-row-hover"
             style={{ gridTemplateColumns: GRID }}
           >
             <span className="font-mono text-[11.5px] font-semibold text-brand">{tk.id}</span>

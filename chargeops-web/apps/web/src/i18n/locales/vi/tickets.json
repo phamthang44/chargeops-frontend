@@ -20,6 +20,9 @@
   },
   "detail": {
     "back": "Danh sách",
+    "context": {
+      "reporter": "Người báo cáo"
+    },
     "loadError": "Không tải được ticket: {{message}}",
     "thread": "Trao đổi",
     "threadHint": "cũ nhất trước · chỉ thêm",

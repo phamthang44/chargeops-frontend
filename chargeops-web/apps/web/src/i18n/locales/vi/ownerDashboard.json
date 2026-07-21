@@ -7,7 +7,7 @@
     "expiring": "SẮP HẾT HẠN",
     "expired": "ĐÃ HẾT HẠN",
     "label": "Giấy phép: {{status}}",
-    "detail": "· hết hạn {{date}} · còn {{days}} ngày",
+    "detail": "Hết hạn {{date}} · còn {{days}} ngày",
     "renewalSoon": "Gia hạn sắp tới"
   },
   "kpi": {

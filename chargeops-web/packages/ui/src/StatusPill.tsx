@@ -6,7 +6,7 @@ const TONES: Record<PillTone, string> = {
   bad: 'bg-bad-soft text-bad',
   brand: 'bg-brand-soft text-brand',
   neutral: 'bg-line-3 text-muted',
-  ink: 'bg-ink text-white',
+  ink: 'bg-solid text-solid-fg',
 };
 
 export function StatusPill({ tone, label }: { tone: PillTone; label: string }) {

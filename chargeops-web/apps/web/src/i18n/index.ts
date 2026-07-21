@@ -5,10 +5,12 @@ import viCommon from './locales/vi/common.json';
 import viOwnerDashboard from './locales/vi/ownerDashboard.json';
 import viStaffDashboard from './locales/vi/staffDashboard.json';
 import viTickets from './locales/vi/tickets.json';
+import viSettings from './locales/vi/settings.json';
 import enCommon from './locales/en/common.json';
 import enOwnerDashboard from './locales/en/ownerDashboard.json';
 import enStaffDashboard from './locales/en/staffDashboard.json';
 import enTickets from './locales/en/tickets.json';
+import enSettings from './locales/en/settings.json';
 
 // Shared packages own their translation content but not the i18next instance —
 // the host app (here) is the one place that initializes i18next and registers
@@ -46,6 +48,7 @@ i18n.use(initReactI18next).init({
       ownerDashboard: viOwnerDashboard,
       staffDashboard: viStaffDashboard,
       tickets: viTickets,
+      settings: viSettings,
       ui: viUi,
       auth: viAuth,
       owner: viOwner,
@@ -56,6 +59,7 @@ i18n.use(initReactI18next).init({
       ownerDashboard: enOwnerDashboard,
       staffDashboard: enStaffDashboard,
       tickets: enTickets,
+      settings: enSettings,
       ui: enUi,
       auth: enAuth,
       owner: enOwner,

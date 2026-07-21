@@ -52,6 +52,22 @@
       }
     }
   },
+  "search": {
+    "groups": {
+      "tickets": "Support",
+      "bookings": "Bookings",
+      "chargers": "Chargers",
+      "stations": "Stations"
+    }
+  },
+  "notifications": {
+    "empty": "No new notifications.",
+    "openTickets": "{{count}} tickets need attention",
+    "license": {
+      "expiring": "License expiring · {{days}} days left",
+      "expired": "License expired"
+    }
+  },
   "assistant": {
     "title": "Policy Assistant",
     "subtitle": "Look up cancellation, check-in, and payment regulations.",

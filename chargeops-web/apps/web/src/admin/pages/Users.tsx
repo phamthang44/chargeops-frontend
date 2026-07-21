@@ -182,10 +182,10 @@ function UserRow({
   return (
     <div
       onClick={onSelect}
-      className="grid cursor-pointer items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium hover:bg-[#fafaff]"
+      className="grid cursor-pointer items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium hover:bg-row-hover"
       style={{
         gridTemplateColumns: '1.6fr 1fr 0.8fr 0.8fr 1fr',
-        background: selected ? '#fafaff' : undefined,
+        background: selected ? 'var(--color-row-hover)' : undefined,
         borderLeft: `3px solid ${selected ? '#5b54e8' : 'transparent'}`,
       }}
     >
@@ -213,7 +213,7 @@ function UserRow({
               onToggle();
             }}
             className="text-[12px] font-semibold"
-            style={{ color: user.status === 'active' ? '#c0392b' : '#0c7a3e' }}
+            style={{ color: user.status === 'active' ? 'var(--color-bad)' : 'var(--color-owner-deep)' }}
           >
             {user.status === 'active' ? t('users.table.suspend') : t('users.table.activate')}
           </button>
@@ -260,7 +260,7 @@ function UserDetail({
         <button
           onClick={onToggle}
           className="w-full rounded-[9px] border border-line py-2.5 text-[12.5px] font-semibold hover:bg-canvas"
-          style={{ color: user.status === 'active' ? '#c0392b' : '#0c7a3e' }}
+          style={{ color: user.status === 'active' ? 'var(--color-bad)' : 'var(--color-owner-deep)' }}
         >
           {user.status === 'active' ? t('users.drawer.suspendAccount') : t('users.drawer.activateAccount')}
         </button>

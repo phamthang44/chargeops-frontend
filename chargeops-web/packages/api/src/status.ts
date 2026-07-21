@@ -68,9 +68,9 @@ export const TICKET_CATEGORY: Record<TicketCategory, string> = {
   other: 'Khác',
 };
 
-/** Role badge colours (mono chips). */
+/** Role badge colours (mono chips) — CSS var references so dark mode repaints them via inline style. */
 export const USER_ROLE_BADGE: Record<'DRIVER' | 'OWNER' | 'ADMIN', { bg: string; fg: string }> = {
-  DRIVER: { bg: '#eef0f2', fg: '#43464d' },
-  OWNER: { bg: '#eafaf1', fg: '#0c7a3e' },
-  ADMIN: { bg: '#16171a', fg: '#ffffff' },
+  DRIVER: { bg: 'var(--color-chip)', fg: 'var(--color-body)' },
+  OWNER: { bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' },
+  ADMIN: { bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' },
 };

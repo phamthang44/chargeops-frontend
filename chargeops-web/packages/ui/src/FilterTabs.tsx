@@ -32,7 +32,7 @@ export function FilterTabs<K extends string>({
             key={t.key}
             onClick={() => onChange(t.key)}
             className={`flex items-center gap-[7px] rounded-ctl border px-3 py-[7px] text-[12.5px] font-semibold ${
-              on ? activeCls : 'border-line bg-white text-body hover:bg-canvas'
+              on ? activeCls : 'border-line bg-surface text-body hover:bg-canvas'
             }`}
           >
             {t.label}

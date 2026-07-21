@@ -50,7 +50,7 @@ export function SearchInput({
 
   return (
     <div
-      className={`flex h-9 items-center gap-2 rounded-ctl border border-line bg-white px-[11px] transition focus-within:ring-2 ${ring} ${className}`}
+      className={`flex h-9 items-center gap-2 rounded-ctl border border-line bg-surface px-[11px] transition focus-within:ring-2 ${ring} ${className}`}
     >
       <IconSearch size={15} strokeWidth={2} className="shrink-0 text-faint" />
       <input

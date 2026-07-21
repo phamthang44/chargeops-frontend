@@ -55,6 +55,20 @@
       }
     }
   },
+  "search": {
+    "groups": {
+      "tickets": "Hỗ trợ",
+      "bookings": "Đặt chỗ",
+      "users": "Người dùng"
+    }
+  },
+  "notifications": {
+    "empty": "Không có thông báo mới.",
+    "pendingStations": "{{count}} hồ sơ trạm chờ duyệt",
+    "expiringLicenses": "{{count}} giấy phép sắp hết hạn · còn {{days}} ngày",
+    "expiredLicenses": "{{count}} giấy phép đã hết hạn",
+    "reportedFaults": "{{count}} trụ lỗi được báo cáo"
+  },
   "rejectModal": {
     "title": "Từ chối đăng ký trạm",
     "subtitle": "Lý do sẽ được gửi tới chủ trạm {{name}} trên màn hình trạng thái đăng ký.",

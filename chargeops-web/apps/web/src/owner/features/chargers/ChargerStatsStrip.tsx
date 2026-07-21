@@ -19,7 +19,7 @@ export function ChargerStatsStrip({ chargers }: { chargers: Charger[] }) {
       <MetricCard label={t('chargers.stats.available')} value={String(available.length)} accent="#12a150" />
       <MetricCard label={t('chargers.stats.maintenance')} value={String(maintenance)} accent="#9a6b16" />
       <MetricCard label="OFFLINE" value={String(offline)} accent="#c0392b" />
-      <MetricCard label={t('chargers.stats.sessions')} value={String(sessions)} sub={t('chargers.stats.sessionsSub', { util: avgUtil })} accent="#16171a" />
+      <MetricCard label={t('chargers.stats.sessions')} value={String(sessions)} sub={t('chargers.stats.sessionsSub', { util: avgUtil })} accent="var(--color-ink)" />
     </div>
   );
 }

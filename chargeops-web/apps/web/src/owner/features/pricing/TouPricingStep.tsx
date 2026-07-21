@@ -29,7 +29,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
           </button>
         }
       />
-      <div className="rounded-panel border border-line-2 bg-white p-5">
+      <div className="rounded-panel border border-line-2 bg-surface p-5">
         {rules.length === 0 ? (
           <div className="py-[22px] text-center text-[12.5px] font-medium text-faint">
             {t('pricing.steps.step3.noRules')}
@@ -73,7 +73,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
                         </div>
                         <div
                           className="mt-px text-[16px] font-bold"
-                          style={{ color: higher ? '#9a6b16' : '#0c7a3e' }}
+                          style={{ color: higher ? 'var(--color-warn)' : 'var(--color-owner-deep)' }}
                         >
                           {higher ? '+' : ''}
                           {pct}%
@@ -93,7 +93,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
                 <div className="mb-[3px] text-[12.5px] font-semibold text-owner-deep">
                   {t('pricing.steps.step3.tipTitle')}
                 </div>
-                <div className="text-[12px] leading-[1.55] text-[#3f6b4f]">
+                <div className="text-[12px] leading-[1.55] text-owner-deep">
                   {t('pricing.steps.step3.tipText')}
                 </div>
               </div>

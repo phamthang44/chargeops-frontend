@@ -56,7 +56,7 @@ export function Assistant() {
     <>
       <PageHeader title={t('assistant.title')} subtitle={t('assistant.subtitle')} />
 
-      <div className="flex min-h-[440px] flex-col overflow-hidden rounded-card border border-line-2 bg-white" style={{ height: 'calc(100vh - 200px)' }}>
+      <div className="flex min-h-[440px] flex-col overflow-hidden rounded-card border border-line-2 bg-surface" style={{ height: 'calc(100vh - 200px)' }}>
         {/* header */}
         <div className="flex items-center gap-2.5 border-b border-line-3 px-4 py-3.5">
           <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-brand-soft">

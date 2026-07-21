@@ -1,11 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Avatar } from './Avatar';
+import { MoreMenu } from './MoreMenu';
 import {
-  IconBell,
   IconBolt,
   IconChevronDown,
+  IconLogout,
   IconMenu,
-  IconSearch,
+  IconSettings,
 } from './icons';
 
 export interface ShellNavItem {
@@ -31,10 +33,17 @@ export interface AppShellProps {
   rolePill: RolePill;
   /** Current station chip in the top bar (owner console). */
   station?: string;
-  userInitials: string;
-  searchPlaceholder?: string;
+  /** Full name — the header Avatar derives its initials fallback from this. */
+  userName: string;
+  /** The whole search box (HeaderSearch) — console-specific, since what's searchable differs by role. */
+  search: ReactNode;
+  /** The whole notification bell (NotificationBell) — console-specific data source. */
+  notifications: ReactNode;
   /** Clicking the logo (e.g. back to the portal). */
   onBrand?: () => void;
+  /** Settings menu item — navigates to the console's settings screen. */
+  onSettings: () => void;
+  onLogout: () => void;
   children: ReactNode;
 }
 
@@ -50,9 +59,12 @@ export function AppShell({
   accent,
   rolePill,
   station,
-  userInitials,
-  searchPlaceholder,
+  userName,
+  search,
+  notifications,
   onBrand,
+  onSettings,
+  onLogout,
   children,
 }: AppShellProps) {
   const { t } = useTranslation('ui');
@@ -99,7 +111,7 @@ export function AppShell({
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ animation: 'fadeIn .25s ease' }}>
       {/* ===== TOP BAR ===== */}
-      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line-2 bg-white px-4">
+      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line-2 bg-surface px-4">
         <div className="flex min-w-0 items-center gap-[13px]">
           <button
             onClick={() => setDrawerOpen((v) => !v)}
@@ -130,30 +142,21 @@ export function AppShell({
           )}
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="hidden h-[34px] w-[230px] items-center gap-2 rounded-ctl border border-line bg-white px-[11px] md:flex">
-            <IconSearch size={15} strokeWidth={2} className="shrink-0 text-faint" />
-            <input
-              placeholder={searchPlaceholder ?? t('search.placeholder')}
-              className="w-full flex-1 border-none bg-transparent text-[13px] text-ink placeholder:text-faint"
-            />
-          </div>
+          {search}
           <span
             className="rounded-full px-[11px] py-[5px] text-[10.5px] font-bold tracking-[0.04em]"
             style={{ background: rolePill.bg, color: rolePill.fg }}
           >
             {rolePill.label}
           </span>
-          <div className="relative flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-ctl border border-line hover:bg-canvas">
-            <IconBell size={17} className="text-body" />
-            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-alert" />
-          </div>
-          <div
-            className={`flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full text-[12px] font-semibold ${
-              accent === 'owner' ? 'bg-owner-soft text-owner-deep' : 'bg-brand-soft text-brand'
-            }`}
-          >
-            {userInitials}
-          </div>
+          {notifications}
+          <MoreMenu
+            items={[
+              { key: 'settings', label: t('avatarMenu.settings'), icon: <IconSettings size={15} strokeWidth={2} />, onClick: onSettings },
+              { key: 'logout', label: t('avatarMenu.logout'), icon: <IconLogout size={15} strokeWidth={2} />, onClick: onLogout, tone: 'danger' },
+            ]}
+            trigger={<Avatar name={userName} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />}
+          />
         </div>
       </div>
 
@@ -184,7 +187,7 @@ export function AppShell({
               style={{ animation: 'fadeIn .15s ease' }}
             />
             <div
-              className="fixed bottom-0 left-0 top-14 z-31 flex w-[264px] flex-col border-r border-line-2 bg-white px-2.5 py-3 md:hidden"
+              className="fixed bottom-0 left-0 top-14 z-31 flex w-[264px] flex-col border-r border-line-2 bg-surface px-2.5 py-3 md:hidden"
               style={{ animation: 'slideIn .2s ease' }}
             >
               {navList(true)}

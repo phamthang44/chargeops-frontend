@@ -42,8 +42,8 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
   };
 
   const navBtn = (enabled: boolean) =>
-    `flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-white text-[13px] font-semibold text-body transition ${
-      enabled ? 'hover:border-[#c9ccd4] hover:bg-canvas' : 'pointer-events-none opacity-40'
+    `flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-[13px] font-semibold text-body transition ${
+      enabled ? 'hover:border-line-hover hover:bg-canvas' : 'pointer-events-none opacity-40'
     }`;
 
   return (
@@ -73,8 +73,8 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
                 aria-current={p === page ? 'page' : undefined}
                 className={`h-8 min-w-8 rounded-lg px-1 text-[12px] font-semibold transition ${
                   p === page
-                    ? 'bg-ink text-white'
-                    : 'border border-line bg-white text-body hover:border-[#c9ccd4] hover:bg-canvas'
+                    ? 'bg-solid text-solid-fg'
+                    : 'border border-line bg-surface text-body hover:border-line-hover hover:bg-canvas'
                 }`}
               >
                 {p + 1}
@@ -102,7 +102,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
               onBlur={() => jump && commitJump()}
               inputMode="numeric"
               placeholder={String(page + 1)}
-              className="h-8 w-12 rounded-lg border border-line bg-white text-center text-[12px] font-semibold text-ink transition focus:border-brand focus:ring-2 focus:ring-brand/15"
+              className="h-8 w-12 rounded-lg border border-line bg-surface text-center text-[12px] font-semibold text-ink transition focus:border-brand focus:ring-2 focus:ring-brand/15"
               aria-label={t('pagination.jumpToPage')}
             />
             <span className="text-faint">/ {pageCount}</span>

@@ -36,11 +36,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
-            className="flex max-w-[90vw] items-center gap-2.5 rounded-[11px] bg-solid px-[18px] py-3 shadow-[0_8px_30px_rgba(0,0,0,.25)]"
+            className="flex max-w-[90vw] items-center gap-2.5 rounded-[11px] bg-surface border border-line px-[18px] py-3 shadow-[0_8px_30px_rgba(0,0,0,.12)]"
             style={{ animation: 'popIn .2s ease' }}
           >
             <span className={`h-[18px] w-[18px] shrink-0 rounded-full ${DOT[t.tone]}`} />
-            <span className="text-[13px] font-medium text-solid-fg">{t.message}</span>
+            <span className="text-[13px] font-medium text-ink">{t.message}</span>
           </div>
         ))}
       </div>

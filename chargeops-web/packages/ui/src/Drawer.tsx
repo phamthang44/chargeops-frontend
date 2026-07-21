@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconX } from './icons';
 
 export interface DrawerProps {
@@ -15,6 +16,7 @@ export interface DrawerProps {
 
 /** Right-side slide-over drawer (booking detail, etc.). Escape closes. */
 export function Drawer({ open, onClose, title, width = '460px', footer, children }: DrawerProps) {
+  const { t } = useTranslation('ui');
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -39,7 +41,7 @@ export function Drawer({ open, onClose, title, width = '460px', footer, children
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-faint hover:bg-chip"
-            aria-label="Đóng"
+            aria-label={t('drawer.close')}
           >
             <IconX size={18} strokeWidth={2} />
           </button>

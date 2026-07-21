@@ -2,8 +2,9 @@
  * @chargeops/auth — authentication for the console apps.
  *
  * MOCK MODE (current): simulates the Keycloak Authorization Code + PKCE
- * round-trip — a short "Đang xác thực qua Keycloak SSO…" overlay, then a fake
- * token whose realm roles come from the app's configured mock user.
+ * round-trip — a short translated "authenticating via Keycloak SSO…" overlay
+ * (see src/locales), then a fake token whose realm roles come from the app's
+ * configured mock user.
  *
  * REAL MODE (later): replace the inside of AuthProvider with keycloak-js /
  * react-oidc-context against realm `chargeops`. The public API (useAuth,
@@ -19,6 +20,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 export type Role = 'platform_admin' | 'station_owner' | 'station_staff' | 'driver';
 
@@ -118,6 +120,7 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
 
 /** Full-screen dark overlay shown during the (simulated) Keycloak redirect. */
 export function SsoRedirectOverlay() {
+  const { t } = useTranslation('auth');
   return (
     <div
       className="fixed inset-0 z-90 flex flex-col items-center justify-center gap-[22px] bg-night"
@@ -135,7 +138,7 @@ export function SsoRedirectOverlay() {
         className="h-[34px] w-[34px] rounded-full border-[3px] border-white/15 border-t-brand"
         style={{ animation: 'spin360 .8s linear infinite' }}
       />
-      <div className="text-[13px] font-medium text-[#8b8f99]">Đang xác thực qua Keycloak SSO…</div>
+      <div className="text-[13px] font-medium text-[#8b8f99]">{t('sso.redirecting')}</div>
     </div>
   );
 }
@@ -149,14 +152,19 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
 /** Role guard — mirrors what the backend enforces on every REST call. */
 export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+  const { t } = useTranslation('auth');
   const { hasRole, user } = useAuth();
   if (!hasRole(role)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-canvas p-8 text-center">
-        <div className="text-[17px] font-bold">Không có quyền truy cập</div>
+        <div className="text-[17px] font-bold">{t('requireRole.title')}</div>
         <div className="max-w-[420px] text-[13px] text-muted">
-          Tài khoản {user?.email ?? 'này'} không có vai trò <b>{role}</b>. Token do Keycloak cấp
-          không chứa quyền cần thiết cho cổng này.
+          <Trans
+            t={t}
+            i18nKey="requireRole.body"
+            values={{ email: user?.email ?? '—', role }}
+            components={{ bold: <b /> }}
+          />
         </div>
       </div>
     );

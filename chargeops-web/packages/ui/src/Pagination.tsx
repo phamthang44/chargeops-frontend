@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface PaginationProps {
   /** 0-based current page. */
@@ -28,6 +29,7 @@ function pageWindow(current: number, count: number): (number | 'gap')[] {
  * (Enter or blur commits, value clamped to the valid range).
  */
 export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
+  const { t } = useTranslation('ui');
   const [jump, setJump] = useState('');
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const from = total === 0 ? 0 : page * pageSize + 1;
@@ -46,9 +48,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-[11px] text-[12px] font-medium text-muted">
-      <span>
-        Hiển thị {from}–{to} / {total}
-      </span>
+      <span>{t('pagination.showing', { from, to, total })}</span>
 
       <div className="flex flex-wrap items-center gap-3">
         {/* page numbers */}
@@ -57,7 +57,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
             disabled={page <= 0}
             onClick={() => onPage(page - 1)}
             className={navBtn(page > 0)}
-            aria-label="Trang trước"
+            aria-label={t('pagination.prevPage')}
           >
             ‹
           </button>
@@ -85,7 +85,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
             disabled={page >= pageCount - 1}
             onClick={() => onPage(page + 1)}
             className={navBtn(page < pageCount - 1)}
-            aria-label="Trang sau"
+            aria-label={t('pagination.nextPage')}
           >
             ›
           </button>
@@ -94,7 +94,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
         {/* jump to page */}
         {pageCount > 3 && (
           <label className="flex items-center gap-1.5">
-            <span>Đến trang</span>
+            <span>{t('pagination.jumpToPage')}</span>
             <input
               value={jump}
               onChange={(e) => setJump(e.target.value.replace(/\D/g, ''))}
@@ -103,7 +103,7 @@ export function Pagination({ page, pageSize, total, onPage }: PaginationProps) {
               inputMode="numeric"
               placeholder={String(page + 1)}
               className="h-8 w-12 rounded-lg border border-line bg-white text-center text-[12px] font-semibold text-ink transition focus:border-brand focus:ring-2 focus:ring-brand/15"
-              aria-label="Đến trang"
+              aria-label={t('pagination.jumpToPage')}
             />
             <span className="text-faint">/ {pageCount}</span>
           </label>

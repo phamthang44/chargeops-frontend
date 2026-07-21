@@ -1,0 +1,25 @@
+{
+  "menu": "Menu",
+  "search": {
+    "placeholder": "Search bookings, chargers, stations…",
+    "clear": "Clear search"
+  },
+  "brand": {
+    "switchPortal": "Switch portal"
+  },
+  "sidebar": {
+    "collapse": "Collapse"
+  },
+  "drawer": {
+    "close": "Close"
+  },
+  "comingSoon": {
+    "message": "This screen will be ported from the design in the next step."
+  },
+  "pagination": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "jumpToPage": "Go to page"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   IconBell,
   IconBolt,
@@ -50,10 +51,11 @@ export function AppShell({
   rolePill,
   station,
   userInitials,
-  searchPlaceholder = 'Tìm đặt chỗ, trụ, trạm…',
+  searchPlaceholder,
   onBrand,
   children,
 }: AppShellProps) {
+  const { t } = useTranslation('ui');
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -102,13 +104,13 @@ export function AppShell({
           <button
             onClick={() => setDrawerOpen((v) => !v)}
             className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-ctl border border-line md:hidden"
-            aria-label="Menu"
+            aria-label={t('menu')}
           >
             <IconMenu size={18} strokeWidth={2} className="text-body" />
           </button>
           <div
             onClick={onBrand}
-            title="Đổi cổng"
+            title={t('brand.switchPortal')}
             className={`flex items-center gap-2 ${onBrand ? 'cursor-pointer' : ''}`}
           >
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-[7px] bg-brand">
@@ -131,7 +133,7 @@ export function AppShell({
           <div className="hidden h-[34px] w-[230px] items-center gap-2 rounded-ctl border border-line bg-white px-[11px] md:flex">
             <IconSearch size={15} strokeWidth={2} className="shrink-0 text-faint" />
             <input
-              placeholder={searchPlaceholder}
+              placeholder={searchPlaceholder ?? t('search.placeholder')}
               className="w-full flex-1 border-none bg-transparent text-[13px] text-ink placeholder:text-faint"
             />
           </div>
@@ -169,7 +171,7 @@ export function AppShell({
             <span className="w-[18px] shrink-0 text-center font-mono text-[13px] font-semibold">
               {collapsed ? '»' : '«'}
             </span>
-            {!collapsed && <span>Thu gọn</span>}
+            {!collapsed && <span>{t('sidebar.collapse')}</span>}
           </div>
         </div>
 

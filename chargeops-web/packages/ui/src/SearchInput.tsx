@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconSearch } from './icons';
 
 export interface SearchInputProps {
@@ -24,6 +25,7 @@ export function SearchInput({
   debounceMs = 300,
   accent = 'brand',
 }: SearchInputProps) {
+  const { t } = useTranslation('ui');
   const [draft, setDraft] = useState(value);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -71,7 +73,7 @@ export function SearchInput({
             onChangeRef.current('');
           }}
           className="text-[14px] font-semibold text-faint hover:text-body"
-          aria-label="Xóa tìm kiếm"
+          aria-label={t('search.clear')}
         >
           ×
         </button>

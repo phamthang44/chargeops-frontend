@@ -1,0 +1,25 @@
+{
+  "menu": "Menu",
+  "search": {
+    "placeholder": "Tìm đặt chỗ, trụ, trạm…",
+    "clear": "Xóa tìm kiếm"
+  },
+  "brand": {
+    "switchPortal": "Đổi cổng"
+  },
+  "sidebar": {
+    "collapse": "Thu gọn"
+  },
+  "drawer": {
+    "close": "Đóng"
+  },
+  "comingSoon": {
+    "message": "Màn hình này sẽ được chuyển từ bản thiết kế trong bước tiếp theo."
+  },
+  "pagination": {
+    "showing": "Hiển thị {{from}}–{{to}} / {{total}}",
+    "prevPage": "Trang trước",
+    "nextPage": "Trang sau",
+    "jumpToPage": "Đến trang"
+  }
+}

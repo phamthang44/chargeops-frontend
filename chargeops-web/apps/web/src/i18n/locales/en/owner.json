@@ -150,7 +150,8 @@
     "status": {
       "available": "Available",
       "maintenance": "Maintenance",
-      "unclaimed": "Unclaimed"
+      "unclaimed": "Unclaimed",
+      "offline": "Offline"
     },
     "stats": {
       "total": "TOTAL CHARGERS",

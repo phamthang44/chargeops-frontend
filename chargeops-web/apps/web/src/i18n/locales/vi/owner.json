@@ -150,7 +150,8 @@
     "status": {
       "available": "Sẵn sàng",
       "maintenance": "Bảo trì",
-      "unclaimed": "Chưa gán"
+      "unclaimed": "Chưa gán",
+      "offline": "Ngoại tuyến"
     },
     "stats": {
       "total": "TỔNG TRỤ",

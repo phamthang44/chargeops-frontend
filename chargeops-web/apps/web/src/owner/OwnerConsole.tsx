@@ -1,7 +1,14 @@
-import type { ComponentType } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ApiProvider, createServices } from '@chargeops/api';
+import { useQuery } from '@tanstack/react-query';
+import {
+  ApiProvider,
+  createServices,
+  formatTimeVn,
+  type OwnerDashboard as OwnerDashboardData,
+  type StaffDashboard as StaffDashboardData,
+} from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
   AppShell,
@@ -15,6 +22,8 @@ import {
   IconPin,
   IconShield,
   IconTag,
+  NotificationBell,
+  type NotificationItem,
   type ShellNavItem,
 } from '@chargeops/ui';
 import { Dashboard } from './pages/Dashboard';
@@ -27,6 +36,8 @@ import { Assistant } from './pages/Assistant';
 import { Revenue } from './pages/Revenue';
 import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
+import { SettingsPage } from '../shared/settings/SettingsPage';
+import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -67,7 +78,7 @@ const services = createServices({ ownerView: true });
 export function OwnerConsole({ base, reduced = false }: { base: string; reduced?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { t } = useTranslation('owner');
 
   const items = reduced ? NAV.filter((n) => STAFF_KEYS.has(n.key)) : NAV;
@@ -81,6 +92,99 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
 
   const activeKey = location.pathname.split('/')[2] || 'dashboard';
 
+  const searchers = useMemo<Searcher[]>(() => {
+    const list: Searcher[] = [
+      {
+        label: t('search.groups.tickets'),
+        run: async (q) => {
+          const res = await services.tickets.list({ search: q, pageSize: 5 });
+          return res.items.map((tk) => ({
+            id: tk.id,
+            title: `${tk.id} · ${tk.subject}`,
+            subtitle: tk.stationName ?? undefined,
+            onSelect: () => navigate(`${base}/tickets/${tk.id}`),
+          }));
+        },
+      },
+      {
+        label: t('search.groups.bookings'),
+        run: async (q) => {
+          const res = await services.bookings.list({ search: q, pageSize: 5 });
+          return res.items.map((b) => ({
+            id: b.id,
+            title: `${b.id} · ${b.driverName}`,
+            subtitle: `${b.chargerId} · ${formatTimeVn(b.startAt)}`,
+            onSelect: () => navigate(`${base}/bookings`),
+          }));
+        },
+      },
+      {
+        label: t('search.groups.chargers'),
+        run: async (q) => {
+          const all = await services.chargers.list();
+          const ql = q.toLowerCase();
+          return all
+            .filter((c) => c.name.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql))
+            .slice(0, 5)
+            .map((c) => ({ id: c.id, title: `${c.id} · ${c.name}`, onSelect: () => navigate(`${base}/chargers`) }));
+        },
+      },
+    ];
+    if (!reduced) {
+      list.push({
+        label: t('search.groups.stations'),
+        run: async (q) => {
+          const all = await services.stations.mine();
+          const ql = q.toLowerCase();
+          return all
+            .filter((s) => s.name.toLowerCase().includes(ql))
+            .slice(0, 5)
+            .map((s) => ({ id: s.id, title: s.name, subtitle: s.address, onSelect: () => navigate(`${base}/stations`) }));
+        },
+      });
+    }
+    return list;
+  }, [base, navigate, reduced, t]);
+
+  // Same queryKey/queryFn the Dashboard page itself uses — react-query dedupes, no extra network call after first mount.
+  const dashboardQuery = useQuery<OwnerDashboardData | StaffDashboardData>({
+    queryKey: reduced ? ['dashboard', 'staff'] : ['dashboard', 'owner'],
+    queryFn: () => (reduced ? services.dashboard.staff() : services.dashboard.owner()),
+  });
+
+  const notificationItems = useMemo<NotificationItem[]>(() => {
+    if (!dashboardQuery.data) return [];
+    const items: NotificationItem[] = [];
+    if (reduced) {
+      const d = dashboardQuery.data as StaffDashboardData;
+      if (d.kpis.offlineChargerNote) {
+        items.push({ id: 'offline', title: d.kpis.offlineChargerNote, tone: 'bad', onSelect: () => navigate(`${base}/chargers`) });
+      }
+      if (d.kpis.openTickets > 0) {
+        items.push({
+          id: 'tickets',
+          title: t('notifications.openTickets', { count: d.kpis.openTickets }),
+          tone: 'warn',
+          onSelect: () => navigate(`${base}/tickets`),
+        });
+      }
+    } else {
+      const d = dashboardQuery.data as OwnerDashboardData;
+      if (d.license.status !== 'active') {
+        items.push({
+          id: 'license',
+          title: t(`notifications.license.${d.license.status}`, { days: d.license.daysLeft }),
+          tone: d.license.status === 'expired' ? 'bad' : 'warn',
+          onSelect: () => navigate(`${base}/license`),
+        });
+      }
+      if (d.kpis.offlineChargerNote) {
+        items.push({ id: 'offline', title: d.kpis.offlineChargerNote, tone: 'bad', onSelect: () => navigate(`${base}/chargers`) });
+      }
+    }
+    return items;
+  }, [dashboardQuery.data, reduced, base, navigate, t]);
+
   return (
     <ApiProvider services={services}>
       <AppShell
@@ -90,11 +194,15 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
         accent="owner"
         rolePill={
           reduced
-            ? { label: t('console.role.staff'), bg: '#eef1f6', fg: '#3a3f4a' }
-            : { label: t('console.role.owner'), bg: '#eafaf1', fg: '#0c7a3e' }
+            ? { label: t('console.role.staff'), bg: 'var(--color-chip)', fg: 'var(--color-muted)' }
+            : { label: t('console.role.owner'), bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' }
         }
         station="Trạm Hà Đông"
-        userInitials={user?.initials ?? '··'}
+        userName={user?.name ?? '···'}
+        search={<HeaderSearch searchers={searchers} accent="owner" />}
+        notifications={<NotificationBell items={notificationItems} emptyLabel={t('notifications.empty')} />}
+        onSettings={() => navigate(`${base}/settings`)}
+        onLogout={logout}
       >
         <Routes>
           <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
@@ -108,6 +216,8 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
               />
             );
           })}
+          {/* Settings lives behind the header avatar menu, not the sidebar. */}
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
         </Routes>
       </AppShell>

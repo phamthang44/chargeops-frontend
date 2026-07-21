@@ -1,0 +1,22 @@
+{
+  "title": "Settings",
+  "subtitle": "Language, theme, and account info.",
+  "language": {
+    "title": "Language",
+    "desc": "The display language across the whole console.",
+    "options": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
+  },
+  "theme": {
+    "title": "Theme",
+    "desc": "Choose a light or dark theme for the console.",
+    "lightDesc": "Clean & bright",
+    "darkDesc": "Easy on eyes",
+    "options": {
+      "light": "Light",
+      "dark": "Dark"
+    }
+  }
+}

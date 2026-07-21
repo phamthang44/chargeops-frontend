@@ -217,7 +217,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
             );
           })}
           {/* Settings lives behind the header avatar menu, not the sidebar. */}
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<SettingsPage accent="owner" />} />
           <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
         </Routes>
       </AppShell>

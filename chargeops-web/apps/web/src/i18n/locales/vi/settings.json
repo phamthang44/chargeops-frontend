@@ -1,0 +1,22 @@
+{
+  "title": "Cài đặt",
+  "subtitle": "Ngôn ngữ, giao diện và thông tin tài khoản.",
+  "language": {
+    "title": "Ngôn ngữ",
+    "desc": "Ngôn ngữ hiển thị trên toàn bộ cổng quản lý.",
+    "options": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
+  },
+  "theme": {
+    "title": "Giao diện",
+    "desc": "Chọn giao diện sáng hoặc tối cho cổng quản lý.",
+    "lightDesc": "Sáng & rõ ràng",
+    "darkDesc": "Dễ chịu cho mắt",
+    "options": {
+      "light": "Sáng",
+      "dark": "Tối"
+    }
+  }
+}

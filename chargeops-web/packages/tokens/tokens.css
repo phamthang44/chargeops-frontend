@@ -50,9 +50,27 @@
   --color-line-3: #eef0f2;
   --color-hairline: #f3f4f6;
   --color-canvas: #f6f7f9;
+  /** Card/panel/input background — use instead of the literal `white` utility so
+   * dark mode (a CSS-variable override below) can repaint every surface without
+   * touching component classNames. `white` itself stays literal white — it's
+   * what button/pill labels use for contrast against a colored fill, in both themes. */
+  --color-surface: #ffffff;
   --color-surface-2: #fbfbfc;
   --color-chip: #f1f2f4;
   --color-night: #0e0f13;
+
+  /** High-contrast "solid" chip (pagination active page, StatusPill ink tone,
+   * admin role badge) — deliberately its own token rather than reusing `ink`.
+   * `ink` is body-text and must get LIGHTER in dark mode; this must stay a
+   * dark, saturated chip in both themes, so the two can't share one variable. */
+  --color-solid: #16171a;
+  --color-solid-fg: #ffffff;
+  /* Subtle tint for hovered/selected table rows (was a literal #fafaff). */
+  --color-row-hover: #fafaff;
+  /* One shade darker than `line` for hover borders (was a literal #c9ccd4). */
+  --color-line-hover: #c9ccd4;
+  /* Button danger-soft hover (was a literal #fce9e7). */
+  --color-bad-soft-hover: #fce2df;
 
   /* Typography */
   --font-sans: "IBM Plex Sans", system-ui, sans-serif;
@@ -78,6 +96,16 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #c2c6cf; }
 input:focus, select:focus, textarea:focus { outline: none; }
 
+/* Raw <input>/<textarea>/<select> elements have no background by default in
+   most browsers other than opaque white — invisible in light mode (sits on a
+   white card) but a glaring white box in dark mode. Reset to transparent so
+   every form control inherits its container's surface; anything that wants
+   its own surface (Select, SearchInput, …) sets bg-surface explicitly. */
+input, textarea, select {
+  background-color: transparent;
+  color: inherit;
+}
+
 /* Tailwind v4 preflight sets buttons to cursor:default — restore the pointer
    affordance on everything interactive. */
 button:not(:disabled),
@@ -102,3 +130,75 @@ summary {
 @keyframes popIn { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: none } }
 @keyframes drawerIn { from { transform: translateX(100%) } to { transform: none } }
 @keyframes slideIn { from { transform: translateX(-100%) } to { transform: none } }
+
+/*
+ * Dark theme — same token names, repainted. Toggled by setting
+ * document.documentElement.dataset.theme = 'dark' (see apps/web/src/theme.tsx).
+ * Every `bg-surface`/`bg-canvas`/`text-ink`/etc. utility repaints automatically
+ * because Tailwind v4 theme utilities resolve through var(--color-*) at
+ * runtime — no `dark:` variant classes needed anywhere in the app.
+ */
+:root[data-theme='dark'] {
+  /* Brand — indigo, lightened for contrast on a dark page */
+  --color-brand: #8b84f5;
+  --color-brand-strong: #a29bff;
+  --color-brand-soft: #292552;
+  --color-brand-faint: #201d3a;
+  --color-brand-line: #3a3670;
+  --color-brand-tint: #5a53c2;
+
+  /* Owner accent — emerald, lightened for contrast on a dark page */
+  --color-owner: #12a150;
+  --color-owner-strong: #0e8a43;
+  --color-owner-deep: #6ee6a0;
+  --color-owner-soft: #113322;
+  --color-owner-border: #1f5c3b;
+  --color-owner-tint: #17492c;
+
+  /* Status */
+  --color-good: #3ddb96;
+  --color-good-soft: #0f2f24;
+  --color-good-deep: #6ee6ae;
+  --color-warn: #f0b93d;
+  --color-warn-deep: #f6cd6e;
+  --color-warn-soft: #332711;
+  --color-warn-border: #4d3c17;
+  --color-warn-pill: #3d2f13;
+  --color-bad: #f0685c;
+  --color-bad-strong: #f5847a;
+  --color-bad-deep: #f5988f;
+  --color-bad-soft: #331a17;
+  --color-bad-border: #522119;
+  --color-alert: #ff6b70;
+
+  /* Neutrals (text) */
+  --color-ink: #f2f3f5;
+  --color-body: #cdd0d6;
+  --color-muted: #a5a9b2;
+  --color-faint: #82868f;
+  --color-ghost: #6c7078;
+  --color-disabled: #55585f;
+
+  /* Neutrals (lines & surfaces) */
+  --color-line: #2c2d34;
+  --color-line-2: #26272d;
+  --color-line-3: #222329;
+  --color-hairline: #1e1f24;
+  --color-canvas: #0f1013;
+  --color-surface: #17181d;
+  --color-surface-2: #1b1c21;
+  --color-chip: #212227;
+  --color-night: #000000;
+
+  /* A "solid" chip must stay a bright, high-contrast fill against the dark
+   * canvas — the light-mode near-black would vanish against a dark surface,
+   * so this one shade shifts lighter instead of darker like everything else. */
+  --color-solid: #3a3b42;
+  --color-solid-fg: #ffffff;
+  --color-row-hover: #1e1f26;
+  --color-line-hover: #3a3b42;
+  --color-bad-soft-hover: #402420;
+}
+
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb { background: #3a3b42; border-color: #0f1013; }
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb:hover { background: #4a4b54; }

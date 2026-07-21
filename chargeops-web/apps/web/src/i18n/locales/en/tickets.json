@@ -1,0 +1,36 @@
+{
+  "title": "Support",
+  "subtitle": "Tickets routed to your station.",
+  "subtitleAdmin": "All support tickets across the platform.",
+  "searchPlaceholder": "Search ID, driver, subject...",
+  "emptyState": "No tickets matched the filters.",
+  "tabs": {
+    "all": "All"
+  },
+  "category": {
+    "all": "All categories"
+  },
+  "table": {
+    "cols": {
+      "id": "ID",
+      "content": "CONTENT",
+      "station": "STATION",
+      "status": "STATUS"
+    }
+  },
+  "detail": {
+    "back": "Ticket list",
+    "loadError": "Could not load ticket: {{message}}",
+    "thread": "Conversation",
+    "threadHint": "oldest first · append-only",
+    "composerPlaceholder": "Type a reply...",
+    "send": "Send",
+    "sending": "Sending...",
+    "statusSuccess": "Status updated",
+    "reassignPlaceholder": "Station name...",
+    "reassignBtn": "Reassign",
+    "reassignSuccess": "Reassigned {{id}} to {{station}}",
+    "escalateBtn": "Escalate to central ops",
+    "escalateSuccess": "Escalated {{id}} to the central ops team"
+  }
+}

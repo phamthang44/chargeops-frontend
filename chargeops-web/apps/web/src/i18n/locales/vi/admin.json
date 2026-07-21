@@ -23,6 +23,11 @@
         "title": "Đặt chỗ toàn nền tảng",
         "subtitle": "Mọi lượt đặt trên tất cả các trạm."
       },
+      "tickets": {
+        "label": "Hỗ trợ",
+        "title": "Hỗ trợ toàn nền tảng",
+        "subtitle": "Toàn bộ ticket hỗ trợ, có thể điều phối và nâng cấp."
+      },
       "transactions": {
         "label": "Giao dịch",
         "title": "Giao dịch",

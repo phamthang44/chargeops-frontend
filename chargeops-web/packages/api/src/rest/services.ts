@@ -13,6 +13,7 @@ export function createRestServices(http: HttpClient): Services {
     dashboard: {
       owner: () => http.get('/dashboard/owner'),
       admin: () => http.get('/dashboard/admin'),
+      staff: () => http.get('/dashboard/staff'),
     },
 
     analytics: {
@@ -66,6 +67,17 @@ export function createRestServices(http: HttpClient): Services {
       save: (doc) => (doc.id ? http.patch(`/policies/${doc.id}`, doc) : http.post('/policies', doc)),
       remove: (id) => http.delete(`/policies/${id}`),
       ask: (question) => http.post('/assistant/ask', { question }),
+    },
+
+    tickets: {
+      list: (params = {}) => http.get('/tickets', params),
+      get: (id) => http.get(`/tickets/${id}`),
+      messages: (id) => http.get(`/tickets/${id}/messages`),
+      summary: () => http.get('/tickets/summary'),
+      reply: (id, body) => http.post(`/tickets/${id}/messages`, { body }),
+      setStatus: (id, status) => http.patch(`/tickets/${id}/status`, { status }),
+      reassign: (id, stationName) => http.post(`/admin/tickets/${id}/reassign`, { stationName }),
+      escalate: (id) => http.post(`/admin/tickets/${id}/escalate`),
     },
   };
 }

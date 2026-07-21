@@ -252,7 +252,85 @@ export interface AssistantAnswer {
   sources: string[];
 }
 
+/* ---------- support tickets (FR-cross-cutting) ---------- */
+
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export type TicketCategory =
+  | 'charging_issue'
+  | 'payment'
+  | 'booking'
+  | 'connector_fault'
+  | 'account'
+  | 'other';
+
+export type TicketAuthorRole = 'driver' | 'station_staff' | 'station_owner' | 'platform_admin';
+
+/** Append-only — no edit/delete once posted. */
+export interface TicketMessage {
+  id: string;
+  ticketId: string;
+  authorName: string;
+  authorRole: TicketAuthorRole;
+  body: string;
+  createdAt: string; // ISO
+}
+
+/** Linked context (station/booking) is shown in the detail header when present. */
+export interface Ticket {
+  id: string;
+  subject: string;
+  category: TicketCategory;
+  status: TicketStatus;
+  stationId: string | null;
+  stationName: string | null;
+  bookingId: string | null;
+  reporterName: string;
+  reporterPhone: string | null;
+  /** null = unassigned. */
+  assigneeName: string | null;
+  createdAt: string;
+  updatedAt: string;
+  lastMessagePreview: string;
+  messageCount: number;
+}
+
+export interface TicketListParams {
+  /** Owner/staff console is implicitly scoped server-side by token; admin sees all. */
+  status?: TicketStatus | 'all';
+  category?: TicketCategory | 'all';
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface TicketSummary {
+  total: number;
+  byStatus: Record<TicketStatus, number>;
+}
+
 /* ---------- dashboards ---------- */
+
+/**
+ * Ops-only — deliberately has NO revenue/license/analytics fields. Station
+ * staff hit a separate endpoint with a separate DTO from OwnerDashboard so
+ * there is nothing financial in the payload to leak via devtools, regardless
+ * of what the UI chooses to render (see RoleRouter / RequireRole notes).
+ */
+export interface StaffDashboard {
+  kpis: {
+    bookingsToday: number;
+    bookingsDelta: number;
+    chargersOnline: number;
+    chargersTotal: number;
+    offlineChargerNote: string | null;
+    openTickets: number;
+    pendingCheckins: number;
+  };
+  chargers: Pick<Charger, 'id' | 'name' | 'status'>[];
+  upcomingBookings: { id: string; startTime: string; driverName: string; chargerId: string }[];
+  recentTickets: Pick<Ticket, 'id' | 'subject' | 'status' | 'updatedAt'>[];
+}
 
 export interface OwnerDashboard {
   license: { status: LicenseStatus; expiryDate: string; daysLeft: number };

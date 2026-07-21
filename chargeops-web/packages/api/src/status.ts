@@ -3,7 +3,15 @@
  * token consumed by @chargeops/ui's StatusPill. Shared so owner and admin
  * render every status identically.
  */
-import type { BookingStatus, ChargerStatus, LicenseStatus, StationStatus, UserStatus } from './types';
+import type {
+  BookingStatus,
+  ChargerStatus,
+  LicenseStatus,
+  StationStatus,
+  TicketCategory,
+  TicketStatus,
+  UserStatus,
+} from './types';
 
 export type Tone = 'good' | 'warn' | 'bad' | 'brand' | 'neutral' | 'ink';
 export interface StatusMeta {
@@ -42,6 +50,22 @@ export const LICENSE_STATUS: Record<LicenseStatus, StatusMeta> = {
 export const USER_STATUS: Record<UserStatus, StatusMeta> = {
   active: { label: 'Hoạt động', tone: 'good' },
   suspended: { label: 'Tạm khóa', tone: 'bad' },
+};
+
+export const TICKET_STATUS: Record<TicketStatus, StatusMeta> = {
+  open: { label: 'Đang mở', tone: 'warn' },
+  in_progress: { label: 'Đang xử lý', tone: 'brand' },
+  resolved: { label: 'Đã giải quyết', tone: 'good' },
+  closed: { label: 'Đã đóng', tone: 'neutral' },
+};
+
+export const TICKET_CATEGORY: Record<TicketCategory, string> = {
+  charging_issue: 'Sự cố sạc',
+  payment: 'Thanh toán',
+  booking: 'Đặt chỗ',
+  connector_fault: 'Trụ hỏng',
+  account: 'Tài khoản',
+  other: 'Khác',
 };
 
 /** Role badge colours (mono chips). */

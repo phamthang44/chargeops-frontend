@@ -11,6 +11,7 @@ import {
   IconCard,
   IconChat,
   IconGrid,
+  IconLifebuoy,
   IconPin,
   IconShield,
   IconTag,
@@ -24,6 +25,8 @@ import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
 import { Revenue } from './pages/Revenue';
+import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
+import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -35,12 +38,14 @@ const PAGES: Record<string, ComponentType> = {
   revenue: Revenue,
   license: License,
   assistant: Assistant,
+  tickets: () => <TicketsRoute admin={false} />,
 };
 
 const NAV = [
   { key: 'dashboard', icon: <IconGrid size={17} /> },
   { key: 'bookings', icon: <IconCalendar size={17} /> },
   { key: 'chargers', icon: <IconBolt size={17} /> },
+  { key: 'tickets', icon: <IconLifebuoy size={17} /> },
   { key: 'pricing', icon: <IconTag size={17} /> },
   { key: 'stations', icon: <IconPin size={17} /> },
   { key: 'revenue', icon: <IconCard size={17} /> },
@@ -49,7 +54,7 @@ const NAV = [
 ];
 
 /** Station staff reuse the owner shell but only see day-to-day operations. */
-const STAFF_KEYS = new Set(['dashboard', 'bookings', 'chargers']);
+const STAFF_KEYS = new Set(['dashboard', 'bookings', 'chargers', 'tickets']);
 
 // Owner and staff both see station-scoped data.
 const services = createServices({ ownerView: true });
@@ -94,11 +99,11 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
         <Routes>
           <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
           {nav.map((n) => {
-            const Page = PAGES[n.key];
+            const Page = n.key === 'dashboard' && reduced ? StaffDashboard : PAGES[n.key];
             return (
               <Route
                 key={n.key}
-                path={n.key}
+                path={`${n.key}/*`}
                 element={Page ? <Page /> : <ComingSoon title={n.title} />}
               />
             );

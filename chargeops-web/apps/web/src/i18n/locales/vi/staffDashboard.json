@@ -1,0 +1,29 @@
+{
+  "title": "Tổng quan",
+  "subtitle": "Hoạt động trạm của bạn hôm nay.",
+  "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+  "kpi": {
+    "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+    "bookingsDelta": "+{{count}} so với hôm qua",
+    "chargersOnline": "TRỤ ONLINE",
+    "allOnline": "Tất cả trụ đang online",
+    "openTickets": "TICKET ĐANG MỞ",
+    "openTicketsSub": "cần xử lý",
+    "pendingCheckins": "CẦN CHECK-IN",
+    "pendingCheckinsSub": "đã xác nhận, chờ khách tới"
+  },
+  "charger": {
+    "available": "Sẵn sàng",
+    "maintenance": "Bảo trì",
+    "offline": "Offline"
+  },
+  "panel": {
+    "chargers": "Trạng thái trụ",
+    "manageLink": "Quản lý →",
+    "upcomingBookings": "Sắp tới",
+    "allBookingsLink": "Tất cả →",
+    "recentTickets": "Hỗ trợ gần đây",
+    "allTicketsLink": "Xem tất cả →",
+    "noTickets": "Không có ticket nào gần đây."
+  }
+}

@@ -14,6 +14,8 @@ import type {
   PricingConfig,
   RateKind,
   Station,
+  Ticket,
+  TicketMessage,
   Transaction,
   UserAccount,
 } from '../types';
@@ -28,9 +30,14 @@ export interface MockDb {
   users: UserAccount[];
   policyDocs: PolicyDoc[];
   transactions: Transaction[];
+  tickets: Ticket[];
+  /** Keyed by ticket id, oldest-first. */
+  ticketMessages: Record<string, TicketMessage[]>;
   pricing: PricingConfig;
   /** Station ids owned by the mock owner account. */
   ownerStationIds: string[];
+  /** Every known station id/name — admin's reassign target list. */
+  stationsDirectory: { id: string; name: string }[];
 }
 
 function lcg(seed: number) {
@@ -173,6 +180,77 @@ export function buildMockDb(): MockDb {
     { id: 'POL-07', category: 'Trụ sạc', content: 'Mã QR trên trụ chỉ mã hóa Charger ID, là nhãn nhận diện tĩnh dùng cho tài xế check-in; không dùng để chuyển quyền sở hữu hay thao tác quản trị.', updatedAt: '2026-06-24' },
   ];
 
+  /* ---- support tickets (cross-cutting: owner/staff scoped, admin sees all) ---- */
+  const msg = (ticketId: string, i: number, authorName: string, authorRole: TicketMessage['authorRole'], body: string, createdAt: string): TicketMessage => ({
+    id: `MSG-${ticketId.slice(4)}-${i}`,
+    ticketId,
+    authorName,
+    authorRole,
+    body,
+    createdAt,
+  });
+
+  const tickets: Ticket[] = [
+    { id: 'TIC-4821', subject: 'Không quét được QR để check-in trụ CH-02', category: 'charging_issue', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[2]?.id ?? null, reporterName: 'Trần Minh Hà', reporterPhone: '+84 987 654 321', assigneeName: null, createdAt: '2026-06-28T07:12:00', updatedAt: '2026-06-28T07:20:00', lastMessagePreview: 'Em đã check-in thủ công cho phiên của anh, anh cắm sạc bình thường.', messageCount: 4 },
+    { id: 'TIC-4816', subject: 'Bị trừ tiền nhưng đặt chỗ báo huỷ', category: 'payment', status: 'in_progress', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[5]?.id ?? null, reporterName: 'Lê Thị Bình', reporterPhone: '+84 912 345 678', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-28T06:38:00', updatedAt: '2026-06-28T06:55:00', lastMessagePreview: 'Em đã chuyển yêu cầu hoàn tiền lên hệ thống thanh toán, chờ xác nhận trong 24h.', messageCount: 2 },
+    { id: 'TIC-4809', subject: 'Trụ CH-05 báo lỗi giữa phiên sạc', category: 'connector_fault', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[8]?.id ?? null, reporterName: 'Phạm Quốc Dũng', reporterPhone: '+84 933 221 100', assigneeName: null, createdAt: '2026-06-28T05:50:00', updatedAt: '2026-06-28T06:10:00', lastMessagePreview: 'Trụ đang được kiểm tra, anh vui lòng đổi sang trụ CH-01 giúp em.', messageCount: 2 },
+    { id: 'TIC-4790', subject: 'Xin gia hạn giờ giữ chỗ thêm 10 phút', category: 'booking', status: 'resolved', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[11]?.id ?? null, reporterName: 'Ngô Bảo Châu', reporterPhone: '+84 977 888 999', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-27T14:00:00', updatedAt: '2026-06-27T14:40:00', lastMessagePreview: 'Đã gia hạn 10 phút cho anh, hẹn gặp tại trạm.', messageCount: 3 },
+    { id: 'TIC-4771', subject: 'Hỏi cách xuất hoá đơn phiên sạc', category: 'account', status: 'closed', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: null, reporterName: 'Đỗ Hải Long', reporterPhone: '+84 966 777 111', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-26T09:00:00', updatedAt: '2026-06-26T09:30:00', lastMessagePreview: 'Hoá đơn điện tử được gửi tự động qua email sau khi phiên sạc kết thúc.', messageCount: 2 },
+    { id: 'TIC-4805', subject: 'Trụ tại Cầu Giấy không nhận thẻ ATM', category: 'payment', status: 'open', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[14]?.id ?? null, reporterName: 'Bùi Thu Hương', reporterPhone: '+84 944 555 222', assigneeName: null, createdAt: '2026-06-28T04:20:00', updatedAt: '2026-06-28T04:45:00', lastMessagePreview: 'Anh thử lại bằng VNPay hoặc Momo giúp em trong lúc em báo kỹ thuật kiểm tra đầu đọc thẻ.', messageCount: 2 },
+    { id: 'TIC-4788', subject: 'Không tìm thấy trạm trên bản đồ dù đã đặt', category: 'booking', status: 'in_progress', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[17]?.id ?? null, reporterName: 'Hoàng Văn Tú', reporterPhone: '+84 922 333 444', assigneeName: 'Nhân viên Trạm Cầu Giấy', createdAt: '2026-06-27T20:00:00', updatedAt: '2026-06-27T20:30:00', lastMessagePreview: 'Em đang kiểm tra lại vị trí ghim trên bản đồ, sẽ phản hồi sớm.', messageCount: 2 },
+    { id: 'TIC-4750', subject: 'Trụ Long Biên báo offline liên tục', category: 'connector_fault', status: 'open', stationId: 'ST-1042', stationName: 'Trạm Long Biên', bookingId: null, reporterName: 'Đặng Mỹ Linh', reporterPhone: '+84 911 222 333', assigneeName: null, createdAt: '2026-06-25T11:00:00', updatedAt: '2026-06-25T13:00:00', lastMessagePreview: 'Minh Phát EV đang cử kỹ thuật xuống kiểm tra nguồn điện của trụ.', messageCount: 2 },
+    { id: 'TIC-4733', subject: 'Yêu cầu hoàn tiền do sạc gián đoạn', category: 'payment', status: 'resolved', stationId: 'ST-1023', stationName: 'Trạm Thanh Xuân', bookingId: null, reporterName: 'Lý Thanh Sơn', reporterPhone: '+84 909 111 222', assigneeName: 'GreenVolt', createdAt: '2026-06-23T10:00:00', updatedAt: '2026-06-24T09:00:00', lastMessagePreview: 'Đã hoàn 50% theo chính sách do gián đoạn giữa phiên (BR-PAY-03).', messageCount: 2 },
+    { id: 'TIC-4700', subject: 'Câu hỏi chung về chính sách hủy', category: 'account', status: 'closed', stationId: 'ST-1009', stationName: 'Trạm Đống Đa', bookingId: null, reporterName: 'Mai Phương Thảo', reporterPhone: '+84 988 000 111', assigneeName: 'SaigonCharge', createdAt: '2026-06-20T08:00:00', updatedAt: '2026-06-20T09:15:00', lastMessagePreview: 'Đã giải đáp — hủy trước 60 phút được hoàn 100% theo BR-PAY-03.', messageCount: 2 },
+  ];
+
+  const ticketMessages: Record<string, TicketMessage[]> = {
+    'TIC-4821': [
+      msg('TIC-4821', 1, 'Trần Minh Hà', 'driver', 'Mình đưa xe tới CH-02 nhưng app quét QR mãi không nhận, đã thử 3 lần.', '2026-06-28T07:12:00'),
+      msg('TIC-4821', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Chào anh, em kiểm tra ngay. Anh thử lau nhẹ tem QR trên trụ và bật lại camera giúp em nhé.', '2026-06-28T07:15:00'),
+      msg('TIC-4821', 3, 'Trần Minh Hà', 'driver', 'Vẫn không được ạ. Tem hơi mờ.', '2026-06-28T07:18:00'),
+      msg('TIC-4821', 4, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Em đã check-in thủ công cho phiên của anh, anh cắm sạc bình thường. Em báo kỹ thuật thay tem QR trụ CH-02.', '2026-06-28T07:20:00'),
+    ],
+    'TIC-4816': [
+      msg('TIC-4816', 1, 'Lê Thị Bình', 'driver', 'Em đặt chỗ xong bấm huỷ nhầm nhưng tiền vẫn bị trừ, chưa thấy hoàn lại.', '2026-06-28T06:38:00'),
+      msg('TIC-4816', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Em đã chuyển yêu cầu hoàn tiền lên hệ thống thanh toán, chờ xác nhận trong 24h.', '2026-06-28T06:55:00'),
+    ],
+    'TIC-4809': [
+      msg('TIC-4809', 1, 'Phạm Quốc Dũng', 'driver', 'Đang sạc thì trụ CH-05 tự dừng, màn hình báo lỗi E-04.', '2026-06-28T05:50:00'),
+      msg('TIC-4809', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Trụ đang được kiểm tra, anh vui lòng đổi sang trụ CH-01 giúp em.', '2026-06-28T06:10:00'),
+    ],
+    'TIC-4790': [
+      msg('TIC-4790', 1, 'Ngô Bảo Châu', 'driver', 'Mình đang kẹt xe, xin giữ chỗ thêm 10 phút được không ạ?', '2026-06-27T14:00:00'),
+      msg('TIC-4790', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Dạ để em kiểm tra khung giờ sau anh giúp em nhé.', '2026-06-27T14:20:00'),
+      msg('TIC-4790', 3, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Đã gia hạn 10 phút cho anh, hẹn gặp tại trạm.', '2026-06-27T14:40:00'),
+    ],
+    'TIC-4771': [
+      msg('TIC-4771', 1, 'Đỗ Hải Long', 'driver', 'Mình cần hoá đơn cho phiên sạc hôm qua để làm quyết toán công ty.', '2026-06-26T09:00:00'),
+      msg('TIC-4771', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Hoá đơn điện tử được gửi tự động qua email sau khi phiên sạc kết thúc.', '2026-06-26T09:30:00'),
+    ],
+    'TIC-4805': [
+      msg('TIC-4805', 1, 'Bùi Thu Hương', 'driver', 'Trụ ở Cầu Giấy quẹt thẻ ATM báo lỗi hoài, thử 2 trụ đều vậy.', '2026-06-28T04:20:00'),
+      msg('TIC-4805', 2, 'Nhân viên Trạm Cầu Giấy', 'station_staff', 'Anh thử lại bằng VNPay hoặc Momo giúp em trong lúc em báo kỹ thuật kiểm tra đầu đọc thẻ.', '2026-06-28T04:45:00'),
+    ],
+    'TIC-4788': [
+      msg('TIC-4788', 1, 'Hoàng Văn Tú', 'driver', 'Mình đặt chỗ Trạm Cầu Giấy nhưng bản đồ chỉ tới sai địa chỉ.', '2026-06-27T20:00:00'),
+      msg('TIC-4788', 2, 'Nhân viên Trạm Cầu Giấy', 'station_staff', 'Em đang kiểm tra lại vị trí ghim trên bản đồ, sẽ phản hồi sớm.', '2026-06-27T20:30:00'),
+    ],
+    'TIC-4750': [
+      msg('TIC-4750', 1, 'Đặng Mỹ Linh', 'driver', 'Trụ tại Long Biên báo mất kết nối suốt từ sáng, không đặt được.', '2026-06-25T11:00:00'),
+      msg('TIC-4750', 2, 'Minh Phát EV', 'station_owner', 'Minh Phát EV đang cử kỹ thuật xuống kiểm tra nguồn điện của trụ.', '2026-06-25T13:00:00'),
+    ],
+    'TIC-4733': [
+      msg('TIC-4733', 1, 'Lý Thanh Sơn', 'driver', 'Phiên sạc bị ngắt giữa chừng, mình vẫn bị tính tiền đầy đủ.', '2026-06-23T10:00:00'),
+      msg('TIC-4733', 2, 'GreenVolt', 'station_owner', 'Đã hoàn 50% theo chính sách do gián đoạn giữa phiên (BR-PAY-03).', '2026-06-24T09:00:00'),
+    ],
+    'TIC-4700': [
+      msg('TIC-4700', 1, 'Mai Phương Thảo', 'driver', 'Cho mình hỏi hủy trước bao lâu thì được hoàn 100%?', '2026-06-20T08:00:00'),
+      msg('TIC-4700', 2, 'SaigonCharge', 'station_owner', 'Đã giải đáp — hủy trước 60 phút được hoàn 100% theo BR-PAY-03.', '2026-06-20T09:15:00'),
+    ],
+  };
+
+  const stationsDirectory = Object.entries(stationIds).map(([name, id]) => ({ id, name }));
+
   /* ---- transactions: derived from bookings ---- */
   const transactions: Transaction[] = [];
   for (const b of bookings) {
@@ -215,7 +293,10 @@ export function buildMockDb(): MockDb {
     users,
     policyDocs,
     transactions,
+    tickets,
+    ticketMessages,
     pricing,
     ownerStationIds: ['ST-1001', 'ST-1018'],
+    stationsDirectory,
   };
 }

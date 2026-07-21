@@ -1,0 +1,36 @@
+{
+  "title": "Hỗ trợ",
+  "subtitle": "Ticket được định tuyến tới trạm của bạn.",
+  "subtitleAdmin": "Toàn bộ ticket hỗ trợ trên nền tảng.",
+  "searchPlaceholder": "Tìm mã, tài xế, tiêu đề…",
+  "emptyState": "Không có ticket nào khớp bộ lọc.",
+  "tabs": {
+    "all": "Tất cả"
+  },
+  "category": {
+    "all": "Tất cả danh mục"
+  },
+  "table": {
+    "cols": {
+      "id": "MÃ",
+      "content": "NỘI DUNG",
+      "station": "TRẠM",
+      "status": "TRẠNG THÁI"
+    }
+  },
+  "detail": {
+    "back": "Danh sách",
+    "loadError": "Không tải được ticket: {{message}}",
+    "thread": "Trao đổi",
+    "threadHint": "cũ nhất trước · chỉ thêm",
+    "composerPlaceholder": "Nhập phản hồi…",
+    "send": "Gửi",
+    "sending": "Đang gửi…",
+    "statusSuccess": "Đã cập nhật trạng thái",
+    "reassignPlaceholder": "Tên trạm…",
+    "reassignBtn": "Chuyển",
+    "reassignSuccess": "Đã điều phối {{id}} tới {{station}}",
+    "escalateBtn": "Nâng cấp lên trung tâm",
+    "escalateSuccess": "Đã nâng cấp {{id}} lên đội vận hành trung tâm"
+  }
+}

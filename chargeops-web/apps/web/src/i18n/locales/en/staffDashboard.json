@@ -1,0 +1,29 @@
+{
+  "title": "Overview",
+  "subtitle": "Your station activity today.",
+  "loadError": "Could not load overview data: {{message}}",
+  "kpi": {
+    "bookingsToday": "BOOKINGS TODAY",
+    "bookingsDelta": "+{{count}} vs yesterday",
+    "chargersOnline": "CHARGERS ONLINE",
+    "allOnline": "All chargers online",
+    "openTickets": "OPEN TICKETS",
+    "openTicketsSub": "need attention",
+    "pendingCheckins": "PENDING CHECK-INS",
+    "pendingCheckinsSub": "confirmed, awaiting arrival"
+  },
+  "charger": {
+    "available": "Available",
+    "maintenance": "Maintenance",
+    "offline": "Offline"
+  },
+  "panel": {
+    "chargers": "Charger status",
+    "manageLink": "Manage →",
+    "upcomingBookings": "Coming up",
+    "allBookingsLink": "All →",
+    "recentTickets": "Recent support tickets",
+    "allTicketsLink": "View all →",
+    "noTickets": "No recent tickets."
+  }
+}

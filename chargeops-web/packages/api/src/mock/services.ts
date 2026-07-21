@@ -5,7 +5,7 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { Booking, BookingStatus, BookingSummary, Charger, PaymentMethod, Station } from '../types';
+import type { Booking, BookingStatus, BookingSummary, Charger, PaymentMethod, Station, TicketMessage, TicketStatus } from '../types';
 import { buildMockDb } from './seed';
 
 const delay = (ms = 250 + Math.random() * 250) => new Promise((r) => setTimeout(r, ms));
@@ -29,6 +29,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           return b && db.ownerStationIds.includes(b.stationId);
         })
       : db.transactions;
+
+  /** Owner/staff see only tickets routed to stations they have access to; admin sees all. */
+  const scopedTickets = () =>
+    scope.ownerView
+      ? db.tickets.filter((tk) => tk.stationId && db.ownerStationIds.includes(tk.stationId))
+      : db.tickets;
 
   return {
     dashboard: {
@@ -88,6 +94,38 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             { name: 'Trạm Thanh Xuân', revenueVnd: 9_100_000 },
             { name: 'Trạm Long Biên', revenueVnd: 7_600_000 },
           ],
+        };
+      },
+      async staff() {
+        await delay();
+        // maintenance still counts as connected/online; only offline drops out
+        const online = db.chargers.filter((c) => c.status !== 'offline');
+        const offline = db.chargers.find((c) => c.status === 'offline');
+        const upcoming = scopedBookings()
+          .filter((b) => b.status === 'confirmed' || b.status === 'pending')
+          .slice(0, 4);
+        const myTickets = scopedTickets();
+        const recentTickets = [...myTickets]
+          .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))
+          .slice(0, 4);
+        return {
+          kpis: {
+            bookingsToday: 24,
+            bookingsDelta: 4,
+            chargersOnline: online.length,
+            chargersTotal: db.chargers.length,
+            offlineChargerNote: offline ? `${offline.id} mất kết nối` : null,
+            openTickets: myTickets.filter((t) => t.status === 'open' || t.status === 'in_progress').length,
+            pendingCheckins: scopedBookings().filter((b) => b.status === 'confirmed').length,
+          },
+          chargers: db.chargers.map(({ id, name, status }) => ({ id, name, status })),
+          upcomingBookings: upcoming.map((b) => ({
+            id: b.id,
+            startTime: b.startAt.slice(11, 16),
+            driverName: b.driverName,
+            chargerId: b.chargerId,
+          })),
+          recentTickets: recentTickets.map(({ id, subject, status, updatedAt }) => ({ id, subject, status, updatedAt })),
         };
       },
     },
@@ -397,6 +435,91 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           db.policyDocs.find((d) => q.split(/\s+/).filter((w) => w.length > 3).some((w) => d.content.toLowerCase().includes(w))) ??
           db.policyDocs[0];
         return { text: hit.content, sources: [hit.id] };
+      },
+    },
+
+    tickets: {
+      async list(params = {}) {
+        await delay();
+        const { status = 'all', category = 'all', search = '', page = 0, pageSize = 10 } = params;
+        const q = search.trim().toLowerCase();
+        let rows = scopedTickets();
+        if (status !== 'all') rows = rows.filter((tk) => tk.status === status);
+        if (category !== 'all') rows = rows.filter((tk) => tk.category === category);
+        if (q) {
+          rows = rows.filter(
+            (tk) =>
+              tk.id.toLowerCase().includes(q) ||
+              tk.subject.toLowerCase().includes(q) ||
+              tk.reporterName.toLowerCase().includes(q),
+          );
+        }
+        rows = [...rows].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+        return { items: rows.slice(page * pageSize, (page + 1) * pageSize), total: rows.length, page, pageSize };
+      },
+      async get(id) {
+        await delay(150);
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        return tk;
+      },
+      async messages(id) {
+        await delay(150);
+        return [...(db.ticketMessages[id] ?? [])];
+      },
+      async summary() {
+        await delay();
+        const rows = scopedTickets();
+        const byStatus = { open: 0, in_progress: 0, resolved: 0, closed: 0 } as Record<TicketStatus, number>;
+        for (const tk of rows) byStatus[tk.status]++;
+        return { total: rows.length, byStatus };
+      },
+      async reply(id, body) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        const now = new Date().toISOString();
+        const reply: TicketMessage = {
+          id: 'MSG-' + seq++,
+          ticketId: id,
+          authorName: scope.ownerView ? 'Bạn' : 'Quản trị viên',
+          authorRole: scope.ownerView ? 'station_staff' : 'platform_admin',
+          body,
+          createdAt: now,
+        };
+        (db.ticketMessages[id] ??= []).push(reply);
+        tk.lastMessagePreview = body.slice(0, 120);
+        tk.messageCount += 1;
+        tk.updatedAt = now;
+        if (tk.status === 'open') tk.status = 'in_progress';
+        return reply;
+      },
+      async setStatus(id, status) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = status;
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
+      },
+      async reassign(id, stationName) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        const match = db.stationsDirectory.find((s) => s.name === stationName);
+        tk.stationId = match?.id ?? tk.stationId;
+        tk.stationName = match?.name ?? stationName;
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
+      },
+      async escalate(id) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = 'in_progress';
+        tk.assigneeName = 'Đội vận hành trung tâm';
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
       },
     },
   };

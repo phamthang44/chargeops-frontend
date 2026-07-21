@@ -19,8 +19,14 @@ import type {
   PaymentMethod,
   PolicyDoc,
   PricingConfig,
+  StaffDashboard,
   Station,
   StationRegistration,
+  Ticket,
+  TicketListParams,
+  TicketMessage,
+  TicketStatus,
+  TicketSummary,
   Transaction,
   TransactionSummary,
   TransactionType,
@@ -31,6 +37,8 @@ import type {
 export interface DashboardService {
   owner(): Promise<OwnerDashboard>;
   admin(): Promise<AdminDashboard>;
+  /** Ops-only KPIs — no revenue/license fields exist on this DTO (see StaffDashboard). */
+  staff(): Promise<StaffDashboard>;
 }
 
 export interface AnalyticsService {
@@ -101,6 +109,22 @@ export interface PolicyService {
   ask(question: string): Promise<AssistantAnswer>;
 }
 
+export interface TicketService {
+  /** Owner/staff: tickets routed to stations they have access to. Admin: all tickets. */
+  list(params?: TicketListParams): Promise<Page<Ticket>>;
+  get(id: string): Promise<Ticket>;
+  /** Oldest-first. */
+  messages(id: string): Promise<TicketMessage[]>;
+  summary(): Promise<TicketSummary>;
+  /** Append-only reply; first reply on an open ticket also flips it to in_progress. */
+  reply(id: string, body: string): Promise<TicketMessage>;
+  setStatus(id: string, status: TicketStatus): Promise<Ticket>;
+  /** Admin only — moves the ticket to a different station's queue. */
+  reassign(id: string, stationName: string): Promise<Ticket>;
+  /** Admin only — pulls the ticket into central ops. */
+  escalate(id: string): Promise<Ticket>;
+}
+
 export interface Services {
   dashboard: DashboardService;
   analytics: AnalyticsService;
@@ -112,4 +136,5 @@ export interface Services {
   users: UserService;
   pricing: PricingService;
   policies: PolicyService;
+  tickets: TicketService;
 }

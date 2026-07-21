@@ -20,6 +20,11 @@
         "title": "Trụ sạc",
         "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng trụ."
       },
+      "tickets": {
+        "label": "Hỗ trợ",
+        "title": "Hỗ trợ",
+        "subtitle": "Ticket hỗ trợ được định tuyến tới trạm của bạn."
+      },
       "pricing": {
         "label": "Giá & giờ hoạt động",
         "title": "Giá & giờ hoạt động",

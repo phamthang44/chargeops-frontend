@@ -3,8 +3,12 @@ import { initReactI18next } from 'react-i18next';
 
 import viCommon from './locales/vi/common.json';
 import viOwnerDashboard from './locales/vi/ownerDashboard.json';
+import viStaffDashboard from './locales/vi/staffDashboard.json';
+import viTickets from './locales/vi/tickets.json';
 import enCommon from './locales/en/common.json';
 import enOwnerDashboard from './locales/en/ownerDashboard.json';
+import enStaffDashboard from './locales/en/staffDashboard.json';
+import enTickets from './locales/en/tickets.json';
 
 // Shared packages own their translation content but not the i18next instance —
 // the host app (here) is the one place that initializes i18next and registers
@@ -37,8 +41,26 @@ function initialLanguage(): Language {
 
 i18n.use(initReactI18next).init({
   resources: {
-    vi: { common: viCommon, ownerDashboard: viOwnerDashboard, ui: viUi, auth: viAuth, owner: viOwner, admin: viAdmin },
-    en: { common: enCommon, ownerDashboard: enOwnerDashboard, ui: enUi, auth: enAuth, owner: enOwner, admin: enAdmin },
+    vi: {
+      common: viCommon,
+      ownerDashboard: viOwnerDashboard,
+      staffDashboard: viStaffDashboard,
+      tickets: viTickets,
+      ui: viUi,
+      auth: viAuth,
+      owner: viOwner,
+      admin: viAdmin,
+    },
+    en: {
+      common: enCommon,
+      ownerDashboard: enOwnerDashboard,
+      staffDashboard: enStaffDashboard,
+      tickets: enTickets,
+      ui: enUi,
+      auth: enAuth,
+      owner: enOwner,
+      admin: enAdmin,
+    },
   },
   lng: initialLanguage(),
   fallbackLng: 'vi',

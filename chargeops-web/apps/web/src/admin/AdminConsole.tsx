@@ -12,6 +12,7 @@ import {
   IconCard,
   IconClipboardCheck,
   IconGrid,
+  IconLifebuoy,
   IconPlusCircle,
   IconShield,
   IconUsers,
@@ -26,6 +27,7 @@ import { Analytics } from './pages/Analytics';
 import { PolicyKB } from './pages/PolicyKB';
 import { Bookings } from './pages/Bookings';
 import { Transactions } from './pages/Transactions';
+import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -38,6 +40,7 @@ const PAGES: Record<string, ComponentType> = {
   users: Users,
   analytics: Analytics,
   kb: PolicyKB,
+  tickets: () => <TicketsRoute admin />,
 };
 
 // Admin console sees platform-wide (unscoped) data.
@@ -56,6 +59,7 @@ export function AdminConsole({ base }: { base: string }) {
     { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
     { key: 'provisioning', label: t('console.nav.provisioning.label'), icon: <IconPlusCircle size={17} />, title: t('console.nav.provisioning.title') },
     { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
+    { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
     { key: 'transactions', label: t('console.nav.transactions.label'), icon: <IconCard size={17} />, title: t('console.nav.transactions.title') },
     { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
     { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
@@ -81,7 +85,7 @@ export function AdminConsole({ base }: { base: string }) {
             return (
               <Route
                 key={n.key}
-                path={n.key}
+                path={`${n.key}/*`}
                 element={Page ? <Page /> : <ComingSoon title={n.title} />}
               />
             );

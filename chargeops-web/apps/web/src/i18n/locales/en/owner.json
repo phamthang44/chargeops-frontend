@@ -20,6 +20,11 @@
         "title": "Chargers",
         "subtitle": "Display names, statuses, and QR check-in codes for each charger."
       },
+      "tickets": {
+        "label": "Support",
+        "title": "Support",
+        "subtitle": "Support tickets routed to your station."
+      },
       "pricing": {
         "label": "Pricing & Hours",
         "title": "Pricing & Hours",

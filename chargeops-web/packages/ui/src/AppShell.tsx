@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from './Avatar';
+import { AvatarDropdown } from './AvatarDropdown';
 import { MoreMenu } from './MoreMenu';
 import {
   IconBolt,
@@ -35,6 +36,8 @@ export interface AppShellProps {
   station?: string;
   /** Full name — the header Avatar derives its initials fallback from this. */
   userName: string;
+  /** User's email address displayed in profile menu. */
+  userEmail?: string;
   /** The whole search box (HeaderSearch) — console-specific, since what's searchable differs by role. */
   search: ReactNode;
   /** The whole notification bell (NotificationBell) — console-specific data source. */
@@ -60,6 +63,7 @@ export function AppShell({
   rolePill,
   station,
   userName,
+  userEmail,
   search,
   notifications,
   onBrand,
@@ -150,12 +154,13 @@ export function AppShell({
             {rolePill.label}
           </span>
           {notifications}
-          <MoreMenu
-            items={[
-              { key: 'settings', label: t('avatarMenu.settings'), icon: <IconSettings size={15} strokeWidth={2} />, onClick: onSettings },
-              { key: 'logout', label: t('avatarMenu.logout'), icon: <IconLogout size={15} strokeWidth={2} />, onClick: onLogout, tone: 'danger' },
-            ]}
-            trigger={<Avatar name={userName} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />}
+          <AvatarDropdown
+            userName={userName}
+            userEmail={userEmail}
+            rolePill={rolePill}
+            accent={accent}
+            onSettings={onSettings}
+            onLogout={onLogout}
           />
         </div>
       </div>

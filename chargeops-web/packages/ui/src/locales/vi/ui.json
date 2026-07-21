@@ -2,7 +2,11 @@
   "menu": "Menu",
   "avatarMenu": {
     "settings": "Cài đặt",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "theme": "Giao diện",
+    "themeLight": "Sáng",
+    "themeDark": "Tối"
   },
   "search": {
     "placeholder": "Tìm đặt chỗ, trụ, trạm…",

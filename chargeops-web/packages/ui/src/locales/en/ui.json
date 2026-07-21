@@ -2,7 +2,11 @@
   "menu": "Menu",
   "avatarMenu": {
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "profile": "Profile",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "search": {
     "placeholder": "Search bookings, chargers, stations…",

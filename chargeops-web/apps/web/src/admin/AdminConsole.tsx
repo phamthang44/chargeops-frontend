@@ -165,6 +165,7 @@ export function AdminConsole({ base }: { base: string }) {
         accent="brand"
         rolePill={{ label: t('console.role'), bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' }}
         userName={user?.name ?? '···'}
+        userEmail={user?.email}
         search={<HeaderSearch searchers={searchers} placeholder={t('console.searchPlaceholder')} />}
         notifications={<NotificationBell items={notificationItems} emptyLabel={t('notifications.empty')} />}
         onSettings={() => navigate(`${base}/settings`)}

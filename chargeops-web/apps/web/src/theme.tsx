@@ -41,5 +41,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (isTheme(detail)) {
+        setTheme(detail);
+      }
+    };
+    window.addEventListener('chargeops-theme-change', handleThemeChange);
+    return () => window.removeEventListener('chargeops-theme-change', handleThemeChange);
+  }, []);
+
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }

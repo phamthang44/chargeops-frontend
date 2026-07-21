@@ -199,6 +199,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
         }
         station="Trạm Hà Đông"
         userName={user?.name ?? '···'}
+        userEmail={user?.email}
         search={<HeaderSearch searchers={searchers} accent="owner" />}
         notifications={<NotificationBell items={notificationItems} emptyLabel={t('notifications.empty')} />}
         onSettings={() => navigate(`${base}/settings`)}

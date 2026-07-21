@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   BOOKING_STATUS,
   formatTimeVn,
@@ -8,7 +9,8 @@ import { Card, EmptyState, StatusPill } from '@chargeops/ui';
 
 /** Mobile bookings list (replaces the table below md). */
 export function BookingCards({ rows, onOpen }: { rows: Booking[]; onOpen: (b: Booking) => void }) {
-  if (rows.length === 0) return <EmptyState>Không có lượt đặt nào khớp bộ lọc.</EmptyState>;
+  const { t } = useTranslation('owner');
+  if (rows.length === 0) return <EmptyState>{t('bookings.emptyState')}</EmptyState>;
   return (
     <div className="flex flex-col gap-2.5">
       {rows.map((b) => {

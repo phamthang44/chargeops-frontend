@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
@@ -26,6 +27,7 @@ const PAGE_SIZE = 10;
 type FilterKey = BookingStatus | 'all';
 
 export function Bookings() {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const toast = useToast();
 
@@ -54,17 +56,17 @@ export function Bookings() {
     const order: FilterKey[] = ['all', 'pending', 'confirmed', 'checkedin', 'charging', 'completed', 'cancelled'];
     return order.map((k) => ({
       key: k,
-      label: k === 'all' ? 'Tất cả' : BOOKING_STATUS[k].label,
+      label: k === 'all' ? t('bookings.tabs.all') : BOOKING_STATUS[k].label,
       count: !s ? undefined : k === 'all' ? s.total : s.byStatus[k],
     }));
-  }, [summaryQuery.data]);
+  }, [summaryQuery.data, t]);
 
   const data = listQuery.data;
   const total = data?.total ?? 0;
 
   return (
     <>
-      <PageHeader title="Đặt chỗ" subtitle="Theo dõi và xử lý các lượt đặt chỗ tại trạm." />
+      <PageHeader title={t('bookings.title')} subtitle={t('bookings.subtitle')} />
 
       {summaryQuery.data && <BookingSummaryStrip summary={summaryQuery.data} />}
 
@@ -75,7 +77,7 @@ export function Bookings() {
         onSearchIn={(f) => resetTo(() => setSearchIn(f))}
         range={range}
         onRange={setRange}
-        onExport={() => toast('Đang xuất CSV… (demo)', 'info')}
+        onExport={() => toast(t('bookings.exportToast'), 'info')}
       />
 
       <div className="mb-3.5">

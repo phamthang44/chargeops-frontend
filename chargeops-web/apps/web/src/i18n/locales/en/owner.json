@@ -1,0 +1,376 @@
+{
+  "console": {
+    "role": {
+      "staff": "STATION STAFF",
+      "owner": "STATION OWNER"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Overview",
+        "title": "Overview",
+        "subtitle": "Your station performance today."
+      },
+      "bookings": {
+        "label": "Bookings",
+        "title": "Bookings",
+        "subtitle": "Track and handle bookings at the station."
+      },
+      "chargers": {
+        "label": "Chargers",
+        "title": "Chargers",
+        "subtitle": "Display names, statuses, and QR check-in codes for each charger."
+      },
+      "pricing": {
+        "label": "Pricing & Hours",
+        "title": "Pricing & Hours",
+        "subtitle": "Base price, TOU time-slots, and operating hours."
+      },
+      "stations": {
+        "label": "My Stations",
+        "title": "My Stations",
+        "subtitle": "Register new stations and track approval status."
+      },
+      "revenue": {
+        "label": "Revenue",
+        "title": "Revenue",
+        "subtitle": "Transactions, refunds, and net revenue."
+      },
+      "license": {
+        "label": "License",
+        "title": "License",
+        "subtitle": "Status of your operational license."
+      },
+      "assistant": {
+        "label": "Policy Assistant",
+        "title": "Policy Assistant",
+        "subtitle": "Look up cancellation, check-in, and payment regulations."
+      }
+    }
+  },
+  "assistant": {
+    "title": "Policy Assistant",
+    "subtitle": "Look up cancellation, check-in, and payment regulations.",
+    "sub": "Lookup only · answers are based on the policy KB (RAG)",
+    "greeting": "Hello! I am the ChargeOps Policy Assistant. Ask me about cancellation/refund policies, check-in windows, payments, or system operations.",
+    "error": "Sorry, an error occurred: {{message}}",
+    "searching": "Searching...",
+    "placeholder": "Ask about cancellations, check-ins, payments...",
+    "send": "Send",
+    "sources": "Sources: {{sources}}",
+    "quickQs": {
+      "cancelRefund": "Refund policy on cancellation?",
+      "checkinWindow": "How long is the check-in window?",
+      "bookingConfirm": "When is a booking confirmed?"
+    }
+  },
+  "bookings": {
+    "title": "Bookings",
+    "subtitle": "Track and handle bookings at the station.",
+    "exportCsv": "Export CSV",
+    "exportToast": "Exporting CSV... (demo)",
+    "cancelSuccess": "Cancelled {{id}} — refunded {{refund}}",
+    "cancelBtn": "Cancel for Guest",
+    "canceling": "Cancelling...",
+    "contactBtn": "Contact Guest",
+    "emptyState": "No bookings matched the filter.",
+    "rangeLabel": "TIME RANGE · CONTINUOUS",
+    "chargerLabel": "CHARGER",
+    "driverLabel": "DRIVER",
+    "snapshotLabel": "FIXED PRICE (SNAPSHOT)",
+    "rateKind": {
+      "locked": "locked at booking",
+      "peak": "Peak",
+      "offpeak": "Off-peak",
+      "normal": "Standard"
+    },
+    "rateLabel": "Price ({{kind}})",
+    "estEnergy": "Est. Energy",
+    "total": "Total",
+    "refundedLabel": "Refunded{{percent}}",
+    "refundPolicy": "REFUND POLICY (BR-PAY-03)",
+    "policy60": "≥ 60 mins before start time",
+    "policy15": "15–60 mins before",
+    "policy0": "< 15 mins / no-show",
+    "refund100": "100% Refund",
+    "refund50": "50% Refund",
+    "refund0": "0% Refund",
+    "metrics": {
+      "totalBookings": "TOTAL BOOKINGS",
+      "activeBookings": "ACTIVE",
+      "activeSub": "confirmed · charging",
+      "completed": "COMPLETED",
+      "cancelled": "CANCELLED",
+      "grossRevenue": "GROSS REVENUE",
+      "revenueSub": "before refunds"
+    },
+    "table": {
+      "cols": {
+        "id": "ID",
+        "driver": "DRIVER",
+        "charger": "CHARGER",
+        "slot": "SLOT",
+        "duration": "DURATION",
+        "method": "METHOD",
+        "amount": "AMOUNT",
+        "status": "STATUS"
+      }
+    },
+    "toolbar": {
+      "ranges": {
+        "today": "Today",
+        "7d": "7 Days",
+        "30d": "30 Days",
+        "all": "All Time"
+      },
+      "fields": {
+        "all": "All Fields",
+        "id": "Booking ID",
+        "driver": "Driver",
+        "charger": "Charger"
+      },
+      "placeholder": "Filter by ID, driver, charger...",
+      "searchIn": "Search in field"
+    },
+    "tabs": {
+      "all": "All"
+    }
+  },
+  "chargers": {
+    "title": "Chargers",
+    "subtitle": "Display names, statuses, and QR check-in codes for each charger.",
+    "updateSuccess": "Updated {{id}}",
+    "downloadToast": "Downloading QR for {{id}}... (demo)",
+    "loadError": "Could not load chargers: {{message}}",
+    "description": "Connectors & power specs are provisioned by Admin — read-only. You can edit the display name and status. Click a row to view details.",
+    "status": {
+      "available": "Available",
+      "maintenance": "Maintenance",
+      "unclaimed": "Unclaimed"
+    },
+    "stats": {
+      "total": "TOTAL CHARGERS",
+      "available": "AVAILABLE",
+      "maintenance": "MAINTENANCE",
+      "sessions": "SESSIONS TODAY",
+      "sessionsSub": "Avg util {{util}}%"
+    },
+    "table": {
+      "cols": {
+        "id": "ID",
+        "name": "NAME ✎",
+        "connector": "CONNECTOR 🔒",
+        "status": "STATUS ✎",
+        "utilization": "UTILIZATION TODAY",
+        "sessions": "SESSIONS"
+      },
+      "downloadQr": "Download QR"
+    },
+    "panel": {
+      "editTitle": "EDIT CHARGER",
+      "close": "Close",
+      "identityGroup": "Identification Info",
+      "chargerId": "CHARGER ID",
+      "idHelp": "Unique ID used to generate check-in QR — cannot be changed.",
+      "displayName": "DISPLAY NAME",
+      "namePlaceholder": "E.g. Fast Charger 60kW — Unit 1",
+      "nameHelp": "This name is displayed to drivers and on the charger screen.",
+      "specGroup": "Technical Specs",
+      "adminProvided": "Admin-assigned",
+      "connector": "CONNECTOR TYPE",
+      "power": "POWER CAPACITY",
+      "specHelp": "Connectors and power capacity are assigned by Admin during installation.",
+      "operationGroup": "Operational Status",
+      "perfGroup": "Performance Today",
+      "utilization": "UTILIZATION",
+      "sessions": "SESSIONS TODAY",
+      "kwh": "kWh TODAY",
+      "qrHelp": "Affix onto charger for drivers to scan on arrival.",
+      "downloadQrBtn": "Download QR",
+      "saveBtn": "Save Changes",
+      "saving": "Saving..."
+    }
+  },
+  "pricing": {
+    "title": "Pricing & Hours",
+    "subtitle": "Base price, TOU time-slots, and operating hours. Changes only apply to new bookings.",
+    "saveSuccess": "Saved pricing and operating hour configurations",
+    "loadError": "Could not load configurations: {{message}}",
+    "cancelBtn": "Cancel",
+    "saveBtn": "Save Changes",
+    "saving": "Saving...",
+    "steps": {
+      "step1": {
+        "title": "Basic Config",
+        "groupTitle": "Duration & Base Price",
+        "groupHelp": "Set the minimum duration for each charging session.",
+        "durationLabel": "SLOT DURATION",
+        "durationVal": "{{minutes}} mins",
+        "basePriceLabel": "DEFAULT CHARGING PRICE",
+        "basePriceSub": "Base price",
+        "basePriceHelp": "This price applies to any time slots not explicitly configured below."
+      },
+      "step2": {
+        "title": "Operating Hours",
+        "toggle247": "Open 24/7",
+        "helpText": "Operating hours affect your station's visibility on the drivers' search map."
+      },
+      "step3": {
+        "title": "TOU Pricing",
+        "addRule": "Add Time-slot",
+        "noRules": "No custom time-slots defined — all bookings will use base price. Click Add Time-slot to start.",
+        "deleteBtn": "Delete",
+        "vsBase": "VS. BASE PRICE",
+        "tipTitle": "Revenue Optimization Tip",
+        "tipText": "Increasing prices during the 18:00 – 21:00 slot could boost monthly revenue by up to 15%."
+      },
+      "step4": {
+        "title": "Availability Rules",
+        "lockTitle": "Auto-lock slots",
+        "lockDesc": "Release slots after 15 mins if the driver does not check in.",
+        "advanceTitle": "Max Advance Booking",
+        "advanceDesc": "How far in advance drivers can book a slot.",
+        "advanceDays": "{{days}} days",
+        "nightTitle": "Night Charging Special",
+        "nightDesc": "10% discount for the 00:00 – 05:00 slot.",
+        "validConfig": "Valid Configuration",
+        "validConfigHelp": "All time slots verified and have no overlaps."
+      }
+    },
+    "addRule": {
+      "title": "Add Time-slot",
+      "subtitle": "Define custom rates that apply to bookings within this time slot.",
+      "ruleName": "RULE NAME",
+      "namePlaceholder": "E.g. Evening peak",
+      "applyDays": "APPLY ON DAYS",
+      "priceLabel": "PRICE (₫/kWh)",
+      "from": "FROM",
+      "to": "TO",
+      "validationError": "Please input a valid rule name, price, and time-slot (HH:mm).",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save Time-slot"
+    },
+    "days": {
+      "daily": "Daily",
+      "weekdays": "Mon–Fri",
+      "weekends": "Sat–Sun",
+      "T2": "Mon",
+      "T3": "Tue",
+      "T4": "Wed",
+      "T5": "Thu",
+      "T6": "Fri",
+      "T7": "Sat",
+      "CN": "Sun"
+    }
+  },
+  "revenue": {
+    "title": "Revenue",
+    "subtitle": "Transactions, refunds, and your net revenue.",
+    "kpis": {
+      "gross": "GROSS REVENUE",
+      "refunded": "TOTAL REFUNDS",
+      "net": "NET REVENUE",
+      "avg": "AVG. VALUE",
+      "txCount": "{{count}} transactions",
+      "refundCount": "{{count}} refunds",
+      "netSub": "gross − refunds",
+      "avgSub": "per transaction"
+    },
+    "filters": {
+      "types": {
+        "all": "All Types",
+        "payment": "Payments",
+        "refund": "Refunds"
+      },
+      "methods": {
+        "all": "All Methods",
+        "ATM": "ATM Card"
+      }
+    },
+    "insights": {
+      "title": "Daily Revenue · {{days}} days",
+      "dayTooltip": "Day {{day}}: {{value}}",
+      "methodTitle": "By Payment Method"
+    },
+    "methods": {
+      "ATM": "ATM Card"
+    },
+    "table": {
+      "cols": {
+        "txId": "TX ID",
+        "bookingId": "BOOKING",
+        "type": "TYPE",
+        "method": "METHOD",
+        "amount": "AMOUNT",
+        "date": "DATE"
+      },
+      "empty": "No transactions matched the filters.",
+      "types": {
+        "refund": "Refund",
+        "payment": "Payment"
+      },
+      "typeWithMethod": "{{type}} · {{method}}"
+    }
+  },
+  "stations": {
+    "title": "My Stations",
+    "subtitle": "Register new stations and track approval status.",
+    "registerBtn": "Register New Station",
+    "loadError": "Could not load stations: {{message}}",
+    "summary": {
+      "total": "TOTAL STATIONS",
+      "active": "ACTIVE",
+      "pending": "PENDING",
+      "online": "CHARGERS ONLINE"
+    },
+    "card": {
+      "bookingsToday": "BOOKINGS TODAY",
+      "chargersOnline": "CHARGERS ONLINE",
+      "utilization": "UTILIZATION",
+      "addressLabel": "Address",
+      "licenseLabel": "License",
+      "rejectionReason": "Rejection reason: {{reason}}",
+      "pendingHelp": "Submission is pending admin review. Station is not visible to drivers yet."
+    },
+    "register": {
+      "title": "Register New Station",
+      "subtitle": "Submission remains in PENDING status until evaluated by an administrator.",
+      "toastSuccess": "Submitted registration for \"{{name}}\" — pending approval",
+      "stationName": "STATION NAME",
+      "namePlaceholder": "E.g. My Dinh Station",
+      "nameRequired": "Please enter a station name.",
+      "nameHelp": "This name is shown to drivers searching on the map.",
+      "address": "ADDRESS",
+      "addressRequired": "Please enter an address.",
+      "addressPlaceholder": "Street number, street name, district",
+      "addressHelp": "Used to pin your station accurately on the search map.",
+      "city": "CITY",
+      "plannedChargers": "EST. CHARGER COUNT",
+      "licenseHelp": "Business licenses are verified off-platform prior to approval (do not upload files here).",
+      "cancelBtn": "Cancel",
+      "submitBtn": "Submit Registration",
+      "submitting": "Submitting..."
+    }
+  },
+  "license": {
+    "title": "License",
+    "subtitle": "Status of your operational license.",
+    "loadError": "Could not load license: {{message}}",
+    "plans": {
+      "yearly": "Yearly Plan",
+      "monthly": "Monthly Plan"
+    },
+    "priceLabel": "{{price}} / {{period}}",
+    "periodYear": "year",
+    "periodMonth": "month",
+    "labels": {
+      "start": "Starts",
+      "expiry": "Expires",
+      "remaining": "Remaining",
+      "remainingVal": "{{days}} days"
+    },
+    "helpTitle": "Renewal coming up ({{days}} days left).",
+    "helpBody": "Purchasing/renewing licenses is handled off-platform; statuses are updated manually by administrators. This page is read-only.",
+    "warningTitle": "When the license expires",
+    "warningBody": "The station and all its chargers will be hidden from driver searches until renewed (BR-STA-01). Active, ongoing sessions will not be affected."
+  }
+}

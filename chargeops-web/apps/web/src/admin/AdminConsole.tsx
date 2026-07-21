@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ApiProvider, createServices } from '@chargeops/api';
@@ -39,27 +40,28 @@ const PAGES: Record<string, ComponentType> = {
   kb: PolicyKB,
 };
 
-const NAV: (ShellNavItem & { title: string })[] = [
-  { key: 'dashboard', label: 'Tổng quan', icon: <IconGrid size={17} />, title: 'Tổng quan' },
-  { key: 'approvals', label: 'Duyệt trạm', icon: <IconClipboardCheck size={17} />, title: 'Duyệt trạm' },
-  { key: 'provisioning', label: 'Cấp trụ sạc', icon: <IconPlusCircle size={17} />, title: 'Cấp trụ sạc' },
-  { key: 'bookings', label: 'Đặt chỗ', icon: <IconCalendar size={17} />, title: 'Đặt chỗ toàn nền tảng' },
-  { key: 'transactions', label: 'Giao dịch', icon: <IconCard size={17} />, title: 'Giao dịch' },
-  { key: 'licenses', label: 'Giấy phép', icon: <IconShield size={17} />, title: 'Giấy phép' },
-  { key: 'users', label: 'Người dùng', icon: <IconUsers size={17} />, title: 'Người dùng' },
-  { key: 'analytics', label: 'Phân tích', icon: <IconBarChart size={17} />, title: 'Phân tích' },
-  { key: 'kb', label: 'Kho chính sách', icon: <IconBook size={17} />, title: 'Kho chính sách' },
-];
-
 // Admin console sees platform-wide (unscoped) data.
 const services = createServices({ ownerView: false });
 
 /** Platform admin console, mounted at `/admin`. */
 export function AdminConsole({ base }: { base: string }) {
+  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const activeKey = location.pathname.split('/')[2] || 'dashboard';
+
+  const NAV: (ShellNavItem & { title: string })[] = [
+    { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
+    { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
+    { key: 'provisioning', label: t('console.nav.provisioning.label'), icon: <IconPlusCircle size={17} />, title: t('console.nav.provisioning.title') },
+    { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
+    { key: 'transactions', label: t('console.nav.transactions.label'), icon: <IconCard size={17} />, title: t('console.nav.transactions.title') },
+    { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
+    { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
+    { key: 'analytics', label: t('console.nav.analytics.label'), icon: <IconBarChart size={17} />, title: t('console.nav.analytics.title') },
+    { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
+  ];
 
   return (
     <ApiProvider services={services}>
@@ -68,9 +70,9 @@ export function AdminConsole({ base }: { base: string }) {
         activeKey={activeKey}
         onNavigate={(key) => navigate(`${base}/${key}`)}
         accent="brand"
-        rolePill={{ label: 'QUẢN TRỊ VIÊN', bg: '#16171a', fg: '#ffffff' }}
+        rolePill={{ label: t('console.role'), bg: '#16171a', fg: '#ffffff' }}
         userInitials={user?.initials ?? '··'}
-        searchPlaceholder="Tìm đặt chỗ, trụ, trạm, chủ trạm…"
+        searchPlaceholder={t('console.searchPlaceholder')}
       >
         <Routes>
           <Route index element={<Navigate to={`${base}/dashboard`} replace />} />

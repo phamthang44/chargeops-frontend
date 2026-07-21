@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -30,6 +31,7 @@ function initialsOf(name: string) {
 
 /** FR12 — admin user management: suspend / reactivate accounts. */
 export function Users() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -47,7 +49,13 @@ export function Users() {
       api.users.setStatus(id, status),
     onSuccess: (u) => {
       qc.invalidateQueries({ queryKey: ['users'] });
-      toast(`${u.name}: ${USER_STATUS[u.status].label}`, 'success');
+      toast(
+        t('users.toastStatus', {
+          name: u.name,
+          status: t(`users.status.${u.status}`, { defaultValue: USER_STATUS[u.status].label }),
+        }),
+        'success',
+      );
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
@@ -63,38 +71,38 @@ export function Users() {
   const tabs = useMemo<FilterTab<RoleKey>[]>(() => {
     const count = (r: RoleKey) => (r === 'all' ? all.length : all.filter((u) => u.role === r).length);
     return [
-      { key: 'all', label: 'Tất cả', count: count('all') },
-      { key: 'DRIVER', label: 'Tài xế', count: count('DRIVER') },
-      { key: 'OWNER', label: 'Chủ trạm', count: count('OWNER') },
-      { key: 'ADMIN', label: 'Quản trị', count: count('ADMIN') },
+      { key: 'all', label: t('users.roles.all'), count: count('all') },
+      { key: 'DRIVER', label: t('users.roles.DRIVER'), count: count('DRIVER') },
+      { key: 'OWNER', label: t('users.roles.OWNER'), count: count('OWNER') },
+      { key: 'ADMIN', label: t('users.roles.ADMIN'), count: count('ADMIN') },
     ];
-  }, [all]);
+  }, [all, t]);
 
   const selected = all.find((u) => u.id === selectedId) ?? null;
 
   return (
     <>
-      <PageHeader title="Người dùng" subtitle="Quản lý tài khoản tài xế, chủ trạm và quản trị viên." />
+      <PageHeader title={t('console.nav.users.title')} subtitle={t('console.nav.users.subtitle')} />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được người dùng: {(error as Error).message}
+          {t('users.error', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <Skeleton className="h-[360px] rounded-card" />
       ) : (
         <>
           <div className="mb-3 grid grid-cols-2 gap-[11px] md:grid-cols-4">
-            <MetricCard label="TỔNG TÀI KHOẢN" value={String(all.length)} accent="#5b54e8" />
-            <MetricCard label="TÀI XẾ" value={String(all.filter((u) => u.role === 'DRIVER').length)} accent="#0d8a5a" />
-            <MetricCard label="CHỦ TRẠM" value={String(all.filter((u) => u.role === 'OWNER').length)} accent="#12a150" />
-            <MetricCard label="TẠM KHÓA" value={String(all.filter((u) => u.status === 'suspended').length)} accent="#c0392b" />
+            <MetricCard label={t('users.kpi.total')} value={String(all.length)} accent="#5b54e8" />
+            <MetricCard label={t('users.kpi.drivers')} value={String(all.filter((u) => u.role === 'DRIVER').length)} accent="#0d8a5a" />
+            <MetricCard label={t('users.kpi.owners')} value={String(all.filter((u) => u.role === 'OWNER').length)} accent="#12a150" />
+            <MetricCard label={t('users.kpi.suspended')} value={String(all.filter((u) => u.status === 'suspended').length)} accent="#c0392b" />
           </div>
 
           <div className="mb-3.5 flex flex-wrap items-center gap-2">
             <FilterTabs tabs={tabs} active={role} onChange={setRole} accent="brand" />
             <div className="ml-auto">
-              <SearchInput value={search} onChange={setSearch} placeholder="Tìm tên, email…" className="w-[230px]" />
+              <SearchInput value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} className="w-[230px]" />
             </div>
           </div>
 
@@ -106,11 +114,11 @@ export function Users() {
                     className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                     style={{ gridTemplateColumns: '1.6fr 1fr 0.8fr 0.8fr 1fr' }}
                   >
-                    <span>TÀI KHOẢN</span>
-                    <span>VAI TRÒ</span>
-                    <span>THAM GIA</span>
-                    <span>TRẠNG THÁI</span>
-                    <span className="text-right">HÀNH ĐỘNG</span>
+                    <span>{t('users.table.cols.account')}</span>
+                    <span>{t('users.table.cols.role')}</span>
+                    <span>{t('users.table.cols.joined')}</span>
+                    <span>{t('users.table.cols.status')}</span>
+                    <span className="text-right">{t('users.table.cols.action')}</span>
                   </div>
                   {rows.map((u) => (
                     <UserRow
@@ -147,11 +155,10 @@ export function Users() {
 }
 
 function RoleBadge({ role }: { role: UserRole }) {
-  const c = USER_ROLE_BADGE[role];
   return (
     <span
       className="inline-block rounded-[6px] px-[9px] py-[3px] text-[10px] font-semibold uppercase tracking-[0.06em]"
-      style={{ background: c.bg, color: c.fg }}
+      style={{ background: USER_ROLE_BADGE[role].bg, color: USER_ROLE_BADGE[role].fg }}
     >
       {role}
     </span>
@@ -169,6 +176,7 @@ function UserRow({
   onSelect: () => void;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation('admin');
   const meta = USER_STATUS[user.status];
   const canAct = user.role !== 'ADMIN';
   return (
@@ -195,7 +203,7 @@ function UserRow({
       </span>
       <span className="text-muted">{formatDateVn(user.joined).slice(3)}</span>
       <span>
-        <StatusPill tone={meta.tone} label={meta.label} />
+        <StatusPill tone={meta.tone} label={t(`users.status.${user.status}`, { defaultValue: meta.label })} />
       </span>
       <span className="text-right">
         {canAct && (
@@ -207,7 +215,7 @@ function UserRow({
             className="text-[12px] font-semibold"
             style={{ color: user.status === 'active' ? '#c0392b' : '#0c7a3e' }}
           >
-            {user.status === 'active' ? 'Tạm khóa' : 'Kích hoạt'}
+            {user.status === 'active' ? t('users.table.suspend') : t('users.table.activate')}
           </button>
         )}
       </span>
@@ -224,6 +232,7 @@ function UserDetail({
   onClose: () => void;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation('admin');
   const canAct = user.role !== 'ADMIN';
   return (
     <Card className="p-[17px]">
@@ -237,15 +246,15 @@ function UserDetail({
             <div className="font-mono text-[11px] text-faint">{user.id}</div>
           </div>
         </div>
-        <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-faint hover:bg-chip" aria-label="Đóng">
+        <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-faint hover:bg-chip" aria-label={t('users.drawer.close')}>
           <IconX size={16} strokeWidth={2} />
         </button>
       </div>
       <div className="mb-[15px] flex flex-col gap-[9px] text-[12px] font-medium text-body">
         <Row label="Email" value={user.email} mono border />
-        <Row label="Vai trò" node={<RoleBadge role={user.role} />} border />
-        <Row label="Tham gia" value={formatDateVn(user.joined)} border />
-        <Row label="Tổng đặt chỗ" value={String(user.bookingCount)} valueClass="font-semibold" />
+        <Row label={t('users.drawer.role')} node={<RoleBadge role={user.role} />} border />
+        <Row label={t('users.drawer.joined')} value={formatDateVn(user.joined)} border />
+        <Row label={t('users.drawer.totalBookings')} value={String(user.bookingCount)} valueClass="font-semibold" />
       </div>
       {canAct && (
         <button
@@ -253,7 +262,7 @@ function UserDetail({
           className="w-full rounded-[9px] border border-line py-2.5 text-[12.5px] font-semibold hover:bg-canvas"
           style={{ color: user.status === 'active' ? '#c0392b' : '#0c7a3e' }}
         >
-          {user.status === 'active' ? 'Tạm khóa tài khoản' : 'Kích hoạt tài khoản'}
+          {user.status === 'active' ? t('users.drawer.suspendAccount') : t('users.drawer.activateAccount')}
         </button>
       )}
     </Card>

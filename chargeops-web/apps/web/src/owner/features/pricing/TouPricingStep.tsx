@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { formatVnd, type TouRule } from '@chargeops/api';
 import { IconBarChart, IconClock, IconPlusCircle } from '@chargeops/ui';
 import { StepHeader } from './StepHeader';
-import { TOU_DAYS_LABEL, pricePctVsBase } from './touDays';
+import { pricePctVsBase } from './touDays';
 
 export interface TouPricingStepProps {
   rules: TouRule[];
@@ -12,26 +13,26 @@ export interface TouPricingStepProps {
 
 /** Step 3 — time-of-use windows whose rate a booking snapshots. */
 export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPricingStepProps) {
+  const { t } = useTranslation('owner');
   return (
     <div>
       <StepHeader
         n={3}
-        title="Giá theo khung giờ"
+        title={t('pricing.steps.step3.title')}
         action={
           <button
             onClick={onAdd}
             className="flex items-center gap-[5px] text-[12px] font-semibold text-owner hover:text-owner-strong"
           >
             <IconPlusCircle size={13} strokeWidth={2.2} />
-            Thêm khung giờ
+            {t('pricing.steps.step3.addRule')}
           </button>
         }
       />
       <div className="rounded-panel border border-line-2 bg-white p-5">
         {rules.length === 0 ? (
           <div className="py-[22px] text-center text-[12.5px] font-medium text-faint">
-            Chưa có khung giờ riêng — mọi lượt đặt dùng giá gốc. Nhấn{' '}
-            <b className="text-owner">Thêm khung giờ</b> để bắt đầu.
+            {t('pricing.steps.step3.noRules')}
           </div>
         ) : (
           <>
@@ -49,14 +50,14 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
                         <div className="min-w-0">
                           <div className="text-[13.5px] font-semibold">{r.name}</div>
                           <div className="mt-0.5 font-mono text-[11px] text-faint">
-                            {r.from}–{r.to} · {TOU_DAYS_LABEL[r.days]}
+                            {r.from}–{r.to} · {t(`pricing.days.${r.days}`)}
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => onRemove(r.id)}
                         className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-bad hover:bg-bad-soft"
-                        aria-label="Xóa"
+                        aria-label={t('pricing.steps.step3.deleteBtn')}
                       >
                         ✕
                       </button>
@@ -68,7 +69,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
                       </div>
                       <div className="text-right">
                         <div className="text-[8.5px] font-semibold uppercase tracking-[0.06em] text-faint">
-                          SO VỚI GIÁ GỐC
+                          {t('pricing.steps.step3.vsBase')}
                         </div>
                         <div
                           className="mt-px text-[16px] font-bold"
@@ -90,11 +91,10 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onRemove }: TouPric
               </span>
               <div>
                 <div className="mb-[3px] text-[12.5px] font-semibold text-owner-deep">
-                  Mẹo tối ưu doanh thu
+                  {t('pricing.steps.step3.tipTitle')}
                 </div>
                 <div className="text-[12px] leading-[1.55] text-[#3f6b4f]">
-                  Tăng giá vào khung giờ <b className="font-semibold">18:00 – 21:00</b> có thể giúp bạn
-                  tăng thêm <b className="font-semibold">15%</b> doanh thu hàng tháng.
+                  {t('pricing.steps.step3.tipText')}
                 </div>
               </div>
             </div>

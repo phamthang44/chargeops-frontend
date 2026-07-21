@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -23,6 +24,7 @@ export function BookingDetailDrawer({
   booking: Booking | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -31,7 +33,7 @@ export function BookingDetailDrawer({
     mutationFn: (id: string) => api.bookings.cancel(id),
     onSuccess: (b) => {
       qc.invalidateQueries({ queryKey: ['bookings'] });
-      toast(`Đã hủy ${b.id} — hoàn ${formatVnd(b.refundVnd)}`, 'success');
+      toast(t('bookings.cancelSuccess', { id: b.id, refund: formatVnd(b.refundVnd) }), 'success');
       onClose();
     },
     onError: (e) => toast((e as Error).message, 'error'),
@@ -39,6 +41,12 @@ export function BookingDetailDrawer({
 
   if (!booking) return null;
   const meta = BOOKING_STATUS[booking.status];
+
+  const kindLabel = booking.rateKind === 'peak'
+    ? t('bookings.rateKind.peak')
+    : booking.rateKind === 'offpeak'
+      ? t('bookings.rateKind.offpeak')
+      : t('bookings.rateKind.normal');
 
   return (
     <Drawer
@@ -53,7 +61,7 @@ export function BookingDetailDrawer({
       footer={
         <>
           <Button variant="secondary" className="flex-1">
-            Liên hệ khách
+            {t('bookings.contactBtn')}
           </Button>
           {canCancel(booking) && (
             <Button
@@ -62,7 +70,7 @@ export function BookingDetailDrawer({
               onClick={() => cancel.mutate(booking.id)}
               disabled={cancel.isPending}
             >
-              {cancel.isPending ? 'Đang hủy…' : 'Hủy thay khách'}
+              {cancel.isPending ? t('bookings.canceling') : t('bookings.cancelBtn')}
             </Button>
           )}
         </>
@@ -71,7 +79,7 @@ export function BookingDetailDrawer({
       {/* time window */}
       <div className="rounded-card border border-line-3 bg-surface-2 p-4">
         <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
-          KHOẢNG THỜI GIAN · LIÊN TỤC
+          {t('bookings.rangeLabel')}
         </div>
         <div className="flex items-center gap-3">
           <div>
@@ -92,7 +100,7 @@ export function BookingDetailDrawer({
 
       {/* charger + driver */}
       <div className="grid grid-cols-2 gap-3.5">
-        <Field label="TRỤ SẠC">
+        <Field label={t('bookings.chargerLabel')}>
           <div className="text-[13px] font-semibold">
             {booking.stationName} · {booking.chargerId}
           </div>
@@ -100,7 +108,7 @@ export function BookingDetailDrawer({
             {booking.connector} · {booking.powerKw} kW
           </div>
         </Field>
-        <Field label="TÀI XẾ">
+        <Field label={t('bookings.driverLabel')}>
           <div className="text-[13px] font-semibold">{booking.driverName}</div>
           <div className="font-mono text-[12px] text-muted">{booking.driverPhone}</div>
         </Field>
@@ -109,22 +117,22 @@ export function BookingDetailDrawer({
       {/* price snapshot */}
       <div className="rounded-card border border-line-3 p-4">
         <div className="mb-[11px] flex items-center justify-between">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">GIÁ CỐ ĐỊNH (SNAPSHOT)</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('bookings.snapshotLabel')}</div>
           <span className="rounded-full bg-warn-pill px-2 py-0.5 text-[10px] font-medium text-warn">
-            đã khóa khi đặt
+            {t('bookings.rateKind.locked')}
           </span>
         </div>
         <div className="flex flex-col gap-[7px] text-[12.5px] font-medium text-body">
           <div className="flex justify-between">
-            <span>Giá {BOOKING_STATUS[booking.status].label === 'Đã hủy' ? '' : ''}({booking.rateKind === 'peak' ? 'Cao điểm' : booking.rateKind === 'offpeak' ? 'Thấp điểm' : 'Giờ thường'})</span>
+            <span>{t('bookings.rateLabel', { kind: kindLabel })}</span>
             <span className="font-mono">{formatVnd(booking.rateVndPerKwh)}/kWh</span>
           </div>
           <div className="flex justify-between">
-            <span>Năng lượng ước tính</span>
+            <span>{t('bookings.estEnergy')}</span>
             <span className="font-mono">~{booking.energyKwh} kWh</span>
           </div>
           <div className="mt-0.5 flex justify-between border-t border-line-3 pt-2 text-[14px] font-bold text-ink">
-            <span>Tổng</span>
+            <span>{t('bookings.total')}</span>
             <span className="font-mono">{formatVnd(booking.amountVnd)}</span>
           </div>
         </div>
@@ -135,7 +143,7 @@ export function BookingDetailDrawer({
         <div className="rounded-card border border-bad-border bg-bad-soft px-4 py-3.5">
           <div className="flex items-center justify-between">
             <span className="text-[12px] font-semibold text-bad-deep">
-              Đã hoàn tiền{booking.refundPct !== null ? ` (${booking.refundPct}%)` : ''}
+              {t('bookings.refundedLabel', { percent: booking.refundPct !== null ? ` (${booking.refundPct}%)` : '' })}
             </span>
             <span className="font-mono text-[14px] font-bold text-bad">{formatVnd(booking.refundVnd)}</span>
           </div>
@@ -144,12 +152,12 @@ export function BookingDetailDrawer({
         canCancel(booking) && (
           <div className="rounded-card border border-line-3 p-4">
             <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
-              CHÍNH SÁCH HOÀN TIỀN (BR-PAY-03)
+              {t('bookings.refundPolicy')}
             </div>
             <div className="flex flex-col gap-1.5 text-[12px] font-medium text-body">
-              <Policy left="≥ 60 phút trước giờ bắt đầu" right="Hoàn 100%" cls="text-good" />
-              <Policy left="15–60 phút trước" right="Hoàn 50%" cls="text-warn" />
-              <Policy left="< 15 phút / no-show" right="Hoàn 0%" cls="text-bad" />
+              <Policy left={t('bookings.policy60')} right={t('bookings.refund100')} cls="text-good" />
+              <Policy left={t('bookings.policy15')} right={t('bookings.refund50')} cls="text-warn" />
+              <Policy left={t('bookings.policy0')} right={t('bookings.refund0')} cls="text-bad" />
             </div>
           </div>
         )

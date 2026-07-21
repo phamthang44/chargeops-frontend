@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CHARGER_STATUS, useApi, type ConnectorType } from '@chargeops/api';
@@ -14,6 +15,7 @@ const PROV_STATION = 'ST-1042';
 
 /** FR14 — admin creates charger records (UNCLAIMED until installed + linked). */
 export function Provisioning() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -30,7 +32,13 @@ export function Provisioning() {
     mutationFn: () => api.chargers.provision({ connector, powerKw, name: name.trim() || undefined }),
     onSuccess: (c) => {
       qc.invalidateQueries({ queryKey: ['chargers'] });
-      toast(`Đã tạo bản ghi ${c.id} (${CHARGER_STATUS[c.status].label})`, 'success');
+      toast(
+        t('provisioning.toastSuccess', {
+          id: c.id,
+          status: t(`provisioning.status.${c.status}`, { defaultValue: CHARGER_STATUS[c.status].label }),
+        }),
+        'success',
+      );
       setName('');
     },
     onError: (e) => toast((e as Error).message, 'error'),
@@ -40,38 +48,37 @@ export function Provisioning() {
 
   return (
     <>
-      <PageHeader title="Cấp trụ sạc" subtitle="Tạo bản ghi trụ sạc và mã QR check-in cho trạm." />
+      <PageHeader title={t('console.nav.provisioning.title')} subtitle={t('console.nav.provisioning.subtitle')} />
 
       <div className="grid items-start gap-[13px] lg:grid-cols-[1fr_1.4fr]">
         {/* create form */}
         <Card className="p-[17px]">
-          <div className="mb-[15px] text-[15px] font-semibold">Tạo bản ghi trụ sạc</div>
+          <div className="mb-[15px] text-[15px] font-semibold">{t('provisioning.createTitle')}</div>
           <div className="flex flex-col gap-[13px]">
-            <Field label="KẾT NỐI">
+            <Field label={t('provisioning.connectorLabel')}>
               <Select
                 value={connector}
                 onChange={(v) => setConnector(v as ConnectorType)}
                 options={CONNECTORS}
               />
             </Field>
-            <Field label="CÔNG SUẤT (kW)">
+            <Field label={t('provisioning.powerLabel')}>
               <Select value={String(powerKw)} onChange={(v) => setPowerKw(Number(v))} options={POWERS} />
             </Field>
-            <Field label="TÊN HIỂN THỊ (tùy chọn)">
+            <Field label={t('provisioning.displayNameLabel')}>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="VD: Cổng A1 — chủ trạm đổi sau"
+                placeholder={t('provisioning.displayNamePlaceholder')}
                 className="w-full rounded-[9px] border border-line px-[11px] py-[9px] text-[13px]"
               />
             </Field>
             <Button fullWidth onClick={() => provision.mutate()} disabled={provision.isPending}>
-              {provision.isPending ? 'Đang tạo…' : 'Tạo mã trụ + QR'}
+              {provision.isPending ? t('provisioning.submitting') : t('provisioning.submitBtn')}
             </Button>
             <div className="flex gap-2 rounded-[9px] border border-warn-border bg-warn-soft px-[13px] py-[11px] text-[11.5px] leading-[1.5] text-warn-deep">
               <span>
-                Bản ghi mới ở trạng thái <b className="font-semibold">CHƯA GÁN</b> → chuyển HOẠT ĐỘNG
-                sau khi lắp đặt &amp; liên kết.
+                {t('provisioning.helpNote')}
               </span>
             </div>
           </div>
@@ -80,8 +87,8 @@ export function Provisioning() {
         {/* provisioned table */}
         <div>
           <div className="mb-[11px] flex items-center justify-between">
-            <div className="text-[15px] font-semibold">Trụ đã cấp · Trạm Long Biên</div>
-            <span className="text-[12px] font-medium text-muted">{rows.length} bản ghi</span>
+            <div className="text-[15px] font-semibold">{t('provisioning.listTitle')}</div>
+            <span className="text-[12px] font-medium text-muted">{t('provisioning.recordsCount', { count: rows.length })}</span>
           </div>
           <Card className="overflow-hidden">
             {isLoading ? (
@@ -97,12 +104,12 @@ export function Provisioning() {
                     className="grid bg-surface-2 px-3.5 py-[11px] text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint"
                     style={{ gridTemplateColumns: '1fr 1fr 1fr 0.8fr 1.1fr 0.7fr' }}
                   >
-                    <span>MÃ</span>
-                    <span>TÊN</span>
-                    <span>KẾT NỐI</span>
-                    <span>kW</span>
-                    <span>TRẠNG THÁI</span>
-                    <span className="text-right">QR</span>
+                    <span>{t('provisioning.table.cols.id')}</span>
+                    <span>{t('provisioning.table.cols.name')}</span>
+                    <span>{t('provisioning.table.cols.connector')}</span>
+                    <span>{t('provisioning.table.cols.power')}</span>
+                    <span>{t('provisioning.table.cols.status')}</span>
+                    <span className="text-right">{t('provisioning.table.cols.qr')}</span>
                   </div>
                   {rows.map((c) => {
                     const meta = CHARGER_STATUS[c.status];
@@ -117,13 +124,13 @@ export function Provisioning() {
                         <span className="text-muted">{c.connector}</span>
                         <span className="text-muted">{c.powerKw}</span>
                         <span>
-                          <StatusPill tone={meta.tone} label={meta.label} />
+                          <StatusPill tone={meta.tone} label={t(`provisioning.status.${c.status}`, { defaultValue: meta.label })} />
                         </span>
                         <span className="text-right">
                           <button
-                            onClick={() => toast(`Đang tải QR cho ${c.id}… (demo)`, 'info')}
+                            onClick={() => toast(t('provisioning.toastDownloading', { id: c.id }), 'info')}
                             className="inline-flex text-brand"
-                            aria-label="Tải QR"
+                            aria-label={t('provisioning.downloadQr')}
                           >
                             <IconCard size={15} strokeWidth={1.9} />
                           </button>

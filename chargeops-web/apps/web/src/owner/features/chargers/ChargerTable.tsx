@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import type { Charger } from '@chargeops/api';
 import { IconCard, ProgressBar } from '@chargeops/ui';
@@ -28,6 +29,7 @@ export function ChargerTable({
   onCycleStatus,
   onDownloadQr,
 }: ChargerTableProps) {
+  const { t } = useTranslation('owner');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
 
@@ -46,13 +48,13 @@ export function ChargerTable({
         className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
         style={{ gridTemplateColumns: GRID }}
       >
-        <span>MÃ</span>
-        <span>TÊN ✎</span>
-        <span>KẾT NỐI 🔒</span>
+        <span>{t('chargers.table.cols.id')}</span>
+        <span>{t('chargers.table.cols.name')}</span>
+        <span>{t('chargers.table.cols.connector')}</span>
         <span>kW 🔒</span>
-        <span>TRẠNG THÁI ✎</span>
-        <span>SỬ DỤNG HÔM NAY</span>
-        <span className="text-right">PHIÊN</span>
+        <span>{t('chargers.table.cols.status')}</span>
+        <span>{t('chargers.table.cols.utilization')}</span>
+        <span className="text-right">{t('chargers.table.cols.sessions')}</span>
         <span className="text-right">QR</span>
       </div>
 
@@ -110,7 +112,7 @@ export function ChargerTable({
                 style={{ background: pill.bg, color: pill.fg }}
               >
                 <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-                {pill.label}
+                {t(`chargers.status.${c.status}`)}
               </button>
             </span>
 
@@ -131,7 +133,7 @@ export function ChargerTable({
                   onDownloadQr(c);
                 }}
                 className="inline-flex text-brand"
-                aria-label="Tải QR"
+                aria-label={t('chargers.table.downloadQr')}
               >
                 <IconCard size={15} strokeWidth={1.9} />
               </button>

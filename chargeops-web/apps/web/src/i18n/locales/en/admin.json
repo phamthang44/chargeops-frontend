@@ -1,0 +1,374 @@
+{
+  "console": {
+    "role": "ADMINISTRATOR",
+    "searchPlaceholder": "Search bookings, chargers, stations, owners...",
+    "nav": {
+      "dashboard": {
+        "label": "Overview",
+        "title": "Platform Overview",
+        "subtitle": "Total stations, bookings, and revenue · Saturday, 28/06/2026"
+      },
+      "approvals": {
+        "label": "Approvals",
+        "title": "Station Approvals",
+        "subtitle": "Review new station registration submissions from owners."
+      },
+      "provisioning": {
+        "label": "Provisioning",
+        "title": "Provision Chargers",
+        "subtitle": "Create charger records and check-in QR codes for stations."
+      },
+      "bookings": {
+        "label": "Bookings",
+        "title": "Platform Bookings",
+        "subtitle": "All bookings across all stations."
+      },
+      "transactions": {
+        "label": "Transactions",
+        "title": "Transactions",
+        "subtitle": "Platform-wide payments and refunds."
+      },
+      "licenses": {
+        "label": "Licenses",
+        "title": "Licenses",
+        "subtitle": "Monitor license expiration and record manual renewals."
+      },
+      "users": {
+        "label": "Users",
+        "title": "Users",
+        "subtitle": "Manage driver, station owner, and administrator accounts."
+      },
+      "analytics": {
+        "label": "Analytics",
+        "title": "Analytics",
+        "subtitle": "Platform-wide trends in bookings, revenue, and operations."
+      },
+      "kb": {
+        "label": "Policy Library",
+        "title": "Policy Library",
+        "subtitle": "Knowledge source for the policy assistant (RAG)."
+      }
+    }
+  },
+  "rejectModal": {
+    "title": "Reject Station Registration",
+    "subtitle": "The reason will be sent to the station owner of {{name}} on the registration status screen.",
+    "reasonLabel": "REJECTION REASON",
+    "reasonRequired": "Rejection reason is required.",
+    "placeholder": "e.g., Missing valid business license...",
+    "cancelBtn": "Cancel",
+    "confirmBtn": "Confirm Rejection",
+    "processing": "Processing..."
+  },
+  "docModal": {
+    "editTitle": "Edit Policy Document",
+    "addTitle": "Add Policy Document",
+    "subtitle": "Once saved, the document will regenerate embeddings for the AI assistant to reply using the latest policies.",
+    "categoryLabel": "CATEGORY",
+    "contentLabel": "POLICY CONTENT",
+    "contentRequired": "Please enter the policy content.",
+    "placeholder": "A clear, self-contained policy statement...",
+    "cancelBtn": "Cancel",
+    "saveBtn": "Save & Regenerate",
+    "saving": "Saving...",
+    "categories": {
+      "all": "All",
+      "cancellationRefund": "Cancellations & Refunds",
+      "checkIn": "Check-in",
+      "payment": "Payments",
+      "pricing": "Pricing",
+      "chargers": "Chargers",
+      "accounts": "Accounts"
+    }
+  },
+  "analytics": {
+    "error": "Failed to load analytics: {{message}}",
+    "ranges": {
+      "30d": "30 days",
+      "90d": "90 days",
+      "12m": "12 months"
+    },
+    "charts": {
+      "bookingsRevenue": "Bookings & Revenue · 12 months",
+      "revenueByStation": "Revenue by Station",
+      "peakHours": "Peak Operating Hours",
+      "peakHoursSub": "Average sessions by hour of day",
+      "connectionTypes": "Connector Type Distribution"
+    },
+    "kpis": {
+      "revenue12m": "12M REVENUE",
+      "totalBookings": "TOTAL BOOKINGS",
+      "activeStations": "ACTIVE STATIONS",
+      "occupancyRate": "OCCUPANCY RATE",
+      "cancellationNoShow": "CANCEL / NO-SHOW"
+    },
+    "deltas": {
+      "vsPrevious": "vs last period",
+      "bookings": "bookings",
+      "thisWeek": "this week",
+      "points": "pts"
+    }
+  },
+  "approvals": {
+    "toastApproved": "Approved {{name}} → ACTIVE",
+    "toastRejected": "Rejected {{name}}",
+    "error": "Failed to load profiles: {{message}}",
+    "emptyTitle": "No pending registrations",
+    "emptyDesc": "All registered stations have been processed.",
+    "table": {
+      "cols": {
+        "id": "ID",
+        "station": "STATION",
+        "owner": "OWNER",
+        "city": "CITY",
+        "chargers": "CHARGERS"
+      }
+    },
+    "detail": {
+      "title": "REVIEW · {{id}}",
+      "statusPending": "Pending",
+      "address": "Address",
+      "proposedChargers": "Proposed Chargers",
+      "proposedChargersVal": "{{count}} ports",
+      "license": "Business License",
+      "submittedAt": "Submitted At",
+      "submittedVal": "Submitted ✓",
+      "documents": "Documents & Images",
+      "approveBtn": "Approve → Set ACTIVE",
+      "approving": "Approving...",
+      "rejectBtn": "Reject (reason required)"
+    }
+  },
+  "bookings": {
+    "searchFields": {
+      "all": "All fields",
+      "id": "Booking ID",
+      "station": "Station",
+      "driver": "Driver",
+      "charger": "Charger"
+    },
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "checkedin": "Checked In",
+      "charging": "Charging",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "metrics": {
+      "total": "TOTAL BOOKINGS",
+      "completed": "COMPLETED",
+      "cancelled": "CANCELLED",
+      "pending": "PENDING PAYMENT"
+    },
+    "placeholder": "Filter by ID, station, driver, charger...",
+    "searchFieldLabel": "Search field",
+    "table": {
+      "cols": {
+        "id": "ID",
+        "station": "STATION",
+        "owner": "OWNER",
+        "charger": "CHARGER",
+        "timeSlot": "TIME SLOT",
+        "amount": "AMOUNT",
+        "status": "STATUS"
+      },
+      "empty": "No bookings match the filters."
+    }
+  },
+  "dashboard": {
+    "error": "Failed to load overview data: {{message}}",
+    "kpi": {
+      "activeStations": "ACTIVE STATIONS",
+      "activeStationsDelta": "+{{count}} this week",
+      "pendingApprovals": "PENDING APPROVALS",
+      "pendingApprovalsDelta": "{{count}} new submissions today",
+      "bookingsToday": "BOOKINGS TODAY",
+      "bookingsDelta": "+{{pct}}% vs yesterday",
+      "revenueMonth": "REVENUE IN JUNE",
+      "revenueDelta": "+{{pct}}% vs May"
+    },
+    "charts": {
+      "trendTitle": "Platform-wide Bookings & Revenue · 14 days",
+      "trendLegend": {
+        "bookings": "Bookings",
+        "revenue": "Revenue"
+      },
+      "stationRevenue": "Revenue by Station · Jun",
+      "stationRevenueLink": "Analytics →"
+    },
+    "actionQueue": {
+      "title": "Action Queue",
+      "link": "Station Approvals →",
+      "pendingStations": "Pending station registrations",
+      "expiringLicenses": "Licenses expiring soon",
+      "expiringLicensesVal": "{{count}} · {{days}} days",
+      "expiredLicenses": "Expired licenses",
+      "reportedFaults": "Reported charger faults"
+    }
+  },
+  "licenses": {
+    "plans": {
+      "yearly": "Year",
+      "monthly": "Month",
+      "yearlyPlan": "Yearly Plan",
+      "monthlyPlan": "Monthly Plan"
+    },
+    "toastRenewal": "Recorded license renewal for {{name}}",
+    "metrics": {
+      "total": "TOTAL LICENSES",
+      "active": "ACTIVE",
+      "expiring": "EXPIRING SOON",
+      "expired": "EXPIRED"
+    },
+    "error": "Failed to load licenses: {{message}}",
+    "queue": {
+      "title": "Renewal Queue",
+      "empty": "No licenses require renewal.",
+      "daysOverdue": "{{days}} days overdue",
+      "daysLeft": "{{days}} days left",
+      "recordRenewal": "Record Renewal"
+    },
+    "distribution": {
+      "title": "Plan Distribution",
+      "help": "Purchases/renewals are processed offline (per SRS). Admin records status here."
+    },
+    "table": {
+      "cols": {
+        "id": "ID",
+        "station": "STATION",
+        "owner": "OWNER",
+        "plan": "PLAN",
+        "expires": "EXPIRES",
+        "remaining": "REMAINING",
+        "status": "STATUS",
+        "action": "ACTION"
+      },
+      "overdueVal": "{{days}} days overdue",
+      "daysLeftVal": "{{days}} days",
+      "renewBtn": "Renew"
+    }
+  },
+  "policyKB": {
+    "toastSaved": "Saved & regenerated embeddings",
+    "toastDeleted": "Deleted document",
+    "addDocBtn": "Add Document",
+    "error": "Failed to load policy library: {{message}}",
+    "syncNote": "Embeddings in sync · updated 29/06",
+    "categorySidebar": "CATEGORIES",
+    "searchPlaceholder": "Search policy content...",
+    "empty": "No documents match.",
+    "updatedAt": "updated {{date}}",
+    "editBtn": "Edit",
+    "deleteBtn": "Delete",
+    "docsLabel": "DOCUMENTS",
+    "catsLabel": "CATEGORIES"
+  },
+  "provisioning": {
+    "toastSuccess": "Created record {{id}} ({{status}})",
+    "createTitle": "Create Charger Record",
+    "connectorLabel": "CONNECTOR",
+    "powerLabel": "POWER (kW)",
+    "displayNameLabel": "DISPLAY NAME (optional)",
+    "displayNamePlaceholder": "e.g., Connector A1 — owner can edit later",
+    "submitBtn": "Create Charger ID & QR",
+    "submitting": "Creating...",
+    "helpNote": "New records start as UNCLAIMED → transition to ACTIVE after installation and pairing.",
+    "listTitle": "Provisioned Chargers · Long Bien Station",
+    "recordsCount": "{{count}} records",
+    "status": {
+      "unclaimed": "Unclaimed",
+      "active": "Active",
+      "charging": "Charging",
+      "faulted": "Faulted"
+    },
+    "table": {
+      "cols": {
+        "id": "ID",
+        "name": "NAME",
+        "connector": "CONNECTOR",
+        "power": "kW",
+        "status": "STATUS",
+        "qr": "QR"
+      }
+    },
+    "toastDownloading": "Downloading QR for {{id}}... (demo)",
+    "downloadQr": "Download QR"
+  },
+  "transactions": {
+    "methods": {
+      "ATM": "ATM Card",
+      "MOMO": "Momo",
+      "VNPAY": "VNPay"
+    },
+    "types": {
+      "all": "All",
+      "payment": "Payment",
+      "refund": "Refund"
+    },
+    "kpi": {
+      "gross": "GROSS REVENUE",
+      "grossSub": "{{count}} transactions",
+      "refunded": "TOTAL REFUNDED",
+      "refundedSub": "{{count}} refunds",
+      "net": "NET REVENUE",
+      "netSub": "payments − refunds",
+      "avg": "AVERAGE VALUE",
+      "avgSub": "per transaction"
+    },
+    "breakdown": "By Payment Method",
+    "table": {
+      "cols": {
+        "id": "TX ID",
+        "bookingId": "BOOKING",
+        "station": "STATION",
+        "type": "TYPE",
+        "method": "METHOD",
+        "amount": "AMOUNT",
+        "date": "DATE"
+      },
+      "empty": "No transactions match the filters."
+    }
+  },
+  "users": {
+    "roles": {
+      "all": "All",
+      "DRIVER": "Drivers",
+      "OWNER": "Owners",
+      "ADMIN": "Admins"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "toastStatus": "{{name}}: {{status}}",
+    "error": "Failed to load users: {{message}}",
+    "kpi": {
+      "total": "TOTAL ACCOUNTS",
+      "drivers": "DRIVERS",
+      "owners": "OWNERS",
+      "suspended": "SUSPENDED"
+    },
+    "searchPlaceholder": "Search name, email...",
+    "table": {
+      "cols": {
+        "account": "ACCOUNT",
+        "role": "ROLE",
+        "joined": "JOINED",
+        "status": "STATUS",
+        "action": "ACTION"
+      },
+      "suspend": "Suspend",
+      "activate": "Activate"
+    },
+    "drawer": {
+      "close": "Close",
+      "role": "Role",
+      "joined": "Joined",
+      "totalBookings": "Total Bookings",
+      "suspendAccount": "Suspend Account",
+      "activateAccount": "Activate Account"
+    }
+  }
+}

@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { STATION_STATUS, type Station } from '@chargeops/api';
 import { Card, IconClock, StatusPill } from '@chargeops/ui';
 
 /** One station card — active shows stats; pending/rejected show a status note. */
 export function StationCard({ station }: { station: Station }) {
+  const { t } = useTranslation('owner');
   const meta = STATION_STATUS[station.status];
   return (
     <Card className="p-[17px]">
@@ -18,19 +20,19 @@ export function StationCard({ station }: { station: Station }) {
 
       {station.status === 'active' && (
         <div className="mb-[13px] grid grid-cols-3 gap-[9px]">
-          <MiniStat label="ĐẶT HÔM NAY" value={String(station.bookingsToday)} />
-          <MiniStat label="TRỤ ONLINE" value={`${station.onlineCount}/${station.chargerCount}`} />
-          <MiniStat label="SỬ DỤNG" value={`${station.utilizationPct}%`} />
+          <MiniStat label={t('stations.card.bookingsToday')} value={String(station.bookingsToday)} />
+          <MiniStat label={t('stations.card.chargersOnline')} value={`${station.onlineCount}/${station.chargerCount}`} />
+          <MiniStat label={t('stations.card.utilization')} value={`${station.utilizationPct}%`} />
         </div>
       )}
 
       <div className="flex flex-col gap-2 text-[12.5px] font-medium text-body">
         <div className="flex justify-between border-b border-hairline pb-[7px]">
-          <span className="text-faint">Địa chỉ</span>
+          <span className="text-faint">{t('stations.card.addressLabel')}</span>
           <span className="text-right">{station.address}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-faint">Giấy phép</span>
+          <span className="text-faint">{t('stations.card.licenseLabel')}</span>
           <span>{station.licenseSummary ?? '—'}</span>
         </div>
       </div>
@@ -38,14 +40,14 @@ export function StationCard({ station }: { station: Station }) {
       {station.status === 'rejected' && station.rejectionReason && (
         <div className="mt-3 flex gap-2 rounded-[9px] border border-bad-border bg-bad-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-bad-deep">
           <span>
-            <b className="font-semibold">Lý do từ chối:</b> {station.rejectionReason}
+            {t('stations.card.rejectionReason', { reason: station.rejectionReason })}
           </span>
         </div>
       )}
       {station.status === 'pending' && (
         <div className="mt-3 flex items-center gap-2 rounded-[9px] border border-warn-border bg-warn-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-warn-deep">
           <IconClock size={15} className="shrink-0" />
-          <span>Hồ sơ đang chờ quản trị viên xét duyệt. Trạm chưa hiển thị cho tài xế.</span>
+          <span>{t('stations.card.pendingHelp')}</span>
         </div>
       )}
     </Card>

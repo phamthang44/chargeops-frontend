@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   BOOKING_STATUS,
   formatDuration,
@@ -8,7 +9,6 @@ import {
 import { EmptyState, StatusPill } from '@chargeops/ui';
 
 const GRID = '0.9fr 1.2fr 0.8fr 1.1fr 0.7fr 0.8fr 0.9fr 0.7fr';
-const HEADERS = ['MÃ', 'TÀI XẾ', 'TRỤ', 'KHUNG GIỜ', 'THỜI LƯỢNG', 'P.THỨC', 'SỐ TIỀN', 'TRẠNG THÁI'];
 
 /** Desktop bookings table. Click a row to open the detail drawer. */
 export function BookingTable({
@@ -18,13 +18,25 @@ export function BookingTable({
   rows: Booking[];
   onOpen: (b: Booking) => void;
 }) {
+  const { t } = useTranslation('owner');
+  const headers = [
+    t('bookings.table.cols.id'),
+    t('bookings.table.cols.driver'),
+    t('bookings.table.cols.charger'),
+    t('bookings.table.cols.slot'),
+    t('bookings.table.cols.duration'),
+    t('bookings.table.cols.method'),
+    t('bookings.table.cols.amount'),
+    t('bookings.table.cols.status'),
+  ];
+
   return (
     <div className="min-w-[820px]">
       <div
         className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
         style={{ gridTemplateColumns: GRID }}
       >
-        {HEADERS.map((h, i) => (
+        {headers.map((h, i) => (
           <span key={h} className={i === 6 ? 'text-right' : i === 7 ? 'text-center' : ''}>
             {h}
           </span>
@@ -32,7 +44,7 @@ export function BookingTable({
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState>Không có lượt đặt nào khớp bộ lọc.</EmptyState>
+        <EmptyState>{t('bookings.emptyState')}</EmptyState>
       ) : (
         rows.map((b) => {
           const meta = BOOKING_STATUS[b.status];

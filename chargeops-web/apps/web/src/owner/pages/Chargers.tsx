@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi, type Charger, type ChargerStatus } from '@chargeops/api';
@@ -8,6 +9,7 @@ import { ChargerDetailPanel } from '../features/chargers/ChargerDetailPanel';
 import { nextStatus } from '../features/chargers/chargerStatus';
 
 export function Chargers() {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -23,25 +25,25 @@ export function Chargers() {
       api.chargers.update(id, patch),
     onSuccess: (c) => {
       qc.invalidateQueries({ queryKey: ['chargers'] });
-      toast(`Đã cập nhật ${c.id}`, 'success');
+      toast(t('chargers.updateSuccess', { id: c.id }), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
 
-  const downloadQr = (c: Charger) => toast(`Đang tải QR cho ${c.id}… (demo)`, 'info');
+  const downloadQr = (c: Charger) => toast(t('chargers.downloadToast', { id: c.id }), 'info');
 
   const selected = data?.find((c) => c.id === selectedId) ?? null;
 
   return (
     <>
       <PageHeader
-        title="Trụ sạc"
-        subtitle="Tên hiển thị, trạng thái và QR check-in của từng trụ."
+        title={t('chargers.title')}
+        subtitle={t('chargers.subtitle')}
       />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được danh sách trụ: {(error as Error).message}
+          {t('chargers.loadError', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <ChargersSkeleton />
@@ -51,11 +53,7 @@ export function Chargers() {
 
           <div className="mb-[13px] flex items-center gap-2 text-[12px] font-medium text-muted">
             <IconLock size={15} className="shrink-0 text-warn" />
-            <span>
-              Kết nối &amp; công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được{' '}
-              <b className="text-ink">tên hiển thị</b> và <b className="text-ink">trạng thái</b>. Nhấp
-              một dòng để xem chi tiết.
-            </span>
+            <span>{t('chargers.description')}</span>
           </div>
 
           <div

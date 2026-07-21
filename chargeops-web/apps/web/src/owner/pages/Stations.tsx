@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@chargeops/api';
@@ -8,6 +9,7 @@ import { RegisterStationModal } from '../features/stations/RegisterStationModal'
 
 /** FR12 — owner's stations with registration. */
 export function Stations() {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const [modalOpen, setModalOpen] = useState(false);
   const { data, isLoading, error } = useQuery({
@@ -18,18 +20,18 @@ export function Stations() {
   return (
     <>
       <PageHeader
-        title="Trạm của tôi"
-        subtitle="Đăng ký trạm mới và theo dõi trạng thái duyệt."
+        title={t('stations.title')}
+        subtitle={t('stations.subtitle')}
         action={
           <Button accent="owner" icon={<IconPlusCircle size={16} strokeWidth={2} />} onClick={() => setModalOpen(true)}>
-            Đăng ký trạm mới
+            {t('stations.registerBtn')}
           </Button>
         }
       />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được danh sách trạm: {(error as Error).message}
+          {t('stations.loadError', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <StationsSkeleton />

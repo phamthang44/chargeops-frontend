@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi, type StationRegistration } from '@chargeops/api';
@@ -14,6 +15,7 @@ const EMPTY: StationRegistration = { name: '', city: 'Hà Nội', address: '', p
  * off-platform (no document upload in this screen).
  */
 export function RegisterStationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -27,7 +29,7 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
     mutationFn: (input: StationRegistration) => api.stations.register(input),
     onSuccess: (station) => {
       qc.invalidateQueries({ queryKey: ['stations', 'mine'] });
-      toast(`Đã gửi đăng ký "${station.name}" — chờ duyệt`, 'success');
+      toast(t('stations.register.toastSuccess', { name: station.name }), 'success');
       close();
     },
     onError: (e) => toast((e as Error).message, 'error'),
@@ -54,51 +56,51 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
           <IconHome size={20} className="text-owner" />
         </span>
         <div>
-          <div className="text-[17px] font-bold">Đăng ký trạm mới</div>
+          <div className="text-[17px] font-bold">{t('stations.register.title')}</div>
           <div className="mt-0.5 text-[12px] text-muted">
-            Hồ sơ ở trạng thái CHỜ DUYỆT cho tới khi quản trị viên xét duyệt.
+            {t('stations.register.subtitle')}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-[15px]">
         <FormField
-          label="TÊN TRẠM"
+          label={t('stations.register.stationName')}
           hint={
             showErrors && nameInvalid
-              ? 'Vui lòng nhập tên trạm.'
-              : 'Tên này hiển thị cho tài xế khi tìm trạm trên bản đồ.'
+              ? t('stations.register.nameRequired')
+              : t('stations.register.nameHelp')
           }
           error={showErrors && nameInvalid}
         >
           <TextInput
             value={form.name}
             onChange={(name) => setForm((f) => ({ ...f, name }))}
-            placeholder="VD: Trạm Mỹ Đình"
+            placeholder={t('stations.register.namePlaceholder')}
             invalid={showErrors && nameInvalid}
           />
         </FormField>
 
         <FormField
-          label="ĐỊA CHỈ"
+          label={t('stations.register.address')}
           hint={
             showErrors && addrInvalid
-              ? 'Vui lòng nhập địa chỉ.'
-              : 'Dùng để định vị trạm chính xác trên bản đồ tìm kiếm.'
+              ? t('stations.register.addressRequired')
+              : t('stations.register.addressHelp')
           }
           error={showErrors && addrInvalid}
         >
           <TextInput
             value={form.address}
             onChange={(address) => setForm((f) => ({ ...f, address }))}
-            placeholder="Số nhà, đường, quận"
+            placeholder={t('stations.register.addressPlaceholder')}
             invalid={showErrors && addrInvalid}
           />
         </FormField>
 
         <div className="flex gap-[11px]">
           <div className="flex-[1.4]">
-            <FormField label="THÀNH PHỐ">
+            <FormField label={t('stations.register.city')}>
               <Select
                 value={form.city}
                 onChange={(city) => setForm((f) => ({ ...f, city }))}
@@ -108,7 +110,7 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
             </FormField>
           </div>
           <div className="flex-[0.8]">
-            <FormField label="SỐ TRỤ DỰ KIẾN">
+            <FormField label={t('stations.register.plannedChargers')}>
               <TextInput
                 value={String(form.plannedChargers)}
                 onChange={(v) =>
@@ -122,18 +124,17 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
 
         <div className="flex gap-2.5 rounded-[10px] border border-warn-border bg-warn-soft px-[13px] py-[11px] text-[11px] leading-[1.5] text-warn-deep">
           <span>
-            Giấy phép kinh doanh được xác minh ngoài nền tảng trước khi duyệt (không nộp tài liệu tại
-            đây).
+            {t('stations.register.licenseHelp')}
           </span>
         </div>
       </div>
 
       <div className="mt-[22px] flex gap-[11px]">
         <Button variant="secondary" size="lg" className="flex-1" onClick={close}>
-          Hủy bỏ
+          {t('stations.register.cancelBtn')}
         </Button>
         <Button accent="owner" size="lg" className="flex-[1.4]" onClick={submit} disabled={mutation.isPending}>
-          {mutation.isPending ? 'Đang gửi…' : 'Gửi đăng ký'}
+          {mutation.isPending ? t('stations.register.submitting') : t('stations.register.submitBtn')}
         </Button>
       </div>
     </Modal>

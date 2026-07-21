@@ -1,12 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import type { TouDays, TouRule } from '@chargeops/api';
 import { Button, FormField, IconClock, Modal, Select, TextInput } from '@chargeops/ui';
-
-const DAY_OPTS = [
-  { value: 'daily', label: 'Mỗi ngày' },
-  { value: 'weekdays', label: 'T2–T6' },
-  { value: 'weekends', label: 'T7–CN' },
-];
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -18,12 +13,19 @@ export interface AddRuleModalProps {
 
 /** Add a time-of-use pricing window. Local validation; the parent persists on save. */
 export function AddRuleModal({ open, onClose, onAdd }: AddRuleModalProps) {
+  const { t } = useTranslation('owner');
   const [name, setName] = useState('');
   const [days, setDays] = useState<TouDays>('daily');
   const [rate, setRate] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [showErrors, setShowErrors] = useState(false);
+
+  const dayOpts = [
+    { value: 'daily', label: t('pricing.days.daily') },
+    { value: 'weekdays', label: t('pricing.days.weekdays') },
+    { value: 'weekends', label: t('pricing.days.weekends') },
+  ];
 
   const rateNum = Number(rate.replace(/\D/g, ''));
   const invalid = !name.trim() || !rateNum || !HHMM.test(from) || !HHMM.test(to);
@@ -54,35 +56,35 @@ export function AddRuleModal({ open, onClose, onAdd }: AddRuleModalProps) {
           <IconClock size={19} className="text-owner" />
         </span>
         <div>
-          <div className="text-[17px] font-bold">Thêm khung giờ</div>
+          <div className="text-[17px] font-bold">{t('pricing.addRule.title')}</div>
           <div className="mt-0.5 text-[12px] text-muted">
-            Mức giá riêng mà các lượt đặt trong khung giờ này sẽ chụp lại.
+            {t('pricing.addRule.subtitle')}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-[13px]">
-        <FormField label="TÊN QUY TẮC">
+        <FormField label={t('pricing.addRule.ruleName')}>
           <TextInput
             value={name}
             onChange={setName}
-            placeholder="VD: Giờ cao điểm tối"
+            placeholder={t('pricing.addRule.namePlaceholder')}
             invalid={showErrors && !name.trim()}
           />
         </FormField>
         <div className="flex gap-[11px]">
           <div className="flex-1">
-            <FormField label="NGÀY ÁP DỤNG">
+            <FormField label={t('pricing.addRule.applyDays')}>
               <Select
                 value={days}
                 onChange={(v) => setDays(v as TouDays)}
-                options={DAY_OPTS}
+                options={dayOpts}
                 accent="owner"
               />
             </FormField>
           </div>
           <div className="flex-1">
-            <FormField label="GIÁ (₫/kWh)">
+            <FormField label={t('pricing.addRule.priceLabel')}>
               <TextInput
                 value={rate}
                 onChange={setRate}
@@ -95,29 +97,29 @@ export function AddRuleModal({ open, onClose, onAdd }: AddRuleModalProps) {
         </div>
         <div className="flex gap-[11px]">
           <div className="flex-1">
-            <FormField label="TỪ">
+            <FormField label={t('pricing.addRule.from')}>
               <TextInput value={from} onChange={setFrom} placeholder="17:00" mono invalid={showErrors && !HHMM.test(from)} />
             </FormField>
           </div>
           <div className="flex-1">
-            <FormField label="ĐẾN">
+            <FormField label={t('pricing.addRule.to')}>
               <TextInput value={to} onChange={setTo} placeholder="21:00" mono invalid={showErrors && !HHMM.test(to)} />
             </FormField>
           </div>
         </div>
         {showErrors && invalid && (
           <div className="text-[11.5px] font-medium text-bad">
-            Vui lòng nhập tên quy tắc, mức giá và khung giờ hợp lệ (HH:mm).
+            {t('pricing.addRule.validationError')}
           </div>
         )}
       </div>
 
       <div className="mt-5 flex gap-2.5">
         <Button variant="secondary" size="lg" className="flex-1" onClick={close}>
-          Hủy bỏ
+          {t('pricing.addRule.cancelBtn')}
         </Button>
         <Button accent="owner" size="lg" className="flex-1" onClick={submit}>
-          Lưu khung giờ
+          {t('pricing.addRule.saveBtn')}
         </Button>
       </div>
     </Modal>

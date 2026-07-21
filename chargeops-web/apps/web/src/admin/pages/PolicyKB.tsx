@@ -1,11 +1,22 @@
+import { useTranslation } from 'react-i18next';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, useApi, type PolicyDoc } from '@chargeops/api';
 import { Button, Card, EmptyState, IconPlusCircle, PageHeader, SearchInput, Skeleton, useToast } from '@chargeops/ui';
 import { DocModal } from '../features/kb/DocModal';
 
+const CAT_KEYS: Record<string, string> = {
+  'Hủy & hoàn tiền': 'docModal.categories.cancellationRefund',
+  'Check-in': 'docModal.categories.checkIn',
+  'Thanh toán': 'docModal.categories.payment',
+  'Giá': 'docModal.categories.pricing',
+  'Trụ sạc': 'docModal.categories.chargers',
+  'Tài khoản': 'docModal.categories.accounts',
+};
+
 /** FR15 — admin CRUD over the policy knowledge base that powers the RAG assistant. */
 export function PolicyKB() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -20,7 +31,7 @@ export function PolicyKB() {
     mutationFn: (input: { id?: string; category: string; content: string }) => api.policies.save(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['policies'] });
-      toast('Đã lưu & tái tạo embedding', 'success');
+      toast(t('policyKB.toastSaved'), 'success');
       setModalOpen(false);
       setEditing(null);
     },
@@ -30,7 +41,7 @@ export function PolicyKB() {
     mutationFn: (id: string) => api.policies.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['policies'] });
-      toast('Đã xóa tài liệu', 'success');
+      toast(t('policyKB.toastDeleted'), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
@@ -59,18 +70,18 @@ export function PolicyKB() {
   return (
     <>
       <PageHeader
-        title="Kho chính sách"
-        subtitle="Nguồn tri thức cho trợ lý chính sách (RAG)."
+        title={t('console.nav.kb.title')}
+        subtitle={t('console.nav.kb.subtitle')}
         action={
           <Button icon={<IconPlusCircle size={16} strokeWidth={2} />} onClick={openCreate}>
-            Thêm tài liệu
+            {t('policyKB.addDocBtn')}
           </Button>
         }
       />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được kho chính sách: {(error as Error).message}
+          {t('policyKB.error', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <Skeleton className="h-[420px] rounded-card" />
@@ -82,27 +93,27 @@ export function PolicyKB() {
               <div className="mb-[11px] flex gap-[9px]">
                 <div className="flex-1 rounded-[9px] border border-line-3 px-[11px] py-[9px] text-center">
                   <div className="text-[18px] font-bold text-brand">{all.length}</div>
-                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">TÀI LIỆU</div>
+                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">{t('policyKB.docsLabel')}</div>
                 </div>
                 <div className="flex-1 rounded-[9px] border border-line-3 px-[11px] py-[9px] text-center">
                   <div className="text-[18px] font-bold">{categories.length}</div>
-                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">DANH MỤC</div>
+                  <div className="text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint">{t('policyKB.catsLabel')}</div>
                 </div>
               </div>
               <div className="flex items-center gap-[7px] rounded-lg bg-good-soft px-2.5 py-2 text-[11px] font-medium text-good-deep">
                 <span className="h-[7px] w-[7px] rounded-full bg-good" />
-                Embedding đồng bộ · cập nhật 29/06
+                {t('policyKB.syncNote')}
               </div>
             </Card>
             <Card className="p-[9px]">
               <div className="px-[9px] pb-[5px] pt-[7px] text-[9px] font-semibold uppercase tracking-[0.07em] text-ghost">
-                DANH MỤC
+                {t('policyKB.categorySidebar')}
               </div>
-              <CatItem label="Tất cả" count={all.length} active={category === 'all'} onClick={() => setCategory('all')} />
+              <CatItem label={t('docModal.categories.all')} count={all.length} active={category === 'all'} onClick={() => setCategory('all')} />
               {categories.map((c) => (
                 <CatItem
                   key={c.label}
-                  label={c.label}
+                  label={t(CAT_KEYS[c.label] || c.label, { defaultValue: c.label })}
                   count={c.count}
                   active={category === c.label}
                   onClick={() => setCategory(c.label)}
@@ -114,11 +125,11 @@ export function PolicyKB() {
           {/* doc list */}
           <div>
             <div className="mb-[13px]">
-              <SearchInput value={search} onChange={setSearch} placeholder="Tìm trong nội dung chính sách…" className="w-full" />
+              <SearchInput value={search} onChange={setSearch} placeholder={t('policyKB.searchPlaceholder')} className="w-full" />
             </div>
             {docs.length === 0 ? (
               <Card>
-                <EmptyState>Không có tài liệu nào khớp.</EmptyState>
+                <EmptyState>{t('policyKB.empty')}</EmptyState>
               </Card>
             ) : (
               <div className="flex flex-col gap-[11px]">
@@ -129,9 +140,9 @@ export function PolicyKB() {
                         <div className="mb-[7px] flex items-center gap-[9px]">
                           <span className="font-mono text-[10.5px] font-semibold text-brand">{d.id}</span>
                           <span className="rounded-full bg-line-3 px-[9px] py-0.5 text-[10px] font-semibold text-muted">
-                            {d.category}
+                            {t(CAT_KEYS[d.category] || d.category, { defaultValue: d.category })}
                           </span>
-                          <span className="text-[10.5px] text-ghost">cập nhật {formatDateVn(d.updatedAt)}</span>
+                          <span className="text-[10.5px] text-ghost">{t('policyKB.updatedAt', { date: formatDateVn(d.updatedAt) })}</span>
                         </div>
                         <div className="text-[13px] leading-[1.55]">{d.content}</div>
                       </div>
@@ -139,14 +150,14 @@ export function PolicyKB() {
                         <button
                           onClick={() => openEdit(d)}
                           className="flex h-8 w-8 items-center justify-center rounded-lg border border-line text-body hover:bg-canvas"
-                          aria-label="Sửa"
+                          aria-label={t('policyKB.editBtn')}
                         >
                           ✎
                         </button>
                         <button
                           onClick={() => remove.mutate(d.id)}
                           className="flex h-8 w-8 items-center justify-center rounded-lg border border-bad-border bg-bad-soft text-bad hover:brightness-95"
-                          aria-label="Xóa"
+                          aria-label={t('policyKB.deleteBtn')}
                         >
                           ✕
                         </button>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, useApi, type Station } from '@chargeops/api';
@@ -6,6 +7,7 @@ import { RejectModal } from '../features/approvals/RejectModal';
 
 /** FR12 — admin reviews pending station registrations, approve or reject. */
 export function Approvals() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -21,7 +23,7 @@ export function Approvals() {
     mutationFn: (id: string) => api.stations.approve(id),
     onSuccess: (s) => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
-      toast(`Đã duyệt ${s.name} → HOẠT ĐỘNG`, 'success');
+      toast(t('approvals.toastApproved', { name: s.name }), 'success');
       setSelectedId(null);
     },
     onError: (e) => toast((e as Error).message, 'error'),
@@ -30,7 +32,7 @@ export function Approvals() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => api.stations.reject(id, reason),
     onSuccess: (s) => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
-      toast(`Đã từ chối ${s.name}`, 'success');
+      toast(t('approvals.toastRejected', { name: s.name }), 'success');
       setRejectOpen(false);
       setSelectedId(null);
     },
@@ -42,11 +44,11 @@ export function Approvals() {
 
   return (
     <>
-      <PageHeader title="Duyệt trạm" subtitle="Xét duyệt hồ sơ đăng ký trạm mới của chủ trạm." />
+      <PageHeader title={t('console.nav.approvals.title')} subtitle={t('console.nav.approvals.subtitle')} />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được hồ sơ: {(error as Error).message}
+          {t('approvals.error', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <Skeleton className="h-[340px] rounded-card" />
@@ -55,8 +57,8 @@ export function Approvals() {
           <div className="mx-auto mb-4 flex h-[54px] w-[54px] items-center justify-center rounded-panel bg-good-soft">
             <IconShieldCheck size={26} className="text-good" />
           </div>
-          <div className="text-[16px] font-semibold">Hết hồ sơ chờ duyệt</div>
-          <div className="mt-[5px] text-[13px] text-muted">Tất cả trạm đăng ký đã được xử lý.</div>
+          <div className="text-[16px] font-semibold">{t('approvals.emptyTitle')}</div>
+          <div className="mt-[5px] text-[13px] text-muted">{t('approvals.emptyDesc')}</div>
         </Card>
       ) : (
         <div className="grid items-start gap-[13px] lg:grid-cols-[1.4fr_1fr]">
@@ -68,11 +70,11 @@ export function Approvals() {
                   className="grid bg-surface-2 px-3.5 py-[11px] text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint"
                   style={{ gridTemplateColumns: '0.9fr 1.5fr 1.4fr 1fr 0.6fr' }}
                 >
-                  <span>MÃ</span>
-                  <span>TRẠM</span>
-                  <span>CHỦ TRẠM</span>
-                  <span>THÀNH PHỐ</span>
-                  <span className="text-center">TRỤ</span>
+                  <span>{t('approvals.table.cols.id')}</span>
+                  <span>{t('approvals.table.cols.station')}</span>
+                  <span>{t('approvals.table.cols.owner')}</span>
+                  <span>{t('approvals.table.cols.city')}</span>
+                  <span className="text-center">{t('approvals.table.cols.chargers')}</span>
                 </div>
                 {rows.map((s) => {
                   const on = s.id === selected?.id;
@@ -128,32 +130,33 @@ function ApprovalDetail({
   onApprove: () => void;
   onReject: () => void;
 }) {
+  const { t } = useTranslation('admin');
   return (
     <Card className="p-[17px]">
       <div className="mb-1 flex items-center justify-between">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">XÉT DUYỆT · {station.id}</div>
-        <StatusPill tone="warn" label="Chờ duyệt" />
+        <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('approvals.detail.title', { id: station.id })}</div>
+        <StatusPill tone="warn" label={t('approvals.detail.statusPending')} />
       </div>
       <div className="mt-1.5 text-[17px] font-bold">{station.name}</div>
       <div className="mb-[15px] text-[13px] font-medium text-muted">
         {station.ownerName} · {station.city}
       </div>
       <div className="mb-[15px] flex flex-col gap-[9px] text-[12.5px] font-medium">
-        <DetailRow label="Địa chỉ" value={station.address} border />
-        <DetailRow label="Trụ đề nghị" value={`${station.chargerCount} cổng`} border />
-        <DetailRow label="Giấy phép" value="Đã nộp ✓" valueClass="font-semibold text-good" border />
-        <DetailRow label="Gửi lúc" value={station.submittedAt ? formatDateVn(station.submittedAt) : '—'} />
+        <DetailRow label={t('approvals.detail.address')} value={station.address} border />
+        <DetailRow label={t('approvals.detail.proposedChargers')} value={t('approvals.detail.proposedChargersVal', { count: station.chargerCount })} border />
+        <DetailRow label={t('approvals.detail.license')} value={t('approvals.detail.submittedVal')} valueClass="font-semibold text-good" border />
+        <DetailRow label={t('approvals.detail.submittedAt')} value={station.submittedAt ? formatDateVn(station.submittedAt) : '—'} />
       </div>
       <div className="mb-3.5 flex h-[60px] items-center justify-center gap-[7px] rounded-[9px] border border-dashed border-line font-mono text-[11px] text-ghost">
         <IconClipboardCheck size={15} className="text-ghost" />
-        Hồ sơ &amp; hình ảnh
+        {t('approvals.detail.documents')}
       </div>
       <div className="flex flex-col gap-[9px]">
         <Button fullWidth onClick={onApprove} disabled={approving}>
-          {approving ? 'Đang duyệt…' : 'Duyệt → đặt HOẠT ĐỘNG'}
+          {approving ? t('approvals.detail.approving') : t('approvals.detail.approveBtn')}
         </Button>
         <Button variant="danger-soft" fullWidth onClick={onReject}>
-          Từ chối (cần lý do)
+          {t('approvals.detail.rejectBtn')}
         </Button>
       </div>
     </Card>

@@ -1,0 +1,376 @@
+{
+  "console": {
+    "role": {
+      "staff": "NHÂN VIÊN TRẠM",
+      "owner": "CHỦ TRẠM"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Tổng quan",
+        "title": "Tổng quan",
+        "subtitle": "Hiệu suất trạm của bạn hôm nay."
+      },
+      "bookings": {
+        "label": "Đặt chỗ",
+        "title": "Đặt chỗ",
+        "subtitle": "Theo dõi và xử lý các lượt đặt chỗ tại trạm."
+      },
+      "chargers": {
+        "label": "Trụ sạc",
+        "title": "Trụ sạc",
+        "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng trụ."
+      },
+      "pricing": {
+        "label": "Giá & giờ hoạt động",
+        "title": "Giá & giờ hoạt động",
+        "subtitle": "Giá gốc, khung giờ TOU và giờ mở cửa."
+      },
+      "stations": {
+        "label": "Trạm của tôi",
+        "title": "Trạm của tôi",
+        "subtitle": "Đăng ký trạm mới và theo dõi trạng thái duyệt."
+      },
+      "revenue": {
+        "label": "Doanh thu",
+        "title": "Doanh thu",
+        "subtitle": "Giao dịch, hoàn tiền và doanh thu ròng."
+      },
+      "license": {
+        "label": "Giấy phép",
+        "title": "Giấy phép",
+        "subtitle": "Trạng thái giấy phép vận hành của bạn."
+      },
+      "assistant": {
+        "label": "Trợ lý chính sách",
+        "title": "Trợ lý chính sách",
+        "subtitle": "Tra cứu quy định hủy, check-in, thanh toán."
+      }
+    }
+  },
+  "assistant": {
+    "title": "Trợ lý chính sách",
+    "subtitle": "Tra cứu quy định hủy, check-in, thanh toán.",
+    "sub": "Chỉ tra cứu · trả lời dựa trên kho chính sách (RAG)",
+    "greeting": "Xin chào! Mình là Trợ lý chính sách ChargeOps. Hỏi mình về quy định hủy/hoàn tiền, cửa sổ check-in, thanh toán, hay cách hoạt động của hệ thống nhé.",
+    "error": "Xin lỗi, đã có lỗi: {{message}}",
+    "searching": "Đang tra cứu…",
+    "placeholder": "Hỏi về quy định hủy, check-in, thanh toán…",
+    "send": "Gửi",
+    "sources": "Nguồn: {{sources}}",
+    "quickQs": {
+      "cancelRefund": "Chính sách hoàn tiền khi hủy?",
+      "checkinWindow": "Cửa sổ check-in kéo dài bao lâu?",
+      "bookingConfirm": "Khi nào đặt chỗ được xác nhận?"
+    }
+  },
+  "bookings": {
+    "title": "Đặt chỗ",
+    "subtitle": "Theo dõi và xử lý các lượt đặt chỗ tại trạm.",
+    "exportCsv": "Xuất CSV",
+    "exportToast": "Đang xuất CSV… (demo)",
+    "cancelSuccess": "Đã hủy {{id}} — hoàn {{refund}}",
+    "cancelBtn": "Hủy thay khách",
+    "canceling": "Đang hủy…",
+    "contactBtn": "Liên hệ khách",
+    "emptyState": "Không có lượt đặt nào khớp bộ lọc.",
+    "rangeLabel": "KHOẢNG THỜI GIAN · LIÊN TỤC",
+    "chargerLabel": "TRỤ SẠC",
+    "driverLabel": "TÀI XẾ",
+    "snapshotLabel": "GIÁ CỐ ĐỊNH (SNAPSHOT)",
+    "rateKind": {
+      "locked": "đã khóa khi đặt",
+      "peak": "Cao điểm",
+      "offpeak": "Thấp điểm",
+      "normal": "Giờ thường"
+    },
+    "rateLabel": "Giá {{kind}}",
+    "estEnergy": "Năng lượng ước tính",
+    "total": "Tổng",
+    "refundedLabel": "Đã hoàn tiền{{percent}}",
+    "refundPolicy": "CHÍNH SÁCH HOÀN TIỀN (BR-PAY-03)",
+    "policy60": "≥ 60 phút trước giờ bắt đầu",
+    "policy15": "15–60 phút trước",
+    "policy0": "< 15 phút / no-show",
+    "refund100": "Hoàn 100%",
+    "refund50": "Hoàn 50%",
+    "refund0": "Hoàn 0%",
+    "metrics": {
+      "totalBookings": "TỔNG LƯỢT ĐẶT",
+      "activeBookings": "ĐANG HOẠT ĐỘNG",
+      "activeSub": "xác nhận · sạc",
+      "completed": "HOÀN TẤT",
+      "cancelled": "ĐÃ HỦY",
+      "grossRevenue": "TỔNG THU",
+      "revenueSub": "trừ hoàn tiền sau"
+    },
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "driver": "TÀI XẾ",
+        "charger": "TRỤ",
+        "slot": "KHUNG GIỜ",
+        "duration": "THỜI LƯỢNG",
+        "method": "P.THỨC",
+        "amount": "SỐ TIỀN",
+        "status": "TRẠNG THÁI"
+      }
+    },
+    "toolbar": {
+      "ranges": {
+        "today": "Hôm nay",
+        "7d": "7 ngày",
+        "30d": "30 ngày",
+        "all": "Tất cả"
+      },
+      "fields": {
+        "all": "Tất cả trường",
+        "id": "Mã đặt chỗ",
+        "driver": "Tài xế",
+        "charger": "Trụ sạc"
+      },
+      "placeholder": "Lọc theo mã, tài xế, trụ…",
+      "searchIn": "Tìm trong trường"
+    },
+    "tabs": {
+      "all": "Tất cả"
+    }
+  },
+  "chargers": {
+    "title": "Trụ sạc",
+    "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng trụ.",
+    "updateSuccess": "Đã cập nhật {{id}}",
+    "downloadToast": "Đang tải QR cho {{id}}… (demo)",
+    "loadError": "Không tải được danh sách trụ: {{message}}",
+    "description": "Kết nối & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên hiển thị và trạng thái. Nhấp một dòng để xem chi tiết.",
+    "status": {
+      "available": "Sẵn sàng",
+      "maintenance": "Bảo trì",
+      "unclaimed": "Chưa gán"
+    },
+    "stats": {
+      "total": "TỔNG TRỤ",
+      "available": "SẴN SÀNG",
+      "maintenance": "BẢO TRÌ",
+      "sessions": "PHIÊN HÔM NAY",
+      "sessionsSub": "SD trung bình {{util}}%"
+    },
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "name": "TÊN ✎",
+        "connector": "KẾT NỐI 🔒",
+        "status": "TRẠNG THÁI ✎",
+        "utilization": "SỬ DỤNG HÔM NAY",
+        "sessions": "PHIÊN"
+      },
+      "downloadQr": "Tải QR"
+    },
+    "panel": {
+      "editTitle": "CHỈNH SỬA TRỤ SẠC",
+      "close": "Đóng",
+      "identityGroup": "Thông tin định danh",
+      "chargerId": "MÃ TRỤ (CHARGER ID)",
+      "idHelp": "Mã duy nhất dùng để tạo QR Check-in — không thể đổi.",
+      "displayName": "TÊN HIỂN THỊ",
+      "namePlaceholder": "VD: Bộ sạc nhanh 60kW — Trụ 1",
+      "nameHelp": "Tên này hiển thị cho tài xế và trên màn hình trụ sạc.",
+      "specGroup": "Thông số kỹ thuật",
+      "adminProvided": "Do QTV cấp",
+      "connector": "LOẠI ĐẦU CẮM",
+      "power": "CÔNG SUẤT",
+      "specHelp": "Kết nối & công suất được Quản trị viên cấp khi lắp đặt.",
+      "operationGroup": "Trạng thái vận hành",
+      "perfGroup": "Hiệu suất hôm nay",
+      "utilization": "SỬ DỤNG",
+      "sessions": "PHIÊN HÔM NAY",
+      "kwh": "kWh HÔM NAY",
+      "qrHelp": "Dán tại trụ để tài xế quét khi đến.",
+      "downloadQrBtn": "Tải QR",
+      "saveBtn": "Lưu thay đổi",
+      "saving": "Đang lưu…"
+    }
+  },
+  "pricing": {
+    "title": "Giá & giờ hoạt động",
+    "subtitle": "Giá gốc, khung giờ TOU và giờ mở cửa. Thay đổi chỉ áp dụng cho đặt chỗ mới.",
+    "saveSuccess": "Đã lưu cấu hình giá & giờ hoạt động",
+    "loadError": "Không tải được cấu hình: {{message}}",
+    "cancelBtn": "Hủy bỏ",
+    "saveBtn": "Lưu thay đổi",
+    "saving": "Đang lưu…",
+    "steps": {
+      "step1": {
+        "title": "Cấu hình cơ bản",
+        "groupTitle": "Thời lượng & Giá gốc",
+        "groupHelp": "Thiết lập thời gian tối thiểu cho mỗi lượt sạc.",
+        "durationLabel": "THỜI LƯỢNG MỘT SLOT",
+        "durationVal": "{{minutes}} phút",
+        "basePriceLabel": "GIÁ SẠC MẶC ĐỊNH",
+        "basePriceSub": "Giá gốc",
+        "basePriceHelp": "Giá này áp dụng cho mọi khung giờ không được thiết lập riêng bên dưới."
+      },
+      "step2": {
+        "title": "Giờ hoạt động",
+        "toggle247": "Đặt mở 24/7",
+        "helpText": "Giờ hoạt động ảnh hưởng đến khả năng hiển thị của trạm trên bản đồ tìm kiếm của tài xế."
+      },
+      "step3": {
+        "title": "Giá theo khung giờ",
+        "addRule": "Thêm khung giờ",
+        "noRules": "Chưa có khung giờ riêng — mọi lượt đặt dùng giá gốc. Nhấn Thêm khung giờ để bắt đầu.",
+        "deleteBtn": "Xóa",
+        "vsBase": "SO VỚI GIÁ GỐC",
+        "tipTitle": "Mẹo tối ưu doanh thu",
+        "tipText": "Tăng giá vào khung giờ 18:00 – 21:00 có thể giúp bạn tăng thêm 15% doanh thu hàng tháng."
+      },
+      "step4": {
+        "title": "Quy tắc khả dụng",
+        "lockTitle": "Tự động khoá slot",
+        "lockDesc": "Khoá slot sau 15 phút nếu khách không check-in.",
+        "advanceTitle": "Cho phép đặt trước tối đa",
+        "advanceDesc": "Thời gian khách có thể đặt slot trước.",
+        "advanceDays": "{{days}} ngày",
+        "nightTitle": "Giá ưu tiên sạc đêm",
+        "nightDesc": "Giảm 10% cho khung giờ 00:00 – 05:00.",
+        "validConfig": "Cấu hình hợp lệ",
+        "validConfigHelp": "Tất cả khung giờ đã được kiểm tra không trùng lặp."
+      }
+    },
+    "addRule": {
+      "title": "Thêm khung giờ",
+      "subtitle": "Mức giá riêng mà các lượt đặt trong khung giờ này sẽ chụp lại.",
+      "ruleName": "TÊN QUY TẮC",
+      "namePlaceholder": "VD: Giờ cao điểm tối",
+      "applyDays": "NGÀY ÁP DỤNG",
+      "priceLabel": "GIÁ (₫/kWh)",
+      "from": "TỪ",
+      "to": "ĐẾN",
+      "validationError": "Vui lòng nhập tên quy tắc, mức giá và khung giờ hợp lệ (HH:mm).",
+      "cancelBtn": "Hủy bỏ",
+      "saveBtn": "Lưu khung giờ"
+    },
+    "days": {
+      "daily": "Mỗi ngày",
+      "weekdays": "T2–T6",
+      "weekends": "T7–CN",
+      "T2": "T2",
+      "T3": "T3",
+      "T4": "T4",
+      "T5": "T5",
+      "T6": "T6",
+      "T7": "T7",
+      "CN": "CN"
+    }
+  },
+  "revenue": {
+    "title": "Doanh thu",
+    "subtitle": "Giao dịch, hoàn tiền và doanh thu ròng của bạn.",
+    "kpis": {
+      "gross": "TỔNG THU",
+      "refunded": "ĐÃ HOÀN",
+      "net": "DOANH THU RÒNG",
+      "avg": "GIÁ TRỊ TB",
+      "txCount": "{{count}} giao dịch",
+      "refundCount": "{{count}} lượt hoàn",
+      "netSub": "thu − hoàn",
+      "avgSub": "mỗi giao dịch"
+    },
+    "filters": {
+      "types": {
+        "all": "Tất cả",
+        "payment": "Thanh toán",
+        "refund": "Hoàn tiền"
+      },
+      "methods": {
+        "all": "Tất cả P.thức",
+        "ATM": "Thẻ ATM"
+      }
+    },
+    "insights": {
+      "title": "Doanh thu theo ngày · {{days}} ngày",
+      "dayTooltip": "Ngày {{day}}: {{value}}",
+      "methodTitle": "Theo phương thức"
+    },
+    "methods": {
+      "ATM": "Thẻ ATM"
+    },
+    "table": {
+      "cols": {
+        "txId": "MÃ GD",
+        "bookingId": "ĐẶT CHỖ",
+        "type": "LOẠI",
+        "method": "P.THỨC",
+        "amount": "SỐ TIỀN",
+        "date": "NGÀY"
+      },
+      "empty": "Không có giao dịch nào khớp bộ lọc.",
+      "types": {
+        "refund": "Hoàn tiền",
+        "payment": "Thanh toán"
+      },
+      "typeWithMethod": "{{type}} · {{method}}"
+    }
+  },
+  "stations": {
+    "title": "Trạm của tôi",
+    "subtitle": "Đăng ký trạm mới và theo dõi trạng thái duyệt.",
+    "registerBtn": "Đăng ký trạm mới",
+    "loadError": "Không tải được danh sách trạm: {{message}}",
+    "summary": {
+      "total": "TỔNG TRẠM",
+      "active": "ĐANG HOẠT ĐỘNG",
+      "pending": "CHỜ DUYỆT",
+      "online": "TRỤ ONLINE"
+    },
+    "card": {
+      "bookingsToday": "ĐẶT HÔM NAY",
+      "chargersOnline": "TRỤ ONLINE",
+      "utilization": "SỬ DỤNG",
+      "addressLabel": "Địa chỉ",
+      "licenseLabel": "Giấy phép",
+      "rejectionReason": "Lý do từ chối: {{reason}}",
+      "pendingHelp": "Hồ sơ đang chờ quản trị viên xét duyệt. Trạm chưa hiển thị cho tài xế."
+    },
+    "register": {
+      "title": "Đăng ký trạm mới",
+      "subtitle": "Hồ sơ ở trạng thái CHỜ DUYỆT cho tới khi quản trị viên xét duyệt.",
+      "toastSuccess": "Đã gửi đăng ký \"{{name}}\" — chờ duyệt",
+      "stationName": "TÊN TRẠM",
+      "namePlaceholder": "VD: Trạm Mỹ Đình",
+      "nameRequired": "Vui lòng nhập tên trạm.",
+      "nameHelp": "Tên này hiển thị cho tài xế khi tìm trạm trên bản đồ.",
+      "address": "ĐỊA CHỈ",
+      "addressRequired": "Vui lòng nhập địa chỉ.",
+      "addressPlaceholder": "Số nhà, đường, quận",
+      "addressHelp": "Dùng để định vị trạm chính xác trên bản đồ tìm kiếm.",
+      "city": "THÀNH PHỐ",
+      "plannedChargers": "SỐ TRỤ DỰ KIẾN",
+      "licenseHelp": "Giấy phép kinh doanh được xác minh ngoài nền tảng trước khi duyệt (không nộp tài liệu tại đây).",
+      "cancelBtn": "Hủy bỏ",
+      "submitBtn": "Gửi đăng ký",
+      "submitting": "Đang gửi…"
+    }
+  },
+  "license": {
+    "title": "Giấy phép",
+    "subtitle": "Trạng thái giấy phép vận hành của bạn.",
+    "loadError": "Không tải được giấy phép: {{message}}",
+    "plans": {
+      "yearly": "Gói Năm (Yearly)",
+      "monthly": "Gói Tháng (Monthly)"
+    },
+    "priceLabel": "{{price}} / {{period}}",
+    "periodYear": "năm",
+    "periodMonth": "tháng",
+    "labels": {
+      "start": "Bắt đầu",
+      "expiry": "Hết hạn",
+      "remaining": "Còn lại",
+      "remainingVal": "{{days}} ngày"
+    },
+    "helpTitle": "Gia hạn sắp tới (còn {{days}} ngày).",
+    "helpBody": "Việc mua/gia hạn giấy phép được xử lý ngoài nền tảng; trạng thái sẽ được quản trị viên ghi nhận thủ công. Màn hình này chỉ hiển thị trạng thái.",
+    "warningTitle": "Khi giấy phép hết hạn",
+    "warningBody": "Trạm và các trụ sẽ bị ẩn khỏi tìm kiếm của tài xế cho tới khi gia hạn (BR-STA-01). Các đặt chỗ đang hoạt động không bị ảnh hưởng."
+  }
+}

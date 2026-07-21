@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { formatVndCompact, useApi, type AdminDashboard } from '@chargeops/api';
 import { Card, KpiCard, PageHeader, SidePanel, Skeleton, TrendChart } from '@chargeops/ui';
 
 /** Admin dashboard — platform-wide; data from the service layer (mock now, REST later). */
 export function Dashboard() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard', 'admin'],
@@ -13,12 +15,12 @@ export function Dashboard() {
   return (
     <>
       <PageHeader
-        title="Tổng quan nền tảng"
-        subtitle="Toàn bộ trạm, đặt chỗ và doanh thu · Thứ Bảy, 28/06/2026"
+        title={t('console.nav.dashboard.title')}
+        subtitle={t('console.nav.dashboard.subtitle')}
       />
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được dữ liệu tổng quan: {(error as Error).message}
+          {t('dashboard.error', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <DashboardSkeleton />
@@ -30,61 +32,62 @@ export function Dashboard() {
 }
 
 function DashboardBody({ data }: { data: AdminDashboard }) {
+  const { t } = useTranslation('admin');
   const { kpis, actionQueue, topStations } = data;
   return (
     <>
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
         <KpiCard
-          label="TRẠM HOẠT ĐỘNG"
+          label={t('dashboard.kpi.activeStations')}
           value={String(kpis.activeStations)}
-          delta={`+${kpis.stationsDeltaWeek} trong tuần này`}
+          delta={t('dashboard.kpi.activeStationsDelta', { count: kpis.stationsDeltaWeek })}
           deltaClass="text-good"
         />
         <KpiCard
-          label="CHỜ DUYỆT"
+          label={t('dashboard.kpi.pendingApprovals')}
           value={String(kpis.pendingApprovals)}
-          delta={`${kpis.newApprovalsToday} hồ sơ mới hôm nay`}
+          delta={t('dashboard.kpi.pendingApprovalsDelta', { count: kpis.newApprovalsToday })}
           deltaClass="text-warn"
         />
         <KpiCard
-          label="ĐẶT CHỖ HÔM NAY"
+          label={t('dashboard.kpi.bookingsToday')}
           value={String(kpis.bookingsToday)}
-          delta={`+${kpis.bookingsDeltaPct}% so với hôm qua`}
+          delta={t('dashboard.kpi.bookingsDelta', { pct: kpis.bookingsDeltaPct })}
           deltaClass="text-good"
         />
         <KpiCard
-          label="DOANH THU THÁNG 6"
+          label={t('dashboard.kpi.revenueMonth')}
           value={formatVndCompact(kpis.revenueMonthVnd).replace('tr', '')}
           suffix="tr"
-          delta={`+${kpis.revenueDeltaPct}% so với tháng 5`}
+          delta={t('dashboard.kpi.revenueDelta', { pct: kpis.revenueDeltaPct })}
           deltaClass="text-good"
         />
       </div>
 
       <div className="grid gap-[13px] lg:grid-cols-[1fr_340px]">
         <TrendChart
-          title="Đặt chỗ & doanh thu toàn nền tảng · 14 ngày"
+          title={t('dashboard.charts.trendTitle')}
           axis={['15/06', '28/06']}
           legend={[
-            { label: 'Doanh thu', colorClass: 'bg-brand' },
-            { label: 'Đặt chỗ', colorClass: 'bg-brand-tint' },
+            { label: t('dashboard.charts.trendLegend.revenue'), colorClass: 'bg-brand' },
+            { label: t('dashboard.charts.trendLegend.bookings'), colorClass: 'bg-brand-tint' },
           ]}
         />
         <div className="flex flex-col gap-[13px]">
           <SidePanel
-            title="Cần xử lý"
+            title={t('dashboard.actionQueue.title')}
             tone="warn"
-            link="Duyệt trạm →"
+            link={t('dashboard.actionQueue.link')}
             rows={[
-              { label: 'Hồ sơ trạm chờ duyệt', value: String(actionQueue.pendingStations), dotClass: 'bg-warn', valueClass: 'text-warn' },
-              { label: 'Giấy phép sắp hết hạn', value: `${actionQueue.expiringLicenses} · ${actionQueue.expiringDaysMin} ngày`, dotClass: 'bg-warn', valueClass: 'text-warn' },
-              { label: 'Giấy phép đã hết hạn', value: String(actionQueue.expiredLicenses), dotClass: 'bg-bad', valueClass: 'text-bad' },
-              { label: 'Trụ lỗi được báo cáo', value: String(actionQueue.reportedFaults), dotClass: 'bg-bad', valueClass: 'text-bad' },
+              { label: t('dashboard.actionQueue.pendingStations'), value: String(actionQueue.pendingStations), dotClass: 'bg-warn', valueClass: 'text-warn' },
+              { label: t('dashboard.actionQueue.expiringLicenses'), value: t('dashboard.actionQueue.expiringLicensesVal', { count: actionQueue.expiringLicenses, days: actionQueue.expiringDaysMin }), dotClass: 'bg-warn', valueClass: 'text-warn' },
+              { label: t('dashboard.actionQueue.expiredLicenses'), value: String(actionQueue.expiredLicenses), dotClass: 'bg-bad', valueClass: 'text-bad' },
+              { label: t('dashboard.actionQueue.reportedFaults'), value: String(actionQueue.reportedFaults), dotClass: 'bg-bad', valueClass: 'text-bad' },
             ]}
           />
           <SidePanel
-            title="Doanh thu theo trạm · T6"
-            link="Phân tích →"
+            title={t('dashboard.charts.stationRevenue')}
+            link={t('dashboard.charts.stationRevenueLink')}
             rows={topStations.map((s, i) => ({
               label: s.name,
               value: formatVndCompact(s.revenueVnd),

@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import type { Charger } from '@chargeops/api';
 import { MetricCard } from '@chargeops/ui';
 
 /** Five-metric status summary above the charger table. */
 export function ChargerStatsStrip({ chargers }: { chargers: Charger[] }) {
+  const { t } = useTranslation('owner');
   const available = chargers.filter((c) => c.status === 'available');
   const maintenance = chargers.filter((c) => c.status === 'maintenance').length;
   const offline = chargers.filter((c) => c.status === 'offline').length;
@@ -13,11 +15,11 @@ export function ChargerStatsStrip({ chargers }: { chargers: Charger[] }) {
 
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">
-      <MetricCard label="TỔNG TRỤ" value={String(chargers.length)} accent="#5b54e8" />
-      <MetricCard label="SẴN SÀNG" value={String(available.length)} accent="#12a150" />
-      <MetricCard label="BẢO TRÌ" value={String(maintenance)} accent="#9a6b16" />
+      <MetricCard label={t('chargers.stats.total')} value={String(chargers.length)} accent="#5b54e8" />
+      <MetricCard label={t('chargers.stats.available')} value={String(available.length)} accent="#12a150" />
+      <MetricCard label={t('chargers.stats.maintenance')} value={String(maintenance)} accent="#9a6b16" />
       <MetricCard label="OFFLINE" value={String(offline)} accent="#c0392b" />
-      <MetricCard label="PHIÊN HÔM NAY" value={String(sessions)} sub={`SD trung bình ${avgUtil}%`} accent="#16171a" />
+      <MetricCard label={t('chargers.stats.sessions')} value={String(sessions)} sub={t('chargers.stats.sessionsSub', { util: avgUtil })} accent="#16171a" />
     </div>
   );
 }

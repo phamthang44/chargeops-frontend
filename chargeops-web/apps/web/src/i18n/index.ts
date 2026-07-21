@@ -15,6 +15,10 @@ import viUi from '@chargeops/ui/locales/vi/ui.json';
 import enUi from '@chargeops/ui/locales/en/ui.json';
 import viAuth from '@chargeops/auth/locales/vi/auth.json';
 import enAuth from '@chargeops/auth/locales/en/auth.json';
+import viOwner from './locales/vi/owner.json';
+import enOwner from './locales/en/owner.json';
+import viAdmin from './locales/vi/admin.json';
+import enAdmin from './locales/en/admin.json';
 
 export const SUPPORTED_LANGUAGES = ['vi', 'en'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -33,8 +37,8 @@ function initialLanguage(): Language {
 
 i18n.use(initReactI18next).init({
   resources: {
-    vi: { common: viCommon, ownerDashboard: viOwnerDashboard, ui: viUi, auth: viAuth },
-    en: { common: enCommon, ownerDashboard: enOwnerDashboard, ui: enUi, auth: enAuth },
+    vi: { common: viCommon, ownerDashboard: viOwnerDashboard, ui: viUi, auth: viAuth, owner: viOwner, admin: viAdmin },
+    en: { common: enCommon, ownerDashboard: enOwnerDashboard, ui: enUi, auth: enAuth, owner: enOwner, admin: enAdmin },
   },
   lng: initialLanguage(),
   fallbackLng: 'vi',

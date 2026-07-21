@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -19,6 +20,7 @@ import { AddRuleModal } from '../features/pricing/AddRuleModal';
  * bookings keep their snapshotted price (POL-06 / BookingPriceLine).
  */
 export function Pricing() {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -39,7 +41,7 @@ export function Pricing() {
     mutationFn: (config: PricingConfig) => api.pricing.save(config),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pricing'] });
-      toast('Đã lưu cấu hình giá & giờ hoạt động', 'success');
+      toast(t('pricing.saveSuccess'), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
@@ -67,13 +69,13 @@ export function Pricing() {
   return (
     <>
       <PageHeader
-        title="Giá & giờ hoạt động"
-        subtitle="Giá gốc, khung giờ TOU và giờ mở cửa. Thay đổi chỉ áp dụng cho đặt chỗ mới."
+        title={t('pricing.title')}
+        subtitle={t('pricing.subtitle')}
       />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được cấu hình: {(error as Error).message}
+          {t('pricing.loadError', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !draft ? (
         <PricingSkeleton />
@@ -96,10 +98,10 @@ export function Pricing() {
 
           <div className="flex justify-end gap-[11px] pb-1.5 pt-0.5">
             <Button variant="secondary" size="lg" onClick={() => data && setDraft(data)}>
-              Hủy bỏ
+              {t('pricing.cancelBtn')}
             </Button>
             <Button accent="owner" size="lg" onClick={() => draft && save.mutate(draft)} disabled={save.isPending}>
-              {save.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+              {save.isPending ? t('pricing.saving') : t('pricing.saveBtn')}
             </Button>
           </div>
         </div>

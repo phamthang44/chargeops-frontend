@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import type { AvailabilityRules } from '@chargeops/api';
 import { IconCalendar, IconShieldCheck, Toggle } from '@chargeops/ui';
@@ -10,28 +11,29 @@ export interface AvailabilityStepProps {
 
 /** Step 4 — auto-lock, max advance booking, night discount. */
 export function AvailabilityStep({ rules, onChange }: AvailabilityStepProps) {
+  const { t } = useTranslation('owner');
   return (
     <div>
-      <StepHeader n={4} title="Quy tắc khả dụng" />
+      <StepHeader n={4} title={t('pricing.steps.step4.title')} />
       <div className="rounded-panel border border-line-2 bg-white px-5 pb-[18px] pt-1.5">
         <Row
-          title="Tự động khoá slot"
-          desc="Khoá slot sau 15 phút nếu khách không check-in."
+          title={t('pricing.steps.step4.lockTitle')}
+          desc={t('pricing.steps.step4.lockDesc')}
           control={<Toggle checked={rules.autoLock} onChange={(v) => onChange({ autoLock: v })} />}
         />
         <Row
-          title="Cho phép đặt trước tối đa"
-          desc="Thời gian khách có thể đặt slot trước."
+          title={t('pricing.steps.step4.advanceTitle')}
+          desc={t('pricing.steps.step4.advanceDesc')}
           control={
             <span className="flex items-center gap-[7px] rounded-[9px] border border-line px-[13px] py-2 text-[12.5px] font-semibold text-ink">
               <IconCalendar size={14} className="text-faint" />
-              {rules.maxAdvanceDays} ngày
+              {t('pricing.steps.step4.advanceDays', { days: rules.maxAdvanceDays })}
             </span>
           }
         />
         <Row
-          title="Giá ưu tiên sạc đêm"
-          desc="Giảm 10% cho khung giờ 00:00 – 05:00."
+          title={t('pricing.steps.step4.nightTitle')}
+          desc={t('pricing.steps.step4.nightDesc')}
           last
           control={<Toggle checked={rules.nightDiscount} onChange={(v) => onChange({ nightDiscount: v })} />}
         />
@@ -41,9 +43,9 @@ export function AvailabilityStep({ rules, onChange }: AvailabilityStepProps) {
             <IconShieldCheck size={15} className="text-white" strokeWidth={2.6} />
           </span>
           <div>
-            <div className="text-[12.5px] font-semibold text-owner-deep">Cấu hình hợp lệ</div>
+            <div className="text-[12.5px] font-semibold text-owner-deep">{t('pricing.steps.step4.validConfig')}</div>
             <div className="text-[11.5px] text-[#3f6b4f]">
-              Tất cả khung giờ đã được kiểm tra không trùng lặp.
+              {t('pricing.steps.step4.validConfigHelp')}
             </div>
           </div>
         </div>

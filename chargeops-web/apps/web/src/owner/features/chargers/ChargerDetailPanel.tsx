@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Charger, ChargerStatus } from '@chargeops/api';
 import { Button, Card, IconBolt, IconClock, IconLock, IconX, QrGlyph } from '@chargeops/ui';
@@ -19,6 +20,7 @@ export function ChargerDetailPanel({
   onSave,
   onDownloadQr,
 }: ChargerDetailPanelProps) {
+  const { t } = useTranslation('owner');
   const [name, setName] = useState(charger.name);
   const [status, setStatus] = useState<ChargerStatus>(charger.status);
 
@@ -33,14 +35,14 @@ export function ChargerDetailPanel({
       <div className="mb-1.5 flex items-start justify-between">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-owner">
-            CHỈNH SỬA TRỤ SẠC
+            {t('chargers.panel.editTitle')}
           </div>
           <div className="mt-1 text-[17px] font-bold">{charger.name}</div>
         </div>
         <button
           onClick={onClose}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-faint hover:bg-chip"
-          aria-label="Đóng"
+          aria-label={t('chargers.panel.close')}
         >
           <IconX size={16} strokeWidth={2} />
         </button>
@@ -48,48 +50,48 @@ export function ChargerDetailPanel({
 
       {/* identity */}
       <SectionTitle icon={<IconBolt size={15} className="text-owner" />}>
-        Thông tin định danh
+        {t('chargers.panel.identityGroup')}
       </SectionTitle>
-      <FieldLabel>MÃ TRỤ (CHARGER ID)</FieldLabel>
+      <FieldLabel>{t('chargers.panel.chargerId')}</FieldLabel>
       <div className="mb-[5px] flex items-center gap-2 rounded-[10px] border border-line-3 bg-[#f7f8fa] px-[13px] py-[11px]">
         <span className="flex-1 font-mono text-[13px] font-semibold text-body">{charger.id}</span>
         <IconLock size={14} className="text-disabled" />
       </div>
       <p className="mb-[15px] text-[11px] leading-[1.5] text-faint">
-        Mã duy nhất dùng để tạo QR Check-in — không thể đổi.
+        {t('chargers.panel.idHelp')}
       </p>
-      <FieldLabel>TÊN HIỂN THỊ</FieldLabel>
+      <FieldLabel>{t('chargers.panel.displayName')}</FieldLabel>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="VD: Bộ sạc nhanh 60kW — Trụ 1"
+        placeholder={t('chargers.panel.namePlaceholder')}
         className="w-full rounded-[10px] border border-line px-[13px] py-[11px] text-[13.5px] font-medium focus:border-owner"
       />
       <p className="mt-[7px] text-[11px] leading-[1.5] text-faint">
-        Tên này hiển thị cho tài xế và trên màn hình trụ sạc.
+        {t('chargers.panel.nameHelp')}
       </p>
 
       {/* locked specs */}
       <div className="mt-[18px] mb-3 flex items-center justify-between">
         <SectionTitleInline icon={<IconBolt size={15} className="text-owner" />}>
-          Thông số kỹ thuật
+          {t('chargers.panel.specGroup')}
         </SectionTitleInline>
         <span className="flex items-center gap-[5px] rounded-full bg-warn-soft px-[9px] py-1 font-mono text-[10px] text-warn">
           <IconLock size={11} strokeWidth={2.1} />
-          Do QTV cấp
+          {t('chargers.panel.adminProvided')}
         </span>
       </div>
       <div className="mb-[5px] flex gap-[11px]">
-        <LockedSpec label="LOẠI ĐẦU CẮM" value={charger.connector} />
-        <LockedSpec label="CÔNG SUẤT" value={`${charger.powerKw} kW`} />
+        <LockedSpec label={t('chargers.panel.connector')} value={charger.connector} />
+        <LockedSpec label={t('chargers.panel.power')} value={`${charger.powerKw} kW`} />
       </div>
       <p className="text-[11px] leading-[1.5] text-faint">
-        Kết nối &amp; công suất được Quản trị viên cấp khi lắp đặt.
+        {t('chargers.panel.specHelp')}
       </p>
 
       {/* status */}
       <SectionTitle className="mt-[18px]" icon={<IconClock size={15} className="text-owner" />}>
-        Trạng thái vận hành
+        {t('chargers.panel.operationGroup')}
       </SectionTitle>
       <div className="flex gap-[7px]">
         {OWNER_CYCLE.map((s) => {
@@ -107,7 +109,7 @@ export function ChargerDetailPanel({
               }}
             >
               <span className="h-[7px] w-[7px] rounded-full" style={{ background: pill.fg }} />
-              {pill.label}
+              {t(`chargers.status.${s}`)}
             </button>
           );
         })}
@@ -115,13 +117,13 @@ export function ChargerDetailPanel({
 
       {/* today performance */}
       <SectionTitle className="mt-[18px]" icon={<IconBolt size={15} className="text-owner" />}>
-        Hiệu suất hôm nay
+        {t('chargers.panel.perfGroup')}
       </SectionTitle>
       <div className="grid grid-cols-2 gap-2.5">
-        <PerfStat label="SỬ DỤNG" value={`${charger.utilizationPct}%`} />
+        <PerfStat label={t('chargers.panel.utilization')} value={`${charger.utilizationPct}%`} />
         <PerfStat label="UPTIME 30N" value={`${charger.uptime30dPct}%`} />
-        <PerfStat label="PHIÊN HÔM NAY" value={String(charger.sessionsToday)} />
-        <PerfStat label="kWh HÔM NAY" value={String(charger.kwhToday)} />
+        <PerfStat label={t('chargers.panel.sessions')} value={String(charger.sessionsToday)} />
+        <PerfStat label={t('chargers.panel.kwh')} value={String(charger.kwhToday)} />
       </div>
 
       {/* QR */}
@@ -132,14 +134,14 @@ export function ChargerDetailPanel({
         <div className="min-w-0 flex-1">
           <div className="text-[12.5px] font-semibold">QR Check-in</div>
           <div className="mt-0.5 text-[11px] leading-[1.45] text-faint">
-            Dán tại trụ để tài xế quét khi đến.
+            {t('chargers.panel.qrHelp')}
           </div>
         </div>
         <button
           onClick={() => onDownloadQr(charger)}
           className="flex shrink-0 items-center gap-1.5 rounded-[9px] border-[1.5px] border-owner-border px-[13px] py-[9px] text-[12px] font-semibold text-owner-deep hover:bg-owner-soft"
         >
-          Tải QR
+          {t('chargers.panel.downloadQrBtn')}
         </button>
       </div>
 
@@ -151,7 +153,7 @@ export function ChargerDetailPanel({
         onClick={() => onSave(charger.id, { name: name.trim() || charger.name, status })}
         disabled={saving}
       >
-        {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
+        {saving ? t('chargers.panel.saving') : t('chargers.panel.saveBtn')}
       </Button>
     </Card>
   );

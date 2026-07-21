@@ -1,9 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import type { PolicyDoc } from '@chargeops/api';
 import { Button, FormField, Modal, Select } from '@chargeops/ui';
 
 const CATEGORIES = ['Hủy & hoàn tiền', 'Check-in', 'Thanh toán', 'Giá', 'Trụ sạc', 'Tài khoản'];
-const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c, label: c }));
+
+const CAT_KEYS: Record<string, string> = {
+  'Hủy & hoàn tiền': 'docModal.categories.cancellationRefund',
+  'Check-in': 'docModal.categories.checkIn',
+  'Thanh toán': 'docModal.categories.payment',
+  'Giá': 'docModal.categories.pricing',
+  'Trụ sạc': 'docModal.categories.chargers',
+  'Tài khoản': 'docModal.categories.accounts',
+};
 
 export interface DocModalProps {
   open: boolean;
@@ -16,6 +25,7 @@ export interface DocModalProps {
 
 /** Create/edit a policy doc. Saving re-embeds it for the RAG assistant. */
 export function DocModal({ open, doc, pending, onClose, onSave }: DocModalProps) {
+  const { t } = useTranslation('admin');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [content, setContent] = useState('');
   const [err, setErr] = useState(false);
@@ -36,21 +46,28 @@ export function DocModal({ open, doc, pending, onClose, onSave }: DocModalProps)
     onSave({ id: doc?.id, category, content: content.trim() });
   };
 
+  const categoryOptions = CATEGORIES.map((c) => ({
+    value: c,
+    label: t(CAT_KEYS[c] || c, { defaultValue: c }),
+  }));
+
   return (
     <Modal open={open} onClose={onClose} maxWidth={480}>
-      <div className="mb-0.5 text-[17px] font-bold">{doc ? 'Sửa tài liệu chính sách' : 'Thêm tài liệu chính sách'}</div>
+      <div className="mb-0.5 text-[17px] font-bold">
+        {doc ? t('docModal.editTitle') : t('docModal.addTitle')}
+      </div>
       <div className="mb-[18px] text-[12.5px] text-muted">
-        Lưu xong, tài liệu được tái tạo embedding để trợ lý trả lời theo chính sách mới nhất.
+        {t('docModal.subtitle')}
       </div>
       <div className="flex flex-col gap-[13px]">
-        <FormField label="DANH MỤC">
-          <Select value={category} onChange={setCategory} options={CATEGORY_OPTIONS} />
+        <FormField label={t('docModal.categoryLabel')}>
+          <Select value={category} onChange={setCategory} options={categoryOptions} />
         </FormField>
-        <FormField label="NỘI DUNG CHÍNH SÁCH" error={err} hint={err ? 'Vui lòng nhập nội dung chính sách.' : undefined}>
+        <FormField label={t('docModal.contentLabel')} error={err} hint={err ? t('docModal.contentRequired') : undefined}>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Một phát biểu chính sách rõ ràng, tự chứa…"
+            placeholder={t('docModal.placeholder')}
             className={`h-[110px] w-full resize-none rounded-[9px] border px-[11px] py-2.5 text-[13px] leading-[1.5] ${
               err ? 'border-bad' : 'border-line'
             }`}
@@ -59,10 +76,10 @@ export function DocModal({ open, doc, pending, onClose, onSave }: DocModalProps)
       </div>
       <div className="mt-5 flex gap-2.5">
         <Button variant="secondary" className="flex-1" onClick={onClose}>
-          Hủy
+          {t('docModal.cancelBtn')}
         </Button>
         <Button className="flex-1" onClick={submit} disabled={pending}>
-          {pending ? 'Đang lưu…' : 'Lưu & tái tạo'}
+          {pending ? t('docModal.saving') : t('docModal.saveBtn')}
         </Button>
       </div>
     </Modal>

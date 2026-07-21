@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
@@ -25,14 +26,15 @@ const PAGE_SIZE = 12;
 type TypeKey = TransactionType | 'all';
 const GRID = '1fr 1fr 1.2fr 0.8fr 0.9fr 1fr 0.9fr';
 
-const METHOD: Record<PaymentMethod, { label: string; color: string }> = {
-  VNPAY: { label: 'VNPay', color: '#5b54e8' },
-  MOMO: { label: 'Momo', color: '#d63384' },
-  ATM: { label: 'Thẻ ATM', color: '#0d8a5a' },
+const METHOD_COLORS: Record<PaymentMethod, string> = {
+  VNPAY: '#5b54e8',
+  MOMO: '#d63384',
+  ATM: '#0d8a5a',
 };
 
 /** Platform-wide transactions (admin). */
 export function Transactions() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const [type, setType] = useState<TypeKey>('all');
   const [page, setPage] = useState(0);
@@ -50,9 +52,9 @@ export function Transactions() {
   };
 
   const typeTabs: FilterTab<TypeKey>[] = [
-    { key: 'all', label: 'Tất cả' },
-    { key: 'payment', label: 'Thanh toán' },
-    { key: 'refund', label: 'Hoàn tiền' },
+    { key: 'all', label: t('transactions.types.all') },
+    { key: 'payment', label: t('transactions.types.payment') },
+    { key: 'refund', label: t('transactions.types.refund') },
   ];
 
   const s = summaryQuery.data;
@@ -61,29 +63,29 @@ export function Transactions() {
 
   return (
     <>
-      <PageHeader title="Giao dịch" subtitle="Thanh toán và hoàn tiền toàn nền tảng." />
+      <PageHeader title={t('console.nav.transactions.title')} subtitle={t('console.nav.transactions.subtitle')} />
 
       {s ? (
         <>
           <div className="mb-3.5 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
-            <KpiCard label="TỔNG THU" value={formatVndCompact(s.grossVnd)} delta={`${s.payCount} giao dịch`} deltaClass="text-faint" />
-            <KpiCard label="ĐÃ HOÀN" value={formatVndCompact(s.refundedVnd)} delta={`${s.refundCount} lượt hoàn`} deltaClass="text-faint" />
-            <KpiCard label="DOANH THU RÒNG" value={formatVndCompact(s.netVnd)} delta="thu − hoàn" deltaClass="text-faint" />
-            <KpiCard label="GIÁ TRỊ TB" value={formatVndCompact(s.avgVnd)} delta="mỗi giao dịch" deltaClass="text-faint" />
+            <KpiCard label={t('transactions.metrics.gross')} value={formatVndCompact(s.grossVnd)} delta={t('transactions.metrics.payCountVal', { count: s.payCount })} deltaClass="text-faint" />
+            <KpiCard label={t('transactions.metrics.refunded')} value={formatVndCompact(s.refundedVnd)} delta={t('transactions.metrics.refundCountVal', { count: s.refundCount })} deltaClass="text-faint" />
+            <KpiCard label={t('transactions.metrics.net')} value={formatVndCompact(s.netVnd)} delta={t('transactions.metrics.netDelta')} deltaClass="text-faint" />
+            <KpiCard label={t('transactions.metrics.avg')} value={formatVndCompact(s.avgVnd)} delta={t('transactions.metrics.avgDelta')} deltaClass="text-faint" />
           </div>
           <Card className="mb-3.5 p-4">
-            <div className="mb-3.5 text-[13px] font-semibold">Theo phương thức</div>
+            <div className="mb-3.5 text-[13px] font-semibold">{t('transactions.methods.title')}</div>
             <div className="grid gap-x-8 gap-y-3 sm:grid-cols-3">
               {s.methodBreakdown.map((m) => (
                 <div key={m.method}>
                   <div className="mb-[5px] flex justify-between text-[12px] font-medium">
                     <span className="flex items-center gap-[7px] text-body">
-                      <span className="h-2 w-2 rounded-[3px]" style={{ background: METHOD[m.method].color }} />
-                      {METHOD[m.method].label}
+                      <span className="h-2 w-2 rounded-[3px]" style={{ background: METHOD_COLORS[m.method] }} />
+                      {t(`transactions.methods.${m.method}`)}
                     </span>
                     <span className="font-semibold">{m.pct}%</span>
                   </div>
-                  <ProgressBar value={m.pct} color={METHOD[m.method].color} className="h-[7px]" />
+                  <ProgressBar value={m.pct} color={METHOD_COLORS[m.method]} className="h-[7px]" />
                 </div>
               ))}
             </div>
@@ -116,16 +118,16 @@ export function Transactions() {
                   className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                   style={{ gridTemplateColumns: GRID }}
                 >
-                  <span>MÃ GD</span>
-                  <span>ĐẶT CHỖ</span>
-                  <span>TRẠM</span>
-                  <span>LOẠI</span>
-                  <span>P.THỨC</span>
-                  <span className="text-right">SỐ TIỀN</span>
-                  <span>NGÀY</span>
+                  <span>{t('transactions.table.cols.txId')}</span>
+                  <span>{t('transactions.table.cols.bookingId')}</span>
+                  <span>{t('transactions.table.cols.station')}</span>
+                  <span>{t('transactions.table.cols.type')}</span>
+                  <span>{t('transactions.table.cols.method')}</span>
+                  <span className="text-right">{t('transactions.table.cols.amount')}</span>
+                  <span>{t('transactions.table.cols.date')}</span>
                 </div>
                 {data.items.length === 0 ? (
-                  <EmptyState>Không có giao dịch nào khớp bộ lọc.</EmptyState>
+                  <EmptyState>{t('transactions.table.empty')}</EmptyState>
                 ) : (
                   data.items.map((t) => <Row key={t.id} tx={t} />)
                 )}
@@ -139,28 +141,29 @@ export function Transactions() {
   );
 }
 
-function Row({ tx: t }: { tx: Transaction }) {
-  const color = t.type === 'refund' ? '#c0392b' : '#0d8a5a';
+function Row({ tx }: { tx: Transaction }) {
+  const { t } = useTranslation('admin');
+  const color = tx.type === 'refund' ? '#c0392b' : '#0d8a5a';
   return (
     <div
       className="grid items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium"
       style={{ gridTemplateColumns: GRID }}
     >
-      <span className="font-mono text-[11px] font-semibold text-brand">{t.id}</span>
-      <span className="font-mono text-[11.5px] text-muted">{t.bookingId}</span>
-      <span className="text-body">{t.stationName}</span>
+      <span className="font-mono text-[11px] font-semibold text-brand">{tx.id}</span>
+      <span className="font-mono text-[11.5px] text-muted">{tx.bookingId}</span>
+      <span className="text-body">{tx.stationName}</span>
       <span>
         <span className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold" style={{ color }}>
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-          {t.type === 'refund' ? 'Hoàn tiền' : 'Thanh toán'}
+          {tx.type === 'refund' ? t('transactions.types.refund') : t('transactions.types.payment')}
         </span>
       </span>
-      <span className="text-muted">{METHOD[t.method].label}</span>
+      <span className="text-muted">{t(`transactions.methods.${tx.method}`)}</span>
       <span className="text-right font-semibold" style={{ color }}>
-        {t.amountVnd < 0 ? '−' : ''}
-        {formatVnd(Math.abs(t.amountVnd))}
+        {tx.amountVnd < 0 ? '−' : ''}
+        {formatVnd(Math.abs(tx.amountVnd))}
       </span>
-      <span className="text-[11.5px] text-faint">{formatDateVn(t.date)}</span>
+      <span className="text-[11.5px] text-faint">{formatDateVn(tx.date)}</span>
     </div>
   );
 }

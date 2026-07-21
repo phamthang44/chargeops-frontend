@@ -1,0 +1,374 @@
+{
+  "console": {
+    "role": "QUẢN TRỊ VIÊN",
+    "searchPlaceholder": "Tìm đặt chỗ, trụ, trạm, chủ trạm…",
+    "nav": {
+      "dashboard": {
+        "label": "Tổng quan",
+        "title": "Tổng quan nền tảng",
+        "subtitle": "Toàn bộ trạm, đặt chỗ và doanh thu · Thứ Bảy, 28/06/2026"
+      },
+      "approvals": {
+        "label": "Duyệt trạm",
+        "title": "Duyệt trạm",
+        "subtitle": "Xét duyệt hồ sơ đăng ký trạm mới của chủ trạm."
+      },
+      "provisioning": {
+        "label": "Cấp trụ sạc",
+        "title": "Cấp trụ sạc",
+        "subtitle": "Tạo bản ghi trụ sạc và mã QR check-in cho trạm."
+      },
+      "bookings": {
+        "label": "Đặt chỗ",
+        "title": "Đặt chỗ toàn nền tảng",
+        "subtitle": "Mọi lượt đặt trên tất cả các trạm."
+      },
+      "transactions": {
+        "label": "Giao dịch",
+        "title": "Giao dịch",
+        "subtitle": "Thanh toán và hoàn tiền toàn nền tảng."
+      },
+      "licenses": {
+        "label": "Giấy phép",
+        "title": "Giấy phép",
+        "subtitle": "Giám sát hạn giấy phép và ghi nhận gia hạn thủ công."
+      },
+      "users": {
+        "label": "Người dùng",
+        "title": "Người dùng",
+        "subtitle": "Quản lý tài khoản tài xế, chủ trạm và quản trị viên."
+      },
+      "analytics": {
+        "label": "Phân tích",
+        "title": "Phân tích",
+        "subtitle": "Xu hướng đặt chỗ, doanh thu và vận hành toàn nền tảng."
+      },
+      "kb": {
+        "label": "Kho chính sách",
+        "title": "Kho chính sách",
+        "subtitle": "Nguồn tri thức cho trợ lý chính sách (RAG)."
+      }
+    }
+  },
+  "rejectModal": {
+    "title": "Từ chối đăng ký trạm",
+    "subtitle": "Lý do sẽ được gửi tới chủ trạm {{name}} trên màn hình trạng thái đăng ký.",
+    "reasonLabel": "LÝ DO TỪ CHỐI",
+    "reasonRequired": "Cần nhập lý do từ chối.",
+    "placeholder": "VD: Thiếu giấy phép kinh doanh hợp lệ…",
+    "cancelBtn": "Hủy",
+    "confirmBtn": "Xác nhận từ chối",
+    "processing": "Đang xử lý…"
+  },
+  "docModal": {
+    "editTitle": "Sửa tài liệu chính sách",
+    "addTitle": "Thêm tài liệu chính sách",
+    "subtitle": "Lưu xong, tài liệu được tái tạo embedding để trợ lý trả lời theo chính sách mới nhất.",
+    "categoryLabel": "DANH MỤC",
+    "contentLabel": "NỘI DUNG CHÍNH SÁCH",
+    "contentRequired": "Vui lòng nhập nội dung chính sách.",
+    "placeholder": "Một phát biểu chính sách rõ ràng, tự chứa…",
+    "cancelBtn": "Hủy",
+    "saveBtn": "Lưu & tái tạo",
+    "saving": "Đang lưu…",
+    "categories": {
+      "all": "Tất cả",
+      "cancellationRefund": "Hủy & hoàn tiền",
+      "checkIn": "Check-in",
+      "payment": "Thanh toán",
+      "pricing": "Giá",
+      "chargers": "Trụ sạc",
+      "accounts": "Tài khoản"
+    }
+  },
+  "analytics": {
+    "error": "Không tải được phân tích: {{message}}",
+    "ranges": {
+      "30d": "30 ngày",
+      "90d": "90 ngày",
+      "12m": "12 tháng"
+    },
+    "charts": {
+      "bookingsRevenue": "Đặt chỗ & doanh thu · 12 tháng",
+      "revenueByStation": "Doanh thu theo trạm",
+      "peakHours": "Khung giờ cao điểm",
+      "peakHoursSub": "Số phiên sạc trung bình theo giờ trong ngày",
+      "connectionTypes": "Phân bổ loại kết nối"
+    },
+    "kpis": {
+      "revenue12m": "DOANH THU 12TH",
+      "totalBookings": "TỔNG ĐẶT CHỖ",
+      "activeStations": "TRẠM HOẠT ĐỘNG",
+      "occupancyRate": "TỶ LỆ LẤP ĐẦY",
+      "cancellationNoShow": "HỦY / NO-SHOW"
+    },
+    "deltas": {
+      "vsPrevious": "so với kỳ trước",
+      "bookings": "lượt",
+      "thisWeek": "tuần này",
+      "points": "điểm"
+    }
+  },
+  "approvals": {
+    "toastApproved": "Đã duyệt {{name}} → HOẠT ĐỘNG",
+    "toastRejected": "Đã từ chối {{name}}",
+    "error": "Không tải được hồ sơ: {{message}}",
+    "emptyTitle": "Hết hồ sơ chờ duyệt",
+    "emptyDesc": "Tất cả trạm đăng ký đã được xử lý.",
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "station": "TRẠM",
+        "owner": "CHỦ TRẠM",
+        "city": "THÀNH PHỐ",
+        "chargers": "TRỤ"
+      }
+    },
+    "detail": {
+      "title": "XÉT DUYỆT · {{id}}",
+      "statusPending": "Chờ duyệt",
+      "address": "Địa chỉ",
+      "proposedChargers": "Trụ đề nghị",
+      "proposedChargersVal": "{{count}} cổng",
+      "license": "Giấy phép",
+      "submittedAt": "Gửi lúc",
+      "submittedVal": "Đã nộp ✓",
+      "documents": "Hồ sơ & hình ảnh",
+      "approveBtn": "Duyệt → đặt HOẠT ĐỘNG",
+      "approving": "Đang duyệt…",
+      "rejectBtn": "Từ chối (cần lý do)"
+    }
+  },
+  "bookings": {
+    "searchFields": {
+      "all": "Tất cả trường",
+      "id": "Mã đặt chỗ",
+      "station": "Trạm",
+      "driver": "Tài xế",
+      "charger": "Trụ sạc"
+    },
+    "status": {
+      "all": "Tất cả",
+      "pending": "Chờ thanh toán",
+      "confirmed": "Đã xác nhận",
+      "checkedin": "Đã check-in",
+      "charging": "Đang sạc",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "metrics": {
+      "total": "TỔNG LƯỢT ĐẶT",
+      "completed": "HOÀN TẤT",
+      "cancelled": "ĐÃ HỦY",
+      "pending": "CHỜ THANH TOÁN"
+    },
+    "placeholder": "Lọc theo mã, trạm, tài xế, trụ…",
+    "searchFieldLabel": "Tìm trong trường",
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "station": "TRẠM",
+        "owner": "CHỦ TRẠM",
+        "charger": "TRỤ",
+        "timeSlot": "KHUNG GIỜ",
+        "amount": "SỐ TIỀN",
+        "status": "TRẠNG THÁI"
+      },
+      "empty": "Không có lượt đặt nào khớp bộ lọc."
+    }
+  },
+  "dashboard": {
+    "error": "Không tải được dữ liệu tổng quan: {{message}}",
+    "kpi": {
+      "activeStations": "TRẠM HOẠT ĐỘNG",
+      "activeStationsDelta": "+{{count}} trong tuần này",
+      "pendingApprovals": "CHỜ DUYỆT",
+      "pendingApprovalsDelta": "{{count}} hồ sơ mới hôm nay",
+      "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+      "bookingsDelta": "+{{pct}}% so với hôm qua",
+      "revenueMonth": "DOANH THU THÁNG 6",
+      "revenueDelta": "+{{pct}}% so với tháng 5"
+    },
+    "charts": {
+      "trendTitle": "Đặt chỗ & doanh thu toàn nền tảng · 14 ngày",
+      "trendLegend": {
+        "bookings": "Đặt chỗ",
+        "revenue": "Doanh thu"
+      },
+      "stationRevenue": "Doanh thu theo trạm · T6",
+      "stationRevenueLink": "Phân tích →"
+    },
+    "actionQueue": {
+      "title": "Cần xử lý",
+      "link": "Duyệt trạm →",
+      "pendingStations": "Hồ sơ trạm chờ duyệt",
+      "expiringLicenses": "Giấy phép sắp hết hạn",
+      "expiringLicensesVal": "{{count}} · {{days}} ngày",
+      "expiredLicenses": "Giấy phép đã hết hạn",
+      "reportedFaults": "Trụ lỗi được báo cáo"
+    }
+  },
+  "licenses": {
+    "plans": {
+      "yearly": "Năm",
+      "monthly": "Tháng",
+      "yearlyPlan": "Gói Năm",
+      "monthlyPlan": "Gói Tháng"
+    },
+    "toastRenewal": "Đã ghi nhận gia hạn {{name}}",
+    "metrics": {
+      "total": "TỔNG GIẤY PHÉP",
+      "active": "ĐANG HOẠT ĐỘNG",
+      "expiring": "SẮP HẾT HẠN",
+      "expired": "ĐÃ HẾT HẠN"
+    },
+    "error": "Không tải được giấy phép: {{message}}",
+    "queue": {
+      "title": "Hàng đợi gia hạn",
+      "empty": "Không có giấy phép nào cần gia hạn.",
+      "daysOverdue": "Quá {{days}} ngày",
+      "daysLeft": "Còn {{days}} ngày",
+      "recordRenewal": "Ghi nhận gia hạn"
+    },
+    "distribution": {
+      "title": "Phân bổ gói",
+      "help": "Mua/gia hạn xử lý ngoài nền tảng (theo SRS). Quản trị viên ghi nhận trạng thái tại đây."
+    },
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "station": "TRẠM",
+        "owner": "CHỦ TRẠM",
+        "plan": "GÓI",
+        "expires": "HẾT HẠN",
+        "remaining": "CÒN LẠI",
+        "status": "TRẠNG THÁI",
+        "action": "HÀNH ĐỘNG"
+      },
+      "overdueVal": "Quá {{days}} ngày",
+      "daysLeftVal": "{{days}} ngày",
+      "renewBtn": "Gia hạn"
+    }
+  },
+  "policyKB": {
+    "toastSaved": "Đã lưu & tái tạo embedding",
+    "toastDeleted": "Đã xóa tài liệu",
+    "addDocBtn": "Thêm tài liệu",
+    "error": "Không tải được kho chính sách: {{message}}",
+    "syncNote": "Embedding đồng bộ · cập nhật 29/06",
+    "categorySidebar": "DANH MỤC",
+    "searchPlaceholder": "Tìm trong nội dung chính sách…",
+    "empty": "Không có tài liệu nào khớp.",
+    "updatedAt": "cập nhật {{date}}",
+    "editBtn": "Sửa",
+    "deleteBtn": "Xóa",
+    "docsLabel": "TÀI LIỆU",
+    "catsLabel": "DANH MỤC"
+  },
+  "provisioning": {
+    "toastSuccess": "Đã tạo bản ghi {{id}} ({{status}})",
+    "createTitle": "Tạo bản ghi trụ sạc",
+    "connectorLabel": "KẾT NỐI",
+    "powerLabel": "CÔNG SUẤT (kW)",
+    "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",
+    "displayNamePlaceholder": "VD: Cổng A1 — chủ trạm đổi sau",
+    "submitBtn": "Tạo mã trụ + QR",
+    "submitting": "Đang tạo…",
+    "helpNote": "Bản ghi mới ở trạng thái CHƯA GÁN → chuyển HOẠT ĐỘNG sau khi lắp đặt & liên kết.",
+    "listTitle": "Trụ đã cấp · Trạm Long Biên",
+    "recordsCount": "{{count}} bản ghi",
+    "status": {
+      "unclaimed": "Chưa gán",
+      "active": "Hoạt động",
+      "charging": "Đang sạc",
+      "faulted": "Lỗi"
+    },
+    "table": {
+      "cols": {
+        "id": "MÃ",
+        "name": "TÊN",
+        "connector": "KẾT NỐI",
+        "power": "kW",
+        "status": "TRẠNG THÁI",
+        "qr": "QR"
+      }
+    },
+    "toastDownloading": "Đang tải QR cho {{id}}… (demo)",
+    "downloadQr": "Tải QR"
+  },
+  "transactions": {
+    "methods": {
+      "ATM": "Thẻ ATM",
+      "MOMO": "Momo",
+      "VNPAY": "VNPay"
+    },
+    "types": {
+      "all": "Tất cả",
+      "payment": "Thanh toán",
+      "refund": "Hoàn tiền"
+    },
+    "kpi": {
+      "gross": "TỔNG THU",
+      "grossSub": "{{count}} giao dịch",
+      "refunded": "ĐÃ HOÀN",
+      "refundedSub": "{{count}} lượt hoàn",
+      "net": "DOANH THU RÒNG",
+      "netSub": "thu − hoàn",
+      "avg": "GIÁ TRỊ TB",
+      "avgSub": "mỗi giao dịch"
+    },
+    "breakdown": "Theo phương thức",
+    "table": {
+      "cols": {
+        "id": "MÃ GD",
+        "bookingId": "ĐẶT CHỖ",
+        "station": "TRẠM",
+        "type": "LOẠI",
+        "method": "P.THỨC",
+        "amount": "SỐ TIỀN",
+        "date": "NGÀY"
+      },
+      "empty": "Không có giao dịch nào khớp bộ lọc."
+    }
+  },
+  "users": {
+    "roles": {
+      "all": "Tất cả",
+      "DRIVER": "Tài xế",
+      "OWNER": "Chủ trạm",
+      "ADMIN": "Quản trị"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "suspended": "Tạm khóa"
+    },
+    "toastStatus": "{{name}}: {{status}}",
+    "error": "Không tải được người dùng: {{message}}",
+    "kpi": {
+      "total": "TỔNG TÀI KHOẢN",
+      "drivers": "TÀI XẾ",
+      "owners": "CHỦ TRẠM",
+      "suspended": "TẠM KHÓA"
+    },
+    "searchPlaceholder": "Tìm tên, email…",
+    "table": {
+      "cols": {
+        "account": "TÀI KHOẢN",
+        "role": "VAI TRÒ",
+        "joined": "THAM GIA",
+        "status": "TRẠNG THÁI",
+        "action": "HÀNH ĐỘNG"
+      },
+      "suspend": "Tạm khóa",
+      "activate": "Kích hoạt"
+    },
+    "drawer": {
+      "close": "Đóng",
+      "role": "Vai trò",
+      "joined": "Tham gia",
+      "totalBookings": "Tổng đặt chỗ",
+      "suspendAccount": "Tạm khóa tài khoản",
+      "activateAccount": "Kích hoạt tài khoản"
+    }
+  }
+}

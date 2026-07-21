@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatVndCompact, useApi, type AnalyticsOverview } from '@chargeops/api';
@@ -16,22 +17,39 @@ const CONNECTOR_LABEL: Record<string, string> = {
   GBT: 'GB/T',
 };
 
+function translateDelta(d: string, t: any): string {
+  if (d.includes('so với kỳ trước')) {
+    return d.replace('so với kỳ trước', t('analytics.deltas.vsPrevious'));
+  }
+  if (d.includes('lượt')) {
+    return d.replace('lượt', t('analytics.deltas.bookings'));
+  }
+  if (d.includes('tuần này')) {
+    return d.replace('tuần này', t('analytics.deltas.thisWeek'));
+  }
+  if (d.includes('điểm')) {
+    return d.replace('điểm', t('analytics.deltas.points'));
+  }
+  return d;
+}
+
 /** Platform-wide analytics (admin, read-only). */
 export function Analytics() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const [range, setRange] = useState<'30d' | '90d' | '12m'>('12m');
   const { data, isLoading, error } = useQuery({ queryKey: ['analytics'], queryFn: () => api.analytics.overview() });
 
   return (
     <>
-      <PageHeader title="Phân tích" subtitle="Xu hướng đặt chỗ, doanh thu và vận hành toàn nền tảng." />
+      <PageHeader title={t('console.nav.analytics.title')} subtitle={t('console.nav.analytics.subtitle')} />
 
       <div className="mb-3.5 flex justify-end">
         <SegmentedControl
           segments={[
-            { key: '30d', label: '30 ngày' },
-            { key: '90d', label: '90 ngày' },
-            { key: '12m', label: '12 tháng' },
+            { key: '30d', label: t('analytics.ranges.30d') },
+            { key: '90d', label: t('analytics.ranges.90d') },
+            { key: '12m', label: t('analytics.ranges.12m') },
           ]}
           active={range}
           onChange={setRange}
@@ -40,7 +58,7 @@ export function Analytics() {
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          Không tải được phân tích: {(error as Error).message}
+          {t('analytics.error', { message: (error as Error).message })}
         </Card>
       ) : isLoading || !data ? (
         <Skeleton className="h-[500px] rounded-card" />
@@ -52,8 +70,17 @@ export function Analytics() {
 }
 
 function Body({ data }: { data: AnalyticsOverview }) {
+  const { t } = useTranslation('admin');
   const maxRev = Math.max(...data.revenueTrend.map((m) => m.vnd));
   const maxPeak = Math.max(...data.peakHours.map((p) => p.sessions), 1);
+
+  const kpiKeys: Record<string, string> = {
+    'DOANH THU 12TH': 'analytics.kpis.revenue12m',
+    'TỔNG ĐẶT CHỖ': 'analytics.kpis.totalBookings',
+    'TRẠM HOẠT ĐỘNG': 'analytics.kpis.activeStations',
+    'TỶ LỆ LẤP ĐẦY': 'analytics.kpis.occupancyRate',
+    'HỦY / NO-SHOW': 'analytics.kpis.cancellationNoShow',
+  };
 
   return (
     <>
@@ -61,9 +88,9 @@ function Body({ data }: { data: AnalyticsOverview }) {
         {data.kpis.map((k) => (
           <KpiCard
             key={k.label}
-            label={k.label}
+            label={t(kpiKeys[k.label] || k.label, { defaultValue: k.label })}
             value={k.value}
-            delta={k.delta}
+            delta={translateDelta(k.delta, t)}
             deltaClass={k.deltaPositive ? 'text-good' : 'text-bad'}
           />
         ))}
@@ -72,7 +99,7 @@ function Body({ data }: { data: AnalyticsOverview }) {
       <div className="mb-3.5 grid gap-[13px] lg:grid-cols-[1fr_340px]">
         {/* revenue 12m bars */}
         <Card className="p-4">
-          <div className="mb-3.5 text-[14px] font-semibold">Đặt chỗ &amp; doanh thu · 12 tháng</div>
+          <div className="mb-3.5 text-[14px] font-semibold">{t('analytics.charts.bookingsRevenue')}</div>
           <div className="flex h-[160px] items-end gap-1.5">
             {data.revenueTrend.map((m) => (
               <div key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
@@ -89,7 +116,7 @@ function Body({ data }: { data: AnalyticsOverview }) {
 
         {/* top stations */}
         <Card className="p-4">
-          <div className="mb-3.5 text-[14px] font-semibold">Doanh thu theo trạm</div>
+          <div className="mb-3.5 text-[14px] font-semibold">{t('analytics.charts.revenueByStation')}</div>
           <div className="flex flex-col gap-[13px]">
             {data.topStations.map((s) => (
               <div key={s.name}>
@@ -107,8 +134,8 @@ function Body({ data }: { data: AnalyticsOverview }) {
       <div className="grid gap-[13px] lg:grid-cols-[1fr_340px]">
         {/* peak hours */}
         <Card className="p-4">
-          <div className="mb-1 text-[14px] font-semibold">Khung giờ cao điểm</div>
-          <div className="mb-3.5 text-[11.5px] text-faint">Số phiên sạc trung bình theo giờ trong ngày</div>
+          <div className="mb-1 text-[14px] font-semibold">{t('analytics.charts.peakHours')}</div>
+          <div className="mb-3.5 text-[11.5px] text-faint">{t('analytics.charts.peakHoursSub')}</div>
           <div className="flex h-[120px] items-end gap-[3px]">
             {data.peakHours.map((p) => (
               <div key={p.hour} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
@@ -127,7 +154,7 @@ function Body({ data }: { data: AnalyticsOverview }) {
 
         {/* connector mix */}
         <Card className="p-4">
-          <div className="mb-3.5 text-[14px] font-semibold">Phân bổ loại kết nối</div>
+          <div className="mb-3.5 text-[14px] font-semibold">{t('analytics.charts.connectionTypes')}</div>
           <div className="mb-4 flex h-[13px] overflow-hidden rounded-[7px]">
             {data.connectorMix.map((c) => (
               <div key={c.connector} style={{ width: `${c.pct}%`, background: CONNECTOR_COLOR[c.connector] }} />

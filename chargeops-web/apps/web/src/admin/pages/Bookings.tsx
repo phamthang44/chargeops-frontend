@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
@@ -23,25 +24,26 @@ import {
   type FilterTab,
 } from '@chargeops/ui';
 
-const SEARCH_FIELDS = [
-  { value: 'all', label: 'Tất cả trường' },
-  { value: 'id', label: 'Mã đặt chỗ' },
-  { value: 'station', label: 'Trạm' },
-  { value: 'driver', label: 'Tài xế' },
-  { value: 'charger', label: 'Trụ sạc' },
-];
-
 const PAGE_SIZE = 10;
 type FilterKey = BookingStatus | 'all';
 const GRID = '0.9fr 1.2fr 1.1fr 0.8fr 1fr 0.9fr 0.9fr';
 
 /** Platform-wide bookings (admin, all stations). */
 export function Bookings() {
+  const { t } = useTranslation('admin');
   const api = useApi();
   const [filter, setFilter] = useState<FilterKey>('all');
   const [search, setSearch] = useState('');
   const [searchIn, setSearchIn] = useState<BookingSearchField>('all');
   const [page, setPage] = useState(0);
+
+  const searchFields = [
+    { value: 'all', label: t('bookings.searchFields.all') },
+    { value: 'id', label: t('bookings.searchFields.id') },
+    { value: 'station', label: t('bookings.searchFields.station') },
+    { value: 'driver', label: t('bookings.searchFields.driver') },
+    { value: 'charger', label: t('bookings.searchFields.charger') },
+  ];
 
   const summaryQuery = useQuery({ queryKey: ['bookings', 'summary'], queryFn: () => api.bookings.summary() });
   const listQuery = useQuery({
@@ -60,10 +62,10 @@ export function Bookings() {
     const order: FilterKey[] = ['all', 'pending', 'confirmed', 'checkedin', 'charging', 'completed', 'cancelled'];
     return order.map((k) => ({
       key: k,
-      label: k === 'all' ? 'Tất cả' : BOOKING_STATUS[k].label,
+      label: t(`bookings.status.${k}`),
       count: !s ? undefined : k === 'all' ? s.total : s.byStatus[k],
     }));
-  }, [summaryQuery.data]);
+  }, [summaryQuery.data, t]);
 
   const data = listQuery.data;
   const total = data?.total ?? 0;
@@ -71,14 +73,14 @@ export function Bookings() {
 
   return (
     <>
-      <PageHeader title="Đặt chỗ toàn nền tảng" subtitle="Mọi lượt đặt trên tất cả các trạm." />
+      <PageHeader title={t('console.nav.bookings.title')} subtitle={t('console.nav.bookings.subtitle')} />
 
       {s && (
         <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">
-          <MetricCard label="TỔNG LƯỢT ĐẶT" value={String(s.total)} accent="#5b54e8" />
-          <MetricCard label="HOÀN TẤT" value={String(s.byStatus.completed)} accent="#0d8a5a" />
-          <MetricCard label="ĐÃ HỦY" value={String(s.byStatus.cancelled)} accent="#c0392b" />
-          <MetricCard label="CHỜ THANH TOÁN" value={String(s.byStatus.pending)} accent="#9a6b16" />
+          <MetricCard label={t('bookings.metrics.total')} value={String(s.total)} accent="#5b54e8" />
+          <MetricCard label={t('bookings.metrics.completed')} value={String(s.byStatus.completed)} accent="#0d8a5a" />
+          <MetricCard label={t('bookings.metrics.cancelled')} value={String(s.byStatus.cancelled)} accent="#c0392b" />
+          <MetricCard label={t('bookings.metrics.pending')} value={String(s.byStatus.pending)} accent="#9a6b16" />
         </div>
       )}
 
@@ -86,15 +88,15 @@ export function Bookings() {
         <SearchInput
           value={search}
           onChange={(v) => resetTo(() => setSearch(v))}
-          placeholder="Lọc theo mã, trạm, tài xế, trụ…"
+          placeholder={t('bookings.placeholder')}
           className="max-w-[320px] min-w-[200px] flex-1"
         />
         <Select
           value={searchIn}
           onChange={(v) => resetTo(() => setSearchIn(v as BookingSearchField))}
-          options={SEARCH_FIELDS}
+          options={searchFields}
           className="w-[142px]"
-          aria-label="Tìm trong trường"
+          aria-label={t('bookings.searchFieldLabel')}
         />
       </div>
       <div className="mb-3.5">
@@ -116,16 +118,16 @@ export function Bookings() {
                   className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                   style={{ gridTemplateColumns: GRID }}
                 >
-                  <span>MÃ</span>
-                  <span>TRẠM</span>
-                  <span>CHỦ TRẠM</span>
-                  <span>TRỤ</span>
-                  <span>KHUNG GIỜ</span>
-                  <span className="text-right">SỐ TIỀN</span>
-                  <span className="text-center">TRẠNG THÁI</span>
+                  <span>{t('bookings.table.cols.id')}</span>
+                  <span>{t('bookings.table.cols.station')}</span>
+                  <span>{t('bookings.table.cols.owner')}</span>
+                  <span>{t('bookings.table.cols.charger')}</span>
+                  <span>{t('bookings.table.cols.timeSlot')}</span>
+                  <span className="text-right">{t('bookings.table.cols.amount')}</span>
+                  <span className="text-center">{t('bookings.table.cols.status')}</span>
                 </div>
                 {data.items.length === 0 ? (
-                  <EmptyState>Không có lượt đặt nào khớp bộ lọc.</EmptyState>
+                  <EmptyState>{t('bookings.table.empty')}</EmptyState>
                 ) : (
                   data.items.map((b) => <Row key={b.id} booking={b} />)
                 )}
@@ -140,6 +142,7 @@ export function Bookings() {
 }
 
 function Row({ booking: b }: { booking: Booking }) {
+  const { t } = useTranslation('admin');
   const meta = BOOKING_STATUS[b.status];
   return (
     <div
@@ -155,7 +158,7 @@ function Row({ booking: b }: { booking: Booking }) {
       </span>
       <span className="text-right font-semibold">{formatVnd(b.amountVnd)}</span>
       <span className="text-center">
-        <StatusPill tone={meta.tone} label={meta.label} />
+        <StatusPill tone={meta.tone} label={t(`bookings.status.${b.status}`, { defaultValue: meta.label })} />
       </span>
     </div>
   );

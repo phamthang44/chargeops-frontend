@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { OperatingHour } from '@chargeops/api';
 import { IconClock, Toggle } from '@chargeops/ui';
 import { StepHeader } from './StepHeader';
@@ -10,18 +11,19 @@ export interface OperatingHoursStepProps {
 
 /** Step 2 — per-day open/close windows with an open/closed toggle. */
 export function OperatingHoursStep({ hours, onToggleDay, onSet247 }: OperatingHoursStepProps) {
+  const { t } = useTranslation('owner');
   return (
     <div>
       <StepHeader
         n={2}
-        title="Giờ hoạt động"
+        title={t('pricing.steps.step2.title')}
         action={
           <button
             onClick={onSet247}
             className="flex items-center gap-[5px] text-[12px] font-semibold text-owner hover:text-owner-strong"
           >
             <IconClock size={13} strokeWidth={2.2} />
-            Đặt mở 24/7
+            {t('pricing.steps.step2.toggle247')}
           </button>
         }
       />
@@ -32,7 +34,7 @@ export function OperatingHoursStep({ hours, onToggleDay, onSet247 }: OperatingHo
             className="grid items-center gap-2.5 border-b border-hairline py-2.5"
             style={{ gridTemplateColumns: '60px 1fr 1fr 48px' }}
           >
-            <span className="text-[13px] font-semibold text-body">{h.day}</span>
+            <span className="text-[13px] font-semibold text-body">{t(`pricing.days.${h.day}`)}</span>
             <span
               className="rounded-[9px] border border-line px-2.5 py-[7px] text-center font-mono text-[12.5px] font-medium"
               style={{ background: h.open24 ? '#fff' : '#f7f8fa', color: h.open24 ? '#16171a' : '#9499a3' }}
@@ -51,7 +53,7 @@ export function OperatingHoursStep({ hours, onToggleDay, onSet247 }: OperatingHo
           </div>
         ))}
         <p className="mt-3 text-[11.5px] leading-[1.5] text-faint">
-          Giờ hoạt động ảnh hưởng đến khả năng hiển thị của trạm trên bản đồ tìm kiếm của tài xế.
+          {t('pricing.steps.step2.helpText')}
         </p>
       </div>
     </div>

@@ -287,8 +287,20 @@
   "provisioning": {
     "submitting": "Đang tạo…",
     "cancel": "Huỷ bỏ",
-    "stationLabel": "CẤP TRỤ CHO TRẠM",
-    "listTitle": "Trụ sạc · {{station}}",
+    "searchPlaceholder": "Tìm theo tên trạm, tỉnh/thành, địa chỉ hoặc đơn vị vận hành…",
+    "resultCount": "{{count}} trạm",
+    "noStations": "Không có trạm nào khớp tìm kiếm hoặc bộ lọc.",
+    "backToStations": "Tất cả trạm",
+    "cpListTitle": "Trụ sạc",
+    "cpCount": "{{count}} trụ sạc",
+    "unclaimedCount": "{{count}} chưa gán",
+    "allLive": "Đã hoạt động",
+    "filters": {
+      "all": "Tất cả",
+      "needsSetup": "Chưa cấp trụ",
+      "inProgress": "Chưa gán",
+      "live": "Đang hoạt động"
+    },
     "recordsCount": "{{count}} trụ sạc",
     "connectorCount": "{{count}} connector",
     "empty": "{{station}} chưa có trụ sạc nào. Tạo một trụ để bắt đầu cấp phát.",

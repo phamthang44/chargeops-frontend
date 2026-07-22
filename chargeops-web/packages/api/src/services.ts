@@ -86,8 +86,8 @@ export interface StationService {
   register(input: StationRegistration): Promise<Station>;
   /** Admin: approval queue (status = pending). */
   approvals(): Promise<Station[]>;
-  /** Every known station as id/name — the light shape pickers need (ticket reassign, provisioning target). */
-  directory(): Promise<{ id: string; name: string }[]>;
+  /** Admin: every approved station platform-wide. Filtering/search happens client-side. */
+  all(): Promise<Station[]>;
   approve(id: string): Promise<Station>;
   reject(id: string, reason: string): Promise<Station>;
 }

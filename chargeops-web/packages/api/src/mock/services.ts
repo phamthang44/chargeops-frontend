@@ -381,9 +381,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         return db.approvalQueue.filter((s) => s.status === 'pending');
       },
-      async directory() {
-        await delay(150);
-        return [...db.stationsDirectory];
+      async all() {
+        await delay();
+        return [...db.allStations];
       },
       async approve(id) {
         await delay();

@@ -28,6 +28,8 @@ export interface MockDb {
   connectors: Connector[];
   ownerStations: Station[];
   approvalQueue: Station[];
+  /** Every approved station platform-wide (admin scope). */
+  allStations: Station[];
   licenses: License[];
   users: UserAccount[];
   stationStaff: StationStaffMember[];
@@ -209,12 +211,66 @@ export function buildMockDb(): MockDb {
   ];
 
   /* ---- admin approval queue ---- */
+  // NB: ST-1042 is deliberately NOT here — it already has provisioned charge
+  // points, which under FR14 can only happen after approval (step 2 → step 3).
   const approvalQueue: Station[] = [
-    { id: 'ST-1042', name: 'Trạm Long Biên', city: 'Hà Nội', address: '123 Ngọc Lâm', ownerName: 'Minh Phát EV', chargerCount: 4, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
+    { id: 'ST-1044', name: 'Trạm Tây Hồ', city: 'Hà Nội', address: '19 Lạc Long Quân', ownerName: 'CityVolt', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
     { id: 'ST-1041', name: 'Trạm Đống Đa', city: 'Hà Nội', address: '45 Tây Sơn', ownerName: 'GreenVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
     { id: 'ST-1039', name: 'Trạm Thủ Đức', city: 'TP.HCM', address: '88 Võ Văn Ngân', ownerName: 'SaigonCharge', chargerCount: 6, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },
     { id: 'ST-1037', name: 'Trạm Hải Châu', city: 'Đà Nẵng', address: '12 Bạch Đằng', ownerName: 'DaNang EV', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-25' },
     { id: 'ST-1034', name: 'Trạm Ninh Kiều', city: 'Cần Thơ', address: '5 Hai Bà Trưng', ownerName: 'MekongVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-24' },
+  ];
+
+  /**
+   * Every approved station on the platform (FR12 admin scope). Sized to be
+   * realistic rather than convenient: at this count a plain dropdown stops
+   * working, which is why the provisioning screen searches and filters instead.
+   */
+  const cityAreas: [string, string[]][] = [
+    ['Hà Nội', ['Hoàn Kiếm', 'Ba Đình', 'Thanh Xuân', 'Hoàng Mai', 'Tây Hồ']],
+    ['TP.HCM', ['Quận 1', 'Quận 7', 'Bình Thạnh', 'Thủ Đức', 'Gò Vấp']],
+    ['Đà Nẵng', ['Hải Châu', 'Sơn Trà', 'Ngũ Hành Sơn']],
+    ['Hải Phòng', ['Lê Chân', 'Ngô Quyền']],
+    ['Cần Thơ', ['Ninh Kiều', 'Cái Răng']],
+    ['Khánh Hòa', ['Nha Trang', 'Cam Ranh']],
+    ['Đồng Nai', ['Biên Hòa']],
+    ['Bà Rịa - Vũng Tàu', ['Vũng Tàu']],
+    ['Thừa Thiên Huế', ['TP. Huế']],
+    ['Quảng Ninh', ['Hạ Long']],
+  ];
+  const streets = ['Nguyễn Trãi', 'Lê Lợi', 'Trần Hưng Đạo', 'Hùng Vương', 'Nguyễn Huệ', 'Lý Thường Kiệt', 'Phan Chu Trinh'];
+  const operators = ['EVGo Co.', 'Minh Phát EV', 'GreenVolt', 'SaigonCharge', 'DaNang EV', 'MekongVolt', 'CityVolt', 'VinCharge', 'Phương Nam Power', 'Trung Bộ EV'];
+
+  const generatedStations: Station[] = [];
+  let stationSeq = 1100;
+  for (const [city, areas] of cityAreas) {
+    for (const area of areas) {
+      const owner = pick(operators);
+      const chargerCount = 2 + Math.floor(R() * 6);
+      generatedStations.push({
+        id: 'ST-' + stationSeq++,
+        name: `Trạm ${area}`,
+        city,
+        address: `${1 + Math.floor(R() * 200)} ${pick(streets)}, ${area}`,
+        ownerName: owner,
+        chargerCount,
+        onlineCount: Math.max(0, chargerCount - Math.floor(R() * 2)),
+        status: 'active',
+        licenseSummary: R() > 0.5 ? 'Năm · hết hạn 12/09/2026' : 'Tháng · hết hạn 30/07/2026',
+        rejectionReason: null,
+        bookingsToday: Math.floor(R() * 40),
+        revenueWeekVnd: Math.round((2 + R() * 16) * 1_000_000),
+        utilizationPct: 40 + Math.floor(R() * 50),
+        submittedAt: null,
+      });
+    }
+  }
+
+  const allStations: Station[] = [
+    // Long Biên is approved and mid-provisioning — it owns the CP-33xx records.
+    { id: 'ST-1042', name: 'Trạm Long Biên', city: 'Hà Nội', address: '123 Ngọc Lâm, Long Biên', ownerName: 'Minh Phát EV', chargerCount: 4, onlineCount: 1, status: 'active', licenseSummary: 'Năm · hết hạn 01/07/2027', rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: null },
+    ...ownerStations.filter((s) => s.status === 'active'),
+    ...generatedStations,
   ];
 
   /* ---- licenses ---- */
@@ -364,6 +420,7 @@ export function buildMockDb(): MockDb {
     connectors: [...connectors, ...provisionedConnectors],
     ownerStations,
     approvalQueue,
+    allStations,
     licenses,
     users,
     stationStaff,

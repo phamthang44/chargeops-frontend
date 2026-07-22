@@ -287,8 +287,20 @@
   "provisioning": {
     "submitting": "Creating...",
     "cancel": "Cancel",
-    "stationLabel": "PROVISIONING FOR STATION",
-    "listTitle": "Charge points · {{station}}",
+    "searchPlaceholder": "Search station, city, address, or operator...",
+    "resultCount": "{{count}} stations",
+    "noStations": "No stations match this search or filter.",
+    "backToStations": "All stations",
+    "cpListTitle": "Charge points",
+    "cpCount": "{{count}} charge points",
+    "unclaimedCount": "{{count}} unclaimed",
+    "allLive": "All live",
+    "filters": {
+      "all": "All",
+      "needsSetup": "Needs setup",
+      "inProgress": "Unclaimed",
+      "live": "Live"
+    },
     "recordsCount": "{{count}} charge points",
     "connectorCount": "{{count}} connectors",
     "empty": "No charge points at {{station}} yet. Create one to start provisioning.",

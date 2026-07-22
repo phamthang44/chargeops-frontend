@@ -6,6 +6,7 @@
  */
 import type { Services } from '../services';
 import type { Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationStaffMember, TicketMessage, TicketStatus } from '../types';
+import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
 
 /**
@@ -50,10 +51,21 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         })
       : db.transactions;
 
-  /** Owner/staff see only tickets routed to stations they have access to; admin sees all. */
+  /**
+   * BR-TKT-01 ticket routing. Owner/staff receive station-scoped categories
+   * only (CHARGING_ISSUE, and BOOKING when linked to a station) and only for
+   * their own stations. PAYMENT, ACCOUNT and OTHER are platform matters and
+   * route to Admin — station access alone does not entitle an owner to a
+   * driver's payment or account thread. Admin sees everything.
+   */
   const scopedTickets = () =>
     scope.ownerView
-      ? db.tickets.filter((tk) => tk.stationId && db.ownerStationIds.includes(tk.stationId))
+      ? db.tickets.filter(
+          (tk) =>
+            tk.stationId &&
+            db.ownerStationIds.includes(tk.stationId) &&
+            STATION_SCOPED_CATEGORIES.includes(tk.category),
+        )
       : db.tickets;
 
   /**

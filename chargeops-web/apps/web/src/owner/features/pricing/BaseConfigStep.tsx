@@ -2,17 +2,18 @@ import { useTranslation } from 'react-i18next';
 import { IconBolt } from '@chargeops/ui';
 import { StepHeader } from './StepHeader';
 
-const SLOTS = [30, 60, 90];
+/** Allowed minimum booking durations (FR05: driver picks start time + duration). */
+const DURATIONS = [30, 60, 90];
 
 export interface BaseConfigStepProps {
-  slotDurationMin: number;
+  minBookingDurationMin: number;
   basePriceVnd: number;
-  onSlot: (min: number) => void;
+  onMinDuration: (min: number) => void;
   onBasePrice: (vnd: number) => void;
 }
 
-/** Step 1 — slot duration segmented control + default price per kWh. */
-export function BaseConfigStep({ slotDurationMin, basePriceVnd, onSlot, onBasePrice }: BaseConfigStepProps) {
+/** Step 1 — minimum booking duration + default price per kWh. */
+export function BaseConfigStep({ minBookingDurationMin, basePriceVnd, onMinDuration, onBasePrice }: BaseConfigStepProps) {
   const { t } = useTranslation('owner');
   return (
     <div>
@@ -34,12 +35,12 @@ export function BaseConfigStep({ slotDurationMin, basePriceVnd, onSlot, onBasePr
           {t('pricing.steps.step1.durationLabel')}
         </div>
         <div className="mb-[18px] flex gap-[5px] rounded-[11px] bg-chip p-1">
-          {SLOTS.map((m) => {
-            const on = m === slotDurationMin;
+          {DURATIONS.map((m) => {
+            const on = m === minBookingDurationMin;
             return (
               <button
                 key={m}
-                onClick={() => onSlot(m)}
+                onClick={() => onMinDuration(m)}
                 className={`flex-1 rounded-lg py-[11px] text-center text-[14px] font-semibold transition ${
                   on ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(16,17,26,.1)]' : 'text-faint'
                 }`}

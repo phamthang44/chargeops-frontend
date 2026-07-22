@@ -28,7 +28,7 @@
       "pricing": {
         "label": "Giá & giờ hoạt động",
         "title": "Giá & giờ hoạt động",
-        "subtitle": "Giá gốc, khung giờ TOU và giờ mở cửa."
+        "subtitle": "Giá gốc, khung giá TOU và giờ mở cửa."
       },
       "stations": {
         "label": "Trạm của tôi",
@@ -296,7 +296,7 @@
   },
   "pricing": {
     "title": "Giá & giờ hoạt động",
-    "subtitle": "Giá gốc, khung giờ TOU và giờ mở cửa. Thay đổi chỉ áp dụng cho đặt chỗ mới.",
+    "subtitle": "Giá gốc, khung giá TOU và giờ mở cửa. Thay đổi chỉ áp dụng cho đặt chỗ mới.",
     "saveSuccess": "Đã lưu cấu hình giá & giờ hoạt động",
     "loadError": "Không tải được cấu hình: {{message}}",
     "cancelBtn": "Hủy bỏ",
@@ -305,13 +305,13 @@
     "steps": {
       "step1": {
         "title": "Cấu hình cơ bản",
-        "groupTitle": "Thời lượng & Giá gốc",
-        "groupHelp": "Thiết lập thời gian tối thiểu cho mỗi lượt sạc.",
-        "durationLabel": "THỜI LƯỢNG MỘT SLOT",
+        "groupTitle": "Thời lượng đặt & giá gốc",
+        "groupHelp": "Khoảng thời gian ngắn nhất tài xế có thể đặt, cũng là bước nhảy thời lượng.",
+        "durationLabel": "THỜI LƯỢNG ĐẶT TỐI THIỂU",
         "durationVal": "{{minutes}} phút",
         "basePriceLabel": "GIÁ SẠC MẶC ĐỊNH",
         "basePriceSub": "Giá gốc",
-        "basePriceHelp": "Giá này áp dụng cho mọi khung giờ không được thiết lập riêng bên dưới."
+        "basePriceHelp": "Giá này áp dụng cho mọi khung giờ không nằm trong khung giá bên dưới."
       },
       "step2": {
         "title": "Giờ hoạt động",
@@ -320,29 +320,29 @@
       },
       "step3": {
         "title": "Giá theo khung giờ",
-        "addRule": "Thêm khung giờ",
-        "noRules": "Chưa có khung giờ riêng — mọi lượt đặt dùng giá gốc. Nhấn Thêm khung giờ để bắt đầu.",
+        "addRule": "Thêm khung giá",
+        "noRules": "Chưa có khung giá riêng — mọi lượt đặt dùng giá gốc. Nhấn Thêm khung giá để bắt đầu.",
         "deleteBtn": "Xóa",
         "vsBase": "SO VỚI GIÁ GỐC",
         "tipTitle": "Mẹo tối ưu doanh thu",
-        "tipText": "Tăng giá vào khung giờ 18:00 – 21:00 có thể giúp bạn tăng thêm 15% doanh thu hàng tháng."
+        "tipText": "Tăng giá khung 18:00 – 21:00 có thể giúp tăng tới 15% doanh thu hàng tháng."
       },
       "step4": {
         "title": "Quy tắc khả dụng",
-        "lockTitle": "Tự động khoá slot",
-        "lockDesc": "Khoá slot sau 15 phút nếu khách không check-in.",
+        "lockTitle": "Tự động thu hồi khi no-show",
+        "lockDesc": "Thu hồi khoảng thời gian đã đặt sau 15 phút nếu tài xế không check-in.",
         "advanceTitle": "Cho phép đặt trước tối đa",
-        "advanceDesc": "Thời gian khách có thể đặt slot trước.",
+        "advanceDesc": "Tài xế được đặt trước bao lâu.",
         "advanceDays": "{{days}} ngày",
         "nightTitle": "Giá ưu tiên sạc đêm",
-        "nightDesc": "Giảm 10% cho khung giờ 00:00 – 05:00.",
+        "nightDesc": "Giảm 10% cho khung 00:00 – 05:00.",
         "validConfig": "Cấu hình hợp lệ",
-        "validConfigHelp": "Tất cả khung giờ đã được kiểm tra không trùng lặp."
+        "validConfigHelp": "Tất cả khung giá đã kiểm tra, không trùng lặp."
       }
     },
     "addRule": {
-      "title": "Thêm khung giờ",
-      "subtitle": "Mức giá riêng mà các lượt đặt trong khung giờ này sẽ chụp lại.",
+      "title": "Thêm khung giá",
+      "subtitle": "Mức giá riêng áp dụng cho các lượt đặt rơi vào khung giờ này.",
       "ruleName": "TÊN QUY TẮC",
       "namePlaceholder": "VD: Giờ cao điểm tối",
       "applyDays": "NGÀY ÁP DỤNG",
@@ -351,7 +351,7 @@
       "to": "ĐẾN",
       "validationError": "Vui lòng nhập tên quy tắc, mức giá và khung giờ hợp lệ (HH:mm).",
       "cancelBtn": "Hủy bỏ",
-      "saveBtn": "Lưu khung giờ"
+      "saveBtn": "Lưu khung giá"
     },
     "days": {
       "daily": "Mỗi ngày",

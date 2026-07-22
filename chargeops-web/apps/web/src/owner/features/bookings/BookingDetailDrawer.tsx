@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type ReactNode } from 'react';
+import type { TFunction } from 'i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BOOKING_STATUS,
@@ -9,6 +10,7 @@ import {
   formatVnd,
   useApi,
   type Booking,
+  type RateKind,
 } from '@chargeops/api';
 import { Button, Drawer, StatusPill, useToast } from '@chargeops/ui';
 
@@ -27,6 +29,14 @@ function mmss(totalSec: number): string {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function rateKindLabel(t: TFunction<'owner'>, kind: RateKind): string {
+  return kind === 'peak'
+    ? t('bookings.rateKind.peak')
+    : kind === 'offpeak'
+      ? t('bookings.rateKind.offpeak')
+      : t('bookings.rateKind.normal');
 }
 
 export function BookingDetailDrawer({
@@ -148,10 +158,26 @@ export function BookingDetailDrawer({
           </span>
         </div>
         <div className="flex flex-col gap-[7px] text-[12.5px] font-medium text-body">
-          <div className="flex justify-between">
-            <span>{t('bookings.rateLabel', { kind: kindLabel })}</span>
-            <span className="font-mono">{formatVnd(booking.rateVndPerKwh)}/kWh</span>
-          </div>
+          {/* One line per TOU band crossed — a window spanning standard into peak
+              cannot be explained by a single rate, so itemise once it splits. */}
+          {booking.priceLines.length > 1 ? (
+            booking.priceLines.map((line, i) => (
+              <div key={i} className="flex justify-between">
+                <span>
+                  {formatTimeVn(line.fromAt)}–{formatTimeVn(line.toAt)} ·{' '}
+                  <span className="text-muted">{rateKindLabel(t, line.rateKind)}</span>
+                </span>
+                <span className="font-mono">
+                  {formatVnd(line.rateVndPerKwh)}/kWh · {formatVnd(line.amountVnd)}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="flex justify-between">
+              <span>{t('bookings.rateLabel', { kind: kindLabel })}</span>
+              <span className="font-mono">{formatVnd(booking.rateVndPerKwh)}/kWh</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>{t('bookings.estEnergy')}</span>
             <span className="font-mono">~{booking.energyKwh} kWh</span>

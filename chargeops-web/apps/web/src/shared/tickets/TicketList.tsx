@@ -39,7 +39,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
             className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-row-hover"
             style={{ gridTemplateColumns: GRID }}
           >
-            <span className="font-mono text-[11.5px] font-semibold text-brand">{tk.id}</span>
+            <span className="font-mono text-[11.5px] font-semibold text-brand">{tk.ticketNo}</span>
             <Meta t={tk} />
             <span className="truncate text-muted">{tk.stationName ?? '—'}</span>
             <span className="text-center">
@@ -63,7 +63,7 @@ export function TicketCards({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
         return (
           <Card key={tk.id} className="cursor-pointer p-[13px]" onClick={() => onOpen(tk)}>
             <div className="mb-[7px] flex items-center justify-between gap-2">
-              <span className="font-mono text-[11.5px] font-semibold text-brand">{tk.id}</span>
+              <span className="font-mono text-[11.5px] font-semibold text-brand">{tk.ticketNo}</span>
               <StatusPill tone={meta.tone} label={meta.label} />
             </div>
             <div className="mb-1 text-[14px] font-semibold">{tk.subject}</div>

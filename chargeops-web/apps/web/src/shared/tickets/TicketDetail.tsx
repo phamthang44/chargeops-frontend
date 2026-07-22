@@ -117,7 +117,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="mb-1 flex items-center gap-2">
-              <span className="font-mono text-[11.5px] font-semibold text-muted">{tk.id}</span>
+              <span className="font-mono text-[11.5px] font-semibold text-muted">{tk.ticketNo} · {tk.id}</span>
               <StatusPill tone={meta.tone} label={meta.label} />
             </div>
             <div className="text-[15px] font-semibold text-ink">{tk.subject}</div>

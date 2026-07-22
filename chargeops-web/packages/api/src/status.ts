@@ -70,9 +70,8 @@ export const TICKET_STATUS: Record<TicketStatus, StatusMeta> = {
 
 export const TICKET_CATEGORY: Record<TicketCategory, string> = {
   charging_issue: 'Sự cố sạc',
-  payment: 'Thanh toán',
   booking: 'Đặt chỗ',
-  connector_fault: 'Trụ hỏng',
+  payment: 'Thanh toán',
   account: 'Tài khoản',
   other: 'Khác',
 };

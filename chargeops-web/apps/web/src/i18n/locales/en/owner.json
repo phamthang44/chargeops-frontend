@@ -28,7 +28,7 @@
       "pricing": {
         "label": "Pricing & Hours",
         "title": "Pricing & Hours",
-        "subtitle": "Base price, TOU time-slots, and operating hours."
+        "subtitle": "Base price, TOU rate windows, and operating hours."
       },
       "stations": {
         "label": "My Stations",
@@ -137,7 +137,7 @@
         "id": "ID",
         "driver": "DRIVER",
         "charger": "CHARGER",
-        "slot": "SLOT",
+        "slot": "TIME RANGE",
         "duration": "DURATION",
         "method": "METHOD",
         "amount": "AMOUNT",
@@ -248,8 +248,8 @@
     "onlineBodyConnector": "This connector will start accepting bookings again and reappear in driver search.",
     "staysOffline": "Stays offline",
     "staysOfflineHint": "{{count}} connector(s) stay offline because you disabled them individually. Turn them back on from their own status control.",
-    "blockedBodyDevice": "{{count}} booking(s) on this charge point are still Confirmed or Checked-In. Under BR-CHG-05 the device cannot go offline while a paid slot is live — the driver may already be plugged in.",
-    "blockedBodyConnector": "{{count}} booking(s) on this connector are still Confirmed or Checked-In. Under BR-CHG-05 it cannot go offline while a paid slot is live — the driver may already be plugged in.",
+    "blockedBodyDevice": "{{count}} booking(s) on this charge point are still Confirmed or Checked-In. Under BR-CHG-05 the device cannot go offline while a paid booking is live — the driver may already be plugged in.",
+    "blockedBodyConnector": "{{count}} booking(s) on this connector are still Confirmed or Checked-In. Under BR-CHG-05 it cannot go offline while a paid booking is live — the driver may already be plugged in.",
     "blockedHint": "Wait until these bookings reach a final state, or cancel them from the Bookings screen first.",
     "confirmOffline": "Take offline",
     "confirmOnline": "Bring online",
@@ -296,7 +296,7 @@
   },
   "pricing": {
     "title": "Pricing & Hours",
-    "subtitle": "Base price, TOU time-slots, and operating hours. Changes only apply to new bookings.",
+    "subtitle": "Base price, TOU rate windows, and operating hours. Changes only apply to new bookings.",
     "saveSuccess": "Saved pricing and operating hour configurations",
     "loadError": "Could not load configurations: {{message}}",
     "cancelBtn": "Cancel",
@@ -305,13 +305,13 @@
     "steps": {
       "step1": {
         "title": "Basic Config",
-        "groupTitle": "Duration & Base Price",
-        "groupHelp": "Set the minimum duration for each charging session.",
-        "durationLabel": "SLOT DURATION",
+        "groupTitle": "Booking duration & base price",
+        "groupHelp": "The shortest window a driver can book, and the increment they step in.",
+        "durationLabel": "MINIMUM BOOKING DURATION",
         "durationVal": "{{minutes}} mins",
         "basePriceLabel": "DEFAULT CHARGING PRICE",
         "basePriceSub": "Base price",
-        "basePriceHelp": "This price applies to any time slots not explicitly configured below."
+        "basePriceHelp": "This price applies to any hours not covered by a rate window below."
       },
       "step2": {
         "title": "Operating Hours",
@@ -319,39 +319,39 @@
         "helpText": "Operating hours affect your station's visibility on the drivers' search map."
       },
       "step3": {
-        "title": "TOU Pricing",
-        "addRule": "Add Time-slot",
-        "noRules": "No custom time-slots defined — all bookings will use base price. Click Add Time-slot to start.",
+        "title": "TOU pricing",
+        "addRule": "Add rate window",
+        "noRules": "No rate windows defined — every booking uses the base price. Click Add rate window to start.",
         "deleteBtn": "Delete",
         "vsBase": "VS. BASE PRICE",
         "tipTitle": "Revenue Optimization Tip",
-        "tipText": "Increasing prices during the 18:00 – 21:00 slot could boost monthly revenue by up to 15%."
+        "tipText": "Raising the rate for the 18:00 – 21:00 window could lift monthly revenue by up to 15%."
       },
       "step4": {
         "title": "Availability Rules",
-        "lockTitle": "Auto-lock slots",
-        "lockDesc": "Release slots after 15 mins if the driver does not check in.",
+        "lockTitle": "Auto-release no-shows",
+        "lockDesc": "Release the booked time range after 15 mins if the driver does not check in.",
         "advanceTitle": "Max Advance Booking",
-        "advanceDesc": "How far in advance drivers can book a slot.",
+        "advanceDesc": "How far ahead drivers can book a time range.",
         "advanceDays": "{{days}} days",
         "nightTitle": "Night Charging Special",
-        "nightDesc": "10% discount for the 00:00 – 05:00 slot.",
+        "nightDesc": "10% discount for the 00:00 – 05:00 window.",
         "validConfig": "Valid Configuration",
-        "validConfigHelp": "All time slots verified and have no overlaps."
+        "validConfigHelp": "All rate windows verified and free of overlaps."
       }
     },
     "addRule": {
-      "title": "Add Time-slot",
-      "subtitle": "Define custom rates that apply to bookings within this time slot.",
+      "title": "Add rate window",
+      "subtitle": "Define a custom rate that applies to bookings falling in this window.",
       "ruleName": "RULE NAME",
       "namePlaceholder": "E.g. Evening peak",
       "applyDays": "APPLY ON DAYS",
       "priceLabel": "PRICE (₫/kWh)",
       "from": "FROM",
       "to": "TO",
-      "validationError": "Please input a valid rule name, price, and time-slot (HH:mm).",
+      "validationError": "Please input a valid rule name, price, and time window (HH:mm).",
       "cancelBtn": "Cancel",
-      "saveBtn": "Save Time-slot"
+      "saveBtn": "Save rate window"
     },
     "days": {
       "daily": "Daily",

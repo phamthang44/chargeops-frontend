@@ -60,6 +60,45 @@ function toLocalIso(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
+/* ---- TOU banding, mirroring the seeded pricing rules below ---- */
+// standard 05:00–17:00 · peak 17:00–21:00 · off-peak 21:00–05:00
+const BAND_BOUNDARIES = [300, 1020, 1260, 1440];
+
+function bandOf(totalMin: number): RateKind {
+  const m = ((totalMin % 1440) + 1440) % 1440;
+  if (m >= 1020 && m < 1260) return 'peak';
+  if (m >= 300 && m < 1020) return 'standard';
+  return 'offpeak';
+}
+
+/** Next TOU boundary at or after `totalMin`, carrying across midnight. */
+function nextBoundary(totalMin: number): number {
+  const inDay = ((totalMin % 1440) + 1440) % 1440;
+  const dayStart = totalMin - inDay;
+  for (const b of BAND_BOUNDARIES) if (b > inDay) return dayStart + b;
+  return dayStart + 1440;
+}
+
+/** Split a booking window into the TOU segments it actually crosses (BookingPriceLine). */
+function splitIntoBands(startTot: number, durationMin: number): { from: number; to: number; kind: RateKind }[] {
+  const segments: { from: number; to: number; kind: RateKind }[] = [];
+  const end = startTot + durationMin;
+  let cur = startTot;
+  while (cur < end) {
+    const to = Math.min(nextBoundary(cur), end);
+    segments.push({ from: cur, to, kind: bandOf(cur) });
+    cur = to;
+  }
+  return segments;
+}
+
+/** Minute-of-June-`day` → local ISO, rolling into following days as needed. */
+function isoAt(day: number, totalMin: number): string {
+  const dayOffset = Math.floor(totalMin / 1440);
+  const inDay = totalMin - dayOffset * 1440;
+  return `2026-06-${pad(day + dayOffset)}T${pad(Math.floor(inDay / 60))}:${pad(inDay % 60)}:00`;
+}
+
 export function buildMockDb(): MockDb {
   const R = lcg(99173);
   const pick = <T,>(a: T[]): T => a[Math.floor(R() * a.length)];
@@ -88,10 +127,32 @@ export function buildMockDb(): MockDb {
     const durationMin = pick([45, 60, 90, 60, 120, 30]);
     const endTot = sh * 60 + sm + durationMin;
     const status = statuses[Math.floor(R() * statuses.length)];
-    const rateKind: RateKind = sh >= 17 && sh < 21 ? 'peak' : sh >= 21 || sh < 5 ? 'offpeak' : 'standard';
-    const rateVndPerKwh = rateKind === 'peak' ? baseRate + 800 : rateKind === 'offpeak' ? baseRate - 600 : baseRate;
-    const energyKwh = +(powerKw * (durationMin / 60) * 0.62).toFixed(1);
-    const amountVnd = Math.round((energyKwh * rateVndPerKwh) / 1000) * 1000;
+    const startTot = sh * 60 + sm;
+
+    // One price line per TOU band the window crosses; the total is their sum,
+    // so a 16:30–18:30 booking is genuinely split standard + peak.
+    const rateFor = (k: RateKind) => (k === 'peak' ? baseRate + 800 : k === 'offpeak' ? baseRate - 600 : baseRate);
+    const priceLines = splitIntoBands(startTot, durationMin).map((seg) => {
+      const segMin = seg.to - seg.from;
+      const segEnergy = +(powerKw * (segMin / 60) * 0.62).toFixed(1);
+      const segRate = rateFor(seg.kind);
+      return {
+        fromAt: isoAt(day, seg.from),
+        toAt: isoAt(day, seg.to),
+        rateKind: seg.kind,
+        rateVndPerKwh: segRate,
+        energyKwh: segEnergy,
+        amountVnd: Math.round((segEnergy * segRate) / 1000) * 1000,
+      };
+    });
+    // Dominant band drives the summary chip; the lines drive the money.
+    const dominant = [...priceLines].sort(
+      (a, b) => new Date(b.toAt).getTime() - new Date(b.fromAt).getTime() - (new Date(a.toAt).getTime() - new Date(a.fromAt).getTime()),
+    )[0];
+    const rateKind: RateKind = dominant.rateKind;
+    const rateVndPerKwh = dominant.rateVndPerKwh;
+    const energyKwh = +priceLines.reduce((s, l) => s + l.energyKwh, 0).toFixed(1);
+    const amountVnd = priceLines.reduce((s, l) => s + l.amountVnd, 0);
     // BR-PAY-03 refund tiers by time-before-start at cancel moment
     let refundPct: number | null = null;
     let refundVnd = 0;
@@ -119,13 +180,16 @@ export function buildMockDb(): MockDb {
       driverName: pick(drivers),
       driverPhone: '+84 9' + pad(Math.floor(R() * 90)) + ' •••• ' + pad(Math.floor(R() * 90)) + Math.floor(R() * 9),
       createdAt: `2026-06-${pad(createdDay)}T${pad(Math.floor(createdTot / 60))}:${pad(createdTot % 60)}:00`,
-      startAt: `2026-06-${pad(day)}T${pad(sh)}:${pad(sm)}:00`,
-      endAt: `2026-06-${pad(eh >= 24 ? day + 1 : day)}T${pad(eh % 24)}:${pad(endTot % 60)}:00`,
+      // BR-BOK-02: the 10-minute hold only exists while payment is outstanding.
+      expiresAt: status === 'pending' ? `2026-06-${pad(createdDay)}T${pad(Math.floor((createdTot + 10) / 60))}:${pad((createdTot + 10) % 60)}:00` : null,
+      startAt: isoAt(day, startTot),
+      endAt: isoAt(day, endTot),
       durationMin,
       rateKind,
       rateVndPerKwh,
       energyKwh,
       amountVnd,
+      priceLines,
       refundPct,
       refundVnd,
       method: pick(methods),
@@ -158,6 +222,7 @@ export function buildMockDb(): MockDb {
       driverName: 'Nguyễn Văn An',
       driverPhone: '+84 987 654 321',
       createdAt: toLocalIso(created),
+      expiresAt: null, // already confirmed — the payment hold no longer applies
       startAt: toLocalIso(start),
       endAt: toLocalIso(end),
       durationMin: 60,
@@ -165,6 +230,9 @@ export function buildMockDb(): MockDb {
       rateVndPerKwh: baseRate,
       energyKwh,
       amountVnd,
+      priceLines: [
+        { fromAt: toLocalIso(start), toAt: toLocalIso(end), rateKind: 'standard', rateVndPerKwh: baseRate, energyKwh, amountVnd },
+      ],
       refundPct: null,
       refundVnd: 0,
       method: 'VNPAY',
@@ -322,16 +390,21 @@ export function buildMockDb(): MockDb {
   });
 
   const tickets: Ticket[] = [
-    { id: 'TIC-4821', subject: 'Không quét được QR để check-in trụ CH-02', category: 'charging_issue', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[2]?.id ?? null, reporterName: 'Trần Minh Hà', reporterPhone: '+84 987 654 321', assigneeName: null, createdAt: '2026-06-28T07:12:00', updatedAt: '2026-06-28T07:20:00', lastMessagePreview: 'Em đã check-in thủ công cho phiên của anh, anh cắm sạc bình thường.', messageCount: 4 },
-    { id: 'TIC-4816', subject: 'Bị trừ tiền nhưng đặt chỗ báo huỷ', category: 'payment', status: 'in_progress', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[5]?.id ?? null, reporterName: 'Lê Thị Bình', reporterPhone: '+84 912 345 678', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-28T06:38:00', updatedAt: '2026-06-28T06:55:00', lastMessagePreview: 'Em đã chuyển yêu cầu hoàn tiền lên hệ thống thanh toán, chờ xác nhận trong 24h.', messageCount: 2 },
-    { id: 'TIC-4809', subject: 'Trụ CH-05 báo lỗi giữa phiên sạc', category: 'connector_fault', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[8]?.id ?? null, reporterName: 'Phạm Quốc Dũng', reporterPhone: '+84 933 221 100', assigneeName: null, createdAt: '2026-06-28T05:50:00', updatedAt: '2026-06-28T06:10:00', lastMessagePreview: 'Trụ đang được kiểm tra, anh vui lòng đổi sang trụ CH-01 giúp em.', messageCount: 2 },
-    { id: 'TIC-4790', subject: 'Xin gia hạn giờ giữ chỗ thêm 10 phút', category: 'booking', status: 'resolved', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[11]?.id ?? null, reporterName: 'Ngô Bảo Châu', reporterPhone: '+84 977 888 999', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-27T14:00:00', updatedAt: '2026-06-27T14:40:00', lastMessagePreview: 'Đã gia hạn 10 phút cho anh, hẹn gặp tại trạm.', messageCount: 3 },
-    { id: 'TIC-4771', subject: 'Hỏi cách xuất hoá đơn phiên sạc', category: 'account', status: 'closed', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: null, reporterName: 'Đỗ Hải Long', reporterPhone: '+84 966 777 111', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-26T09:00:00', updatedAt: '2026-06-26T09:30:00', lastMessagePreview: 'Hoá đơn điện tử được gửi tự động qua email sau khi phiên sạc kết thúc.', messageCount: 2 },
-    { id: 'TIC-4805', subject: 'Trụ tại Cầu Giấy không nhận thẻ ATM', category: 'payment', status: 'open', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[14]?.id ?? null, reporterName: 'Bùi Thu Hương', reporterPhone: '+84 944 555 222', assigneeName: null, createdAt: '2026-06-28T04:20:00', updatedAt: '2026-06-28T04:45:00', lastMessagePreview: 'Anh thử lại bằng VNPay hoặc Momo giúp em trong lúc em báo kỹ thuật kiểm tra đầu đọc thẻ.', messageCount: 2 },
-    { id: 'TIC-4788', subject: 'Không tìm thấy trạm trên bản đồ dù đã đặt', category: 'booking', status: 'in_progress', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[17]?.id ?? null, reporterName: 'Hoàng Văn Tú', reporterPhone: '+84 922 333 444', assigneeName: 'Nhân viên Trạm Cầu Giấy', createdAt: '2026-06-27T20:00:00', updatedAt: '2026-06-27T20:30:00', lastMessagePreview: 'Em đang kiểm tra lại vị trí ghim trên bản đồ, sẽ phản hồi sớm.', messageCount: 2 },
-    { id: 'TIC-4750', subject: 'Trụ Long Biên báo offline liên tục', category: 'connector_fault', status: 'open', stationId: 'ST-1042', stationName: 'Trạm Long Biên', bookingId: null, reporterName: 'Đặng Mỹ Linh', reporterPhone: '+84 911 222 333', assigneeName: null, createdAt: '2026-06-25T11:00:00', updatedAt: '2026-06-25T13:00:00', lastMessagePreview: 'Minh Phát EV đang cử kỹ thuật xuống kiểm tra nguồn điện của trụ.', messageCount: 2 },
-    { id: 'TIC-4733', subject: 'Yêu cầu hoàn tiền do sạc gián đoạn', category: 'payment', status: 'resolved', stationId: 'ST-1023', stationName: 'Trạm Thanh Xuân', bookingId: null, reporterName: 'Lý Thanh Sơn', reporterPhone: '+84 909 111 222', assigneeName: 'GreenVolt', createdAt: '2026-06-23T10:00:00', updatedAt: '2026-06-24T09:00:00', lastMessagePreview: 'Đã hoàn 50% theo chính sách do gián đoạn giữa phiên (BR-PAY-03).', messageCount: 2 },
-    { id: 'TIC-4700', subject: 'Câu hỏi chung về chính sách hủy', category: 'account', status: 'closed', stationId: 'ST-1009', stationName: 'Trạm Đống Đa', bookingId: null, reporterName: 'Mai Phương Thảo', reporterPhone: '+84 988 000 111', assigneeName: 'SaigonCharge', createdAt: '2026-06-20T08:00:00', updatedAt: '2026-06-20T09:15:00', lastMessagePreview: 'Đã giải đáp — hủy trước 60 phút được hoàn 100% theo BR-PAY-03.', messageCount: 2 },
+    // Station-scoped (CHARGING_ISSUE / station-linked BOOKING) — reach Owner + Staff per BR-TKT-01.
+    { id: 'TIC-4821', ticketNo: '#1084', subject: 'Không quét được QR để check-in trụ CH-02', category: 'charging_issue', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[2]?.id ?? null, reporterName: 'Trần Minh Hà', reporterPhone: '+84 987 654 321', assigneeName: null, createdAt: '2026-06-28T07:12:00', updatedAt: '2026-06-28T07:20:00', lastMessagePreview: 'Em đã check-in thủ công cho phiên của anh, anh cắm sạc bình thường.', messageCount: 4 },
+    { id: 'TIC-4812', ticketNo: '#1083', subject: 'Sạc rất chậm so với công suất ghi trên trụ', category: 'charging_issue', status: 'in_progress', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[6]?.id ?? null, reporterName: 'Vũ Ngọc Khanh', reporterPhone: '+84 901 234 567', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-28T06:05:00', updatedAt: '2026-06-28T06:30:00', lastMessagePreview: 'Em đã kiểm tra, trụ đang chia tải với xe bên cạnh. Anh đợi thêm ít phút giúp em.', messageCount: 2 },
+    { id: 'TIC-4809', ticketNo: '#1082', subject: 'Trụ CH-05 báo lỗi giữa phiên sạc', category: 'charging_issue', status: 'open', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[8]?.id ?? null, reporterName: 'Phạm Quốc Dũng', reporterPhone: '+84 933 221 100', assigneeName: null, createdAt: '2026-06-28T05:50:00', updatedAt: '2026-06-28T06:10:00', lastMessagePreview: 'Trụ đang được kiểm tra, anh vui lòng đổi sang trụ CH-01 giúp em.', messageCount: 2 },
+    { id: 'TIC-4790', ticketNo: '#1079', subject: 'Xin gia hạn giờ giữ chỗ thêm 10 phút', category: 'booking', status: 'resolved', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[11]?.id ?? null, reporterName: 'Ngô Bảo Châu', reporterPhone: '+84 977 888 999', assigneeName: 'Nhân viên Trạm Hà Đông', createdAt: '2026-06-27T14:00:00', updatedAt: '2026-06-27T14:40:00', lastMessagePreview: 'Đã gia hạn 10 phút cho anh, hẹn gặp tại trạm.', messageCount: 3 },
+    { id: 'TIC-4830', ticketNo: '#1086', subject: 'Cổng CCS2 không khớp với đầu sạc của xe', category: 'charging_issue', status: 'open', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[9]?.id ?? null, reporterName: 'Đỗ Hải Long', reporterPhone: '+84 966 777 111', assigneeName: null, createdAt: '2026-06-28T08:05:00', updatedAt: '2026-06-28T08:15:00', lastMessagePreview: 'Anh cho em xin ảnh đầu cắm trên xe để em xác nhận đúng chuẩn giúp anh.', messageCount: 2 },
+    { id: 'TIC-4788', ticketNo: '#1078', subject: 'Không tìm thấy trạm trên bản đồ dù đã đặt', category: 'booking', status: 'in_progress', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[17]?.id ?? null, reporterName: 'Hoàng Văn Tú', reporterPhone: '+84 922 333 444', assigneeName: 'Nhân viên Trạm Cầu Giấy', createdAt: '2026-06-27T20:00:00', updatedAt: '2026-06-27T20:30:00', lastMessagePreview: 'Em đang kiểm tra lại vị trí ghim trên bản đồ, sẽ phản hồi sớm.', messageCount: 2 },
+    { id: 'TIC-4772', ticketNo: '#1076', subject: 'Đặt nhầm khung giờ, xin đổi sang buổi chiều', category: 'booking', status: 'closed', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[13]?.id ?? null, reporterName: 'Mai Phương Thảo', reporterPhone: '+84 988 000 111', assigneeName: 'Nhân viên Trạm Cầu Giấy', createdAt: '2026-06-26T15:10:00', updatedAt: '2026-06-26T15:45:00', lastMessagePreview: 'Anh huỷ trong 5 phút đầu được hoàn 100% rồi đặt lại khung chiều giúp em nhé.', messageCount: 2 },
+    // Platform-level (PAYMENT / ACCOUNT / OTHER) — route to Admin only, even though a station is linked.
+    { id: 'TIC-4816', ticketNo: '#1085', subject: 'Bị trừ tiền nhưng đặt chỗ báo huỷ', category: 'payment', status: 'in_progress', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: bookings[5]?.id ?? null, reporterName: 'Lê Thị Bình', reporterPhone: '+84 912 345 678', assigneeName: 'Đội vận hành trung tâm', createdAt: '2026-06-28T06:38:00', updatedAt: '2026-06-28T06:55:00', lastMessagePreview: 'Em đã chuyển yêu cầu hoàn tiền lên hệ thống thanh toán, chờ xác nhận trong 24h.', messageCount: 2 },
+    { id: 'TIC-4771', ticketNo: '#1075', subject: 'Hỏi cách xuất hoá đơn phiên sạc', category: 'account', status: 'closed', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', bookingId: null, reporterName: 'Đỗ Hải Long', reporterPhone: '+84 966 777 111', assigneeName: 'Đội vận hành trung tâm', createdAt: '2026-06-26T09:00:00', updatedAt: '2026-06-26T09:30:00', lastMessagePreview: 'Hoá đơn điện tử được gửi tự động qua email sau khi phiên sạc kết thúc.', messageCount: 2 },
+    { id: 'TIC-4805', ticketNo: '#1081', subject: 'Trụ tại Cầu Giấy không nhận thẻ ATM', category: 'payment', status: 'open', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', bookingId: bookings[14]?.id ?? null, reporterName: 'Bùi Thu Hương', reporterPhone: '+84 944 555 222', assigneeName: null, createdAt: '2026-06-28T04:20:00', updatedAt: '2026-06-28T04:45:00', lastMessagePreview: 'Anh thử lại bằng VNPay hoặc Momo giúp em trong lúc em báo kỹ thuật kiểm tra đầu đọc thẻ.', messageCount: 2 },
+    { id: 'TIC-4750', ticketNo: '#1073', subject: 'Trụ Long Biên báo offline liên tục', category: 'charging_issue', status: 'open', stationId: 'ST-1042', stationName: 'Trạm Long Biên', bookingId: null, reporterName: 'Đặng Mỹ Linh', reporterPhone: '+84 911 222 333', assigneeName: null, createdAt: '2026-06-25T11:00:00', updatedAt: '2026-06-25T13:00:00', lastMessagePreview: 'Minh Phát EV đang cử kỹ thuật xuống kiểm tra nguồn điện của trụ.', messageCount: 2 },
+    { id: 'TIC-4733', ticketNo: '#1071', subject: 'Yêu cầu hoàn tiền do sạc gián đoạn', category: 'payment', status: 'resolved', stationId: 'ST-1023', stationName: 'Trạm Thanh Xuân', bookingId: null, reporterName: 'Lý Thanh Sơn', reporterPhone: '+84 909 111 222', assigneeName: 'Đội vận hành trung tâm', createdAt: '2026-06-23T10:00:00', updatedAt: '2026-06-24T09:00:00', lastMessagePreview: 'Đã hoàn 50% theo chính sách do gián đoạn giữa phiên (BR-PAY-03).', messageCount: 2 },
+    { id: 'TIC-4700', ticketNo: '#1068', subject: 'Câu hỏi chung về chính sách hủy', category: 'account', status: 'closed', stationId: 'ST-1009', stationName: 'Trạm Đống Đa', bookingId: null, reporterName: 'Mai Phương Thảo', reporterPhone: '+84 988 000 111', assigneeName: 'Đội vận hành trung tâm', createdAt: '2026-06-20T08:00:00', updatedAt: '2026-06-20T09:15:00', lastMessagePreview: 'Đã giải đáp — hủy trước 60 phút được hoàn 100% theo BR-PAY-03.', messageCount: 2 },
   ];
 
   const ticketMessages: Record<string, TicketMessage[]> = {
@@ -348,6 +421,18 @@ export function buildMockDb(): MockDb {
     'TIC-4809': [
       msg('TIC-4809', 1, 'Phạm Quốc Dũng', 'driver', 'Đang sạc thì trụ CH-05 tự dừng, màn hình báo lỗi E-04.', '2026-06-28T05:50:00'),
       msg('TIC-4809', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Trụ đang được kiểm tra, anh vui lòng đổi sang trụ CH-01 giúp em.', '2026-06-28T06:10:00'),
+    ],
+    'TIC-4812': [
+      msg('TIC-4812', 1, 'Vũ Ngọc Khanh', 'driver', 'Trụ ghi 60kW nhưng xe chỉ nhận khoảng 25kW, có phải trụ lỗi không ạ?', '2026-06-28T06:05:00'),
+      msg('TIC-4812', 2, 'Nhân viên Trạm Hà Đông', 'station_staff', 'Em đã kiểm tra, trụ đang chia tải với xe bên cạnh. Anh đợi thêm ít phút giúp em.', '2026-06-28T06:30:00'),
+    ],
+    'TIC-4830': [
+      msg('TIC-4830', 1, 'Đỗ Hải Long', 'driver', 'Em ra tới nơi nhưng đầu CCS2 không cắm vừa xe, có cổng nào khác không ạ?', '2026-06-28T08:05:00'),
+      msg('TIC-4830', 2, 'Nhân viên Trạm Cầu Giấy', 'station_staff', 'Anh cho em xin ảnh đầu cắm trên xe để em xác nhận đúng chuẩn giúp anh.', '2026-06-28T08:15:00'),
+    ],
+    'TIC-4772': [
+      msg('TIC-4772', 1, 'Mai Phương Thảo', 'driver', 'Mình lỡ đặt khung 8h sáng, muốn đổi sang chiều nay có được không?', '2026-06-26T15:10:00'),
+      msg('TIC-4772', 2, 'Nhân viên Trạm Cầu Giấy', 'station_staff', 'Anh huỷ trong 5 phút đầu được hoàn 100% rồi đặt lại khung chiều giúp em nhé.', '2026-06-26T15:45:00'),
     ],
     'TIC-4790': [
       msg('TIC-4790', 1, 'Ngô Bảo Châu', 'driver', 'Mình đang kẹt xe, xin giữ chỗ thêm 10 phút được không ạ?', '2026-06-27T14:00:00'),
@@ -395,7 +480,7 @@ export function buildMockDb(): MockDb {
 
   /* ---- pricing & hours (FR11) ---- */
   const pricing: PricingConfig = {
-    slotDurationMin: 60,
+    minBookingDurationMin: 60,
     basePriceVnd: 3400,
     hours: [
       { day: 'T2', open: '06:00', close: '23:00', open24: true },

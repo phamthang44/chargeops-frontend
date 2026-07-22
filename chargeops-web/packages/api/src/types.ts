@@ -29,6 +29,23 @@ export type BookingStatus =
 
 export type RateKind = 'peak' | 'standard' | 'offpeak';
 
+/**
+ * One TOU rate segment of a booking's window, snapshotted at booking time
+ * (SRS BookingPriceLine). A booking that crosses a rate boundary — say
+ * 16:30–18:30 spanning standard into peak — carries one line per band, which is
+ * why the total cannot be re-derived from a single rate. Never recalculated:
+ * later pricing edits apply to new bookings only (BR-STA-03).
+ */
+export interface BookingPriceLine {
+  /** ISO datetimes bounding this segment within the booking window. */
+  fromAt: string;
+  toAt: string;
+  rateKind: RateKind;
+  rateVndPerKwh: number;
+  energyKwh: number;
+  amountVnd: number;
+}
+
 /** Fat/denormalized on purpose: price + names are snapshots taken at booking time (BookingPriceLine). */
 export interface Booking {
   id: string;
@@ -43,14 +60,22 @@ export interface Booking {
   driverPhone: string;
   /** ISO datetime the booking was created — anchors the FR08 grace-period window. */
   createdAt: string;
+  /**
+   * ISO datetime the unpaid reservation lapses (createdAt + 10 min, BR-BOK-02).
+   * Null once the booking leaves Pending Payment — the hold no longer applies.
+   */
+  expiresAt: string | null;
   /** ISO datetimes. */
   startAt: string;
   endAt: string;
   durationMin: number;
+  /** Dominant band, kept for list/filter display; `priceLines` is authoritative for the total. */
   rateKind: RateKind;
   rateVndPerKwh: number;
   energyKwh: number;
   amountVnd: number;
+  /** Per-band snapshots; one entry unless the window crosses a TOU boundary. */
+  priceLines: BookingPriceLine[];
   /**
    * BR-PAY-03 refund tiers, evaluated at cancel moment: 100 if cancelled within 5 min of
    * `createdAt` (grace period, FR08 override — takes priority regardless of time-before-start),
@@ -290,7 +315,13 @@ export interface AvailabilityRules {
 }
 
 export interface PricingConfig {
-  slotDurationMin: number; // 30 | 60 | 90
+  /**
+   * Shortest window a driver may book, and the increment they step in
+   * (30 | 60 | 90). Not a pre-generated slot: FR05 has the driver pick a start
+   * time plus a duration, and the booking stores that range itself — the system
+   * never materialises fixed slots to hand out.
+   */
+  minBookingDurationMin: number;
   basePriceVnd: number; // per kWh, applies to any window without a TOU rule
   hours: OperatingHour[];
   touRules: TouRule[];
@@ -316,13 +347,20 @@ export interface AssistantAnswer {
 
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 
+/**
+ * FR16 categories. Also the routing key (BR-TKT-01): CHARGING_ISSUE and
+ * station-linked BOOKING tickets go to that station's Owner/Staff; PAYMENT,
+ * ACCOUNT and OTHER go to Admin.
+ */
 export type TicketCategory =
   | 'charging_issue'
-  | 'payment'
   | 'booking'
-  | 'connector_fault'
+  | 'payment'
   | 'account'
   | 'other';
+
+/** Categories an Owner/Staff console may see, provided the ticket is station-linked. */
+export const STATION_SCOPED_CATEGORIES: readonly TicketCategory[] = ['charging_issue', 'booking'];
 
 export type TicketAuthorRole = 'driver' | 'station_staff' | 'station_owner' | 'platform_admin';
 
@@ -339,6 +377,8 @@ export interface TicketMessage {
 /** Linked context (station/booking) is shown in the detail header when present. */
 export interface Ticket {
   id: string;
+  /** Human-readable reference quoted to the reporter, alongside the system id (FR16). */
+  ticketNo: string;
   subject: string;
   category: TicketCategory;
   status: TicketStatus;

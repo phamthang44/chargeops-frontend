@@ -82,9 +82,9 @@ export function Pricing() {
       ) : (
         <div className="mx-auto flex max-w-[880px] flex-col gap-[22px]">
           <BaseConfigStep
-            slotDurationMin={draft.slotDurationMin}
+            minBookingDurationMin={draft.minBookingDurationMin}
             basePriceVnd={draft.basePriceVnd}
-            onSlot={(slotDurationMin) => patch({ slotDurationMin })}
+            onMinDuration={(minBookingDurationMin) => patch({ minBookingDurationMin })}
             onBasePrice={(basePriceVnd) => patch({ basePriceVnd })}
           />
           <OperatingHoursStep hours={draft.hours} onToggleDay={toggleDay} onSet247={set247} />

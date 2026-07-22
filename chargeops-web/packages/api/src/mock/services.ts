@@ -5,8 +5,28 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { Booking, BookingStatus, BookingSummary, Charger, PaymentMethod, Station, TicketMessage, TicketStatus } from '../types';
+import type { Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationStaffMember, TicketMessage, TicketStatus } from '../types';
 import { buildMockDb } from './seed';
+
+/**
+ * BR-CHG-01 — a Connector is only live if its Charge Point is ACTIVE. Derived
+ * here rather than stored so a device going offline never overwrites (and then
+ * loses) the per-connector status the owner set.
+ */
+function effectiveRuntimeStatus(c: Connector, chargePoints: ChargePoint[]): Connector['runtimeStatus'] {
+  const cp = chargePoints.find((x) => x.id === c.chargePointId);
+  return cp?.status === 'active' ? c.runtimeStatus : 'offline';
+}
+
+/** BR-PAY-03 + FR08 grace-period override, evaluated at cancel moment. */
+function computeRefundPct(b: Booking, now = Date.now()): number {
+  const minutesSinceCreated = (now - new Date(b.createdAt).getTime()) / 60_000;
+  if (minutesSinceCreated <= 5) return 100; // grace period — overrides the tier table
+  const minutesBeforeStart = (new Date(b.startAt).getTime() - now) / 60_000;
+  if (minutesBeforeStart >= 60) return 100;
+  if (minutesBeforeStart >= 15) return 50;
+  return 0;
+}
 
 const delay = (ms = 250 + Math.random() * 250) => new Promise((r) => setTimeout(r, ms));
 
@@ -36,14 +56,29 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       ? db.tickets.filter((tk) => tk.stationId && db.ownerStationIds.includes(tk.stationId))
       : db.tickets;
 
+  /**
+   * Connectors reachable by the caller (BR-ACC-05). A Connector has no stationId
+   * of its own — it inherits one through its Charge Point — so scoping has to
+   * hop via chargePoints rather than filtering connectors directly.
+   */
+  const scopedConnectors = () => {
+    if (!scope.ownerView) return db.connectors;
+    const mine = new Set(
+      db.chargePoints.filter((cp) => db.ownerStationIds.includes(cp.stationId)).map((cp) => cp.id),
+    );
+    return db.connectors.filter((c) => mine.has(c.chargePointId));
+  };
+
   return {
     dashboard: {
       async owner() {
         await delay();
         const lic = db.licenses[0];
-        // maintenance still counts as connected/online; only offline drops out
-        const online = db.chargers.filter((c) => c.status !== 'offline');
-        const offline = db.chargers.find((c) => c.status === 'offline');
+        // OFFLINE connectors drop out; AVAILABLE/IN_USE both count as connected/online
+        const mine = scopedConnectors();
+        const live = mine.map((c) => ({ c, status: effectiveRuntimeStatus(c, db.chargePoints) }));
+        const online = live.filter((x) => x.status !== 'offline');
+        const offline = live.find((x) => x.status === 'offline')?.c;
         const upcoming = scopedBookings()
           .filter((b) => b.status === 'confirmed' || b.status === 'pending')
           .slice(0, 4);
@@ -55,12 +90,18 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             revenueTodayVnd: 4_200_000,
             revenueDeltaPct: 12,
             chargersOnline: online.length,
-            chargersTotal: db.chargers.length,
+            chargersTotal: mine.length,
             offlineChargerNote: offline ? `${offline.id} mất kết nối` : null,
             avgUtilizationPct: 68,
             utilizationDeltaPts: 5,
           },
-          chargers: db.chargers.map(({ id, name, status, utilizationPct }) => ({ id, name, status, utilizationPct })),
+          chargers: mine.map((c) => ({
+            id: c.id,
+            name: c.name,
+            zoneLabel: db.chargePoints.find((cp) => cp.id === c.chargePointId)?.zoneLabel ?? null,
+            runtimeStatus: effectiveRuntimeStatus(c, db.chargePoints),
+            utilizationPct: c.utilizationPct,
+          })),
           upcomingBookings: upcoming.map((b) => ({
             id: b.id,
             startTime: b.startAt.slice(11, 16),
@@ -86,7 +127,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             expiringLicenses: db.licenses.filter((l) => l.status === 'expiring').length,
             expiringDaysMin: 11,
             expiredLicenses: db.licenses.filter((l) => l.status === 'expired').length,
-            reportedFaults: db.chargers.reduce((n, c) => n + c.faultCount, 0),
+            reportedFaults: db.connectors.reduce((n, c) => n + c.faultCount, 0),
           },
           topStations: [
             { name: 'Trạm Cầu Giấy', revenueVnd: 15_800_000 },
@@ -98,9 +139,11 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async staff() {
         await delay();
-        // maintenance still counts as connected/online; only offline drops out
-        const online = db.chargers.filter((c) => c.status !== 'offline');
-        const offline = db.chargers.find((c) => c.status === 'offline');
+        // OFFLINE connectors drop out; AVAILABLE/IN_USE both count as connected/online
+        const mine = scopedConnectors();
+        const live = mine.map((c) => ({ c, status: effectiveRuntimeStatus(c, db.chargePoints) }));
+        const online = live.filter((x) => x.status !== 'offline');
+        const offline = live.find((x) => x.status === 'offline')?.c;
         const upcoming = scopedBookings()
           .filter((b) => b.status === 'confirmed' || b.status === 'pending')
           .slice(0, 4);
@@ -113,17 +156,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             bookingsToday: 24,
             bookingsDelta: 4,
             chargersOnline: online.length,
-            chargersTotal: db.chargers.length,
+            chargersTotal: mine.length,
             offlineChargerNote: offline ? `${offline.id} mất kết nối` : null,
             openTickets: myTickets.filter((t) => t.status === 'open' || t.status === 'in_progress').length,
             pendingCheckins: scopedBookings().filter((b) => b.status === 'confirmed').length,
           },
-          chargers: db.chargers.map(({ id, name, status }) => ({ id, name, status })),
+          chargers: mine.map((c) => ({
+            id: c.id,
+            name: c.name,
+            zoneLabel: db.chargePoints.find((cp) => cp.id === c.chargePointId)?.zoneLabel ?? null,
+            runtimeStatus: effectiveRuntimeStatus(c, db.chargePoints),
+          })),
           upcomingBookings: upcoming.map((b) => ({
             id: b.id,
             startTime: b.startAt.slice(11, 16),
             driverName: b.driverName,
-            chargerId: b.chargerId,
+            connectorId: b.connectorId,
           })),
           recentTickets: recentTickets.map(({ id, subject, status, updatedAt }) => ({ id, subject, status, updatedAt })),
         };
@@ -181,12 +229,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
                 return [b.id];
               case 'driver':
                 return [b.driverName];
-              case 'charger':
-                return [b.chargerId];
+              case 'connector':
+                return [b.connectorId];
               case 'station':
                 return [b.stationName];
               default:
-                return [b.id, b.driverName, b.chargerId, b.stationName];
+                return [b.id, b.driverName, b.connectorId, b.stationName];
             }
           };
           rows = rows.filter((b) => fieldsOf(b).some((f) => f.toLowerCase().includes(q)));
@@ -214,37 +262,81 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async cancel(id) {
         await delay();
         const b = await this.get(id);
-        // BR-PAY-03 — mock assumes ≥60 min before start ⇒ 100% refund.
+        const refundPct = computeRefundPct(b);
         b.status = 'cancelled';
-        b.refundPct = 100;
-        b.refundVnd = b.amountVnd;
+        b.refundPct = refundPct;
+        b.refundVnd = Math.round((b.amountVnd * refundPct) / 100 / 1000) * 1000;
         return { ...b };
+      },
+      async activeFor(connectorIds) {
+        await delay(180);
+        const ids = new Set(connectorIds);
+        return db.bookings
+          .filter((b) => ids.has(b.connectorId) && (b.status === 'confirmed' || b.status === 'checkedin'))
+          .sort((a, b) => (a.startAt < b.startAt ? -1 : 1));
       },
     },
 
-    chargers: {
+    chargePoints: {
       async list(stationId) {
         await delay();
-        const all = [...db.chargers, ...db.provisioned];
-        return stationId ? all.filter((c) => c.stationId === stationId) : scope.ownerView ? db.chargers : all;
+        return stationId ? db.chargePoints.filter((c) => c.stationId === stationId) : scope.ownerView ? db.chargePoints.filter((c) => db.ownerStationIds.includes(c.stationId)) : db.chargePoints;
       },
       async update(id, patch) {
         await delay();
-        const c = [...db.chargers, ...db.provisioned].find((x) => x.id === id);
-        if (!c) throw new Error(`Không tìm thấy trụ ${id}`);
-        if (patch.name !== undefined) c.name = patch.name;
-        if (patch.status !== undefined) c.status = patch.status;
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        if (patch.name !== undefined) cp.name = patch.name;
+        if (patch.zoneLabel !== undefined) cp.zoneLabel = patch.zoneLabel;
+        if (patch.status !== undefined) cp.status = patch.status;
+        return { ...cp };
+      },
+      async provision(input) {
+        await delay();
+        const rec: ChargePoint = {
+          id: 'CP-' + seq++,
+          stationId: input.stationId,
+          name: input.name || '—',
+          zoneLabel: input.zoneLabel ?? null,
+          maxPowerKw: 0,
+          status: 'unclaimed',
+        };
+        db.chargePoints.unshift(rec);
+        return { ...rec };
+      },
+      async activate(id) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        cp.status = 'active';
+        return { ...cp };
+      },
+    },
+
+    connectors: {
+      async list(chargePointId) {
+        await delay();
+        return chargePointId
+          ? db.connectors.filter((c) => c.chargePointId === chargePointId)
+          : scopedConnectors();
+      },
+      async update(id, patch) {
+        await delay();
+        const c = db.connectors.find((x) => x.id === id);
+        if (!c) throw new Error(`Không tìm thấy connector ${id}`);
+        if (patch.runtimeStatus !== undefined) c.runtimeStatus = patch.runtimeStatus;
         return { ...c };
       },
       async provision(input) {
         await delay();
-        const rec: Charger = {
+        const rec: Connector = {
           id: 'CH-' + seq++,
-          stationId: 'ST-1042',
-          name: input.name || '—',
-          connector: input.connector,
+          chargePointId: input.chargePointId,
+          name: input.name || 'Connector ' + (db.connectors.filter((c) => c.chargePointId === input.chargePointId).length + 1),
+          connectorType: input.connectorType,
           powerKw: input.powerKw,
-          status: 'unclaimed',
+          runtimeStatus: 'offline',
+          qrToken: 'QR-' + seq,
           utilizationPct: 0,
           sessionsToday: 0,
           uptime30dPct: 0,
@@ -252,7 +344,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           faultCount: 0,
           lastSeen: '—',
         };
-        db.provisioned.unshift(rec);
+        db.connectors.unshift(rec);
+        const cp = db.chargePoints.find((c) => c.id === input.chargePointId);
+        if (cp) cp.maxPowerKw = Math.max(cp.maxPowerKw, input.powerKw);
         return { ...rec };
       },
     },
@@ -286,6 +380,10 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async approvals() {
         await delay();
         return db.approvalQueue.filter((s) => s.status === 'pending');
+      },
+      async directory() {
+        await delay(150);
+        return [...db.stationsDirectory];
       },
       async approve(id) {
         await delay();
@@ -388,6 +486,61 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (!u) throw new Error(`Không tìm thấy người dùng ${id}`);
         u.status = status;
         return { ...u };
+      },
+    },
+
+    staff: {
+      async list() {
+        await delay();
+        // BR-ACC-05: owner sees assignments for their own stations only.
+        return db.stationStaff
+          .filter((s) => db.ownerStationIds.includes(s.stationId))
+          .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      },
+      async invite({ email, stationId }) {
+        await delay();
+        const clean = email.trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) throw new Error('Email không hợp lệ');
+
+        const station = db.ownerStations.find((s) => s.id === stationId);
+        if (!station) throw new Error(`Không tìm thấy trạm ${stationId}`);
+        if (db.stationStaff.some((s) => s.email.toLowerCase() === clean && s.stationId === stationId)) {
+          throw new Error(`${email} đã là nhân viên của ${station.name}`);
+        }
+
+        // FR17: grant additively to an existing account, else provision a new one.
+        const existing = db.users.find((u) => u.email.toLowerCase() === clean);
+        const created = !existing;
+        const member: StationStaffMember = {
+          userId: existing?.id ?? 'U-' + seq++,
+          stationId,
+          stationName: station.name,
+          name: existing?.name ?? clean,
+          email: existing?.email ?? clean,
+          primaryRole: existing?.role ?? 'DRIVER',
+          provisioned: created,
+          createdAt: new Date().toISOString().slice(0, 10),
+        };
+        db.stationStaff.unshift(member);
+        if (created) {
+          db.users.push({
+            id: member.userId,
+            name: member.name,
+            email: member.email,
+            role: 'DRIVER',
+            joined: member.createdAt,
+            bookingCount: 0,
+            status: 'active',
+          });
+        }
+        return { member: { ...member }, created };
+      },
+      async revoke(userId, stationId) {
+        await delay();
+        const i = db.stationStaff.findIndex((s) => s.userId === userId && s.stationId === stationId);
+        if (i < 0) throw new Error('Không tìm thấy phân công này');
+        // Deletes the assignment row only — the account and its other roles survive (FR17).
+        db.stationStaff.splice(i, 1);
       },
     },
 

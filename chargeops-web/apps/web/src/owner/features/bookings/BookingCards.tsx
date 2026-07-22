@@ -24,7 +24,7 @@ export function BookingCards({ rows, onOpen }: { rows: Booking[]; onOpen: (b: Bo
             <div className="mb-1 text-[14px] font-semibold">{b.driverName}</div>
             <div className="flex items-center justify-between text-[12px] font-medium text-muted">
               <span>
-                {b.chargerId} · {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
+                {b.connectorId} · {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
               </span>
               <span className="font-semibold text-ink">{formatVnd(b.amountVnd)}</span>
             </div>

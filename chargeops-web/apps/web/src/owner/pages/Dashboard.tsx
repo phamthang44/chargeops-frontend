@@ -46,10 +46,10 @@ function DashboardBody({ data }: { data: OwnerDashboard }) {
   const { license, kpis, chargers, upcomingBookings } = data;
 
   const chargerRow = (c: OwnerDashboard['chargers'][number]): SidePanelRow =>
-    c.status === 'available'
+    c.runtimeStatus === 'available'
       ? { label: `${c.id} · ${c.name}`, value: `${c.utilizationPct}%`, dotClass: 'bg-good' }
-      : c.status === 'maintenance'
-        ? { label: `${c.id} · ${c.name}`, value: t('charger.maintenance'), dotClass: 'bg-warn', valueClass: 'text-warn' }
+      : c.runtimeStatus === 'inuse'
+        ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
         : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
 
   const licenseStatusLabel =

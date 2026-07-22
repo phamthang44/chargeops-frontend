@@ -14,7 +14,7 @@
   },
   "charger": {
     "available": "Sẵn sàng",
-    "maintenance": "Bảo trì",
+    "inuse": "Đang sạc",
     "offline": "Offline"
   },
   "panel": {

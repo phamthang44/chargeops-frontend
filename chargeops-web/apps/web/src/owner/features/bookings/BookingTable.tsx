@@ -57,7 +57,7 @@ export function BookingTable({
             >
               <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>
               <span className="font-semibold">{b.driverName}</span>
-              <span className="text-muted">{b.chargerId}</span>
+              <span className="text-muted">{b.connectorId}</span>
               <span className="text-muted">
                 {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
               </span>

@@ -5,8 +5,9 @@
  */
 import type {
   BookingStatus,
-  ChargerStatus,
+  ConnectorRuntimeStatus,
   LicenseStatus,
+  ProvisioningStatus,
   StationStatus,
   TicketCategory,
   TicketStatus,
@@ -28,11 +29,19 @@ export const BOOKING_STATUS: Record<BookingStatus, StatusMeta> = {
   cancelled: { label: 'Đã hủy', tone: 'bad' },
 };
 
-export const CHARGER_STATUS: Record<ChargerStatus, StatusMeta> = {
-  available: { label: 'Sẵn sàng', tone: 'good' },
-  maintenance: { label: 'Bảo trì', tone: 'warn' },
-  offline: { label: 'Offline', tone: 'bad' },
+/** Charge Point lifecycle (FR14) — admin owns unclaimed/suspended, owner/staff toggle active<->offline. */
+export const CHARGE_POINT_STATUS: Record<ProvisioningStatus, StatusMeta> = {
   unclaimed: { label: 'Chưa gán', tone: 'neutral' },
+  active: { label: 'Hoạt động', tone: 'good' },
+  offline: { label: 'Offline', tone: 'bad' },
+  suspended: { label: 'Đình chỉ', tone: 'bad' },
+};
+
+/** Connector runtime status (FR07) — AVAILABLE<->IN_USE is system-driven; OFFLINE is owner/staff-toggled. */
+export const CONNECTOR_STATUS: Record<ConnectorRuntimeStatus, StatusMeta> = {
+  available: { label: 'Sẵn sàng', tone: 'good' },
+  inuse: { label: 'Đang sạc', tone: 'brand' },
+  offline: { label: 'Offline', tone: 'bad' },
 };
 
 export const STATION_STATUS: Record<StationStatus, StatusMeta> = {

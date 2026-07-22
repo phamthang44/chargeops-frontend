@@ -22,6 +22,7 @@ import {
   IconPin,
   IconShield,
   IconTag,
+  IconUsers,
   NotificationBell,
   type NotificationItem,
   type ShellNavItem,
@@ -34,6 +35,7 @@ import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
 import { Revenue } from './pages/Revenue';
+import { Staff } from './pages/Staff';
 import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
@@ -49,6 +51,7 @@ const PAGES: Record<string, ComponentType> = {
   revenue: Revenue,
   license: License,
   assistant: Assistant,
+  staff: Staff,
   tickets: () => <TicketsRoute admin={false} />,
 };
 
@@ -59,12 +62,19 @@ const NAV = [
   { key: 'tickets', icon: <IconLifebuoy size={17} /> },
   { key: 'pricing', icon: <IconTag size={17} /> },
   { key: 'stations', icon: <IconPin size={17} /> },
+  { key: 'staff', icon: <IconUsers size={17} /> },
   { key: 'revenue', icon: <IconCard size={17} /> },
   { key: 'license', icon: <IconShield size={17} /> },
   { key: 'assistant', icon: <IconChat size={17} /> },
 ];
 
-/** Station staff reuse the owner shell but only see day-to-day operations. */
+/**
+ * Station staff reuse the owner shell but only see day-to-day operations
+ * (FR17 capability matrix). Anything absent here has no route generated either,
+ * so a hand-typed /staff/staff URL falls through to the dashboard rather than
+ * rendering an owner-only screen. This is UX convenience, not the security
+ * boundary — BR-ACC-05 requires the server to enforce it independently.
+ */
 const STAFF_KEYS = new Set(['dashboard', 'bookings', 'chargers', 'tickets']);
 
 // Owner and staff both see station-scoped data.
@@ -113,7 +123,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
           return res.items.map((b) => ({
             id: b.id,
             title: `${b.id} · ${b.driverName}`,
-            subtitle: `${b.chargerId} · ${formatTimeVn(b.startAt)}`,
+            subtitle: `${b.connectorId} · ${formatTimeVn(b.startAt)}`,
             onSelect: () => navigate(`${base}/bookings`),
           }));
         },
@@ -121,7 +131,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
       {
         label: t('search.groups.chargers'),
         run: async (q) => {
-          const all = await services.chargers.list();
+          const all = await services.chargePoints.list();
           const ql = q.toLowerCase();
           return all
             .filter((c) => c.name.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql))

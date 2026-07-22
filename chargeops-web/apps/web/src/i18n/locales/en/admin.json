@@ -164,7 +164,7 @@
       "id": "Booking ID",
       "station": "Station",
       "driver": "Driver",
-      "charger": "Charger"
+      "connector": "Connector"
     },
     "status": {
       "all": "All",
@@ -285,32 +285,59 @@
     "catsLabel": "CATEGORIES"
   },
   "provisioning": {
-    "toastSuccess": "Created record {{id}} ({{status}})",
-    "createTitle": "Create Charger Record",
-    "connectorLabel": "CONNECTOR",
-    "powerLabel": "POWER (kW)",
-    "displayNameLabel": "DISPLAY NAME (optional)",
-    "displayNamePlaceholder": "e.g., Connector A1 — owner can edit later",
-    "submitBtn": "Create Charger ID & QR",
     "submitting": "Creating...",
-    "helpNote": "New records start as UNCLAIMED → transition to ACTIVE after installation and pairing.",
-    "listTitle": "Provisioned Chargers · Long Bien Station",
-    "recordsCount": "{{count}} records",
+    "cancel": "Cancel",
+    "stationLabel": "PROVISIONING FOR STATION",
+    "listTitle": "Charge points · {{station}}",
+    "recordsCount": "{{count}} charge points",
+    "connectorCount": "{{count}} connectors",
+    "empty": "No charge points at {{station}} yet. Create one to start provisioning.",
+    "noConnectors": "No connectors yet — this charge point can't be activated or booked until it has at least one.",
+    "activateBtn": "Set Active",
+    "activating": "Activating...",
+    "activateHint": "Needs at least 1 connector",
+    "activateSuccess": "{{id}} is now Active",
+    "liveForDrivers": "Live for drivers",
+    "flow": {
+      "step1": "Create charge point",
+      "step2": "Add connectors (1 QR each)",
+      "step3": "Send QR images to owner",
+      "step4": "Set Active"
+    },
+    "chargePoint": {
+      "createBtn": "New charge point",
+      "createTitle": "Create charge point",
+      "createSub": "A new physical device at {{station}}.",
+      "createHelp": "It starts UNCLAIMED and stays hidden from drivers until you add connectors and set it Active.",
+      "nameLabel": "DISPLAY NAME (optional)",
+      "namePlaceholder": "e.g., Charge Point A1",
+      "zoneLabel": "ZONE / LOCATION HINT (optional)",
+      "zonePlaceholder": "e.g., Near the entrance, row B",
+      "submitBtn": "Create charge point",
+      "toastSuccess": "Created Charge Point {{id}} (Unclaimed)"
+    },
+    "connector": {
+      "addBtn": "Add connector",
+      "createTitle": "Add connector",
+      "createSub": "Adding to",
+      "createHelp": "Connector type and power are locked after provisioning (BR-CHG-03). This generates one Charger ID and one QR image for this port.",
+      "connectorLabel": "CONNECTOR TYPE",
+      "powerLabel": "POWER (kW)",
+      "displayNameLabel": "DISPLAY NAME (optional)",
+      "displayNamePlaceholder": "e.g., Connector 1 — owner can edit later",
+      "submitBtn": "Create Connector ID & QR",
+      "toastSuccess": "Created Connector {{id}}"
+    },
     "status": {
       "unclaimed": "Unclaimed",
       "active": "Active",
-      "charging": "Charging",
-      "faulted": "Faulted"
+      "offline": "Offline",
+      "suspended": "Suspended"
     },
-    "table": {
-      "cols": {
-        "id": "ID",
-        "name": "NAME",
-        "connector": "CONNECTOR",
-        "power": "kW",
-        "status": "STATUS",
-        "qr": "QR"
-      }
+    "connectorStatus": {
+      "available": "Available",
+      "inuse": "In use",
+      "offline": "Offline"
     },
     "toastDownloading": "Downloading QR for {{id}}... (demo)",
     "downloadQr": "Download QR"

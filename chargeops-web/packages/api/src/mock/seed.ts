@@ -6,7 +6,8 @@
 import type {
   Booking,
   BookingStatus,
-  Charger,
+  ChargePoint,
+  Connector,
   ConnectorType,
   License,
   PaymentMethod,
@@ -14,6 +15,7 @@ import type {
   PricingConfig,
   RateKind,
   Station,
+  StationStaffMember,
   Ticket,
   TicketMessage,
   Transaction,
@@ -22,12 +24,13 @@ import type {
 
 export interface MockDb {
   bookings: Booking[];
-  chargers: Charger[];
-  provisioned: Charger[];
+  chargePoints: ChargePoint[];
+  connectors: Connector[];
   ownerStations: Station[];
   approvalQueue: Station[];
   licenses: License[];
   users: UserAccount[];
+  stationStaff: StationStaffMember[];
   policyDocs: PolicyDoc[];
   transactions: Transaction[];
   tickets: Ticket[];
@@ -49,6 +52,11 @@ function lcg(seed: number) {
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Local wall-clock ISO (no 'Z') — matches the convention of every other seeded timestamp. */
+function toLocalIso(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
 
 export function buildMockDb(): MockDb {
   const R = lcg(99173);
@@ -90,16 +98,25 @@ export function buildMockDb(): MockDb {
       refundVnd = Math.round((amountVnd * refundPct) / 100 / 1000) * 1000;
     }
     const eh = Math.floor(endTot / 60);
+    // Booking created some lead time before its slot start (BR-BOK-02 style lead, not the 10-min hold window).
+    const leadMin = pick([10, 20, 45, 90, 180, 720, 1440]);
+    let createdTot = sh * 60 + sm - leadMin;
+    let createdDay = day;
+    if (createdTot < 0) {
+      createdTot += 24 * 60;
+      createdDay -= 1;
+    }
     bookings.push({
       id: 'BK-' + (38100 + i),
       stationId: stationIds[stationName],
       stationName,
       ownerName: owners[stationName],
-      chargerId: 'CH-' + pad(1 + Math.floor(R() * 8)),
+      connectorId: 'CH-' + pad(1 + Math.floor(R() * 8)),
       connector,
       powerKw,
       driverName: pick(drivers),
       driverPhone: '+84 9' + pad(Math.floor(R() * 90)) + ' •••• ' + pad(Math.floor(R() * 90)) + Math.floor(R() * 9),
+      createdAt: `2026-06-${pad(createdDay)}T${pad(Math.floor(createdTot / 60))}:${pad(createdTot % 60)}:00`,
       startAt: `2026-06-${pad(day)}T${pad(sh)}:${pad(sm)}:00`,
       endAt: `2026-06-${pad(eh >= 24 ? day + 1 : day)}T${pad(eh % 24)}:${pad(endTot % 60)}:00`,
       durationMin,
@@ -115,21 +132,72 @@ export function buildMockDb(): MockDb {
   }
   bookings.sort((a, b) => (a.startAt < b.startAt ? 1 : -1));
 
-  /* ---- chargers (owner's Trạm Hà Đông) ---- */
-  const chargers: Charger[] = [
-    { id: 'CH-01', stationId: 'ST-1001', name: 'Cổng A1', connector: 'CCS2', powerKw: 60, status: 'available', utilizationPct: 72, sessionsToday: 14, uptime30dPct: 99.6, kwhToday: 248, faultCount: 0, lastSeen: '12 giây trước' },
-    { id: 'CH-02', stationId: 'ST-1001', name: 'Cổng A2', connector: 'CCS2', powerKw: 60, status: 'available', utilizationPct: 81, sessionsToday: 17, uptime30dPct: 99.9, kwhToday: 296, faultCount: 0, lastSeen: '4 giây trước' },
-    { id: 'CH-03', stationId: 'ST-1001', name: 'Cổng B1', connector: 'CHAdeMO', powerKw: 50, status: 'maintenance', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 92.1, kwhToday: 0, faultCount: 2, lastSeen: '2 giờ trước' },
-    { id: 'CH-04', stationId: 'ST-1001', name: 'Cổng B2', connector: 'Type2AC', powerKw: 22, status: 'offline', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 78.4, kwhToday: 0, faultCount: 1, lastSeen: '1 ngày trước' },
-    { id: 'CH-05', stationId: 'ST-1001', name: 'Cổng C1', connector: 'CCS2', powerKw: 120, status: 'available', utilizationPct: 64, sessionsToday: 11, uptime30dPct: 99.2, kwhToday: 372, faultCount: 0, lastSeen: '9 giây trước' },
+  /* ---- live grace-period demo bookings (FR08) — createdAt anchored to real wall-clock "now" ---- */
+  const now = Date.now();
+  const freshBookings: [string, number][] = [
+    ['BK-39002', 2 * 60_000], // created 2 min ago — still inside the 5-min grace window on load
+    ['BK-39001', 20 * 60_000], // created 20 min ago — grace window already closed, normal tiers apply
+  ];
+  for (const [id, ageMs] of freshBookings) {
+    const created = new Date(now - ageMs);
+    const start = new Date(now + 90 * 60_000);
+    const end = new Date(start.getTime() + 60 * 60_000);
+    const [connector, powerKw, baseRate] = conns[0];
+    const energyKwh = +(powerKw * 1 * 0.62).toFixed(1);
+    const amountVnd = Math.round((energyKwh * baseRate) / 1000) * 1000;
+    bookings.unshift({
+      id,
+      stationId: 'ST-1001',
+      stationName: 'Trạm Hà Đông',
+      ownerName: 'EVGo Co.',
+      connectorId: 'CH-01',
+      connector,
+      powerKw,
+      driverName: 'Nguyễn Văn An',
+      driverPhone: '+84 987 654 321',
+      createdAt: toLocalIso(created),
+      startAt: toLocalIso(start),
+      endAt: toLocalIso(end),
+      durationMin: 60,
+      rateKind: 'standard',
+      rateVndPerKwh: baseRate,
+      energyKwh,
+      amountVnd,
+      refundPct: null,
+      refundVnd: 0,
+      method: 'VNPAY',
+      status: 'confirmed',
+    });
+  }
+
+  /* ---- charge points & connectors (owner's Trạm Hà Đông) — FR10/FR14 ---- */
+  const chargePoints: ChargePoint[] = [
+    { id: 'CP-01', stationId: 'ST-1001', name: 'Cổng A1', zoneLabel: 'Gần lối vào', maxPowerKw: 60, status: 'active' },
+    { id: 'CP-02', stationId: 'ST-1001', name: 'Cổng A2', zoneLabel: 'Gần lối vào', maxPowerKw: 60, status: 'active' },
+    { id: 'CP-03', stationId: 'ST-1001', name: 'Cổng B1', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 50, status: 'active' },
+    { id: 'CP-04', stationId: 'ST-1001', name: 'Cổng B2', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 22, status: 'active' },
+    { id: 'CP-05', stationId: 'ST-1001', name: 'Cổng C1', zoneLabel: 'Sát trạm biến áp', maxPowerKw: 120, status: 'active' },
+  ];
+  const connectors: Connector[] = [
+    { id: 'CH-01', chargePointId: 'CP-01', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH01', utilizationPct: 72, sessionsToday: 14, uptime30dPct: 99.6, kwhToday: 248, faultCount: 0, lastSeen: '12 giây trước' },
+    { id: 'CH-02', chargePointId: 'CP-02', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH02', utilizationPct: 81, sessionsToday: 17, uptime30dPct: 99.9, kwhToday: 296, faultCount: 0, lastSeen: '4 giây trước' },
+    { id: 'CH-03', chargePointId: 'CP-03', name: 'Connector 1', connectorType: 'CHAdeMO', powerKw: 50, runtimeStatus: 'offline', qrToken: 'QR-CH03', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 92.1, kwhToday: 0, faultCount: 2, lastSeen: '2 giờ trước' },
+    { id: 'CH-04', chargePointId: 'CP-04', name: 'Connector 1', connectorType: 'Type2AC', powerKw: 22, runtimeStatus: 'offline', qrToken: 'QR-CH04', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 78.4, kwhToday: 0, faultCount: 1, lastSeen: '1 ngày trước' },
+    { id: 'CH-05', chargePointId: 'CP-05', name: 'Connector 1', connectorType: 'CCS2', powerKw: 120, runtimeStatus: 'available', qrToken: 'QR-CH05', utilizationPct: 64, sessionsToday: 11, uptime30dPct: 99.2, kwhToday: 372, faultCount: 0, lastSeen: '9 giây trước' },
   ];
 
-  /* ---- admin-provisioned records ---- */
-  const provisioned: Charger[] = [
-    { id: 'CH-3303', stationId: 'ST-1042', name: 'Cổng A1', connector: 'CCS2', powerKw: 60, status: 'available', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 100, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3302', stationId: 'ST-1042', name: '—', connector: 'CCS2', powerKw: 60, status: 'unclaimed', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3301', stationId: 'ST-1042', name: '—', connector: 'CHAdeMO', powerKw: 50, status: 'unclaimed', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3300', stationId: 'ST-1042', name: '—', connector: 'Type2AC', powerKw: 22, status: 'unclaimed', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+  /* ---- admin-provisioned records (unclaimed Charge Point + its Connectors) ---- */
+  const provisionedChargePoints: ChargePoint[] = [
+    { id: 'CP-3303', stationId: 'ST-1042', name: 'Cổng A1', zoneLabel: null, maxPowerKw: 60, status: 'active' },
+    { id: 'CP-3302', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 60, status: 'unclaimed' },
+    { id: 'CP-3301', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 50, status: 'unclaimed' },
+    { id: 'CP-3300', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 22, status: 'unclaimed' },
+  ];
+  const provisionedConnectors: Connector[] = [
+    { id: 'CH-3303', chargePointId: 'CP-3303', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH3303', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 100, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3302', chargePointId: 'CP-3302', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'offline', qrToken: 'QR-CH3302', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3301', chargePointId: 'CP-3301', name: 'Connector 1', connectorType: 'CHAdeMO', powerKw: 50, runtimeStatus: 'offline', qrToken: 'QR-CH3301', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3300', chargePointId: 'CP-3300', name: 'Connector 1', connectorType: 'Type2AC', powerKw: 22, runtimeStatus: 'offline', qrToken: 'QR-CH3300', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
   ];
 
   /* ---- owner stations (FR12) ---- */
@@ -169,15 +237,22 @@ export function buildMockDb(): MockDb {
     { id: 'U-2002', name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', role: 'ADMIN', joined: '2025-01-01', bookingCount: 0, status: 'active' },
   ];
 
+  /* ---- station staff (FR17) — assignments across the owner's two stations ---- */
+  const stationStaff: StationStaffMember[] = [
+    { userId: 'U-2041', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', name: 'Nguyễn Văn An', email: 'an.nguyen@gmail.com', primaryRole: 'DRIVER', provisioned: false, createdAt: '2026-05-14' },
+    { userId: 'U-2035', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', name: 'Trần Minh Hà', email: 'ha.tran@gmail.com', primaryRole: 'DRIVER', provisioned: false, createdAt: '2026-06-02' },
+    { userId: 'U-2088', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', name: 'ca.truc@evgo.vn', email: 'ca.truc@evgo.vn', primaryRole: 'DRIVER', provisioned: true, createdAt: '2026-06-19' },
+  ];
+
   /* ---- policy KB (FR15) ---- */
   const policyDocs: PolicyDoc[] = [
-    { id: 'POL-01', category: 'Hủy & hoàn tiền', content: 'Hủy trước giờ bắt đầu từ 60 phút trở lên được hoàn 100%; từ 15–60 phút hoàn 50%; dưới 15 phút hoặc không đến (no-show) hoàn 0%.', updatedAt: '2026-06-24' },
+    { id: 'POL-01', category: 'Hủy & hoàn tiền', content: 'Hủy trong vòng 5 phút kể từ khi đặt chỗ (thời gian ân hạn) luôn được hoàn 100%, bất kể còn bao lâu đến giờ bắt đầu. Sau thời gian ân hạn: hủy trước giờ bắt đầu từ 60 phút trở lên được hoàn 100%; từ 15–60 phút hoàn 50%; dưới 15 phút hoặc không đến (no-show) hoàn 0%.', updatedAt: '2026-07-21' },
     { id: 'POL-02', category: 'Hủy & hoàn tiền', content: 'Chỉ được hủy đặt chỗ khi đang ở trạng thái Chờ thanh toán hoặc Đã xác nhận. Đặt chỗ đã Check-in hoặc Đang sạc không thể hủy.', updatedAt: '2026-06-24' },
     { id: 'POL-03', category: 'Check-in', content: 'Cửa sổ check-in mở từ thời điểm bắt đầu khung giờ và đóng đúng 15 phút sau đó. Không thể check-in trước giờ bắt đầu hoặc sau khi cửa sổ đã đóng.', updatedAt: '2026-06-24' },
     { id: 'POL-04', category: 'Check-in', content: 'Nếu tài xế không check-in trong vòng 15 phút kể từ giờ bắt đầu, đặt chỗ tự động bị hủy và hoàn 0% (xử lý như no-show).', updatedAt: '2026-06-24' },
     { id: 'POL-05', category: 'Thanh toán', content: 'Đặt chỗ chỉ chuyển sang Đã xác nhận sau khi cổng thanh toán xác nhận thu tiền thành công. Phần đặt chỗ được giữ tối đa 10 phút chờ thanh toán.', updatedAt: '2026-06-24' },
     { id: 'POL-06', category: 'Giá', content: 'Thay đổi giờ hoạt động và giá chỉ áp dụng cho đặt chỗ mới. Đặt chỗ hiện hữu giữ nguyên mức giá đã chụp tại thời điểm đặt (BookingPriceLine).', updatedAt: '2026-06-24' },
-    { id: 'POL-07', category: 'Trụ sạc', content: 'Mã QR trên trụ chỉ mã hóa Charger ID, là nhãn nhận diện tĩnh dùng cho tài xế check-in; không dùng để chuyển quyền sở hữu hay thao tác quản trị.', updatedAt: '2026-06-24' },
+    { id: 'POL-07', category: 'Trụ sạc', content: 'Mỗi cổng sạc (Connector) có một mã QR riêng, chỉ mã hóa Charger ID của Connector đó — là nhãn nhận diện tĩnh dùng cho tài xế check-in; không dùng để chuyển quyền sở hữu hay thao tác quản trị. Một trụ sạc (Charge Point) có thể có nhiều Connector, mỗi Connector một mã QR riêng biệt.', updatedAt: '2026-07-21' },
   ];
 
   /* ---- support tickets (cross-cutting: owner/staff scoped, admin sees all) ---- */
@@ -285,12 +360,13 @@ export function buildMockDb(): MockDb {
 
   return {
     bookings,
-    chargers,
-    provisioned,
+    chargePoints: [...chargePoints, ...provisionedChargePoints],
+    connectors: [...connectors, ...provisionedConnectors],
     ownerStations,
     approvalQueue,
     licenses,
     users,
+    stationStaff,
     policyDocs,
     transactions,
     tickets,

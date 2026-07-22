@@ -14,7 +14,7 @@
   },
   "charger": {
     "available": "Available",
-    "maintenance": "Maintenance",
+    "inuse": "In use",
     "offline": "Offline"
   },
   "panel": {

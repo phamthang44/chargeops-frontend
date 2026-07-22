@@ -25,18 +25,27 @@ export function createRestServices(http: HttpClient): Services {
       get: (id) => http.get(`/bookings/${id}`),
       summary: () => http.get('/bookings/summary'),
       cancel: (id) => http.post(`/bookings/${id}/cancel`),
+      activeFor: (connectorIds) => http.get('/bookings/active', { connectorIds: connectorIds.join(',') }),
     },
 
-    chargers: {
-      list: (stationId) => http.get('/chargers', { stationId }),
-      update: (id, patch) => http.patch(`/chargers/${id}`, patch),
-      provision: (input) => http.post('/admin/chargers', input),
+    chargePoints: {
+      list: (stationId) => http.get('/charge-points', { stationId }),
+      update: (id, patch) => http.patch(`/charge-points/${id}`, patch),
+      provision: (input) => http.post('/admin/charge-points', input),
+      activate: (id) => http.post(`/admin/charge-points/${id}/activate`),
+    },
+
+    connectors: {
+      list: (chargePointId) => http.get('/connectors', { chargePointId }),
+      update: (id, patch) => http.patch(`/connectors/${id}`, patch),
+      provision: (input) => http.post('/admin/connectors', input),
     },
 
     stations: {
       mine: () => http.get('/stations/mine'),
       register: (input) => http.post('/stations', input),
       approvals: () => http.get('/admin/stations/approvals'),
+      directory: () => http.get('/stations/directory'),
       approve: (id) => http.post(`/admin/stations/${id}/approve`),
       reject: (id, reason) => http.post(`/admin/stations/${id}/reject`, { reason }),
     },
@@ -55,6 +64,12 @@ export function createRestServices(http: HttpClient): Services {
     users: {
       list: (params = {}) => http.get('/admin/users', params),
       setStatus: (id, status) => http.patch(`/admin/users/${id}/status`, { status }),
+    },
+
+    staff: {
+      list: () => http.get('/staff'),
+      invite: (input) => http.post('/staff', input),
+      revoke: (userId, stationId) => http.delete(`/staff/${stationId}/${userId}`),
     },
 
     pricing: {

@@ -42,7 +42,7 @@ export function Bookings() {
     { value: 'id', label: t('bookings.searchFields.id') },
     { value: 'station', label: t('bookings.searchFields.station') },
     { value: 'driver', label: t('bookings.searchFields.driver') },
-    { value: 'charger', label: t('bookings.searchFields.charger') },
+    { value: 'connector', label: t('bookings.searchFields.connector') },
   ];
 
   const summaryQuery = useQuery({ queryKey: ['bookings', 'summary'], queryFn: () => api.bookings.summary() });
@@ -152,7 +152,7 @@ function Row({ booking: b }: { booking: Booking }) {
       <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>
       <span className="font-semibold">{b.stationName}</span>
       <span className="text-muted">{b.ownerName}</span>
-      <span className="text-muted">{b.chargerId}</span>
+      <span className="text-muted">{b.connectorId}</span>
       <span className="text-muted">
         {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
       </span>

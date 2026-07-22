@@ -18,7 +18,7 @@
       "chargers": {
         "label": "Trụ sạc",
         "title": "Trụ sạc",
-        "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng trụ."
+        "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng cổng sạc (connector)."
       },
       "tickets": {
         "label": "Hỗ trợ",
@@ -34,6 +34,11 @@
         "label": "Trạm của tôi",
         "title": "Trạm của tôi",
         "subtitle": "Đăng ký trạm mới và theo dõi trạng thái duyệt."
+      },
+      "staff": {
+        "label": "Nhân viên",
+        "title": "Nhân viên trạm",
+        "subtitle": "Cấp và thu hồi quyền nhân viên cho các trạm của bạn."
       },
       "revenue": {
         "label": "Doanh thu",
@@ -109,6 +114,9 @@
     "total": "Tổng",
     "refundedLabel": "Đã hoàn tiền{{percent}}",
     "refundPolicy": "CHÍNH SÁCH HOÀN TIỀN (BR-PAY-03)",
+    "graceHint": "Miễn phí hủy đến {{time}} · còn lại",
+    "policyGrace": "Trong vòng 5 phút kể từ khi đặt (ân hạn)",
+    "refundGrace": "Hoàn 100%",
     "policy60": "≥ 60 phút trước giờ bắt đầu",
     "policy15": "15–60 phút trước",
     "policy0": "< 15 phút / no-show",
@@ -147,7 +155,7 @@
         "all": "Tất cả trường",
         "id": "Mã đặt chỗ",
         "driver": "Tài xế",
-        "charger": "Trụ sạc"
+        "connector": "Trụ sạc"
       },
       "placeholder": "Lọc theo mã, tài xế, trụ…",
       "searchIn": "Tìm trong trường"
@@ -158,58 +166,132 @@
   },
   "chargers": {
     "title": "Trụ sạc",
-    "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng trụ.",
-    "updateSuccess": "Đã cập nhật {{id}}",
-    "downloadToast": "Đang tải QR cho {{id}}… (demo)",
+    "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng cổng sạc (connector).",
     "loadError": "Không tải được danh sách trụ: {{message}}",
-    "description": "Kết nối & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên hiển thị và trạng thái. Nhấp một dòng để xem chi tiết.",
+    "description": "Loại đầu cắm & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên, khu vực và trạng thái. Nhấp một Trụ sạc để xem chi tiết."
+  },
+  "chargePoints": {
+    "updateSuccess": "Đã cập nhật {{id}}",
     "status": {
-      "available": "Sẵn sàng",
-      "maintenance": "Bảo trì",
       "unclaimed": "Chưa gán",
-      "offline": "Ngoại tuyến"
+      "active": "Hoạt động",
+      "offline": "Ngoại tuyến",
+      "suspended": "Đình chỉ"
     },
-    "stats": {
-      "total": "TỔNG TRỤ",
-      "available": "SẴN SÀNG",
-      "maintenance": "BẢO TRÌ",
-      "sessions": "PHIÊN HÔM NAY",
-      "sessionsSub": "SD trung bình {{util}}%"
-    },
-    "table": {
-      "cols": {
-        "id": "MÃ",
-        "name": "TÊN ✎",
-        "connector": "KẾT NỐI 🔒",
-        "status": "TRẠNG THÁI ✎",
-        "utilization": "SỬ DỤNG HÔM NAY",
-        "sessions": "PHIÊN"
-      },
-      "downloadQr": "Tải QR"
-    },
+    "connectorCount": "{{count}} connector",
     "panel": {
       "editTitle": "CHỈNH SỬA TRỤ SẠC",
       "close": "Đóng",
       "identityGroup": "Thông tin định danh",
-      "chargerId": "MÃ TRỤ (CHARGER ID)",
-      "idHelp": "Mã duy nhất dùng để tạo QR Check-in — không thể đổi.",
+      "chargePointId": "MÃ TRỤ SẠC",
+      "idHelp": "Mã thiết bị duy nhất — không thể đổi.",
       "displayName": "TÊN HIỂN THỊ",
       "namePlaceholder": "VD: Bộ sạc nhanh 60kW — Trụ 1",
-      "nameHelp": "Tên này hiển thị cho tài xế và trên màn hình trụ sạc.",
-      "specGroup": "Thông số kỹ thuật",
+      "zoneLabel": "KHU VỰC / GỢI Ý VỊ TRÍ",
+      "zonePlaceholder": "VD: Gần lối vào, hàng B",
+      "zoneHelp": "Hiển thị cho tài xế trên trang chi tiết trạm.",
+      "operationGroup": "Trạng thái vận hành",
+      "saveBtn": "Lưu thay đổi",
+      "saving": "Đang lưu…"
+    }
+  },
+  "staff": {
+    "title": "Nhân viên trạm",
+    "subtitle": "Cấp và thu hồi quyền nhân viên cho các trạm của bạn.",
+    "revokeBtn": "Thu hồi",
+    "revokeToast": "Đã thu hồi quyền của {{name}} tại {{station}}",
+    "invite": {
+      "title": "Thêm nhân viên",
+      "emailLabel": "ĐỊA CHỈ EMAIL",
+      "emailPlaceholder": "ten@example.com",
+      "stationLabel": "PHÂN CÔNG VÀO TRẠM",
+      "submitBtn": "Cấp quyền nhân viên",
+      "submitting": "Đang cấp quyền…",
+      "help": "Chỉ mời qua email — hệ thống không có danh bạ người dùng toàn nền tảng. Nếu email đã có tài khoản ChargeOps, tài khoản giữ nguyên vai trò hiện tại và được cấp thêm STATION_STAFF. Nếu chưa có, hệ thống tạo tài khoản mới kèm mật khẩu tạm. Quyền có hiệu lực ngay.",
+      "toastGranted": "{{name}} đã có quyền nhân viên tại {{station}}",
+      "toastProvisioned": "Đã tạo tài khoản mới cho {{email}} với quyền nhân viên tại {{station}}"
+    },
+    "matrix": {
+      "title": "Nhân viên được làm gì",
+      "help": "Nhân viên chỉ có một phần quyền vận hành của bạn. Các chức năng kinh doanh vẫn thuộc riêng chủ trạm.",
+      "capability": "Chức năng",
+      "owner": "Chủ",
+      "staff": "NV",
+      "rows": {
+        "viewStation": "Xem thông tin trạm, đặt chỗ, trạng thái connector",
+        "toggleConnector": "Đổi trạng thái connector (Sẵn sàng / Ngoại tuyến)",
+        "handleTickets": "Xử lý ticket hỗ trợ của trạm",
+        "pricing": "Cấu hình giờ hoạt động & giá TOU",
+        "revenue": "Xem doanh thu & phân tích",
+        "manageStaff": "Quản lý nhân viên — thêm / xoá"
+      }
+    },
+    "list": {
+      "title": "Phân công hiện tại",
+      "count": "{{count}} phân công",
+      "empty": "Chưa có nhân viên nào. Thêm một người qua email để bắt đầu.",
+      "since": "từ {{date}}",
+      "provisioned": "Tài khoản mới",
+      "revokeNote": "Thu hồi chỉ gỡ quyền tại trạm đó — không bao giờ xoá tài khoản hay các vai trò khác của người đó (họ vẫn giữ tài khoản tài xế và lịch sử đặt chỗ)."
+    }
+  },
+  "statusDialog": {
+    "offlineTitle": "Chuyển \"{{name}}\" sang Ngoại tuyến?",
+    "onlineTitle": "Đưa \"{{name}}\" hoạt động trở lại?",
+    "blockedTitle": "Chưa thể chuyển \"{{name}}\" sang Ngoại tuyến",
+    "offlineBodyDevice": "Trụ sạc này có {{count}} connector. Chuyển trụ sang Ngoại tuyến sẽ kéo theo toàn bộ connector của trụ.",
+    "offlineBodyConnector": "Connector này sẽ ngừng phục vụ tài xế. Các connector khác trên cùng trụ không bị ảnh hưởng.",
+    "impactNoBookings": "Không thể phát sinh đặt chỗ mới trên (các) connector bị ảnh hưởng.",
+    "impactHiddenFromDrivers": "Chúng sẽ biến mất khỏi kết quả tìm kiếm và bản đồ của tài xế.",
+    "impactRestores": "Trạng thái riêng của từng connector được ghi nhớ — khi hoạt động trở lại sẽ khôi phục đúng những gì bạn đã đặt trước đó.",
+    "onlineBodyDevice": "{{returning}}/{{total}} connector sẽ nhận đặt chỗ trở lại.",
+    "onlineBodyConnector": "Connector này sẽ nhận đặt chỗ trở lại và xuất hiện lại trong tìm kiếm của tài xế.",
+    "staysOffline": "Vẫn ngoại tuyến",
+    "staysOfflineHint": "{{count}} connector vẫn ngoại tuyến vì bạn đã tắt riêng từng cái. Hãy bật lại từ nút trạng thái của chính connector đó.",
+    "blockedBodyDevice": "{{count}} đặt chỗ trên trụ này vẫn đang ở trạng thái Đã xác nhận hoặc Đã check-in. Theo BR-CHG-05, không thể chuyển trụ sang Ngoại tuyến khi còn khung giờ đã thanh toán — tài xế có thể đang cắm sạc.",
+    "blockedBodyConnector": "{{count}} đặt chỗ trên connector này vẫn đang ở trạng thái Đã xác nhận hoặc Đã check-in. Theo BR-CHG-05, không thể chuyển sang Ngoại tuyến khi còn khung giờ đã thanh toán — tài xế có thể đang cắm sạc.",
+    "blockedHint": "Hãy đợi các đặt chỗ này kết thúc, hoặc huỷ chúng ở màn hình Đặt chỗ trước.",
+    "confirmOffline": "Chuyển Ngoại tuyến",
+    "confirmOnline": "Đưa vào hoạt động",
+    "applying": "Đang áp dụng…",
+    "cancel": "Huỷ bỏ",
+    "close": "Đóng"
+  },
+  "connectors": {
+    "downloadToast": "Đang tải QR cho {{id}}… (demo)",
+    "updateSuccess": "Đã cập nhật {{id}}",
+    "status": {
+      "available": "Sẵn sàng",
+      "inuse": "Đang sạc",
+      "offline": "Ngoại tuyến"
+    },
+    "stats": {
+      "total": "TỔNG CONNECTOR",
+      "available": "SẴN SÀNG",
+      "inuse": "ĐANG SẠC",
+      "sessions": "PHIÊN HÔM NAY",
+      "sessionsSub": "SD trung bình {{util}}%"
+    },
+    "table": {
+      "downloadQr": "QR"
+    },
+    "card": {
+      "none": "Trụ sạc này chưa có connector nào được cấp.",
+      "util": "Sử dụng",
+      "sessions": "{{count}} phiên",
+      "deviceDown": "Trụ sạc đang {{status}} — mọi connector của trụ đều không nhận đặt chỗ cho đến khi trụ hoạt động trở lại.",
+      "lockedByDevice": "Đưa trụ sạc về trạng thái Hoạt động để đổi trạng thái connector này."
+    },
+    "panel": {
+      "groupTitle": "Connector ({{count}})",
       "adminProvided": "Do QTV cấp",
       "connector": "LOẠI ĐẦU CẮM",
       "power": "CÔNG SUẤT",
-      "specHelp": "Kết nối & công suất được Quản trị viên cấp khi lắp đặt.",
-      "operationGroup": "Trạng thái vận hành",
-      "perfGroup": "Hiệu suất hôm nay",
       "utilization": "SỬ DỤNG",
       "sessions": "PHIÊN HÔM NAY",
       "kwh": "kWh HÔM NAY",
-      "qrHelp": "Dán tại trụ để tài xế quét khi đến.",
-      "downloadQrBtn": "Tải QR",
-      "saveBtn": "Lưu thay đổi",
-      "saving": "Đang lưu…"
+      "qrHelp": "Dán tại connector này để tài xế quét khi đến.",
+      "downloadQrBtn": "Tải QR"
     }
   },
   "pricing": {

@@ -21,7 +21,7 @@
     "utilizationDelta": "+{{points}} pts vs. last week"
   },
   "charger": {
-    "maintenance": "Maintenance",
+    "inuse": "In use",
     "offline": "Offline"
   },
   "chart": {

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BOOKING_STATUS,
@@ -12,9 +12,21 @@ import {
 } from '@chargeops/api';
 import { Button, Drawer, StatusPill, useToast } from '@chargeops/ui';
 
+const GRACE_MS = 5 * 60_000;
+
 /** A booking may be cancelled only while pending or confirmed (POL-02). */
 function canCancel(b: Booking): boolean {
   return b.status === 'pending' || b.status === 'confirmed';
+}
+
+function clock(d: Date): string {
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function mmss(totalSec: number): string {
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 export function BookingDetailDrawer({
@@ -28,6 +40,15 @@ export function BookingDetailDrawer({
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!booking || !canCancel(booking)) return;
+    const graceEndsAt = new Date(booking.createdAt).getTime() + GRACE_MS;
+    if (Date.now() >= graceEndsAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [booking?.id, booking?.createdAt, booking?.status]);
 
   const cancel = useMutation({
     mutationFn: (id: string) => api.bookings.cancel(id),
@@ -41,6 +62,10 @@ export function BookingDetailDrawer({
 
   if (!booking) return null;
   const meta = BOOKING_STATUS[booking.status];
+
+  const graceEndsAt = new Date(booking.createdAt).getTime() + GRACE_MS;
+  const inGrace = canCancel(booking) && now < graceEndsAt;
+  const graceRemainingSec = Math.max(0, Math.round((graceEndsAt - now) / 1000));
 
   const kindLabel = booking.rateKind === 'peak'
     ? t('bookings.rateKind.peak')
@@ -102,7 +127,7 @@ export function BookingDetailDrawer({
       <div className="grid grid-cols-2 gap-3.5">
         <Field label={t('bookings.chargerLabel')}>
           <div className="text-[13px] font-semibold">
-            {booking.stationName} · {booking.chargerId}
+            {booking.stationName} · {booking.connectorId}
           </div>
           <div className="text-[12px] font-medium text-muted">
             {booking.connector} · {booking.powerKw} kW
@@ -138,6 +163,16 @@ export function BookingDetailDrawer({
         </div>
       </div>
 
+      {/* live grace-period hint (FR05/FR08 — reconsideration window) */}
+      {inGrace && (
+        <div className="flex items-center justify-between rounded-card bg-good-soft px-4 py-3">
+          <span className="text-[12px] font-semibold text-good-deep">
+            {t('bookings.graceHint', { time: clock(new Date(graceEndsAt)) })}
+          </span>
+          <span className="font-mono text-[13px] font-bold text-good-deep">{mmss(graceRemainingSec)}</span>
+        </div>
+      )}
+
       {/* refund state OR policy */}
       {booking.status === 'cancelled' ? (
         <div className="rounded-card border border-bad-border bg-bad-soft px-4 py-3.5">
@@ -155,6 +190,7 @@ export function BookingDetailDrawer({
               {t('bookings.refundPolicy')}
             </div>
             <div className="flex flex-col gap-1.5 text-[12px] font-medium text-body">
+              <Policy left={t('bookings.policyGrace')} right={t('bookings.refundGrace')} cls="text-good" />
               <Policy left={t('bookings.policy60')} right={t('bookings.refund100')} cls="text-good" />
               <Policy left={t('bookings.policy15')} right={t('bookings.refund50')} cls="text-warn" />
               <Policy left={t('bookings.policy0')} right={t('bookings.refund0')} cls="text-bad" />

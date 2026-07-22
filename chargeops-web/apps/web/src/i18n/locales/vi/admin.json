@@ -164,7 +164,7 @@
       "id": "Mã đặt chỗ",
       "station": "Trạm",
       "driver": "Tài xế",
-      "charger": "Trụ sạc"
+      "connector": "Trụ sạc"
     },
     "status": {
       "all": "Tất cả",
@@ -285,32 +285,59 @@
     "catsLabel": "DANH MỤC"
   },
   "provisioning": {
-    "toastSuccess": "Đã tạo bản ghi {{id}} ({{status}})",
-    "createTitle": "Tạo bản ghi trụ sạc",
-    "connectorLabel": "KẾT NỐI",
-    "powerLabel": "CÔNG SUẤT (kW)",
-    "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",
-    "displayNamePlaceholder": "VD: Cổng A1 — chủ trạm đổi sau",
-    "submitBtn": "Tạo mã trụ + QR",
     "submitting": "Đang tạo…",
-    "helpNote": "Bản ghi mới ở trạng thái CHƯA GÁN → chuyển HOẠT ĐỘNG sau khi lắp đặt & liên kết.",
-    "listTitle": "Trụ đã cấp · Trạm Long Biên",
-    "recordsCount": "{{count}} bản ghi",
+    "cancel": "Huỷ bỏ",
+    "stationLabel": "CẤP TRỤ CHO TRẠM",
+    "listTitle": "Trụ sạc · {{station}}",
+    "recordsCount": "{{count}} trụ sạc",
+    "connectorCount": "{{count}} connector",
+    "empty": "{{station}} chưa có trụ sạc nào. Tạo một trụ để bắt đầu cấp phát.",
+    "noConnectors": "Chưa có connector — trụ này chưa thể kích hoạt hay nhận đặt chỗ cho tới khi có ít nhất một connector.",
+    "activateBtn": "Kích hoạt",
+    "activating": "Đang kích hoạt…",
+    "activateHint": "Cần ít nhất 1 connector",
+    "activateSuccess": "{{id}} đã Hoạt động",
+    "liveForDrivers": "Đã hiển thị cho tài xế",
+    "flow": {
+      "step1": "Tạo trụ sạc",
+      "step2": "Thêm connector (mỗi cái 1 QR)",
+      "step3": "Gửi ảnh QR cho chủ trạm",
+      "step4": "Kích hoạt"
+    },
+    "chargePoint": {
+      "createBtn": "Trụ sạc mới",
+      "createTitle": "Tạo trụ sạc",
+      "createSub": "Một thiết bị vật lý mới tại {{station}}.",
+      "createHelp": "Trụ bắt đầu ở trạng thái CHƯA GÁN và bị ẩn với tài xế cho tới khi bạn thêm connector và Kích hoạt.",
+      "nameLabel": "TÊN HIỂN THỊ (tùy chọn)",
+      "namePlaceholder": "VD: Trụ sạc A1",
+      "zoneLabel": "KHU VỰC / GỢI Ý VỊ TRÍ (tùy chọn)",
+      "zonePlaceholder": "VD: Gần lối vào, hàng B",
+      "submitBtn": "Tạo trụ sạc",
+      "toastSuccess": "Đã tạo Trụ sạc {{id}} (Chưa gán)"
+    },
+    "connector": {
+      "addBtn": "Thêm connector",
+      "createTitle": "Thêm connector",
+      "createSub": "Thêm vào",
+      "createHelp": "Loại đầu cắm và công suất bị khoá sau khi cấp phát (BR-CHG-03). Thao tác này tạo một Charger ID và một ảnh QR riêng cho cổng sạc này.",
+      "connectorLabel": "LOẠI ĐẦU CẮM",
+      "powerLabel": "CÔNG SUẤT (kW)",
+      "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",
+      "displayNamePlaceholder": "VD: Connector 1 — chủ trạm đổi sau",
+      "submitBtn": "Tạo mã Connector + QR",
+      "toastSuccess": "Đã tạo Connector {{id}}"
+    },
     "status": {
       "unclaimed": "Chưa gán",
       "active": "Hoạt động",
-      "charging": "Đang sạc",
-      "faulted": "Lỗi"
+      "offline": "Ngoại tuyến",
+      "suspended": "Đình chỉ"
     },
-    "table": {
-      "cols": {
-        "id": "MÃ",
-        "name": "TÊN",
-        "connector": "KẾT NỐI",
-        "power": "kW",
-        "status": "TRẠNG THÁI",
-        "qr": "QR"
-      }
+    "connectorStatus": {
+      "available": "Sẵn sàng",
+      "inuse": "Đang sạc",
+      "offline": "Ngoại tuyến"
     },
     "toastDownloading": "Đang tải QR cho {{id}}… (demo)",
     "downloadQr": "Tải QR"

@@ -37,7 +37,7 @@ export function BookingToolbar({
     { value: 'all', label: t('bookings.toolbar.fields.all') },
     { value: 'id', label: t('bookings.toolbar.fields.id') },
     { value: 'driver', label: t('bookings.toolbar.fields.driver') },
-    { value: 'charger', label: t('bookings.toolbar.fields.charger') },
+    { value: 'connector', label: t('bookings.toolbar.fields.connector') },
   ];
 
   return (

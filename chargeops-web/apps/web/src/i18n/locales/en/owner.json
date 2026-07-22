@@ -18,7 +18,7 @@
       "chargers": {
         "label": "Chargers",
         "title": "Chargers",
-        "subtitle": "Display names, statuses, and QR check-in codes for each charger."
+        "subtitle": "Display names, statuses, and QR check-in codes for each connector."
       },
       "tickets": {
         "label": "Support",
@@ -34,6 +34,11 @@
         "label": "My Stations",
         "title": "My Stations",
         "subtitle": "Register new stations and track approval status."
+      },
+      "staff": {
+        "label": "Staff",
+        "title": "Station Staff",
+        "subtitle": "Grant and revoke staff access to your stations."
       },
       "revenue": {
         "label": "Revenue",
@@ -109,6 +114,9 @@
     "total": "Total",
     "refundedLabel": "Refunded{{percent}}",
     "refundPolicy": "REFUND POLICY (BR-PAY-03)",
+    "graceHint": "Free cancellation until {{time}} · time left",
+    "policyGrace": "Within 5 mins of booking creation (grace period)",
+    "refundGrace": "100% Refund",
     "policy60": "≥ 60 mins before start time",
     "policy15": "15–60 mins before",
     "policy0": "< 15 mins / no-show",
@@ -147,9 +155,9 @@
         "all": "All Fields",
         "id": "Booking ID",
         "driver": "Driver",
-        "charger": "Charger"
+        "connector": "Connector"
       },
-      "placeholder": "Filter by ID, driver, charger...",
+      "placeholder": "Filter by ID, driver, connector...",
       "searchIn": "Search in field"
     },
     "tabs": {
@@ -158,58 +166,132 @@
   },
   "chargers": {
     "title": "Chargers",
-    "subtitle": "Display names, statuses, and QR check-in codes for each charger.",
-    "updateSuccess": "Updated {{id}}",
-    "downloadToast": "Downloading QR for {{id}}... (demo)",
+    "subtitle": "Display names, statuses, and QR check-in codes for each connector.",
     "loadError": "Could not load chargers: {{message}}",
-    "description": "Connectors & power specs are provisioned by Admin — read-only. You can edit the display name and status. Click a row to view details.",
+    "description": "Connector type & power are provisioned by Admin — read-only. You can edit names, zone labels, and status. Click a Charge Point row to view details."
+  },
+  "chargePoints": {
+    "updateSuccess": "Updated {{id}}",
+    "status": {
+      "unclaimed": "Unclaimed",
+      "active": "Active",
+      "offline": "Offline",
+      "suspended": "Suspended"
+    },
+    "connectorCount": "{{count}} connectors",
+    "panel": {
+      "editTitle": "EDIT CHARGE POINT",
+      "close": "Close",
+      "identityGroup": "Identification Info",
+      "chargePointId": "CHARGE POINT ID",
+      "idHelp": "Unique device ID — cannot be changed.",
+      "displayName": "DISPLAY NAME",
+      "namePlaceholder": "E.g. Fast Charger 60kW — Unit 1",
+      "zoneLabel": "ZONE / LOCATION HINT",
+      "zonePlaceholder": "E.g. Near the entrance, row B",
+      "zoneHelp": "Shown to drivers on the station detail page.",
+      "operationGroup": "Operational Status",
+      "saveBtn": "Save Changes",
+      "saving": "Saving..."
+    }
+  },
+  "staff": {
+    "title": "Station Staff",
+    "subtitle": "Grant and revoke staff access to your stations.",
+    "revokeBtn": "Revoke",
+    "revokeToast": "Revoked {{name}}'s access to {{station}}",
+    "invite": {
+      "title": "Add staff member",
+      "emailLabel": "EMAIL ADDRESS",
+      "emailPlaceholder": "name@example.com",
+      "stationLabel": "ASSIGN TO STATION",
+      "submitBtn": "Grant staff access",
+      "submitting": "Granting...",
+      "help": "Invite by email only — there is no platform-wide user directory. If the address already has a ChargeOps account, it keeps its existing role and gains STATION_STAFF on top. If not, a new account is provisioned with a temporary password. Access takes effect immediately.",
+      "toastGranted": "{{name}} now has staff access to {{station}}",
+      "toastProvisioned": "Provisioned a new account for {{email}} with staff access to {{station}}"
+    },
+    "matrix": {
+      "title": "What staff can do",
+      "help": "Staff hold a strict subset of your operational permissions. Business functions stay owner-only.",
+      "capability": "Capability",
+      "owner": "Owner",
+      "staff": "Staff",
+      "rows": {
+        "viewStation": "View station details, bookings, connector status",
+        "toggleConnector": "Toggle connector status (Available / Offline)",
+        "handleTickets": "Handle support tickets for the station",
+        "pricing": "Configure operating hours & TOU pricing",
+        "revenue": "View revenue dashboard & analytics",
+        "manageStaff": "Manage staff — add / remove"
+      }
+    },
+    "list": {
+      "title": "Current assignments",
+      "count": "{{count}} assignments",
+      "empty": "No staff assigned yet. Add someone by email to get started.",
+      "since": "since {{date}}",
+      "provisioned": "New account",
+      "revokeNote": "Revoking removes access to that station only — it never deletes the account or any other role the person holds (they keep their driver account and bookings)."
+    }
+  },
+  "statusDialog": {
+    "offlineTitle": "Take \"{{name}}\" offline?",
+    "onlineTitle": "Bring \"{{name}}\" back online?",
+    "blockedTitle": "Can't take \"{{name}}\" offline yet",
+    "offlineBodyDevice": "This charge point has {{count}} connector(s). Taking the device offline takes every one of them down with it.",
+    "offlineBodyConnector": "This connector will stop serving drivers. Other connectors on the same charge point are unaffected.",
+    "impactNoBookings": "No new bookings can be made on the affected connector(s).",
+    "impactHiddenFromDrivers": "They disappear from driver search and map results.",
+    "impactRestores": "Each connector's own status is remembered — bringing it back online restores exactly what you set before.",
+    "onlineBodyDevice": "{{returning}} of {{total}} connector(s) will start accepting bookings again.",
+    "onlineBodyConnector": "This connector will start accepting bookings again and reappear in driver search.",
+    "staysOffline": "Stays offline",
+    "staysOfflineHint": "{{count}} connector(s) stay offline because you disabled them individually. Turn them back on from their own status control.",
+    "blockedBodyDevice": "{{count}} booking(s) on this charge point are still Confirmed or Checked-In. Under BR-CHG-05 the device cannot go offline while a paid slot is live — the driver may already be plugged in.",
+    "blockedBodyConnector": "{{count}} booking(s) on this connector are still Confirmed or Checked-In. Under BR-CHG-05 it cannot go offline while a paid slot is live — the driver may already be plugged in.",
+    "blockedHint": "Wait until these bookings reach a final state, or cancel them from the Bookings screen first.",
+    "confirmOffline": "Take offline",
+    "confirmOnline": "Bring online",
+    "applying": "Applying...",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "connectors": {
+    "downloadToast": "Downloading QR for {{id}}... (demo)",
+    "updateSuccess": "Updated {{id}}",
     "status": {
       "available": "Available",
-      "maintenance": "Maintenance",
-      "unclaimed": "Unclaimed",
+      "inuse": "In use",
       "offline": "Offline"
     },
     "stats": {
-      "total": "TOTAL CHARGERS",
+      "total": "TOTAL CONNECTORS",
       "available": "AVAILABLE",
-      "maintenance": "MAINTENANCE",
+      "inuse": "IN USE",
       "sessions": "SESSIONS TODAY",
       "sessionsSub": "Avg util {{util}}%"
     },
     "table": {
-      "cols": {
-        "id": "ID",
-        "name": "NAME ✎",
-        "connector": "CONNECTOR 🔒",
-        "status": "STATUS ✎",
-        "utilization": "UTILIZATION TODAY",
-        "sessions": "SESSIONS"
-      },
-      "downloadQr": "Download QR"
+      "downloadQr": "QR"
+    },
+    "card": {
+      "none": "No connectors provisioned on this charge point yet.",
+      "util": "Util",
+      "sessions": "{{count}} sessions",
+      "deviceDown": "Charge point is {{status}} — none of its connectors can accept bookings until it is back online.",
+      "lockedByDevice": "Bring the charge point back online to change this connector's status."
     },
     "panel": {
-      "editTitle": "EDIT CHARGER",
-      "close": "Close",
-      "identityGroup": "Identification Info",
-      "chargerId": "CHARGER ID",
-      "idHelp": "Unique ID used to generate check-in QR — cannot be changed.",
-      "displayName": "DISPLAY NAME",
-      "namePlaceholder": "E.g. Fast Charger 60kW — Unit 1",
-      "nameHelp": "This name is displayed to drivers and on the charger screen.",
-      "specGroup": "Technical Specs",
+      "groupTitle": "Connectors ({{count}})",
       "adminProvided": "Admin-assigned",
       "connector": "CONNECTOR TYPE",
       "power": "POWER CAPACITY",
-      "specHelp": "Connectors and power capacity are assigned by Admin during installation.",
-      "operationGroup": "Operational Status",
-      "perfGroup": "Performance Today",
       "utilization": "UTILIZATION",
       "sessions": "SESSIONS TODAY",
       "kwh": "kWh TODAY",
-      "qrHelp": "Affix onto charger for drivers to scan on arrival.",
-      "downloadQrBtn": "Download QR",
-      "saveBtn": "Save Changes",
-      "saving": "Saving..."
+      "qrHelp": "Affix onto this connector for drivers to scan on arrival.",
+      "downloadQrBtn": "Download QR"
     }
   },
   "pricing": {

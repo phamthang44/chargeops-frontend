@@ -35,11 +35,14 @@ export interface Booking {
   stationId: string;
   stationName: string;
   ownerName: string;
-  chargerId: string;
+  /** The Connector booked (legacy "Charger ID" glossary term — see Connector.id). */
+  connectorId: string;
   connector: ConnectorType;
   powerKw: number;
   driverName: string;
   driverPhone: string;
+  /** ISO datetime the booking was created — anchors the FR08 grace-period window. */
+  createdAt: string;
   /** ISO datetimes. */
   startAt: string;
   endAt: string;
@@ -48,7 +51,12 @@ export interface Booking {
   rateVndPerKwh: number;
   energyKwh: number;
   amountVnd: number;
-  /** BR-PAY-03: 100 / 50 / 0 by time-before-start at cancel moment. Null unless cancelled. */
+  /**
+   * BR-PAY-03 refund tiers, evaluated at cancel moment: 100 if cancelled within 5 min of
+   * `createdAt` (grace period, FR08 override — takes priority regardless of time-before-start),
+   * else 100 / 50 / 0 by time remaining before slot start (>=60min / 15-60min / <15min).
+   * Null unless cancelled.
+   */
   refundPct: number | null;
   refundVnd: number;
   method: PaymentMethod;
@@ -56,7 +64,7 @@ export interface Booking {
 }
 
 /** Which field a booking search matches against. */
-export type BookingSearchField = 'all' | 'id' | 'driver' | 'charger' | 'station';
+export type BookingSearchField = 'all' | 'id' | 'driver' | 'connector' | 'station';
 
 export interface BookingListParams {
   /** Owner console is implicitly scoped server-side by token; admin sees all. */
@@ -75,22 +83,50 @@ export interface BookingSummary {
   refundedVnd: number;
 }
 
-/* ---------- chargers ---------- */
+/* ---------- charge points & connectors (FR10, FR14) ---------- */
 
-export type ChargerStatus =
-  | 'available'
-  | 'maintenance'
-  | 'offline'
-  | 'unclaimed'; // admin-provisioned, not yet installed/linked
+/**
+ * Charge Point lifecycle (FR14 provisioning table). Admin owns UNCLAIMED→ACTIVE and
+ * SUSPENDED; owner/staff may toggle ACTIVE<->OFFLINE (e.g. for maintenance — a reason,
+ * not a separate stored state).
+ */
+export type ProvisioningStatus = 'unclaimed' | 'active' | 'offline' | 'suspended';
 
-export interface Charger {
+/**
+ * Connector runtime status (FR07). AVAILABLE<->IN_USE is system-driven by check-in /
+ * session-complete; owner/staff may independently toggle a specific connector to OFFLINE
+ * (BR-CHG-05) even while its Charge Point is ACTIVE.
+ */
+export type ConnectorRuntimeStatus = 'available' | 'inuse' | 'offline';
+
+/** The physical device. Bookings never attach here directly — only to its Connectors. */
+export interface ChargePoint {
   id: string;
   stationId: string;
-  /** Owner-editable display name; connector/power are admin-provisioned (read-only for owners). */
+  /** Owner-editable display name. */
   name: string;
-  connector: ConnectorType;
+  /** Free-text location hint shown to drivers, e.g. "near the entrance, row B" (FR10). */
+  zoneLabel: string | null;
+  /** Display-only aggregate; not an enforced booking constraint (BR-CHG-06). */
+  maxPowerKw: number;
+  status: ProvisioningStatus;
+}
+
+/**
+ * The bookable unit (FR05, FR07). Hardware attributes (connectorType, powerKw) are
+ * admin-provisioned and locked after provisioning (BR-CHG-03) — read-only for owners.
+ * `id` is what the SRS glossary calls "Charger ID": encoded in this Connector's printed
+ * QR code, despite the legacy name.
+ */
+export interface Connector {
+  id: string;
+  chargePointId: string;
+  name: string;
+  connectorType: ConnectorType;
   powerKw: number;
-  status: ChargerStatus;
+  runtimeStatus: ConnectorRuntimeStatus;
+  /** Static QR payload — never changes after provisioning (BR-CHG-04). */
+  qrToken: string;
   utilizationPct: number;
   sessionsToday: number;
   uptime30dPct: number;
@@ -159,6 +195,30 @@ export interface UserAccount {
   joined: string;
   bookingCount: number;
   status: UserStatus;
+}
+
+/* ---------- station staff (FR17) ---------- */
+
+/**
+ * A STATION_STAFF grant, scoped to one station. Mirrors the SRS StationStaff
+ * join entity (user_id + station_id composite key) with the display fields the
+ * console needs denormalized onto it.
+ *
+ * Roles are additive (BR-ACC-01): `primaryRole` is what the account registered
+ * as — usually DRIVER — and STATION_STAFF sits on top of it. Revoking deletes
+ * this assignment only, never the account or any other role it holds.
+ */
+export interface StationStaffMember {
+  userId: string;
+  stationId: string;
+  stationName: string;
+  name: string;
+  email: string;
+  primaryRole: UserRole;
+  /** True when the invite provisioned a brand-new account rather than granting to an existing one. */
+  provisioned: boolean;
+  /** ISO date the assignment was created. */
+  createdAt: string;
 }
 
 /* ---------- transactions ---------- */
@@ -317,6 +377,14 @@ export interface TicketSummary {
  * there is nothing financial in the payload to leak via devtools, regardless
  * of what the UI chooses to render (see RoleRouter / RequireRole notes).
  */
+/** A Connector joined with its Charge Point's zoneLabel — dashboards show connectors (the runtime unit), scoped by location hint. */
+export interface DashboardConnectorRow {
+  id: string;
+  name: string;
+  zoneLabel: string | null;
+  runtimeStatus: ConnectorRuntimeStatus;
+}
+
 export interface StaffDashboard {
   kpis: {
     bookingsToday: number;
@@ -327,8 +395,8 @@ export interface StaffDashboard {
     openTickets: number;
     pendingCheckins: number;
   };
-  chargers: Pick<Charger, 'id' | 'name' | 'status'>[];
-  upcomingBookings: { id: string; startTime: string; driverName: string; chargerId: string }[];
+  chargers: DashboardConnectorRow[];
+  upcomingBookings: { id: string; startTime: string; driverName: string; connectorId: string }[];
   recentTickets: Pick<Ticket, 'id' | 'subject' | 'status' | 'updatedAt'>[];
 }
 
@@ -345,7 +413,7 @@ export interface OwnerDashboard {
     avgUtilizationPct: number;
     utilizationDeltaPts: number;
   };
-  chargers: Pick<Charger, 'id' | 'name' | 'status' | 'utilizationPct'>[];
+  chargers: (DashboardConnectorRow & Pick<Connector, 'utilizationPct'>)[];
   upcomingBookings: { id: string; startTime: string; driverName: string }[];
 }
 

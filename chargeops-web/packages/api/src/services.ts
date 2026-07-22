@@ -10,8 +10,9 @@ import type {
   Booking,
   BookingListParams,
   BookingSummary,
-  Charger,
-  ChargerStatus,
+  ChargePoint,
+  Connector,
+  ConnectorRuntimeStatus,
   ConnectorType,
   License,
   OwnerDashboard,
@@ -19,9 +20,11 @@ import type {
   PaymentMethod,
   PolicyDoc,
   PricingConfig,
+  ProvisioningStatus,
   StaffDashboard,
   Station,
   StationRegistration,
+  StationStaffMember,
   Ticket,
   TicketListParams,
   TicketMessage,
@@ -51,14 +54,30 @@ export interface BookingService {
   summary(): Promise<BookingSummary>;
   /** Owner cancelling on behalf of the driver — refund per BR-PAY-03. */
   cancel(id: string): Promise<Booking>;
+  /**
+   * BR-CHG-05 — bookings in Confirmed/Checked-In state on the given connectors.
+   * A non-empty result blocks taking those connectors (or their charge point)
+   * offline: the slot is sold and the driver may already be plugged in.
+   */
+  activeFor(connectorIds: string[]): Promise<Booking[]>;
 }
 
-export interface ChargerService {
-  list(stationId?: string): Promise<Charger[]>;
-  /** Owners may only change display name and operational status. */
-  update(id: string, patch: { name?: string; status?: ChargerStatus }): Promise<Charger>;
-  /** Admin: create an UNCLAIMED charger record (connector/power fixed at provisioning). */
-  provision(input: { connector: ConnectorType; powerKw: number; name?: string }): Promise<Charger>;
+export interface ChargePointService {
+  list(stationId?: string): Promise<ChargePoint[]>;
+  /** Owners may edit display name, zone label, and toggle ACTIVE<->OFFLINE. */
+  update(id: string, patch: { name?: string; zoneLabel?: string; status?: ProvisioningStatus }): Promise<ChargePoint>;
+  /** Admin: create an UNCLAIMED charge point for a station (FR14 step 1). */
+  provision(input: { stationId: string; name?: string; zoneLabel?: string }): Promise<ChargePoint>;
+  /** Admin: UNCLAIMED → ACTIVE once its connectors are provisioned and QR stickers installed. */
+  activate(id: string): Promise<ChargePoint>;
+}
+
+export interface ConnectorService {
+  list(chargePointId?: string): Promise<Connector[]>;
+  /** Owner/staff may only toggle runtime status (AVAILABLE<->OFFLINE); hardware attrs are locked (BR-CHG-03). */
+  update(id: string, patch: { runtimeStatus?: ConnectorRuntimeStatus }): Promise<Connector>;
+  /** Admin: create a connector under a charge point — connector type/power fixed at provisioning (FR14 step 2). */
+  provision(input: { chargePointId: string; connectorType: ConnectorType; powerKw: number; name?: string }): Promise<Connector>;
 }
 
 export interface StationService {
@@ -67,6 +86,8 @@ export interface StationService {
   register(input: StationRegistration): Promise<Station>;
   /** Admin: approval queue (status = pending). */
   approvals(): Promise<Station[]>;
+  /** Every known station as id/name — the light shape pickers need (ticket reassign, provisioning target). */
+  directory(): Promise<{ id: string; name: string }[]>;
   approve(id: string): Promise<Station>;
   reject(id: string, reason: string): Promise<Station>;
 }
@@ -93,6 +114,22 @@ export interface LicenseService {
 export interface UserService {
   list(params?: { role?: string; search?: string }): Promise<UserAccount[]>;
   setStatus(id: string, status: UserStatus): Promise<UserAccount>;
+}
+
+export interface StaffService {
+  /** Owner: STATION_STAFF assignments across the stations they own (BR-ACC-05 scopes this server-side). */
+  list(): Promise<StationStaffMember[]>;
+  /**
+   * FR17 invite-by-email. Email is the only handle by design — the SRS
+   * deliberately exposes no platform-wide user search or directory browsing.
+   * Grants STATION_STAFF additively to an existing account, or provisions a new
+   * one via the identity provider's admin API. `created` distinguishes the two
+   * so the UI can say which happened. Effective immediately: v1 has no
+   * invitation-acceptance step (documented simplification in FR17).
+   */
+  invite(input: { email: string; stationId: string }): Promise<{ member: StationStaffMember; created: boolean }>;
+  /** Revokes this station assignment only — never deletes the account or its other roles. */
+  revoke(userId: string, stationId: string): Promise<void>;
 }
 
 export interface PricingService {
@@ -129,11 +166,13 @@ export interface Services {
   dashboard: DashboardService;
   analytics: AnalyticsService;
   bookings: BookingService;
-  chargers: ChargerService;
+  chargePoints: ChargePointService;
+  connectors: ConnectorService;
   stations: StationService;
   transactions: TransactionService;
   licenses: LicenseService;
   users: UserService;
+  staff: StaffService;
   pricing: PricingService;
   policies: PolicyService;
   tickets: TicketService;

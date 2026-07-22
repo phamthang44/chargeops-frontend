@@ -1,48 +1,60 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type ReactNode } from 'react';
-import type { Charger, ChargerStatus } from '@chargeops/api';
+import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
+
 import { Button, Card, IconBolt, IconClock, IconLock, IconX, QrGlyph } from '@chargeops/ui';
-import { CHARGER_PILL, OWNER_CYCLE } from './chargerStatus';
+import {
+  CHARGE_POINT_PILL,
+  CONNECTOR_PILL,
+  OWNER_CHARGE_POINT_CYCLE,
+  canToggleConnector,
+  effectiveConnectorStatus,
+} from './chargerStatus';
 
 export interface ChargerDetailPanelProps {
-  charger: Charger;
+  chargePoint: ChargePoint;
+  connectors: Connector[];
   saving: boolean;
   onClose: () => void;
-  onSave: (id: string, patch: { name: string; status: ChargerStatus }) => void;
-  onDownloadQr: (c: Charger) => void;
+  onSave: (id: string, patch: { name: string; zoneLabel: string; status: ProvisioningStatus }) => void;
+  onCycleConnectorStatus: (c: Connector) => void;
+  onDownloadQr: (c: Connector) => void;
 }
 
-/** Right-hand editor: owner edits name + status; specs are read-only (admin-provisioned). */
+/** Right-hand editor: Charge Point identity/zone/status on top, its Connectors (locked specs, own QR) below. */
 export function ChargerDetailPanel({
-  charger,
+  chargePoint,
+  connectors,
   saving,
   onClose,
   onSave,
+  onCycleConnectorStatus,
   onDownloadQr,
 }: ChargerDetailPanelProps) {
   const { t } = useTranslation('owner');
-  const [name, setName] = useState(charger.name);
-  const [status, setStatus] = useState<ChargerStatus>(charger.status);
+  const [name, setName] = useState(chargePoint.name);
+  const [zoneLabel, setZoneLabel] = useState(chargePoint.zoneLabel ?? '');
+  const [status, setStatus] = useState<ProvisioningStatus>(chargePoint.status);
 
-  // Re-sync drafts when a different charger is selected.
   useEffect(() => {
-    setName(charger.name);
-    setStatus(charger.status);
-  }, [charger.id, charger.name, charger.status]);
+    setName(chargePoint.name);
+    setZoneLabel(chargePoint.zoneLabel ?? '');
+    setStatus(chargePoint.status);
+  }, [chargePoint.id, chargePoint.name, chargePoint.zoneLabel, chargePoint.status]);
 
   return (
     <Card className="p-[18px]">
       <div className="mb-1.5 flex items-start justify-between">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-owner">
-            {t('chargers.panel.editTitle')}
+            {t('chargePoints.panel.editTitle')}
           </div>
-          <div className="mt-1 text-[17px] font-bold">{charger.name}</div>
+          <div className="mt-1 text-[17px] font-bold">{chargePoint.name}</div>
         </div>
         <button
           onClick={onClose}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-faint hover:bg-chip"
-          aria-label={t('chargers.panel.close')}
+          aria-label={t('chargePoints.panel.close')}
         >
           <IconX size={16} strokeWidth={2} />
         </button>
@@ -50,52 +62,41 @@ export function ChargerDetailPanel({
 
       {/* identity */}
       <SectionTitle icon={<IconBolt size={15} className="text-owner" />}>
-        {t('chargers.panel.identityGroup')}
+        {t('chargePoints.panel.identityGroup')}
       </SectionTitle>
-      <FieldLabel>{t('chargers.panel.chargerId')}</FieldLabel>
+      <FieldLabel>{t('chargePoints.panel.chargePointId')}</FieldLabel>
       <div className="mb-[5px] flex items-center gap-2 rounded-[10px] border border-line-3 bg-chip px-[13px] py-[11px]">
-        <span className="flex-1 font-mono text-[13px] font-semibold text-body">{charger.id}</span>
+        <span className="flex-1 font-mono text-[13px] font-semibold text-body">{chargePoint.id}</span>
         <IconLock size={14} className="text-disabled" />
       </div>
-      <p className="mb-[15px] text-[11px] leading-[1.5] text-faint">
-        {t('chargers.panel.idHelp')}
-      </p>
-      <FieldLabel>{t('chargers.panel.displayName')}</FieldLabel>
+      <p className="mb-[15px] text-[11px] leading-[1.5] text-faint">{t('chargePoints.panel.idHelp')}</p>
+
+      <FieldLabel>{t('chargePoints.panel.displayName')}</FieldLabel>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder={t('chargers.panel.namePlaceholder')}
+        placeholder={t('chargePoints.panel.namePlaceholder')}
         className="w-full rounded-[10px] border border-line px-[13px] py-[11px] text-[13.5px] font-medium focus:border-owner"
       />
-      <p className="mt-[7px] text-[11px] leading-[1.5] text-faint">
-        {t('chargers.panel.nameHelp')}
-      </p>
 
-      {/* locked specs */}
-      <div className="mt-[18px] mb-3 flex items-center justify-between">
-        <SectionTitleInline icon={<IconBolt size={15} className="text-owner" />}>
-          {t('chargers.panel.specGroup')}
-        </SectionTitleInline>
-        <span className="flex items-center gap-[5px] rounded-full bg-warn-soft px-[9px] py-1 font-mono text-[10px] text-warn">
-          <IconLock size={11} strokeWidth={2.1} />
-          {t('chargers.panel.adminProvided')}
-        </span>
+      <div className="mt-[11px]">
+        <FieldLabel>{t('chargePoints.panel.zoneLabel')}</FieldLabel>
+        <input
+          value={zoneLabel}
+          onChange={(e) => setZoneLabel(e.target.value)}
+          placeholder={t('chargePoints.panel.zonePlaceholder')}
+          className="w-full rounded-[10px] border border-line px-[13px] py-[11px] text-[13.5px] font-medium focus:border-owner"
+        />
+        <p className="mt-[7px] text-[11px] leading-[1.5] text-faint">{t('chargePoints.panel.zoneHelp')}</p>
       </div>
-      <div className="mb-[5px] flex gap-[11px]">
-        <LockedSpec label={t('chargers.panel.connector')} value={charger.connector} />
-        <LockedSpec label={t('chargers.panel.power')} value={`${charger.powerKw} kW`} />
-      </div>
-      <p className="text-[11px] leading-[1.5] text-faint">
-        {t('chargers.panel.specHelp')}
-      </p>
 
       {/* status */}
       <SectionTitle className="mt-[18px]" icon={<IconClock size={15} className="text-owner" />}>
-        {t('chargers.panel.operationGroup')}
+        {t('chargePoints.panel.operationGroup')}
       </SectionTitle>
       <div className="flex gap-[7px]">
-        {OWNER_CYCLE.map((s) => {
-          const pill = CHARGER_PILL[s];
+        {OWNER_CHARGE_POINT_CYCLE.map((s) => {
+          const pill = CHARGE_POINT_PILL[s];
           const on = s === status;
           return (
             <button
@@ -109,40 +110,10 @@ export function ChargerDetailPanel({
               }}
             >
               <span className="h-[7px] w-[7px] rounded-full" style={{ background: pill.fg }} />
-              {t(`chargers.status.${s}`)}
+              {t(`chargePoints.status.${s}`)}
             </button>
           );
         })}
-      </div>
-
-      {/* today performance */}
-      <SectionTitle className="mt-[18px]" icon={<IconBolt size={15} className="text-owner" />}>
-        {t('chargers.panel.perfGroup')}
-      </SectionTitle>
-      <div className="grid grid-cols-2 gap-2.5">
-        <PerfStat label={t('chargers.panel.utilization')} value={`${charger.utilizationPct}%`} />
-        <PerfStat label="UPTIME 30N" value={`${charger.uptime30dPct}%`} />
-        <PerfStat label={t('chargers.panel.sessions')} value={String(charger.sessionsToday)} />
-        <PerfStat label={t('chargers.panel.kwh')} value={String(charger.kwhToday)} />
-      </div>
-
-      {/* QR */}
-      <div className="mt-[18px] flex items-center gap-[13px] rounded-card border border-line-3 bg-surface-2 p-3.5">
-        <span className="flex h-[74px] w-[74px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
-          <QrGlyph size={56} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[12.5px] font-semibold">QR Check-in</div>
-          <div className="mt-0.5 text-[11px] leading-[1.45] text-faint">
-            {t('chargers.panel.qrHelp')}
-          </div>
-        </div>
-        <button
-          onClick={() => onDownloadQr(charger)}
-          className="flex shrink-0 items-center gap-1.5 rounded-[9px] border-[1.5px] border-owner-border px-[13px] py-[9px] text-[12px] font-semibold text-owner-deep hover:bg-owner-soft"
-        >
-          {t('chargers.panel.downloadQrBtn')}
-        </button>
       </div>
 
       <Button
@@ -150,12 +121,97 @@ export function ChargerDetailPanel({
         size="lg"
         fullWidth
         className="mt-4"
-        onClick={() => onSave(charger.id, { name: name.trim() || charger.name, status })}
+        onClick={() => onSave(chargePoint.id, { name: name.trim() || chargePoint.name, zoneLabel: zoneLabel.trim(), status })}
         disabled={saving}
       >
-        {saving ? t('chargers.panel.saving') : t('chargers.panel.saveBtn')}
+        {saving ? t('chargePoints.panel.saving') : t('chargePoints.panel.saveBtn')}
       </Button>
+
+      {/* connectors */}
+      <SectionTitle className="mt-[22px]" icon={<IconBolt size={15} className="text-owner" />}>
+        {t('connectors.panel.groupTitle', { count: connectors.length })}
+      </SectionTitle>
+      <div className="flex flex-col gap-[13px]">
+        {connectors.map((c) => (
+          <ConnectorCard
+            key={c.id}
+            connector={c}
+            chargePointStatus={chargePoint.status}
+            onCycleStatus={onCycleConnectorStatus}
+            onDownloadQr={onDownloadQr}
+          />
+        ))}
+      </div>
     </Card>
+  );
+}
+
+function ConnectorCard({
+  connector: c,
+  chargePointStatus,
+  onCycleStatus,
+  onDownloadQr,
+}: {
+  connector: Connector;
+  chargePointStatus: ProvisioningStatus;
+  onCycleStatus: (c: Connector) => void;
+  onDownloadQr: (c: Connector) => void;
+}) {
+  const { t } = useTranslation('owner');
+  const effective = effectiveConnectorStatus(chargePointStatus, c.runtimeStatus);
+  const canToggle = canToggleConnector(chargePointStatus, c.runtimeStatus);
+  const pill = CONNECTOR_PILL[effective];
+
+  return (
+    <div className="rounded-card border border-line-3 p-3.5">
+      <div className="mb-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[12px] font-semibold text-brand">{c.id}</span>
+          <span className="text-[12.5px] font-semibold">{c.name}</span>
+        </div>
+        <button
+          onClick={() => onCycleStatus(c)}
+          disabled={!canToggle}
+          title={chargePointStatus !== 'active' ? t('connectors.card.lockedByDevice') : undefined}
+          className="inline-flex items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
+          style={{ background: pill.bg, color: pill.fg }}
+        >
+          <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
+          {t(`connectors.status.${effective}`)}
+        </button>
+      </div>
+
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <span className="flex items-center gap-[5px] rounded-full bg-warn-soft px-[9px] py-1 font-mono text-[10px] text-warn">
+          <IconLock size={11} strokeWidth={2.1} />
+          {t('connectors.panel.adminProvided')}
+        </span>
+      </div>
+      <div className="mb-2.5 flex gap-[11px]">
+        <LockedSpec label={t('connectors.panel.connector')} value={c.connectorType} />
+        <LockedSpec label={t('connectors.panel.power')} value={`${c.powerKw} kW`} />
+      </div>
+
+      <div className="mb-2.5 grid grid-cols-2 gap-2.5">
+        <PerfStat label={t('connectors.panel.utilization')} value={`${c.utilizationPct}%`} />
+        <PerfStat label="UPTIME 30N" value={`${c.uptime30dPct}%`} />
+        <PerfStat label={t('connectors.panel.sessions')} value={String(c.sessionsToday)} />
+        <PerfStat label={t('connectors.panel.kwh')} value={String(c.kwhToday)} />
+      </div>
+
+      <div className="flex items-center gap-[11px] rounded-card border border-line-3 bg-surface-2 p-3">
+        <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
+          <QrGlyph size={38} />
+        </span>
+        <div className="min-w-0 flex-1 text-[11px] leading-[1.4] text-faint">{t('connectors.panel.qrHelp')}</div>
+        <button
+          onClick={() => onDownloadQr(c)}
+          className="flex shrink-0 items-center gap-1.5 rounded-[9px] border-[1.5px] border-owner-border px-[11px] py-[7px] text-[11.5px] font-semibold text-owner-deep hover:bg-owner-soft"
+        >
+          {t('connectors.panel.downloadQrBtn')}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -170,17 +226,6 @@ function SectionTitle({
 }) {
   return (
     <div className={`mb-3 flex items-center gap-2.5 ${className}`}>
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-owner-soft">
-        {icon}
-      </span>
-      <span className="text-[13.5px] font-semibold">{children}</span>
-    </div>
-  );
-}
-
-function SectionTitleInline({ icon, children }: { icon: ReactNode; children: ReactNode }) {
-  return (
-    <div className="flex items-center gap-2.5">
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-owner-soft">
         {icon}
       </span>

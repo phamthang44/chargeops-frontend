@@ -50,10 +50,10 @@ function DashboardBody({
   const { kpis, chargers, upcomingBookings, recentTickets } = data;
 
   const chargerRow = (c: StaffDashboardData['chargers'][number]): SidePanelRow =>
-    c.status === 'available'
+    c.runtimeStatus === 'available'
       ? { label: `${c.id} · ${c.name}`, value: t('charger.available'), dotClass: 'bg-good', valueClass: 'text-good' }
-      : c.status === 'maintenance'
-        ? { label: `${c.id} · ${c.name}`, value: t('charger.maintenance'), dotClass: 'bg-warn', valueClass: 'text-warn' }
+      : c.runtimeStatus === 'inuse'
+        ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
         : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
 
   const TONE_CLASS: Record<string, string> = { good: 'text-good', warn: 'text-warn', bad: 'text-bad', brand: 'text-brand', neutral: 'text-muted', ink: 'text-ink' };

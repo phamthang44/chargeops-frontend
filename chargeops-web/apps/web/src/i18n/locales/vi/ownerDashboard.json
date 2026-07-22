@@ -21,7 +21,7 @@
     "utilizationDelta": "+{{points}} điểm so với tuần trước"
   },
   "charger": {
-    "maintenance": "Bảo trì",
+    "inuse": "Đang sạc",
     "offline": "Offline"
   },
   "chart": {

@@ -28,8 +28,40 @@ export interface StationFilter {
   currentType?: 'AC' | 'DC';
   /** Only stations with at least one port free right now. */
   availableOnly?: boolean;
+  /** Only stations that are open right now. */
+  openOnly?: boolean;
   /** Only stations within this many km. */
   maxDistanceKm?: number;
+  /** Result ordering (defaults to nearest). */
+  sort?: StationSort;
+}
+
+/** How the station list is ordered. */
+export type StationSort = 'nearest' | 'cheapest' | 'rating' | 'available';
+
+/**
+ * One page of stations plus the cursor for the next page. Cursor-based (not
+ * offset) paging: `nextCursor` is the last item's id, and the next request
+ * returns the items that follow it in the same sorted order — stable even as
+ * the underlying set grows. `null` means there are no more.
+ */
+export interface StationPage {
+  items: Station[];
+  nextCursor: string | null;
+  /** Total matching the filter (for a "showing X of N" style count). */
+  total: number;
+}
+
+/** Default page size for the discovery list. */
+export const STATION_PAGE_SIZE = 12;
+
+function sortStations(list: Station[], sort: StationSort): Station[] {
+  const by = [...list];
+  if (sort === 'cheapest') by.sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
+  else if (sort === 'rating') by.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+  else if (sort === 'available') by.sort((a, b) => b.availableConnectors - a.availableConnectors);
+  else by.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+  return by;
 }
 
 /** Charge Points a driver is allowed to see: UNCLAIMED/SUSPENDED are hidden (BR-CHG-01). */
@@ -68,6 +100,7 @@ function matchesFilter(station: Station, filter: StationFilter): boolean {
   if (filter.availableOnly) {
     if (!connectors.some((c) => c.effectiveStatus === 'AVAILABLE')) return false;
   }
+  if (filter.openOnly && !station.isOpen) return false;
   if (filter.maxDistanceKm !== undefined) {
     if ((station.distanceKm ?? Number.POSITIVE_INFINITY) > filter.maxDistanceKm) return false;
   }
@@ -75,15 +108,25 @@ function matchesFilter(station: Station, filter: StationFilter): boolean {
 }
 
 /**
- * Search & filter stations (FR02). Results are sorted by distance by default.
- * NOW: filters the mock locally. LATER: GET /stations/nearby?lat=&lng=&… with
- * the same criteria as query parameters.
+ * Search, filter and page stations (FR02). All filtering + ordering happens here
+ * so the cursor stays consistent across pages. Results are sorted per
+ * `filter.sort` (nearest by default), then a `cursor`-anchored slice is returned.
+ * NOW: pages the mock locally. LATER: GET /stations/nearby?lat=&lng=&cursor=&… —
+ * the backend returns the same {items, nextCursor} shape from a DB keyset query.
  */
-export async function getNearbyStations(filter: StationFilter = {}): Promise<Station[]> {
-  const results = stationsMock
-    .filter((s) => matchesFilter(s, filter))
-    .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
-  return simulateNetwork(results);
+export async function getNearbyStations(
+  filter: StationFilter = {},
+  page: { cursor?: string | null; limit?: number } = {},
+): Promise<StationPage> {
+  const { cursor = null, limit = STATION_PAGE_SIZE } = page;
+  const sorted = sortStations(
+    stationsMock.filter((s) => matchesFilter(s, filter)),
+    filter.sort ?? 'nearest',
+  );
+  const start = cursor ? sorted.findIndex((s) => s.id === cursor) + 1 : 0;
+  const items = sorted.slice(start, start + limit);
+  const nextCursor = start + limit < sorted.length && items.length > 0 ? items[items.length - 1].id : null;
+  return simulateNetwork({ items, nextCursor, total: sorted.length });
 }
 
 export async function getStationById(id: string): Promise<Station | null> {

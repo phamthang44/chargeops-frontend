@@ -97,8 +97,9 @@ export function MapScreen() {
 
   useEffect(() => {
     let active = true;
-    getNearbyStations().then((data) => {
-      if (active) setStations(data);
+    // The map only pins the nearest handful; one generous page is plenty.
+    getNearbyStations({}, { limit: 40 }).then((page) => {
+      if (active) setStations(page.items);
     });
     return () => {
       active = false;

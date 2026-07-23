@@ -164,7 +164,9 @@
     },
     "fastCharge": "Fast charge",
     "resultCount": "{{count}} stations",
-    "clearFilters": "Clear"
+    "clearFilters": "Clear",
+    "showMore": "Show more",
+    "showingCount": "Showing {{shown}} of {{total}}"
   },
   "map": {
     "title": "Map",

@@ -164,7 +164,9 @@
     },
     "fastCharge": "Sạc nhanh",
     "resultCount": "{{count}} trạm",
-    "clearFilters": "Xóa lọc"
+    "clearFilters": "Xóa lọc",
+    "showMore": "Xem thêm trạm",
+    "showingCount": "Đang hiển thị {{shown}}/{{total}}"
   },
   "map": {
     "title": "Bản đồ",

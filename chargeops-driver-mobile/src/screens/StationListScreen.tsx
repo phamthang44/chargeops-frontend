@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -176,23 +177,35 @@ export function StationListScreen() {
   const [sortOpen, setSortOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  // Search + filtering belong to the data layer (they will be query parameters
-  // on the real endpoint), so the criteria travel to the service rather than
-  // being applied to an already-fetched page.
+  // Cursor pagination state. The service owns filtering + ordering, so the
+  // cursor stays valid across pages; the client just accumulates what it fetches.
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Search + all filters + the sort travel to the data layer (they will be query
+  // parameters on the real endpoint), so a page is fully resolved server-side.
   const filter: StationFilter = useMemo(
     () => ({
       query,
       connectorTypes: types.length ? types : undefined,
       currentType: currentType ?? undefined,
       availableOnly: availableOnly || undefined,
+      openOnly: openOnly || undefined,
+      sort,
     }),
-    [query, types, currentType, availableOnly],
+    [query, types, currentType, availableOnly, openOnly, sort],
   );
 
+  // Load / reload the FIRST page (on any filter change). Resets the cursor.
   const load = useCallback(async (criteria: StationFilter) => {
     try {
-      const data = await getNearbyStations(criteria);
-      setStations(data);
+      const page = await getNearbyStations(criteria, {});
+      setStations(page.items);
+      setCursor(page.nextCursor);
+      setHasMore(page.nextCursor !== null);
+      setTotal(page.total);
       setError(false);
     } catch {
       setError(true);
@@ -210,6 +223,23 @@ export function StationListScreen() {
       active = false;
     };
   }, [load, filter]);
+
+  // Fetch the NEXT page from the last cursor and append it.
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await getNearbyStations(filter, { cursor });
+      setStations((prev) => [...prev, ...page.items]);
+      setCursor(page.nextCursor);
+      setHasMore(page.nextCursor !== null);
+      setTotal(page.total);
+    } catch {
+      // Keep what we have; the button stays for a retry.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, filter, cursor]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -232,17 +262,6 @@ export function StationListScreen() {
     setCurrentType(null);
     setTypes([]);
   }
-
-  // "Open now" stays client-side: it's derived display state, not a stored field.
-  const visible = useMemo(() => {
-    const list = openOnly ? stations.filter((s) => s.isOpen) : stations;
-    const sorted = [...list];
-    if (sort === 'nearest') sorted.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
-    if (sort === 'cheapest') sorted.sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
-    if (sort === 'rating') sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-    if (sort === 'available') sorted.sort((a, b) => b.availableConnectors - a.availableConnectors);
-    return sorted;
-  }, [stations, openOnly, sort]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -326,7 +345,7 @@ export function StationListScreen() {
         style={styles.list}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        data={loading || error ? [] : visible}
+        data={loading || error ? [] : stations}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => (
           <StationCard
@@ -345,7 +364,7 @@ export function StationListScreen() {
                 <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
                 {!loading && (
                   <Text style={styles.resultCount}>
-                    {t('stationList.resultCount', { count: visible.length })}
+                    {t('stationList.resultCount', { count: total })}
                   </Text>
                 )}
               </View>
@@ -382,14 +401,35 @@ export function StationListScreen() {
           )
         }
         ListFooterComponent={
-          !loading && !error && visible.length > 0 ? (
-            <View style={styles.promo}>
-              <View style={styles.promoIcon}>
-                <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
-              </View>
-              <View style={styles.promoBody}>
-                <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
-                <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
+          !loading && !error && stations.length > 0 ? (
+            <View style={styles.footerWrap}>
+              {/* Cursor pagination: fetch the next page from the last position */}
+              {hasMore && (
+                <Pressable
+                  style={styles.showMore}
+                  disabled={loadingMore}
+                  onPress={loadMore}
+                >
+                  {loadingMore ? (
+                    <ActivityIndicator color={colors.primary} size="small" />
+                  ) : (
+                    <>
+                      <Text style={styles.showMoreText}>{t('stationList.showMore')}</Text>
+                      <Text style={styles.showMoreCount}>
+                        {t('stationList.showingCount', { shown: stations.length, total })}
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+              )}
+              <View style={styles.promo}>
+                <View style={styles.promoIcon}>
+                  <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
+                </View>
+                <View style={styles.promoBody}>
+                  <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
+                  <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
+                </View>
               </View>
             </View>
           ) : null
@@ -614,6 +654,22 @@ const styles = StyleSheet.create({
   availText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
   directionsBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.sm },
   directionsText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
+
+  footerWrap: { gap: spacing.md },
+  // Cursor-pagination "show more" control
+  showMore: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    minHeight: 48,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+  },
+  showMoreText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
+  showMoreCount: { fontSize: fontSizes.caption, color: colors.textMuted },
 
   promo: {
     flexDirection: 'row',

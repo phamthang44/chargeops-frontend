@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import {
   type GestureResponderEvent,
@@ -8,7 +9,31 @@ import {
 } from 'react-native';
 
 import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
-import { formatMinutes, type BusyRange } from '@/utils/availability';
+import { formatMinutes, MIN_DURATION_MIN, type BusyRange } from '@/utils/availability';
+
+interface FreeGap {
+  fromMin: number;
+  toMin: number;
+}
+
+/**
+ * The stretches of the day a booking can actually start in: operating hours,
+ * minus the past and minus everything already booked, keeping only gaps long
+ * enough to fit the shortest booking. These become the visible "tap here" bands.
+ */
+function computeFreeGaps(startMin: number, endMin: number, busy: BusyRange[]): FreeGap[] {
+  const blocks = busy.map((b) => [b.fromMin, b.toMin] as const).sort((a, b) => a[0] - b[0]);
+  const gaps: FreeGap[] = [];
+  let cursor = startMin;
+  for (const [bf, bt] of blocks) {
+    if (bt <= cursor) continue;
+    if (bf > cursor) gaps.push({ fromMin: cursor, toMin: Math.min(bf, endMin) });
+    cursor = Math.max(cursor, bt);
+    if (cursor >= endMin) break;
+  }
+  if (cursor < endMin) gaps.push({ fromMin: cursor, toMin: endMin });
+  return gaps.filter((g) => g.toMin - g.fromMin >= MIN_DURATION_MIN);
+}
 
 /**
  * Vertical day view for booking (FR05/FR11).
@@ -58,10 +83,13 @@ export function DayAgenda({
 
   const pastBottom = clampTop(Math.min(earliestMin, closesAtMin));
 
-  function handleTap(e: GestureResponderEvent) {
+  const firstFree = Math.max(opensAtMin, Math.min(earliestMin, closesAtMin));
+  const freeGaps = computeFreeGaps(firstFree, closesAtMin, busy);
+
+  /** A tap inside a free band sets the start at the tapped minute of that gap. */
+  function tapGap(gap: FreeGap, e: GestureResponderEvent) {
     const localY = e.nativeEvent.locationY;
-    const min = opensAtMin + (localY / HOUR_H) * 60;
-    onPickStart(min);
+    onPickStart(gap.fromMin + (localY / HOUR_H) * 60);
   }
 
   return (
@@ -83,6 +111,24 @@ export function DayAgenda({
               {pastBottom > 22 && <Text style={styles.pastText}>{t('timeRangePicker.past')}</Text>}
             </View>
           )}
+
+          {/* Free, tappable time — the obvious "tap here" bands */}
+          {freeGaps.map((g, i) => {
+            const top = clampTop(g.fromMin);
+            const height = Math.max(18, clampTop(g.toMin) - top);
+            return (
+              <Pressable key={`free-${i}`} style={[styles.free, { top, height }]} onPress={(e) => tapGap(g, e)}>
+                {height > 40 ? (
+                  <View style={styles.freeInner}>
+                    <Ionicons name="add-circle" size={15} color={colors.primary} />
+                    <Text style={styles.freeText}>{t('timeRangePicker.freeSlot')}</Text>
+                  </View>
+                ) : height > 22 ? (
+                  <Ionicons name="add" size={14} color={colors.primary} />
+                ) : null}
+              </Pressable>
+            );
+          })}
 
           {/* Ranges already booked */}
           {busy.map((r, i) => {
@@ -126,13 +172,6 @@ export function DayAgenda({
             </View>
           )}
 
-          {/* Tap surface — taps set the start, drags still scroll the page */}
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={handleTap}
-            accessibilityRole="adjustable"
-            accessibilityLabel={t('timeRangePicker.tapToStart')}
-          />
         </View>
       </View>
 
@@ -180,6 +219,22 @@ const styles = StyleSheet.create({
   },
   pastText: { fontSize: fontSizes.caption, color: colors.textMuted },
 
+  // Free, bookable time — a faint emerald wash + a "tap to choose" affordance so
+  // it reads as an inviting, tappable surface (vs. the solid grey booked blocks).
+  free: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    borderRadius: radius.sm,
+    backgroundColor: `${colors.primary}26`,
+    borderWidth: 1,
+    borderColor: `${colors.primary}66`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  freeInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  freeText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.primaryDark },
+
   busy: {
     position: 'absolute',
     left: 0,
@@ -208,7 +263,7 @@ const styles = StyleSheet.create({
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginTop: spacing.md },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   swatch: { width: 12, height: 12, borderRadius: 3 },
-  swFree: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  swFree: { backgroundColor: `${colors.primary}26`, borderWidth: 1, borderColor: `${colors.primary}66` },
   swBooked: { backgroundColor: colors.border },
   swMine: { backgroundColor: `${colors.info}26` },
   swSelected: { backgroundColor: colors.primary },

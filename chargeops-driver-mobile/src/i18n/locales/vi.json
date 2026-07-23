@@ -514,6 +514,7 @@
     "empty": "Không còn khung giờ trống trong ngày này. Hãy thử ngày khác hoặc cổng sạc khác.",
     "tapToStart": "Chạm vào khung giờ trống để chọn giờ bắt đầu",
     "past": "Đã qua",
-    "legendFree": "Còn trống"
+    "legendFree": "Còn trống",
+    "freeSlot": "Chạm để chọn"
   }
 }

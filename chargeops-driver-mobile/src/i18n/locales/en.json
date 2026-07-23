@@ -514,6 +514,7 @@
     "empty": "No time left on this day. Try another date or another connector.",
     "tapToStart": "Tap a free time to set the start",
     "past": "Past",
-    "legendFree": "Free"
+    "legendFree": "Free",
+    "freeSlot": "Tap to choose"
   }
 }

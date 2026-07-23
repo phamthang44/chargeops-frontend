@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, AvailabilityTimeline, GlassButton, StatusBadge } from '@/components';
+import { AppButton, DayAgenda, GlassButton, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBusyRanges } from '@/services/bookingService';
 import {
@@ -251,7 +251,7 @@ export function TimeRangePickerScreen() {
           <ActivityIndicator color={colors.primary} style={styles.loader} />
         ) : (
           <>
-            <AvailabilityTimeline
+            <DayAgenda
               opensAtMin={opensAtMin}
               closesAtMin={closesAtMin}
               busy={busy}
@@ -264,36 +264,13 @@ export function TimeRangePickerScreen() {
               <Text style={styles.empty}>{t('timeRangePicker.empty')}</Text>
             ) : (
               <>
-                {/* Start time */}
-                <Text style={styles.fieldLabel}>{t('timeRangePicker.startTime')}</Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.chipRow}
-                >
-                  {starts.map((o) => {
-                    const disabled = o.maxDurationMin < MIN_DURATION_MIN;
-                    const active = o.startMin === startMin;
-                    return (
-                      <Pressable
-                        key={o.startMin}
-                        disabled={disabled}
-                        onPress={() => selectStart(o.startMin, o.maxDurationMin)}
-                        style={[styles.chip, active && styles.chipActive, disabled && styles.chipDisabled]}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            active && styles.chipTextActive,
-                            disabled && styles.chipTextDisabled,
-                          ]}
-                        >
-                          {formatMinutes(o.startMin)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
+                {/* Prompt until the driver taps a start on the agenda */}
+                {startMin === null && (
+                  <View style={styles.tapHint}>
+                    <Ionicons name="hand-left-outline" size={16} color={colors.primary} />
+                    <Text style={styles.tapHintText}>{t('timeRangePicker.tapToStart')}</Text>
+                  </View>
+                )}
 
                 {/* Duration */}
                 <Text style={styles.fieldLabel}>{t('timeRangePicker.duration')}</Text>
@@ -482,17 +459,19 @@ const styles = StyleSheet.create({
 
   fieldLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
 
-  // Start-time chips
-  chipRow: { gap: spacing.sm, paddingVertical: spacing.xs },
-  chip: {
-    paddingHorizontal: spacing.lg,
+  // Tap prompt shown until a start is chosen on the agenda
+  tapHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tapHintText: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.primaryDark },
+
+  // Shared chip text (duration pills)
   chipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
   chipText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
   chipTextActive: { color: colors.textInverse },

@@ -510,6 +510,9 @@
     "refundBody": "Cancel within 5 minutes of booking for a full refund. After that: 100% more than 60 minutes before the start, 50% between 15 and 60 minutes, nothing inside 15 minutes or for a no-show.",
     "selectHint": "Pick a start time and a duration",
     "selectedWindow": "Selected window",
-    "empty": "No time left on this day. Try another date or another connector."
+    "empty": "No time left on this day. Try another date or another connector.",
+    "tapToStart": "Tap a free time to set the start",
+    "past": "Past",
+    "legendFree": "Free"
   }
 }

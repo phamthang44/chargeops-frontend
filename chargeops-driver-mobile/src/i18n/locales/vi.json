@@ -510,6 +510,9 @@
     "refundBody": "Hủy trong 5 phút sau khi đặt được hoàn 100%. Sau đó: hoàn 100% nếu hủy trước 60 phút, 50% nếu hủy trước 15–60 phút, và không hoàn nếu hủy sát giờ hoặc không đến.",
     "selectHint": "Chọn giờ bắt đầu và thời lượng",
     "selectedWindow": "Khung giờ đã chọn",
-    "empty": "Không còn khung giờ trống trong ngày này. Hãy thử ngày khác hoặc cổng sạc khác."
+    "empty": "Không còn khung giờ trống trong ngày này. Hãy thử ngày khác hoặc cổng sạc khác.",
+    "tapToStart": "Chạm vào khung giờ trống để chọn giờ bắt đầu",
+    "past": "Đã qua",
+    "legendFree": "Còn trống"
   }
 }

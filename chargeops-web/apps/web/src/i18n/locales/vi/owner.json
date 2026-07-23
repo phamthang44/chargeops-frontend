@@ -433,7 +433,11 @@
       "addressLabel": "Địa chỉ",
       "licenseLabel": "Giấy phép",
       "rejectionReason": "Lý do từ chối: {{reason}}",
-      "pendingHelp": "Hồ sơ đang chờ quản trị viên xét duyệt. Trạm chưa hiển thị cho tài xế."
+      "pendingHelp": "Hồ sơ đang chờ quản trị viên xét duyệt. Trạm chưa hiển thị cho tài xế.",
+      "amenitiesLabel": "Tiện ích",
+      "editAmenities": "Chỉnh sửa",
+      "addAmenities": "Thêm tiện ích",
+      "noAmenities": "Chưa có tiện ích nào"
     },
     "register": {
       "title": "Đăng ký trạm mới",
@@ -453,6 +457,27 @@
       "cancelBtn": "Hủy bỏ",
       "submitBtn": "Gửi đăng ký",
       "submitting": "Đang gửi…"
+    },
+    "amenities": {
+      "wifi": "Wifi miễn phí",
+      "food": "Đồ ăn",
+      "coffee": "Cà phê",
+      "parking": "Bãi đỗ xe",
+      "security": "An ninh 24/7",
+      "restroom": "Nhà vệ sinh",
+      "lounge": "Phòng chờ",
+      "atm": "ATM",
+      "carwash": "Rửa xe",
+      "shop": "Cửa hàng tiện lợi"
+    },
+    "amenitiesModal": {
+      "title": "Tiện ích của trạm",
+      "subtitle": "Chọn các tiện ích có tại {{name}} để hiển thị cho tài xế.",
+      "hint": "Tài xế sẽ thấy các tiện ích này trên trang chi tiết trạm trong ứng dụng.",
+      "cancel": "Hủy",
+      "save": "Lưu tiện ích",
+      "saving": "Đang lưu…",
+      "saved": "Đã cập nhật tiện ích."
     }
   },
   "license": {

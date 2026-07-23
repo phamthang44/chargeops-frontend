@@ -389,6 +389,14 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         db.ownerStations.push(st);
         return { ...st };
       },
+      async updateAmenities(id, amenities) {
+        await delay();
+        // Owner may only edit their own stations (BR-STA-02) — scoped to ownerStations.
+        const st = db.ownerStations.find((s) => s.id === id);
+        if (!st) throw new Error(`Không tìm thấy trạm ${id}`);
+        st.amenities = [...amenities];
+        return { ...st };
+      },
       async approvals() {
         await delay();
         return db.approvalQueue.filter((s) => s.status === 'pending');

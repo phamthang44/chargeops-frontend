@@ -1,11 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { STATION_STATUS, type Station } from '@chargeops/api';
+import { useState } from 'react';
+import { AMENITY_EMOJI, STATION_STATUS, type Station } from '@chargeops/api';
 import { Card, IconClock, StatusPill } from '@chargeops/ui';
+import { AmenitiesModal } from './AmenitiesModal';
 
 /** One station card — active shows stats; pending/rejected show a status note. */
 export function StationCard({ station }: { station: Station }) {
   const { t } = useTranslation('owner');
   const meta = STATION_STATUS[station.status];
+  const [editAmenities, setEditAmenities] = useState(false);
+  const amenities = station.amenities ?? [];
   return (
     <Card className="p-[17px]">
       <div className="mb-3 flex items-start justify-between gap-2.5">
@@ -37,6 +41,39 @@ export function StationCard({ station }: { station: Station }) {
         </div>
       </div>
 
+      {/* Owner-managed amenities (FR10-adjacent self-service) */}
+      {station.status === 'active' && (
+        <div className="mt-3 border-t border-hairline pt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+              {t('stations.card.amenitiesLabel')}
+            </span>
+            <button
+              type="button"
+              onClick={() => setEditAmenities(true)}
+              className="text-[12px] font-semibold text-owner hover:underline"
+            >
+              {amenities.length ? t('stations.card.editAmenities') : t('stations.card.addAmenities')}
+            </button>
+          </div>
+          {amenities.length === 0 ? (
+            <span className="text-[12px] text-faint">{t('stations.card.noAmenities')}</span>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {amenities.map((a) => (
+                <span
+                  key={a}
+                  className="inline-flex items-center gap-1 rounded-full border border-line-3 bg-surface-2 px-2.5 py-1 text-[11.5px] font-medium text-body"
+                >
+                  <span className="text-[13px] leading-none">{AMENITY_EMOJI[a]}</span>
+                  {t(`stations.amenities.${a}`)}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {station.status === 'rejected' && station.rejectionReason && (
         <div className="mt-3 flex gap-2 rounded-[9px] border border-bad-border bg-bad-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-bad-deep">
           <span>
@@ -50,6 +87,8 @@ export function StationCard({ station }: { station: Station }) {
           <span>{t('stations.card.pendingHelp')}</span>
         </div>
       )}
+
+      <AmenitiesModal station={station} open={editAmenities} onClose={() => setEditAmenities(false)} />
     </Card>
   );
 }

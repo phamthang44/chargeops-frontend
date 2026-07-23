@@ -181,7 +181,56 @@ export interface Station {
   utilizationPct: number;
   /** ISO date the registration was submitted (approval queue). */
   submittedAt: string | null;
+  /** Owner-advertised amenities shown to drivers (FR10-adjacent, owner self-service). */
+  amenities?: Amenity[];
 }
+
+/* ---------- amenities (owner-managed) ---------- */
+
+/**
+ * Amenities an owner can advertise on their station. Owners toggle these
+ * themselves — they don't ask an admin — and the set flows to the driver app's
+ * station detail page.
+ */
+export type Amenity =
+  | 'wifi'
+  | 'food'
+  | 'coffee'
+  | 'parking'
+  | 'security'
+  | 'restroom'
+  | 'lounge'
+  | 'atm'
+  | 'carwash'
+  | 'shop';
+
+/** The full catalogue an owner can pick from, in display order. */
+export const AMENITY_CATALOG: readonly Amenity[] = [
+  'wifi',
+  'food',
+  'coffee',
+  'parking',
+  'security',
+  'restroom',
+  'lounge',
+  'atm',
+  'carwash',
+  'shop',
+];
+
+/** Emoji glyph per amenity — the UI kit has no amenity-specific icons. */
+export const AMENITY_EMOJI: Record<Amenity, string> = {
+  wifi: '📶',
+  food: '🍜',
+  coffee: '☕',
+  parking: '🅿️',
+  security: '🛡️',
+  restroom: '🚻',
+  lounge: '🛋️',
+  atm: '🏧',
+  carwash: '🚿',
+  shop: '🛍️',
+};
 
 export interface StationRegistration {
   name: string;

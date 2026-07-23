@@ -44,6 +44,7 @@ export function createRestServices(http: HttpClient): Services {
     stations: {
       mine: () => http.get('/stations/mine'),
       register: (input) => http.post('/stations', input),
+      updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
       approvals: () => http.get('/admin/stations/approvals'),
       all: () => http.get('/admin/stations'),
       approve: (id) => http.post(`/admin/stations/${id}/approve`),

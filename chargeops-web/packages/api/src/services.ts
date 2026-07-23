@@ -22,6 +22,7 @@ import type {
   PricingConfig,
   ProvisioningStatus,
   StaffDashboard,
+  Amenity,
   Station,
   StationRegistration,
   StationStaffMember,
@@ -84,6 +85,8 @@ export interface StationService {
   /** Owner: own stations, any status. */
   mine(): Promise<Station[]>;
   register(input: StationRegistration): Promise<Station>;
+  /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
+  updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
   /** Admin: approval queue (status = pending). */
   approvals(): Promise<Station[]>;
   /** Admin: every approved station platform-wide. Filtering/search happens client-side. */

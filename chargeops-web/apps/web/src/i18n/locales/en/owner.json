@@ -433,7 +433,11 @@
       "addressLabel": "Address",
       "licenseLabel": "License",
       "rejectionReason": "Rejection reason: {{reason}}",
-      "pendingHelp": "Submission is pending admin review. Station is not visible to drivers yet."
+      "pendingHelp": "Submission is pending admin review. Station is not visible to drivers yet.",
+      "amenitiesLabel": "Amenities",
+      "editAmenities": "Edit",
+      "addAmenities": "Add amenities",
+      "noAmenities": "No amenities yet"
     },
     "register": {
       "title": "Register New Station",
@@ -453,6 +457,27 @@
       "cancelBtn": "Cancel",
       "submitBtn": "Submit Registration",
       "submitting": "Submitting..."
+    },
+    "amenities": {
+      "wifi": "Free Wi-Fi",
+      "food": "Food",
+      "coffee": "Coffee",
+      "parking": "Parking",
+      "security": "24/7 security",
+      "restroom": "Restroom",
+      "lounge": "Lounge",
+      "atm": "ATM",
+      "carwash": "Car wash",
+      "shop": "Convenience store"
+    },
+    "amenitiesModal": {
+      "title": "Station amenities",
+      "subtitle": "Choose what {{name}} offers — drivers see these on the station page.",
+      "hint": "These amenities appear on the station detail page in the driver app.",
+      "cancel": "Cancel",
+      "save": "Save amenities",
+      "saving": "Saving…",
+      "saved": "Amenities updated."
     }
   },
   "license": {

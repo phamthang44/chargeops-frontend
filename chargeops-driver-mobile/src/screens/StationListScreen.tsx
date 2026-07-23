@@ -14,24 +14,42 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader, BottomSheet, Card, EmptyState, StatusBadge } from '@/components';
+import { AppHeader, BottomSheet, EmptyState, StationThumb } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { getNearbyStations } from '@/services/stationService';
+import { getNearbyStations, type StationFilter } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { Station } from '@/types';
+import type { ConnectorType, Station } from '@/types';
 import { formatRate } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type FilterKey = 'all' | 'dc' | 'open';
 type SortKey = 'nearest' | 'cheapest' | 'rating' | 'available';
 
-const FILTERS: FilterKey[] = ['all', 'dc', 'open'];
+/** Connector types a driver can filter by (FR02). */
+const CONNECTOR_TYPES: ConnectorType[] = ['CCS2', 'CHADEMO', 'TYPE2', 'GBT'];
+
 const SORTS: { key: SortKey; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'nearest', icon: 'navigate-outline' },
   { key: 'cheapest', icon: 'pricetag-outline' },
   { key: 'rating', icon: 'star-outline' },
   { key: 'available', icon: 'flash-outline' },
 ];
+
+/** One toggleable FR02 filter chip. */
+function FilterChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
+      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+    </Pressable>
+  );
+}
 
 /** Rough city-driving ETA from distance (~3 min per km). */
 function etaMinutes(distanceKm?: number): number {
@@ -41,7 +59,7 @@ function etaMinutes(distanceKm?: number): number {
 /** Greyed-out placeholder card shown while the list loads. */
 function SkeletonCard() {
   return (
-    <Card style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.cardTop}>
         <View style={[styles.thumb, styles.skel]} />
         <View style={styles.cardBody}>
@@ -51,7 +69,7 @@ function SkeletonCard() {
           <View style={[styles.skel, styles.skelBadge]} />
         </View>
       </View>
-    </Card>
+    </View>
   );
 }
 
@@ -68,14 +86,32 @@ export function StationListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<FilterKey>('all');
+  // FR02 filters. Independent toggles rather than one exclusive chip: a driver
+  // looking for "a free CCS2 port right now" needs to combine them.
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [openOnly, setOpenOnly] = useState(false);
+  const [currentType, setCurrentType] = useState<'AC' | 'DC' | null>(null);
+  const [types, setTypes] = useState<ConnectorType[]>([]);
   const [sort, setSort] = useState<SortKey>('nearest');
   const [sortOpen, setSortOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const load = useCallback(async () => {
+  // Search + filtering belong to the data layer (they will be query parameters
+  // on the real endpoint), so the criteria travel to the service rather than
+  // being applied to an already-fetched page.
+  const filter: StationFilter = useMemo(
+    () => ({
+      query,
+      connectorTypes: types.length ? types : undefined,
+      currentType: currentType ?? undefined,
+      availableOnly: availableOnly || undefined,
+    }),
+    [query, types, currentType, availableOnly],
+  );
+
+  const load = useCallback(async (criteria: StationFilter) => {
     try {
-      const data = await getNearbyStations();
+      const data = await getNearbyStations(criteria);
       setStations(data);
       setError(false);
     } catch {
@@ -83,45 +119,50 @@ export function StationListScreen() {
     }
   }, []);
 
+  // Only the first load shows skeletons; later refetches swap the results in
+  // place so typing doesn't make the list flash.
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    load().finally(() => {
+    load(filter).finally(() => {
       if (active) setLoading(false);
     });
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [load, filter]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    load().finally(() => setRefreshing(false));
-  }, [load]);
+    load(filter).finally(() => setRefreshing(false));
+  }, [load, filter]);
 
   const retry = useCallback(() => {
     setLoading(true);
-    load().finally(() => setLoading(false));
-  }, [load]);
+    load(filter).finally(() => setLoading(false));
+  }, [load, filter]);
 
+  function toggleType(type: ConnectorType) {
+    setTypes((prev) => (prev.includes(type) ? prev.filter((x) => x !== type) : [...prev, type]));
+  }
+
+  const hasActiveFilters = availableOnly || openOnly || currentType !== null || types.length > 0;
+  function clearFilters() {
+    setAvailableOnly(false);
+    setOpenOnly(false);
+    setCurrentType(null);
+    setTypes([]);
+  }
+
+  // "Open now" stays client-side: it's derived display state, not a stored field.
   const visible = useMemo(() => {
-    let list = stations;
-    const q = query.trim().toLowerCase();
-    if (q) {
-      list = list.filter(
-        (s) => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q),
-      );
-    }
-    if (filter === 'dc') list = list.filter((s) => s.hasFastCharging);
-    if (filter === 'open') list = list.filter((s) => s.isOpen);
-
+    const list = openOnly ? stations.filter((s) => s.isOpen) : stations;
     const sorted = [...list];
     if (sort === 'nearest') sorted.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
     if (sort === 'cheapest') sorted.sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
     if (sort === 'rating') sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-    if (sort === 'available') sorted.sort((a, b) => b.availableChargers - a.availableChargers);
+    if (sort === 'available') sorted.sort((a, b) => b.availableConnectors - a.availableConnectors);
     return sorted;
-  }, [stations, query, filter, sort]);
+  }, [stations, openOnly, sort]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -136,7 +177,7 @@ export function StationListScreen() {
         }
       />
 
-      {/* Search bar (filter/tune icon opens the sort sheet) */}
+      {/* Search bar */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={colors.textMuted} />
@@ -148,33 +189,56 @@ export function StationListScreen() {
             onChangeText={setQuery}
             returnKeyType="search"
           />
-          <Pressable style={styles.filterIconBtn} hitSlop={6} onPress={() => setSortOpen(true)}>
-            <Ionicons name="options-outline" size={18} color={colors.primary} />
-          </Pressable>
+          {query.length > 0 && (
+            <Pressable hitSlop={8} onPress={() => setQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          )}
         </View>
       </View>
 
-      {/* Filter chips */}
+      {/* Filter chips (a Clear pill leads the row once any filter is on) */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.chipRow}
         style={styles.chipScroll}
       >
-        {FILTERS.map((key) => {
-          const active = filter === key;
-          return (
-            <Pressable
-              key={key}
-              onPress={() => setFilter(key)}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {t(`stationList.filters.${key}`)}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {hasActiveFilters && (
+          <Pressable style={styles.clearChip} onPress={clearFilters} hitSlop={4}>
+            <Ionicons name="close" size={14} color={colors.textInverse} />
+            <Text style={styles.clearChipText}>{t('stationList.clearFilters')}</Text>
+          </Pressable>
+        )}
+        <FilterChip
+          label={t('stationList.filters.available')}
+          active={availableOnly}
+          onPress={() => setAvailableOnly((v) => !v)}
+        />
+        <FilterChip
+          label={t('stationList.filters.open')}
+          active={openOnly}
+          onPress={() => setOpenOnly((v) => !v)}
+        />
+        <FilterChip
+          label={t('stationList.filters.dc')}
+          active={currentType === 'DC'}
+          onPress={() => setCurrentType((v) => (v === 'DC' ? null : 'DC'))}
+        />
+        <FilterChip
+          label={t('stationList.filters.ac')}
+          active={currentType === 'AC'}
+          onPress={() => setCurrentType((v) => (v === 'AC' ? null : 'AC'))}
+        />
+        <View style={styles.chipDivider} />
+        {CONNECTOR_TYPES.map((type) => (
+          <FilterChip
+            key={type}
+            label={t(`stationList.connectorTypes.${type}`)}
+            active={types.includes(type)}
+            onPress={() => toggleType(type)}
+          />
+        ))}
       </ScrollView>
 
       <ScrollView
@@ -197,11 +261,20 @@ export function StationListScreen() {
         ) : (
           <>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
-                <View style={styles.updatedRow}>
-                  <Ionicons name="time-outline" size={13} color={colors.textMuted} />
-                  <Text style={styles.updated}>{t('stationList.updated', { minutes: 2 })}</Text>
+                <View style={styles.sectionTitleBlock}>
+                  <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
+                  {!loading && (
+                    <Text style={styles.resultCount}>
+                      {t('stationList.resultCount', { count: visible.length })}
+                    </Text>
+                  )}
                 </View>
+                {/* Sort is now a visible, labelled control (was a silent icon) */}
+                <Pressable style={styles.sortControl} hitSlop={6} onPress={() => setSortOpen(true)}>
+                  <Ionicons name="swap-vertical" size={15} color={colors.textBody} />
+                  <Text style={styles.sortControlText}>{t(`stationList.sort.${sort}`)}</Text>
+                  <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+                </Pressable>
               </View>
 
               {loading ? (
@@ -217,83 +290,78 @@ export function StationListScreen() {
                 </View>
               ) : (
                 visible.map((station) => {
-                  const full = station.availableChargers === 0;
+                  const full = station.availableConnectors === 0;
+                  const statusColor = full ? colors.error : colors.primary;
                   return (
                     <Pressable
                       key={station.id}
+                      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
                       onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
                     >
-                      <Card style={styles.card}>
-                        <View style={styles.cardTop}>
-                          <View style={styles.thumb}>
-                            <Ionicons name="flash" size={26} color={colors.primaryDark} />
+                      <View style={styles.cardTop}>
+                        <StationThumb size={64} />
+                        <View style={styles.cardBody}>
+                          <View style={styles.nameRow}>
+                            <Text style={styles.stationName} numberOfLines={1}>
+                              {station.name}
+                            </Text>
+                            {station.rating !== undefined && (
+                              <View style={styles.ratingPill}>
+                                <Ionicons name="star" size={12} color={colors.warning} />
+                                <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
+                              </View>
+                            )}
                           </View>
-                          <View style={styles.cardBody}>
-                            <View style={styles.nameRow}>
-                              <Text style={styles.stationName} numberOfLines={1}>
-                                {station.name}
+
+                          <View style={styles.addressRow}>
+                            <Ionicons name="location-outline" size={13} color={colors.textMuted} />
+                            <Text style={styles.address} numberOfLines={1}>
+                              {station.address}
+                            </Text>
+                          </View>
+
+                          <View style={styles.metaRow}>
+                            {station.hasFastCharging && (
+                              <View style={styles.fastBadge}>
+                                <Ionicons name="flash" size={11} color={colors.primaryDark} />
+                                <Text style={styles.fastBadgeText}>{t('stationList.fastCharge')}</Text>
+                              </View>
+                            )}
+                            {station.minRatePerKwh !== undefined && (
+                              <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
+                            )}
+                            {station.distanceKm !== undefined && (
+                              <Text style={styles.meta}>
+                                · {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
                               </Text>
-                              {station.rating !== undefined && (
-                                <View style={styles.ratingPill}>
-                                  <Ionicons name="star" size={12} color={colors.warning} />
-                                  <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
-                                </View>
-                              )}
-                            </View>
-
-                            <View style={styles.addressRow}>
-                              <Ionicons name="location-outline" size={13} color={colors.textMuted} />
-                              <Text style={styles.address} numberOfLines={1}>
-                                {station.address}
-                              </Text>
-                            </View>
-
-                            <View style={styles.metaRow}>
-                              {station.minRatePerKwh !== undefined && (
-                                <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
-                              )}
-                              {station.distanceKm !== undefined && (
-                                <>
-                                  <Text style={styles.metaDot}>·</Text>
-                                  <Ionicons name="navigate-outline" size={12} color={colors.textMuted} />
-                                  <Text style={styles.meta}>
-                                    {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
-                                  </Text>
-                                </>
-                              )}
-                            </View>
-
-                            <StatusBadge
-                              style={styles.availability}
-                              variant={full ? 'error' : 'success'}
-                              dot
-                              label={
-                                full
-                                  ? t('stationList.full')
-                                  : t('stationList.ports', {
-                                      available: station.availableChargers,
-                                      total: station.totalChargers,
-                                    })
-                              }
-                            />
+                            )}
                           </View>
                         </View>
+                      </View>
 
-                        <View style={styles.cardActions}>
-                          <Pressable
-                            style={styles.directionsBtn}
-                            hitSlop={6}
-                            onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}
-                          >
-                            <Ionicons name="navigate-outline" size={16} color={colors.primary} />
-                            <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
-                          </Pressable>
-                          <View style={styles.viewDetail}>
-                            <Text style={styles.viewDetailText}>{t('stationList.viewDetail')}</Text>
-                            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                          </View>
+                      <View style={styles.cardFooter}>
+                        {/* Availability: neutral pill + a colored dot, so status reads
+                            without another block of green filling the card. */}
+                        <View style={styles.availPill}>
+                          <View style={[styles.availDot, { backgroundColor: statusColor }]} />
+                          <Text style={[styles.availText, { color: full ? colors.error : colors.primaryDark }]}>
+                            {full
+                              ? t('stationList.full')
+                              : t('stationList.ports', {
+                                  available: station.availableConnectors,
+                                  total: station.totalConnectors,
+                                })}
+                          </Text>
                         </View>
-                      </Card>
+                        <Pressable
+                          style={styles.directionsBtn}
+                          hitSlop={6}
+                          onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}
+                        >
+                          <Ionicons name="navigate" size={15} color={colors.primary} />
+                          <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
+                        </Pressable>
+                      </View>
                     </Pressable>
                   );
                 })
@@ -375,17 +443,9 @@ const styles = StyleSheet.create({
     height: 48,
   },
   searchInput: { flex: 1, fontSize: fontSizes.body, color: colors.textStrong, padding: 0 },
-  filterIconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
   chipScroll: { flexGrow: 0 },
-  chipRow: { paddingHorizontal: spacing.lg, gap: spacing.sm, paddingBottom: spacing.md },
+  chipRow: { paddingHorizontal: spacing.lg, gap: spacing.sm, paddingBottom: spacing.md, alignItems: 'center' },
   chip: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
@@ -395,8 +455,20 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipDivider: { width: 1, alignSelf: 'stretch', marginVertical: spacing.xs, marginHorizontal: spacing.xs, backgroundColor: colors.border },
   chipText: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textBody },
   chipTextActive: { color: colors.textInverse },
+  // Clear-filters pill (dark, to read as an action rather than another toggle)
+  clearChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.textStrong,
+  },
+  clearChipText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textInverse },
 
   list: { flex: 1 },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
@@ -406,9 +478,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: spacing.xs,
   },
+  sectionTitleBlock: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  updatedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  updated: { fontSize: fontSizes.caption, color: colors.textMuted },
+  resultCount: { fontSize: fontSizes.caption, color: colors.textMuted },
+  // Visible sort control (replaces the silent options icon)
+  sortControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  sortControlText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody },
 
   // Empty / error / notifications states
   stateBox: { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xxl },
@@ -430,19 +515,33 @@ const styles = StyleSheet.create({
   skelLine: { height: 12, borderRadius: radius.sm, marginBottom: spacing.sm },
   skelBadge: { height: 20, width: 110, borderRadius: radius.full, marginTop: spacing.xs },
 
-  card: { gap: spacing.md },
+  // Station card — one surface, soft ambient shadow (modern, flat-ish)
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    gap: spacing.md,
+    shadowColor: colors.textStrong,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  cardPressed: { backgroundColor: colors.surfaceAlt },
   cardTop: { flexDirection: 'row', gap: spacing.md },
   thumb: {
     width: 64,
     height: 64,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardBody: { flex: 1, gap: spacing.xs },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  stationName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
+  stationName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   ratingPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -455,13 +554,22 @@ const styles = StyleSheet.create({
   ratingText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textStrong },
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   address: { flex: 1, fontSize: fontSizes.body, color: colors.textMuted },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap', marginTop: 2 },
+  // Fast-charge badge: neutral pill, emerald only in the bolt glyph
+  fastBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  fastBadgeText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody },
   price: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
-  metaDot: { color: colors.textMuted },
   meta: { fontSize: fontSizes.caption, color: colors.textMuted },
-  availability: { marginTop: spacing.xs },
 
-  cardActions: {
+  cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -469,10 +577,19 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     paddingTop: spacing.md,
   },
-  directionsBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  availPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  availDot: { width: 7, height: 7, borderRadius: radius.full },
+  availText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
+  directionsBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.sm },
   directionsText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
-  viewDetail: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  viewDetailText: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
 
   promo: {
     flexDirection: 'row',

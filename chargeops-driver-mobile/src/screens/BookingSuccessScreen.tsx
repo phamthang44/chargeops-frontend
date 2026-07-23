@@ -95,8 +95,8 @@ export function BookingSuccessScreen() {
           />
           <TxRow
             icon="flash-outline"
-            label={t('bookingSuccess.charger')}
-            value={`${booking.chargerName} (${booking.connectorType})`}
+            label={t('bookingSuccess.connector')}
+            value={`${booking.chargePointName} · ${booking.connectorName} (${booking.connectorType})`}
           />
           <View style={styles.txSplit}>
             <View style={styles.txSplitItem}>

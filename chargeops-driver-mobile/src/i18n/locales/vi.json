@@ -6,7 +6,9 @@
     "loading": "Đang tải…",
     "language": "Ngôn ngữ",
     "back": "Quay lại",
-    "role": "TÀI XẾ"
+    "role": "TÀI XẾ",
+    "cancel": "Hủy",
+    "close": "Đóng"
   },
   "nav": {
     "stationList": "Tìm trạm",
@@ -15,8 +17,8 @@
     "history": "Lịch sử",
     "profile": "Hồ sơ",
     "stationDetail": "Chi tiết trạm",
-    "slotPicker": "Chọn khung giờ",
-    "qrCheckIn": "Quét QR Check-in"
+    "qrCheckIn": "Quét QR Check-in",
+    "timeRangePicker": "Chọn khung giờ"
   },
   "auth": {
     "errors": {
@@ -54,9 +56,9 @@
     },
     "simBooking": {
       "SUCCESS": "Thành công",
-      "SLOT_TAKEN": "Trùng chỗ",
       "NETWORK_ERROR": "Lỗi mạng",
-      "RANDOM": "Ngẫu nhiên"
+      "RANDOM": "Ngẫu nhiên",
+      "RANGE_TAKEN": "Trùng khung giờ"
     }
   },
   "welcome": {
@@ -132,15 +134,14 @@
     "ports": "Còn {{available}}/{{total}} cổng",
     "full": "Hết chỗ",
     "nearby": "Trạm sạc gần bạn",
-    "updated": "Cập nhật {{minutes}} phút trước",
     "eta": "{{minutes}} phút lái xe",
     "directions": "Chỉ đường",
-    "viewDetail": "Xem chi tiết",
     "empty": "Không tìm thấy trạm sạc phù hợp.",
     "filters": {
-      "all": "Tất cả",
-      "dc": "Sạc nhanh (DC)",
-      "open": "Đang mở"
+      "available": "Còn chỗ",
+      "open": "Đang mở",
+      "dc": "Sạc nhanh DC",
+      "ac": "Sạc thường AC"
     },
     "sortTitle": "Sắp xếp",
     "sort": {
@@ -154,7 +155,16 @@
     "notificationsTitle": "Thông báo",
     "notificationsEmpty": "Bạn chưa có thông báo nào.",
     "promoTitle": "Ưu đãi hôm nay",
-    "promoBody": "Giảm 20% phí sạc tại các trạm chọn lọc từ 22h – 6h sáng."
+    "promoBody": "Giảm 20% phí sạc tại các trạm chọn lọc từ 22h – 6h sáng.",
+    "connectorTypes": {
+      "CCS2": "CCS2",
+      "CHADEMO": "CHAdeMO",
+      "TYPE2": "AC Type 2",
+      "GBT": "GB/T"
+    },
+    "fastCharge": "Sạc nhanh",
+    "resultCount": "{{count}} trạm",
+    "clearFilters": "Xóa lọc"
   },
   "map": {
     "title": "Bản đồ",
@@ -169,7 +179,8 @@
       "busy": "Sắp đầy",
       "full": "Hết chỗ",
       "closed": "Đóng cửa"
-    }
+    },
+    "full": "Hết chỗ"
   },
   "bookingCard": {
     "code": "Mã: {{code}}",
@@ -236,10 +247,6 @@
     "refundLine1": "Hoàn 100% nếu hủy trước 60 phút.",
     "refundLine2": "Hoàn 50% nếu hủy trong khoảng 15–60 phút.",
     "refundLine3": "Không hoàn tiền nếu hủy dưới 15 phút hoặc không đến.",
-    "chargerList": "Danh sách bộ sạc",
-    "selectCharger": "Chọn bộ sạc",
-    "selectChargerHint": "Vui lòng chọn bộ sạc để tiếp tục",
-    "chargerCount": "{{available}}/{{total}} đang trống",
     "descriptionTitle": "Mô tả trạm",
     "priceFrom": "Giá từ",
     "locationTitle": "Vị trí",
@@ -254,34 +261,13 @@
     "status": {
       "AVAILABLE": "Sẵn sàng",
       "IN_USE": "Đang sạc",
-      "DISABLED": "Tạm khóa",
-      "MAINTENANCE": "Bảo trì"
-    }
-  },
-  "slotPicker": {
-    "title": "Chọn khung giờ",
-    "cta": "Tiếp tục thanh toán",
-    "selectDate": "Chọn ngày sạc",
-    "monthYear": "Tháng {{month}}, {{year}}",
-    "weekdays": ["CN", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7"],
-    "availableSlots": "Khung giờ trống",
-    "legendAvailable": "Có thể đặt",
-    "legendMine": "Của bạn",
-    "legendBooked": "Đã đặt",
-    "until": "Đến {{time}}",
-    "status": {
-      "AVAILABLE": "Có thể đặt",
-      "OCCUPIED": "Người khác đã đặt",
-      "UNAVAILABLE": "Bảo trì",
-      "MINE": "Lượt đặt của bạn"
+      "OFFLINE": "Ngừng hoạt động"
     },
-    "chargerStatusActive": "Đang hoạt động",
-    "refundTitle": "Chính sách hoàn tiền",
-    "refundBody": "Hoàn 100% nếu hủy trước 60 phút. Hoàn 50% nếu hủy trong vòng 15–60 phút trước giờ bắt đầu.",
-    "selectHint": "Vui lòng chọn một khung giờ để tiếp tục",
-    "selectedCount": "Đã chọn {{count}} khung giờ",
-    "total": "Tổng cộng",
-    "empty": "Không có khung giờ nào cho ngày này."
+    "selectConnector": "Chọn cổng sạc",
+    "selectConnectorHint": "Vui lòng chọn cổng sạc để tiếp tục",
+    "connectorCount": "{{available}}/{{total}} cổng đang trống",
+    "maxPower": "Tối đa {{power}} kW",
+    "refundLine0": "Hủy trong 5 phút sau khi đặt: hoàn 100%"
   },
   "bookingStatus": {
     "PENDING": "Chờ xác nhận",
@@ -290,7 +276,10 @@
     "COMPLETED": "Hoàn thành",
     "CANCELLED": "Đã hủy",
     "NO_SHOW": "Không đến",
-    "UPCOMING": "Sắp tới"
+    "UPCOMING": "Sắp tới",
+    "CHARGING": "Đang sạc",
+    "EXPIRED": "Hết hạn giữ chỗ",
+    "PAYMENT_TIMEOUT": "Quá hạn thanh toán"
   },
   "payment": {
     "title": "Phương thức thanh toán",
@@ -307,10 +296,7 @@
     "detailTitle": "Chi tiết đặt chỗ",
     "date": "NGÀY",
     "time": "THỜI GIAN",
-    "charger": "THIẾT BỊ SẠC",
-    "chargerValue": "{{name}} - {{power}}kW (Cổng {{connector}})",
     "invoiceTitle": "Chi tiết hóa đơn",
-    "chargingFee": "Phí sạc ({{count}} giờ)",
     "serviceFee": "Phí dịch vụ",
     "total": "Tổng cộng",
     "refundTitle": "Chính sách hoàn tiền",
@@ -319,7 +305,15 @@
     "refund3": "Không hỗ trợ hoàn tiền nếu hủy dưới 15 phút.",
     "totalToPay": "TỔNG THANH TOÁN",
     "secure": "Thanh toán bảo mật",
-    "cta": "Thanh toán và đặt chỗ"
+    "cta": "Thanh toán và đặt chỗ",
+    "connector": "Cổng sạc",
+    "connectorValue": "{{chargePoint}} · {{name}} — {{connector}} {{power}} kW",
+    "fastCharge": "Sạc nhanh DC",
+    "lineDetail": "~{{kwh}} kWh × {{rate}}/kWh",
+    "refundGrace": "Hủy trong 5 phút sau khi đặt: hoàn 100%",
+    "overlapTitle": "Bạn đã có lượt đặt trùng giờ",
+    "overlapBody": "Bạn đang có một lượt đặt {{start}}–{{end}} tại {{station}}. Bạn vẫn muốn đặt thêm khung giờ này?",
+    "overlapConfirm": "Vẫn đặt"
   },
   "paymentProcessing": {
     "title": "Đang xử lý thanh toán",
@@ -345,9 +339,9 @@
   },
   "booking": {
     "errors": {
-      "SLOT_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.",
       "NETWORK_ERROR": "Không có kết nối mạng. Vui lòng kiểm tra và thử lại.",
-      "GENERIC": "Không thể tạo lượt đặt chỗ. Vui lòng thử lại."
+      "GENERIC": "Không thể tạo lượt đặt chỗ. Vui lòng thử lại.",
+      "RANGE_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác."
     }
   },
   "bookingSuccess": {
@@ -356,7 +350,6 @@
     "txTitle": "CHI TIẾT GIAO DỊCH",
     "paid": "Đã thanh toán",
     "station": "Trạm sạc",
-    "charger": "Thiết bị",
     "time": "Thời gian",
     "total": "Tổng cộng",
     "checkInTitle": "Hướng dẫn Check-in",
@@ -365,7 +358,8 @@
     "step3": "Kết nối súng sạc và bắt đầu phiên sạc từ ứng dụng.",
     "viewDetail": "Xem chi tiết đặt chỗ",
     "home": "Quay lại Trang chủ",
-    "refundNote": "Áp dụng chính sách hoàn tiền 100% nếu hủy trước 30 phút."
+    "refundNote": "Áp dụng chính sách hoàn tiền 100% nếu hủy trước 30 phút.",
+    "connector": "Cổng sạc"
   },
   "bookingDetail": {
     "title": "Chi tiết đặt chỗ",
@@ -374,12 +368,9 @@
     "countdownTitle": "Thời gian chờ Check-in còn lại",
     "countdownNote": "Vui lòng có mặt đúng giờ và quét mã QR trên trụ sạc để bắt đầu phiên. Đặt chỗ sẽ tự động hủy nếu bạn trễ quá 15 phút.",
     "stationTitle": "Thông tin trạm sạc",
-    "charger": "TRỤ SẠC",
     "connector": "LOẠI ĐẦU SẠC",
     "date": "NGÀY SẠC",
-    "slot": "KHUNG GIỜ",
     "paymentTitle": "Chi tiết thanh toán",
-    "chargingFee": "Phí sạc dự kiến ({{count}}h)",
     "serviceFee": "Phí dịch vụ",
     "total": "Tổng cộng",
     "refundTitle": "Chính sách hoàn tiền",
@@ -390,7 +381,13 @@
     "completedNote": "Lượt đặt chỗ đã kết thúc.",
     "checkedInNote": "Bạn đã check-in lúc {{time}}.",
     "refundedNote": "Đã hủy. Hoàn {{amount}} về Ví ChargeOps.",
-    "noRefundNote": "Lượt đặt chỗ đã hủy, không được hoàn tiền."
+    "noRefundNote": "Lượt đặt chỗ đã hủy, không được hoàn tiền.",
+    "chargePoint": "Trụ sạc",
+    "timeRange": "Khung giờ",
+    "chargerId": "Mã cổng sạc (quét QR)",
+    "holdNote": "Chỗ được giữ trong {{time}} nữa. Hoàn tất thanh toán trước khi hết giờ, nếu không khung giờ sẽ được mở lại.",
+    "graceHint": "Hủy miễn phí đến {{time}}",
+    "refundNow": "Hủy bây giờ được hoàn"
   },
   "cancelBooking": {
     "title": "Xác nhận hủy đặt chỗ",
@@ -408,7 +405,9 @@
     "timeLeft": "Thời gian còn lại:",
     "confirm": "Xác nhận hủy",
     "dismiss": "Giữ lại đặt chỗ",
-    "warning": "Hành động hủy quá nhiều lần có thể ảnh hưởng đến điểm uy tín của bạn trên ChargeOps."
+    "warning": "Hành động hủy quá nhiều lần có thể ảnh hưởng đến điểm uy tín của bạn trên ChargeOps.",
+    "policyGrace": "Bạn đang trong 5 phút đầu sau khi đặt — hủy ngay bây giờ được hoàn lại toàn bộ, bất kể còn bao lâu đến giờ sạc.",
+    "graceLeft": "Còn {{time}} trong thời gian hoàn tiền toàn phần"
   },
   "qrCheckIn": {
     "title": "Quét QR Check-in",
@@ -419,14 +418,30 @@
     "permissionBody": "ChargeOps cần dùng camera để quét mã QR trên trụ sạc khi check-in.",
     "allow": "Cho phép truy cập camera",
     "openSettings": "Mở Cài đặt",
-    "successTitle": "Check-in thành công!",
     "chargerCode": "Mã định danh bộ sạc: {{code}}",
     "station": "Trạm sạc",
     "connector": "Cổng sạc",
     "time": "Thời gian đặt",
-    "startCharging": "Bắt đầu sạc ngay",
     "autoStop": "Sạc sẽ tự động ngắt khi đầy pin",
-    "close": "Đóng"
+    "close": "Đóng",
+    "confirmTitle": "Xác nhận check-in",
+    "confirmCta": "Xác nhận & bắt đầu sạc",
+    "scannedCode": "Mã vừa quét: {{code}}",
+    "rescan": "Quét lại",
+    "errorTitles": {
+      "UNKNOWN_QR": "Không nhận diện được mã QR",
+      "NO_BOOKING": "Không tìm thấy lượt đặt",
+      "WRONG_CONNECTOR": "Sai cổng sạc",
+      "TOO_EARLY": "Chưa đến giờ check-in",
+      "WINDOW_EXPIRED": "Đã quá hạn check-in"
+    },
+    "errors": {
+      "UNKNOWN_QR": "Mã QR này không thuộc hệ thống ChargeOps. Hãy kiểm tra xem bạn có đang quét đúng tem trên cổng sạc không.",
+      "NO_BOOKING": "Bạn không có lượt đặt nào đang hiệu lực trên cổng sạc này vào lúc này.",
+      "WRONG_CONNECTOR": "Lượt đặt của bạn ở {{chargePoint}} · {{connector}} ({{zone}}). Hãy quét mã QR trên đúng cổng sạc đó.",
+      "TOO_EARLY": "Check-in mở lúc {{time}} — còn {{minutes}} phút nữa. Bạn chưa thể quét trước giờ bắt đầu.",
+      "WINDOW_EXPIRED": "Cửa sổ check-in 15 phút đã đóng, lượt đặt được tự động hủy và không hoàn tiền."
+    }
   },
   "chargingSession": {
     "headerTitle": "Đang sạc - {{station}}",
@@ -454,5 +469,47 @@
     "autoNote": "Hệ thống sẽ tự động ngắt dòng điện khi đạt mức 100% hoặc khi hết khung giờ đã đặt chỗ.",
     "finish": "Kết thúc phiên sạc",
     "finishFull": "Hoàn tất phiên sạc"
+  },
+  "timeRangePicker": {
+    "weekdays": [
+      "CN",
+      "Th 2",
+      "Th 3",
+      "Th 4",
+      "Th 5",
+      "Th 6",
+      "Th 7"
+    ],
+    "title": "Chọn khung giờ",
+    "cta": "Tiếp tục",
+    "selectDate": "Chọn ngày",
+    "monthYear": "Tháng {{month}}/{{year}}",
+    "availability": "Khung giờ còn trống",
+    "timelineLabel": "Dòng thời gian trong ngày — chạm để chọn giờ bắt đầu",
+    "legendSelected": "Bạn đang chọn",
+    "legendBooked": "Đã có người đặt",
+    "legendMine": "Lượt đặt của bạn",
+    "startTime": "Giờ bắt đầu",
+    "duration": "Thời lượng sạc",
+    "durationMin": "{{minutes}} phút",
+    "durationHour": "{{hours}} giờ",
+    "durationHourMin": "{{hours}} giờ {{minutes}} phút",
+    "durationCapped": "Tối đa {{duration}} — sau đó đã có người đặt hoặc trạm đóng cửa.",
+    "openUntil": "Mở đến {{time}}",
+    "priceTitle": "Tạm tính",
+    "band": {
+      "PEAK": "Giờ cao điểm",
+      "STANDARD": "Giờ thường",
+      "OFFPEAK": "Giờ thấp điểm"
+    },
+    "perKwh": "{{rate}}/kWh",
+    "estEnergy": "Ước tính ~{{kwh}} kWh",
+    "serviceFee": "Phí dịch vụ",
+    "total": "Tổng cộng",
+    "refundTitle": "Chính sách hủy",
+    "refundBody": "Hủy trong 5 phút sau khi đặt được hoàn 100%. Sau đó: hoàn 100% nếu hủy trước 60 phút, 50% nếu hủy trước 15–60 phút, và không hoàn nếu hủy sát giờ hoặc không đến.",
+    "selectHint": "Chọn giờ bắt đầu và thời lượng",
+    "selectedWindow": "Khung giờ đã chọn",
+    "empty": "Không còn khung giờ trống trong ngày này. Hãy thử ngày khác hoặc cổng sạc khác."
   }
 }

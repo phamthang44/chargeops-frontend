@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { cancelBooking, computeRefund } from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
-import { formatCountdown, formatVnd } from '@/utils/format';
+import { formatCountdown, formatMmSs, formatVnd } from '@/utils/format';
 import { BottomSheet } from './BottomSheet';
 
 interface CancelBookingSheetProps {
@@ -17,8 +17,14 @@ interface CancelBookingSheetProps {
   onConfirmed: (booking: Booking) => void;
 }
 
-// Map the refund tier to the policy-banner body copy.
-const TIER_KEY = { FULL: 'policyFull', PARTIAL: 'policyPartial', NONE: 'policyNone' } as const;
+// Map the refund tier to the policy-banner body copy. GRACE is the FR05
+// reconsideration window — a full refund that overrides the time-based tiers.
+const TIER_KEY = {
+  GRACE: 'policyGrace',
+  FULL: 'policyFull',
+  PARTIAL: 'policyPartial',
+  NONE: 'policyNone',
+} as const;
 
 /**
  * "Xác nhận hủy đặt chỗ" — refund-aware cancellation confirmation sheet
@@ -56,15 +62,24 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
     <BottomSheet visible={visible} onClose={onClose} title={t('cancelBooking.title')}>
       <Text style={styles.subtitle}>{t('cancelBooking.subtitle')}</Text>
 
-      {/* Current-policy banner */}
-      <View style={styles.policyCard}>
+      {/* Current-policy banner — green while the grace window still applies */}
+      <View style={[styles.policyCard, refund.tier === 'GRACE' && styles.policyCardGrace]}>
         <View style={styles.policyHeader}>
-          <Ionicons name="alert-circle-outline" size={18} color={colors.error} />
-          <Text style={styles.policyTitle}>
+          <Ionicons
+            name={refund.tier === 'GRACE' ? 'arrow-undo-outline' : 'alert-circle-outline'}
+            size={18}
+            color={refund.tier === 'GRACE' ? colors.primaryDark : colors.error}
+          />
+          <Text style={[styles.policyTitle, refund.tier === 'GRACE' && styles.policyTitleGrace]}>
             {t('cancelBooking.policyTitle', { percent: refund.percent })}
           </Text>
         </View>
         <Text style={styles.policyBody}>{t(`cancelBooking.${TIER_KEY[refund.tier]}`)}</Text>
+        {refund.tier === 'GRACE' && (
+          <Text style={styles.policyTimer}>
+            {t('cancelBooking.graceLeft', { time: formatMmSs(refund.graceRemainingMs) })}
+          </Text>
+        )}
       </View>
 
       {/* Refund summary */}
@@ -148,9 +163,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
   },
+  policyCardGrace: { backgroundColor: colors.primarySoft },
   policyHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   policyTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.error },
+  policyTitleGrace: { color: colors.primaryDark },
   policyBody: { fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
+  policyTimer: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.primaryDark },
 
   // Summary
   summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },

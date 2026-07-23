@@ -1,7 +1,5 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 
-import type { BookingSlotInput } from '@/types';
-
 /**
  * Bottom tab routes (5 tabs, matching the design):
  * Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ.
@@ -19,7 +17,7 @@ export type BottomTabParamList = {
  * (see RootNavigator): the auth stack when signed out, the app stack when signed in.
  *
  * Auth flow: Welcome -> Login -> Register -> OtpVerification -> (sign in) -> Tabs.
- * Booking flow: StationList/Map -> StationDetail -> SlotPicker ->
+ * Booking flow: StationList/Map -> StationDetail -> TimeRangePicker ->
  *   BookingConfirmation -> PaymentProcessing -> BookingSuccess -> BookingDetail
  *   -> QRCheckIn -> ChargingSession.
  */
@@ -32,9 +30,15 @@ export type RootStackParamList = {
   // App stack (signed in)
   Tabs: NavigatorScreenParams<BottomTabParamList> | undefined;
   StationDetail: { stationId: string };
-  SlotPicker: { stationId: string; chargerId?: string };
-  // Review the chosen slots + pick a payment method, then create the booking.
-  BookingConfirmation: { stationId: string; chargerId: string; slots: BookingSlotInput[] };
+  // Pick a date, a start time and a duration on one Connector (FR05/FR11).
+  TimeRangePicker: { stationId: string; connectorId?: string };
+  // Review the chosen window + pick a payment method, then create the booking.
+  BookingConfirmation: {
+    stationId: string;
+    connectorId: string;
+    startAt: string;
+    durationMin: number;
+  };
   // "Waiting for payment" — booking is PENDING until the gateway confirms.
   PaymentProcessing: { bookingId: string };
   // Post-payment confirmation screen.

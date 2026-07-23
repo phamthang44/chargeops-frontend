@@ -15,7 +15,7 @@ export type PaymentSimOutcome = 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'TIMEOUT' |
 export type PaymentResultStatus = Exclude<PaymentSimOutcome, 'RANDOM'>;
 
 /** What `createBooking` should do. RANDOM picks a weighted outcome. */
-export type BookingSimOutcome = 'SUCCESS' | 'SLOT_TAKEN' | 'NETWORK_ERROR' | 'RANDOM';
+export type BookingSimOutcome = 'SUCCESS' | 'RANGE_TAKEN' | 'NETWORK_ERROR' | 'RANDOM';
 /** Concrete booking-creation results (RANDOM resolved away). */
 export type BookingResultStatus = Exclude<BookingSimOutcome, 'RANDOM'>;
 
@@ -56,7 +56,7 @@ const BOOKING_POOL: readonly BookingResultStatus[] = [
   'SUCCESS',
   'SUCCESS',
   'SUCCESS',
-  'SLOT_TAKEN',
+  'RANGE_TAKEN',
   'NETWORK_ERROR',
 ];
 

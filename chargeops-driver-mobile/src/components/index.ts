@@ -1,6 +1,7 @@
 /** Reusable UI components barrel. Usage: import { AppButton, Card } from '@/components'; */
 export { AppButton } from './AppButton';
 export { AppHeader } from './AppHeader';
+export { AvailabilityTimeline } from './AvailabilityTimeline';
 export { BookingCard } from './BookingCard';
 export { BottomSheet } from './BottomSheet';
 export { BrandMark, Logo } from './brand/Logo';
@@ -9,6 +10,7 @@ export { Card } from './Card';
 export { EmptyState, type EmptyVariant } from './illustrations/EmptyState';
 export { FeatureArt, type FeatureName } from './illustrations/FeatureArt';
 export { StationPin, type PinStatus } from './StationPin';
+export { StationThumb } from './StationThumb';
 export { Checkbox } from './Checkbox';
 export { GlassButton } from './GlassButton';
 export { GlassSurface } from './GlassSurface';

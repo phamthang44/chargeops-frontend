@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader, StationPin, type PinStatus } from '@/components';
+import { AppHeader, StationPin, StationThumb, type PinStatus } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getNearbyStations } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -41,9 +41,44 @@ const SNAP = CARD_W + spacing.md;
 /** Derive a pin color/status from a station's live availability. */
 function pinStatus(s: Station): PinStatus {
   if (s.isOpen === false) return 'closed';
-  if (s.availableChargers <= 0) return 'full';
-  if (s.availableChargers <= 1) return 'busy';
+  if (s.availableConnectors <= 0) return 'full';
+  if (s.availableConnectors <= 1) return 'busy';
   return 'available';
+}
+
+/** Decorative city blocks — grey "buildings" on a white ground. */
+const MAP_BLOCKS: { top: DimensionValue; left: DimensionValue; w: number; h: number }[] = [
+  { top: '9%', left: '7%', w: 74, h: 52 },
+  { top: '12%', left: '46%', w: 58, h: 66 },
+  { top: '8%', left: '74%', w: 66, h: 44 },
+  { top: '44%', left: '10%', w: 60, h: 72 },
+  { top: '52%', left: '52%', w: 84, h: 58 },
+  { top: '46%', left: '80%', w: 44, h: 80 },
+  { top: '76%', left: '20%', w: 70, h: 46 },
+  { top: '78%', left: '58%', w: 56, h: 50 },
+];
+
+/**
+ * Stylized placeholder for the interactive map (real Google Maps is out of
+ * scope). Abstract grey blocks + a couple of streets + one green "park" read as
+ * a minimalist map rather than graph paper — swapped for a real <MapView> later
+ * without touching the pins/carousel logic layered above it.
+ */
+function FauxMap() {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {/* Streets */}
+      <View style={[styles.street, styles.streetH, { top: '37%' }]} />
+      <View style={[styles.street, styles.streetH, { top: '70%' }]} />
+      <View style={[styles.street, styles.streetV, { left: '36%' }]} />
+      {/* Park (subtle brand hint) */}
+      <View style={[styles.park, { top: '30%', left: '60%' }]} />
+      {/* Blocks */}
+      {MAP_BLOCKS.map((b, i) => (
+        <View key={i} style={[styles.block, { top: b.top, left: b.left, width: b.w, height: b.h }]} />
+      ))}
+    </View>
+  );
 }
 
 /**
@@ -102,14 +137,7 @@ export function MapScreen() {
       <View style={styles.mapWrap}>
         {/* Faux map canvas */}
         <View style={styles.map}>
-          <View style={styles.grid} pointerEvents="none">
-            {[0, 1, 2, 3].map((i) => (
-              <View key={`h${i}`} style={[styles.gridLineH, { top: `${(i + 1) * 20}%` }]} />
-            ))}
-            {[0, 1, 2, 3].map((i) => (
-              <View key={`v${i}`} style={[styles.gridLineV, { left: `${(i + 1) * 20}%` }]} />
-            ))}
-          </View>
+          <FauxMap />
 
           {/* Current-location dot */}
           <View style={styles.meDot} pointerEvents="none">
@@ -171,49 +199,57 @@ export function MapScreen() {
             contentContainerStyle={styles.carousel}
             style={styles.carouselWrap}
           >
-            {visible.map((s, i) => (
-              <Pressable
-                key={s.id}
-                style={[styles.card, { width: CARD_W }, i === selected && styles.cardActive]}
-                onPress={() => selectStation(i)}
-              >
-                <View style={styles.cardHead}>
-                  <Text style={styles.cardName} numberOfLines={1}>
-                    {s.name}
-                  </Text>
-                  {!!s.rating && (
-                    <View style={styles.rating}>
-                      <Ionicons name="star" size={13} color={colors.warning} />
-                      <Text style={styles.ratingText}>{s.rating.toFixed(1)}</Text>
+            {visible.map((s, i) => {
+              const full = s.availableConnectors === 0;
+              return (
+                <Pressable
+                  key={s.id}
+                  style={[styles.card, { width: CARD_W }, i === selected && styles.cardActive]}
+                  onPress={() => selectStation(i)}
+                >
+                  <View style={styles.cardHead}>
+                    <StationThumb size={44} />
+                    <View style={styles.cardHeadBody}>
+                      <View style={styles.cardTitleRow}>
+                        <Text style={styles.cardName} numberOfLines={1}>
+                          {s.name}
+                        </Text>
+                        {!!s.rating && (
+                          <View style={styles.rating}>
+                            <Ionicons name="star" size={12} color={colors.warning} />
+                            <Text style={styles.ratingText}>{s.rating.toFixed(1)}</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.cardAddr} numberOfLines={1}>
+                        {s.address}
+                      </Text>
                     </View>
-                  )}
-                </View>
-                <Text style={styles.cardAddr} numberOfLines={1}>
-                  {s.address}
-                </Text>
-                <View style={styles.cardMetaRow}>
-                  <View style={styles.metaPill}>
-                    <Ionicons name="flash" size={13} color={colors.primary} />
-                    <Text style={styles.metaPillText}>
-                      {t('map.portsFree', { count: s.availableChargers })}
-                    </Text>
                   </View>
-                  {s.distanceKm != null && (
-                    <View style={styles.metaPill}>
-                      <Ionicons name="navigate" size={13} color={colors.textMuted} />
-                      <Text style={styles.metaPillText}>{s.distanceKm.toFixed(1)} km</Text>
+
+                  <View style={styles.cardMetaRow}>
+                    <View style={styles.availPill}>
+                      <View
+                        style={[styles.availDot, { backgroundColor: full ? colors.error : colors.primary }]}
+                      />
+                      <Text style={[styles.availText, { color: full ? colors.error : colors.primaryDark }]}>
+                        {full ? t('map.full') : t('map.portsFree', { count: s.availableConnectors })}
+                      </Text>
                     </View>
-                  )}
-                  <Pressable
-                    style={styles.detailBtn}
-                    onPress={() => navigation.navigate('StationDetail', { stationId: s.id })}
-                  >
-                    <Text style={styles.detailBtnText}>{t('map.viewDetail')}</Text>
-                    <Ionicons name="chevron-forward" size={14} color={colors.textInverse} />
-                  </Pressable>
-                </View>
-              </Pressable>
-            ))}
+                    {s.distanceKm != null && (
+                      <Text style={styles.cardDistance}>{s.distanceKm.toFixed(1)} km</Text>
+                    )}
+                    <Pressable
+                      style={styles.detailBtn}
+                      onPress={() => navigation.navigate('StationDetail', { stationId: s.id })}
+                    >
+                      <Text style={styles.detailBtnText}>{t('map.viewDetail')}</Text>
+                      <Ionicons name="chevron-forward" size={14} color={colors.textInverse} />
+                    </Pressable>
+                  </View>
+                </Pressable>
+              );
+            })}
           </ScrollView>
         )}
       </View>
@@ -225,10 +261,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   mapWrap: { flex: 1, position: 'relative' },
 
-  map: { flex: 1, backgroundColor: colors.surfaceAlt, overflow: 'hidden' },
-  grid: { ...StyleSheet.absoluteFillObject },
-  gridLineH: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: colors.border, opacity: 0.6 },
-  gridLineV: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: colors.border, opacity: 0.6 },
+  map: { flex: 1, backgroundColor: colors.surface, overflow: 'hidden' },
+  // Stylized map decor
+  block: { position: 'absolute', borderRadius: radius.sm, backgroundColor: colors.surfaceAlt },
+  street: { position: 'absolute', backgroundColor: colors.surfaceAlt, opacity: 0.7 },
+  streetH: { left: 0, right: 0, height: 10 },
+  streetV: { top: 0, bottom: 0, width: 10 },
+  park: { position: 'absolute', width: 78, height: 62, borderRadius: radius.md, backgroundColor: colors.primarySoft, opacity: 0.7 },
   pin: { position: 'absolute', transform: [{ translateX: -20 }, { translateY: -40 }] },
 
   // Current-location dot
@@ -292,13 +331,15 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardActive: { borderColor: colors.primary, borderWidth: 2 },
-  cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  cardHeadBody: { flex: 1, gap: 2 },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   cardName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   rating: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   ratingText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody },
   cardAddr: { fontSize: fontSizes.caption, color: colors.textMuted, lineHeight: lineHeights.caption },
-  cardMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
-  metaPill: {
+  cardMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
+  availPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
@@ -307,7 +348,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
-  metaPillText: { fontSize: fontSizes.caption, color: colors.textBody },
+  availDot: { width: 7, height: 7, borderRadius: radius.full },
+  availText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
+  cardDistance: { fontSize: fontSizes.caption, color: colors.textMuted },
   detailBtn: {
     flexDirection: 'row',
     alignItems: 'center',

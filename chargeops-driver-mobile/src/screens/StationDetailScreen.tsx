@@ -19,9 +19,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton, GlassButton, GlassSurface, StarRating, StatusBadge, type BadgeVariant } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { getChargersByStation, getReviewsByStation, getStationById } from '@/services/stationService';
+import {
+  getChargePointsByStation,
+  getConnectorsByStation,
+  getReviewsByStation,
+  getStationById,
+} from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { Amenity, Charger, ChargerStatus, Review, Station } from '@/types';
+import type { Amenity, ConnectorRuntimeStatus, Review, Station } from '@/types';
+import { groupByChargePoint, type ChargePointGroup } from '@/utils/connectors';
 import { formatDate, formatRate } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'StationDetail'>;
@@ -35,11 +41,10 @@ const AMENITY_ICON: Record<Amenity, keyof typeof Ionicons.glyphMap> = {
   restroom: 'sparkles-outline',
 };
 
-const STATUS_VARIANT: Record<ChargerStatus, BadgeVariant> = {
+const STATUS_VARIANT: Record<ConnectorRuntimeStatus, BadgeVariant> = {
   AVAILABLE: 'success',
   IN_USE: 'info',
-  DISABLED: 'neutral',
-  MAINTENANCE: 'warning',
+  OFFLINE: 'neutral',
 };
 
 // Decorative gallery slides (real photo gallery comes later).
@@ -61,27 +66,33 @@ export function StationDetailScreen() {
   const { isFavorite, toggleFavorite } = usePreferences();
 
   const [station, setStation] = useState<Station | null>(null);
-  const [chargers, setChargers] = useState<Charger[]>([]);
+  const [groups, setGroups] = useState<ChargePointGroup[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [slide, setSlide] = useState(0);
-  const [selectedChargerId, setSelectedChargerId] = useState<string | null>(null);
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     Promise.all([
       getStationById(params.stationId),
-      getChargersByStation(params.stationId),
+      getChargePointsByStation(params.stationId),
+      getConnectorsByStation(params.stationId),
       getReviewsByStation(params.stationId),
-    ]).then(([s, c, r]) => {
-      if (active) {
-        setStation(s);
-        setChargers(c);
-        setReviews(r);
-        // Pre-select the first available charger so the CTA is ready.
-        setSelectedChargerId(c.find((ch) => ch.status === 'AVAILABLE')?.id ?? null);
-        setLoading(false);
-      }
+    ]).then(([s, points, connectors, r]) => {
+      if (!active) return;
+      // FR04: connectors are shown grouped by the Charge Point they sit on, so
+      // the zone_label tells the driver which device to walk to.
+      const grouped = groupByChargePoint(points, connectors);
+      setStation(s);
+      setGroups(grouped);
+      setReviews(r);
+      // Pre-select the first bookable port so the CTA is ready.
+      const firstFree = grouped
+        .flatMap((g) => g.connectors)
+        .find((c) => c.effectiveStatus === 'AVAILABLE');
+      setSelectedConnectorId(firstFree?.id ?? null);
+      setLoading(false);
     });
     return () => {
       active = false;
@@ -119,14 +130,14 @@ export function StationDetailScreen() {
     );
   }
 
-  const unavailable = !station.isOpen || station.availableChargers === 0;
-  const canBook = !unavailable && !!selectedChargerId;
+  const unavailable = !station.isOpen || station.availableConnectors === 0;
+  const canBook = !unavailable && !!selectedConnectorId;
   const gateHint = !station.isOpen
     ? t('stationDetail.closedHint')
-    : station.availableChargers === 0
+    : station.availableConnectors === 0
       ? t('stationDetail.fullHint')
-      : !selectedChargerId
-        ? t('stationDetail.selectChargerHint')
+      : !selectedConnectorId
+        ? t('stationDetail.selectConnectorHint')
         : null;
 
   return (
@@ -208,62 +219,90 @@ export function StationDetailScreen() {
             <Ionicons name="shield-checkmark" size={20} color={colors.primaryDark} />
             <View style={styles.refundBody}>
               <Text style={styles.refundTitle}>{t('stationDetail.refundTitle')}</Text>
+              {/* The 5-minute reconsideration window comes first: it overrides
+                  the time-based tiers below it (FR05 / FR08). */}
+              <Text style={styles.refundLine}>• {t('stationDetail.refundLine0')}</Text>
               <Text style={styles.refundLine}>• {t('stationDetail.refundLine1')}</Text>
               <Text style={styles.refundLine}>• {t('stationDetail.refundLine2')}</Text>
               <Text style={styles.refundLine}>• {t('stationDetail.refundLine3')}</Text>
             </View>
           </View>
 
-          {/* Charger selection */}
+          {/* Connector selection, grouped by Charge Point (FR04) */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('stationDetail.selectCharger')}</Text>
+            <Text style={styles.sectionTitle}>{t('stationDetail.selectConnector')}</Text>
             <Text style={styles.sectionMeta}>
-              {t('stationDetail.chargerCount', {
-                available: station.availableChargers,
-                total: station.totalChargers,
+              {t('stationDetail.connectorCount', {
+                available: station.availableConnectors,
+                total: station.totalConnectors,
               })}
             </Text>
           </View>
-          <View style={styles.chargerList}>
-            {chargers.map((c) => {
-              const selectable = c.status === 'AVAILABLE';
-              const isSel = selectedChargerId === c.id;
-              return (
-                <Pressable
-                  key={c.id}
-                  disabled={!selectable}
-                  onPress={() => setSelectedChargerId(c.id)}
-                  style={[
-                    styles.chargerRow,
-                    isSel && styles.chargerRowSelected,
-                    !selectable && styles.chargerRowDisabled,
-                  ]}
-                >
-                  <View style={styles.chargerIcon}>
-                    <Ionicons name="flash" size={22} color={colors.textMuted} />
+          <View style={styles.groupList}>
+            {groups.map(({ chargePoint, connectors }) => (
+              <View key={chargePoint.id} style={styles.group}>
+                {/* The device: what to look for in the car park */}
+                <View style={styles.groupHeader}>
+                  <View style={styles.groupIcon}>
+                    <Ionicons name="hardware-chip-outline" size={18} color={colors.primaryDark} />
                   </View>
-                  <View style={styles.chargerBody}>
-                    <Text style={styles.chargerName}>{c.name}</Text>
-                    <Text style={styles.chargerMeta}>
-                      {c.connectorType} · {c.powerKw} kW
-                    </Text>
-                  </View>
-                  <View style={styles.chargerRight}>
-                    <StatusBadge variant={STATUS_VARIANT[c.status]} label={t(`stationDetail.status.${c.status}`)} />
-                    {c.ratePerKwh !== undefined && (
-                      <Text style={styles.chargerRate}>{formatRate(c.ratePerKwh)}</Text>
+                  <View style={styles.flex1}>
+                    <Text style={styles.groupName}>{chargePoint.name}</Text>
+                    {chargePoint.zoneLabel && (
+                      <View style={styles.zoneRow}>
+                        <Ionicons name="navigate-outline" size={12} color={colors.textMuted} />
+                        <Text style={styles.zoneLabel}>{chargePoint.zoneLabel}</Text>
+                      </View>
                     )}
                   </View>
-                  {selectable && (
-                    <Ionicons
-                      name={isSel ? 'checkmark-circle' : 'ellipse-outline'}
-                      size={22}
-                      color={isSel ? colors.primary : colors.border}
-                    />
-                  )}
-                </Pressable>
-              );
-            })}
+                  <Text style={styles.groupMeta}>
+                    {t('stationDetail.maxPower', { power: chargePoint.maxPowerKw })}
+                  </Text>
+                </View>
+
+                {/* Its bookable ports */}
+                {connectors.map((c) => {
+                  const selectable = c.effectiveStatus === 'AVAILABLE';
+                  const isSel = selectedConnectorId === c.id;
+                  return (
+                    <Pressable
+                      key={c.id}
+                      disabled={!selectable}
+                      onPress={() => setSelectedConnectorId(c.id)}
+                      style={[
+                        styles.connectorRow,
+                        isSel && styles.connectorRowSelected,
+                        !selectable && styles.connectorRowDisabled,
+                      ]}
+                    >
+                      <View style={styles.connectorIcon}>
+                        <Ionicons name="flash" size={20} color={colors.textMuted} />
+                      </View>
+                      <View style={styles.connectorBody}>
+                        <Text style={styles.connectorName}>{c.name}</Text>
+                        <Text style={styles.connectorMeta}>
+                          {c.connectorType} · {c.powerKw} kW · {c.currentType}
+                        </Text>
+                      </View>
+                      <View style={styles.connectorRight}>
+                        <StatusBadge
+                          variant={STATUS_VARIANT[c.effectiveStatus]}
+                          label={t(`stationDetail.status.${c.effectiveStatus}`)}
+                        />
+                        <Text style={styles.connectorRate}>{formatRate(c.ratePerKwh)}</Text>
+                      </View>
+                      {selectable && (
+                        <Ionicons
+                          name={isSel ? 'checkmark-circle' : 'ellipse-outline'}
+                          size={22}
+                          color={isSel ? colors.primary : colors.border}
+                        />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
           </View>
 
           {/* Location / map snippet */}
@@ -352,9 +391,9 @@ export function StationDetailScreen() {
             label={t('stationDetail.cta')}
             disabled={!canBook}
             onPress={() =>
-              navigation.navigate('SlotPicker', {
+              navigation.navigate('TimeRangePicker', {
                 stationId: params.stationId,
-                chargerId: selectedChargerId ?? undefined,
+                connectorId: selectedConnectorId ?? undefined,
               })
             }
           />
@@ -432,32 +471,61 @@ const styles = StyleSheet.create({
   sectionMeta: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
   viewAll: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
 
-  chargerList: { gap: spacing.sm, marginTop: -spacing.sm },
-  chargerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
+  // Charge Point groups, each holding its connectors
+  groupList: { gap: spacing.md, marginTop: -spacing.sm },
+  group: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
   },
-  chargerRowSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  chargerRowDisabled: { opacity: 0.6 },
-  chargerIcon: {
-    width: 44,
-    height: 44,
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  groupIcon: {
+    width: 32,
+    height: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.surfaceAlt,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chargerBody: { flex: 1, gap: 2 },
-  chargerName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  chargerMeta: { fontSize: fontSizes.caption, color: colors.textMuted },
-  chargerRight: { alignItems: 'flex-end', gap: spacing.xs },
-  chargerRate: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textStrong },
+  groupName: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
+  zoneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
+  zoneLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
+  groupMeta: { fontSize: fontSizes.caption, color: colors.textMuted },
+
+  connectorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.transparent,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  connectorRowSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  connectorRowDisabled: { opacity: 0.6 },
+  connectorIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectorBody: { flex: 1, gap: 2 },
+  connectorName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
+  connectorMeta: { fontSize: fontSizes.caption, color: colors.textMuted },
+  connectorRight: { alignItems: 'flex-end', gap: spacing.xs },
+  connectorRate: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textStrong },
 
   // Map snippet
   mapCard: {

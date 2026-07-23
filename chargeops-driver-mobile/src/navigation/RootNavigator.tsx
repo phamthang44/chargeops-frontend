@@ -12,8 +12,8 @@ import { PaymentProcessingScreen } from '@/screens/PaymentProcessingScreen';
 import { OtpVerificationScreen } from '@/screens/OtpVerificationScreen';
 import { QRCheckInScreen } from '@/screens/QRCheckInScreen';
 import { RegisterScreen } from '@/screens/RegisterScreen';
-import { SlotPickerScreen } from '@/screens/SlotPickerScreen';
 import { StationDetailScreen } from '@/screens/StationDetailScreen';
+import { TimeRangePickerScreen } from '@/screens/TimeRangePickerScreen';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { BottomTabs } from './BottomTabs';
 import type { RootStackParamList } from './types';
@@ -53,15 +53,15 @@ export function RootNavigator() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="SlotPicker"
-              component={SlotPickerScreen}
+              name="TimeRangePicker"
+              component={TimeRangePickerScreen}
               // Custom in-screen header (own back button) for reliable touch handling.
               options={{ headerShown: false }}
             />
             <Stack.Screen
               name="BookingConfirmation"
               component={BookingConfirmationScreen}
-              // Custom in-screen header (own back button), matching SlotPicker.
+              // Custom in-screen header (own back button), matching TimeRangePicker.
               options={{ headerShown: false }}
             />
             <Stack.Screen

@@ -47,6 +47,25 @@ export function formatDayMonth(iso: string): string {
 }
 
 /**
+ * Split a minute count into hours + minutes so screens can compose a localized
+ * duration label via i18n rather than hardcoding "giờ"/"phút" here.
+ */
+export function splitDuration(totalMin: number): { hours: number; minutes: number } {
+  return { hours: Math.floor(totalMin / 60), minutes: totalMin % 60 };
+}
+
+/**
+ * Format a millisecond duration as a MM:SS countdown, e.g. "04:52".
+ * Used for the short grace-period / payment-hold timers.
+ */
+export function formatMmSs(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+/**
  * Format a millisecond duration as a HH:MM:SS countdown, e.g. "00:14:28".
  * Negative values clamp to "00:00:00".
  */

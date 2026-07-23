@@ -17,7 +17,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { StatusBadge } from './StatusBadge';
 
 const PAYMENT_OUTCOMES: PaymentSimOutcome[] = ['SUCCESS', 'FAILED', 'CANCELLED', 'TIMEOUT', 'RANDOM'];
-const BOOKING_OUTCOMES: BookingSimOutcome[] = ['SUCCESS', 'SLOT_TAKEN', 'NETWORK_ERROR', 'RANDOM'];
+const BOOKING_OUTCOMES: BookingSimOutcome[] = ['SUCCESS', 'RANGE_TAKEN', 'NETWORK_ERROR', 'RANDOM'];
 
 const APPEARANCE: { mode: AppearanceMode; icon: keyof typeof Ionicons.glyphMap }[] = [
   { mode: 'light', icon: 'sunny-outline' },

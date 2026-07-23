@@ -3,26 +3,31 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, GlassButton, StatusBadge } from '@/components';
 import { bookingErrorMessage } from '@/i18n/bookingErrors';
 import type { RootStackParamList } from '@/navigation/types';
-import { SERVICE_FEE, createBooking } from '@/services/bookingService';
-import { getChargersByStation, getStationById } from '@/services/stationService';
+import { createBooking, findOverlappingBookings } from '@/services/bookingService';
+import {
+  getChargePointsByStation,
+  getConnectorsByStation,
+  getStationById,
+} from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { Charger, PaymentMethod, Station } from '@/types';
-import { formatDate, formatTimeRange, formatVnd } from '@/utils/format';
+import type { ChargePoint, Connector, PaymentMethod, Station } from '@/types';
+import { formatDate, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
 import { PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
+import { quoteBooking } from '@/utils/pricing';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
 type Route = RouteProp<RootStackParamList, 'BookingConfirmation'>;
 
 /**
- * "Xác nhận đặt chỗ" — review the chosen slots, see the invoice, pick a payment
- * method, then create the booking. The booking is only created here (after
- * "pay"), not on the slot-picker step.
+ * "Xác nhận đặt chỗ" — review the chosen time range, see the invoice, pick a
+ * payment method, then create the booking. The booking is only created here
+ * (after "pay"), not on the time-range step.
  */
 export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
@@ -30,7 +35,8 @@ export function BookingConfirmationScreen() {
   const { t } = useTranslation();
 
   const [station, setStation] = useState<Station | null>(null);
-  const [charger, setCharger] = useState<Charger | null>(null);
+  const [connector, setConnector] = useState<Connector | null>(null);
+  const [chargePoint, setChargePoint] = useState<ChargePoint | null>(null);
   const [loading, setLoading] = useState(true);
   const [method, setMethod] = useState<PaymentMethod>('MOMO');
   const [submitting, setSubmitting] = useState(false);
@@ -38,32 +44,44 @@ export function BookingConfirmationScreen() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([getStationById(params.stationId), getChargersByStation(params.stationId)]).then(
-      ([s, chargers]) => {
-        if (!active) return;
-        setStation(s);
-        setCharger(chargers.find((c) => c.id === params.chargerId) ?? null);
-        setLoading(false);
-      },
-    );
+    Promise.all([
+      getStationById(params.stationId),
+      getConnectorsByStation(params.stationId),
+      getChargePointsByStation(params.stationId),
+    ]).then(([s, connectors, points]) => {
+      if (!active) return;
+      const picked = connectors.find((c) => c.id === params.connectorId) ?? null;
+      setStation(s);
+      setConnector(picked);
+      setChargePoint(points.find((p) => p.id === picked?.chargePointId) ?? null);
+      setLoading(false);
+    });
     return () => {
       active = false;
     };
-  }, [params.stationId, params.chargerId]);
+  }, [params.stationId, params.connectorId]);
 
-  const sortedSlots = useMemo(
-    () => [...params.slots].sort((a, b) => (a.startAt < b.startAt ? -1 : 1)),
-    [params.slots],
+  const endAt = useMemo(
+    () => new Date(new Date(params.startAt).getTime() + params.durationMin * 60_000).toISOString(),
+    [params.startAt, params.durationMin],
   );
-  const first = sortedSlots[0];
-  const last = sortedSlots[sortedSlots.length - 1];
-  const chargingFee = useMemo(() => sortedSlots.reduce((sum, s) => sum + s.price, 0), [sortedSlots]);
-  const total = chargingFee + SERVICE_FEE;
+  // Same pure quote the picker showed and the booking will snapshot.
+  const quote = useMemo(
+    () => (connector ? quoteBooking(connector, params.startAt, params.durationMin) : null),
+    [connector, params.startAt, params.durationMin],
+  );
   // Pseudo invoice id for display until the booking exists (real code on success).
   const previewCode = useMemo(() => `CO-${String(Date.now()).slice(-4)}`, []);
 
-  async function handlePay() {
-    if (!charger) return;
+  function durationLabel(min: number): string {
+    const { hours, minutes } = splitDuration(min);
+    if (hours === 0) return t('timeRangePicker.durationMin', { minutes });
+    if (minutes === 0) return t('timeRangePicker.durationHour', { hours });
+    return t('timeRangePicker.durationHourMin', { hours, minutes });
+  }
+
+  async function submitBooking() {
+    if (!connector) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -71,18 +89,44 @@ export function BookingConfirmationScreen() {
       // screen which waits for the gateway to settle before showing success.
       const booking = await createBooking({
         stationId: params.stationId,
-        chargerId: charger.id,
-        slots: sortedSlots,
+        connectorId: connector.id,
+        startAt: params.startAt,
+        durationMin: params.durationMin,
         paymentMethod: method,
       });
       // Replace so the user can't go "back" into payment and pay again.
       navigation.replace('PaymentProcessing', { bookingId: booking.id });
     } catch (e) {
-      // Booking creation edge cases (slot taken / network) — let the user retry.
+      // Booking creation edge cases (range taken / network) — let the user retry.
       setError(bookingErrorMessage(t, e));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handlePay() {
+    if (!connector) return;
+    // BR-BOK-08: holding two bookings over the same hours on different ports is
+    // allowed, but it is nearly always a mistake — warn before committing, and
+    // let the driver proceed if they meant it.
+    const clashes = await findOverlappingBookings(params.startAt, endAt, connector.id);
+    if (clashes.length > 0) {
+      const other = clashes[0];
+      Alert.alert(
+        t('bookingConfirm.overlapTitle'),
+        t('bookingConfirm.overlapBody', {
+          start: formatTime(other.startAt),
+          end: formatTime(other.endAt),
+          station: other.stationName,
+        }),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('bookingConfirm.overlapConfirm'), onPress: () => void submitBooking() },
+        ],
+      );
+      return;
+    }
+    await submitBooking();
   }
 
   return (
@@ -102,7 +146,7 @@ export function BookingConfirmationScreen() {
         <View style={styles.headerBtn} />
       </View>
 
-      {loading || !station || !charger || !first ? (
+      {loading || !station || !connector || !quote ? (
         <ActivityIndicator color={colors.primary} style={styles.loader} />
       ) : (
         <>
@@ -117,8 +161,8 @@ export function BookingConfirmationScreen() {
                 <Ionicons name="flash" size={26} color={colors.primaryDark} />
               </View>
               <View style={styles.stationBody}>
-                {charger.chargerType === 'DC' && (
-                  <StatusBadge variant="success" label={t('stationDetail.status.AVAILABLE')} />
+                {connector.currentType === 'DC' && (
+                  <StatusBadge variant="success" label={t('bookingConfirm.fastCharge')} />
                 )}
                 <Text style={styles.stationName} numberOfLines={2}>
                   {station.name}
@@ -143,14 +187,15 @@ export function BookingConfirmationScreen() {
                   <Ionicons name="calendar-outline" size={14} color={colors.primary} />
                   <Text style={styles.detailLabel}>{t('bookingConfirm.date')}</Text>
                 </View>
-                <Text style={styles.detailValue}>{formatDate(first.startAt)}</Text>
+                <Text style={styles.detailValue}>{formatDate(params.startAt)}</Text>
               </View>
               <View style={styles.detailBox}>
                 <View style={styles.detailLabelRow}>
                   <Ionicons name="time-outline" size={14} color={colors.primary} />
                   <Text style={styles.detailLabel}>{t('bookingConfirm.time')}</Text>
                 </View>
-                <Text style={styles.detailValue}>{formatTimeRange(first.startAt, last.endAt)}</Text>
+                <Text style={styles.detailValue}>{formatTimeRange(params.startAt, endAt)}</Text>
+                <Text style={styles.detailSub}>{durationLabel(params.durationMin)}</Text>
               </View>
             </View>
 
@@ -159,52 +204,68 @@ export function BookingConfirmationScreen() {
                 <Ionicons name="flash" size={20} color={colors.primaryDark} />
               </View>
               <View style={styles.chargerBody}>
-                <Text style={styles.detailLabel}>{t('bookingConfirm.charger')}</Text>
+                <Text style={styles.detailLabel}>{t('bookingConfirm.connector')}</Text>
                 <Text style={styles.detailValue}>
-                  {t('bookingConfirm.chargerValue', {
-                    name: charger.name,
-                    power: charger.powerKw,
-                    connector: charger.connectorType,
+                  {t('bookingConfirm.connectorValue', {
+                    chargePoint: chargePoint?.name ?? '',
+                    name: connector.name,
+                    power: connector.powerKw,
+                    connector: connector.connectorType,
                   })}
                 </Text>
+                {chargePoint?.zoneLabel && (
+                  <Text style={styles.detailSub}>{chargePoint.zoneLabel}</Text>
+                )}
               </View>
             </View>
 
-            {/* Invoice */}
+            {/* Invoice — one line per TOU band the window crosses (BookingPriceLine) */}
             <View style={styles.divider} />
             <Text style={styles.sectionTitle}>{t('bookingConfirm.invoiceTitle')}</Text>
-            <View style={styles.invoiceRow}>
-              <Text style={styles.invoiceLabel}>
-                {t('bookingConfirm.chargingFee', { count: sortedSlots.length })}
-              </Text>
-              <Text style={styles.invoiceValue}>{formatVnd(chargingFee)}</Text>
-            </View>
+            {quote.priceLines.map((line, i) => (
+              <View key={i} style={styles.invoiceRow}>
+                <View style={styles.flex1}>
+                  <Text style={styles.invoiceLabel}>
+                    {formatTimeRange(line.fromAt, line.toAt)} ·{' '}
+                    {t(`timeRangePicker.band.${line.rateKind}`)}
+                  </Text>
+                  <Text style={styles.invoiceSub}>
+                    {t('bookingConfirm.lineDetail', {
+                      kwh: line.energyKwh,
+                      rate: formatVnd(line.rateVndPerKwh),
+                    })}
+                  </Text>
+                </View>
+                <Text style={styles.invoiceValue}>{formatVnd(line.amount)}</Text>
+              </View>
+            ))}
             <View style={styles.invoiceRow}>
               <Text style={styles.invoiceLabel}>{t('bookingConfirm.serviceFee')}</Text>
-              <Text style={styles.invoiceValue}>{formatVnd(SERVICE_FEE)}</Text>
+              <Text style={styles.invoiceValue}>{formatVnd(quote.serviceFee)}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.invoiceRow}>
               <Text style={styles.totalLabel}>{t('bookingConfirm.total')}</Text>
-              <Text style={styles.totalValue}>{formatVnd(total)}</Text>
+              <Text style={styles.totalValue}>{formatVnd(quote.totalPrice)}</Text>
             </View>
 
-            {/* Refund policy (green) */}
+            {/* Refund policy (green) — grace period first, then the time tiers */}
             <View style={styles.refundCard}>
               <View style={styles.refundHeader}>
                 <Ionicons name="shield-checkmark-outline" size={18} color={colors.primaryDark} />
                 <Text style={styles.refundTitle}>{t('bookingConfirm.refundTitle')}</Text>
               </View>
               {[
+                t('bookingConfirm.refundGrace'),
                 t('bookingConfirm.refund1'),
                 t('bookingConfirm.refund2'),
                 t('bookingConfirm.refund3'),
               ].map((line, i) => (
                 <View key={i} style={styles.refundLine}>
                   <Ionicons
-                    name={i === 2 ? 'information-circle-outline' : 'checkmark-circle-outline'}
+                    name={i === 3 ? 'information-circle-outline' : 'checkmark-circle-outline'}
                     size={15}
-                    color={i === 2 ? colors.textMuted : colors.primary}
+                    color={i === 3 ? colors.textMuted : colors.primary}
                   />
                   <Text style={styles.refundText}>{line}</Text>
                 </View>
@@ -249,7 +310,7 @@ export function BookingConfirmationScreen() {
             <View style={styles.footerTop}>
               <View>
                 <Text style={styles.footerTotalLabel}>{t('bookingConfirm.totalToPay')}</Text>
-                <Text style={styles.footerTotal}>{formatVnd(total)}</Text>
+                <Text style={styles.footerTotal}>{formatVnd(quote.totalPrice)}</Text>
               </View>
               <View style={styles.secureRow}>
                 <Ionicons name="lock-closed" size={14} color={colors.primary} />
@@ -266,6 +327,7 @@ export function BookingConfirmationScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  flex1: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -331,6 +393,7 @@ const styles = StyleSheet.create({
   detailLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   detailLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textMuted, letterSpacing: 0.5 },
   detailValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
+  detailSub: { fontSize: fontSizes.caption, color: colors.textMuted },
   chargerBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -353,6 +416,7 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
   invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   invoiceLabel: { fontSize: fontSizes.body, color: colors.textBody },
+  invoiceSub: { fontSize: fontSizes.caption, color: colors.textMuted },
   invoiceValue: { fontSize: fontSizes.body, color: colors.textStrong, fontWeight: fontWeights.medium },
   totalLabel: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   totalValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.primary },

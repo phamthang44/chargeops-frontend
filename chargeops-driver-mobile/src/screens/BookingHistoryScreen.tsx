@@ -15,13 +15,15 @@ import { formatVnd } from '@/utils/format';
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Filter = 'all' | 'completed' | 'cancelled';
 
-// Ended bookings only — active/upcoming ones live on the Đặt chỗ tab.
-const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'NO_SHOW'];
+// Ended bookings only — active/upcoming ones live on the Đặt chỗ tab. A no-show
+// is a CANCELLED booking with a reason (BR-BOK-05), so it needs no state of its
+// own here; EXPIRED covers holds that lapsed before payment (BR-BOK-02).
+const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'EXPIRED'];
 const FILTERS: Filter[] = ['all', 'completed', 'cancelled'];
 const FILTER_MATCH: Record<Filter, BookingStatus[]> = {
   all: ENDED_STATUSES,
   completed: ['COMPLETED'],
-  cancelled: ['CANCELLED', 'NO_SHOW'],
+  cancelled: ['CANCELLED', 'EXPIRED'],
 };
 
 // English month names (vi formats numerically via i18n). Index 0 = January.
@@ -62,7 +64,7 @@ export function BookingHistoryScreen() {
     const done = bookings.filter((b) => b.status === 'COMPLETED');
     return {
       sessions: done.length,
-      hours: done.reduce((sum, b) => sum + b.slotCount, 0),
+      hours: Math.round(done.reduce((sum, b) => sum + b.durationMin, 0) / 60),
       spent: done.reduce((sum, b) => sum + b.totalPrice, 0),
     };
   }, [bookings]);

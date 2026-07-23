@@ -1,21 +1,29 @@
 /**
  * Core domain types — mirror the database schema (only fields the UI needs).
+ * Aligned with SRS v4.7 Section 7.
  */
 
 export type ConnectorType = 'CCS2' | 'CHADEMO' | 'TYPE2' | 'GBT';
 
-export type ChargerStatus = 'AVAILABLE' | 'IN_USE' | 'DISABLED' | 'MAINTENANCE';
-
 /** Station amenities (mapped to an icon + i18n label in the UI). */
 export type Amenity = 'wifi' | 'food' | 'parking' | 'security' | 'restroom';
 
+/**
+ * Booking lifecycle (SRS Section 4). There is no NO_SHOW state: a driver who
+ * fails to check in is auto-CANCELLED at 0% refund (BR-BOK-05) — the reason is
+ * carried separately in `Booking.cancelReason` so history can still label it.
+ */
 export type BookingStatus =
   | 'PENDING'
   | 'CONFIRMED'
   | 'CHECKED_IN'
+  | 'CHARGING'
   | 'COMPLETED'
   | 'CANCELLED'
-  | 'NO_SHOW';
+  | 'EXPIRED';
+
+/** Why a CANCELLED booking ended that way — drives the history badge + refund copy. */
+export type CancelReason = 'DRIVER' | 'NO_SHOW' | 'PAYMENT_TIMEOUT';
 
 export interface Station {
   id: string;
@@ -28,52 +36,89 @@ export interface Station {
   imageUrl?: string;
   contactPhone?: string;
   operatingHours?: string;
-  availableChargers: number; // number of free chargers (derived)
-  totalChargers: number;
+  /** Opening/closing minutes from midnight; used to clamp the bookable window (FR11). */
+  opensAtMin: number;
+  closesAtMin: number; // 1440 = open until midnight (24/7 stations use 0–1440)
+  availableConnectors: number; // free bookable ports (derived)
+  totalConnectors: number;
   rating?: number; // average rating, e.g. 4.8 (shown in station list/detail)
   reviewCount?: number; // number of ratings, optional
   isOpen?: boolean; // derived open/closed state (vs operatingHours)
-  hasFastCharging?: boolean; // has at least one DC charger (for list filtering)
+  hasFastCharging?: boolean; // has at least one DC connector (for list filtering)
   minRatePerKwh?: number; // cheapest đ/kWh rate label (info only, "Giá từ")
   amenities?: Amenity[]; // shown on the station detail screen
 }
 
-export interface Charger {
-  id: string;
-  stationId: string;
-  name: string; // e.g. "Sạc Nhanh DC-01"
-  connectorType: ConnectorType;
-  powerKw: number;
-  chargerType: 'AC' | 'DC';
-  status: ChargerStatus;
-  ratePerKwh?: number; // informational đ/kWh rate label (NEVER used to compute price)
-}
+/**
+ * Charge Point provisioning lifecycle (FR14). Drivers only ever see ACTIVE ones:
+ * UNCLAIMED and SUSPENDED devices are hidden from search and cannot be booked
+ * (BR-CHG-01).
+ */
+export type ProvisioningStatus = 'UNCLAIMED' | 'ACTIVE' | 'OFFLINE' | 'SUSPENDED';
 
 /**
- * Slot availability from the current driver's perspective:
- * - AVAILABLE   = bookable (Có thể đặt)
- * - OCCUPIED    = booked by someone else (Người khác đã đặt)
- * - UNAVAILABLE = maintenance / offline (Bảo trì)
- * - MINE        = already booked by this driver (Lượt đặt của bạn)
+ * The physical device. It is NOT the bookable unit — bookings attach to its
+ * Connectors (SRS Section 7). Its only driver-facing job is to say where in the
+ * car park the ports are (`zoneLabel`) and group them (FR04).
  */
-export type SlotStatus = 'AVAILABLE' | 'OCCUPIED' | 'UNAVAILABLE' | 'MINE';
-
-export interface Slot {
+export interface ChargePoint {
   id: string;
-  chargerId: string;
-  startAt: string; // ISO datetime
-  endAt: string;
-  price: number; // FIXED slot price (VND), already snapshotted — display as-is
-  status: SlotStatus;
+  stationId: string;
+  name: string; // e.g. "Trụ sạc A"
+  zoneLabel: string | null; // free-text location hint, e.g. "gần lối vào, dãy B"
+  maxPowerKw: number; // display-only descriptor (BR-CHG-06)
+  status: ProvisioningStatus;
+}
+
+/** Runtime status of one bookable port (FR07/FR10). */
+export type ConnectorRuntimeStatus = 'AVAILABLE' | 'IN_USE' | 'OFFLINE';
+
+/**
+ * A Connector is the bookable port and the unit of contention: availability,
+ * locking, and the (connector, time range) exclusion invariant all live here.
+ * Its `id` is what the glossary calls the "Charger ID" and what the printed QR
+ * sticker encodes (BR-CHG-02).
+ */
+export interface Connector {
+  id: string;
+  chargePointId: string;
+  stationId: string; // denormalized for station-scoped lookups
+  name: string; // e.g. "Cổng 1"
+  connectorType: ConnectorType;
+  powerKw: number; // 3.0–360.0 (BR-CHG-07)
+  currentType: 'AC' | 'DC';
+  runtimeStatus: ConnectorRuntimeStatus;
+  qrToken: string; // payload of the printed QR label; never changes (BR-CHG-04)
+  ratePerKwh: number; // base đ/kWh before TOU banding
+}
+
+/** Which time-of-use band a stretch of a booking falls in. */
+export type RateKind = 'PEAK' | 'STANDARD' | 'OFFPEAK';
+
+/**
+ * One TOU band's slice of a booking's price, snapshotted at booking time
+ * (SRS BookingPriceLine). A booking that crosses a band boundary — say
+ * 16:15–17:45 — cannot be explained by a single rate, so it carries one line
+ * per band and the total is their sum. Never recalculated afterwards: pricing
+ * changes apply to new bookings only (BR-STA-03).
+ */
+export interface BookingPriceLine {
+  fromAt: string; // ISO datetime
+  toAt: string;
+  rateKind: RateKind;
+  rateVndPerKwh: number;
+  energyKwh: number;
+  amount: number; // VND for this band
 }
 
 /** Payment methods offered on the booking-confirmation screen. */
 export type PaymentMethod = 'MOMO' | 'VISA' | 'ZALOPAY' | 'ATM' | 'WALLET';
 
 /**
- * A booking, denormalized for display.
- * The booking snapshots the station/charger/slot details at creation time so the
- * history & detail screens never need to re-join against live station data.
+ * A booking, denormalized for display. It reserves a continuous time range on
+ * one Connector — there is no stored slot entity (SRS Section 7). The booking
+ * snapshots the station/connector details and the price lines at creation time
+ * so history & detail screens never re-join against live data.
  */
 export interface Booking {
   id: string;
@@ -83,44 +128,46 @@ export interface Booking {
   stationName: string;
   stationAddress: string;
   stationImageUrl?: string;
-  // Charger snapshot
-  chargerId: string;
-  chargerName: string;
+  // Connector snapshot (chargePointName/zoneLabel help the driver find the port)
+  connectorId: string;
+  connectorName: string;
+  chargePointName: string;
+  zoneLabel: string | null;
   connectorType: ConnectorType;
   powerKw: number;
-  // Time window (earliest slot start -> latest slot end)
+  // Reserved time range
   startAt: string; // ISO datetime
   endAt: string; // ISO datetime
-  slotCount: number; // number of hourly slots booked (= duration in hours)
-  // Pricing (VND, snapshotted)
-  chargingFee: number; // sum of the chosen slot prices
+  durationMin: number;
+  // Pricing (VND, snapshotted at booking time)
+  priceLines: BookingPriceLine[];
+  energyKwh: number; // estimated kWh across all bands
+  chargingFee: number; // sum of the price lines
   serviceFee: number; // flat platform fee
   totalPrice: number; // chargingFee + serviceFee
   paymentMethod: PaymentMethod;
   // Lifecycle
   status: BookingStatus;
+  cancelReason?: CancelReason;
   checkedInAt?: string;
-  createdAt: string; // ISO datetime
-  refundAmount?: number; // VND credited back when CANCELLED (per FR08 refund tiers)
-}
-
-/** One chosen time slot in a booking request (ISO timestamps + fixed price). */
-export interface BookingSlotInput {
-  startAt: string;
-  endAt: string;
-  price: number;
+  createdAt: string; // ISO datetime — the 5-minute grace window runs from here (FR05)
+  /** When an unpaid PENDING booking's hold lapses (BR-BOK-02); null once paid. */
+  expiresAt: string | null;
+  refundAmount?: number; // VND credited back when CANCELLED (FR08 tiers)
+  refundPercent?: number; // 100 | 50 | 0 — which tier applied
 }
 
 /**
- * Payload sent to the backend to create a booking.
- * The frontend generates the slot grid; the chosen slots' ISO timestamps travel here.
- * Multiple slots may be selected in one booking. Pricing is derived server-side
- * from the snapshotted slot prices — the client never sends a total it computed itself.
+ * Payload sent to the backend to create a booking. The driver picks a start
+ * time and a duration; the backend re-derives the price and checks the range
+ * against existing bookings on that Connector (FR05, BR-BOK-01). The client
+ * never sends a total it computed itself.
  */
 export interface CreateBookingRequest {
   stationId: string;
-  chargerId: string;
-  slots: BookingSlotInput[];
+  connectorId: string;
+  startAt: string; // ISO datetime
+  durationMin: number;
   paymentMethod: PaymentMethod;
 }
 

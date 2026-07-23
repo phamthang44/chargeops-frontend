@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 
 /** Booking error codes thrown by bookingService (see BookingErrorCode there). */
-const BOOKING_ERROR_CODES = ['SLOT_TAKEN', 'NETWORK_ERROR', 'GENERIC'] as const;
+const BOOKING_ERROR_CODES = ['RANGE_TAKEN', 'NETWORK_ERROR', 'GENERIC'] as const;
 
 /**
  * Map an error thrown by the booking service (whose message is a stable CODE) to

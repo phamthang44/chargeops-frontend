@@ -8,10 +8,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, CancelBookingSheet, GlassButton, StatusBadge, type BadgeVariant } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { getBookingById } from '@/services/bookingService';
+import {
+  CHECK_IN_WINDOW_MIN,
+  computeRefund,
+  getBookingById,
+  GRACE_PERIOD_MIN,
+} from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
-import { formatCountdown, formatDate, formatTime, formatTimeRange, formatVnd } from '@/utils/format';
+import {
+  formatCountdown,
+  formatDate,
+  formatMmSs,
+  formatTime,
+  formatTimeRange,
+  formatVnd,
+  splitDuration,
+} from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingDetail'>;
 type Route = RouteProp<RootStackParamList, 'BookingDetail'>;
@@ -20,16 +33,17 @@ const STATUS_VARIANT: Record<BookingStatus, BadgeVariant> = {
   PENDING: 'warning',
   CONFIRMED: 'success',
   CHECKED_IN: 'info',
+  CHARGING: 'info',
   COMPLETED: 'neutral',
   CANCELLED: 'error',
-  NO_SHOW: 'error',
+  EXPIRED: 'neutral',
 };
 
 /** Bookings that are still actionable (paid + can check in / cancel). */
 const ACTIVE_STATUSES: BookingStatus[] = ['CONFIRMED'];
 
-// Grace period after slot start before auto no-show (BR: ~15 min).
-const GRACE_MS = 15 * 60_000;
+/** Check-in closes this long after the start time; after that it's a no-show (BR-BOK-04/05). */
+const CHECK_IN_WINDOW_MS = CHECK_IN_WINDOW_MIN * 60_000;
 
 /**
  * "Chi tiết đặt chỗ" — a single booking. For upcoming bookings it shows a live
@@ -60,13 +74,15 @@ export function BookingDetailScreen() {
   }, [params.bookingId]);
 
   const isActive = booking ? ACTIVE_STATUSES.includes(booking.status) : false;
+  const isAwaitingPayment = booking?.status === 'PENDING';
 
-  // Tick the countdown once per second while the booking is still actionable.
+  // Tick once per second while any countdown is on screen: the check-in window,
+  // the unpaid hold, or the grace period.
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive && !isAwaitingPayment) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [isActive]);
+  }, [isActive, isAwaitingPayment]);
 
   if (loading) {
     return (
@@ -85,8 +101,27 @@ export function BookingDetailScreen() {
     );
   }
 
-  const deadline = new Date(booking.startAt).getTime() + GRACE_MS;
+  const deadline = new Date(booking.startAt).getTime() + CHECK_IN_WINDOW_MS;
   const remaining = deadline - now;
+
+  // FR05 reconsideration window: for five minutes after booking, cancelling is
+  // free whatever the time-based tier would say. Surfaced as a live countdown so
+  // the driver knows the undo exists and when it runs out.
+  const refund = computeRefund(booking, now);
+  const cancellable = booking.status === 'CONFIRMED' || booking.status === 'PENDING';
+  const inGrace = cancellable && refund.graceRemainingMs > 0;
+  const graceEndsAt = new Date(booking.createdAt).getTime() + GRACE_PERIOD_MIN * 60_000;
+
+  // BR-BOK-02: an unpaid booking only holds its range for ten minutes.
+  const holdRemaining = booking.expiresAt ? new Date(booking.expiresAt).getTime() - now : 0;
+
+  const { hours: durH, minutes: durM } = splitDuration(booking.durationMin);
+  const durationText =
+    durH === 0
+      ? t('timeRangePicker.durationMin', { minutes: durM })
+      : durM === 0
+        ? t('timeRangePicker.durationHour', { hours: durH })
+        : t('timeRangePicker.durationHourMin', { hours: durH, minutes: durM });
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -124,10 +159,29 @@ export function BookingDetailScreen() {
               <Text style={styles.infoNoteText}>{t('bookingDetail.countdownNote')}</Text>
             </View>
           </>
+        ) : isAwaitingPayment ? (
+          // The range is only held, not booked, until payment lands (BR-BOK-02).
+          <View style={styles.holdNote}>
+            <Ionicons name="hourglass-outline" size={18} color={colors.warning} />
+            <Text style={styles.holdText}>
+              {t('bookingDetail.holdNote', { time: formatMmSs(holdRemaining) })}
+            </Text>
+          </View>
         ) : (
           <View style={styles.infoNote}>
             <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
             <Text style={styles.infoNoteText}>{statusNote(booking, t)}</Text>
+          </View>
+        )}
+
+        {/* Grace period — free cancellation for five minutes after booking (FR05) */}
+        {inGrace && (
+          <View style={styles.graceCard}>
+            <Ionicons name="arrow-undo-outline" size={18} color={colors.primaryDark} />
+            <Text style={styles.graceText}>
+              {t('bookingDetail.graceHint', { time: formatTime(new Date(graceEndsAt).toISOString()) })}
+            </Text>
+            <Text style={styles.graceTimer}>{formatMmSs(refund.graceRemainingMs)}</Text>
           </View>
         )}
 
@@ -148,8 +202,11 @@ export function BookingDetailScreen() {
           <View style={styles.divider} />
           <View style={styles.gridRow}>
             <View style={styles.gridCell}>
-              <Text style={styles.gridLabel}>{t('bookingDetail.charger')}</Text>
-              <Text style={styles.gridValue}>{booking.chargerName}</Text>
+              <Text style={styles.gridLabel}>{t('bookingDetail.chargePoint')}</Text>
+              <Text style={styles.gridValue}>
+                {booking.chargePointName} · {booking.connectorName}
+              </Text>
+              {booking.zoneLabel && <Text style={styles.gridSub}>{booking.zoneLabel}</Text>}
             </View>
             <View style={[styles.gridCell, styles.gridCellRight]}>
               <Text style={styles.gridLabel}>{t('bookingDetail.connector')}</Text>
@@ -166,8 +223,16 @@ export function BookingDetailScreen() {
               <Text style={styles.gridValue}>{formatDate(booking.startAt)}</Text>
             </View>
             <View style={[styles.gridCell, styles.gridCellRight]}>
-              <Text style={styles.gridLabel}>{t('bookingDetail.slot')}</Text>
+              <Text style={styles.gridLabel}>{t('bookingDetail.timeRange')}</Text>
               <Text style={styles.gridValue}>{formatTimeRange(booking.startAt, booking.endAt)}</Text>
+              <Text style={styles.gridSub}>{durationText}</Text>
+            </View>
+          </View>
+          {/* The Charger ID is what the QR on the port encodes (BR-CHG-02). */}
+          <View style={styles.gridRow}>
+            <View style={styles.gridCell}>
+              <Text style={styles.gridLabel}>{t('bookingDetail.chargerId')}</Text>
+              <Text style={styles.gridMono}>{booking.connectorId}</Text>
             </View>
           </View>
         </View>
@@ -178,12 +243,24 @@ export function BookingDetailScreen() {
           <Text style={styles.sectionTitle}>{t('bookingDetail.paymentTitle')}</Text>
         </View>
         <View style={styles.card}>
-          <View style={styles.invoiceRow}>
-            <Text style={styles.invoiceLabel}>
-              {t('bookingDetail.chargingFee', { count: booking.slotCount })}
-            </Text>
-            <Text style={styles.invoiceValue}>{formatVnd(booking.chargingFee)}</Text>
-          </View>
+          {/* One line per TOU band crossed — the price the booking locked in */}
+          {booking.priceLines.map((line, i) => (
+            <View key={i} style={styles.invoiceRow}>
+              <View style={styles.flex1}>
+                <Text style={styles.invoiceLabel}>
+                  {formatTimeRange(line.fromAt, line.toAt)} ·{' '}
+                  {t(`timeRangePicker.band.${line.rateKind}`)}
+                </Text>
+                <Text style={styles.invoiceSub}>
+                  {t('bookingConfirm.lineDetail', {
+                    kwh: line.energyKwh,
+                    rate: formatVnd(line.rateVndPerKwh),
+                  })}
+                </Text>
+              </View>
+              <Text style={styles.invoiceValue}>{formatVnd(line.amount)}</Text>
+            </View>
+          ))}
           <View style={styles.invoiceRow}>
             <Text style={styles.invoiceLabel}>{t('bookingDetail.serviceFee')}</Text>
             <Text style={styles.invoiceValue}>{formatVnd(booking.serviceFee)}</Text>
@@ -201,7 +278,7 @@ export function BookingDetailScreen() {
           </View>
         </View>
 
-        {/* Refund policy (active only) */}
+        {/* Refund policy (active only) — what cancelling right now would return */}
         {isActive && (
           <View style={styles.refundCard}>
             <View style={styles.refundHeader}>
@@ -209,6 +286,12 @@ export function BookingDetailScreen() {
               <Text style={styles.refundTitle}>{t('bookingDetail.refundTitle')}</Text>
             </View>
             <Text style={styles.refundText}>{t('bookingDetail.refundBody')}</Text>
+            <View style={styles.refundNowRow}>
+              <Text style={styles.refundNowLabel}>{t('bookingDetail.refundNow')}</Text>
+              <Text style={styles.refundNowValue}>
+                {formatVnd(refund.refundAmount)} ({refund.percent}%)
+              </Text>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -280,6 +363,7 @@ function Header({ onBack }: { onBack: () => void }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  flex1: { flex: 1 },
   loader: { flex: 1 },
   notFound: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl },
 
@@ -328,6 +412,30 @@ const styles = StyleSheet.create({
   },
   infoNoteText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
 
+  // Unpaid hold (amber) — the range lapses when this runs out
+  holdNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: `${colors.warning}1A`,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  holdText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
+
+  // Grace period (green) — free-cancel countdown
+  graceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  graceText: { flex: 1, fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.primaryDark },
+  graceTimer: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
+
   // Sections
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
   sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
@@ -356,11 +464,14 @@ const styles = StyleSheet.create({
   gridCellRight: { alignItems: 'flex-end' },
   gridLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textMuted, letterSpacing: 0.5 },
   gridValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
+  gridSub: { fontSize: fontSizes.caption, color: colors.textMuted },
+  gridMono: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textBody, letterSpacing: 0.5 },
   connectorBadge: { alignSelf: 'flex-end' },
 
   // Invoice
-  invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   invoiceLabel: { fontSize: fontSizes.body, color: colors.textBody },
+  invoiceSub: { fontSize: fontSizes.caption, color: colors.textMuted },
   invoiceValue: { fontSize: fontSizes.body, color: colors.textStrong, fontWeight: fontWeights.medium },
   totalLabel: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   totalValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.primary },
@@ -377,6 +488,14 @@ const styles = StyleSheet.create({
   refundHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   refundTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.error },
   refundText: { fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
+  refundNowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  refundNowLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody },
+  refundNowValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
 
   // Footer
   footer: {

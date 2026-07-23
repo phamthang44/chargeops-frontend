@@ -13,10 +13,24 @@ const STATUS_VARIANT: Record<BookingStatus, BadgeVariant> = {
   PENDING: 'warning',
   CONFIRMED: 'success',
   CHECKED_IN: 'info',
+  CHARGING: 'info',
   COMPLETED: 'neutral',
   CANCELLED: 'error',
-  NO_SHOW: 'error',
+  EXPIRED: 'neutral',
 };
+
+/**
+ * A no-show is stored as CANCELLED (there is no NO_SHOW state — BR-BOK-05), but
+ * the driver still needs to see why it ended that way, so the reason overrides
+ * the status label on the badge.
+ */
+function statusLabelKey(b: Booking): string {
+  if (b.status === 'CANCELLED' && b.cancelReason === 'NO_SHOW') return 'bookingStatus.NO_SHOW';
+  if (b.status === 'CANCELLED' && b.cancelReason === 'PAYMENT_TIMEOUT') {
+    return 'bookingStatus.PAYMENT_TIMEOUT';
+  }
+  return `bookingStatus.${b.status}`;
+}
 
 interface BookingCardProps {
   booking: Booking;
@@ -47,7 +61,7 @@ export function BookingCard({ booking: b, onPress, action, banner, accentColor }
         <Text style={styles.stationName} numberOfLines={1}>
           {b.stationName}
         </Text>
-        <StatusBadge variant={STATUS_VARIANT[b.status]} label={t(`bookingStatus.${b.status}`)} />
+        <StatusBadge variant={STATUS_VARIANT[b.status]} label={t(statusLabelKey(b))} />
       </View>
       <Text style={styles.code}>{t('bookingCard.code', { code: b.code })}</Text>
 
@@ -68,7 +82,7 @@ export function BookingCard({ booking: b, onPress, action, banner, accentColor }
       <View style={styles.metaRow}>
         <Ionicons name="flash-outline" size={15} color={colors.primary} />
         <Text style={styles.metaText}>
-          {b.chargerName} • {b.connectorType} ({b.powerKw}kW)
+          {b.chargePointName} • {b.connectorName} • {b.connectorType} ({b.powerKw}kW)
         </Text>
       </View>
 

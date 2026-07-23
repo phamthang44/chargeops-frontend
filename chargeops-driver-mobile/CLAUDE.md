@@ -94,35 +94,60 @@ App.tsx         # imports '@/i18n' (init) > SafeAreaProvider > AuthProvider > Ro
 | `BookingsScreen` | Đặt chỗ | Upcoming/active bookings | `visily-driver-booking-detail.jpg` |
 | `BookingHistoryScreen` | Lịch sử | Past bookings with status badges | `visily-booking-history.jpg` |
 | `ProfileScreen` | Hồ sơ | Account & settings | `visily-profile-&-settings.jpg` |
-| `StationDetailScreen` | flow | Station photos, amenities, refund policy, charger list, "Chọn khung giờ" CTA | `visily-driver-station-detail.jpg` |
-| `SlotPickerScreen` | flow | Date strip + slot grid (fixed per-slot prices), refund policy | `visily-slot-picker.jpg` |
+| `StationDetailScreen` | flow | Station photos, amenities, refund policy, connectors grouped by Charge Point (FR04), "Chọn khung giờ" CTA | `visily-driver-station-detail.jpg` |
+| `TimeRangePickerScreen` | flow | Date strip + availability timeline + start time + duration, live TOU price breakdown (FR05/FR11) | `visily-slot-picker.jpg` (superseded — the grid is gone) |
 | `QRCheckInScreen` | flow | QR scan → check-in success → start charging | `visily-qr-check-in.jpg`, `visily-charging-session.jpg` |
 
 Additional designs to build later: `visily-booking-confirmation.jpg`, `visily-booking-success.jpg`,
 `visily-cancellation-confirmation.jpg`, `visily-charging-session.jpg`.
 
 ## Domain model (`src/types/index.ts`)
-`Station`, `Charger`, `Slot`, `Booking` plus enums `ConnectorType` (CCS2/CHADEMO/TYPE2/GBT),
-`ChargerStatus` (AVAILABLE/IN_USE/DISABLED/MAINTENANCE), `BookingStatus`
-(PENDING/CONFIRMED/CHECKED_IN/COMPLETED/CANCELLED/NO_SHOW).
+Aligned with **SRS v4.7 Section 7**. `Station`, `ChargePoint`, `Connector`, `Booking`,
+`BookingPriceLine` plus enums `ConnectorType` (CCS2/CHADEMO/TYPE2/GBT), `ProvisioningStatus`
+(UNCLAIMED/ACTIVE/OFFLINE/SUSPENDED — on the Charge Point), `ConnectorRuntimeStatus`
+(AVAILABLE/IN_USE/OFFLINE — on the Connector), `BookingStatus`
+(PENDING/CONFIRMED/CHECKED_IN/CHARGING/COMPLETED/CANCELLED/EXPIRED), `RateKind`
+(PEAK/STANDARD/OFFPEAK).
+
+**There is no `Slot` type and no `NO_SHOW` status** — see the business rules below.
+
 Auth/account: `User` (mirrors SRS User entity), `UserRole`, `UserStatus`, `AuthTokens`,
 `AuthSession`, `RegisterRequest`, `LoginRequest`. The client sends a `password`; it never handles
 `password_hash` (backend bcrypt per FR01). Role is `DRIVER` and immutable in this app (BR-ACC-01).
 
-> **The SRS exists**: `../documents/ChargeOps_SRS_v4_2.docx` (FR01 auth, FR05–FR09 booking, FR08
-> refund tiers, Section 9 business rules BR-*, Section 7 data model). Treat it as authoritative for
-> behavior; treat the Visily designs as authoritative for visuals.
+> **The SRS exists**: `../documents/ChargeOps_SRS_v4_7.docx` (FR01 auth, FR02 search/filter,
+> FR04 station detail, FR05–FR09 booking, FR08 refund tiers, Section 9 business rules BR-*,
+> Section 7 data model). Treat it as authoritative for behavior; treat the Visily designs as
+> authoritative for visuals **except** where v4.7 changed the flow (the slot grid).
 
-### Business rules (cross-check the SRS at `../documents/ChargeOps_SRS_v4_2.docx`)
-- **Pricing is fixed per slot.** The owner sets a default `đ/kWh` rate per charger plus time-band
-  overrides (peak hours cost more). The system **snapshots a fixed price onto each `Slot`**
-  (e.g. 45.000đ, 55.000đ). **The driver UI displays `Slot.price` as-is and must NEVER compute price
-  from kWh.** The `đ/kWh` figure on station/charger views is an informational rate label only.
-- **Slot status** maps to availability: `AVAILABLE` (Có sẵn), `BOOKED` (Đã đặt), `DISABLED` (Tạm khóa).
-- **Refund/cancellation** is time-tiered (e.g. 100% if cancelled early, 50% within a window, 0% if too
-  late / no-show). Copy varies per screen — treat exact thresholds as SRS-defined.
-- **Auto no-show:** a slot auto-locks ~15 min after start if the driver doesn't check in → `NO_SHOW`.
-- **Check-in** is by QR at the station; success → option to start charging; charging auto-stops when full.
+### Business rules (cross-check the SRS at `../documents/ChargeOps_SRS_v4_7.docx`)
+- **Charge Point vs Connector.** A Charge Point is the physical device — it carries a `zoneLabel`
+  ("where in the car park") and a provisioning status. A **Connector** is the bookable port and the
+  unit of contention: bookings, QR check-in, and availability all operate on it. Its `id` is what the
+  glossary calls the **Charger ID** and what the printed QR encodes (BR-CHG-02). A Charge Point that
+  isn't ACTIVE forces all its connectors to read OFFLINE (BR-CHG-01) — derived for display in
+  `utils/connectors.ts`, never written back.
+- **There are no stored time slots.** Bookable time is *derived* from the station's operating hours
+  minus the ranges already booked on that connector (`utils/availability.ts`). The driver picks a
+  start time + duration; a booking reserves a continuous range (FR05/FR11).
+- **Pricing is time-of-use and computed** (`utils/pricing.ts`): standard 05:00–17:00, peak 17:00–21:00
+  (base + 800đ/kWh), off-peak 21:00–05:00 (base − 600đ/kWh); energy ≈ `powerKw × hours × 0.62`. A
+  window crossing a band boundary produces **one `BookingPriceLine` per band** and the total is their
+  sum. The lines are snapshotted onto the booking and never recalculated (BR-STA-03). These constants
+  mirror the owner console's mock pricing so both apps quote the same price.
+- **Refund tiers (FR08):** within **5 minutes of creating the booking → 100%** (the grace period —
+  an override that beats every tier below); then 100% at 60+ min before start, 50% at 15–60 min,
+  0% inside 15 min or on a no-show.
+- **Payment hold:** an unpaid booking holds its range for 10 minutes via `expiresAt`, then becomes
+  `EXPIRED` (BR-BOK-02).
+- **Auto no-show:** no check-in within 15 min of the start → the booking is **auto-CANCELLED with
+  `cancelReason: 'NO_SHOW'`** at 0% refund (BR-BOK-05). There is no `NO_SHOW` status; the reason
+  drives the history badge.
+- **Check-in (FR07)** is by QR on the connector. Scanning only *resolves* — the driver confirms on a
+  screen before the state changes. Failures are distinguished: wrong connector / too early / window
+  expired / no booking / unknown QR.
+- **Overlapping bookings are allowed** on different connectors, with a non-blocking warning at
+  confirmation time (BR-BOK-08).
 - **Ratings:** stations show an average star rating (`Station.rating`, `reviewCount`). Display only;
   driver-side rating submission is not yet specified.
 

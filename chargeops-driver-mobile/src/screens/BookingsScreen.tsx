@@ -155,7 +155,7 @@ export function BookingsScreen() {
           {b.stationName}
         </Text>
         <Text style={styles.heroTime}>
-          {formatTime(b.startAt)} • {b.chargerName}
+          {formatTime(b.startAt)} • {b.connectorName}
         </Text>
 
         <Text style={styles.heroCountdown}>{due ? t('bookings.readyNow') : formatCountdown(msLeft)}</Text>

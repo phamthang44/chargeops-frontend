@@ -6,7 +6,9 @@
     "loading": "Loading…",
     "language": "Language",
     "back": "Back",
-    "role": "DRIVER"
+    "role": "DRIVER",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "nav": {
     "stationList": "Stations",
@@ -15,8 +17,8 @@
     "history": "History",
     "profile": "Profile",
     "stationDetail": "Station details",
-    "slotPicker": "Choose a time slot",
-    "qrCheckIn": "QR Check-in"
+    "qrCheckIn": "QR Check-in",
+    "timeRangePicker": "Choose a time"
   },
   "auth": {
     "errors": {
@@ -54,9 +56,9 @@
     },
     "simBooking": {
       "SUCCESS": "Success",
-      "SLOT_TAKEN": "Slot taken",
       "NETWORK_ERROR": "Network error",
-      "RANDOM": "Random"
+      "RANDOM": "Random",
+      "RANGE_TAKEN": "Range taken"
     }
   },
   "welcome": {
@@ -132,15 +134,14 @@
     "ports": "{{available}}/{{total}} ports free",
     "full": "Full",
     "nearby": "Stations near you",
-    "updated": "Updated {{minutes}} min ago",
     "eta": "{{minutes}} min drive",
     "directions": "Directions",
-    "viewDetail": "View details",
     "empty": "No matching charging stations found.",
     "filters": {
-      "all": "All",
-      "dc": "Fast (DC)",
-      "open": "Open now"
+      "available": "Free now",
+      "open": "Open now",
+      "dc": "DC fast",
+      "ac": "AC"
     },
     "sortTitle": "Sort by",
     "sort": {
@@ -154,7 +155,16 @@
     "notificationsTitle": "Notifications",
     "notificationsEmpty": "You have no notifications yet.",
     "promoTitle": "Today's offer",
-    "promoBody": "20% off charging at selected stations from 10pm – 6am."
+    "promoBody": "20% off charging at selected stations from 10pm – 6am.",
+    "connectorTypes": {
+      "CCS2": "CCS2",
+      "CHADEMO": "CHAdeMO",
+      "TYPE2": "AC Type 2",
+      "GBT": "GB/T"
+    },
+    "fastCharge": "Fast charge",
+    "resultCount": "{{count}} stations",
+    "clearFilters": "Clear"
   },
   "map": {
     "title": "Map",
@@ -169,7 +179,8 @@
       "busy": "Almost full",
       "full": "Full",
       "closed": "Closed"
-    }
+    },
+    "full": "Full"
   },
   "bookingCard": {
     "code": "Code: {{code}}",
@@ -236,10 +247,6 @@
     "refundLine1": "100% refund if cancelled more than 60 minutes ahead.",
     "refundLine2": "50% refund if cancelled within 15–60 minutes.",
     "refundLine3": "No refund if cancelled under 15 minutes or no-show.",
-    "chargerList": "Chargers",
-    "selectCharger": "Choose a charger",
-    "selectChargerHint": "Please choose a charger to continue",
-    "chargerCount": "{{available}}/{{total}} available",
     "descriptionTitle": "About this station",
     "priceFrom": "From",
     "locationTitle": "Location",
@@ -254,34 +261,13 @@
     "status": {
       "AVAILABLE": "Available",
       "IN_USE": "Charging",
-      "DISABLED": "Locked",
-      "MAINTENANCE": "Maintenance"
-    }
-  },
-  "slotPicker": {
-    "title": "Choose a time slot",
-    "cta": "Continue to payment",
-    "selectDate": "Choose a date",
-    "monthYear": "{{month}}/{{year}}",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    "availableSlots": "Available slots",
-    "legendAvailable": "Available",
-    "legendMine": "Yours",
-    "legendBooked": "Occupied",
-    "until": "Until {{time}}",
-    "status": {
-      "AVAILABLE": "Available",
-      "OCCUPIED": "Occupied",
-      "UNAVAILABLE": "Unavailable",
-      "MINE": "Your booking"
+      "OFFLINE": "Offline"
     },
-    "chargerStatusActive": "Active",
-    "refundTitle": "Refund policy",
-    "refundBody": "100% refund if cancelled more than 60 minutes ahead. 50% refund within 15–60 minutes before the start time.",
-    "selectHint": "Please choose a time slot to continue",
-    "selectedCount": "{{count}} slot(s) selected",
-    "total": "Total",
-    "empty": "No slots available for this date."
+    "selectConnector": "Choose a connector",
+    "selectConnectorHint": "Please choose a connector to continue",
+    "connectorCount": "{{available}}/{{total}} connectors free",
+    "maxPower": "Up to {{power}} kW",
+    "refundLine0": "Cancel within 5 minutes of booking: 100% refund"
   },
   "bookingStatus": {
     "PENDING": "Pending",
@@ -290,7 +276,10 @@
     "COMPLETED": "Completed",
     "CANCELLED": "Cancelled",
     "NO_SHOW": "No-show",
-    "UPCOMING": "Upcoming"
+    "UPCOMING": "Upcoming",
+    "CHARGING": "Charging",
+    "EXPIRED": "Hold expired",
+    "PAYMENT_TIMEOUT": "Payment timed out"
   },
   "payment": {
     "title": "Payment method",
@@ -307,10 +296,7 @@
     "detailTitle": "Booking details",
     "date": "DATE",
     "time": "TIME",
-    "charger": "CHARGER",
-    "chargerValue": "{{name}} - {{power}}kW ({{connector}} port)",
     "invoiceTitle": "Invoice",
-    "chargingFee": "Charging fee ({{count}}h)",
     "serviceFee": "Service fee",
     "total": "Total",
     "refundTitle": "Refund policy",
@@ -319,7 +305,15 @@
     "refund3": "No refund if cancelled under 15 minutes.",
     "totalToPay": "TOTAL TO PAY",
     "secure": "Secure payment",
-    "cta": "Pay and book"
+    "cta": "Pay and book",
+    "connector": "Connector",
+    "connectorValue": "{{chargePoint}} · {{name}} — {{connector}} {{power}} kW",
+    "fastCharge": "DC fast charging",
+    "lineDetail": "~{{kwh}} kWh × {{rate}}/kWh",
+    "refundGrace": "Cancel within 5 minutes of booking: 100% refund",
+    "overlapTitle": "You already have a booking then",
+    "overlapBody": "You have a booking from {{start}}–{{end}} at {{station}}. Do you still want to book this one?",
+    "overlapConfirm": "Book anyway"
   },
   "paymentProcessing": {
     "title": "Processing payment",
@@ -345,9 +339,9 @@
   },
   "booking": {
     "errors": {
-      "SLOT_TAKEN": "Sorry, this slot was just booked by someone else. Please pick another time.",
       "NETWORK_ERROR": "No network connection. Please check and try again.",
-      "GENERIC": "Couldn't create the booking. Please try again."
+      "GENERIC": "Couldn't create the booking. Please try again.",
+      "RANGE_TAKEN": "Sorry, this time range was just booked by someone else. Please pick another time."
     }
   },
   "bookingSuccess": {
@@ -356,7 +350,6 @@
     "txTitle": "TRANSACTION DETAILS",
     "paid": "Paid",
     "station": "Station",
-    "charger": "Charger",
     "time": "Time",
     "total": "Total",
     "checkInTitle": "Check-in guide",
@@ -365,7 +358,8 @@
     "step3": "Plug in the connector and start the session from the app.",
     "viewDetail": "View booking details",
     "home": "Back to home",
-    "refundNote": "100% refund policy applies if cancelled more than 30 minutes ahead."
+    "refundNote": "100% refund policy applies if cancelled more than 30 minutes ahead.",
+    "connector": "Connector"
   },
   "bookingDetail": {
     "title": "Booking details",
@@ -374,12 +368,9 @@
     "countdownTitle": "Check-in window remaining",
     "countdownNote": "Please arrive on time and scan the QR code on the charger to start your session. The booking auto-cancels if you are more than 15 minutes late.",
     "stationTitle": "Station info",
-    "charger": "CHARGER",
     "connector": "CONNECTOR",
     "date": "DATE",
-    "slot": "TIME SLOT",
     "paymentTitle": "Payment details",
-    "chargingFee": "Est. charging fee ({{count}}h)",
     "serviceFee": "Service fee",
     "total": "Total",
     "refundTitle": "Refund policy",
@@ -390,7 +381,13 @@
     "completedNote": "This booking has ended.",
     "checkedInNote": "You checked in at {{time}}.",
     "refundedNote": "Cancelled. {{amount}} refunded to your ChargeOps Wallet.",
-    "noRefundNote": "Booking cancelled — no refund applied."
+    "noRefundNote": "Booking cancelled — no refund applied.",
+    "chargePoint": "Charge point",
+    "timeRange": "Time range",
+    "chargerId": "Charger ID (scan the QR)",
+    "holdNote": "Your time is held for {{time}} more. Finish payment before it runs out or the range is released.",
+    "graceHint": "Free cancellation until {{time}}",
+    "refundNow": "Refund if cancelled now"
   },
   "cancelBooking": {
     "title": "Confirm cancellation",
@@ -408,7 +405,9 @@
     "timeLeft": "Time left:",
     "confirm": "Confirm cancellation",
     "dismiss": "Keep booking",
-    "warning": "Cancelling too often may affect your reputation score on ChargeOps."
+    "warning": "Cancelling too often may affect your reputation score on ChargeOps.",
+    "policyGrace": "You're within 5 minutes of booking — cancelling now refunds everything, however close the start time is.",
+    "graceLeft": "{{time}} left on the full-refund window"
   },
   "qrCheckIn": {
     "title": "QR Check-in",
@@ -419,14 +418,30 @@
     "permissionBody": "ChargeOps uses the camera to scan the QR code on the charger when you check in.",
     "allow": "Allow camera access",
     "openSettings": "Open Settings",
-    "successTitle": "Check-in successful!",
     "chargerCode": "Charger ID: {{code}}",
     "station": "Station",
     "connector": "Connector",
     "time": "Booked time",
-    "startCharging": "Start charging now",
     "autoStop": "Charging stops automatically when full",
-    "close": "Close"
+    "close": "Close",
+    "confirmTitle": "Confirm check-in",
+    "confirmCta": "Confirm & start charging",
+    "scannedCode": "Scanned: {{code}}",
+    "rescan": "Scan again",
+    "errorTitles": {
+      "UNKNOWN_QR": "QR code not recognised",
+      "NO_BOOKING": "No booking found",
+      "WRONG_CONNECTOR": "Wrong connector",
+      "TOO_EARLY": "Too early to check in",
+      "WINDOW_EXPIRED": "Check-in window closed"
+    },
+    "errors": {
+      "UNKNOWN_QR": "This QR code isn't a ChargeOps connector. Check that you're scanning the sticker on the port itself.",
+      "NO_BOOKING": "You have no active booking on this connector right now.",
+      "WRONG_CONNECTOR": "Your booking is on {{chargePoint}} · {{connector}} ({{zone}}). Scan the QR on that connector instead.",
+      "TOO_EARLY": "Check-in opens at {{time}}, in {{minutes}} min. You can't scan before the start time.",
+      "WINDOW_EXPIRED": "The 15-minute check-in window has closed; the booking was auto-cancelled with no refund."
+    }
   },
   "chargingSession": {
     "headerTitle": "Charging - {{station}}",
@@ -454,5 +469,47 @@
     "autoNote": "The system automatically stops the current when it reaches 100% or when your booked slot ends.",
     "finish": "End charging session",
     "finishFull": "Complete session"
+  },
+  "timeRangePicker": {
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "title": "Choose a time",
+    "cta": "Continue",
+    "selectDate": "Pick a date",
+    "monthYear": "{{month}}/{{year}}",
+    "availability": "Available time",
+    "timelineLabel": "Timeline for the day — tap to set a start time",
+    "legendSelected": "Your selection",
+    "legendBooked": "Already booked",
+    "legendMine": "Your booking",
+    "startTime": "Start time",
+    "duration": "Duration",
+    "durationMin": "{{minutes}} min",
+    "durationHour": "{{hours}}h",
+    "durationHourMin": "{{hours}}h {{minutes}}m",
+    "durationCapped": "Up to {{duration}} — after that the connector is booked or the station closes.",
+    "openUntil": "Open until {{time}}",
+    "priceTitle": "Estimated price",
+    "band": {
+      "PEAK": "Peak",
+      "STANDARD": "Standard",
+      "OFFPEAK": "Off-peak"
+    },
+    "perKwh": "{{rate}}/kWh",
+    "estEnergy": "Est. ~{{kwh}} kWh",
+    "serviceFee": "Service fee",
+    "total": "Total",
+    "refundTitle": "Cancellation policy",
+    "refundBody": "Cancel within 5 minutes of booking for a full refund. After that: 100% more than 60 minutes before the start, 50% between 15 and 60 minutes, nothing inside 15 minutes or for a no-show.",
+    "selectHint": "Pick a start time and a duration",
+    "selectedWindow": "Selected window",
+    "empty": "No time left on this day. Try another date or another connector."
   }
 }

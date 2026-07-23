@@ -9,19 +9,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { checkInBooking, getBookingById } from '@/services/bookingService';
+import {
+  confirmCheckIn,
+  getBookingById,
+  resolveCheckIn,
+  type CheckInResolution,
+} from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
-import { formatTimeRange } from '@/utils/format';
+import { formatTime, formatTimeRange } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'QRCheckIn'>;
 type Route = RouteProp<RootStackParamList, 'QRCheckIn'>;
 
 /**
- * "Quét QR Check-in" — final step of the booking flow.
+ * "Quét QR Check-in" — final step of the booking flow (FR07).
+ *
  * Uses the real device camera (expo-camera, bundled in Expo Go SDK 54) to scan
- * the QR code on the charger. A "simulate" fallback keeps it usable on a
- * simulator or when camera permission is denied.
+ * the QR on the Connector. The QR encodes one Connector id and nothing else, so
+ * the scan resolves to exactly one port; the service then looks for a Confirmed
+ * booking of this driver's on that port inside the check-in window.
+ *
+ * Scanning never checks anyone in by itself: a successful scan shows a
+ * confirmation screen and the driver taps to commit. A failed scan says *why* —
+ * wrong port, too early, or window expired — because the remedy differs.
+ *
+ * A "simulate" fallback keeps it usable on a simulator or when camera permission
+ * is denied.
  */
 export function QRCheckInScreen() {
   const navigation = useNavigation<Nav>();
@@ -29,17 +43,20 @@ export function QRCheckInScreen() {
   const { t } = useTranslation();
 
   const [permission, requestPermission] = useCameraPermissions();
-  const [booking, setBooking] = useState<Booking | null>(null);
+  const [expected, setExpected] = useState<Booking | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState(false);
+  const [result, setResult] = useState<CheckInResolution | null>(null);
+  const [committing, setCommitting] = useState(false);
   // Guards against the camera firing onBarcodeScanned many times per second.
   const handled = useRef(false);
 
+  // The booking the driver came here to check into — used to prefill the
+  // simulate fallback with the right QR token.
   useEffect(() => {
     if (!params?.bookingId) return;
     let active = true;
     getBookingById(params.bookingId).then((b) => {
-      if (active) setBooking(b);
+      if (active) setExpected(b);
     });
     return () => {
       active = false;
@@ -53,22 +70,54 @@ export function QRCheckInScreen() {
     }
   }, [permission, requestPermission]);
 
-  async function runCheckIn() {
+  async function handleScan(payload: string) {
     if (handled.current) return;
     handled.current = true;
     setScanning(true);
-    if (params?.bookingId) await checkInBooking(params.bookingId);
+    setResult(await resolveCheckIn(payload));
     setScanning(false);
-    setScanned(true);
   }
 
-  function startCharging() {
-    navigation.replace('ChargingSession', { bookingId: params?.bookingId });
+  /** Simulator fallback: pretend we scanned the port this booking is for. */
+  function simulateScan() {
+    void handleScan(expected?.connectorId ?? '');
   }
 
-  const chargerCode = booking
-    ? `EV-${booking.connectorType}-${booking.chargerId.replace('ch-', '')}`
-    : 'EV-VN-0000';
+  function retry() {
+    handled.current = false;
+    setResult(null);
+  }
+
+  async function commitCheckIn() {
+    if (!result?.ok) return;
+    setCommitting(true);
+    await confirmCheckIn(result.booking.id);
+    setCommitting(false);
+    navigation.replace('ChargingSession', { bookingId: result.booking.id });
+  }
+
+  /** Localized explanation for a rejected scan (FR07 failure cases). */
+  function errorBody(r: Extract<CheckInResolution, { ok: false }>): string {
+    switch (r.code) {
+      case 'TOO_EARLY':
+        return t('qrCheckIn.errors.TOO_EARLY', {
+          time: r.booking ? formatTime(r.booking.startAt) : '',
+          minutes: r.minutesUntilOpen ?? 0,
+        });
+      case 'WINDOW_EXPIRED':
+        return t('qrCheckIn.errors.WINDOW_EXPIRED');
+      case 'WRONG_CONNECTOR':
+        return t('qrCheckIn.errors.WRONG_CONNECTOR', {
+          connector: r.booking?.connectorName ?? '',
+          chargePoint: r.booking?.chargePointName ?? '',
+          zone: r.booking?.zoneLabel ?? '',
+        });
+      case 'UNKNOWN_QR':
+        return t('qrCheckIn.errors.UNKNOWN_QR');
+      default:
+        return t('qrCheckIn.errors.NO_BOOKING');
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -95,7 +144,9 @@ export function QRCheckInScreen() {
               style={StyleSheet.absoluteFill}
               facing="back"
               barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-              onBarcodeScanned={scanned || scanning ? undefined : runCheckIn}
+              onBarcodeScanned={
+                result || scanning ? undefined : ({ data }) => void handleScan(data)
+              }
             />
             {/* Frame overlay */}
             <View style={styles.frame}>
@@ -109,7 +160,7 @@ export function QRCheckInScreen() {
               <Text style={styles.scanHint}>
                 {scanning ? t('qrCheckIn.scanning') : t('qrCheckIn.scanHint')}
               </Text>
-              <Pressable onPress={runCheckIn} hitSlop={8}>
+              <Pressable onPress={simulateScan} hitSlop={8}>
                 <Text style={styles.simulateLink}>{t('qrCheckIn.simulate')}</Text>
               </Pressable>
             </View>
@@ -127,54 +178,79 @@ export function QRCheckInScreen() {
               onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())}
               style={styles.permissionBtn}
             />
-            <Pressable onPress={runCheckIn} hitSlop={8}>
+            <Pressable onPress={simulateScan} hitSlop={8}>
               <Text style={styles.simulateLink}>{t('qrCheckIn.simulate')}</Text>
             </Pressable>
           </View>
         )}
       </View>
 
-      {/* Success sheet */}
-      {scanned && (
+      {/* Confirmation sheet — the driver commits the check-in from here (FR07) */}
+      {result?.ok && (
         <View style={styles.sheetOverlay}>
           <View style={styles.sheet}>
             <View style={styles.checkRing}>
-              <Ionicons name="checkmark" size={32} color={colors.primary} />
+              <Ionicons name="qr-code-outline" size={30} color={colors.primary} />
             </View>
-            <Text style={styles.sheetTitle}>{t('qrCheckIn.successTitle')}</Text>
-            <Text style={styles.sheetCode}>{t('qrCheckIn.chargerCode', { code: chargerCode })}</Text>
+            <Text style={styles.sheetTitle}>{t('qrCheckIn.confirmTitle')}</Text>
+            {/* The Charger ID the QR resolved to (BR-CHG-02) */}
+            <Text style={styles.sheetCode}>
+              {t('qrCheckIn.chargerCode', { code: result.connector.id })}
+            </Text>
 
             <View style={styles.sheetCard}>
               <View style={styles.sheetRow}>
                 <Text style={styles.sheetLabel}>{t('qrCheckIn.station')}</Text>
                 <Text style={styles.sheetValue} numberOfLines={1}>
-                  {booking?.stationName ?? '—'}
+                  {result.booking.stationName}
                 </Text>
               </View>
               <View style={styles.sheetRow}>
                 <Text style={styles.sheetLabel}>{t('qrCheckIn.connector')}</Text>
-                {booking ? (
-                  <StatusBadge
-                    variant="success"
-                    label={`${booking.connectorType} ${booking.powerKw}kW`}
-                  />
-                ) : (
-                  <Text style={styles.sheetValue}>—</Text>
-                )}
+                <StatusBadge
+                  variant="success"
+                  label={`${result.connector.connectorType} ${result.connector.powerKw}kW`}
+                />
               </View>
               <View style={styles.sheetRow}>
                 <Text style={styles.sheetLabel}>{t('qrCheckIn.time')}</Text>
                 <Text style={styles.sheetValue}>
-                  {booking ? formatTimeRange(booking.startAt, booking.endAt) : '—'}
+                  {formatTimeRange(result.booking.startAt, result.booking.endAt)}
                 </Text>
               </View>
             </View>
 
-            <AppButton label={t('qrCheckIn.startCharging')} onPress={startCharging} />
+            <AppButton
+              label={t('qrCheckIn.confirmCta')}
+              loading={committing}
+              onPress={commitCheckIn}
+            />
             <View style={styles.autoStopRow}>
               <Ionicons name="information-circle-outline" size={15} color={colors.textMuted} />
               <Text style={styles.autoStop}>{t('qrCheckIn.autoStop')}</Text>
             </View>
+          </View>
+        </View>
+      )}
+
+      {/* Rejected scan — say which of the FR07 failure cases it was */}
+      {result && !result.ok && (
+        <View style={styles.sheetOverlay}>
+          <View style={styles.sheet}>
+            <View style={styles.errorRing}>
+              <Ionicons name="alert" size={30} color={colors.error} />
+            </View>
+            <Text style={styles.sheetTitle}>{t(`qrCheckIn.errorTitles.${result.code}`)}</Text>
+            <Text style={styles.errorBody}>{errorBody(result)}</Text>
+            {result.connector && (
+              <Text style={styles.sheetCode}>
+                {t('qrCheckIn.scannedCode', { code: result.connector.id })}
+              </Text>
+            )}
+            <AppButton label={t('qrCheckIn.rescan')} onPress={retry} />
+            <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+              <Text style={styles.dismissLink}>{t('common.close')}</Text>
+            </Pressable>
           </View>
         </View>
       )}
@@ -260,6 +336,28 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorRing: {
+    alignSelf: 'center',
+    width: 64,
+    height: 64,
+    borderRadius: radius.full,
+    borderWidth: 2,
+    borderColor: colors.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorBody: {
+    fontSize: fontSizes.body,
+    color: colors.textBody,
+    textAlign: 'center',
+    lineHeight: lineHeights.body,
+  },
+  dismissLink: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.semibold,
+    color: colors.textMuted,
+    textAlign: 'center',
   },
   sheetTitle: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: colors.textStrong, textAlign: 'center' },
   sheetCode: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center' },

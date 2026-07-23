@@ -267,7 +267,8 @@
     "selectConnectorHint": "Please choose a connector to continue",
     "connectorCount": "{{available}}/{{total}} connectors free",
     "maxPower": "Up to {{power}} kW",
-    "refundLine0": "Cancel within 5 minutes of booking: 100% refund"
+    "refundLine0": "Cancel within 5 minutes of booking: 100% refund",
+    "photoPending": "Photo coming soon"
   },
   "bookingStatus": {
     "PENDING": "Pending",

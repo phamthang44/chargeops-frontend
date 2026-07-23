@@ -153,7 +153,8 @@ export function StationDetailScreen() {
           >
             {GALLERY.map((icon, i) => (
               <View key={i} style={[styles.slide, { width }]}>
-                <Ionicons name={icon} size={72} color={colors.textInverse} style={styles.heroIcon} />
+                <Ionicons name={icon} size={64} color={colors.border} />
+                <Text style={styles.heroHint}>{t('stationDetail.photoPending')}</Text>
               </View>
             ))}
           </ScrollView>
@@ -194,6 +195,10 @@ export function StationDetailScreen() {
             <Ionicons name="location" size={16} color={colors.primary} />
             <Text style={styles.address}>{station.address}</Text>
           </View>
+
+          {/* Description — up top with the rest of the "about" content, not
+              stranded below the reviews at the bottom of the page. */}
+          {station.description && <Text style={styles.desc}>{station.description}</Text>}
 
           {/* Amenities */}
           {station.amenities && station.amenities.length > 0 && (
@@ -332,40 +337,41 @@ export function StationDetailScreen() {
             <Text style={styles.metaMuted}>{t('stationDetail.noReviews')}</Text>
           ) : (
             <View style={styles.reviewList}>
+              {/* Rating summary — score + stars, clean and airy */}
               {station.rating !== undefined && (
                 <View style={styles.ratingSummary}>
-                  <Text style={styles.ratingBig}>{station.rating.toFixed(1)}</Text>
+                  <View style={styles.ratingScoreBlock}>
+                    <Text style={styles.ratingBig}>{station.rating.toFixed(1)}</Text>
+                    <Text style={styles.ratingOutOf}>/5</Text>
+                  </View>
                   <View style={styles.flex1}>
                     <StarRating rating={station.rating} size={16} />
                     {station.reviewCount !== undefined && (
-                      <Text style={styles.metaMuted}>{t('stationDetail.reviews', { count: station.reviewCount })}</Text>
+                      <Text style={styles.ratingCount}>
+                        {t('stationDetail.reviews', { count: station.reviewCount })}
+                      </Text>
                     )}
                   </View>
                 </View>
               )}
-              {reviews.slice(0, 2).map((r) => (
-                <View key={r.id} style={styles.reviewRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{r.authorName.charAt(0)}</Text>
-                  </View>
-                  <View style={styles.flex1}>
-                    <View style={styles.reviewHead}>
-                      <Text style={styles.reviewName}>{r.authorName}</Text>
-                      <Text style={styles.metaMuted}>{formatDate(r.createdAt)}</Text>
+              {/* Each review as its own card */}
+              {reviews.slice(0, 3).map((r) => (
+                <View key={r.id} style={styles.reviewCard}>
+                  <View style={styles.reviewHead}>
+                    <View style={styles.reviewWho}>
+                      <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>{r.authorName.charAt(0)}</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.reviewName}>{r.authorName}</Text>
+                        <Text style={styles.reviewDate}>{formatDate(r.createdAt)}</Text>
+                      </View>
                     </View>
                     <StarRating rating={r.rating} size={12} />
-                    <Text style={styles.reviewComment}>{r.comment}</Text>
                   </View>
+                  <Text style={styles.reviewComment}>{r.comment}</Text>
                 </View>
               ))}
-            </View>
-          )}
-
-          {/* Description */}
-          {station.description && (
-            <View style={styles.descBlock}>
-              <Text style={styles.sectionTitle}>{t('stationDetail.descriptionTitle')}</Text>
-              <Text style={styles.desc}>{station.description}</Text>
             </View>
           )}
         </View>
@@ -407,12 +413,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   flex1: { flex: 1 },
 
-  hero: { height: HERO_HEIGHT, backgroundColor: colors.primary },
-  slide: { height: HERO_HEIGHT, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  heroIcon: { opacity: 0.9 },
+  // Neutral photo placeholder (real photos drop in later) — no longer a wall of green
+  hero: { height: HERO_HEIGHT, backgroundColor: colors.surfaceAlt },
+  slide: { height: HERO_HEIGHT, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+  heroHint: { fontSize: fontSizes.caption, color: colors.textMuted, fontWeight: fontWeights.medium },
   dots: { position: 'absolute', bottom: spacing.xl, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: spacing.sm },
-  dot: { width: 7, height: 7, borderRadius: radius.full, backgroundColor: colors.surface, opacity: 0.5 },
-  dotActive: { opacity: 1, width: 18 },
+  dot: { width: 7, height: 7, borderRadius: radius.full, backgroundColor: colors.textStrong, opacity: 0.2 },
+  dotActive: { opacity: 0.55, width: 18 },
 
   centerLoader: { position: 'absolute', top: '60%', alignSelf: 'center' },
 
@@ -458,12 +465,14 @@ const styles = StyleSheet.create({
   refundCard: {
     flexDirection: 'row',
     gap: spacing.md,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radius.lg,
     padding: spacing.lg,
   },
   refundBody: { flex: 1, gap: spacing.xs },
-  refundTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
+  refundTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
   refundLine: { fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
 
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -492,7 +501,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -541,24 +550,41 @@ const styles = StyleSheet.create({
 
   // Reviews
   reviewList: { gap: spacing.md, marginTop: -spacing.sm },
-  ratingSummary: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  ratingSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  ratingScoreBlock: { flexDirection: 'row', alignItems: 'baseline' },
   ratingBig: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong },
-  reviewRow: { flexDirection: 'row', gap: spacing.md },
+  ratingOutOf: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textMuted },
+  ratingCount: { fontSize: fontSizes.caption, color: colors.textMuted, marginTop: 2 },
+  reviewCard: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    gap: spacing.sm,
+  },
+  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reviewWho: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: radius.full,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
-  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  avatarText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
   reviewName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  reviewComment: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body, marginTop: spacing.xs },
+  reviewDate: { fontSize: fontSizes.caption, color: colors.textMuted, marginTop: 1 },
+  reviewComment: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body },
 
-  descBlock: { gap: spacing.sm },
-  desc: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body },
+  desc: { fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body, marginTop: -spacing.sm },
 
   bottomBar: {
     position: 'absolute',

@@ -267,7 +267,8 @@
     "selectConnectorHint": "Vui lòng chọn cổng sạc để tiếp tục",
     "connectorCount": "{{available}}/{{total}} cổng đang trống",
     "maxPower": "Tối đa {{power}} kW",
-    "refundLine0": "Hủy trong 5 phút sau khi đặt: hoàn 100%"
+    "refundLine0": "Hủy trong 5 phút sau khi đặt: hoàn 100%",
+    "photoPending": "Ảnh đang cập nhật"
   },
   "bookingStatus": {
     "PENDING": "Chờ xác nhận",

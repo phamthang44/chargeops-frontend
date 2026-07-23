@@ -1,7 +1,6 @@
 /** Reusable UI components barrel. Usage: import { AppButton, Card } from '@/components'; */
 export { AppButton } from './AppButton';
 export { AppHeader } from './AppHeader';
-export { DayAgenda } from './DayAgenda';
 export { BookingCard } from './BookingCard';
 export { BottomSheet } from './BottomSheet';
 export { BrandMark, Logo } from './brand/Logo';

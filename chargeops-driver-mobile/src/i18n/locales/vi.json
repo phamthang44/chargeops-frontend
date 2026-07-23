@@ -515,6 +515,9 @@
     "tapToStart": "Chạm vào khung giờ trống để chọn giờ bắt đầu",
     "past": "Đã qua",
     "legendFree": "Còn trống",
-    "freeSlot": "Chạm để chọn"
+    "freeSlot": "Chạm để chọn",
+    "slotHint": "Chạm khung giờ bắt đầu, chạm khung khác để kéo dài (mỗi khung 30 phút).",
+    "slotBooked": "Đã đặt",
+    "slotSummary": "{{count}} khung · {{duration}}"
   }
 }

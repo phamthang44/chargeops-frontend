@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, DayAgenda, GlassButton, StatusBadge } from '@/components';
+import { AppButton, GlassButton, StatusBadge } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBusyRanges } from '@/services/bookingService';
 import {
@@ -17,15 +17,10 @@ import {
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { ChargePoint, Connector, Station } from '@/types';
 import {
-  DURATION_OPTIONS,
   earliestStartMin,
   formatMinutes,
   getUpcomingDates,
   isoAtMinutes,
-  maxDurationFrom,
-  MIN_DURATION_MIN,
-  startOptions,
-  STEP_MIN,
   type BusyRange,
 } from '@/utils/availability';
 import { effectiveConnectorStatus } from '@/utils/connectors';
@@ -35,13 +30,26 @@ import { quoteBooking } from '@/utils/pricing';
 type Nav = NativeStackNavigationProp<RootStackParamList, 'TimeRangePicker'>;
 type Route = RouteProp<RootStackParamList, 'TimeRangePicker'>;
 
+/** The booking quantum: bookable time is chosen in 30-minute slots. */
+const SLOT_MIN = 30;
+
+interface SlotCell {
+  startMin: number;
+  startAt: string;
+  booked: boolean;
+  /** Charging cost of this 30-minute slot (TOU rate for its band), fee excluded. */
+  price: number;
+}
+
 /**
  * "Chọn khung giờ" — step 3 of the booking flow (FR05/FR11).
  *
- * The driver picks a date, a start time and a duration. There is no slot grid:
- * bookable time is derived from the station's operating hours minus the ranges
- * already booked on the chosen connector, so the timeline shows what's left and
- * the duration options are capped by the next booking.
+ * The day is shown as a grid of 30-minute slots. The driver taps a start slot,
+ * then taps another free slot to stretch a contiguous range (06:00–06:30, or
+ * 06:00–08:00 …) — always in 30-minute steps, which keeps the range trivial to
+ * validate here and on the backend. A booking still reserves one continuous
+ * range (start + duration); the slots are just the selection grid, not stored
+ * entities (SRS §7).
  */
 export function TimeRangePickerScreen() {
   const navigation = useNavigation<Nav>();
@@ -57,8 +65,9 @@ export function TimeRangePickerScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(dates[0]);
   const [busy, setBusy] = useState<BusyRange[]>([]);
   const [loading, setLoading] = useState(true);
-  const [startMin, setStartMin] = useState<number | null>(null);
-  const [durationMin, setDurationMin] = useState<number>(60);
+  // Contiguous 30-minute slot selection: anchor = first tapped, focus = last.
+  const [anchor, setAnchor] = useState<number | null>(null);
+  const [focus, setFocus] = useState<number | null>(null);
 
   // Load the station and resolve which connector is being booked.
   useEffect(() => {
@@ -89,7 +98,8 @@ export function TimeRangePickerScreen() {
     if (!connector) return;
     let active = true;
     setLoading(true);
-    setStartMin(null); // a start time is only meaningful for one day
+    setAnchor(null); // selection is only meaningful for one day
+    setFocus(null);
     getBusyRanges(connector.id, selectedDate.toISOString()).then((ranges) => {
       if (!active) return;
       setBusy(ranges);
@@ -107,37 +117,59 @@ export function TimeRangePickerScreen() {
     [selectedDate, opensAtMin],
   );
 
-  const starts = useMemo(
-    () => startOptions(selectedDate, opensAtMin, closesAtMin, busy),
-    [selectedDate, opensAtMin, closesAtMin, busy],
-  );
+  // Bookable 30-minute slots for the day: operating hours, dropping the past,
+  // each flagged if a booking overlaps it. Adjacent array entries are exactly
+  // 30 minutes apart, so a contiguous index range == a contiguous time range.
+  const slots = useMemo<SlotCell[]>(() => {
+    if (!connector) return [];
+    const out: SlotCell[] = [];
+    const first = Math.ceil(opensAtMin / SLOT_MIN) * SLOT_MIN;
+    for (let s = first; s + SLOT_MIN <= closesAtMin; s += SLOT_MIN) {
+      if (s < earliestMin) continue; // slot has already started
+      const startAt = isoAtMinutes(selectedDate, s);
+      const booked = busy.some((b) => s < b.toMin && b.fromMin < s + SLOT_MIN);
+      out.push({ startMin: s, startAt, booked, price: quoteBooking(connector, startAt, SLOT_MIN).chargingFee });
+    }
+    return out;
+  }, [connector, opensAtMin, closesAtMin, selectedDate, busy, earliestMin]);
 
-  /** Longest booking possible from the chosen start — caps the duration pills. */
-  const maxDuration = useMemo(
-    () => (startMin === null ? 0 : maxDurationFrom(startMin, busy, closesAtMin)),
-    [startMin, busy, closesAtMin],
-  );
+  const selStart = anchor === null || focus === null ? null : Math.min(anchor, focus);
+  const selEnd = anchor === null || focus === null ? null : Math.max(anchor, focus);
+  const hasSel = selStart !== null && selEnd !== null;
 
-  // Snap a tapped position on the timeline to the nearest selectable start.
-  function pickStartFromTimeline(rawMin: number) {
-    const snapped = Math.round(rawMin / STEP_MIN) * STEP_MIN;
-    const nearest = [...starts]
-      .filter((o) => o.maxDurationMin >= MIN_DURATION_MIN)
-      .sort((a, b) => Math.abs(a.startMin - snapped) - Math.abs(b.startMin - snapped))[0];
-    if (nearest) selectStart(nearest.startMin, nearest.maxDurationMin);
+  /** Every slot across an inclusive index range is free (no booking cuts through). */
+  function rangeFree(a: number, b: number): boolean {
+    for (let i = a; i <= b; i++) if (slots[i].booked) return false;
+    return true;
   }
 
-  function selectStart(min: number, allowed: number) {
-    setStartMin(min);
-    // Keep the current duration when it still fits, otherwise fall back to the
-    // longest option that does — never leave an impossible window selected.
-    if (durationMin > allowed) {
-      const fits = [...DURATION_OPTIONS].reverse().find((d) => d <= allowed);
-      if (fits) setDurationMin(fits);
+  /** Tap anchors a start; tapping another free slot stretches the range in 30-min steps. */
+  function tapSlot(i: number) {
+    if (slots[i].booked) return;
+    if (anchor === null) {
+      setAnchor(i);
+      setFocus(i);
+      return;
+    }
+    if (i === anchor && focus === anchor) {
+      setAnchor(null); // tapping the lone selected slot clears it
+      setFocus(null);
+      return;
+    }
+    const a = Math.min(anchor, i);
+    const b = Math.max(anchor, i);
+    if (rangeFree(a, b)) setFocus(i);
+    else {
+      setAnchor(i); // a booking blocks the span — restart the selection here
+      setFocus(i);
     }
   }
 
-  const startAt = startMin === null ? null : isoAtMinutes(selectedDate, startMin);
+  const startAt = hasSel ? slots[selStart].startAt : null;
+  const durationMin = hasSel ? (selEnd - selStart + 1) * SLOT_MIN : 0;
+  const endMin = hasSel ? slots[selEnd].startMin + SLOT_MIN : 0;
+  const slotCount = durationMin / SLOT_MIN;
+
   const quote = useMemo(
     () => (connector && startAt ? quoteBooking(connector, startAt, durationMin) : null),
     [connector, startAt, durationMin],
@@ -145,7 +177,6 @@ export function TimeRangePickerScreen() {
 
   function handleContinue() {
     if (!connector || !startAt) return;
-    // The booking itself is created after the confirmation step.
     navigation.navigate('BookingConfirmation', {
       stationId: params.stationId,
       connectorId: connector.id,
@@ -165,8 +196,6 @@ export function TimeRangePickerScreen() {
     if (minutes === 0) return t('timeRangePicker.durationHour', { hours });
     return t('timeRangePicker.durationHourMin', { hours, minutes });
   }
-
-  const noneAvailable = !loading && starts.every((o) => o.maxDurationMin < MIN_DURATION_MIN);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -249,70 +278,56 @@ export function TimeRangePickerScreen() {
 
         {loading ? (
           <ActivityIndicator color={colors.primary} style={styles.loader} />
+        ) : slots.length === 0 ? (
+          <Text style={styles.empty}>{t('timeRangePicker.empty')}</Text>
         ) : (
           <>
-            <DayAgenda
-              opensAtMin={opensAtMin}
-              closesAtMin={closesAtMin}
-              busy={busy}
-              earliestMin={earliestMin}
-              selection={startMin === null ? null : { startMin, durationMin }}
-              onPickStart={pickStartFromTimeline}
-            />
+            <View style={styles.slotHint}>
+              <Ionicons name="hand-left-outline" size={15} color={colors.primary} />
+              <Text style={styles.slotHintText}>{t('timeRangePicker.slotHint')}</Text>
+            </View>
 
-            {noneAvailable ? (
-              <Text style={styles.empty}>{t('timeRangePicker.empty')}</Text>
-            ) : (
-              <>
-                {/* Prompt until the driver taps a start on the agenda */}
-                {startMin === null && (
-                  <View style={styles.tapHint}>
-                    <Ionicons name="hand-left-outline" size={16} color={colors.primary} />
-                    <Text style={styles.tapHintText}>{t('timeRangePicker.tapToStart')}</Text>
-                  </View>
-                )}
+            <View style={styles.grid}>
+              {slots.map((sl, i) => {
+                const selected = hasSel && i >= selStart! && i <= selEnd!;
+                return (
+                  <Pressable
+                    key={sl.startMin}
+                    disabled={sl.booked}
+                    onPress={() => tapSlot(i)}
+                    style={[styles.slot, selected && styles.slotSel, sl.booked && styles.slotBooked]}
+                  >
+                    <Text
+                      style={[styles.slotTime, selected && styles.slotTimeSel, sl.booked && styles.slotTimeDim]}
+                    >
+                      {formatMinutes(sl.startMin)}
+                    </Text>
+                    {sl.booked ? (
+                      <Text style={styles.slotTag}>{t('timeRangePicker.slotBooked')}</Text>
+                    ) : (
+                      <Text style={[styles.slotPrice, selected && styles.slotPriceSel]}>
+                        {formatVnd(sl.price)}
+                      </Text>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
 
-                {/* Duration */}
-                <Text style={styles.fieldLabel}>{t('timeRangePicker.duration')}</Text>
-                <View style={styles.durationRow}>
-                  {DURATION_OPTIONS.map((d) => {
-                    // Before a start is chosen every option is offered; after,
-                    // anything that would run into the next booking is out.
-                    const disabled = startMin !== null && d > maxDuration;
-                    const active = d === durationMin;
-                    return (
-                      <Pressable
-                        key={d}
-                        disabled={disabled}
-                        onPress={() => setDurationMin(d)}
-                        style={[
-                          styles.duration,
-                          active && styles.durationActive,
-                          disabled && styles.chipDisabled,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            active && styles.chipTextActive,
-                            disabled && styles.chipTextDisabled,
-                          ]}
-                        >
-                          {durationLabel(d)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                {startMin !== null && maxDuration < DURATION_OPTIONS[DURATION_OPTIONS.length - 1] && (
-                  <Text style={styles.capHint}>
-                    {t('timeRangePicker.durationCapped', {
-                      duration: durationLabel(maxDuration),
-                    })}
-                  </Text>
-                )}
-              </>
-            )}
+            <View style={styles.legendRow}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendSw, styles.swFree]} />
+                <Text style={styles.legendText}>{t('timeRangePicker.legendFree')}</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendSw, styles.swSel]} />
+                <Text style={styles.legendText}>{t('timeRangePicker.legendSelected')}</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendSw, styles.swBooked]} />
+                <Text style={styles.legendText}>{t('timeRangePicker.legendBooked')}</Text>
+              </View>
+            </View>
           </>
         )}
 
@@ -363,9 +378,9 @@ export function TimeRangePickerScreen() {
         </View>
       </ScrollView>
 
-      {/* Footer: chosen window + gated CTA */}
+      {/* Footer: chosen range + gated CTA */}
       <View style={styles.footer}>
-        {startAt === null ? (
+        {!hasSel ? (
           <View style={styles.hint}>
             <Ionicons name="time-outline" size={16} color={colors.textMuted} />
             <Text style={styles.hintText}>{t('timeRangePicker.selectHint')}</Text>
@@ -375,7 +390,10 @@ export function TimeRangePickerScreen() {
             <View>
               <Text style={styles.summaryLabel}>{t('timeRangePicker.selectedWindow')}</Text>
               <Text style={styles.summaryValue}>
-                {formatMinutes(startMin!)} – {formatMinutes(startMin! + durationMin)}
+                {formatMinutes(slots[selStart!].startMin)} – {formatMinutes(endMin)}
+              </Text>
+              <Text style={styles.summarySub}>
+                {t('timeRangePicker.slotSummary', { count: slotCount, duration: durationLabel(durationMin) })}
               </Text>
             </View>
             <View style={styles.summaryTotalBlock}>
@@ -384,11 +402,7 @@ export function TimeRangePickerScreen() {
             </View>
           </View>
         )}
-        <AppButton
-          label={t('timeRangePicker.cta')}
-          disabled={startAt === null}
-          onPress={handleContinue}
-        />
+        <AppButton label={t('timeRangePicker.cta')} disabled={!hasSel} onPress={handleContinue} />
       </View>
     </SafeAreaView>
   );
@@ -457,10 +471,8 @@ const styles = StyleSheet.create({
   loader: { marginVertical: spacing.xl },
   empty: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.lg },
 
-  fieldLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
-
-  // Tap prompt shown until a start is chosen on the agenda
-  tapHint: {
+  // Slot grid instruction
+  slotHint: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
@@ -469,26 +481,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  tapHintText: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.primaryDark },
+  slotHintText: { flex: 1, fontSize: fontSizes.caption, fontWeight: fontWeights.medium, color: colors.primaryDark, lineHeight: lineHeights.caption },
 
-  // Shared chip text (duration pills)
-  chipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-  chipText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  chipTextActive: { color: colors.textInverse },
-  chipTextDisabled: { color: colors.textMuted, opacity: 0.6 },
-
-  // Duration pills
-  durationRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  duration: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+  // 30-minute slot grid (2 columns)
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  slot: {
+    width: '48%',
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    gap: 2,
   },
-  durationActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  capHint: { fontSize: fontSizes.caption, color: colors.textMuted },
+  slotSel: { backgroundColor: colors.primary, borderColor: colors.primary },
+  slotBooked: { backgroundColor: colors.surfaceAlt, borderColor: colors.border, opacity: 0.7 },
+  slotTime: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
+  slotTimeSel: { color: colors.textInverse },
+  slotTimeDim: { color: colors.textMuted, textDecorationLine: 'line-through' },
+  slotPrice: { fontSize: fontSizes.caption, color: colors.textMuted },
+  slotPriceSel: { color: colors.textInverse, opacity: 0.85 },
+  slotTag: { fontSize: fontSizes.caption, color: colors.textMuted, fontWeight: fontWeights.medium },
+
+  // Legend
+  legendRow: { flexDirection: 'row', gap: spacing.lg },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  legendSw: { width: 12, height: 12, borderRadius: 3, borderWidth: 1 },
+  swFree: { backgroundColor: colors.surface, borderColor: colors.border },
+  swSel: { backgroundColor: colors.primary, borderColor: colors.primary },
+  swBooked: { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
+  legendText: { fontSize: fontSizes.caption, color: colors.textMuted, fontWeight: fontWeights.medium },
 
   // Price breakdown
   priceCard: {
@@ -550,6 +573,7 @@ const styles = StyleSheet.create({
   summaryRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   summaryLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
   summaryValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  summarySub: { fontSize: fontSizes.caption, color: colors.textMuted, marginTop: 1 },
   summaryTotalBlock: { alignItems: 'flex-end' },
   summaryTotal: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
 });

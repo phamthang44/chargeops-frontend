@@ -515,6 +515,9 @@
     "tapToStart": "Tap a free time to set the start",
     "past": "Past",
     "legendFree": "Free",
-    "freeSlot": "Tap to choose"
+    "freeSlot": "Tap to choose",
+    "slotHint": "Tap a start slot, tap another to extend (30 min each).",
+    "slotBooked": "Booked",
+    "slotSummary": "{{count}} slots · {{duration}}"
   }
 }

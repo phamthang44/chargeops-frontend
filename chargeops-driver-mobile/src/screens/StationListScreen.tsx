@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  FlatList,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -54,6 +55,85 @@ function FilterChip({
 /** Rough city-driving ETA from distance (~3 min per km). */
 function etaMinutes(distanceKm?: number): number {
   return Math.max(1, Math.round((distanceKm ?? 0) * 3));
+}
+
+/** One station row in the discovery list (kept module-level for FlatList perf). */
+function StationCard({
+  station,
+  onOpen,
+  onDirections,
+}: {
+  station: Station;
+  onOpen: () => void;
+  onDirections: () => void;
+}) {
+  const { t } = useTranslation();
+  const full = station.availableConnectors === 0;
+  const statusColor = full ? colors.error : colors.primary;
+  return (
+    <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={onOpen}>
+      <View style={styles.cardTop}>
+        <StationThumb size={64} />
+        <View style={styles.cardBody}>
+          <View style={styles.nameRow}>
+            <Text style={styles.stationName} numberOfLines={1}>
+              {station.name}
+            </Text>
+            {station.rating !== undefined && (
+              <View style={styles.ratingPill}>
+                <Ionicons name="star" size={12} color={colors.warning} />
+                <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.addressRow}>
+            <Ionicons name="location-outline" size={13} color={colors.textMuted} />
+            <Text style={styles.address} numberOfLines={1}>
+              {station.address}
+            </Text>
+          </View>
+
+          <View style={styles.metaRow}>
+            {station.hasFastCharging && (
+              <View style={styles.fastBadge}>
+                <Ionicons name="flash" size={11} color={colors.primaryDark} />
+                <Text style={styles.fastBadgeText}>{t('stationList.fastCharge')}</Text>
+              </View>
+            )}
+            {station.minRatePerKwh !== undefined && (
+              <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
+            )}
+            {station.distanceKm !== undefined && (
+              <Text style={styles.meta}>
+                · {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
+              </Text>
+            )}
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.cardFooter}>
+        {/* Availability: neutral pill + a colored dot, so status reads without
+            another block of green filling the card. */}
+        <View style={styles.availPill}>
+          <View style={[styles.availDot, { backgroundColor: statusColor }]} />
+          <Text style={[styles.availText, { color: full ? colors.error : colors.primaryDark }]}>
+            {full
+              ? t('stationList.full')
+              : t('stationList.ports', {
+                  available: station.availableConnectors,
+                  total: station.totalConnectors,
+                })}
+          </Text>
+        </View>
+        <Pressable style={styles.directionsBtn} hitSlop={6} onPress={onDirections}>
+          <Ionicons name="navigate" size={15} color={colors.primary} />
+          <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
+        </Pressable>
+      </View>
+    </Pressable>
+  );
 }
 
 /** Greyed-out placeholder card shown while the list loads. */
@@ -241,146 +321,84 @@ export function StationListScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView
+      {/* Virtualized so nationwide coverage (100s of stations) stays smooth */}
+      <FlatList
         style={styles.list}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        data={loading || error ? [] : visible}
+        keyExtractor={(s) => s.id}
+        renderItem={({ item }) => (
+          <StationCard
+            station={item}
+            onOpen={() => navigation.navigate('StationDetail', { stationId: item.id })}
+            onDirections={() => navigation.navigate('Tabs', { screen: 'Map' })}
+          />
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
         }
-      >
-        {error && !loading ? (
-          <View style={styles.stateBox}>
-            <Ionicons name="cloud-offline-outline" size={40} color={colors.textMuted} />
-            <Text style={styles.stateText}>{t('stationList.error')}</Text>
-            <Pressable style={styles.retryBtn} onPress={retry}>
-              <Ionicons name="refresh" size={16} color={colors.textInverse} />
-              <Text style={styles.retryText}>{t('stationList.retry')}</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionTitleBlock}>
-                  <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
-                  {!loading && (
-                    <Text style={styles.resultCount}>
-                      {t('stationList.resultCount', { count: visible.length })}
-                    </Text>
-                  )}
-                </View>
-                {/* Sort is now a visible, labelled control (was a silent icon) */}
-                <Pressable style={styles.sortControl} hitSlop={6} onPress={() => setSortOpen(true)}>
-                  <Ionicons name="swap-vertical" size={15} color={colors.textBody} />
-                  <Text style={styles.sortControlText}>{t(`stationList.sort.${sort}`)}</Text>
-                  <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
-                </Pressable>
+        ListHeaderComponent={
+          error ? null : (
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleBlock}>
+                <Text style={styles.sectionTitle}>{t('stationList.nearby')}</Text>
+                {!loading && (
+                  <Text style={styles.resultCount}>
+                    {t('stationList.resultCount', { count: visible.length })}
+                  </Text>
+                )}
               </View>
-
-              {loading ? (
-                <>
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                </>
-              ) : visible.length === 0 ? (
-                <View style={styles.stateBox}>
-                  <EmptyState variant="search" />
-                  <Text style={styles.stateText}>{t('stationList.empty')}</Text>
-                </View>
-              ) : (
-                visible.map((station) => {
-                  const full = station.availableConnectors === 0;
-                  const statusColor = full ? colors.error : colors.primary;
-                  return (
-                    <Pressable
-                      key={station.id}
-                      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-                      onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
-                    >
-                      <View style={styles.cardTop}>
-                        <StationThumb size={64} />
-                        <View style={styles.cardBody}>
-                          <View style={styles.nameRow}>
-                            <Text style={styles.stationName} numberOfLines={1}>
-                              {station.name}
-                            </Text>
-                            {station.rating !== undefined && (
-                              <View style={styles.ratingPill}>
-                                <Ionicons name="star" size={12} color={colors.warning} />
-                                <Text style={styles.ratingText}>{station.rating.toFixed(1)}</Text>
-                              </View>
-                            )}
-                          </View>
-
-                          <View style={styles.addressRow}>
-                            <Ionicons name="location-outline" size={13} color={colors.textMuted} />
-                            <Text style={styles.address} numberOfLines={1}>
-                              {station.address}
-                            </Text>
-                          </View>
-
-                          <View style={styles.metaRow}>
-                            {station.hasFastCharging && (
-                              <View style={styles.fastBadge}>
-                                <Ionicons name="flash" size={11} color={colors.primaryDark} />
-                                <Text style={styles.fastBadgeText}>{t('stationList.fastCharge')}</Text>
-                              </View>
-                            )}
-                            {station.minRatePerKwh !== undefined && (
-                              <Text style={styles.price}>{formatRate(station.minRatePerKwh)}</Text>
-                            )}
-                            {station.distanceKm !== undefined && (
-                              <Text style={styles.meta}>
-                                · {station.distanceKm} km · {t('stationList.eta', { minutes: etaMinutes(station.distanceKm) })}
-                              </Text>
-                            )}
-                          </View>
-                        </View>
-                      </View>
-
-                      <View style={styles.cardFooter}>
-                        {/* Availability: neutral pill + a colored dot, so status reads
-                            without another block of green filling the card. */}
-                        <View style={styles.availPill}>
-                          <View style={[styles.availDot, { backgroundColor: statusColor }]} />
-                          <Text style={[styles.availText, { color: full ? colors.error : colors.primaryDark }]}>
-                            {full
-                              ? t('stationList.full')
-                              : t('stationList.ports', {
-                                  available: station.availableConnectors,
-                                  total: station.totalConnectors,
-                                })}
-                          </Text>
-                        </View>
-                        <Pressable
-                          style={styles.directionsBtn}
-                          hitSlop={6}
-                          onPress={() => navigation.navigate('Tabs', { screen: 'Map' })}
-                        >
-                          <Ionicons name="navigate" size={15} color={colors.primary} />
-                          <Text style={styles.directionsText}>{t('stationList.directions')}</Text>
-                        </Pressable>
-                      </View>
-                    </Pressable>
-                  );
-                })
-              )}
-
-              {!loading && (
-                <View style={styles.promo}>
-                  <View style={styles.promoIcon}>
-                    <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
-                  </View>
-                  <View style={styles.promoBody}>
-                    <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
-                    <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
-                  </View>
-                </View>
-              )}
-            </>
-          )}
-      </ScrollView>
+              {/* Sort is a visible, labelled control (was a silent icon) */}
+              <Pressable style={styles.sortControl} hitSlop={6} onPress={() => setSortOpen(true)}>
+                <Ionicons name="swap-vertical" size={15} color={colors.textBody} />
+                <Text style={styles.sortControlText}>{t(`stationList.sort.${sort}`)}</Text>
+                <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+              </Pressable>
+            </View>
+          )
+        }
+        ListEmptyComponent={
+          error ? (
+            <View style={styles.stateBox}>
+              <Ionicons name="cloud-offline-outline" size={40} color={colors.textMuted} />
+              <Text style={styles.stateText}>{t('stationList.error')}</Text>
+              <Pressable style={styles.retryBtn} onPress={retry}>
+                <Ionicons name="refresh" size={16} color={colors.textInverse} />
+                <Text style={styles.retryText}>{t('stationList.retry')}</Text>
+              </Pressable>
+            </View>
+          ) : loading ? (
+            <View style={styles.skelWrap}>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </View>
+          ) : (
+            <View style={styles.stateBox}>
+              <EmptyState variant="search" />
+              <Text style={styles.stateText}>{t('stationList.empty')}</Text>
+            </View>
+          )
+        }
+        ListFooterComponent={
+          !loading && !error && visible.length > 0 ? (
+            <View style={styles.promo}>
+              <View style={styles.promoIcon}>
+                <Ionicons name="pricetag" size={20} color={colors.primaryDark} />
+              </View>
+              <View style={styles.promoBody}>
+                <Text style={styles.promoTitle}>{t('stationList.promoTitle')}</Text>
+                <Text style={styles.promoText}>{t('stationList.promoBody')}</Text>
+              </View>
+            </View>
+          ) : null
+        }
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={11}
+        removeClippedSubviews
+      />
 
       {/* Sort sheet */}
       <BottomSheet visible={sortOpen} onClose={() => setSortOpen(false)} title={t('stationList.sortTitle')}>
@@ -407,8 +425,13 @@ export function StationListScreen() {
         })}
       </BottomSheet>
 
-      {/* Notifications sheet (empty for now) */}
-      <BottomSheet visible={notifOpen} onClose={() => setNotifOpen(false)} title={t('stationList.notificationsTitle')}>
+      {/* Notifications panel — appears immediately (fade), not sliding up */}
+      <BottomSheet
+        visible={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        title={t('stationList.notificationsTitle')}
+        animation="fade"
+      >
         <View style={styles.notifEmpty}>
           <EmptyState variant="notifications" />
           <Text style={styles.stateText}>{t('stationList.notificationsEmpty')}</Text>
@@ -511,6 +534,7 @@ const styles = StyleSheet.create({
   notifEmpty: { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xl },
 
   // Skeleton
+  skelWrap: { gap: spacing.md },
   skel: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
   skelLine: { height: 12, borderRadius: radius.sm, marginBottom: spacing.sm },
   skelBadge: { height: 20, width: 110, borderRadius: radius.full, marginTop: spacing.xs },

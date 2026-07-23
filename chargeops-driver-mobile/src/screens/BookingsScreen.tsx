@@ -36,6 +36,10 @@ const TONE_BG: Record<ActionTone, string> = {
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
+// Muted white for text/icons on the dark hero card (no token for on-dark tints).
+const HERO_MUTED = `${colors.textInverse}B3`; // white 70%
+const HERO_CHIP_BG = `${colors.textInverse}1A`; // white 10%
+
 /**
  * "Đặt chỗ" tab — active & upcoming bookings, split into:
  *   - Đang sạc  = CHECKED_IN (a charging session in progress)
@@ -149,14 +153,23 @@ export function BookingsScreen() {
       >
         <View style={styles.heroTopRow}>
           <Text style={styles.heroEyebrow}>{t('bookings.nextSession')}</Text>
-          <Ionicons name="flash" size={16} color={colors.textInverse} />
+          <View style={styles.heroChip}>
+            <Ionicons name="flash" size={11} color={colors.primaryLight} />
+            <Text style={styles.heroChipText}>
+              {b.connectorType} · {b.powerKw}kW
+            </Text>
+          </View>
         </View>
+
         <Text style={styles.heroStation} numberOfLines={1}>
           {b.stationName}
         </Text>
-        <Text style={styles.heroTime}>
-          {formatTime(b.startAt)} • {b.connectorName}
-        </Text>
+        <View style={styles.heroMetaRow}>
+          <Ionicons name="location-outline" size={13} color={HERO_MUTED} />
+          <Text style={styles.heroMeta} numberOfLines={1}>
+            {b.chargePointName} · {b.connectorName} · {formatTime(b.startAt)}
+          </Text>
+        </View>
 
         <Text style={styles.heroCountdown}>{due ? t('bookings.readyNow') : formatCountdown(msLeft)}</Text>
         <Text style={styles.heroCaption}>
@@ -167,7 +180,7 @@ export function BookingsScreen() {
           style={styles.heroBtn}
           onPress={() => navigation.navigate('QRCheckIn', { bookingId: b.id })}
         >
-          <Ionicons name="qr-code-outline" size={16} color={colors.primaryDark} />
+          <Ionicons name="qr-code-outline" size={16} color={colors.textInverse} />
           <Text style={styles.heroBtnText}>{t('bookings.checkInNow')}</Text>
         </Pressable>
       </Pressable>
@@ -252,34 +265,45 @@ const styles = StyleSheet.create({
 
   content: { padding: spacing.lg, paddingTop: 0, gap: spacing.md },
 
-  // Live countdown hero (next confirmed session)
+  // Next-session hero — a dark "active session" card; emerald is the accent only
   hero: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.textStrong,
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.xs,
-    shadowColor: colors.primaryDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
+    shadowColor: colors.textStrong,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
     elevation: 4,
   },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroEyebrow: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.textInverse, letterSpacing: 1, opacity: 0.85 },
-  heroStation: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textInverse },
-  heroTime: { fontSize: fontSizes.body, color: colors.textInverse, opacity: 0.85 },
+  heroEyebrow: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.primaryLight, letterSpacing: 1 },
+  heroChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: HERO_CHIP_BG,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  heroChipText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textInverse },
+  heroStation: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textInverse, marginTop: 2 },
+  heroMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  heroMeta: { flex: 1, fontSize: fontSizes.caption, color: HERO_MUTED },
   heroCountdown: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textInverse, marginTop: spacing.sm, fontVariant: ['tabular-nums'] },
-  heroCaption: { fontSize: fontSizes.caption, color: colors.textInverse, opacity: 0.85, marginBottom: spacing.sm },
+  heroCaption: { fontSize: fontSizes.caption, color: HERO_MUTED, marginBottom: spacing.sm },
   heroBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primary,
     borderRadius: radius.full,
     paddingVertical: spacing.md,
   },
-  heroBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
+  heroBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textInverse },
 
   // Charging banner (inside BookingCard)
   chargeBanner: { gap: spacing.sm },

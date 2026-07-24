@@ -563,6 +563,7 @@
     "unlock": "UNLOCK",
     "autoNote": "The system automatically stops the current when it reaches 100% or when your booked slot ends.",
     "finish": "End charging session",
+    "finishWarn": "Stops at {{percent}}% — this can't be undone",
     "finishFull": "Complete session"
   },
   "timeRangePicker": {

@@ -563,6 +563,7 @@
     "unlock": "MỞ KHÓA CẤP",
     "autoNote": "Hệ thống sẽ tự động ngắt dòng điện khi đạt mức 100% hoặc khi hết khung giờ đã đặt chỗ.",
     "finish": "Kết thúc phiên sạc",
+    "finishWarn": "Dừng ở mức {{percent}}% — không thể hoàn tác",
     "finishFull": "Hoàn tất phiên sạc"
   },
   "timeRangePicker": {

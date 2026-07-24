@@ -9,7 +9,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-type Variant = 'primary' | 'secondary';
+// `danger` = a consequential, hard-to-undo action (e.g. ending a charging
+// session before it's full). Solid error fill so it can never be mistaken for
+// the routine emerald primary.
+type Variant = 'primary' | 'secondary' | 'danger';
 
 interface AppButtonProps {
   label: string;
@@ -31,7 +34,11 @@ export function AppButton({
 }: AppButtonProps) {
   const { themeColors } = usePreferences();
   const isPrimary = variant === 'primary';
+  const isDanger = variant === 'danger';
+  const isSolid = isPrimary || isDanger; // filled + white label
   const isDisabled = disabled || loading;
+
+  const solidBg = isDanger ? themeColors.error : themeColors.primary;
 
   return (
     <Pressable
@@ -39,8 +46,16 @@ export function AppButton({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        isPrimary
-          ? { backgroundColor: themeColors.primary }
+        isSolid
+          ? {
+              backgroundColor: solidBg,
+              // A soft glow in the button's own color lifts it off the footer.
+              shadowColor: solidBg,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.28,
+              shadowRadius: 10,
+              elevation: 3,
+            }
           : {
               backgroundColor: themeColors.surfaceAlt,
               borderWidth: 1,
@@ -52,12 +67,12 @@ export function AppButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? '#FFFFFF' : themeColors.primary} />
+        <ActivityIndicator color={isSolid ? '#FFFFFF' : themeColors.primary} />
       ) : (
         <Text
           style={[
             styles.label,
-            { color: isPrimary ? '#FFFFFF' : themeColors.textStrong },
+            { color: isSolid ? '#FFFFFF' : themeColors.textStrong },
           ]}
         >
           {label}

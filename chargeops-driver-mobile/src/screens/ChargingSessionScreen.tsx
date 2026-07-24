@@ -240,11 +240,21 @@ export function ChargingSessionScreen() {
         </View>
       </ScrollView>
 
-      {/* Footer */}
+      {/* Footer. Ending before 100% stops the charge for good — a danger
+          (red) button + a caption naming the % they'll stop at. Once full,
+          ending is just completion, so it becomes the emerald primary. */}
       <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+        {!full && (
+          <View style={styles.finishWarnRow}>
+            <Ionicons name="warning-outline" size={15} color={themeColors.error} />
+            <Text style={[styles.finishWarnText, { color: themeColors.textMuted }]}>
+              {t('chargingSession.finishWarn', { percent })}
+            </Text>
+          </View>
+        )}
         <AppButton
           label={full ? t('chargingSession.finishFull') : t('chargingSession.finish')}
-          variant={full ? 'primary' : 'secondary'}
+          variant={full ? 'primary' : 'danger'}
           onPress={finish}
         />
       </View>
@@ -369,5 +379,16 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
+    gap: spacing.sm,
+  },
+  finishWarnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  finishWarnText: {
+    fontSize: fontSizes.caption,
+    textAlign: 'center',
   },
 });

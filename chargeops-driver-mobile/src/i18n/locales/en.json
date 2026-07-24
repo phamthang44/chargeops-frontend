@@ -207,6 +207,13 @@
     "checkInNow": "Check in now",
     "liveCharging": "CHARGING"
   },
+  "notifications": {
+    "unreadCount": "{{total}} unread",
+    "markAllRead": "Mark all read",
+    "clearAll": "Clear all",
+    "delete": "Delete",
+    "viewDetail": "View detail"
+  },
   "history": {
     "title": "Booking history",
     "role": "DRIVER",
@@ -231,11 +238,48 @@
     "error": "Couldn't load booking history."
   },
   "profile": {
-    "title": "Profile",
+    "title": "Profile & Settings",
     "placeholder": "User profile screen (placeholder)",
     "role": "Role: {{role}}",
     "signOut": "Sign out",
-    "notSignedIn": "Not signed in."
+    "notSignedIn": "Not signed in.",
+    "goldMember": "GOLD MEMBER",
+    "ownerBanner": {
+      "title": "Become Station Owner",
+      "subtitle": "Manage charging stations, track revenue, and optimize operations now.",
+      "cta": "Switch to Station Owner Mode"
+    },
+    "wallet": {
+      "sectionTitle": "Payment & Wallet",
+      "currentBalance": "CURRENT BALANCE",
+      "topUp": "Top up",
+      "paymentMethods": "Payment methods",
+      "paymentMethodsSub": "Visa, Mastercard, MoMo",
+      "history": "Transaction history",
+      "historySub": "Review paid invoices"
+    },
+    "appSettings": {
+      "sectionTitle": "App Settings",
+      "notifications": "Notifications",
+      "notificationsSub": "Sound, Vibration, Battery alerts",
+      "language": "Language",
+      "helpCenter": "Help center",
+      "helpCenterSub": "FAQ & Support"
+    },
+    "logout": "Log out account",
+    "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",
+    "topUpModal": {
+      "title": "Top up ChargeOps Wallet",
+      "amountLabel": "Select top-up amount",
+      "methodLabel": "Payment method",
+      "confirm": "Confirm Top Up",
+      "success": "Successfully topped up {{amount}}!"
+    },
+    "ownerModal": {
+      "title": "Station Owner Mode",
+      "desc": "Dedicated feature for Station Owners to manage chargers, set up time slots, and monitor charging revenue.",
+      "understood": "Understood"
+    }
   },
   "stationDetail": {
     "title": "Station details",
@@ -250,7 +294,13 @@
       "food": "Cafe & Food",
       "parking": "Spacious parking",
       "security": "24/7 security",
-      "restroom": "Clean restroom"
+      "restroom": "Clean restroom",
+      "RESTROOM": "Restroom",
+      "CAFE": "Cafe",
+      "WIFI": "Free Wifi",
+      "PARKING": "Parking lot",
+      "CONVENIENCE_STORE": "Convenience store",
+      "SHOPPING": "Shopping center"
     },
     "refundTitle": "Refund policy",
     "refundLine1": "100% refund if cancelled more than 60 minutes ahead.",
@@ -259,6 +309,7 @@
     "descriptionTitle": "About this station",
     "priceFrom": "From",
     "locationTitle": "Location",
+    "getDirections": "Get directions",
     "openMap": "Open map",
     "reviewsTitle": "Reviews",
     "viewAll": "View all",
@@ -274,10 +325,14 @@
     },
     "selectConnector": "Choose a connector",
     "selectConnectorHint": "Please choose a connector to continue",
+    "connectorHint": "Select a connector matching your EV port type",
     "connectorCount": "{{available}}/{{total}} connectors free",
     "maxPower": "Up to {{power}} kW",
     "refundLine0": "Cancel within 5 minutes of booking: 100% refund",
-    "photoPending": "Photo coming soon"
+    "photoPending": "Photo coming soon",
+    "selectedConn": "Selected connector:",
+    "none": "None selected",
+    "bookNow": "Book Now"
   },
   "bookingStatus": {
     "PENDING": "Pending",
@@ -294,57 +349,84 @@
   "payment": {
     "title": "Payment method",
     "MOMO": "MoMo Wallet",
-    "VISA": "International card (Visa/Master)",
+    "MOMO_desc": "Pay via MoMo e-wallet app",
+    "VISA": "International Card (Visa/Master)",
+    "VISA_desc": "Debit or Credit card",
     "ZALOPAY": "ZaloPay Wallet",
-    "ATM": "Domestic ATM card",
+    "ZALOPAY_desc": "Pay via ZaloPay e-wallet app",
+    "ATM": "Domestic ATM Card",
+    "ATM_desc": "Pay via Napas / Internet Banking",
     "WALLET": "ChargeOps Wallet",
+    "WALLET_desc": "Deduct directly from ChargeOps Wallet balance",
     "paidVia": "Paid via {{method}}"
   },
+  "bookingConfirmation": {
+    "title": "Booking confirmation",
+    "timeTitle": "Charging window",
+    "date": "Date",
+    "timeRange": "Time range",
+    "holdNotice": "This time slot is temporarily held for 10 minutes for you to complete payment.",
+    "invoiceTitle": "Invoice breakdown",
+    "chargingBand": "{{kind}} ({{from}} – {{to}})",
+    "bandSub": "~{{kwh}} kWh × {{rate}}",
+    "serviceFee": "Service fee",
+    "total": "Total booking fee",
+    "paymentTitle": "Payment method",
+    "totalPayment": "Total payment",
+    "payBtn": "Pay {{amount}}",
+    "errorTitle": "Unable to create booking"
+  },
   "bookingConfirm": {
-    "title": "Confirm booking",
+    "title": "Booking confirmation",
     "bookingId": "ID: #{{code}}",
     "detailTitle": "Booking details",
     "date": "DATE",
     "time": "TIME",
-    "invoiceTitle": "Invoice",
+    "invoiceTitle": "Invoice details",
     "serviceFee": "Service fee",
     "total": "Total",
     "refundTitle": "Refund policy",
-    "refund1": "100% refund if cancelled more than 60 minutes ahead.",
-    "refund2": "50% refund if cancelled within 15–60 minutes.",
-    "refund3": "No refund if cancelled under 15 minutes.",
-    "totalToPay": "TOTAL TO PAY",
+    "refund1": "100% refund if cancelled >60m ahead.",
+    "refund2": "50% refund if cancelled 15–60m ahead.",
+    "refund3": "No refund if cancelled <15m ahead.",
+    "totalToPay": "TOTAL PAYMENT",
     "secure": "Secure payment",
-    "cta": "Pay and book",
+    "cta": "Pay & Confirm Booking",
     "connector": "Connector",
     "connectorValue": "{{chargePoint}} · {{name}} — {{connector}} {{power}} kW",
-    "fastCharge": "DC fast charging",
+    "fastCharge": "DC Fast Charge",
     "lineDetail": "~{{kwh}} kWh × {{rate}}/kWh",
     "refundGrace": "Cancel within 5 minutes of booking: 100% refund",
-    "overlapTitle": "You already have a booking then",
-    "overlapBody": "You have a booking from {{start}}–{{end}} at {{station}}. Do you still want to book this one?",
+    "overlapTitle": "Overlapping booking detected",
+    "overlapBody": "You already have a booking {{start}}–{{end}} at {{station}}. Do you still want to book this window?",
     "overlapConfirm": "Book anyway"
   },
   "paymentProcessing": {
     "title": "Processing payment",
-    "subtitle": "Connecting to {{method}}. Please don't close the app.",
-    "amount": "Amount",
-    "step": "Waiting for confirmation from the payment gateway…",
-    "secure": "Your transaction is encrypted and secure",
+    "processingTitle": "Processing payment",
+    "processingBody": "Connecting to payment gateway. Please keep the app open.",
+    "doNotClose": "256-bit encrypted & secure transaction",
+    "subtitle": "Connecting to {{method}}. Please do not close the app.",
+    "amount": "Payment amount",
+    "code": "Order Code",
+    "method": "Payment method",
     "retry": "Try again",
     "cancel": "Cancel transaction",
-    "home": "Back to home",
+    "backHome": "Back to Home",
+    "step": "Awaiting confirmation from payment gateway…",
+    "secure": "Transaction is encrypted & secure",
+    "home": "Back to Home",
     "FAILED": {
       "title": "Payment failed",
-      "body": "The transaction was declined or funds were insufficient. Try again or choose another method."
+      "body": "Transaction was declined or insufficient balance. Please try again or pick another method."
     },
     "TIMEOUT": {
-      "title": "Request timed out",
-      "body": "The payment gateway didn't respond. Your booking is still pending — please try again."
+      "title": "Payment timed out",
+      "body": "Payment gateway did not respond. Your booking is still pending — please try again."
     },
     "CANCELLED": {
       "title": "Payment cancelled",
-      "body": "You cancelled the transaction. The booking was not confirmed."
+      "body": "You cancelled the transaction. Booking is not yet confirmed."
     }
   },
   "booking": {
@@ -355,7 +437,7 @@
     }
   },
   "bookingSuccess": {
-    "title": "Booking confirmed!",
+    "title": "Booking successful!",
     "code": "Booking code: {{code}}",
     "txTitle": "TRANSACTION DETAILS",
     "paid": "Paid",
@@ -363,12 +445,15 @@
     "time": "Time",
     "total": "Total",
     "checkInTitle": "Check-in guide",
-    "step1": "Arrive at the station 5 minutes before your slot.",
-    "step2": "Open the app, tap \"Scan QR\" and scan the code on the charger.",
-    "step3": "Plug in the connector and start the session from the app.",
+    "guideTitle": "Check-in guide",
+    "stepNum": "STEP {{num}}",
+    "step1": "Arrive at the station 5 minutes before your time slot.",
+    "step2": "Open the app, select \"Scan QR\" and scan the code on the charger.",
+    "step3": "Plug in the charging cable and start the session from the app.",
     "viewDetail": "View booking details",
-    "home": "Back to home",
-    "refundNote": "100% refund policy applies if cancelled more than 30 minutes ahead.",
+    "home": "Back to Home",
+    "goHome": "Back to Home",
+    "refundNote": "100% refund policy applies if cancelled 30 minutes ahead.",
     "connector": "Connector"
   },
   "bookingDetail": {

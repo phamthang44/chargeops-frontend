@@ -1,4 +1,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { useColorScheme } from 'react-native';
+
+import { getThemeColors, type Colors } from '@/theme';
 
 /** Appearance preference. `system` follows the OS setting. */
 export type AppearanceMode = 'light' | 'dark' | 'system';
@@ -6,6 +9,8 @@ export type AppearanceMode = 'light' | 'dark' | 'system';
 interface PreferencesContextValue {
   appearance: AppearanceMode;
   setAppearance: (mode: AppearanceMode) => void;
+  themeColors: Colors;
+  isDark: boolean;
   /** IDs of stations the driver has saved/favorited. */
   favorites: string[];
   toggleFavorite: (stationId: string) => void;
@@ -15,25 +20,36 @@ interface PreferencesContextValue {
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
 
 /**
- * Holds user UI preferences (appearance, …).
- * Skeleton scope: in-memory only (resets on relaunch), mirroring AuthContext.
- * LATER: persist via expo-secure-store / AsyncStorage, and feed `appearance`
- * into a theme provider so the whole app repaints for dark mode.
+ * Holds user UI preferences (appearance, dynamic theme palette, favorites).
+ * Seamlessly resolves light, dark, and OS system themes across all components.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [appearance, setAppearance] = useState<AppearanceMode>('system');
   const [favorites, setFavorites] = useState<string[]>([]);
+  const systemScheme = useColorScheme();
+
+  const themeColors = useMemo(
+    () => getThemeColors(appearance, systemScheme),
+    [appearance, systemScheme],
+  );
+
+  const isDark = useMemo(
+    () => (appearance === 'dark' ? true : appearance === 'light' ? false : systemScheme === 'dark'),
+    [appearance, systemScheme],
+  );
 
   const value = useMemo<PreferencesContextValue>(
     () => ({
       appearance,
       setAppearance,
+      themeColors,
+      isDark,
       favorites,
       toggleFavorite: (id) =>
         setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id])),
       isFavorite: (id) => favorites.includes(id),
     }),
-    [appearance, favorites],
+    [appearance, themeColors, isDark, favorites],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

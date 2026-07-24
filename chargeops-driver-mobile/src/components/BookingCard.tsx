@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
 import { formatDate, formatTimeRange, formatVnd } from '@/utils/format';
 
@@ -19,11 +20,6 @@ const STATUS_VARIANT: Record<BookingStatus, BadgeVariant> = {
   EXPIRED: 'neutral',
 };
 
-/**
- * A no-show is stored as CANCELLED (there is no NO_SHOW state — BR-BOK-05), but
- * the driver still needs to see why it ended that way, so the reason overrides
- * the status label on the badge.
- */
 function statusLabelKey(b: Booking): string {
   if (b.status === 'CANCELLED' && b.cancelReason === 'NO_SHOW') return 'bookingStatus.NO_SHOW';
   if (b.status === 'CANCELLED' && b.cancelReason === 'PAYMENT_TIMEOUT') {
@@ -43,55 +39,60 @@ interface BookingCardProps {
   accentColor?: string;
 }
 
-/**
- * Shared booking summary card used by the Đặt chỗ (Bookings) and Lịch sử (History)
- * lists: station, code, time/place/charger meta, and a total + optional action footer.
- * An optional `banner` strip and left `accentColor` let callers flag special states.
- */
+/** Dynamic theme-aware booking summary card. */
 export function BookingCard({ booking: b, onPress, action, banner, accentColor }: BookingCardProps) {
   const { t } = useTranslation();
+  const { themeColors } = usePreferences();
 
   return (
     <Pressable
-      style={[styles.card, accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : null]}
+      style={[
+        styles.card,
+        {
+          backgroundColor: themeColors.surface,
+          borderColor: themeColors.border,
+          shadowColor: themeColors.textStrong,
+        },
+        accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : null,
+      ]}
       onPress={onPress}
     >
       {banner ? <View style={styles.banner}>{banner}</View> : null}
       <View style={styles.cardTop}>
-        <Text style={styles.stationName} numberOfLines={1}>
+        <Text style={[styles.stationName, { color: themeColors.textStrong }]} numberOfLines={1}>
           {b.stationName}
         </Text>
         <StatusBadge variant={STATUS_VARIANT[b.status]} label={t(statusLabelKey(b))} />
       </View>
-      <Text style={styles.code}>{t('bookingCard.code', { code: b.code })}</Text>
+      <Text style={[styles.code, { color: themeColors.textMuted }]}>{t('bookingCard.code', { code: b.code })}</Text>
 
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
       <View style={styles.metaRow}>
-        <Ionicons name="calendar-outline" size={15} color={colors.primary} />
-        <Text style={styles.metaText}>
+        <Ionicons name="calendar-outline" size={15} color={themeColors.primary} />
+        <Text style={[styles.metaText, { color: themeColors.textBody }]}>
           {formatDate(b.startAt)} • {formatTimeRange(b.startAt, b.endAt)}
         </Text>
       </View>
       <View style={styles.metaRow}>
-        <Ionicons name="location-outline" size={15} color={colors.primary} />
-        <Text style={styles.metaText} numberOfLines={1}>
+        <Ionicons name="location-outline" size={15} color={themeColors.primary} />
+        <Text style={[styles.metaText, { color: themeColors.textBody }]} numberOfLines={1}>
           {b.stationAddress}
         </Text>
       </View>
       <View style={styles.metaRow}>
-        <Ionicons name="flash-outline" size={15} color={colors.primary} />
-        <Text style={styles.metaText}>
+        <Ionicons name="flash-outline" size={15} color={themeColors.primary} />
+        <Text style={[styles.metaText, { color: themeColors.textBody }]}>
           {b.chargePointName} • {b.connectorName} • {b.connectorType} ({b.powerKw}kW)
         </Text>
       </View>
 
-      <View style={styles.dashDivider} />
+      <View style={[styles.dashDivider, { borderColor: themeColors.border }]} />
 
       <View style={styles.cardFooter}>
         <View>
-          <Text style={styles.totalLabel}>{t('bookingCard.total')}</Text>
-          <Text style={styles.total}>{formatVnd(b.totalPrice)}</Text>
+          <Text style={[styles.totalLabel, { color: themeColors.textMuted }]}>{t('bookingCard.total')}</Text>
+          <Text style={[styles.total, { color: themeColors.textStrong }]}>{formatVnd(b.totalPrice)}</Text>
         </View>
         {action}
       </View>
@@ -101,13 +102,10 @@ export function BookingCard({ booking: b, onPress, action, banner, accentColor }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.sm,
-    shadowColor: colors.textStrong,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -115,13 +113,13 @@ const styles = StyleSheet.create({
   },
   banner: { marginBottom: spacing.xs },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  stationName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  code: { fontSize: fontSizes.caption, color: colors.textMuted },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
+  stationName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  code: { fontSize: fontSizes.caption },
+  divider: { height: 1, marginVertical: spacing.xs },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  metaText: { flex: 1, fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body },
-  dashDivider: { height: 1, borderTopWidth: 1, borderStyle: 'dashed', borderColor: colors.border, marginVertical: spacing.xs },
+  metaText: { flex: 1, fontSize: fontSizes.body, lineHeight: lineHeights.body },
+  dashDivider: { height: 1, borderTopWidth: 1, borderStyle: 'dashed', marginVertical: spacing.xs },
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  totalLabel: { fontSize: fontSizes.caption, color: colors.textMuted, letterSpacing: 0.5 },
-  total: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  totalLabel: { fontSize: fontSizes.caption, letterSpacing: 0.5 },
+  total: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
 });

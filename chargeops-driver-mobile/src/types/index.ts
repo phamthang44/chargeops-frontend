@@ -6,7 +6,18 @@
 export type ConnectorType = 'CCS2' | 'CHADEMO' | 'TYPE2' | 'GBT';
 
 /** Station amenities (mapped to an icon + i18n label in the UI). */
-export type Amenity = 'wifi' | 'food' | 'parking' | 'security' | 'restroom';
+export type Amenity =
+  | 'RESTROOM'
+  | 'CAFE'
+  | 'WIFI'
+  | 'PARKING'
+  | 'CONVENIENCE_STORE'
+  | 'SHOPPING'
+  | 'wifi'
+  | 'food'
+  | 'parking'
+  | 'security'
+  | 'restroom';
 
 /**
  * Booking lifecycle (SRS Section 4). There is no NO_SHOW state: a driver who

@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, GlassButton, StatusBadge } from '@/components';
+import { AppButton, BottomSheet, GlassButton, StatusBadge } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import { bookingErrorMessage } from '@/i18n/bookingErrors';
 import type { RootStackParamList } from '@/navigation/types';
 import { createBooking, findOverlappingBookings } from '@/services/bookingService';
@@ -15,8 +16,8 @@ import {
   getConnectorsByStation,
   getStationById,
 } from '@/services/stationService';
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { ChargePoint, Connector, PaymentMethod, Station } from '@/types';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
 import { formatDate, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
 import { PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
 import { quoteBooking } from '@/utils/pricing';
@@ -25,14 +26,14 @@ type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
 type Route = RouteProp<RootStackParamList, 'BookingConfirmation'>;
 
 /**
- * "Xác nhận đặt chỗ" — review the chosen time range, see the invoice, pick a
- * payment method, then create the booking. The booking is only created here
- * (after "pay"), not on the time-range step.
+ * "Xác nhận đặt chỗ" — review chosen time range, see invoice, pick payment method, create booking.
+ * Includes BR-BOK-08 duplicate/overlapping booking warning modal & dynamic Dark/Light mode theme support.
  */
 export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
+  const { themeColors, isDark } = usePreferences();
 
   const [station, setStation] = useState<Station | null>(null);
   const [connector, setConnector] = useState<Connector | null>(null);
@@ -42,35 +43,45 @@ export function BookingConfirmationScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Duplicate booking warning state (BR-BOK-08)
+  const [overlappingBooking, setOverlappingBooking] = useState<Booking | null>(null);
+  const [showOverlapModal, setShowOverlapModal] = useState(false);
+
+  const endAt = useMemo(
+    () => new Date(new Date(params.startAt).getTime() + params.durationMin * 60_000).toISOString(),
+    [params.startAt, params.durationMin],
+  );
+
   useEffect(() => {
     let active = true;
     Promise.all([
       getStationById(params.stationId),
       getConnectorsByStation(params.stationId),
       getChargePointsByStation(params.stationId),
-    ]).then(([s, connectors, points]) => {
+      findOverlappingBookings(params.startAt, endAt),
+    ]).then(([s, connectors, points, overlaps]) => {
       if (!active) return;
       const picked = connectors.find((c) => c.id === params.connectorId) ?? null;
       setStation(s);
       setConnector(picked);
       setChargePoint(points.find((p) => p.id === picked?.chargePointId) ?? null);
       setLoading(false);
+
+      if (overlaps.length > 0) {
+        setOverlappingBooking(overlaps[0]);
+        setShowOverlapModal(true);
+      }
     });
     return () => {
       active = false;
     };
-  }, [params.stationId, params.connectorId]);
+  }, [params.stationId, params.connectorId, params.startAt, endAt]);
 
-  const endAt = useMemo(
-    () => new Date(new Date(params.startAt).getTime() + params.durationMin * 60_000).toISOString(),
-    [params.startAt, params.durationMin],
-  );
-  // Same pure quote the picker showed and the booking will snapshot.
   const quote = useMemo(
     () => (connector ? quoteBooking(connector, params.startAt, params.durationMin) : null),
     [connector, params.startAt, params.durationMin],
   );
-  // Pseudo invoice id for display until the booking exists (real code on success).
+
   const previewCode = useMemo(() => `CO-${String(Date.now()).slice(-4)}`, []);
 
   function durationLabel(min: number): string {
@@ -85,8 +96,6 @@ export function BookingConfirmationScreen() {
     setSubmitting(true);
     setError(null);
     try {
-      // Create the booking as PENDING, then hand off to the payment-processing
-      // screen which waits for the gateway to settle before showing success.
       const booking = await createBooking({
         stationId: params.stationId,
         connectorId: connector.id,
@@ -94,240 +103,255 @@ export function BookingConfirmationScreen() {
         durationMin: params.durationMin,
         paymentMethod: method,
       });
-      // Replace so the user can't go "back" into payment and pay again.
       navigation.replace('PaymentProcessing', { bookingId: booking.id });
     } catch (e) {
-      // Booking creation edge cases (range taken / network) — let the user retry.
-      setError(bookingErrorMessage(t, e));
+      const msg = bookingErrorMessage(t, e);
+      setError(msg);
+      Alert.alert(t('bookingConfirmation.errorTitle'), msg);
     } finally {
       setSubmitting(false);
     }
   }
 
-  async function handlePay() {
-    if (!connector) return;
-    // BR-BOK-08: holding two bookings over the same hours on different ports is
-    // allowed, but it is nearly always a mistake — warn before committing, and
-    // let the driver proceed if they meant it.
-    const clashes = await findOverlappingBookings(params.startAt, endAt, connector.id);
-    if (clashes.length > 0) {
-      const other = clashes[0];
-      Alert.alert(
-        t('bookingConfirm.overlapTitle'),
-        t('bookingConfirm.overlapBody', {
-          start: formatTime(other.startAt),
-          end: formatTime(other.endAt),
-          station: other.stationName,
-        }),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('bookingConfirm.overlapConfirm'), onPress: () => void submitBooking() },
-        ],
-      );
-      return;
-    }
-    await submitBooking();
+  if (loading || !station || !connector || !quote) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+        <ActivityIndicator color={themeColors.primary} style={styles.loader} />
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Custom header */}
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      {/* Header */}
+      <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
         <GlassButton
           size={40}
           glassEffectStyle="regular"
-          fallbackColor={colors.surfaceAlt}
+          fallbackColor={themeColors.surfaceAlt}
           accessibilityLabel={t('common.back')}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={22} color={colors.textStrong} />
+          <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
         </GlassButton>
-        <Text style={styles.headerTitle}>{t('bookingConfirm.title')}</Text>
+        <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.title')}</Text>
         <View style={styles.headerBtn} />
       </View>
 
-      {loading || !station || !connector || !quote ? (
-        <ActivityIndicator color={colors.primary} style={styles.loader} />
-      ) : (
-        <>
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Station summary */}
+        <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <Text style={[styles.stationName, { color: themeColors.textStrong }]}>{station.name}</Text>
+          <View style={styles.metaRow}>
+            <Ionicons name="location-outline" size={14} color={themeColors.textMuted} />
+            <Text style={[styles.metaText, { color: themeColors.textMuted }]} numberOfLines={1}>
+              {station.address}
+            </Text>
+          </View>
+          <View style={[styles.connectorPill, { backgroundColor: themeColors.surfaceAlt }]}>
+            <Ionicons name="flash-outline" size={14} color={themeColors.primary} />
+            <Text style={[styles.connectorText, { color: themeColors.textStrong }]}>
+              {chargePoint?.name ?? ''} · {connector.name} ({connector.connectorType}) · {connector.powerKw} kW
+            </Text>
+          </View>
+        </View>
+
+        {/* Overlapping booking warning banner if driver proceeds */}
+        {overlappingBooking && (
+          <Pressable
+            style={[styles.overlapCard, { backgroundColor: `${themeColors.warning}1A`, borderColor: themeColors.warning }]}
+            onPress={() => setShowOverlapModal(true)}
           >
-            {/* Station summary */}
-            <View style={styles.stationCard}>
-              <View style={styles.stationThumb}>
-                <Ionicons name="flash" size={26} color={colors.primaryDark} />
-              </View>
-              <View style={styles.stationBody}>
-                {connector.currentType === 'DC' && (
-                  <StatusBadge variant="success" label={t('bookingConfirm.fastCharge')} />
-                )}
-                <Text style={styles.stationName} numberOfLines={2}>
-                  {station.name}
-                </Text>
-                <Text style={styles.stationAddr} numberOfLines={2}>
-                  {station.address}
-                </Text>
-              </View>
+            <Ionicons name="warning-outline" size={20} color={themeColors.warning} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.overlapTitle, { color: themeColors.warning }]}>{t('bookingConfirm.overlapTitle')}</Text>
+              <Text style={[styles.overlapSub, { color: themeColors.textBody }]}>
+                {t('bookingConfirm.overlapBody', {
+                  start: formatTime(overlappingBooking.startAt),
+                  end: formatTime(overlappingBooking.endAt),
+                  station: overlappingBooking.stationName,
+                })}
+              </Text>
             </View>
+            <Ionicons name="chevron-forward" size={18} color={themeColors.warning} />
+          </Pressable>
+        )}
 
-            {/* Booking details */}
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>{t('bookingConfirm.detailTitle')}</Text>
-              <View style={styles.idPill}>
-                <Text style={styles.idPillText}>{t('bookingConfirm.bookingId', { code: previewCode })}</Text>
-              </View>
+        {/* Time summary */}
+        <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="calendar-outline" size={18} color={themeColors.primary} />
+            <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.timeTitle')}</Text>
+          </View>
+
+          <View style={styles.timeBlock}>
+            <View style={styles.timeCell}>
+              <Text style={[styles.timeLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.date')}</Text>
+              <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>{formatDate(params.startAt)}</Text>
             </View>
-
-            <View style={styles.detailRow}>
-              <View style={styles.detailBox}>
-                <View style={styles.detailLabelRow}>
-                  <Ionicons name="calendar-outline" size={14} color={colors.primary} />
-                  <Text style={styles.detailLabel}>{t('bookingConfirm.date')}</Text>
-                </View>
-                <Text style={styles.detailValue}>{formatDate(params.startAt)}</Text>
-              </View>
-              <View style={styles.detailBox}>
-                <View style={styles.detailLabelRow}>
-                  <Ionicons name="time-outline" size={14} color={colors.primary} />
-                  <Text style={styles.detailLabel}>{t('bookingConfirm.time')}</Text>
-                </View>
-                <Text style={styles.detailValue}>{formatTimeRange(params.startAt, endAt)}</Text>
-                <Text style={styles.detailSub}>{durationLabel(params.durationMin)}</Text>
-              </View>
+            <View style={[styles.timeDivider, { backgroundColor: themeColors.border }]} />
+            <View style={styles.timeCell}>
+              <Text style={[styles.timeLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.timeRange')}</Text>
+              <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>{formatTimeRange(params.startAt, endAt)}</Text>
+              <Text style={[styles.timeSub, { color: themeColors.textMuted }]}>{durationLabel(params.durationMin)}</Text>
             </View>
+          </View>
 
-            <View style={styles.chargerBox}>
-              <View style={styles.chargerIcon}>
-                <Ionicons name="flash" size={20} color={colors.primaryDark} />
-              </View>
-              <View style={styles.chargerBody}>
-                <Text style={styles.detailLabel}>{t('bookingConfirm.connector')}</Text>
-                <Text style={styles.detailValue}>
-                  {t('bookingConfirm.connectorValue', {
-                    chargePoint: chargePoint?.name ?? '',
-                    name: connector.name,
-                    power: connector.powerKw,
-                    connector: connector.connectorType,
+          <View style={[styles.holdHint, { backgroundColor: isDark ? '#152A4A' : '#EFF6FF' }]}>
+            <Ionicons name="information-circle-outline" size={16} color={themeColors.info} />
+            <Text style={[styles.holdHintText, { color: themeColors.textBody }]}>{t('bookingConfirmation.holdNotice')}</Text>
+          </View>
+        </View>
+
+        {/* Invoice breakdown */}
+        <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="receipt-outline" size={18} color={themeColors.primary} />
+            <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.invoiceTitle')}</Text>
+            <StatusBadge variant="neutral" label={previewCode} />
+          </View>
+
+          {quote.priceLines.map((line, i) => (
+            <View key={i} style={styles.invoiceRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.invoiceLineTitle, { color: themeColors.textStrong }]}>
+                  {t('bookingConfirmation.chargingBand', {
+                    kind: t(`timeRangePicker.band.${line.rateKind}`),
+                    from: formatTime(line.fromAt),
+                    to: formatTime(line.toAt),
                   })}
                 </Text>
-                {chargePoint?.zoneLabel && (
-                  <Text style={styles.detailSub}>{chargePoint.zoneLabel}</Text>
-                )}
+                <Text style={[styles.invoiceLineSub, { color: themeColors.textMuted }]}>
+                  {t('bookingConfirmation.bandSub', {
+                    kwh: line.energyKwh,
+                    rate: formatVnd(line.rateVndPerKwh),
+                  })}
+                </Text>
               </View>
+              <Text style={[styles.invoiceLineAmount, { color: themeColors.textStrong }]}>{formatVnd(line.amount)}</Text>
             </View>
+          ))}
 
-            {/* Invoice — one line per TOU band the window crosses (BookingPriceLine) */}
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>{t('bookingConfirm.invoiceTitle')}</Text>
-            {quote.priceLines.map((line, i) => (
-              <View key={i} style={styles.invoiceRow}>
-                <View style={styles.flex1}>
-                  <Text style={styles.invoiceLabel}>
-                    {formatTimeRange(line.fromAt, line.toAt)} ·{' '}
-                    {t(`timeRangePicker.band.${line.rateKind}`)}
-                  </Text>
-                  <Text style={styles.invoiceSub}>
-                    {t('bookingConfirm.lineDetail', {
-                      kwh: line.energyKwh,
-                      rate: formatVnd(line.rateVndPerKwh),
-                    })}
-                  </Text>
-                </View>
-                <Text style={styles.invoiceValue}>{formatVnd(line.amount)}</Text>
-              </View>
-            ))}
-            <View style={styles.invoiceRow}>
-              <Text style={styles.invoiceLabel}>{t('bookingConfirm.serviceFee')}</Text>
-              <Text style={styles.invoiceValue}>{formatVnd(quote.serviceFee)}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.invoiceRow}>
-              <Text style={styles.totalLabel}>{t('bookingConfirm.total')}</Text>
-              <Text style={styles.totalValue}>{formatVnd(quote.totalPrice)}</Text>
-            </View>
-
-            {/* Refund policy (green) — grace period first, then the time tiers */}
-            <View style={styles.refundCard}>
-              <View style={styles.refundHeader}>
-                <Ionicons name="shield-checkmark-outline" size={18} color={colors.primaryDark} />
-                <Text style={styles.refundTitle}>{t('bookingConfirm.refundTitle')}</Text>
-              </View>
-              {[
-                t('bookingConfirm.refundGrace'),
-                t('bookingConfirm.refund1'),
-                t('bookingConfirm.refund2'),
-                t('bookingConfirm.refund3'),
-              ].map((line, i) => (
-                <View key={i} style={styles.refundLine}>
-                  <Ionicons
-                    name={i === 3 ? 'information-circle-outline' : 'checkmark-circle-outline'}
-                    size={15}
-                    color={i === 3 ? colors.textMuted : colors.primary}
-                  />
-                  <Text style={styles.refundText}>{line}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Payment methods */}
-            <Text style={styles.sectionTitle}>{t('payment.title')}</Text>
-            <View style={styles.methods}>
-              {SELECTABLE_PAYMENT_METHODS.map((m) => {
-                const meta = PAYMENT_META[m];
-                const active = m === method;
-                return (
-                  <Pressable
-                    key={m}
-                    onPress={() => setMethod(m)}
-                    style={[styles.method, active && styles.methodActive]}
-                  >
-                    <View style={[styles.methodIcon, { backgroundColor: `${meta.color}1A` }]}>
-                      <Ionicons name={meta.icon} size={20} color={meta.color} />
-                    </View>
-                    <Text style={styles.methodLabel}>{t(`payment.${m}`)}</Text>
-                    <Ionicons
-                      name={active ? 'radio-button-on' : 'radio-button-off'}
-                      size={22}
-                      color={active ? colors.primary : colors.border}
-                    />
-                  </Pressable>
-                );
-              })}
-            </View>
-          </ScrollView>
-
-          {/* Footer: total + pay CTA */}
-          <View style={styles.footer}>
-            {error && (
-              <View style={styles.errorBanner}>
-                <Ionicons name="alert-circle" size={18} color={colors.error} />
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            )}
-            <View style={styles.footerTop}>
-              <View>
-                <Text style={styles.footerTotalLabel}>{t('bookingConfirm.totalToPay')}</Text>
-                <Text style={styles.footerTotal}>{formatVnd(quote.totalPrice)}</Text>
-              </View>
-              <View style={styles.secureRow}>
-                <Ionicons name="lock-closed" size={14} color={colors.primary} />
-                <Text style={styles.secureText}>{t('bookingConfirm.secure')}</Text>
-              </View>
-            </View>
-            <AppButton label={t('bookingConfirm.cta')} loading={submitting} onPress={handlePay} />
+          <View style={styles.invoiceRow}>
+            <Text style={[styles.invoiceFeeLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.serviceFee')}</Text>
+            <Text style={[styles.invoiceFeeAmount, { color: themeColors.textStrong }]}>{formatVnd(quote.serviceFee)}</Text>
           </View>
-        </>
+
+          <View style={[styles.invoiceTotalRow, { borderTopColor: themeColors.border }]}>
+            <Text style={[styles.totalLabel, { color: themeColors.textStrong }]}>{t('bookingConfirmation.total')}</Text>
+            <Text style={[styles.totalAmount, { color: themeColors.textStrong }]}>{formatVnd(quote.totalPrice)}</Text>
+          </View>
+        </View>
+
+        {/* Payment method selector */}
+        <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="wallet-outline" size={18} color={themeColors.primary} />
+            <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.paymentTitle')}</Text>
+          </View>
+
+          {SELECTABLE_PAYMENT_METHODS.map((pm) => {
+            const meta = PAYMENT_META[pm];
+            const isSel = method === pm;
+            return (
+              <Pressable
+                key={pm}
+                style={[
+                  styles.paymentRow,
+                  {
+                    backgroundColor: isSel ? themeColors.primarySoft : themeColors.surfaceAlt,
+                    borderColor: isSel ? themeColors.primary : themeColors.border,
+                  },
+                ]}
+                onPress={() => setMethod(pm)}
+              >
+                <View style={[styles.paymentIcon, { backgroundColor: `${meta.color}1A` }]}>
+                  <Ionicons name={meta.icon} size={20} color={meta.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.paymentName, { color: themeColors.textStrong }]}>{t(`payment.${pm}`)}</Text>
+                  <Text style={[styles.paymentDesc, { color: themeColors.textMuted }]}>{t(`payment.${pm}_desc`)}</Text>
+                </View>
+                <View
+                  style={[
+                    styles.radio,
+                    { borderColor: isSel ? themeColors.primary : themeColors.border },
+                  ]}
+                >
+                  {isSel && <View style={[styles.radioDot, { backgroundColor: themeColors.primary }]} />}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {error && (
+          <View style={[styles.errorBox, { backgroundColor: `${themeColors.error}1A` }]}>
+            <Ionicons name="alert-circle-outline" size={18} color={themeColors.error} />
+            <Text style={[styles.errorText, { color: themeColors.error }]}>{error}</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Sticky footer */}
+      <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+        <View style={styles.footerRow}>
+          <View>
+            <Text style={[styles.footerLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.totalPayment')}</Text>
+            <Text style={[styles.footerAmount, { color: themeColors.textStrong }]}>{formatVnd(quote.totalPrice)}</Text>
+          </View>
+          <AppButton
+            label={t('bookingConfirmation.payBtn', { amount: formatVnd(quote.totalPrice) })}
+            loading={submitting}
+            onPress={submitBooking}
+            style={styles.payBtn}
+          />
+        </View>
+      </View>
+
+      {/* Duplicate / Overlapping Booking Warning Sheet (BR-BOK-08) */}
+      {overlappingBooking && (
+        <BottomSheet
+          visible={showOverlapModal}
+          onClose={() => setShowOverlapModal(false)}
+          title={t('bookingConfirm.overlapTitle')}
+        >
+          <View style={styles.modalContent}>
+            <View style={[styles.modalIconRing, { backgroundColor: `${themeColors.warning}1A` }]}>
+              <Ionicons name="warning-outline" size={32} color={themeColors.warning} />
+            </View>
+            <Text style={[styles.modalBodyText, { color: themeColors.textBody }]}>
+              {t('bookingConfirm.overlapBody', {
+                start: formatTime(overlappingBooking.startAt),
+                end: formatTime(overlappingBooking.endAt),
+                station: overlappingBooking.stationName,
+              })}
+            </Text>
+            <View style={styles.modalActions}>
+              <AppButton
+                label={t('bookingConfirm.overlapConfirm')}
+                onPress={() => setShowOverlapModal(false)}
+              />
+              <AppButton
+                label={t('common.cancel')}
+                variant="secondary"
+                onPress={() => {
+                  setShowOverlapModal(false);
+                  navigation.goBack();
+                }}
+              />
+            </View>
+          </View>
+        </BottomSheet>
       )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  flex1: { flex: 1 },
+  container: { flex: 1 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -335,149 +359,113 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   headerBtn: { width: 40, height: 40 },
-  headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  loader: { marginTop: spacing.xl },
-  scroll: { flex: 1 },
-  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
 
-  // Station summary
-  stationCard: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
+  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
+
+  card: {
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  stationName: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  metaText: { fontSize: fontSizes.caption },
+
+  connectorPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  connectorText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
+
+  overlapCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     padding: spacing.md,
   },
-  stationThumb: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stationBody: { flex: 1, gap: spacing.xs },
-  stationName: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
-  stationAddr: { fontSize: fontSizes.caption, color: colors.textMuted, lineHeight: lineHeights.caption },
+  overlapTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  overlapSub: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption },
 
-  // Section
-  sectionHeaderRow: {
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.xs },
+  cardTitle: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+
+  timeBlock: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  timeCell: { flex: 1, gap: 2 },
+  timeLabel: { fontSize: fontSizes.caption },
+  timeValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  timeSub: { fontSize: fontSizes.caption },
+  timeDivider: { width: 1, height: 36 },
+
+  holdHint: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+  },
+  holdHintText: { flex: 1, fontSize: fontSizes.caption, lineHeight: lineHeights.caption },
+
+  invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  invoiceLineTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
+  invoiceLineSub: { fontSize: fontSizes.caption },
+  invoiceLineAmount: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
+  invoiceFeeLabel: { fontSize: fontSizes.caption },
+  invoiceFeeAmount: { fontSize: fontSizes.body },
+  invoiceTotalRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing.sm,
+    borderTopWidth: 1,
+    paddingTop: spacing.md,
   },
-  sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  idPill: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  idPillText: { fontSize: fontSizes.caption, color: colors.textMuted, fontWeight: fontWeights.medium },
+  totalLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  totalAmount: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
 
-  // Detail boxes
-  detailRow: { flexDirection: 'row', gap: spacing.md },
-  detailBox: {
-    flex: 1,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  detailLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  detailLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textMuted, letterSpacing: 0.5 },
-  detailValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
-  detailSub: { fontSize: fontSizes.caption, color: colors.textMuted },
-  chargerBox: {
+  paymentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  chargerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chargerBody: { flex: 1, gap: spacing.xs },
-
-  // Invoice
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
-  invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  invoiceLabel: { fontSize: fontSizes.body, color: colors.textBody },
-  invoiceSub: { fontSize: fontSizes.caption, color: colors.textMuted },
-  invoiceValue: { fontSize: fontSizes.body, color: colors.textStrong, fontWeight: fontWeights.medium },
-  totalLabel: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  totalValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.primary },
-
-  // Refund (green tint)
-  refundCard: {
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  refundHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  refundTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark },
-  refundLine: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  refundText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
-
-  // Payment methods
-  methods: { gap: spacing.sm },
-  method: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
   },
-  methodActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  methodIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  methodLabel: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textStrong },
+  paymentIcon: { width: 36, height: 36, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  paymentName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
+  paymentDesc: { fontSize: fontSizes.caption },
+  radio: { width: 20, height: 20, borderRadius: radius.full, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  radioDot: { width: 10, height: 10, borderRadius: radius.full },
 
-  // Footer
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
-    gap: spacing.md,
-  },
-  errorBanner: {
+  errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: `${colors.error}14`,
+    gap: spacing.xs,
     borderRadius: radius.md,
     padding: spacing.md,
   },
-  errorText: { flex: 1, fontSize: fontSizes.caption, color: colors.error, fontWeight: fontWeights.medium },
-  footerTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  footerTotalLabel: { fontSize: fontSizes.caption, color: colors.textMuted, letterSpacing: 0.5 },
-  footerTotal: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: colors.textStrong },
-  secureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingBottom: spacing.xs },
-  secureText: { fontSize: fontSizes.caption, color: colors.primary, fontWeight: fontWeights.medium },
+  errorText: { flex: 1, fontSize: fontSizes.caption },
+
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+  },
+  footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  footerLabel: { fontSize: fontSizes.caption },
+  footerAmount: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  payBtn: { flex: 1 },
+
+  modalContent: { gap: spacing.md, alignItems: 'center', paddingTop: spacing.xs },
+  modalIconRing: { width: 64, height: 64, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+  modalBodyText: { fontSize: fontSizes.body, textAlign: 'center', lineHeight: lineHeights.body },
+  modalActions: { alignSelf: 'stretch', gap: spacing.sm, marginTop: spacing.sm },
 });

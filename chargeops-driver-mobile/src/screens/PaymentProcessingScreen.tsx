@@ -7,10 +7,11 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { cancelBooking, confirmPayment, getBookingById } from '@/services/bookingService';
 import type { PaymentResultStatus } from '@/services/simulation';
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatVnd } from '@/utils/format';
 import { PAYMENT_META } from '@/utils/payments';
@@ -18,33 +19,29 @@ import { PAYMENT_META } from '@/utils/payments';
 type Nav = NativeStackNavigationProp<RootStackParamList, 'PaymentProcessing'>;
 type Route = RouteProp<RootStackParamList, 'PaymentProcessing'>;
 
-// SUCCESS is never stored as a phase — it navigates away immediately.
 type FailPhase = Exclude<PaymentResultStatus, 'SUCCESS'>;
 type Phase = 'processing' | FailPhase;
 
-// Failure presentation per gateway outcome.
-const FAILURE_META: Record<
-  FailPhase,
-  { icon: keyof typeof Ionicons.glyphMap; color: string; retry: boolean }
-> = {
-  FAILED: { icon: 'close-circle', color: colors.error, retry: true },
-  TIMEOUT: { icon: 'time-outline', color: colors.warning, retry: true },
-  CANCELLED: { icon: 'ban-outline', color: colors.textMuted, retry: false },
-};
-
 /**
- * "Đang xử lý thanh toán" — the booking is PENDING and we're waiting for the
- * payment gateway. Handles every outcome: SUCCESS hands off to BookingSuccess;
- * FAILED/TIMEOUT offer a retry; CANCELLED ends the transaction. Back/swipe are
- * disabled (route opts) so a transaction can't be interrupted mid-flight.
+ * "Đang xử lý thanh toán" — processing / loading screen with dynamic Dark and Light mode theme support.
  */
 export function PaymentProcessingScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
+  const { themeColors, isDark } = usePreferences();
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phase, setPhase] = useState<Phase>('processing');
+
+  const FAILURE_META: Record<
+    FailPhase,
+    { icon: keyof typeof Ionicons.glyphMap; color: string; retry: boolean }
+  > = {
+    FAILED: { icon: 'close-circle', color: themeColors.error, retry: true },
+    TIMEOUT: { icon: 'time-outline', color: themeColors.warning, retry: true },
+    CANCELLED: { icon: 'ban-outline', color: themeColors.textMuted, retry: false },
+  };
 
   useEffect(() => {
     let active = true;
@@ -73,7 +70,6 @@ export function PaymentProcessingScreen() {
     };
   }, [params.bookingId, navigation]);
 
-  // Kick off the first attempt on mount.
   useEffect(() => attempt(), [attempt]);
 
   function goHome() {
@@ -92,83 +88,90 @@ export function PaymentProcessingScreen() {
   if (phase !== 'processing') {
     const f = FAILURE_META[phase];
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
         <View style={styles.content}>
           <View style={[styles.resultIcon, { backgroundColor: `${f.color}1A` }]}>
             <Ionicons name={f.icon} size={44} color={f.color} />
           </View>
-          <Text style={styles.title}>{t(`paymentProcessing.${phase}.title`)}</Text>
-          <Text style={styles.subtitle}>{t(`paymentProcessing.${phase}.body`)}</Text>
+          <Text style={[styles.title, { color: themeColors.textStrong }]}>{t(`paymentProcessing.${phase}.title`)}</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>{t(`paymentProcessing.${phase}.body`)}</Text>
 
           {booking && (
-            <View style={styles.amountBlock}>
-              <Text style={styles.amountLabel}>{t('paymentProcessing.amount')}</Text>
-              <Text style={styles.amount}>{formatVnd(booking.totalPrice)}</Text>
+            <View style={[styles.infoCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>{t('paymentProcessing.code')}</Text>
+                <Text style={[styles.infoVal, { color: themeColors.textStrong }]}>{booking.code}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>{t('paymentProcessing.amount')}</Text>
+                <Text style={[styles.infoVal, { color: themeColors.textStrong }]}>{formatVnd(booking.totalPrice)}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>{t('paymentProcessing.method')}</Text>
+                <Text style={[styles.infoVal, { color: themeColors.textStrong }]}>{methodLabel}</Text>
+              </View>
             </View>
           )}
         </View>
 
-        <View style={styles.actions}>
-          {f.retry && <AppButton label={t('paymentProcessing.retry')} onPress={attempt} />}
-          <AppButton
-            label={f.retry ? t('paymentProcessing.cancel') : t('paymentProcessing.home')}
-            variant={f.retry ? 'secondary' : 'primary'}
-            onPress={f.retry ? cancelAndExit : goHome}
-          />
+        <View style={styles.footer}>
+          {f.retry ? (
+            <>
+              <AppButton label={t('paymentProcessing.retry')} onPress={attempt} />
+              <AppButton
+                label={t('paymentProcessing.cancel')}
+                variant="secondary"
+                onPress={cancelAndExit}
+              />
+            </>
+          ) : (
+            <AppButton label={t('paymentProcessing.backHome')} onPress={goHome} />
+          )}
         </View>
       </SafeAreaView>
     );
   }
 
-  // ---- Processing state ----
+  // ---- Processing spinner state ----
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        <View style={styles.ring}>
-          <ActivityIndicator size="large" color={colors.primary} style={StyleSheet.absoluteFill} />
-          <View style={[styles.methodIcon, meta && { backgroundColor: `${meta.color}1A` }]}>
-            <Ionicons name={meta?.icon ?? 'card'} size={28} color={meta?.color ?? colors.primary} />
-          </View>
+        <View style={[styles.spinnerOuter, { backgroundColor: isDark ? '#152A4A' : '#EFF6FF' }]}>
+          <ActivityIndicator color={themeColors.primary} size="large" />
         </View>
 
-        <Text style={styles.title}>{t('paymentProcessing.title')}</Text>
-        <Text style={styles.subtitle}>{t('paymentProcessing.subtitle', { method: methodLabel })}</Text>
+        <Text style={[styles.title, { color: themeColors.textStrong }]}>{t('paymentProcessing.processingTitle')}</Text>
+        <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>{t('paymentProcessing.processingBody')}</Text>
 
-        {booking && (
-          <View style={styles.amountBlock}>
-            <Text style={styles.amountLabel}>{t('paymentProcessing.amount')}</Text>
-            <Text style={styles.amount}>{formatVnd(booking.totalPrice)}</Text>
+        {booking && meta && (
+          <View style={[styles.brandCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+            <View style={[styles.brandIcon, { backgroundColor: `${meta.color}1A` }]}>
+              <Ionicons name={meta.icon} size={24} color={meta.color} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.brandName, { color: themeColors.textStrong }]}>{methodLabel}</Text>
+              <Text style={[styles.brandAmount, { color: themeColors.primary }]}>{formatVnd(booking.totalPrice)}</Text>
+            </View>
           </View>
         )}
-
-        <View style={styles.stepRow}>
-          <ActivityIndicator size="small" color={colors.textMuted} />
-          <Text style={styles.stepText}>{t('paymentProcessing.step')}</Text>
-        </View>
       </View>
 
-      <View style={styles.footer}>
-        <Ionicons name="lock-closed" size={14} color={colors.primary} />
-        <Text style={styles.secure}>{t('paymentProcessing.secure')}</Text>
-      </View>
+      <Text style={[styles.lockHint, { color: themeColors.textMuted }]}>{t('paymentProcessing.doNotClose')}</Text>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md },
-
-  ring: { width: 96, height: 96, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
-  methodIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.full,
-    backgroundColor: colors.primarySoft,
+  container: { flex: 1 },
+  content: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    gap: spacing.md,
   },
-  resultIcon: {
+
+  spinnerOuter: {
     width: 96,
     height: 96,
     borderRadius: radius.full,
@@ -176,24 +179,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-
-  title: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: colors.textStrong, textAlign: 'center' },
-  subtitle: {
-    fontSize: fontSizes.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: lineHeights.body,
-    paddingHorizontal: spacing.lg,
+  resultIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
   },
 
-  amountBlock: { alignItems: 'center', gap: spacing.xs, marginTop: spacing.md },
-  amountLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
-  amount: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong },
+  title: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, textAlign: 'center' },
+  subtitle: {
+    fontSize: fontSizes.body,
+    textAlign: 'center',
+    lineHeight: lineHeights.body,
+  },
 
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.lg },
-  stepText: { fontSize: fontSizes.caption, color: colors.textMuted },
+  brandCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    alignSelf: 'stretch',
+    marginTop: spacing.md,
+  },
+  brandIcon: { width: 44, height: 44, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  brandName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
+  brandAmount: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
 
-  actions: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, gap: spacing.sm },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingBottom: spacing.lg },
-  secure: { fontSize: fontSizes.caption, color: colors.primary, fontWeight: fontWeights.medium },
+  infoCard: {
+    alignSelf: 'stretch',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.xs,
+    marginTop: spacing.md,
+  },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  infoLabel: { fontSize: fontSizes.caption },
+  infoVal: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+
+  lockHint: {
+    fontSize: fontSizes.caption,
+    textAlign: 'center',
+    paddingBottom: spacing.lg,
+  },
+
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    gap: spacing.sm,
+  },
 });

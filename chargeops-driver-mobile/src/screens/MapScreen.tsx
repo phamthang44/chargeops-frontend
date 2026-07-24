@@ -17,15 +17,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader, StationPin, StationThumb, type PinStatus } from '@/components';
+import { AppHeader, StationPin, StationThumb, useTabBarInset, type PinStatus } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { getNearbyStations } from '@/services/stationService';
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Station } from '@/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-// Faux pin coordinates on the preview canvas (real lat/long → screen later).
 const PIN_SPOTS: { top: DimensionValue; left: DimensionValue }[] = [
   { top: '22%', left: '24%' },
   { top: '38%', left: '60%' },
@@ -35,10 +35,9 @@ const PIN_SPOTS: { top: DimensionValue; left: DimensionValue }[] = [
 ];
 
 const SCREEN_W = Dimensions.get('window').width;
-const CARD_W = SCREEN_W - spacing.lg * 2 - 28; // leave a peek of the next card
+const CARD_W = SCREEN_W - spacing.lg * 2 - 28;
 const SNAP = CARD_W + spacing.md;
 
-/** Derive a pin color/status from a station's live availability. */
 function pinStatus(s: Station): PinStatus {
   if (s.isOpen === false) return 'closed';
   if (s.availableConnectors <= 0) return 'full';
@@ -46,7 +45,6 @@ function pinStatus(s: Station): PinStatus {
   return 'available';
 }
 
-/** Decorative city blocks — grey "buildings" on a white ground. */
 const MAP_BLOCKS: { top: DimensionValue; left: DimensionValue; w: number; h: number }[] = [
   { top: '9%', left: '7%', w: 74, h: 52 },
   { top: '12%', left: '46%', w: 58, h: 66 },
@@ -59,37 +57,45 @@ const MAP_BLOCKS: { top: DimensionValue; left: DimensionValue; w: number; h: num
 ];
 
 /**
- * Stylized placeholder for the interactive map (real Google Maps is out of
- * scope). Abstract grey blocks + a couple of streets + one green "park" read as
- * a minimalist map rather than graph paper — swapped for a real <MapView> later
- * without touching the pins/carousel logic layered above it.
+ * Faux map canvas backdrop — uses real map-colored ground (#F8FAFC) as requested.
  */
 function FauxMap() {
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {/* Streets */}
-      <View style={[styles.street, styles.streetH, { top: '37%' }]} />
-      <View style={[styles.street, styles.streetH, { top: '70%' }]} />
-      <View style={[styles.street, styles.streetV, { left: '36%' }]} />
-      {/* Park (subtle brand hint) */}
-      <View style={[styles.park, { top: '30%', left: '60%' }]} />
-      {/* Blocks */}
+    <View style={[styles.mapCanvas, { backgroundColor: '#F8FAFC' }]}>
       {MAP_BLOCKS.map((b, i) => (
-        <View key={i} style={[styles.block, { top: b.top, left: b.left, width: b.w, height: b.h }]} />
+        <View
+          key={i}
+          style={[
+            styles.block,
+            {
+              top: b.top,
+              left: b.left,
+              width: b.w,
+              height: b.h,
+              backgroundColor: '#E2E8F0',
+            },
+          ]}
+        />
       ))}
+      <View style={[styles.street, styles.streetH, { top: '34%', backgroundColor: '#E2E8F0' }]} />
+      <View style={[styles.street, styles.streetH, { top: '72%', backgroundColor: '#E2E8F0' }]} />
+      <View style={[styles.street, styles.streetV, { left: '38%', backgroundColor: '#E2E8F0' }]} />
+      <View style={[styles.street, styles.streetV, { left: '76%', backgroundColor: '#E2E8F0' }]} />
+      <View style={[styles.park, { top: '24%', left: '44%', backgroundColor: '#DCFCE7' }]} />
     </View>
   );
 }
 
 /**
- * "Bản đồ" tab. The real interactive map (Google Maps) is out of scope, so this
- * shows a faux map canvas with station pins synced to a swipeable card carousel,
- * a floating search bar, and a recenter control. Swapping in a real <MapView>
- * later only replaces the faux-map View — the carousel/search logic stays.
+ * "Bản đồ" tab — map discovery view with neutral map canvas and floating theme-aware controls.
  */
 export function MapScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
+  const { themeColors } = usePreferences();
+  // The carousel is anchored to the bottom edge, so it has to sit above the bar.
+  const tabInset = useTabBarInset();
+
   const [stations, setStations] = useState<Station[]>([]);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
@@ -97,7 +103,6 @@ export function MapScreen() {
 
   useEffect(() => {
     let active = true;
-    // The map only pins the nearest handful; one generous page is plenty.
     getNearbyStations({}, { limit: 40 }).then((page) => {
       if (active) setStations(page.items);
     });
@@ -107,21 +112,17 @@ export function MapScreen() {
   }, []);
 
   const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const list = q
-      ? stations.filter((s) => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q))
-      : stations;
-    return list.slice(0, PIN_SPOTS.length);
+    if (!query.trim()) return stations;
+    const q = query.toLowerCase();
+    return stations.filter(
+      (s) => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q),
+    );
   }, [stations, query]);
 
-  // Keep the selection valid as the filtered set changes.
-  useEffect(() => {
-    setSelected((i) => Math.min(i, Math.max(0, visible.length - 1)));
-  }, [visible.length]);
-
   const selectStation = (index: number) => {
-    setSelected(index);
-    scrollRef.current?.scrollTo({ x: index * SNAP, animated: true });
+    const idx = Math.max(0, Math.min(index, visible.length - 1));
+    setSelected(idx);
+    scrollRef.current?.scrollTo({ x: idx * SNAP, animated: true });
   };
 
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -132,7 +133,7 @@ export function MapScreen() {
   const recenter = () => selectStation(0);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
       <AppHeader title={t('map.title')} />
 
       <View style={styles.mapWrap}>
@@ -142,12 +143,12 @@ export function MapScreen() {
 
           {/* Current-location dot */}
           <View style={styles.meDot} pointerEvents="none">
-            <View style={styles.meRing} />
-            <View style={styles.meCore} />
+            <View style={[styles.meRing, { backgroundColor: themeColors.info }]} />
+            <View style={[styles.meCore, { backgroundColor: themeColors.info, borderColor: '#FFFFFF' }]} />
           </View>
 
           {/* Station pins */}
-          {visible.map((s, i) => {
+          {visible.slice(0, PIN_SPOTS.length).map((s, i) => {
             const isSel = i === selected;
             return (
               <Pressable
@@ -162,32 +163,41 @@ export function MapScreen() {
         </View>
 
         {/* Floating search bar */}
-        <View style={styles.searchFloat}>
-          <Ionicons name="search" size={18} color={colors.textMuted} />
+        <View style={[styles.searchFloat, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <Ionicons name="search" size={18} color={themeColors.textMuted} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: themeColors.textStrong }]}
             placeholder={t('map.searchPlaceholder')}
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={themeColors.textMuted}
             value={query}
             onChangeText={setQuery}
             returnKeyType="search"
           />
           {query.length > 0 && (
             <Pressable hitSlop={8} onPress={() => setQuery('')}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              <Ionicons name="close-circle" size={18} color={themeColors.textMuted} />
             </Pressable>
           )}
         </View>
 
         {/* Recenter control */}
-        <Pressable style={styles.recenter} hitSlop={8} onPress={recenter}>
-          <Ionicons name="locate" size={20} color={colors.primary} />
+        <Pressable
+          style={[styles.recenter, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
+          hitSlop={8}
+          onPress={recenter}
+        >
+          <Ionicons name="locate" size={20} color={themeColors.primary} />
         </Pressable>
 
-        {/* Station carousel synced with the selected pin */}
+        {/* Station carousel */}
         {visible.length === 0 ? (
-          <View style={styles.noResults}>
-            <Text style={styles.noResultsText}>{t('map.noResults')}</Text>
+          <View
+            style={[
+              styles.noResults,
+              { backgroundColor: themeColors.surface, borderColor: themeColors.border, bottom: tabInset },
+            ]}
+          >
+            <Text style={[styles.noResultsText, { color: themeColors.textMuted }]}>{t('map.noResults')}</Text>
           </View>
         ) : (
           <ScrollView
@@ -198,54 +208,63 @@ export function MapScreen() {
             decelerationRate="fast"
             onMomentumScrollEnd={onMomentumEnd}
             contentContainerStyle={styles.carousel}
-            style={styles.carouselWrap}
+            style={[styles.carouselWrap, { bottom: tabInset }]}
           >
             {visible.map((s, i) => {
               const full = s.availableConnectors === 0;
+              const isSelected = i === selected;
               return (
                 <Pressable
                   key={s.id}
-                  style={[styles.card, { width: CARD_W }, i === selected && styles.cardActive]}
+                  style={[
+                    styles.card,
+                    {
+                      width: CARD_W,
+                      backgroundColor: themeColors.surface,
+                      borderColor: isSelected ? themeColors.primary : themeColors.border,
+                    },
+                    isSelected && styles.cardActive,
+                  ]}
                   onPress={() => selectStation(i)}
                 >
                   <View style={styles.cardHead}>
                     <StationThumb size={44} />
                     <View style={styles.cardHeadBody}>
                       <View style={styles.cardTitleRow}>
-                        <Text style={styles.cardName} numberOfLines={1}>
+                        <Text style={[styles.cardName, { color: themeColors.textStrong }]} numberOfLines={1}>
                           {s.name}
                         </Text>
                         {!!s.rating && (
                           <View style={styles.rating}>
-                            <Ionicons name="star" size={12} color={colors.warning} />
-                            <Text style={styles.ratingText}>{s.rating.toFixed(1)}</Text>
+                            <Ionicons name="star" size={12} color={themeColors.warning} />
+                            <Text style={[styles.ratingText, { color: themeColors.textStrong }]}>{s.rating.toFixed(1)}</Text>
                           </View>
                         )}
                       </View>
-                      <Text style={styles.cardAddr} numberOfLines={1}>
+                      <Text style={[styles.cardAddr, { color: themeColors.textMuted }]} numberOfLines={1}>
                         {s.address}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.cardMetaRow}>
-                    <View style={styles.availPill}>
+                    <View style={[styles.availPill, { backgroundColor: themeColors.surfaceAlt }]}>
                       <View
-                        style={[styles.availDot, { backgroundColor: full ? colors.error : colors.primary }]}
+                        style={[styles.availDot, { backgroundColor: full ? themeColors.error : themeColors.primary }]}
                       />
-                      <Text style={[styles.availText, { color: full ? colors.error : colors.primaryDark }]}>
+                      <Text style={[styles.availText, { color: full ? themeColors.error : themeColors.primaryDark }]}>
                         {full ? t('map.full') : t('map.portsFree', { count: s.availableConnectors })}
                       </Text>
                     </View>
                     {s.distanceKm != null && (
-                      <Text style={styles.cardDistance}>{s.distanceKm.toFixed(1)} km</Text>
+                      <Text style={[styles.cardDistance, { color: themeColors.textMuted }]}>{s.distanceKm.toFixed(1)} km</Text>
                     )}
                     <Pressable
-                      style={styles.detailBtn}
+                      style={[styles.detailBtn, { backgroundColor: themeColors.primary }]}
                       onPress={() => navigation.navigate('StationDetail', { stationId: s.id })}
                     >
-                      <Text style={styles.detailBtnText}>{t('map.viewDetail')}</Text>
-                      <Ionicons name="chevron-forward" size={14} color={colors.textInverse} />
+                      <Text style={[styles.detailBtnText, { color: '#FFFFFF' }]}>{t('map.viewDetail')}</Text>
+                      <Ionicons name="chevron-forward" size={14} color="#FFFFFF" />
                     </Pressable>
                   </View>
                 </Pressable>
@@ -259,24 +278,22 @@ export function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
   mapWrap: { flex: 1, position: 'relative' },
 
-  map: { flex: 1, backgroundColor: colors.surface, overflow: 'hidden' },
-  // Stylized map decor
-  block: { position: 'absolute', borderRadius: radius.sm, backgroundColor: colors.surfaceAlt },
-  street: { position: 'absolute', backgroundColor: colors.surfaceAlt, opacity: 0.7 },
+  map: { flex: 1, overflow: 'hidden' },
+  mapCanvas: { flex: 1, position: 'relative' },
+  block: { position: 'absolute', borderRadius: radius.sm },
+  street: { position: 'absolute', opacity: 0.7 },
   streetH: { left: 0, right: 0, height: 10 },
   streetV: { top: 0, bottom: 0, width: 10 },
-  park: { position: 'absolute', width: 78, height: 62, borderRadius: radius.md, backgroundColor: colors.primarySoft, opacity: 0.7 },
+  park: { position: 'absolute', width: 78, height: 62, borderRadius: radius.md, opacity: 0.7 },
   pin: { position: 'absolute', transform: [{ translateX: -20 }, { translateY: -40 }] },
 
-  // Current-location dot
   meDot: { position: 'absolute', top: '50%', left: '46%', alignItems: 'center', justifyContent: 'center' },
-  meRing: { position: 'absolute', width: 28, height: 28, borderRadius: radius.full, backgroundColor: colors.info, opacity: 0.18 },
-  meCore: { width: 14, height: 14, borderRadius: radius.full, backgroundColor: colors.info, borderWidth: 2.5, borderColor: colors.surface },
+  meRing: { position: 'absolute', width: 28, height: 28, borderRadius: radius.full, opacity: 0.18 },
+  meCore: { width: 14, height: 14, borderRadius: radius.full, borderWidth: 2.5 },
 
-  // Floating search
   searchFloat: {
     position: 'absolute',
     top: spacing.md,
@@ -285,99 +302,89 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.surface,
     borderRadius: radius.full,
+    borderWidth: 1,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    shadowColor: colors.textStrong,
+    height: 48,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  searchInput: { flex: 1, fontSize: fontSizes.body, color: colors.textStrong, padding: 0 },
+  searchInput: { flex: 1, fontSize: fontSizes.body, padding: 0 },
 
-  // Recenter FAB (sits just above the carousel)
   recenter: {
     position: 'absolute',
+    top: 76,
     right: spacing.lg,
-    bottom: 168,
     width: 44,
     height: 44,
     borderRadius: radius.full,
-    backgroundColor: colors.surface,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.textStrong,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-
-  // Carousel
-  carouselWrap: { position: 'absolute', left: 0, right: 0, bottom: spacing.lg },
-  carousel: { paddingHorizontal: spacing.lg, gap: spacing.md },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    gap: spacing.xs,
-    shadowColor: colors.textStrong,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowRadius: 6,
     elevation: 3,
   },
-  cardActive: { borderColor: colors.primary, borderWidth: 2 },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+
+  noResults: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    left: spacing.lg,
+    right: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  noResultsText: { fontSize: fontSizes.body },
+
+  // `bottom` is applied inline — it clears the floating tab bar.
+  carouselWrap: { position: 'absolute', left: 0, right: 0, flexGrow: 0 },
+  carousel: { paddingHorizontal: spacing.lg, gap: spacing.md },
+  card: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  cardActive: { borderWidth: 2 },
+  cardHead: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
   cardHeadBody: { flex: 1, gap: 2 },
-  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  cardName: { flex: 1, fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  cardName: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.bold },
   rating: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  ratingText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody },
-  cardAddr: { fontSize: fontSizes.caption, color: colors.textMuted, lineHeight: lineHeights.caption },
-  cardMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
+  ratingText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
+  cardAddr: { fontSize: fontSizes.caption },
+
+  cardMetaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   availPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    paddingVertical: 2,
   },
-  availDot: { width: 7, height: 7, borderRadius: radius.full },
+  availDot: { width: 6, height: 6, borderRadius: radius.full },
   availText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
-  cardDistance: { fontSize: fontSizes.caption, color: colors.textMuted },
+  cardDistance: { fontSize: fontSizes.caption },
   detailBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    marginLeft: 'auto',
-    backgroundColor: colors.primary,
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
-  detailBtnText: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textInverse },
-
-  noResults: {
-    position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
-    bottom: spacing.xl,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-    shadowColor: colors.textStrong,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  noResultsText: { fontSize: fontSizes.body, color: colors.textMuted },
+  detailBtnText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold },
 });

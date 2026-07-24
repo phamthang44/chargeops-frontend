@@ -2,28 +2,33 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { colors, fontSizes } from '@/theme';
+import { FloatingTabBar } from '@/components/FloatingTabBar';
+import { usePreferences } from '@/context/PreferencesContext';
 import { BookingHistoryScreen } from '@/screens/BookingHistoryScreen';
 import { BookingsScreen } from '@/screens/BookingsScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { StationListScreen } from '@/screens/StationListScreen';
+import { fontSizes } from '@/theme';
 import type { BottomTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
-/** Bottom tabs (5): Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ. */
+/**
+ * Bottom tabs (5): Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ
+ *
+ * Uses the custom `FloatingTabBar` — a frosted-glass floating pill with an
+ * elevated emerald FAB for the center "Đặt chỗ" tab. Dynamic theme support.
+ */
 export function BottomTabs() {
   const { t } = useTranslation();
+  const { themeColors } = usePreferences();
 
   return (
     <Tab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
-        headerTitleStyle: { color: colors.textStrong },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: fontSizes.caption },
+        headerShown: false,
       }}
     >
       <Tab.Screen
@@ -31,8 +36,6 @@ export function BottomTabs() {
         component={StationListScreen}
         options={{
           title: t('nav.stationList'),
-          // Screen draws its own app bar (ChargeOps + TÀI XẾ); hide the default tab header.
-          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
         }}
       />
@@ -41,8 +44,6 @@ export function BottomTabs() {
         component={MapScreen}
         options={{
           title: t('nav.map'),
-          // Screen draws its own app bar (AppHeader); hide the default tab header.
-          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
         }}
       />
@@ -51,9 +52,7 @@ export function BottomTabs() {
         component={BookingsScreen}
         options={{
           title: t('nav.bookings'),
-          // Screen draws its own app bar (AppHeader); hide the default tab header.
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="bookmark-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="flash-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -61,8 +60,6 @@ export function BottomTabs() {
         component={BookingHistoryScreen}
         options={{
           title: t('nav.history'),
-          // Screen draws its own header (logo + TÀI XẾ + segmented tabs).
-          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />,
         }}
       />
@@ -71,8 +68,6 @@ export function BottomTabs() {
         component={ProfileScreen}
         options={{
           title: t('nav.profile'),
-          // Screen draws its own app bar (AppHeader); hide the default tab header.
-          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
         }}
       />

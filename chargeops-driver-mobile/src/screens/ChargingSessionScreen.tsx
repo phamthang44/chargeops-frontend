@@ -8,9 +8,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { AppButton, GlassButton, StatusBadge } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { completeBooking, getBookingById } from '@/services/bookingService';
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatCountdown, formatTime } from '@/utils/format';
 
@@ -25,19 +26,18 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 // Demo session params: starts ~32 min ago at 84%, climbs ~1%/3s to 100%.
 const SESSION_START_OFFSET_MS = 32 * 60_000 + 15_000;
 const START_PERCENT = 84;
-const FULL_RANGE_KM = 320; // range at 100% (for the "km left" estimate)
+const FULL_RANGE_KM = 320;
 const POWER_KW = 45.2;
 const TEMP_C = 38;
 
 /**
- * "Đang sạc" — live charging session after check-in. The hardware controls are
- * intentionally locked (safety: physical buttons only). Values here are a
- * frontend simulation; the backend will stream real telemetry later.
+ * "Đang sạc" — live charging session screen with Electric Info Blue theme and dynamic Dark/Light mode support.
  */
 export function ChargingSessionScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
+  const { themeColors, isDark } = usePreferences();
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const startedAt = useRef(Date.now() - SESSION_START_OFFSET_MS);
@@ -71,49 +71,51 @@ export function ChargingSessionScreen() {
   const full = percent >= 100;
   const elapsedMs = now - startedAt.current;
   const kmLeft = Math.round((FULL_RANGE_KM * percent) / 100);
-  // Rough remaining estimate: ~1.2 min per remaining percent.
   const remainingMin = Math.max(0, Math.round((100 - percent) * 1.2));
   const endTime = new Date(now + remainingMin * 60_000).toISOString();
 
+  /** Stop / Complete charging session */
   function finish() {
     if (params?.bookingId) completeBooking(params.bookingId);
     navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Tabs' }] }));
   }
 
   const progressOffset = CIRCUMFERENCE * (1 - percent / 100);
+  const ringCardBg = isDark ? '#0F1E36' : '#EFF6FF';
+  const ringTrackColor = isDark ? '#1E2D4A' : '#DBEAFE';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Header */}
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      {/* Header with back button returning to previous screen (BookingsScreen) */}
+      <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
         <GlassButton
           size={40}
           glassEffectStyle="regular"
-          fallbackColor={colors.surfaceAlt}
+          fallbackColor={themeColors.surfaceAlt}
           accessibilityLabel={t('common.back')}
-          onPress={finish}
+          onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={22} color={colors.textStrong} />
+          <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
         </GlassButton>
         <View style={styles.headerTitleBlock}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
+          <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
             {t('chargingSession.headerTitle', { station: booking?.stationName ?? '' })}
           </Text>
-          <Text style={styles.headerRole}>{t('chargingSession.role')}</Text>
+          <Text style={[styles.headerRole, { color: themeColors.info }]}>{t('chargingSession.role')}</Text>
         </View>
         <View style={styles.headerBtn} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Progress ring card */}
-        <View style={styles.ringCard}>
+        {/* Progress ring card themed with Electric Info Blue */}
+        <View style={[styles.ringCard, { backgroundColor: ringCardBg, borderColor: themeColors.border }]}>
           <View style={styles.ringWrap}>
             <Svg width={RING_SIZE} height={RING_SIZE}>
               <Circle
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
                 r={RADIUS}
-                stroke={colors.border}
+                stroke={ringTrackColor}
                 strokeWidth={STROKE}
                 fill="none"
               />
@@ -121,124 +123,125 @@ export function ChargingSessionScreen() {
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
                 r={RADIUS}
-                stroke={colors.primary}
+                stroke={themeColors.info}
                 strokeWidth={STROKE}
                 fill="none"
                 strokeLinecap="round"
                 strokeDasharray={CIRCUMFERENCE}
                 strokeDashoffset={progressOffset}
-                // Start the arc at 12 o'clock.
                 transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
               />
             </Svg>
             <View style={styles.ringCenter}>
               <View style={styles.ringStatusRow}>
-                <Ionicons name="flash" size={16} color={colors.primaryDark} />
-                <Text style={styles.ringStatus}>
+                <Ionicons name="flash" size={16} color={themeColors.info} />
+                <Text style={[styles.ringStatus, { color: themeColors.info }]}>
                   {full ? t('chargingSession.full') : t('chargingSession.charging')}
                 </Text>
               </View>
-              <Text style={styles.ringPercent}>{percent}%</Text>
-              <Text style={styles.ringKm}>{t('chargingSession.rangeLeft', { km: kmLeft })}</Text>
+              <Text style={[styles.ringPercent, { color: themeColors.textStrong }]}>{percent}%</Text>
+              <Text style={[styles.ringKm, { color: themeColors.textMuted }]}>
+                {t('chargingSession.rangeLeft', { km: kmLeft })}
+              </Text>
             </View>
           </View>
 
           {/* Current status sub-card */}
-          <View style={styles.statusCard}>
-            <Ionicons name="pulse" size={20} color={colors.primaryDark} />
+          <View style={[styles.statusCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+            <Ionicons name="pulse" size={20} color={themeColors.info} />
             <View style={styles.statusBody}>
-              <Text style={styles.statusLabel}>{t('chargingSession.currentStatus')}</Text>
-              <Text style={styles.statusValue}>{t('chargingSession.currentStatusValue')}</Text>
+              <Text style={[styles.statusLabel, { color: themeColors.textMuted }]}>{t('chargingSession.currentStatus')}</Text>
+              <Text style={[styles.statusValue, { color: themeColors.textStrong }]}>{t('chargingSession.currentStatusValue')}</Text>
             </View>
-            <StatusBadge variant="success" label={t('chargingSession.active')} dot />
+            <StatusBadge variant="info" label={t('chargingSession.active')} dot />
           </View>
         </View>
 
         {/* Stat row */}
         <View style={styles.statRow}>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
             <View style={styles.statHead}>
-              <Ionicons name="power" size={16} color={colors.info} />
-              <Text style={styles.statLabel}>{t('chargingSession.power')}</Text>
+              <Ionicons name="power" size={16} color={themeColors.info} />
+              <Text style={[styles.statLabel, { color: themeColors.textMuted }]}>{t('chargingSession.power')}</Text>
             </View>
-            <Text style={styles.statValue}>
-              {POWER_KW} <Text style={styles.statUnit}>kW</Text>
+            <Text style={[styles.statValue, { color: themeColors.textStrong }]}>
+              {POWER_KW} <Text style={[styles.statUnit, { color: themeColors.textMuted }]}>kW</Text>
             </Text>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
             <View style={styles.statHead}>
-              <Ionicons name="thermometer-outline" size={16} color={colors.warning} />
-              <Text style={styles.statLabel}>{t('chargingSession.temperature')}</Text>
+              <Ionicons name="thermometer-outline" size={16} color={themeColors.warning} />
+              <Text style={[styles.statLabel, { color: themeColors.textMuted }]}>{t('chargingSession.temperature')}</Text>
             </View>
-            <Text style={styles.statValue}>
-              {TEMP_C} <Text style={styles.statUnit}>°C</Text>
+            <Text style={[styles.statValue, { color: themeColors.textStrong }]}>
+              {TEMP_C} <Text style={[styles.statUnit, { color: themeColors.textMuted }]}>°C</Text>
             </Text>
           </View>
         </View>
 
         {/* Time info */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.cardTitleRow}>
-            <Ionicons name="time-outline" size={18} color={colors.primary} />
-            <Text style={styles.cardTitle}>{t('chargingSession.timeTitle')}</Text>
+            <Ionicons name="time-outline" size={18} color={themeColors.info} />
+            <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('chargingSession.timeTitle')}</Text>
           </View>
           <View style={styles.timeRow}>
-            <View style={styles.timeIcon}>
-              <Ionicons name="time-outline" size={18} color={colors.primaryDark} />
+            <View style={[styles.timeIcon, { backgroundColor: isDark ? '#152A4A' : '#EFF6FF' }]}>
+              <Ionicons name="time-outline" size={18} color={themeColors.info} />
             </View>
             <View style={styles.timeBody}>
-              <Text style={styles.timeLabel}>{t('chargingSession.elapsed')}</Text>
-              <Text style={styles.timeValue}>{formatCountdown(elapsedMs)}</Text>
-              <Text style={styles.timeSub}>
+              <Text style={[styles.timeLabel, { color: themeColors.textMuted }]}>{t('chargingSession.elapsed')}</Text>
+              <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>{formatCountdown(elapsedMs)}</Text>
+              <Text style={[styles.timeSub, { color: themeColors.textMuted }]}>
                 {t('chargingSession.startedAt', { time: formatTime(new Date(startedAt.current).toISOString()) })}
               </Text>
             </View>
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
           <View style={styles.timeRow}>
-            <View style={styles.timeIcon}>
-              <Ionicons name="flash" size={18} color={colors.primaryDark} />
+            <View style={[styles.timeIcon, { backgroundColor: isDark ? '#152A4A' : '#EFF6FF' }]}>
+              <Ionicons name="flash" size={18} color={themeColors.info} />
             </View>
             <View style={styles.timeBody}>
-              <Text style={styles.timeLabel}>{t('chargingSession.estEnd')}</Text>
-              <Text style={styles.timeValue}>
+              <Text style={[styles.timeLabel, { color: themeColors.textMuted }]}>{t('chargingSession.estEnd')}</Text>
+              <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>
                 {full
                   ? formatTime(endTime)
                   : t('chargingSession.estEndValue', { time: formatTime(endTime), minutes: remainingMin })}
               </Text>
-              <Text style={styles.timeSub}>{t('chargingSession.estEndNote')}</Text>
+              <Text style={[styles.timeSub, { color: themeColors.textMuted }]}>{t('chargingSession.estEndNote')}</Text>
             </View>
           </View>
         </View>
 
         {/* Hardware controls (locked) */}
         <View style={styles.cardTitleRow}>
-          <Text style={styles.cardTitle}>{t('chargingSession.controlTitle')}</Text>
+          <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('chargingSession.controlTitle')}</Text>
           <StatusBadge variant="neutral" label={t('chargingSession.locked')} />
         </View>
-        <View style={styles.lockedCard}>
-          <Ionicons name="lock-closed-outline" size={22} color={colors.textMuted} />
-          <Text style={styles.lockedTitle}>{t('chargingSession.controlDisabledTitle')}</Text>
-          <Text style={styles.lockedBody}>{t('chargingSession.controlDisabledBody')}</Text>
+        <View style={[styles.lockedCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+          <Ionicons name="lock-closed-outline" size={22} color={themeColors.textMuted} />
+          <Text style={[styles.lockedTitle, { color: themeColors.textBody }]}>{t('chargingSession.controlDisabledTitle')}</Text>
+          <Text style={[styles.lockedBody, { color: themeColors.textMuted }]}>{t('chargingSession.controlDisabledBody')}</Text>
           <View style={styles.lockedBtnRow}>
-            <View style={[styles.lockedBtn, styles.lockedBtnDisabled]}>
-              <Text style={styles.lockedBtnText}>{t('chargingSession.stop')}</Text>
+            <View style={[styles.lockedBtn, { backgroundColor: themeColors.border }]}>
+              <Text style={[styles.lockedBtnText, { color: themeColors.textMuted }]}>{t('chargingSession.stop')}</Text>
             </View>
-            <View style={[styles.lockedBtn, styles.lockedBtnDisabled]}>
-              <Text style={styles.lockedBtnText}>{t('chargingSession.unlock')}</Text>
+            <View style={[styles.lockedBtn, { backgroundColor: themeColors.border }]}>
+              <Text style={[styles.lockedBtnText, { color: themeColors.textMuted }]}>{t('chargingSession.unlock')}</Text>
             </View>
           </View>
         </View>
 
         {/* Auto note */}
-        <View style={styles.autoNote}>
-          <Ionicons name="information-circle-outline" size={18} color={colors.info} />
-          <Text style={styles.autoNoteText}>{t('chargingSession.autoNote')}</Text>
+        <View style={[styles.autoNote, { backgroundColor: isDark ? '#0F1E36' : `${themeColors.info}14` }]}>
+          <Ionicons name="information-circle-outline" size={18} color={themeColors.info} />
+          <Text style={[styles.autoNoteText, { color: themeColors.textBody }]}>{t('chargingSession.autoNote')}</Text>
         </View>
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
         <AppButton
           label={full ? t('chargingSession.finishFull') : t('chargingSession.finish')}
           variant={full ? 'primary' : 'secondary'}
@@ -250,7 +253,7 @@ export function ChargingSessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
 
   // Header
   header: {
@@ -260,71 +263,64 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   headerBtn: { width: 40, height: 40 },
   headerTitleBlock: { flex: 1, alignItems: 'center' },
-  headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.primary, letterSpacing: 1 },
+  headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
+  headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 1 },
 
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
 
   // Ring card
   ringCard: {
-    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.lg,
     alignItems: 'stretch',
+    borderWidth: 1,
   },
   ringWrap: { alignSelf: 'center', width: RING_SIZE, height: RING_SIZE, alignItems: 'center', justifyContent: 'center' },
   ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
   ringStatusRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  ringStatus: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.primaryDark, letterSpacing: 1 },
-  ringPercent: { fontSize: 56, fontWeight: fontWeights.bold, color: colors.textStrong },
-  ringKm: { fontSize: fontSizes.body, color: colors.textMuted },
+  ringStatus: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, letterSpacing: 1 },
+  ringPercent: { fontSize: 56, fontWeight: fontWeights.bold },
+  ringKm: { fontSize: fontSizes.body },
 
   statusCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
   },
   statusBody: { flex: 1, gap: 2 },
-  statusLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
-  statusValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
+  statusLabel: { fontSize: fontSizes.caption },
+  statusValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
 
   // Stat row
   statRow: { flexDirection: 'row', gap: spacing.md },
   statCard: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.sm,
   },
   statHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  statLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textMuted, letterSpacing: 0.5 },
-  statValue: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: colors.textStrong },
-  statUnit: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
+  statLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, letterSpacing: 0.5 },
+  statValue: { fontSize: fontSizes.title, fontWeight: fontWeights.bold },
+  statUnit: { fontSize: fontSizes.body, fontWeight: fontWeights.medium },
 
   // Generic card
   card: {
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.md,
   },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, marginTop: spacing.xs },
-  cardTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  cardTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
 
   // Time rows
   timeRow: { flexDirection: 'row', gap: spacing.md },
@@ -332,45 +328,40 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   timeBody: { flex: 1, gap: 2 },
-  timeLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
-  timeValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  timeSub: { fontSize: fontSizes.caption, color: colors.textMuted, fontStyle: 'italic' },
-  divider: { height: 1, backgroundColor: colors.border },
+  timeLabel: { fontSize: fontSizes.caption },
+  timeValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  timeSub: { fontSize: fontSizes.caption, fontStyle: 'italic' },
+  divider: { height: 1 },
 
   // Locked control
   lockedCard: {
-    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.border,
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.sm,
   },
-  lockedTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textBody },
-  lockedBody: { fontSize: fontSizes.caption, color: colors.textMuted, textAlign: 'center', lineHeight: lineHeights.body },
+  lockedTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  lockedBody: { fontSize: fontSizes.caption, textAlign: 'center', lineHeight: lineHeights.body },
   lockedBtnRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm, alignSelf: 'stretch' },
-  lockedBtn: { flex: 1, alignItems: 'center', paddingVertical: spacing.md, borderRadius: radius.md, backgroundColor: colors.border },
-  lockedBtnDisabled: { opacity: 0.5 },
-  lockedBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textMuted },
+  lockedBtn: { flex: 1, alignItems: 'center', paddingVertical: spacing.md, borderRadius: radius.md, opacity: 0.5 },
+  lockedBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
 
   // Auto note
   autoNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    backgroundColor: `${colors.info}14`,
     borderRadius: radius.md,
     padding: spacing.md,
     marginTop: spacing.xs,
   },
-  autoNoteText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.body },
+  autoNoteText: { flex: 1, fontSize: fontSizes.caption, lineHeight: lineHeights.body },
 
   // Footer
   footer: {
@@ -378,7 +369,5 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
   },
 });

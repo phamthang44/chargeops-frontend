@@ -59,21 +59,34 @@ export function splitDuration(totalMin: number): { hours: number; minutes: numbe
  * Used for the short grace-period / payment-hold timers.
  */
 export function formatMmSs(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const mm = String(Math.floor(s / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
 }
 
 /**
- * Format a millisecond duration as a HH:MM:SS countdown, e.g. "00:14:28".
- * Negative values clamp to "00:00:00".
+ * Format a second duration as a countdown string, e.g. 3661 -> "01:01:01".
  */
-export function formatCountdown(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+export function formatCountdown(secOrMs: number): string {
+  const s = secOrMs > 100000 ? Math.floor(secOrMs / 1000) : secOrMs;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) {
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  }
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+/** Format ISO string to human relative time string e.g. "5 phút trước", "2 giờ trước", "1 ngày trước". */
+export function formatRelativeTime(iso: string, t?: any): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return 'Vừa xong';
+  if (diffMin < 60) return `${diffMin} phút trước`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} ngày trước`;
 }

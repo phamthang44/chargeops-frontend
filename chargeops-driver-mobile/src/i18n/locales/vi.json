@@ -207,6 +207,13 @@
     "checkInNow": "Check-in ngay",
     "liveCharging": "ĐANG SẠC"
   },
+  "notifications": {
+    "unreadCount": "{{total}} chưa đọc",
+    "markAllRead": "Đã đọc tất cả",
+    "clearAll": "Xóa tất cả",
+    "delete": "Xóa",
+    "viewDetail": "Xem chi tiết"
+  },
   "history": {
     "title": "Lịch sử đặt chỗ",
     "role": "TÀI XẾ",
@@ -231,11 +238,48 @@
     "error": "Không thể tải lịch sử đặt chỗ."
   },
   "profile": {
-    "title": "Hồ sơ",
+    "title": "Hồ sơ & Cài đặt",
     "placeholder": "Màn hình hồ sơ người dùng (placeholder)",
     "role": "Vai trò: {{role}}",
     "signOut": "Đăng xuất",
-    "notSignedIn": "Chưa đăng nhập."
+    "notSignedIn": "Chưa đăng nhập.",
+    "goldMember": "THÀNH VIÊN VÀNG",
+    "ownerBanner": {
+      "title": "Trở thành Chủ trạm sạc",
+      "subtitle": "Quản lý trạm sạc, theo dõi doanh thu và tối ưu hóa vận hành ngay.",
+      "cta": "Chuyển sang Chế độ Chủ trạm"
+    },
+    "wallet": {
+      "sectionTitle": "Thanh toán & Ví",
+      "currentBalance": "SỐ DƯ HIỆN TẠI",
+      "topUp": "Nạp tiền",
+      "paymentMethods": "Phương thức thanh toán",
+      "paymentMethodsSub": "Visa, Mastercard, MoMo",
+      "history": "Lịch sử giao dịch",
+      "historySub": "Xem lại các hóa đơn đã thanh toán"
+    },
+    "appSettings": {
+      "sectionTitle": "Cài đặt ứng dụng",
+      "notifications": "Thông báo",
+      "notificationsSub": "Âm thanh, Rung, Cảnh báo pin",
+      "language": "Ngôn ngữ",
+      "helpCenter": "Trung tâm trợ giúp",
+      "helpCenterSub": "Câu hỏi thường gặp & Hỗ trợ"
+    },
+    "logout": "Đăng xuất tài khoản",
+    "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",
+    "topUpModal": {
+      "title": "Nạp tiền vào Ví ChargeOps",
+      "amountLabel": "Chọn số tiền nạp",
+      "methodLabel": "Phương thức thanh toán",
+      "confirm": "Xác nhận nạp tiền",
+      "success": "Nạp tiền thành công {{amount}}!"
+    },
+    "ownerModal": {
+      "title": "Chế độ Chủ trạm sạc",
+      "desc": "Tính năng dành riêng cho Chủ trạm sạc (Station Owner) để quản lý trụ sạc, thiết lập khung giờ và theo dõi doanh thu phiên sạc.",
+      "understood": "Đã hiểu"
+    }
   },
   "stationDetail": {
     "title": "Chi tiết trạm",
@@ -250,7 +294,13 @@
       "food": "Cafe & Ăn",
       "parking": "Đỗ xe rộng",
       "security": "An ninh 24/7",
-      "restroom": "WC sạch sẽ"
+      "restroom": "WC sạch sẽ",
+      "RESTROOM": "WC sạch sẽ",
+      "CAFE": "Quán Cafe",
+      "WIFI": "Wifi miễn phí",
+      "PARKING": "Bãi đỗ xe",
+      "CONVENIENCE_STORE": "Cửa hàng tiện lợi",
+      "SHOPPING": "Trung tâm mua sắm"
     },
     "refundTitle": "Chính sách hoàn tiền",
     "refundLine1": "Hoàn 100% nếu hủy trước 60 phút.",
@@ -259,6 +309,7 @@
     "descriptionTitle": "Mô tả trạm",
     "priceFrom": "Giá từ",
     "locationTitle": "Vị trí",
+    "getDirections": "Chỉ đường",
     "openMap": "Mở bản đồ",
     "reviewsTitle": "Đánh giá",
     "viewAll": "Xem tất cả",
@@ -274,10 +325,14 @@
     },
     "selectConnector": "Chọn cổng sạc",
     "selectConnectorHint": "Vui lòng chọn cổng sạc để tiếp tục",
+    "connectorHint": "Chọn cổng sạc phù hợp với chuẩn xe của bạn",
     "connectorCount": "{{available}}/{{total}} cổng đang trống",
     "maxPower": "Tối đa {{power}} kW",
     "refundLine0": "Hủy trong 5 phút sau khi đặt: hoàn 100%",
-    "photoPending": "Ảnh đang cập nhật"
+    "photoPending": "Ảnh đang cập nhật",
+    "selectedConn": "Cổng sạc chọn:",
+    "none": "Chưa chọn",
+    "bookNow": "Đặt chỗ ngay"
   },
   "bookingStatus": {
     "PENDING": "Chờ xác nhận",
@@ -294,11 +349,32 @@
   "payment": {
     "title": "Phương thức thanh toán",
     "MOMO": "Ví MoMo",
+    "MOMO_desc": "Thanh toán qua ứng dụng ví MoMo",
     "VISA": "Thẻ Quốc tế (Visa/Master)",
+    "VISA_desc": "Thẻ ghi nợ / tín dụng Quốc tế",
     "ZALOPAY": "Ví ZaloPay",
+    "ZALOPAY_desc": "Thanh toán qua ứng dụng ví ZaloPay",
     "ATM": "Thẻ ATM Nội địa",
+    "ATM_desc": "Thanh toán qua cổng Napas / Internet Banking",
     "WALLET": "Ví ChargeOps",
+    "WALLET_desc": "Trừ trực tiếp từ số dư Ví ChargeOps",
     "paidVia": "Thanh toán qua {{method}}"
+  },
+  "bookingConfirmation": {
+    "title": "Xác nhận đặt chỗ",
+    "timeTitle": "Khung giờ đặt sạc",
+    "date": "Ngày sạc",
+    "timeRange": "Khung giờ",
+    "holdNotice": "Khung giờ sẽ được giữ tạm thời trong 10 phút để bạn hoàn tất thanh toán.",
+    "invoiceTitle": "Chi tiết hóa đơn",
+    "chargingBand": "{{kind}} ({{from}} – {{to}})",
+    "bandSub": "~{{kwh}} kWh × {{rate}}",
+    "serviceFee": "Phí dịch vụ",
+    "total": "Tổng phí đặt chỗ",
+    "paymentTitle": "Phương thức thanh toán",
+    "totalPayment": "Tổng tiền thanh toán",
+    "payBtn": "Thanh toán {{amount}}",
+    "errorTitle": "Không thể tạo lượt đặt"
   },
   "bookingConfirm": {
     "title": "Xác nhận đặt chỗ",
@@ -327,12 +403,18 @@
   },
   "paymentProcessing": {
     "title": "Đang xử lý thanh toán",
+    "processingTitle": "Đang xử lý thanh toán",
+    "processingBody": "Đang kết nối tới cổng thanh toán. Vui lòng giữ ứng dụng mở.",
+    "doNotClose": "Giao dịch được mã hóa và bảo mật 256-bit",
     "subtitle": "Đang kết nối tới {{method}}. Vui lòng không đóng ứng dụng.",
     "amount": "Số tiền thanh toán",
-    "step": "Đang chờ xác nhận từ cổng thanh toán…",
-    "secure": "Giao dịch được mã hóa và bảo mật",
+    "code": "Mã đơn hàng",
+    "method": "Phương thức",
     "retry": "Thử lại",
     "cancel": "Hủy giao dịch",
+    "backHome": "Quay lại Trang chủ",
+    "step": "Đang chờ xác nhận từ cổng thanh toán…",
+    "secure": "Giao dịch được mã hóa và bảo mật",
     "home": "Quay lại Trang chủ",
     "FAILED": {
       "title": "Thanh toán thất bại",
@@ -363,11 +445,14 @@
     "time": "Thời gian",
     "total": "Tổng cộng",
     "checkInTitle": "Hướng dẫn Check-in",
+    "guideTitle": "Hướng dẫn Check-in",
+    "stepNum": "BƯỚC {{num}}",
     "step1": "Có mặt tại trạm trước 5 phút so với giờ đặt chỗ.",
     "step2": "Mở ứng dụng, chọn \"Quét QR\" và quét mã trên trụ sạc.",
     "step3": "Kết nối súng sạc và bắt đầu phiên sạc từ ứng dụng.",
     "viewDetail": "Xem chi tiết đặt chỗ",
     "home": "Quay lại Trang chủ",
+    "goHome": "Quay lại Trang chủ",
     "refundNote": "Áp dụng chính sách hoàn tiền 100% nếu hủy trước 30 phút.",
     "connector": "Cổng sạc"
   },

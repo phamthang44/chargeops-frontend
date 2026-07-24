@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSizes, fontWeights, lineHeights, spacing } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontSizes, fontWeights, lineHeights, spacing } from '@/theme';
 
 import { BrandMark } from './brand/Logo';
 
@@ -21,11 +22,12 @@ interface AppHeaderProps {
 
 /**
  * Shared top app bar (DESIGN_SYSTEM §1): leading brand mark + screen title with a
- * small uppercase role label beneath it, and an optional trailing action. Used by
- * every tab screen so the header pattern stays identical across the app.
+ * small uppercase role label beneath it, and an optional trailing action. Dynamic
+ * theme aware for Light and Dark modes.
  */
 export function AppHeader({ title, accent, role, trailing, markVariant = 'brand' }: AppHeaderProps) {
   const { t } = useTranslation();
+  const { themeColors } = usePreferences();
   const roleLabel = role ?? t('common.role');
 
   return (
@@ -33,11 +35,11 @@ export function AppHeader({ title, accent, role, trailing, markVariant = 'brand'
       <View style={styles.left}>
         <BrandMark size={40} variant={markVariant} />
         <View style={styles.titleBlock}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, { color: themeColors.textStrong }]} numberOfLines={1}>
             {title}
-            {accent ? <Text style={styles.accent}>{accent}</Text> : null}
+            {accent ? <Text style={{ color: themeColors.primary }}>{accent}</Text> : null}
           </Text>
-          {!!roleLabel && <Text style={styles.role}>{roleLabel}</Text>}
+          {!!roleLabel && <Text style={[styles.role, { color: themeColors.textMuted }]}>{roleLabel}</Text>}
         </View>
       </View>
       {trailing ? <View style={styles.trailing}>{trailing}</View> : null}
@@ -59,14 +61,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSizes.heading,
     fontWeight: fontWeights.bold,
-    color: colors.textStrong,
     lineHeight: lineHeights.heading,
   },
-  accent: { color: colors.primary },
   role: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    color: colors.textMuted,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },

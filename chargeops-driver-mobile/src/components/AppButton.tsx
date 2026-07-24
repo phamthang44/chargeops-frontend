@@ -1,4 +1,5 @@
-import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import {
   ActivityIndicator,
   Pressable,
@@ -19,7 +20,7 @@ interface AppButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** Reusable button using only theme tokens — no hardcoded colors/spacing. */
+/** Dynamic theme-aware button using design system tokens. */
 export function AppButton({
   label,
   onPress,
@@ -28,6 +29,7 @@ export function AppButton({
   loading = false,
   style,
 }: AppButtonProps) {
+  const { themeColors } = usePreferences();
   const isPrimary = variant === 'primary';
   const isDisabled = disabled || loading;
 
@@ -37,16 +39,27 @@ export function AppButton({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        isPrimary ? styles.primary : styles.secondary,
+        isPrimary
+          ? { backgroundColor: themeColors.primary }
+          : {
+              backgroundColor: themeColors.surfaceAlt,
+              borderWidth: 1,
+              borderColor: themeColors.border,
+            },
         pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? colors.textInverse : colors.primary} />
+        <ActivityIndicator color={isPrimary ? '#FFFFFF' : themeColors.primary} />
       ) : (
-        <Text style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelSecondary]}>
+        <Text
+          style={[
+            styles.label,
+            { color: isPrimary ? '#FFFFFF' : themeColors.textStrong },
+          ]}
+        >
           {label}
         </Text>
       )}
@@ -62,14 +75,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  secondary: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
   pressed: {
     opacity: 0.85,
   },
@@ -79,11 +84,5 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
-  },
-  labelPrimary: {
-    color: colors.textInverse,
-  },
-  labelSecondary: {
-    color: colors.primary,
   },
 });

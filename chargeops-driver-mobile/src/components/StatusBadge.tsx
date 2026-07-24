@@ -1,21 +1,13 @@
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 
 /**
  * Pill-shaped status badge (DESIGN_SYSTEM §7). Tinted background + solid text,
  * mapped to a semantic variant. Optionally shows a leading status dot.
  */
 export type BadgeVariant = 'success' | 'error' | 'info' | 'warning' | 'neutral';
-
-// `${hex}1A` ≈ 10% alpha tint, derived from the token (no hardcoded colors).
-const VARIANTS: Record<BadgeVariant, { bg: string; fg: string }> = {
-  success: { bg: colors.primarySoft, fg: colors.primaryDark },
-  error: { bg: `${colors.error}1A`, fg: colors.error },
-  info: { bg: `${colors.info}1A`, fg: colors.info },
-  warning: { bg: `${colors.warning}1A`, fg: colors.warning },
-  neutral: { bg: colors.surfaceAlt, fg: colors.textMuted },
-};
 
 interface StatusBadgeProps {
   label: string;
@@ -25,7 +17,18 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ label, variant = 'neutral', dot = false, style }: StatusBadgeProps) {
-  const v = VARIANTS[variant];
+  const { themeColors } = usePreferences();
+
+  const variantStyles: Record<BadgeVariant, { bg: string; fg: string }> = {
+    success: { bg: themeColors.primarySoft, fg: themeColors.primaryDark },
+    error: { bg: `${themeColors.error}26`, fg: themeColors.error },
+    info: { bg: `${themeColors.info}26`, fg: themeColors.info },
+    warning: { bg: `${themeColors.warning}26`, fg: themeColors.warning },
+    neutral: { bg: themeColors.surfaceAlt, fg: themeColors.textMuted },
+  };
+
+  const v = variantStyles[variant];
+
   return (
     <View style={[styles.badge, { backgroundColor: v.bg }, style]}>
       {dot && <View style={[styles.dot, { backgroundColor: v.fg }]} />}

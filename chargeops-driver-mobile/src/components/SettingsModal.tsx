@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -12,7 +13,7 @@ import {
   type BookingSimOutcome,
   type PaymentSimOutcome,
 } from '@/services/simulation';
-import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { StatusBadge } from './StatusBadge';
 
@@ -37,11 +38,11 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-/** Bottom-sheet settings menu: language, appearance, and future options. */
+/** Bottom-sheet settings menu with notification-style blur backdrop and dynamic theme support. */
 export function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { appearance, setAppearance } = usePreferences();
+  const { appearance, setAppearance, themeColors, isDark } = usePreferences();
   const [sim, setSim] = useState(getSimConfig);
 
   function pickPayment(outcome: PaymentSimOutcome) {
@@ -54,37 +55,68 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <View style={styles.handle} />
+        {/* Notification-style blur backdrop */}
+        <BlurView intensity={28} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: themeColors.surface,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
+        >
+          <View style={[styles.handle, { backgroundColor: themeColors.border }]} />
 
           <View style={styles.header}>
-            <Text style={styles.title}>{t('settings.title')}</Text>
-            <Pressable style={styles.closeBtn} hitSlop={8} onPress={onClose}>
-              <Ionicons name="close" size={22} color={colors.textBody} />
+            <Text style={[styles.title, { color: themeColors.textStrong }]}>{t('settings.title')}</Text>
+            <Pressable
+              style={[styles.closeBtn, { backgroundColor: themeColors.surfaceAlt }]}
+              hitSlop={8}
+              onPress={onClose}
+            >
+              <Ionicons name="close" size={22} color={themeColors.textBody} />
             </Pressable>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
             {/* Language */}
-            <Text style={styles.sectionLabel}>{t('settings.language')}</Text>
+            <Text style={[styles.sectionLabel, { color: themeColors.textMuted }]}>{t('settings.language')}</Text>
             <LanguageSwitcher />
 
             {/* Appearance */}
-            <Text style={styles.sectionLabel}>{t('settings.appearance')}</Text>
+            <Text style={[styles.sectionLabel, { color: themeColors.textMuted }]}>{t('settings.appearance')}</Text>
             <View style={styles.appearanceRow}>
               {APPEARANCE.map(({ mode, icon }) => {
                 const active = appearance === mode;
                 return (
                   <Pressable
                     key={mode}
-                    style={[styles.appearanceOption, active && styles.appearanceActive]}
+                    style={[
+                      styles.appearanceOption,
+                      {
+                        borderColor: active ? themeColors.primary : themeColors.border,
+                        backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                      },
+                    ]}
                     onPress={() => setAppearance(mode)}
                   >
-                    <Ionicons name={icon} size={22} color={active ? colors.primary : colors.textMuted} />
-                    <Text style={[styles.appearanceLabel, active && styles.appearanceLabelActive]}>
+                    <Ionicons
+                      name={icon}
+                      size={22}
+                      color={active ? themeColors.primary : themeColors.textMuted}
+                    />
+                    <Text
+                      style={[
+                        styles.appearanceLabel,
+                        { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                        active && styles.appearanceLabelActive,
+                      ]}
+                    >
                       {t(`settings.appearanceOptions.${mode}`)}
                     </Text>
                   </Pressable>
@@ -94,22 +126,38 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
 
             {/* Demo / simulation (mock only) */}
             <View style={styles.demoHeader}>
-              <Ionicons name="flask-outline" size={16} color={colors.textMuted} />
-              <Text style={styles.sectionLabelInline}>{t('settings.demo')}</Text>
+              <Ionicons name="flask-outline" size={16} color={themeColors.textMuted} />
+              <Text style={[styles.sectionLabelInline, { color: themeColors.textMuted }]}>
+                {t('settings.demo')}
+              </Text>
             </View>
-            <Text style={styles.demoHint}>{t('settings.demoHint')}</Text>
+            <Text style={[styles.demoHint, { color: themeColors.textMuted }]}>{t('settings.demoHint')}</Text>
 
-            <Text style={styles.demoSubLabel}>{t('settings.demoPayment')}</Text>
+            <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
+              {t('settings.demoPayment')}
+            </Text>
             <View style={styles.chipRow}>
               {PAYMENT_OUTCOMES.map((o) => {
                 const active = sim.payment === o;
                 return (
                   <Pressable
                     key={o}
-                    style={[styles.chip, active && styles.chipActive]}
+                    style={[
+                      styles.chip,
+                      {
+                        borderColor: active ? themeColors.primary : themeColors.border,
+                        backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                      },
+                    ]}
                     onPress={() => pickPayment(o)}
                   >
-                    <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                        active && styles.chipTextActive,
+                      ]}
+                    >
                       {t(`settings.simPayment.${o}`)}
                     </Text>
                   </Pressable>
@@ -117,17 +165,31 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
               })}
             </View>
 
-            <Text style={styles.demoSubLabel}>{t('settings.demoBooking')}</Text>
+            <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
+              {t('settings.demoBooking')}
+            </Text>
             <View style={styles.chipRow}>
               {BOOKING_OUTCOMES.map((o) => {
                 const active = sim.booking === o;
                 return (
                   <Pressable
                     key={o}
-                    style={[styles.chip, active && styles.chipActive]}
+                    style={[
+                      styles.chip,
+                      {
+                        borderColor: active ? themeColors.primary : themeColors.border,
+                        backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                      },
+                    ]}
                     onPress={() => pickBooking(o)}
                   >
-                    <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                        active && styles.chipTextActive,
+                      ]}
+                    >
                       {t(`settings.simBooking.${o}`)}
                     </Text>
                   </Pressable>
@@ -136,12 +198,14 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
             </View>
 
             {/* Future work */}
-            <Text style={styles.sectionLabel}>{t('settings.more')}</Text>
+            <Text style={[styles.sectionLabel, { color: themeColors.textMuted }]}>{t('settings.more')}</Text>
             <View style={styles.moreList}>
               {FUTURE.map(({ key, icon }) => (
                 <View key={key} style={styles.moreRow}>
-                  <Ionicons name={icon} size={20} color={colors.textMuted} />
-                  <Text style={styles.moreLabel}>{t(`settings.${key}`)}</Text>
+                  <Ionicons name={icon} size={20} color={themeColors.textMuted} />
+                  <Text style={[styles.moreLabel, { color: themeColors.textBody }]}>
+                    {t(`settings.${key}`)}
+                  </Text>
                   <StatusBadge variant="neutral" label={t('settings.comingSoon')} />
                 </View>
               ))}
@@ -155,9 +219,7 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.overlay },
   sheet: {
-    backgroundColor: colors.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     paddingHorizontal: spacing.lg,
@@ -170,17 +232,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: radius.full,
-    backgroundColor: colors.border,
     alignSelf: 'center',
     marginBottom: spacing.sm,
   },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  title: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -188,35 +248,29 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginTop: spacing.sm,
   },
 
-  // Demo / simulation
   demoHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.sm },
   sectionLabelInline: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  demoHint: { fontSize: fontSizes.caption, color: colors.textMuted, lineHeight: 16 },
-  demoSubLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.textBody, marginTop: spacing.xs },
+  demoHint: { fontSize: fontSizes.caption, lineHeight: 16 },
+  demoSubLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, marginTop: spacing.xs },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
   },
-  chipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  chipText: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium, color: colors.textMuted },
-  chipTextActive: { color: colors.primaryDark, fontWeight: fontWeights.semibold },
+  chipText: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
+  chipTextActive: { fontWeight: fontWeights.semibold },
 
   appearanceRow: { flexDirection: 'row', gap: spacing.sm },
   appearanceOption: {
@@ -226,12 +280,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
   },
-  appearanceActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  appearanceLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
-  appearanceLabelActive: { color: colors.primaryDark, fontWeight: fontWeights.semibold },
+  appearanceLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.medium },
+  appearanceLabelActive: { fontWeight: fontWeights.semibold },
 
   moreList: { gap: spacing.xs },
   moreRow: {
@@ -240,5 +291,5 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingVertical: spacing.md,
   },
-  moreLabel: { flex: 1, fontSize: fontSizes.body, color: colors.textBody },
+  moreLabel: { flex: 1, fontSize: fontSizes.body },
 });

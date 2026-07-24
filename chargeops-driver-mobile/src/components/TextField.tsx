@@ -8,7 +8,8 @@ import {
   type TextInputProps,
 } from 'react-native';
 
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
 export interface TextFieldProps extends TextInputProps {
   label?: string;
@@ -20,27 +21,37 @@ export interface TextFieldProps extends TextInputProps {
   rightAccessory?: React.ReactNode;
 }
 
-/** Labeled text input with optional icon and inline error state. Theme tokens only. */
+/** Labeled text input with optional icon and inline error state. Dynamic theme aware. */
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
   { label, leftIcon, error, rightAccessory, style, ...inputProps },
   ref,
 ) {
+  const { themeColors } = usePreferences();
+
   return (
     <View style={styles.wrap}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={[styles.field, error ? styles.fieldError : null]}>
+      {label ? <Text style={[styles.label, { color: themeColors.textStrong }]}>{label}</Text> : null}
+      <View
+        style={[
+          styles.field,
+          {
+            borderColor: error ? themeColors.error : themeColors.border,
+            backgroundColor: themeColors.surface,
+          },
+        ]}
+      >
         {leftIcon ? (
-          <Ionicons name={leftIcon} size={18} color={colors.textMuted} style={styles.leftIcon} />
+          <Ionicons name={leftIcon} size={18} color={themeColors.textMuted} style={styles.leftIcon} />
         ) : null}
         <TextInput
           ref={ref}
-          style={[styles.input, style]}
-          placeholderTextColor={colors.textMuted}
+          style={[styles.input, { color: themeColors.textStrong }, style]}
+          placeholderTextColor={themeColors.textMuted}
           {...inputProps}
         />
         {rightAccessory ? <View style={styles.rightAccessory}>{rightAccessory}</View> : null}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={[styles.error, { color: themeColors.error }]}>{error}</Text> : null}
     </View>
   );
 });
@@ -52,19 +63,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
-    color: colors.textStrong,
   },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
-  },
-  fieldError: {
-    borderColor: colors.error,
   },
   leftIcon: {
     marginRight: spacing.sm,
@@ -72,7 +77,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: fontSizes.body,
-    color: colors.textStrong,
     paddingVertical: spacing.md,
   },
   rightAccessory: {
@@ -80,7 +84,6 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: fontSizes.caption,
-    color: colors.error,
     lineHeight: lineHeights.caption,
   },
 });

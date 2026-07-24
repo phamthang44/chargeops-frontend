@@ -7,9 +7,10 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
+import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBookingById } from '@/services/bookingService';
-import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatDayMonth, formatTimeRange, formatVnd } from '@/utils/format';
 
@@ -19,14 +20,13 @@ type Route = RouteProp<RootStackParamList, 'BookingSuccess'>;
 const STEP_ICONS: (keyof typeof Ionicons.glyphMap)[] = ['time-outline', 'qr-code-outline', 'flash'];
 
 /**
- * "Đặt chỗ thành công" — post-payment confirmation. Shows the booking code, a
- * transaction summary, and the check-in guide. "View details" replaces this
- * screen with BookingDetail; "Home" resets the stack to the tabs.
+ * "Đặt chỗ thành công" — post-payment confirmation screen with dynamic Dark and Light mode theme support.
  */
 export function BookingSuccessScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
+  const { themeColors, isDark } = usePreferences();
 
   const [booking, setBooking] = useState<Booking | null>(null);
 
@@ -41,15 +41,12 @@ export function BookingSuccessScreen() {
   }, [params.bookingId]);
 
   function goHome() {
-    // Drop the whole booking flow; land back on the tabs.
     navigation.dispatch(
       CommonActions.reset({ index: 0, routes: [{ name: 'Tabs' }] }),
     );
   }
 
   function viewDetail() {
-    // Clear the whole booking flow; land on detail with the tabs underneath so
-    // back from detail returns home (not the confirmation/success screens).
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
@@ -60,34 +57,32 @@ export function BookingSuccessScreen() {
 
   if (!booking) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <ActivityIndicator color={colors.primary} style={styles.loader} />
+      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+        <ActivityIndicator color={themeColors.primary} style={styles.loader} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Success mark */}
-        <View style={styles.checkOuter}>
-          <View style={styles.checkInner}>
-            <Ionicons name="checkmark-sharp" size={48} color={colors.textInverse} />
+        <View style={[styles.checkOuter, { backgroundColor: themeColors.primarySoft }]}>
+          <View style={[styles.checkInner, { backgroundColor: themeColors.primary }]}>
+            <Ionicons name="checkmark-sharp" size={48} color="#FFFFFF" />
           </View>
         </View>
-        <Text style={styles.title}>{t('bookingSuccess.title')}</Text>
-        <Text style={styles.code}>{t('bookingSuccess.code', { code: booking.code })}</Text>
+
+        <Text style={[styles.title, { color: themeColors.textStrong }]}>{t('bookingSuccess.title')}</Text>
+        <Text style={[styles.code, { color: themeColors.primary }]}>{t('bookingSuccess.code', { code: booking.code })}</Text>
 
         {/* Transaction summary */}
-        <View style={styles.txCard}>
+        <View style={[styles.txCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.txHeader}>
-            <Text style={styles.txTitle}>{t('bookingSuccess.txTitle')}</Text>
+            <Text style={[styles.txTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.txTitle')}</Text>
             <StatusBadge variant="success" label={t('bookingSuccess.paid')} />
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
           <TxRow
             icon="location-outline"
             label={t('bookingSuccess.station')}
@@ -98,53 +93,49 @@ export function BookingSuccessScreen() {
             label={t('bookingSuccess.connector')}
             value={`${booking.chargePointName} · ${booking.connectorName} (${booking.connectorType})`}
           />
-          <View style={styles.txSplit}>
-            <View style={styles.txSplitItem}>
-              <TxRow
-                icon="time-outline"
-                label={t('bookingSuccess.time')}
-                value={`${formatTimeRange(booking.startAt, booking.endAt)}, ${formatDayMonth(booking.startAt)}`}
-              />
-            </View>
-            <View style={styles.txSplitItem}>
-              <TxRow
-                icon="card-outline"
-                label={t('bookingSuccess.total')}
-                value={formatVnd(booking.totalPrice)}
-                valueStrong
-              />
-            </View>
+          <TxRow
+            icon="calendar-outline"
+            label={t('bookingSuccess.window')}
+            value={`${formatDayMonth(booking.startAt)} · ${formatTimeRange(booking.startAt, booking.endAt)}`}
+          />
+          <TxRow
+            icon="card-outline"
+            label={t('bookingSuccess.total')}
+            value={formatVnd(booking.totalPrice)}
+            valueBold
+          />
+        </View>
+
+        {/* Guide steps */}
+        <View style={[styles.guideCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+          <Text style={[styles.guideTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.guideTitle')}</Text>
+          <View style={styles.guideSteps}>
+            {([1, 2, 3] as const).map((step, idx) => (
+              <View key={step} style={styles.stepRow}>
+                <View style={[styles.stepIcon, { backgroundColor: themeColors.surface }]}>
+                  <Ionicons name={STEP_ICONS[idx]} size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.stepBody}>
+                  <Text style={[styles.stepNum, { color: themeColors.primary }]}>
+                    {t('bookingSuccess.stepNum', { num: step })}
+                  </Text>
+                  <Text style={[styles.stepText, { color: themeColors.textBody }]}>
+                    {t(`bookingSuccess.step${step}`)}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
-
-        {/* Check-in guide */}
-        <View style={styles.guideHeader}>
-          <Ionicons name="information-circle" size={18} color={colors.info} />
-          <Text style={styles.guideTitle}>{t('bookingSuccess.checkInTitle')}</Text>
-        </View>
-        {[t('bookingSuccess.step1'), t('bookingSuccess.step2'), t('bookingSuccess.step3')].map(
-          (step, i) => (
-            <View key={i} style={styles.step}>
-              <View style={styles.stepIcon}>
-                <Ionicons name={STEP_ICONS[i]} size={18} color={colors.primaryDark} />
-              </View>
-              <Text style={styles.stepText}>{step}</Text>
-            </View>
-          ),
-        )}
-
-        <View style={styles.actions}>
-          <AppButton label={t('bookingSuccess.viewDetail')} onPress={viewDetail} />
-          <Pressable onPress={goHome} style={styles.homeBtn}>
-            <Text style={styles.homeText}>{t('bookingSuccess.home')}</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.note}>
-          <Ionicons name="information-circle-outline" size={15} color={colors.textMuted} />
-          <Text style={styles.noteText}>{t('bookingSuccess.refundNote')}</Text>
-        </View>
       </ScrollView>
+
+      {/* Footer CTAs */}
+      <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+        <AppButton label={t('bookingSuccess.viewDetail')} onPress={viewDetail} />
+        <Pressable style={styles.homeBtn} onPress={goHome}>
+          <Text style={[styles.homeText, { color: themeColors.textMuted }]}>{t('bookingSuccess.goHome')}</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
@@ -153,115 +144,99 @@ function TxRow({
   icon,
   label,
   value,
-  valueStrong,
+  valueBold,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
-  valueStrong?: boolean;
+  valueBold?: boolean;
 }) {
+  const { themeColors } = usePreferences();
   return (
     <View style={styles.txRow}>
-      <Ionicons name={icon} size={18} color={colors.primary} style={styles.txRowIcon} />
-      <View style={styles.txRowBody}>
-        <Text style={styles.txRowLabel}>{label}</Text>
-        <Text style={[styles.txRowValue, valueStrong && styles.txRowValueStrong]}>{value}</Text>
-      </View>
+      <Ionicons name={icon} size={16} color={themeColors.textMuted} />
+      <Text style={[styles.txLabel, { color: themeColors.textMuted }]}>{label}</Text>
+      <Text
+        style={[
+          styles.txValue,
+          { color: themeColors.textStrong },
+          valueBold && styles.txValueBold,
+        ]}
+        numberOfLines={1}
+      >
+        {value}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  loader: { flex: 1 },
-  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl, alignItems: 'stretch' },
+  container: { flex: 1 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
-  // Success mark
+  content: {
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    gap: spacing.lg,
+    alignItems: 'center',
+  },
+
   checkOuter: {
-    alignSelf: 'center',
-    width: 112,
-    height: 112,
+    width: 104,
+    height: 104,
     borderRadius: radius.full,
-    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.xl,
   },
   checkInner: {
-    width: 80,
-    height: 80,
+    width: 72,
+    height: 72,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: fontSizes.title,
-    fontWeight: fontWeights.bold,
-    color: colors.textStrong,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-  code: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center' },
 
-  // Transaction card
+  title: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, textAlign: 'center' },
+  code: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, letterSpacing: 1 },
+
   txCard: {
-    backgroundColor: colors.surface,
+    alignSelf: 'stretch',
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.md,
-    marginTop: spacing.md,
   },
   txHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  txTitle: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.textMuted, letterSpacing: 0.5 },
-  divider: { height: 1, backgroundColor: colors.border },
-  txRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
-  txRowIcon: { marginTop: 2 },
-  txRowBody: { flex: 1, gap: 2 },
-  txRowLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
-  txRowValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: colors.textStrong },
-  txRowValueStrong: { color: colors.primary },
-  txSplit: { flexDirection: 'row', gap: spacing.md },
-  txSplitItem: { flex: 1 },
+  txTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  divider: { height: 1 },
 
-  // Check-in guide
-  guideHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
-  guideTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  step: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  stepIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepText: { flex: 1, fontSize: fontSizes.body, color: colors.textBody, lineHeight: lineHeights.body },
+  txRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  txLabel: { fontSize: fontSizes.caption, width: 90 },
+  txValue: { flex: 1, fontSize: fontSizes.body, textAlign: 'right' },
+  txValueBold: { fontWeight: fontWeights.bold, fontSize: fontSizes.heading },
 
-  // Actions
-  actions: { gap: spacing.sm, marginTop: spacing.md },
-  homeBtn: { alignItems: 'center', paddingVertical: spacing.sm },
-  homeText: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textMuted },
-
-  note: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
+  guideCard: {
+    alignSelf: 'stretch',
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginTop: spacing.sm,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
-  noteText: { flex: 1, fontSize: fontSizes.caption, color: colors.textMuted, lineHeight: lineHeights.caption },
+  guideTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
+  guideSteps: { gap: spacing.md },
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  stepIcon: { width: 36, height: 36, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  stepBody: { flex: 1, gap: 2 },
+  stepNum: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0.5 },
+  stepText: { fontSize: fontSizes.body, lineHeight: lineHeights.body },
+
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderTopWidth: 1,
+    gap: spacing.sm,
+  },
+  homeBtn: { alignItems: 'center', paddingVertical: spacing.sm },
+  homeText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
 });

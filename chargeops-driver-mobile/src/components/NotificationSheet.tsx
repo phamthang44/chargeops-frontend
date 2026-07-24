@@ -110,7 +110,11 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
         },
       ]}
     >
-      <Pressable style={styles.itemMain} onPress={onPress} accessibilityRole="button">
+      <Pressable
+        style={({ pressed }) => [styles.itemMain, pressed && styles.pressedRow]}
+        onPress={onPress}
+        accessibilityRole="button"
+      >
         <View style={[styles.iconWrap, { backgroundColor: `${color}1A` }]}>
           <Ionicons name={icon} size={20} color={color} />
         </View>
@@ -143,7 +147,15 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
 
       {/* Delete — its own tap target, outside the card's press area */}
       <Pressable
-        style={[styles.rowDelete, { backgroundColor: `${themeColors.error}14` }]}
+        style={({ pressed }) => [
+          styles.rowDelete,
+          {
+            // Deepens from a 8% wash to 30% on press — unmistakable feedback
+            // for the one destructive control on the row.
+            backgroundColor: pressed ? `${themeColors.error}4D` : `${themeColors.error}14`,
+            transform: [{ scale: pressed ? 0.92 : 1 }],
+          },
+        ]}
         onPress={onDelete}
         hitSlop={6}
         accessibilityRole="button"
@@ -244,7 +256,16 @@ export function NotificationSheet({
           {unreadCount > 0 && (
             <Pressable
               onPress={handleMarkAllRead}
-              style={[styles.bulkBtn, { borderColor: themeColors.primary }]}
+              // Press feedback: the pill fills with its own tint and dims
+              // slightly, so the tap registers visually before the list moves.
+              style={({ pressed }) => [
+                styles.bulkBtn,
+                {
+                  borderColor: themeColors.primary,
+                  backgroundColor: pressed ? themeColors.primarySoft : 'transparent',
+                  opacity: pressed ? 0.75 : 1,
+                },
+              ]}
             >
               <Ionicons name="checkmark-done" size={16} color={themeColors.primary} />
               <Text style={[styles.bulkText, { color: themeColors.primary }]}>
@@ -254,7 +275,14 @@ export function NotificationSheet({
           )}
           <Pressable
             onPress={handleClearAll}
-            style={[styles.bulkBtn, { borderColor: themeColors.error }]}
+            style={({ pressed }) => [
+              styles.bulkBtn,
+              {
+                borderColor: themeColors.error,
+                backgroundColor: pressed ? `${themeColors.error}1F` : 'transparent',
+                opacity: pressed ? 0.75 : 1,
+              },
+            ]}
           >
             <Ionicons name="trash-outline" size={16} color={themeColors.error} />
             <Text style={[styles.bulkText, { color: themeColors.error }]}>
@@ -298,8 +326,10 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    // The two bulk pills sit side by side — they need air between them and
+    // below, or they read as one wide control.
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   badge: {
     paddingHorizontal: spacing.sm,
@@ -315,11 +345,13 @@ const styles = StyleSheet.create({
   bulkBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.xs,
-    minHeight: 36,
+    minHeight: 40,
     borderWidth: 1,
     borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
   bulkText: {
     fontSize: fontSizes.caption,
@@ -344,6 +376,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   itemMain: { flex: 1, flexDirection: 'row', gap: spacing.md },
+  pressedRow: { opacity: 0.6 },
   // Delete: 40pt circle, tinted with the error color so it reads as destructive
   // without shouting at the driver on every row.
   rowDelete: {

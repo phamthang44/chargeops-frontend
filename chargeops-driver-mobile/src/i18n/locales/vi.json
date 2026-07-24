@@ -225,6 +225,9 @@
     "resultCount": "{{total}} kết quả",
     "noResults": "Không tìm thấy lượt đặt nào cho “{{query}}”.",
     "clearSearch": "Xóa tìm kiếm",
+    "showMore": "Xem thêm",
+    "showingCount": "Đang hiển thị {{shown}} / {{total}} lượt",
+    "endOfList": "Đã hiển thị tất cả {{total}} lượt",
     "error": "Không thể tải lịch sử đặt chỗ."
   },
   "profile": {

@@ -225,6 +225,9 @@
     "resultCount": "{{total}} results",
     "noResults": "No bookings found for “{{query}}”.",
     "clearSearch": "Clear search",
+    "showMore": "Show more",
+    "showingCount": "Showing {{shown}} of {{total}}",
+    "endOfList": "All {{total}} bookings shown",
     "error": "Couldn't load booking history."
   },
   "profile": {

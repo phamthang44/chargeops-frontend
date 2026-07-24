@@ -80,7 +80,7 @@ function build(seed: BookingSeed): Booking {
   };
 }
 
-export const bookingsMock: Booking[] = [
+const curatedBookings: Booking[] = [
   // Just booked — inside the 5-minute grace window, so the detail screen shows
   // the "free cancellation until …" countdown (FR05).
   build({
@@ -193,3 +193,74 @@ export const bookingsMock: Booking[] = [
     refundPercent: 0,
   }),
 ];
+
+/**
+ * A long tail of past bookings so the history screen is exercised at realistic
+ * volume — a driver who charges twice a week builds ~150 rows in under two
+ * years, which is what breaks a "load everything and filter in the component"
+ * approach. Deterministic (seeded LCG) so every reload shows the same history
+ * and screenshots stay comparable.
+ */
+const HISTORY_COUNT = 160;
+
+function lcg(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+function generateHistory(): Booking[] {
+  const rnd = lcg(20260724);
+  const pool = connectorsMock;
+  const out: Booking[] = [];
+  // Walk backwards from ~10 days ago, 2–6 days between sessions.
+  let dayOffset = 10;
+
+  for (let i = 0; i < HISTORY_COUNT; i++) {
+    const connector = pool[Math.floor(rnd() * pool.length)];
+    const start = new Date(NOW);
+    start.setDate(start.getDate() - dayOffset);
+    start.setHours(6 + Math.floor(rnd() * 16), rnd() < 0.5 ? 0 : 30, 0, 0);
+    const durationMin = [30, 60, 60, 90, 120][Math.floor(rnd() * 5)];
+
+    // Most sessions complete; the rest split between a driver cancellation and
+    // an auto no-show, so both history filters have real data at every depth.
+    const roll = rnd();
+    const status: BookingStatus = roll < 0.78 ? 'COMPLETED' : 'CANCELLED';
+    const cancelReason: CancelReason | undefined =
+      status === 'CANCELLED' ? (roll < 0.9 ? 'DRIVER' : 'NO_SHOW') : undefined;
+    const refundPercent =
+      status !== 'CANCELLED' ? undefined : cancelReason === 'NO_SHOW' ? 0 : rnd() < 0.6 ? 100 : 50;
+
+    const createdAt = new Date(start.getTime() - (30 + Math.floor(rnd() * 900)) * 60_000);
+
+    out.push(
+      build({
+        id: `bk-h${String(i).padStart(3, '0')}`,
+        code: `CHG-${1000 + i * 7}`,
+        connectorId: connector.id,
+        startAt: start.toISOString(),
+        durationMin,
+        paymentMethod: (['MOMO', 'ZALOPAY', 'VISA', 'ATM', 'WALLET'] as const)[
+          Math.floor(rnd() * 5)
+        ],
+        status,
+        createdAt: createdAt.toISOString(),
+        checkedInAt:
+          status === 'COMPLETED'
+            ? new Date(start.getTime() - 3 * 60_000).toISOString()
+            : undefined,
+        cancelReason,
+        refundPercent,
+      }),
+    );
+
+    dayOffset += 2 + Math.floor(rnd() * 5);
+  }
+  return out;
+}
+
+/** Newest first — the order every history read expects. */
+export const bookingsMock: Booking[] = [...curatedBookings, ...generateHistory()];

@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, BookingCard, EmptyState, LiveDot } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { getBookingHistory } from '@/services/bookingService';
+import { getActiveBookings } from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
 import { formatCountdown, formatTime } from '@/utils/format';
@@ -66,7 +66,7 @@ export function BookingsScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      getBookingHistory().then((data) => {
+      getActiveBookings().then((data) => {
         if (active) {
           setBookings(data);
           setLoading(false);

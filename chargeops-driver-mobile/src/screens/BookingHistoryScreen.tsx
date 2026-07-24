@@ -1,135 +1,226 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  SectionList,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, BookingCard, EmptyState } from '@/components';
 import type { RootStackParamList } from '@/navigation/types';
-import { getBookingHistory } from '@/services/bookingService';
+import {
+  BOOKING_PAGE_SIZE,
+  getBookingHistory,
+  getBookingStats,
+  type BookingStats,
+  type HistoryStatusFilter,
+} from '@/services/bookingService';
 import { colors, fontSizes, fontWeights, radius, spacing } from '@/theme';
-import type { Booking, BookingStatus } from '@/types';
+import type { Booking } from '@/types';
 import { formatVnd } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type Filter = 'all' | 'completed' | 'cancelled';
 
-// Ended bookings only — active/upcoming ones live on the Đặt chỗ tab. A no-show
-// is a CANCELLED booking with a reason (BR-BOK-05), so it needs no state of its
-// own here; EXPIRED covers holds that lapsed before payment (BR-BOK-02).
-const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'EXPIRED'];
-const FILTERS: Filter[] = ['all', 'completed', 'cancelled'];
-const FILTER_MATCH: Record<Filter, BookingStatus[]> = {
-  all: ENDED_STATUSES,
-  completed: ['COMPLETED'],
-  cancelled: ['CANCELLED', 'EXPIRED'],
-};
+const FILTERS: HistoryStatusFilter[] = ['all', 'completed', 'cancelled'];
+
+/** How long the search box stays quiet before it asks the service for results. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 // English month names (vi formats numerically via i18n). Index 0 = January.
 const EN_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-/**
- * Free-text match over the fields a driver would actually recall about a past
- * booking: the station, the booking code on the receipt, or the port they used.
- * Mirrors the station-list search so both screens feel the same.
- * LATER: this becomes a `query` param on GET /bookings, matched server-side.
- */
-function matchesQuery(b: Booking, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  const haystack = [b.stationName, b.stationAddress, b.code, b.chargePointName, b.connectorName, b.connectorType]
-    .join(' ')
-    .toLowerCase();
-  return haystack.includes(q);
-}
-
-interface MonthGroup {
+interface MonthSection {
   key: string;
   month: number; // 0-11
   year: number;
-  items: Booking[];
+  data: Booking[];
 }
 
-/** "Lịch sử" tab — past bookings with lifetime stats, status filters, and month grouping. */
+const EMPTY_COUNTS: Record<HistoryStatusFilter, number> = { all: 0, completed: 0, cancelled: 0 };
+
+/**
+ * "Lịch sử" tab — past bookings with lifetime stats, search, status filters and
+ * month grouping.
+ *
+ * History is unbounded (a regular driver passes a hundred rows inside a year),
+ * so the screen never holds the full list: it asks the service for one page at a
+ * time and lets the service do the searching and filtering. Changing the query
+ * or the status chip starts a new page 1 rather than re-filtering what is
+ * already on screen — otherwise the cursor would point into the wrong set.
+ */
 export function BookingHistoryScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Filter>('all');
+
+  // Raw input vs. the debounced term actually sent to the service.
+  const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<HistoryStatusFilter>('all');
+
+  const [items, setItems] = useState<Booking[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState(EMPTY_COUNTS);
+  const [stats, setStats] = useState<BookingStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  // Bumped on focus so returning from a booking detail refetches page 1.
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    const id = setTimeout(() => setQuery(input), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(id);
+  }, [input]);
 
   useFocusEffect(
     useCallback(() => {
-      let active = true;
-      getBookingHistory().then((data) => {
-        if (active) {
-          setBookings(data);
-          setLoading(false);
-        }
-      });
-      return () => {
-        active = false;
-      };
+      setReloadKey((k) => k + 1);
     }, []),
   );
 
-  // Lifetime stats are computed from COMPLETED sessions only.
-  const stats = useMemo(() => {
-    const done = bookings.filter((b) => b.status === 'COMPLETED');
-    return {
-      sessions: done.length,
-      hours: Math.round(done.reduce((sum, b) => sum + b.durationMin, 0) / 60),
-      spent: done.reduce((sum, b) => sum + b.totalPrice, 0),
+  // Page 1 — refetched whenever the query, the status filter, or focus changes.
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getBookingHistory({ query, status: filter }).then((page) => {
+      if (!active) return;
+      setItems(page.items);
+      setCursor(page.nextCursor);
+      setTotal(page.total);
+      setCounts(page.counts);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
     };
-  }, [bookings]);
+  }, [query, filter, reloadKey]);
 
-  // Search is applied before month grouping so the sections reflect the query.
-  const filtered = useMemo(
-    () =>
-      bookings
-        .filter((b) => FILTER_MATCH[filter].includes(b.status) && matchesQuery(b, query))
-        .sort((a, b) => (a.startAt < b.startAt ? 1 : -1)),
-    [bookings, filter, query],
-  );
+  // Lifetime stats are an aggregate over every completed session, so they come
+  // from their own call — they can't be summed from the rows currently loaded.
+  useEffect(() => {
+    let active = true;
+    getBookingStats().then((s) => {
+      if (active) setStats(s);
+    });
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
+  /** Fetch the next page from the last row's cursor and append it. */
+  const loadMore = useCallback(() => {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    getBookingHistory({ query, status: filter }, { cursor }).then((page) => {
+      setItems((prev) => [...prev, ...page.items]);
+      setCursor(page.nextCursor);
+      setTotal(page.total);
+      setLoadingMore(false);
+    });
+  }, [cursor, loadingMore, query, filter]);
+
+  // Bucket the loaded rows (already newest-first) into month sections.
+  const sections = useMemo<MonthSection[]>(() => {
+    const map = new Map<string, MonthSection>();
+    for (const b of items) {
+      const d = new Date(b.startAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      let s = map.get(key);
+      if (!s) {
+        s = { key, month: d.getMonth(), year: d.getFullYear(), data: [] };
+        map.set(key, s);
+      }
+      s.data.push(b);
+    }
+    return Array.from(map.values());
+  }, [items]);
 
   const searching = query.trim().length > 0;
 
-  // Chip counts respect the search so the driver can see how a query splits.
-  const counts = useMemo(() => {
-    const inQuery = bookings.filter((b) => matchesQuery(b, query));
-    return FILTERS.reduce<Record<Filter, number>>(
-      (acc, f) => {
-        acc[f] = inQuery.filter((b) => FILTER_MATCH[f].includes(b.status)).length;
-        return acc;
-      },
-      { all: 0, completed: 0, cancelled: 0 },
-    );
-  }, [bookings, query]);
+  const listHeader = (
+    <View style={styles.header}>
+      {/* Lifetime stats */}
+      <View style={styles.stats}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats?.sessions ?? '—'}</Text>
+          <Text style={styles.statLabel}>{t('history.statSessions')}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats ? `${stats.hours}h` : '—'}</Text>
+          <Text style={styles.statLabel}>{t('history.statHours')}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+            {stats ? formatVnd(stats.spent) : '—'}
+          </Text>
+          <Text style={styles.statLabel}>{t('history.statSpent')}</Text>
+        </View>
+      </View>
 
-  // Group the (already newest-first) list into month sections, preserving order.
-  const groups = useMemo<MonthGroup[]>(() => {
-    const map = new Map<string, MonthGroup>();
-    for (const b of filtered) {
-      const d = new Date(b.startAt);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      let g = map.get(key);
-      if (!g) {
-        g = { key, month: d.getMonth(), year: d.getFullYear(), items: [] };
-        map.set(key, g);
-      }
-      g.items.push(b);
+      {/* Status filter chips — counts come from the service, scoped to the query */}
+      <View style={styles.chips}>
+        {FILTERS.map((f) => (
+          <Pressable
+            key={f}
+            style={[styles.chip, filter === f && styles.chipActive]}
+            onPress={() => setFilter(f)}
+          >
+            <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>
+              {t(`history.filter.${f}`)}{' '}
+              <Text style={[styles.chipCount, filter === f && styles.chipCountActive]}>
+                {counts[f]}
+              </Text>
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {searching && total > 0 && (
+        <Text style={styles.resultCount}>{t('history.resultCount', { total })}</Text>
+      )}
+    </View>
+  );
+
+  const listFooter = () => {
+    if (loading || items.length === 0) return null;
+    if (cursor) {
+      return (
+        <View style={styles.footer}>
+          <Pressable style={styles.moreBtn} onPress={loadMore} disabled={loadingMore}>
+            {loadingMore ? (
+              <ActivityIndicator color={colors.primary} size="small" />
+            ) : (
+              <>
+                <Text style={styles.moreBtnText}>{t('history.showMore')}</Text>
+                <Ionicons name="chevron-down" size={16} color={colors.primary} />
+              </>
+            )}
+          </Pressable>
+          <Text style={styles.footerCount}>
+            {t('history.showingCount', { shown: items.length, total })}
+          </Text>
+        </View>
+      );
     }
-    return Array.from(map.values());
-  }, [filtered]);
+    return (
+      <Text style={styles.footerCount}>{t('history.endOfList', { total })}</Text>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <AppHeader title={t('history.title')} />
 
-      {/* Search — station, booking code, or the port used */}
+      {/* Search stays pinned above the list — a long history is scrolled, and the
+          box has to stay reachable. Filtering itself happens in the service. */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={colors.textMuted} />
@@ -137,66 +228,46 @@ export function BookingHistoryScreen() {
             style={styles.searchInput}
             placeholder={t('history.searchPlaceholder')}
             placeholderTextColor={colors.textMuted}
-            value={query}
-            onChangeText={setQuery}
+            value={input}
+            onChangeText={setInput}
             returnKeyType="search"
           />
-          {query.length > 0 && (
-            <Pressable hitSlop={8} onPress={() => setQuery('')}>
+          {input.length > 0 && (
+            <Pressable hitSlop={8} onPress={() => setInput('')}>
               <Ionicons name="close-circle" size={18} color={colors.textMuted} />
             </Pressable>
           )}
         </View>
       </View>
 
-      {loading ? (
-        <ActivityIndicator color={colors.primary} style={styles.loader} />
-      ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Lifetime stats */}
-          <View style={styles.stats}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stats.sessions}</Text>
-              <Text style={styles.statLabel}>{t('history.statSessions')}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stats.hours}h</Text>
-              <Text style={styles.statLabel}>{t('history.statHours')}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-                {formatVnd(stats.spent)}
-              </Text>
-              <Text style={styles.statLabel}>{t('history.statSpent')}</Text>
-            </View>
-          </View>
-
-          {/* Status filter chips */}
-          <View style={styles.chips}>
-            {FILTERS.map((f) => (
-              <Pressable
-                key={f}
-                style={[styles.chip, filter === f && styles.chipActive]}
-                onPress={() => setFilter(f)}
-              >
-                <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>
-                  {t(`history.filter.${f}`)}{' '}
-                  <Text style={[styles.chipCount, filter === f && styles.chipCountActive]}>
-                    {counts[f]}
-                  </Text>
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {searching && filtered.length > 0 && (
-            <Text style={styles.resultCount}>
-              {t('history.resultCount', { total: filtered.length })}
-            </Text>
-          )}
-
-          {/* Grouped list */}
-          {groups.length === 0 ? (
+      <SectionList
+        sections={sections}
+        keyExtractor={(b) => b.id}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        stickySectionHeadersEnabled={false}
+        initialNumToRender={BOOKING_PAGE_SIZE}
+        ListHeaderComponent={listHeader}
+        ListFooterComponent={listFooter}
+        renderSectionHeader={({ section }) => (
+          <Text style={styles.sectionTitle}>
+            {t('history.monthGroup', {
+              month: section.month + 1,
+              monthName: EN_MONTHS[section.month],
+              year: section.year,
+            })}
+          </Text>
+        )}
+        renderItem={({ item }) => (
+          <BookingCard
+            booking={item}
+            onPress={() => navigation.navigate('BookingDetail', { bookingId: item.id })}
+          />
+        )}
+        ListEmptyComponent={
+          loading ? (
+            <ActivityIndicator color={colors.primary} style={styles.loader} />
+          ) : (
             <View style={styles.empty}>
               <EmptyState variant="bookings" />
               <Text style={styles.emptyText}>
@@ -207,33 +278,14 @@ export function BookingHistoryScreen() {
                     : t('history.emptyFiltered')}
               </Text>
               {searching && (
-                <Pressable style={styles.clearBtn} onPress={() => setQuery('')}>
+                <Pressable style={styles.clearBtn} onPress={() => setInput('')}>
                   <Text style={styles.clearBtnText}>{t('history.clearSearch')}</Text>
                 </Pressable>
               )}
             </View>
-          ) : (
-            groups.map((g) => (
-              <View key={g.key} style={styles.group}>
-                <Text style={styles.groupTitle}>
-                  {t('history.monthGroup', {
-                    month: g.month + 1,
-                    monthName: EN_MONTHS[g.month],
-                    year: g.year,
-                  })}
-                </Text>
-                {g.items.map((b) => (
-                  <BookingCard
-                    key={b.id}
-                    booking={b}
-                    onPress={() => navigation.navigate('BookingDetail', { bookingId: b.id })}
-                  />
-                ))}
-              </View>
-            ))
-          )}
-        </ScrollView>
-      )}
+          )
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -243,20 +295,7 @@ const styles = StyleSheet.create({
 
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.lg, paddingTop: 0, gap: spacing.md },
-
-  // Lifetime stats strip
-  stats: { flexDirection: 'row', gap: spacing.sm },
-  statCard: {
-    flex: 1,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  statValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
-  statLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
+  header: { gap: spacing.md },
 
   // Search bar (mirrors the station-list search)
   searchWrap: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
@@ -273,6 +312,20 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: fontSizes.body, color: colors.textStrong, padding: 0 },
   resultCount: { fontSize: fontSizes.caption, color: colors.textMuted },
+
+  // Lifetime stats strip
+  stats: { flexDirection: 'row', gap: spacing.sm },
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  statValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
+  statLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
 
   // Filter chips
   chips: { flexDirection: 'row', gap: spacing.sm },
@@ -291,8 +344,31 @@ const styles = StyleSheet.create({
   chipCountActive: { color: colors.textInverse },
 
   // Month sections
-  group: { gap: spacing.md },
-  groupTitle: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: colors.textMuted, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: spacing.xs },
+  sectionTitle: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    color: colors.textMuted,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginTop: spacing.xs,
+  },
+
+  // Paging footer
+  footer: { alignItems: 'center', gap: spacing.sm, paddingTop: spacing.sm },
+  moreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    minHeight: 44,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.surface,
+  },
+  moreBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.primary },
+  footerCount: { fontSize: fontSizes.caption, color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.sm },
 
   empty: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingVertical: spacing.xxl },
   emptyText: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center' },

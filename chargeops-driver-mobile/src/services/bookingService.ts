@@ -1,7 +1,7 @@
 import { bookingsMock } from '@/mock/bookings.mock';
 import { occupancyMock } from '@/mock/occupancy.mock';
 import { chargePointsMock, connectorsMock, stationsMock } from '@/mock/stations.mock';
-import type { Booking, Connector, CreateBookingRequest } from '@/types';
+import type { Booking, BookingStatus, Connector, CreateBookingRequest } from '@/types';
 import { busyRangesForDay, isSameDay, rangesOverlap, type BusyRange } from '@/utils/availability';
 import { quoteBooking, SERVICE_FEE, type Quote } from '@/utils/pricing';
 import {
@@ -130,10 +130,135 @@ function reconcileLapsed(now = Date.now()): void {
   }
 }
 
-export async function getBookingHistory(): Promise<Booking[]> {
-  // NOW: return the in-memory store. LATER: GET /bookings (current user)
+/** Bookings that are still live — the Đặt chỗ tab. Never many, so never paged. */
+const ACTIVE_STATUSES: BookingStatus[] = ['PENDING', 'CONFIRMED', 'CHECKED_IN', 'CHARGING'];
+/** Bookings that are over — the Lịch sử tab. Grows without bound, so always paged. */
+const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'EXPIRED'];
+
+/**
+ * Active bookings for the driver (FR09). A driver holds a handful of these at
+ * most, so this deliberately returns the whole set with no paging.
+ * LATER: GET /bookings?state=active
+ */
+export async function getActiveBookings(): Promise<Booking[]> {
   reconcileLapsed();
-  return simulateNetwork([...store]);
+  const items = store
+    .filter((b) => ACTIVE_STATUSES.includes(b.status))
+    .sort((a, b) => (a.startAt < b.startAt ? -1 : 1));
+  return simulateNetwork(items);
+}
+
+/** Which ended bookings the history screen is asking for. */
+export type HistoryStatusFilter = 'all' | 'completed' | 'cancelled';
+
+const HISTORY_STATUS_MATCH: Record<HistoryStatusFilter, BookingStatus[]> = {
+  all: ENDED_STATUSES,
+  completed: ['COMPLETED'],
+  cancelled: ['CANCELLED', 'EXPIRED'],
+};
+
+export interface BookingHistoryFilter {
+  /** Free-text match against station, address, booking code and connector. */
+  query?: string;
+  status?: HistoryStatusFilter;
+}
+
+/**
+ * One page of history plus the counts the UI needs but cannot derive from a
+ * page. `nextCursor` is the last item's id (keyset paging, same contract as
+ * StationPage): stable while older rows are appended below.
+ */
+export interface BookingHistoryPage {
+  items: Booking[];
+  nextCursor: string | null;
+  /** Rows matching the *whole* filter, not just this page. */
+  total: number;
+  /** Per-status totals under the current query — drives the chip counters. */
+  counts: Record<HistoryStatusFilter, number>;
+}
+
+/** Lifetime totals across every completed session — an aggregate, never a page scan. */
+export interface BookingStats {
+  sessions: number;
+  hours: number;
+  spent: number;
+}
+
+export const BOOKING_PAGE_SIZE = 15;
+
+/**
+ * Free-text match over the fields a driver would actually recall about a past
+ * booking. Lives in the service, not the screen: this is the predicate the
+ * backend will run, and the UI must never see the rows it excludes.
+ */
+function matchesBookingQuery(b: Booking, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = [
+    b.stationName,
+    b.stationAddress,
+    b.code,
+    b.chargePointName,
+    b.connectorName,
+    b.connectorType,
+  ]
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(q);
+}
+
+/**
+ * Search, filter and page the driver's ended bookings (FR09).
+ *
+ * Everything that narrows the list happens here so the cursor stays consistent
+ * across pages — the screen must never re-filter what it was handed, or page 2
+ * would be a slice of the wrong set.
+ * LATER: GET /bookings?state=ended&query=&status=&cursor=&limit= — the backend
+ * runs the same predicate as a DB keyset query and returns this exact shape.
+ */
+export async function getBookingHistory(
+  filter: BookingHistoryFilter = {},
+  page: { cursor?: string | null; limit?: number } = {},
+): Promise<BookingHistoryPage> {
+  reconcileLapsed();
+  const { cursor = null, limit = BOOKING_PAGE_SIZE } = page;
+  const { query = '', status = 'all' } = filter;
+
+  // Query first: the chip counts are "how this search splits by status", so they
+  // must be computed over the query-matched set, before the status narrows it.
+  const matched = store
+    .filter((b) => ENDED_STATUSES.includes(b.status) && matchesBookingQuery(b, query))
+    .sort((a, b) => (a.startAt < b.startAt ? 1 : -1)); // newest first
+
+  const counts = {
+    all: matched.length,
+    completed: matched.filter((b) => HISTORY_STATUS_MATCH.completed.includes(b.status)).length,
+    cancelled: matched.filter((b) => HISTORY_STATUS_MATCH.cancelled.includes(b.status)).length,
+  };
+
+  const filtered = matched.filter((b) => HISTORY_STATUS_MATCH[status].includes(b.status));
+  const start = cursor ? filtered.findIndex((b) => b.id === cursor) + 1 : 0;
+  const items = filtered.slice(start, start + limit);
+  const nextCursor =
+    start + limit < filtered.length && items.length > 0 ? items[items.length - 1].id : null;
+
+  return simulateNetwork({ items, nextCursor, total: filtered.length, counts });
+}
+
+/**
+ * Lifetime charging totals. Separate from the history page on purpose: these
+ * cover every completed session ever, so they can never be summed from the rows
+ * currently loaded on screen.
+ * LATER: GET /bookings/stats — one aggregate query, not a full-table read.
+ */
+export async function getBookingStats(): Promise<BookingStats> {
+  reconcileLapsed();
+  const done = store.filter((b) => b.status === 'COMPLETED');
+  return simulateNetwork({
+    sessions: done.length,
+    hours: Math.round(done.reduce((sum, b) => sum + b.durationMin, 0) / 60),
+    spent: done.reduce((sum, b) => sum + b.totalPrice, 0),
+  });
 }
 
 export async function getBookingById(id: string): Promise<Booking | null> {

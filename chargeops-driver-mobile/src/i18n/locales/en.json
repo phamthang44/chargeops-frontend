@@ -221,6 +221,10 @@
     "monthGroup": "{{monthName}} {{year}}",
     "empty": "No booking history yet.",
     "emptyFiltered": "No matching bookings.",
+    "searchPlaceholder": "Search by station, code, or connector",
+    "resultCount": "{{total}} results",
+    "noResults": "No bookings found for “{{query}}”.",
+    "clearSearch": "Clear search",
     "error": "Couldn't load booking history."
   },
   "profile": {

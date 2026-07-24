@@ -1,8 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, BookingCard, EmptyState } from '@/components';
@@ -29,6 +30,21 @@ const FILTER_MATCH: Record<Filter, BookingStatus[]> = {
 // English month names (vi formats numerically via i18n). Index 0 = January.
 const EN_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+/**
+ * Free-text match over the fields a driver would actually recall about a past
+ * booking: the station, the booking code on the receipt, or the port they used.
+ * Mirrors the station-list search so both screens feel the same.
+ * LATER: this becomes a `query` param on GET /bookings, matched server-side.
+ */
+function matchesQuery(b: Booking, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = [b.stationName, b.stationAddress, b.code, b.chargePointName, b.connectorName, b.connectorType]
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(q);
+}
+
 interface MonthGroup {
   key: string;
   month: number; // 0-11
@@ -43,6 +59,7 @@ export function BookingHistoryScreen() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>('all');
+  const [query, setQuery] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -69,13 +86,28 @@ export function BookingHistoryScreen() {
     };
   }, [bookings]);
 
+  // Search is applied before month grouping so the sections reflect the query.
   const filtered = useMemo(
     () =>
       bookings
-        .filter((b) => FILTER_MATCH[filter].includes(b.status))
+        .filter((b) => FILTER_MATCH[filter].includes(b.status) && matchesQuery(b, query))
         .sort((a, b) => (a.startAt < b.startAt ? 1 : -1)),
-    [bookings, filter],
+    [bookings, filter, query],
   );
+
+  const searching = query.trim().length > 0;
+
+  // Chip counts respect the search so the driver can see how a query splits.
+  const counts = useMemo(() => {
+    const inQuery = bookings.filter((b) => matchesQuery(b, query));
+    return FILTERS.reduce<Record<Filter, number>>(
+      (acc, f) => {
+        acc[f] = inQuery.filter((b) => FILTER_MATCH[f].includes(b.status)).length;
+        return acc;
+      },
+      { all: 0, completed: 0, cancelled: 0 },
+    );
+  }, [bookings, query]);
 
   // Group the (already newest-first) list into month sections, preserving order.
   const groups = useMemo<MonthGroup[]>(() => {
@@ -96,6 +128,26 @@ export function BookingHistoryScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <AppHeader title={t('history.title')} />
+
+      {/* Search — station, booking code, or the port used */}
+      <View style={styles.searchWrap}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t('history.searchPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+          />
+          {query.length > 0 && (
+            <Pressable hitSlop={8} onPress={() => setQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          )}
+        </View>
+      </View>
 
       {loading ? (
         <ActivityIndicator color={colors.primary} style={styles.loader} />
@@ -128,19 +180,37 @@ export function BookingHistoryScreen() {
                 onPress={() => setFilter(f)}
               >
                 <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>
-                  {t(`history.filter.${f}`)}
+                  {t(`history.filter.${f}`)}{' '}
+                  <Text style={[styles.chipCount, filter === f && styles.chipCountActive]}>
+                    {counts[f]}
+                  </Text>
                 </Text>
               </Pressable>
             ))}
           </View>
+
+          {searching && filtered.length > 0 && (
+            <Text style={styles.resultCount}>
+              {t('history.resultCount', { total: filtered.length })}
+            </Text>
+          )}
 
           {/* Grouped list */}
           {groups.length === 0 ? (
             <View style={styles.empty}>
               <EmptyState variant="bookings" />
               <Text style={styles.emptyText}>
-                {filter === 'all' ? t('history.empty') : t('history.emptyFiltered')}
+                {searching
+                  ? t('history.noResults', { query: query.trim() })
+                  : filter === 'all'
+                    ? t('history.empty')
+                    : t('history.emptyFiltered')}
               </Text>
+              {searching && (
+                <Pressable style={styles.clearBtn} onPress={() => setQuery('')}>
+                  <Text style={styles.clearBtnText}>{t('history.clearSearch')}</Text>
+                </Pressable>
+              )}
             </View>
           ) : (
             groups.map((g) => (
@@ -188,6 +258,22 @@ const styles = StyleSheet.create({
   statValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: colors.textStrong },
   statLabel: { fontSize: fontSizes.caption, color: colors.textMuted },
 
+  // Search bar (mirrors the station-list search)
+  searchWrap: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    height: 48,
+  },
+  searchInput: { flex: 1, fontSize: fontSizes.body, color: colors.textStrong, padding: 0 },
+  resultCount: { fontSize: fontSizes.caption, color: colors.textMuted },
+
   // Filter chips
   chips: { flexDirection: 'row', gap: spacing.sm },
   chip: {
@@ -201,6 +287,8 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: fontSizes.body, fontWeight: fontWeights.medium, color: colors.textBody },
   chipTextActive: { color: colors.textInverse, fontWeight: fontWeights.semibold },
+  chipCount: { color: colors.textMuted, fontWeight: fontWeights.semibold },
+  chipCountActive: { color: colors.textInverse },
 
   // Month sections
   group: { gap: spacing.md },
@@ -208,4 +296,13 @@ const styles = StyleSheet.create({
 
   empty: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingVertical: spacing.xxl },
   emptyText: { fontSize: fontSizes.body, color: colors.textMuted, textAlign: 'center' },
+  clearBtn: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
+  },
+  clearBtnText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold, color: colors.textBody },
 });

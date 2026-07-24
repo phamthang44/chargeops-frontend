@@ -221,6 +221,10 @@
     "monthGroup": "Tháng {{month}}, {{year}}",
     "empty": "Chưa có lịch sử đặt chỗ.",
     "emptyFiltered": "Không có lượt nào phù hợp.",
+    "searchPlaceholder": "Tìm theo trạm, mã đặt chỗ, cổng sạc",
+    "resultCount": "{{total}} kết quả",
+    "noResults": "Không tìm thấy lượt đặt nào cho “{{query}}”.",
+    "clearSearch": "Xóa tìm kiếm",
     "error": "Không thể tải lịch sử đặt chỗ."
   },
   "profile": {

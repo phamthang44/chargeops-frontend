@@ -24,7 +24,7 @@ const PreferencesContext = createContext<PreferencesContextValue | undefined>(un
  * Seamlessly resolves light, dark, and OS system themes across all components.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [appearance, setAppearance] = useState<AppearanceMode>('system');
+  const [appearance, setAppearance] = useState<AppearanceMode>('light');
   const [favorites, setFavorites] = useState<string[]>([]);
   const systemScheme = useColorScheme();
 

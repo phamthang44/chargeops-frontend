@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors, fontWeights } from '@/theme';
@@ -29,7 +30,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * screens never need to imperatively navigate to/from the tabs.
  */
 export function RootNavigator() {
-  const { session } = useAuth();
+  const { initializing, session } = useAuth();
+
+  if (initializing) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>

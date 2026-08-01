@@ -83,7 +83,7 @@
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "forgot": "Forgot password?",
-    "securityNote": "Your information is fully protected with AES-256 encryption.",
+    "securityNote": "Your sign-in details are protected. Your password is never stored in readable form.",
     "cta": "Log in",
     "noAccount": "Don't have an account? ",
     "signUp": "Sign up"

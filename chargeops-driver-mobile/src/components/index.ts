@@ -15,6 +15,7 @@ export { Checkbox } from './Checkbox';
 export { GlassButton } from './GlassButton';
 export { GlassSurface } from './GlassSurface';
 export { LanguageSwitcher } from './LanguageSwitcher';
+export { LegalDocumentSheet } from './LegalDocumentSheet';
 export { LiveDot } from './LiveDot';
 export { OtpInput } from './OtpInput';
 export { PasswordField } from './PasswordField';
@@ -27,5 +28,4 @@ export { TextField } from './TextField';
 export type { TextFieldProps } from './TextField';
 export { TopUpModal } from './TopUpModal';
 export { NotificationSheet } from './NotificationSheet';
-
 

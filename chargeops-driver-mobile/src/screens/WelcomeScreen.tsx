@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, BrandMark, FeatureArt, SettingsModal, type FeatureName } from '@/components';
+import { AppButton, BrandMark, FeatureArt, LegalDocumentSheet, SettingsModal, type FeatureName } from '@/components';
+import type { LegalDocType } from '@/content/legal';
 import type { RootStackParamList } from '@/navigation/types';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
@@ -22,6 +23,7 @@ export function WelcomeScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -83,17 +85,22 @@ export function WelcomeScreen() {
         />
         <Text style={styles.footerNote}>
           {t('welcome.agreePrefix')}
-          <Text style={styles.footerLink} onPress={() => {}}>
+          <Text style={styles.footerLink} onPress={() => setLegalDoc('terms')}>
             {t('common.terms')}
           </Text>
           {t('welcome.and')}
-          <Text style={styles.footerLink} onPress={() => {}}>
+          <Text style={styles.footerLink} onPress={() => setLegalDoc('privacy')}>
             {t('common.privacy')}
           </Text>
         </Text>
       </View>
 
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <LegalDocumentSheet
+        visible={legalDoc !== null}
+        type={legalDoc ?? 'terms'}
+        onClose={() => setLegalDoc(null)}
+      />
     </SafeAreaView>
   );
 }

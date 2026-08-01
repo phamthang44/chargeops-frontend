@@ -4,6 +4,7 @@
     "slug": "chargeops-driver-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "chargeops",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
@@ -36,7 +37,9 @@
         {
           "cameraPermission": "ChargeOps cần quyền truy cập camera để quét mã QR trên trụ sạc khi check-in."
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-secure-store"
     ]
   }
 }

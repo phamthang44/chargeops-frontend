@@ -83,7 +83,7 @@
     "passwordLabel": "Mật khẩu",
     "passwordPlaceholder": "Nhập mật khẩu",
     "forgot": "Quên mật khẩu?",
-    "securityNote": "Thông tin của bạn được bảo mật tuyệt đối theo tiêu chuẩn mã hóa AES-256.",
+    "securityNote": "Thông tin đăng nhập của bạn được bảo vệ an toàn. Mật khẩu không được lưu dưới dạng có thể đọc được.",
     "cta": "Đăng nhập",
     "noAccount": "Chưa có tài khoản? ",
     "signUp": "Đăng ký"

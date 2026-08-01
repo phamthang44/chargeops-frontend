@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, Checkbox, PasswordField, PhoneField, TextField } from '@/components';
+import { AppButton, Checkbox, LegalDocumentSheet, PasswordField, PhoneField, TextField } from '@/components';
+import type { LegalDocType } from '@/content/legal';
 import { authErrorMessage } from '@/i18n/authErrors';
 import type { RootStackParamList } from '@/navigation/types';
 import { register } from '@/services/authService';
@@ -38,6 +39,7 @@ export function RegisterScreen() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
@@ -133,9 +135,9 @@ export function RegisterScreen() {
 
             <Checkbox checked={agreed} onChange={setAgreed}>
               {t('register.agreePrefix')}
-              <Text style={styles.link}>{t('common.terms')}</Text>
+              <Text style={styles.link} onPress={() => setLegalDoc('terms')}>{t('common.terms')}</Text>
               {t('register.agreeMid')}
-              <Text style={styles.link}>{t('common.privacy')}</Text>
+              <Text style={styles.link} onPress={() => setLegalDoc('privacy')}>{t('common.privacy')}</Text>
               {t('register.agreeSuffix')}
             </Checkbox>
 
@@ -153,6 +155,11 @@ export function RegisterScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+      <LegalDocumentSheet
+        visible={legalDoc !== null}
+        type={legalDoc ?? 'terms'}
+        onClose={() => setLegalDoc(null)}
+      />
     </SafeAreaView>
   );
 }

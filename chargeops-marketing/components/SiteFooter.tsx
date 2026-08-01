@@ -33,6 +33,8 @@ export function SiteFooter() {
           title="Liên hệ"
           links={[
             { label: "phamthang3564@gmail.com", href: "mailto:phamthang3564@gmail.com" },
+            { label: "Điều khoản dịch vụ", href: "/dieu-khoan" },
+            { label: "Chính sách bảo mật", href: "/chinh-sach-bao-mat" },
           ]}
         />
       </div>

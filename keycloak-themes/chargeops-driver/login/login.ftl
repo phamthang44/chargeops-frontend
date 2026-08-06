@@ -76,6 +76,22 @@
         </div>
       </#if>
 
+      <#if social.providers?? && social.providers?has_content>
+        <div class="co-social-section">
+          <#list social.providers as provider>
+            <a class="co-social-btn co-social-${provider.alias}" id="social-${provider.alias}" href="${provider.loginUrl}">
+              <#if provider.alias == "google">
+                <span class="co-social-google-mark" aria-hidden="true">G</span>
+              <#else>
+                <span class="co-social-generic-mark" aria-hidden="true">${(provider.displayName!provider.alias)?substring(0, 1)?upper_case}</span>
+              </#if>
+              <span>${msg("socialContinueWith", provider.displayName)}</span>
+            </a>
+          </#list>
+        </div>
+        <div class="co-divider"><span>${msg("socialDivider")}</span></div>
+      </#if>
+
       <form id="kc-form-login" class="co-form" action="${url.loginAction}" method="post">
         <#if !(usernameHidden??)>
           <div class="co-input-group">
@@ -124,7 +140,7 @@
               type="button" 
               class="co-password-toggle" 
               onclick="togglePasswordVisibility('password', this)" 
-              aria-label="Toggle password visibility"
+              aria-label="${msg('showPassword')}"
             >
               <!-- Eye Off (Hidden State) -->
               <svg class="co-icon-eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -139,6 +155,26 @@
             </button>
           </div>
         </div>
+
+        <#if realm.rememberMe && !usernameHidden??>
+          <div class="co-login-option-row">
+            <label class="co-checkbox-label co-remember-label">
+              <input
+                id="rememberMe"
+                name="rememberMe"
+                type="checkbox"
+                class="co-checkbox-input"
+                <#if login.rememberMe??>checked</#if>
+              />
+              <span class="co-checkbox-custom">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+              <span class="co-checkbox-text">${msg("rememberMe")}</span>
+            </label>
+          </div>
+        </#if>
 
         <#if realm.resetPasswordAllowed>
           <div class="co-forgot-row">

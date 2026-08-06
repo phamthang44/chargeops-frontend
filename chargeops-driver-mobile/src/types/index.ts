@@ -206,10 +206,12 @@ export interface User {
   status: UserStatus;
 }
 
-/** JWT access + refresh token pair (SRS auth model). */
+/** OAuth credentials held only in React memory. */
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  idToken?: string;
+  expiresAt?: number;
 }
 
 /** A logged-in session = the user plus their tokens. */

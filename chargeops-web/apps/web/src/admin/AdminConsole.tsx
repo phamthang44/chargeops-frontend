@@ -49,14 +49,13 @@ const PAGES: Record<string, ComponentType> = {
 };
 
 // Admin console sees platform-wide (unscoped) data.
-const services = createServices({ ownerView: false });
-
 /** Platform admin console, mounted at `/admin`. */
 export function AdminConsole({ base }: { base: string }) {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, getToken } = useAuth();
+  const services = useMemo(() => createServices({ ownerView: false, getToken }), [getToken]);
   const activeKey = location.pathname.split('/')[2] || 'dashboard';
 
   const NAV: (ShellNavItem & { title: string })[] = [
@@ -111,7 +110,7 @@ export function AdminConsole({ base }: { base: string }) {
         },
       },
     ],
-    [base, navigate, t],
+    [base, navigate, services, t],
   );
 
   // Same queryKey/queryFn the admin Dashboard page uses — react-query dedupes, no extra network call after first mount.

@@ -75,6 +75,9 @@
     "and": " & "
   },
   "login": {
+    "hostedDescription": "You will continue to ChargeOps' secure sign-in page to authenticate.",
+    "authNotReady": "The sign-in service is still loading. Please try again in a moment.",
+    "authError": "Unable to sign in right now. Please try again.",
     "headerTitle": "Log in",
     "title": "Welcome back",
     "subtitle": "Log in with your email and password to keep using the smart EV charging service.",

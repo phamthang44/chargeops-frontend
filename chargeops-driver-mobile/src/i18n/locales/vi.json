@@ -75,6 +75,9 @@
     "and": " & "
   },
   "login": {
+    "hostedDescription": "Bạn sẽ được chuyển tới trang đăng nhập bảo mật của ChargeOps để xác thực.",
+    "authNotReady": "Đang kết nối tới dịch vụ đăng nhập. Vui lòng thử lại sau một chút.",
+    "authError": "Không thể đăng nhập lúc này. Vui lòng thử lại.",
     "headerTitle": "Đăng nhập",
     "title": "Chào mừng trở lại",
     "subtitle": "Đăng nhập bằng email và mật khẩu để tiếp tục sử dụng dịch vụ sạc xe điện thông minh.",

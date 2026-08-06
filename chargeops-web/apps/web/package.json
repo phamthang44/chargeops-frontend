@@ -15,6 +15,7 @@
     "@chargeops/ui": "*",
     "@tanstack/react-query": "^5.80.0",
     "i18next": "^26.3.6",
+    "keycloak-js": "^26.2.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^17.0.10",

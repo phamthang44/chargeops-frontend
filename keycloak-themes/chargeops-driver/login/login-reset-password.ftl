@@ -114,7 +114,7 @@
     </div>
 
     <div class="co-screen-footer">
-      <button class="co-cta-btn" type="submit" form="kc-reset-password-form">${msg("doSubmit")}</button>
+      <button class="co-cta-btn" type="submit" form="kc-reset-password-form">${msg("resetPasswordCta")}</button>
       <div class="co-switch-row">
         <a href="${url.loginUrl}" class="co-switch-link">${msg("backToLogin")}</a>
       </div>

@@ -16,95 +16,91 @@ const TERMS_VI: LegalDocument = {
   title: 'Điều khoản dịch vụ',
   updatedAt: '01/08/2026',
   intro:
-    'Bản nháp dùng cho ChargeOps theo SRS v4.7. Điều khoản này mô tả cách tài xế sử dụng ứng dụng để tìm trạm, đặt khung giờ sạc, thanh toán sandbox và check-in bằng QR.',
+    'Điều khoản dịch vụ cho nền tảng ChargeOps theo SRS v4.7. Điều khoản này quy định cách tài xế sử dụng ứng dụng để tìm trạm, đặt khung giờ sạc, thanh toán và quét mã QR check-in.',
   sections: [
     {
-      title: '1. Tài khoản và vai trò',
+      title: '1. Tài khoản và phân quyền',
       body: [
-        'Tài xế đăng ký tài khoản bằng họ tên, email, số điện thoại và mật khẩu. Tài khoản driver trong ứng dụng này được gán vai trò DRIVER.',
-        'Người dùng phải cung cấp thông tin chính xác và tự bảo vệ thông tin đăng nhập. Mọi truy cập API được kiểm soát bằng token và phân quyền RBAC.',
+        'Tài xế đăng ký tài khoản bằng Họ và tên, Email, Số điện thoại và Mật khẩu. Tài khoản trong ứng dụng này được gán vai trò DRIVER.',
+        'Hệ thống quản lý truy cập API bằng cơ chế mã hóa Token (OpenID Connect / JWT) và kiểm soát phân quyền RBAC nghiêm ngặt.',
       ],
     },
     {
-      title: '2. Đặt khung giờ sạc',
+      title: '2. Bảo mật mật khẩu & Tiến trình xác thực PKCE',
+      body: [
+        'Mật khẩu tài khoản được bảo vệ bởi dịch vụ xác thực chuyên biệt và mã hóa một chiều bằng thuật toán Argon2id (Salted Password Hashing), chống lại các cuộc tấn công dò quét mật khẩu.',
+        'Tiến trình xác thực đăng nhập tuân thủ tiêu chuẩn OpenID Connect Authorization Code Flow kết hợp PKCE S256, đảm bảo an toàn tuyệt đối cho ứng dụng di động.',
+      ],
+    },
+    {
+      title: '3. Đặt khung giờ sạc',
       body: [
         'Tài xế chọn trạm, cổng sạc, ngày, giờ bắt đầu và thời lượng sạc. Hệ thống kiểm tra khung giờ theo giờ hoạt động của trạm và tình trạng đặt chỗ hiện có.',
-        'Một cổng sạc chỉ có một booking hợp lệ tại cùng một khoảng thời gian. Nếu có người khác giữ chỗ trước, yêu cầu đặt chỗ có thể bị từ chối.',
+        'Một cổng sạc chỉ có một booking hợp lệ tại cùng một khoảng thời gian. Khi có cạnh tranh đặt chỗ, hệ thống sẽ sử dụng cơ chế khóa dữ liệu (Locking) để chỉ chấp nhận một yêu cầu duy nhất.',
       ],
     },
     {
-      title: '3. Thanh toán và trạng thái booking',
+      title: '4. Thanh toán và hoàn tiền',
       body: [
-        'Booking được tạo ở trạng thái chờ thanh toán. Khung giờ được giữ tạm trong thời gian cấu hình, hiện theo SRS là 10 phút.',
-        'Dự án hiện dùng chế độ sandbox/test cho cổng thanh toán. ChargeOps không giữ tiền người dùng trong phạm vi đồ án này.',
+        'Booking mới ở trạng thái Chờ thanh toán và giữ khung giờ tạm thời trong 10 phút. Dự án hiện sử dụng chế độ Sandbox cho cổng thanh toán.',
+        'Tài xế có 5 phút grace window sau khi đặt để hủy và được hoàn tiền 100%. Sau 5 phút, các mốc hoàn tiền theo thời gian trước giờ sạc sẽ được tự động áp dụng.',
       ],
     },
     {
-      title: '4. Hủy và hoàn tiền',
-      body: [
-        'Trong 5 phút đầu sau khi đặt, tài xế có thể hủy và được hoàn 100% theo grace window của SRS.',
-        'Sau grace window, các mức hoàn tiền theo thời gian trước giờ sạc sẽ được áp dụng trong backend và hiển thị trong màn hình booking.',
-      ],
-    },
-    {
-      title: '5. Check-in và sử dụng trạm',
+      title: '5. Check-in QR và trạng thái trụ sạc',
       body: [
         'Tài xế check-in bằng cách quét mã QR trên đúng cổng sạc đã đặt. Mã QR đại diện cho Connector ID trong hệ thống.',
-        'ChargeOps trong phạm vi đồ án không điều khiển phần cứng thật; trạng thái sạc và cổng sạc là logic hệ thống hoặc mô phỏng.',
+        'Trong phạm vi đồ án, trạng thái trụ sạc và phiên sạc là mô hình trạng thái logic (Simulated State).',
       ],
     },
     {
-      title: '6. Hỗ trợ',
+      title: '6. Hỗ trợ sự cố',
       body: [
-        'Người dùng có thể tạo ticket hỗ trợ cho sự cố booking, thanh toán, tài khoản hoặc trạm sạc. Ticket được định tuyến theo loại vấn đề và phạm vi trạm.',
+        'Người dùng có thể tạo ticket hỗ trợ cho các sự cố booking, thanh toán, tài khoản hoặc trạm sạc. Ticket được tự động định tuyến đến chủ trạm hoặc quản trị viên.',
       ],
     },
   ],
 };
 
 const PRIVACY_VI: LegalDocument = {
-  title: 'Chính sách bảo mật',
+  title: 'Chính sách bảo mật dữ liệu',
   updatedAt: '01/08/2026',
   intro:
-    'Bản nháp dùng cho ChargeOps theo SRS v4.7. Chính sách này tóm tắt loại dữ liệu ứng dụng xử lý khi tài xế đăng ký, tìm trạm, đặt chỗ, thanh toán và nhận hỗ trợ.',
+    'Chính sách này tóm tắt loại dữ liệu ChargeOps thu thập, tiêu chuẩn mã hóa bảo vệ thông tin khách hàng và quyền riêng tư khi tài xế sử dụng ứng dụng.',
   sections: [
     {
-      title: '1. Dữ liệu tài khoản',
+      title: '1. Dữ liệu tài khoản & Mã hóa mật khẩu',
       body: [
-        'ChargeOps xử lý họ tên, email, số điện thoại, vai trò tài khoản và trạng thái tài khoản để đăng ký, đăng nhập và phân quyền.',
-        'Khi tích hợp Keycloak, mật khẩu và phiên đăng nhập được xử lý bởi Keycloak. Ứng dụng mobile chỉ nhận token và thông tin hồ sơ cần thiết.',
+        'ChargeOps xử lý Họ tên, Email, Số điện thoại và Vai trò tài khoản để đăng ký, đăng nhập và phân quyền dịch vụ.',
+        'Mật khẩu của bạn được quản lý bởi dịch vụ xác thực bảo mật và mã hóa an toàn bằng thuật toán Argon2id (salted password hashing). Mật khẩu gốc không bao giờ được lưu dưới dạng thô.',
       ],
     },
     {
-      title: '2. Dữ liệu đặt chỗ và sạc',
+      title: '2. Chuẩn xác thực OIDC & Ký số Token RS256',
       body: [
-        'Ứng dụng lưu thông tin trạm, cổng sạc, khung giờ, trạng thái booking, lịch sử phiên sạc, mã booking và thông tin check-in QR.',
-        'Dữ liệu này được dùng để giữ chỗ, tránh trùng khung giờ, hiển thị lịch sử và xử lý hỗ trợ.',
+        'Xác thực đăng nhập chạy theo chuẩn OpenID Connect với PKCE S256. Tất cả Token phiên làm việc (JWT/JWS) được ký số bất đối xứng bằng thuật toán RS256 (RSA với SHA-256), chống giả mạo dữ liệu.',
       ],
     },
     {
-      title: '3. Thanh toán',
+      title: '3. Mã hóa đường truyền HTTPS & Data at Rest',
       body: [
-        'Trong phạm vi đồ án, thanh toán chạy ở sandbox/test mode. ChargeOps chỉ ghi nhận giao dịch phục vụ hiển thị, kiểm thử và audit.',
-        'Không lưu thông tin thẻ đầy đủ trong ứng dụng. Việc xử lý thanh toán thật, nếu triển khai, phải đi qua nhà cung cấp thanh toán được cấp phép.',
+        'Toàn bộ dữ liệu truyền tải qua mạng giữa ứng dụng mobile và server bắt buộc mã hóa qua giao thức HTTPS/TLS 1.2 trở lên.',
+        'Dữ liệu lưu trữ trong cơ sở dữ liệu (PostgreSQL) được mã hóa lưu trữ Data at Rest ở cấp độ hạ tầng (Volume/Storage Encryption với AES-256).',
+        'OAuth Token chỉ được giữ tạm thời trong bộ nhớ khi ứng dụng đang chạy và không được ghi vào localStorage, SecureStore hoặc bộ nhớ lâu dài khác. Trên web, sau khi tải lại trang, ứng dụng khôi phục đăng nhập bằng phiên SSO HttpOnly do Keycloak quản lý.',
       ],
     },
     {
-      title: '4. Vị trí và QR',
+      title: '4. Dữ liệu đặt chỗ, vị trí & Camera QR',
       body: [
-        'Ứng dụng có thể dùng vị trí để gợi ý trạm gần bạn và dùng camera để quét mã QR check-in. Các quyền này chỉ nên xin khi cần đến tính năng tương ứng.',
+        'Ứng dụng lưu thông tin trạm sạc, khung giờ, mã booking, lịch sử phiên sạc và mã QR check-in để vận hành dịch vụ và xử lý khiếu nại.',
+        'Quyền Vị trí chỉ xin khi tìm trạm gần nhất và quyền Camera chỉ xin khi thực hiện quét mã QR check-in.',
       ],
     },
     {
-      title: '5. Email, SMS và thông báo',
+      title: '5. Thời gian lưu trữ & Quyền riêng tư',
       body: [
-        'Email hoặc SMS có thể được dùng để xác minh tài khoản, gửi thông báo vòng đời booking và hỗ trợ khôi phục tài khoản.',
-      ],
-    },
-    {
-      title: '6. Bảo mật và lưu trữ token',
-      body: [
-        'Token đăng nhập trên mobile nên được lưu trong SecureStore/Keychain. Backend xác thực access token và áp dụng RBAC cho từng endpoint.',
+        'Dữ liệu được lưu trữ trong thời gian tài khoản hoạt động và tuân thủ các quy định bảo lưu lịch sử giao dịch.',
+        'Khách hàng có quyền truy cập, cập nhật hoặc gửi yêu cầu xóa dữ liệu cá nhân thông qua trung tâm hỗ trợ ChargeOps.',
       ],
     },
   ],
@@ -114,95 +110,91 @@ const TERMS_EN: LegalDocument = {
   title: 'Terms of Service',
   updatedAt: '2026-08-01',
   intro:
-    'Draft for ChargeOps based on SRS v4.7. These terms describe how drivers use the app to discover stations, reserve charging windows, use sandbox payments, and check in with QR codes.',
+    'Terms of Service for ChargeOps based on SRS v4.7. These terms govern how drivers use the app to discover stations, reserve slots, complete sandbox payments, and check in via QR code.',
   sections: [
     {
       title: '1. Account and roles',
       body: [
-        'Drivers register with full name, email, phone number, and password. This driver app assigns the DRIVER role.',
-        'Users must provide accurate information and protect their credentials. API access is controlled by tokens and RBAC.',
+        'Drivers register using full name, email, phone number, and password. This mobile app assigns the DRIVER role.',
+        'API access is authenticated via tokens and strictly authorized with Role-Based Access Control (RBAC).',
       ],
     },
     {
-      title: '2. Charging reservations',
+      title: '2. Password security & PKCE authentication',
       body: [
-        'Drivers choose a station, connector, date, start time, and duration. The system checks operating hours and existing reservations.',
-        'A connector can only hold one valid booking for the same time range. Conflicting reservations may be rejected.',
+        'Passwords are managed by a dedicated secure authentication service using Argon2id salted password hashing, protecting against brute-force and credential stuffing attacks.',
+        'Authentication follows OpenID Connect Authorization Code Flow with PKCE (S256), securing mobile authorization flows against code interception.',
       ],
     },
     {
-      title: '3. Payment and booking status',
+      title: '3. Charging reservations',
       body: [
-        'Bookings start in Pending Payment. The selected time range is temporarily held for the configured timeout, currently 10 minutes in the SRS.',
-        'This project uses sandbox/test payment mode. ChargeOps does not custody user funds in this project scope.',
+        'Drivers select a station, connector, date, start time, and duration. The system validates operating hours and availability.',
+        'A connector can hold only one valid booking at any given time. Concurrent reservation requests are serialized using backend pessimistic locking.',
       ],
     },
     {
-      title: '4. Cancellation and refunds',
+      title: '4. Payment and refunds',
       body: [
-        'Drivers may cancel within the first 5 minutes after booking for a 100% grace refund.',
-        'After the grace window, backend refund tiers based on time before charging apply and are shown in the booking screens.',
+        'New bookings hold the time range for 10 minutes in Pending Payment. Payments run in Sandbox test mode for this project.',
+        'Drivers enjoy a 5-minute grace window for 100% refund upon cancellation. Subsequent cancellation fees apply according to SRS refund tiers.',
       ],
     },
     {
-      title: '5. QR check-in and station use',
+      title: '5. QR check-in & simulated hardware',
       body: [
-        'Drivers check in by scanning the QR code on the correct reserved connector. The QR code represents the Connector ID.',
-        'ChargeOps does not control real charger hardware in this project; charger and connector states are logical or simulated.',
+        'Drivers check in by scanning the QR code at the reserved connector. The QR code encodes the unique Connector ID.',
+        'In this project scope, charger states and charging sessions represent logical simulated states.',
       ],
     },
     {
-      title: '6. Support',
+      title: '6. Incident support',
       body: [
-        'Users may create support tickets for booking, payment, account, or station issues. Tickets are routed by issue type and station scope.',
+        'Users may submit support tickets for booking, payment, account, or station issues. Tickets are routed directly to station owners or platform admins.',
       ],
     },
   ],
 };
 
 const PRIVACY_EN: LegalDocument = {
-  title: 'Privacy Policy',
+  title: 'Data Privacy Policy',
   updatedAt: '2026-08-01',
   intro:
-    'Draft for ChargeOps based on SRS v4.7. This policy summarizes the data processed when drivers register, discover stations, book charging windows, pay, and request support.',
+    'This policy outlines how ChargeOps collects, stores, encrypts, and protects customer personal data and charging records.',
   sections: [
     {
-      title: '1. Account data',
+      title: '1. Account data & Argon2id password hashing',
       body: [
-        'ChargeOps processes full name, email, phone number, account role, and account status for registration, authentication, and authorization.',
-        'When Keycloak is integrated, passwords and login sessions are handled by Keycloak. The mobile app receives only tokens and necessary profile data.',
+        'ChargeOps processes full name, email, phone number, and account role for identity verification and service provision.',
+        'Passwords are stored by the secure authentication service and hashed using Argon2id with random salt. Plain-text passwords are never stored.',
       ],
     },
     {
-      title: '2. Booking and charging data',
+      title: '2. OIDC authentication & RS256 token signing',
       body: [
-        'The app stores station, connector, time range, booking status, charging history, booking code, and QR check-in data.',
-        'This data is used to reserve time ranges, prevent conflicts, show history, and support user issues.',
+        'Mobile authentication complies with OpenID Connect PKCE S256. Access tokens and ID tokens (JWT/JWS) are signed using RS256 (RSA with SHA-256) for tamper-proof security.',
       ],
     },
     {
-      title: '3. Payment',
+      title: '3. Transport security & Data at Rest encryption',
       body: [
-        'Payments run in sandbox/test mode for this project. ChargeOps records transactions for display, testing, and audit.',
-        'The app does not store full card details. Real payment processing must go through a suitable licensed payment provider.',
+        'All client-server network traffic is encrypted using HTTPS with TLS 1.2+ protocols.',
+        'PostgreSQL database records at rest are encrypted at the infrastructure storage volume layer (AES-256).',
+        'OAuth tokens are held only in memory while the app is running and are not written to localStorage, SecureStore, or other persistent storage. On web reload, the app restores sign-in through the HttpOnly SSO session managed by Keycloak.',
       ],
     },
     {
-      title: '4. Location and QR',
+      title: '4. Booking, location & QR data',
       body: [
-        'The app may use location to suggest nearby stations and camera access to scan QR check-in codes. These permissions should be requested only when needed.',
+        'The system records station selections, time ranges, booking codes, charging history, and check-in logs.',
+        'Location access is requested only for nearby station discovery, and camera access is requested only for QR code scanning.',
       ],
     },
     {
-      title: '5. Email, SMS, and notifications',
+      title: '5. Retention & customer privacy rights',
       body: [
-        'Email or SMS may be used for account verification, booking lifecycle notifications, and account recovery.',
-      ],
-    },
-    {
-      title: '6. Token security',
-      body: [
-        'Mobile tokens should be stored in SecureStore or the platform keychain. Backend APIs validate access tokens and apply RBAC on every protected endpoint.',
+        'Data is retained during active account lifecycle and stored in compliance with auditing standards.',
+        'Customers hold rights to inspect, update, or request erasure of personal data through ChargeOps support.',
       ],
     },
   ],

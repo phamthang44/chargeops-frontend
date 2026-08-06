@@ -55,12 +55,12 @@ components ──▶ useQuery(api.bookings.list(...)) ──▶ Services interfa
 - **Switch**: set `VITE_USE_MOCKS=false` + `VITE_API_URL` in the app's `.env` (see
   `.env.example`). Zero UI changes.
 
-## Auth: mock now, Keycloak later
+## Auth: Keycloak with mock fallback
 
-`@chargeops/auth` currently **simulates** the Keycloak Authorization Code + PKCE flow (short SSO
-overlay → fake token with realm roles). The public API (`useAuth`, `AuthGate`, `RequireRole`,
-`resolveHome`, `rolesFromRealm`) is shaped after Keycloak's token model, so switching to the real
-thing is contained inside `packages/auth` + `App.tsx`:
+`@chargeops/auth` uses Keycloak Authorization Code + PKCE when
+`VITE_KEYCLOAK_ENABLED=true`; otherwise it keeps the local `?as=admin|owner|staff|driver` demo.
+The public API (`useAuth`, `AuthGate`, `RequireRole`, `resolveHome`, `rolesFromRealm`) is the same
+in both modes.
 
 - Keycloak realm `chargeops`, **one public client `chargeops-web`** (PKCE) — not one per console.
 - Realm roles `ADMIN` / `OWNER` / `STATION_STAFF` / `DRIVER` → canonical roles via `rolesFromRealm`;
@@ -69,7 +69,14 @@ thing is contained inside `packages/auth` + `App.tsx`:
   typing `/admin` without the role hits the no-access screen, never the data.
 - No app ever sees a password: credentials are entered on Keycloak's hosted login page. That login
   page is a **Keycloak custom theme** (`login.ftl` + CSS), not a React component in this app.
-- Real mode replaces the `?as=` mock pick in `App.tsx` with the roles from the decoded access token.
+- Copy `apps/web/.env.example` to `apps/web/.env`, set `VITE_KEYCLOAK_ENABLED=true`, and use
+  `VITE_API_URL=http://localhost:8081/api/v1` with `VITE_USE_MOCKS=false` only after the backend
+  REST controllers are available.
+- In Keycloak, set the web client's valid redirect URI to `http://localhost:5173/*`, web origin to
+  `http://localhost:5173`, and PKCE method to `S256`. The client is public; never put a secret in
+  this Vite app.
+- The API client calls `getToken()` before every request, so refresh and Bearer header handling stay
+  inside the auth provider.
 
 ## Stack
 

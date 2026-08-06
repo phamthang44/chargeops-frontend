@@ -78,8 +78,6 @@ const NAV = [
 const STAFF_KEYS = new Set(['dashboard', 'bookings', 'chargers', 'tickets']);
 
 // Owner and staff both see station-scoped data.
-const services = createServices({ ownerView: true });
-
 /**
  * Owner console, mounted at `base` (`/owner` or `/staff`). When `reduced`, the
  * menu is trimmed to the staff subset — owner-only pages have no route, so a
@@ -88,8 +86,9 @@ const services = createServices({ ownerView: true });
 export function OwnerConsole({ base, reduced = false }: { base: string; reduced?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, getToken } = useAuth();
   const { t } = useTranslation('owner');
+  const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
 
   const items = reduced ? NAV.filter((n) => STAFF_KEYS.has(n.key)) : NAV;
   const nav: (ShellNavItem & { title: string; subtitle: string })[] = items.map((item) => ({
@@ -154,7 +153,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
       });
     }
     return list;
-  }, [base, navigate, reduced, t]);
+  }, [base, navigate, reduced, services, t]);
 
   // Same queryKey/queryFn the Dashboard page itself uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery<OwnerDashboardData | StaffDashboardData>({

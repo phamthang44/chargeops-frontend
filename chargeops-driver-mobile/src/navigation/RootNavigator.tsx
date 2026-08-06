@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors, fontWeights } from '@/theme';
@@ -8,7 +8,7 @@ import { BookingConfirmationScreen } from '@/screens/BookingConfirmationScreen';
 import { BookingDetailScreen } from '@/screens/BookingDetailScreen';
 import { BookingSuccessScreen } from '@/screens/BookingSuccessScreen';
 import { ChargingSessionScreen } from '@/screens/ChargingSessionScreen';
-import { LoginScreen } from '@/screens/LoginScreen';
+import { KeycloakLoginScreen } from '@/screens/KeycloakLoginScreen';
 import { PaymentProcessingScreen } from '@/screens/PaymentProcessingScreen';
 import { OtpVerificationScreen } from '@/screens/OtpVerificationScreen';
 import { QRCheckInScreen } from '@/screens/QRCheckInScreen';
@@ -31,6 +31,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  */
 export function RootNavigator() {
   const { initializing, session } = useAuth();
+  const hasKeycloakCallback =
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    (new URLSearchParams(window.location.search).has('code') ||
+      new URLSearchParams(window.location.search).has('error'));
 
   if (initializing) {
     return (
@@ -43,6 +48,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        initialRouteName={session ? 'Tabs' : hasKeycloakCallback ? 'Login' : 'Welcome'}
         screenOptions={{
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.primary,
@@ -107,7 +113,7 @@ export function RootNavigator() {
         ) : (
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Login" component={KeycloakLoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen
               name="OtpVerification"

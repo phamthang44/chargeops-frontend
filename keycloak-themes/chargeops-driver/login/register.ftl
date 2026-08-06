@@ -76,35 +76,23 @@
         </div>
       </#if>
 
-      <form id="kc-register-form" class="co-form" action="${url.registrationAction}" method="post">
-        <!-- Name Field -->
-        <div class="co-input-group">
-          <label class="co-input-label" for="firstName">${msg("registerNameLabel")}</label>
-          <div class="co-input-field <#if messagesPerField.existsError('firstName','lastName')>is-error</#if>">
-            <span class="co-input-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </span>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              class="co-input"
-              value="${(register.formData.firstName!'')}"
-              placeholder="${msg('registerNamePlaceholder')}"
-              autocomplete="name"
-              autofocus
-              aria-invalid="<#if messagesPerField.existsError('firstName','lastName')>true</#if>"
-            />
-            <input type="hidden" id="lastName" name="lastName" value="${(register.formData.lastName!'.')}" />
-          </div>
-          <#if messagesPerField.existsError('firstName')>
-            <span class="co-field-error">${kcSanitize(messagesPerField.get('firstName'))?no_esc}</span>
-          </#if>
+      <#if social.providers?? && social.providers?has_content>
+        <div class="co-social-section">
+          <#list social.providers as provider>
+            <a class="co-social-btn co-social-${provider.alias}" id="social-${provider.alias}" href="${provider.loginUrl}">
+              <#if provider.alias == "google">
+                <span class="co-social-google-mark" aria-hidden="true">G</span>
+              <#else>
+                <span class="co-social-generic-mark" aria-hidden="true">${(provider.displayName!provider.alias)?substring(0, 1)?upper_case}</span>
+              </#if>
+              <span>${msg("socialContinueWith", provider.displayName)}</span>
+            </a>
+          </#list>
         </div>
+        <div class="co-divider"><span>${msg("socialDivider")}</span></div>
+      </#if>
 
+      <form id="kc-register-form" class="co-form" action="${url.registrationAction}" method="post">
         <!-- Email Field -->
         <div class="co-input-group">
           <label class="co-input-label" for="email">${msg("registerEmailLabel")}</label>
@@ -123,38 +111,12 @@
               value="${(register.formData.email!'')}"
               placeholder="${msg('registerEmailPlaceholder')}"
               autocomplete="email"
+              autofocus
               aria-invalid="<#if messagesPerField.existsError('email')>true</#if>"
             />
           </div>
           <#if messagesPerField.existsError('email')>
             <span class="co-field-error">${kcSanitize(messagesPerField.get('email'))?no_esc}</span>
-          </#if>
-        </div>
-
-        <!-- Phone Field -->
-        <div class="co-input-group">
-          <label class="co-input-label" for="user.attributes.phone">${msg("registerPhoneLabel")}</label>
-          <div class="co-phone-field <#if messagesPerField.existsError('user.attributes.phone')>is-error</#if>">
-            <div class="co-country-code">
-              <span class="co-flag">🇻🇳</span>
-              <span class="co-dial-code">+84</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </div>
-            <input
-              id="user.attributes.phone"
-              name="user.attributes.phone"
-              type="tel"
-              class="co-input co-phone-input"
-              value="${(register.formData['user.attributes.phone']!'')}"
-              placeholder="987 654 321"
-              autocomplete="tel"
-              aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
-            />
-          </div>
-          <#if messagesPerField.existsError('user.attributes.phone')>
-            <span class="co-field-error">${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}</span>
           </#if>
         </div>
 
@@ -205,7 +167,7 @@
                 type="button" 
                 class="co-password-toggle" 
                 onclick="togglePasswordVisibility('password', this)" 
-                aria-label="Toggle password visibility"
+                aria-label="${msg('showPassword')}"
               >
                 <!-- Eye Off (Hidden State) -->
                 <svg class="co-icon-eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -247,7 +209,7 @@
                 type="button" 
                 class="co-password-toggle" 
                 onclick="togglePasswordVisibility('password-confirm', this)" 
-                aria-label="Toggle password visibility"
+                aria-label="${msg('showPassword')}"
               >
                 <!-- Eye Off (Hidden State) -->
                 <svg class="co-icon-eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -273,9 +235,20 @@
           </div>
         </#if>
 
-        <!-- Terms & Privacy Checkbox -->
-        <label class="co-checkbox-label">
-          <input id="termsAccepted" name="termsAccepted" type="checkbox" class="co-checkbox-input" required />
+        <!-- These names map to the identity service profile attributes. -->
+        <#if properties.chargeopsInlineConsentEnabled == 'true'>
+        <label class="co-checkbox-label <#if messagesPerField.existsError('user.attributes.termsAccepted')>is-error</#if>">
+          <input
+            id="termsAccepted"
+            name="user.attributes.termsAccepted"
+            value="true"
+            type="checkbox"
+            class="co-checkbox-input"
+            required
+            aria-describedby="termsAccepted-error"
+            aria-invalid="<#if messagesPerField.existsError('user.attributes.termsAccepted')>true<#else>false</#if>"
+            <#if register.formData['user.attributes.termsAccepted']?has_content>checked</#if>
+          />
           <span class="co-checkbox-custom">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3">
               <polyline points="20 6 9 17 4 12"></polyline>
@@ -283,26 +256,50 @@
           </span>
           <span class="co-checkbox-text">
             ${msg("registerAgreePrefix")}
-            <a href="#" onclick="window.open('/terms', '_blank'); return false;" class="co-link">${msg("termsOfService")}</a>
-            ${msg("registerAgreeMid")}
-            <a href="#" onclick="window.open('/privacy', '_blank'); return false;" class="co-link">${msg("privacyPolicy")}</a>
+            <a href="${properties.chargeopsTermsUrl!}" target="_blank" rel="noopener noreferrer" class="co-link">${msg("termsOfService")}</a>
             ${msg("registerAgreeSuffix")}
           </span>
         </label>
+        <span
+          id="termsAccepted-error"
+          class="co-field-error"
+          aria-live="polite"
+          <#if !messagesPerField.existsError('user.attributes.termsAccepted')>hidden</#if>
+        ><#if messagesPerField.existsError('user.attributes.termsAccepted')>${kcSanitize(messagesPerField.get('user.attributes.termsAccepted'))?no_esc}<#else>${msg("termsRequiredMessage")}</#if></span>
+        </#if>
+
+        <label class="co-checkbox-label <#if messagesPerField.existsError('user.attributes.privacyAccepted')>is-error</#if>">
+          <input
+            id="privacyAccepted"
+            name="user.attributes.privacyAccepted"
+            value="true"
+            type="checkbox"
+            class="co-checkbox-input"
+            required
+            aria-describedby="privacyAccepted-error"
+            aria-invalid="<#if messagesPerField.existsError('user.attributes.privacyAccepted')>true<#else>false</#if>"
+            <#if register.formData['user.attributes.privacyAccepted']?has_content>checked</#if>
+          />
+          <span class="co-checkbox-custom">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <span class="co-checkbox-text">
+            ${msg("registerAgreePrivacyPrefix")}&#32;
+            <a href="${properties.chargeopsPrivacyUrl!}" target="_blank" rel="noopener noreferrer" class="co-link">${msg("privacyPolicy")}</a>
+            ${msg("registerAgreeSuffix")}
+          </span>
+        </label>
+        <span
+          id="privacyAccepted-error"
+          class="co-field-error"
+          aria-live="polite"
+          <#if !messagesPerField.existsError('user.attributes.privacyAccepted')>hidden</#if>
+        ><#if messagesPerField.existsError('user.attributes.privacyAccepted')>${kcSanitize(messagesPerField.get('user.attributes.privacyAccepted'))?no_esc}<#else>${msg("privacyRequiredMessage")}</#if></span>
       </form>
 
       <script>
-        document.getElementById('kc-register-form').addEventListener('submit', function() {
-          var fullName = document.getElementById('firstName').value.trim();
-          var parts = fullName.split(/\s+/);
-          if (parts.length > 1) {
-            document.getElementById('firstName').value = parts[0];
-            document.getElementById('lastName').value = parts.slice(1).join(' ');
-          } else {
-            document.getElementById('lastName').value = '.';
-          }
-        });
-
         function togglePasswordVisibility(id, btn) {
           var input = document.getElementById(id);
           if (input.type === 'password') {
@@ -313,11 +310,63 @@
             btn.classList.remove('is-visible');
           }
         }
+
+        (function setupConsentValidation() {
+          var form = document.getElementById('kc-register-form');
+          if (!form) return;
+
+          var consentIds = ['termsAccepted', 'privacyAccepted'];
+          var focusScheduled = false;
+
+          function setConsentError(input, visible) {
+            var label = input.closest('.co-checkbox-label');
+            var error = document.getElementById(input.id + '-error');
+            if (label) label.classList.toggle('is-error', visible);
+            input.setAttribute('aria-invalid', visible ? 'true' : 'false');
+            if (error) error.hidden = !visible;
+          }
+
+          consentIds.forEach(function(id) {
+            var input = document.getElementById(id);
+            if (!input) return;
+
+            input.addEventListener('invalid', function(event) {
+              event.preventDefault();
+              setConsentError(input, true);
+              if (!focusScheduled) {
+                focusScheduled = true;
+                window.setTimeout(function() {
+                  input.focus();
+                  focusScheduled = false;
+                }, 0);
+              }
+            });
+
+            input.addEventListener('change', function() {
+              setConsentError(input, !input.checked);
+            });
+          });
+
+          form.addEventListener('submit', function(event) {
+            var firstMissing = null;
+            consentIds.forEach(function(id) {
+              var input = document.getElementById(id);
+              if (!input || input.checked) return;
+              setConsentError(input, true);
+              if (!firstMissing) firstMissing = input;
+            });
+
+            if (firstMissing) {
+              event.preventDefault();
+              firstMissing.focus();
+            }
+          });
+        })();
       </script>
     </div>
 
     <div class="co-screen-footer">
-      <button class="co-cta-btn" type="submit" form="kc-register-form">${msg("registerCta")}</button>
+      <button id="kc-register-submit" class="co-cta-btn" type="submit" form="kc-register-form">${msg("registerCta")}</button>
       <div class="co-switch-row">
         <span class="co-switch-text">${msg("registerHasAccount")}</span>
         <a href="${url.loginUrl}" class="co-switch-link">${msg("registerSignIn")}</a>

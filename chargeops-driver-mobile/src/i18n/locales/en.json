@@ -233,12 +233,43 @@
     "emptyFiltered": "No matching bookings.",
     "searchPlaceholder": "Search by station, code, or connector",
     "resultCount": "{{total}} results",
+    "resetFilters": "Reset",
+    "sectionCount": "{{count}} bookings",
     "noResults": "No bookings found for “{{query}}”.",
     "clearSearch": "Clear search",
     "showMore": "Show more",
     "showingCount": "Showing {{shown}} of {{total}}",
     "endOfList": "All {{total}} bookings shown",
-    "error": "Couldn't load booking history."
+    "error": "Couldn't load booking history.",
+    "retry": "Try again"
+  },
+  "completeProfile": {
+    "eyebrow": "Account setup",
+    "title": "Complete your profile",
+    "subtitle": "Add a display name and phone number to continue using ChargeOps.",
+    "emailLabel": "Verified email",
+    "displayNameLabel": "Display name",
+    "displayNamePlaceholder": "e.g. Alex Nguyen",
+    "phoneLabel": "Phone number",
+    "notice": "This information is stored in ChargeOps and does not change your Keycloak sign-in account.",
+    "submit": "Finish and continue",
+    "signOut": "Sign out",
+    "errors": {
+      "displayNameRequired": "Please enter a display name.",
+      "displayNameMax": "Display name cannot exceed 255 characters.",
+      "phoneRequired": "Please enter a phone number.",
+      "phoneInvalid": "Enter a valid Vietnamese phone number.",
+      "emailConflict": "This email is already linked to another ChargeOps profile.",
+      "submit": "We could not update your profile. Check the information and try again."
+    }
+  },
+  "profileBootstrap": {
+    "title": "Profile sync failed",
+    "subtitle": "ChargeOps could not load your profile from the server. Check your connection and try again.",
+    "emailConflict": "This sign-in email belongs to another ChargeOps profile. Contact support or sign in with the original account.",
+    "errorCode": "Error code: {{code}}",
+    "retry": "Try again",
+    "signOut": "Sign out"
   },
   "profile": {
     "title": "Profile & Settings",
@@ -247,10 +278,50 @@
     "signOut": "Sign out",
     "notSignedIn": "Not signed in.",
     "goldMember": "GOLD MEMBER",
+    "account": {
+      "sectionTitle": "Personal account",
+      "unknownName": "ChargeOps user",
+      "phone": "Phone number",
+      "signInEmail": "Sign-in email",
+      "notProvided": "Not provided"
+    },
+    "edit": {
+      "open": "Edit profile",
+      "title": "Edit profile",
+      "subtitle": "Update the display name and phone number used in ChargeOps.",
+      "displayNameLabel": "Display name",
+      "displayNamePlaceholder": "e.g. Alex Nguyen",
+      "phoneLabel": "Phone number",
+      "identityNotice": "Email, password, two-factor authentication, and active sessions are securely managed by Keycloak.",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "successTitle": "Profile updated",
+      "successBody": "Your new display name and phone number have been saved.",
+      "errors": {
+        "displayNameRequired": "Please enter a display name.",
+        "displayNameMax": "Display name cannot exceed 255 characters.",
+        "phoneRequired": "Please enter a phone number.",
+        "phoneInvalid": "Enter a valid Vietnamese phone number.",
+        "submit": "We could not update your profile. Check the information and try again."
+      }
+    },
+    "security": {
+      "passwordTitle": "Change password",
+      "passwordSubtitle": "Securely update your sign-in password",
+      "twoFactorTitle": "Two-factor authentication",
+      "twoFactorSubtitle": "Set up or manage an authenticator app",
+      "errorTitle": "Couldn't open security settings",
+      "errorBody": "Keycloak Account Security could not be opened. Please try again."
+    },
     "ownerBanner": {
       "title": "Become Station Owner",
       "subtitle": "Manage charging stations, track revenue, and optimize operations now.",
-      "cta": "Switch to Station Owner Mode"
+      "cta": "Switch to Station Owner Mode",
+      "portalTitle": "Station Owner Workspace",
+      "portalSubtitle": "Open the web console to manage stations, staff, and revenue.",
+      "portalCta": "Open management console",
+      "errorTitle": "Couldn't open the Owner Portal",
+      "errorBody": "Check the configured Owner Portal address and try again."
     },
     "wallet": {
       "sectionTitle": "Payment & Wallet",
@@ -264,10 +335,14 @@
     "appSettings": {
       "sectionTitle": "App Settings",
       "notifications": "Notifications",
-      "notificationsSub": "Sound, Vibration, Battery alerts",
+      "notificationsSub": "Notification permission in device settings",
+      "notificationsWebHint": "Use your browser's site permissions to enable or disable ChargeOps notifications.",
+      "openSettingsError": "Device settings could not be opened right now.",
       "language": "Language",
+      "appearance": "Appearance",
+      "appearanceSub": "Light, dark, or system theme",
       "helpCenter": "Help center",
-      "helpCenterSub": "FAQ & Support"
+      "helpCenterSub": "Contact support@chargeops.vn"
     },
     "logout": "Log out account",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",

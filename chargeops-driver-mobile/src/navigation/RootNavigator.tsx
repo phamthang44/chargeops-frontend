@@ -3,14 +3,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, Platform, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
-import { colors, fontWeights } from '@/theme';
+import { usePreferences } from '@/context/PreferencesContext';
+import { fontWeights } from '@/theme';
 import { BookingConfirmationScreen } from '@/screens/BookingConfirmationScreen';
 import { BookingDetailScreen } from '@/screens/BookingDetailScreen';
 import { BookingSuccessScreen } from '@/screens/BookingSuccessScreen';
 import { ChargingSessionScreen } from '@/screens/ChargingSessionScreen';
+import { CompleteProfileScreen } from '@/screens/CompleteProfileScreen';
 import { KeycloakLoginScreen } from '@/screens/KeycloakLoginScreen';
 import { PaymentProcessingScreen } from '@/screens/PaymentProcessingScreen';
 import { OtpVerificationScreen } from '@/screens/OtpVerificationScreen';
+import { ProfileBootstrapErrorScreen } from '@/screens/ProfileBootstrapErrorScreen';
 import { QRCheckInScreen } from '@/screens/QRCheckInScreen';
 import { RegisterScreen } from '@/screens/RegisterScreen';
 import { StationDetailScreen } from '@/screens/StationDetailScreen';
@@ -30,35 +33,63 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * screens never need to imperatively navigate to/from the tabs.
  */
 export function RootNavigator() {
-  const { initializing, session } = useAuth();
+  const { initializing, session, profile, profileStatus } = useAuth();
+  const { themeColors } = usePreferences();
   const hasKeycloakCallback =
     Platform.OS === 'web' &&
     typeof window !== 'undefined' &&
     (new URLSearchParams(window.location.search).has('code') ||
       new URLSearchParams(window.location.search).has('error'));
 
-  if (initializing) {
+  const loadingProfile =
+    Boolean(session) && (profileStatus === 'idle' || profileStatus === 'loading');
+
+  if (initializing || loadingProfile) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.primary} />
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: themeColors.background,
+        }}
+      >
+        <ActivityIndicator color={themeColors.primary} />
       </View>
     );
   }
 
+  if (session && profileStatus === 'error') {
+    return <ProfileBootstrapErrorScreen />;
+  }
+
+  const profileCompleted = profile?.profileCompleted === true;
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={session ? 'Tabs' : hasKeycloakCallback ? 'Login' : 'Welcome'}
+        initialRouteName={
+          session
+            ? profileCompleted
+              ? 'Tabs'
+              : 'CompleteProfile'
+            : hasKeycloakCallback
+              ? 'Login'
+              : 'Welcome'
+        }
         screenOptions={{
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.primary,
-          headerTitleStyle: { color: colors.textStrong, fontWeight: fontWeights.semibold },
-          contentStyle: { backgroundColor: colors.background },
+          headerStyle: { backgroundColor: themeColors.surface },
+          headerTintColor: themeColors.primary,
+          headerTitleStyle: {
+            color: themeColors.textStrong,
+            fontWeight: fontWeights.semibold,
+          },
+          contentStyle: { backgroundColor: themeColors.background },
           // Chevron-only back button (no previous-screen title text).
           headerBackButtonDisplayMode: 'minimal',
         }}
       >
-        {session ? (
+        {session ? profileCompleted ? (
           <>
             <Stack.Screen name="Tabs" component={BottomTabs} options={{ headerShown: false }} />
             <Stack.Screen
@@ -110,6 +141,12 @@ export function RootNavigator() {
               options={{ headerShown: false, gestureEnabled: false }}
             />
           </>
+        ) : (
+          <Stack.Screen
+            name="CompleteProfile"
+            component={CompleteProfileScreen}
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
         ) : (
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />

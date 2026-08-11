@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   OtpVerification: { channel: 'phone' | 'email'; target: string };
+  CompleteProfile: undefined;
   // App stack (signed in)
   Tabs: NavigatorScreenParams<BottomTabParamList> | undefined;
   StationDetail: { stationId: string };

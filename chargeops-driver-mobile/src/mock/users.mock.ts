@@ -27,6 +27,7 @@ export const usersMock: User[] = [
 export function makeMockSession(user: User): AuthSession {
   return {
     user,
+    grantedRoles: [user.role],
     tokens: {
       accessToken: `mock-access-${user.id}-${Date.now()}`,
       refreshToken: `mock-refresh-${user.id}-${Date.now()}`,

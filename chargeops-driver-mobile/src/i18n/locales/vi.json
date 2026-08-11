@@ -233,12 +233,43 @@
     "emptyFiltered": "Không có lượt nào phù hợp.",
     "searchPlaceholder": "Tìm theo trạm, mã đặt chỗ, cổng sạc",
     "resultCount": "{{total}} kết quả",
+    "resetFilters": "Đặt lại",
+    "sectionCount": "{{count}} lượt",
     "noResults": "Không tìm thấy lượt đặt nào cho “{{query}}”.",
     "clearSearch": "Xóa tìm kiếm",
     "showMore": "Xem thêm",
     "showingCount": "Đang hiển thị {{shown}} / {{total}} lượt",
     "endOfList": "Đã hiển thị tất cả {{total}} lượt",
-    "error": "Không thể tải lịch sử đặt chỗ."
+    "error": "Không thể tải lịch sử đặt chỗ.",
+    "retry": "Thử lại"
+  },
+  "completeProfile": {
+    "eyebrow": "Thiết lập tài khoản",
+    "title": "Hoàn thiện hồ sơ",
+    "subtitle": "Bổ sung tên hiển thị và số điện thoại để tiếp tục sử dụng ChargeOps.",
+    "emailLabel": "Email đã xác thực",
+    "displayNameLabel": "Tên hiển thị",
+    "displayNamePlaceholder": "Ví dụ: Nguyễn Văn A",
+    "phoneLabel": "Số điện thoại",
+    "notice": "Thông tin này được lưu trong ChargeOps và không làm thay đổi tài khoản đăng nhập Keycloak của bạn.",
+    "submit": "Hoàn tất và tiếp tục",
+    "signOut": "Đăng xuất",
+    "errors": {
+      "displayNameRequired": "Vui lòng nhập tên hiển thị.",
+      "displayNameMax": "Tên hiển thị không được vượt quá 255 ký tự.",
+      "phoneRequired": "Vui lòng nhập số điện thoại.",
+      "phoneInvalid": "Số điện thoại Việt Nam không hợp lệ.",
+      "emailConflict": "Email này đang được liên kết với một hồ sơ ChargeOps khác.",
+      "submit": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra thông tin và thử lại."
+    }
+  },
+  "profileBootstrap": {
+    "title": "Không thể đồng bộ hồ sơ",
+    "subtitle": "ChargeOps chưa thể tải hồ sơ của bạn từ máy chủ. Hãy kiểm tra kết nối và thử lại.",
+    "emailConflict": "Email đăng nhập đang thuộc một hồ sơ ChargeOps khác. Vui lòng liên hệ hỗ trợ hoặc đăng nhập bằng tài khoản trước đó.",
+    "errorCode": "Mã lỗi: {{code}}",
+    "retry": "Thử lại",
+    "signOut": "Đăng xuất"
   },
   "profile": {
     "title": "Hồ sơ & Cài đặt",
@@ -247,10 +278,50 @@
     "signOut": "Đăng xuất",
     "notSignedIn": "Chưa đăng nhập.",
     "goldMember": "THÀNH VIÊN VÀNG",
+    "account": {
+      "sectionTitle": "Tài khoản cá nhân",
+      "unknownName": "Người dùng ChargeOps",
+      "phone": "Số điện thoại",
+      "signInEmail": "Email đăng nhập",
+      "notProvided": "Chưa cập nhật"
+    },
+    "edit": {
+      "open": "Chỉnh sửa hồ sơ",
+      "title": "Chỉnh sửa hồ sơ",
+      "subtitle": "Cập nhật tên hiển thị và số điện thoại dùng trong ChargeOps.",
+      "displayNameLabel": "Tên hiển thị",
+      "displayNamePlaceholder": "Ví dụ: Nguyễn Văn A",
+      "phoneLabel": "Số điện thoại",
+      "identityNotice": "Email, mật khẩu, xác thực hai bước và phiên đăng nhập được quản lý an toàn bởi Keycloak.",
+      "save": "Lưu thay đổi",
+      "cancel": "Hủy",
+      "successTitle": "Đã cập nhật hồ sơ",
+      "successBody": "Tên hiển thị và số điện thoại mới đã được lưu.",
+      "errors": {
+        "displayNameRequired": "Vui lòng nhập tên hiển thị.",
+        "displayNameMax": "Tên hiển thị không được vượt quá 255 ký tự.",
+        "phoneRequired": "Vui lòng nhập số điện thoại.",
+        "phoneInvalid": "Số điện thoại Việt Nam không hợp lệ.",
+        "submit": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra thông tin và thử lại."
+      }
+    },
+    "security": {
+      "passwordTitle": "Đổi mật khẩu",
+      "passwordSubtitle": "Cập nhật mật khẩu đăng nhập an toàn",
+      "twoFactorTitle": "Xác thực hai bước",
+      "twoFactorSubtitle": "Thiết lập hoặc quản lý ứng dụng xác thực",
+      "errorTitle": "Không thể mở cài đặt bảo mật",
+      "errorBody": "Không thể mở khu vực bảo mật Keycloak. Vui lòng thử lại."
+    },
     "ownerBanner": {
       "title": "Trở thành Chủ trạm sạc",
       "subtitle": "Quản lý trạm sạc, theo dõi doanh thu và tối ưu hóa vận hành ngay.",
-      "cta": "Chuyển sang Chế độ Chủ trạm"
+      "cta": "Chuyển sang Chế độ Chủ trạm",
+      "portalTitle": "Không gian Chủ trạm",
+      "portalSubtitle": "Mở cổng quản lý trên web để theo dõi trạm, nhân viên và doanh thu.",
+      "portalCta": "Mở cổng quản lý",
+      "errorTitle": "Không thể mở cổng Chủ trạm",
+      "errorBody": "Vui lòng kiểm tra địa chỉ Owner Portal trong cấu hình ứng dụng rồi thử lại."
     },
     "wallet": {
       "sectionTitle": "Thanh toán & Ví",
@@ -264,10 +335,14 @@
     "appSettings": {
       "sectionTitle": "Cài đặt ứng dụng",
       "notifications": "Thông báo",
-      "notificationsSub": "Âm thanh, Rung, Cảnh báo pin",
+      "notificationsSub": "Quyền thông báo trong cài đặt thiết bị",
+      "notificationsWebHint": "Hãy dùng phần cài đặt quyền của trình duyệt để bật hoặc tắt thông báo cho ChargeOps.",
+      "openSettingsError": "Không thể mở cài đặt thiết bị lúc này.",
       "language": "Ngôn ngữ",
+      "appearance": "Giao diện",
+      "appearanceSub": "Sáng, tối hoặc theo hệ thống",
       "helpCenter": "Trung tâm trợ giúp",
-      "helpCenterSub": "Câu hỏi thường gặp & Hỗ trợ"
+      "helpCenterSub": "Liên hệ support@chargeops.vn"
     },
     "logout": "Đăng xuất tài khoản",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",

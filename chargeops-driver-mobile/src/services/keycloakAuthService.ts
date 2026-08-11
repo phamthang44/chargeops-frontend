@@ -12,9 +12,10 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
-import type { AuthSession as AppAuthSession, User } from '@/types';
+import type { AuthSession as AppAuthSession, GrantedRole, User } from '@/types';
 
 const DRIVER_ROLE = 'DRIVER';
+const CHARGEOPS_ROLES = new Set<GrantedRole>(['DRIVER', 'OWNER', 'ADMIN', 'STATION_STAFF']);
 const WEB_AUTH_TRANSACTION_KEY = 'chargeops.keycloak.webAuthTransaction';
 
 export const keycloakConfig = {
@@ -122,6 +123,16 @@ interface JwtPayload extends KeycloakUserInfo {
   };
 }
 
+function grantedRolesFromRealm(realmRoles: string[]): GrantedRole[] {
+  return [
+    ...new Set(
+      realmRoles
+        .map((role) => role.toUpperCase())
+        .filter((role): role is GrantedRole => CHARGEOPS_ROLES.has(role as GrantedRole)),
+    ),
+  ];
+}
+
 function decodeJwtPayload(token?: string): JwtPayload | null {
   if (!token) return null;
   const [, payload] = token.split('.');
@@ -200,8 +211,8 @@ export async function createSessionFromKeycloakToken(
   }
 
   const payload = decodeJwtPayload(accessToken);
-  const roles = payload?.realm_access?.roles ?? [];
-  if (roles.length > 0 && !roles.some((role) => role.toUpperCase() === DRIVER_ROLE)) {
+  const grantedRoles = grantedRolesFromRealm(payload?.realm_access?.roles ?? []);
+  if (!grantedRoles.includes(DRIVER_ROLE)) {
     throw new Error('Tài khoản này chưa được cấp quyền tài xế trên hệ thống ChargeOps.');
   }
 
@@ -220,6 +231,7 @@ export async function createSessionFromKeycloakToken(
 
   return {
     user: buildDriverUser(payload, userInfo),
+    grantedRoles,
     tokens: {
       accessToken,
       refreshToken,

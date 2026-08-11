@@ -4,7 +4,18 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BlurView } from 'expo-blur';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -16,28 +27,39 @@ import {
   TopUpModal,
   useTabBarInset,
 } from '@/components';
+import { EditProfileModal } from '@/components/EditProfileModal';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
+import { openKeycloakSecuritySettings } from '@/services/accountNavigation';
+import { openOwnerPortal } from '@/services/portalNavigation';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function ProfileScreen() {
   const { t, i18n } = useTranslation();
-  const { session, signOut } = useAuth();
+  const { session, profile, signOut } = useAuth();
   const { themeColors, isDark } = usePreferences();
   // Clears the absolutely-positioned floating tab bar.
   const tabInset = useTabBarInset();
   const navigation = useNavigation<NavigationProp>();
 
   const [walletBalance, setWalletBalance] = useState(2450000);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<'all' | 'language' | 'appearance'>('all');
   const [topUpVisible, setTopUpVisible] = useState(false);
   const [ownerModalVisible, setOwnerModalVisible] = useState(false);
+  const [openingOwnerPortal, setOpeningOwnerPortal] = useState(false);
+  const [openingSecurityAction, setOpeningSecurityAction] = useState<
+    'password' | 'twoFactor' | null
+  >(null);
 
-  const userName = session?.user.name ?? 'Nguyễn Văn An';
-  const userEmail = session?.user.email ?? 'an.nguyen@example.com';
+  const userName = profile?.displayName ?? session?.user.name ?? t('profile.account.unknownName');
+  const userEmail = profile?.email ?? session?.user.email ?? '';
+  const userPhone = profile?.phone ?? session?.user.phone ?? '';
+  const hasOwnerAccess = session?.grantedRoles.includes('OWNER') ?? false;
 
   function handleTopUpSuccess(amount: number) {
     setWalletBalance((prev) => prev + amount);
@@ -45,6 +67,66 @@ export function ProfileScreen() {
 
   function handleOpenHistory() {
     navigation.navigate('Tabs', { screen: 'BookingHistory' });
+  }
+
+  async function handleOwnerAction() {
+    if (!hasOwnerAccess) {
+      setOwnerModalVisible(true);
+      return;
+    }
+
+    setOpeningOwnerPortal(true);
+    try {
+      await openOwnerPortal();
+    } catch {
+      Alert.alert(
+        t('profile.ownerBanner.errorTitle'),
+        t('profile.ownerBanner.errorBody'),
+      );
+    } finally {
+      setOpeningOwnerPortal(false);
+    }
+  }
+
+  async function handleOpenSecurity(action: 'password' | 'twoFactor') {
+    setOpeningSecurityAction(action);
+    try {
+      await openKeycloakSecuritySettings();
+    } catch {
+      Alert.alert(t('profile.security.errorTitle'), t('profile.security.errorBody'));
+    } finally {
+      setOpeningSecurityAction(null);
+    }
+  }
+
+  async function handleNotificationSettings() {
+    if (Platform.OS === 'web') {
+      Alert.alert(
+        t('profile.appSettings.notifications'),
+        t('profile.appSettings.notificationsWebHint'),
+      );
+      return;
+    }
+
+    try {
+      await Linking.openSettings();
+    } catch {
+      Alert.alert(
+        t('profile.appSettings.notifications'),
+        t('profile.appSettings.openSettingsError'),
+      );
+    }
+  }
+
+  async function handleOpenSupport() {
+    const supportUrl = `mailto:support@chargeops.vn?subject=${encodeURIComponent('ChargeOps support')}`;
+    try {
+      const supported = await Linking.canOpenURL(supportUrl);
+      if (!supported) throw new Error('Mail is unavailable.');
+      await Linking.openURL(supportUrl);
+    } catch {
+      Alert.alert(t('profile.appSettings.helpCenter'), 'support@chargeops.vn');
+    }
   }
 
   return (
@@ -55,7 +137,10 @@ export function ProfileScreen() {
         trailing={
           <GlassButton
             size={36}
-            onPress={() => setSettingsVisible(true)}
+            onPress={() => {
+              setSettingsSection('all');
+              setSettingsVisible(true);
+            }}
             accessibilityLabel={t('settings.title')}
             fallbackColor={themeColors.surfaceAlt}
           >
@@ -71,14 +156,13 @@ export function ProfileScreen() {
         {/* 1. User Profile Header Card */}
         <Card style={[styles.userCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.userRow}>
-            {/* Avatar with Green Status Badge */}
+            {/* Initials avatar uses real profile data and avoids a hardcoded remote photo. */}
             <View style={styles.avatarWrapper}>
-              <Image
-                source={{
-                  uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-                }}
-                style={[styles.avatar, { backgroundColor: themeColors.surfaceAlt }]}
-              />
+              <View style={[styles.avatar, { backgroundColor: themeColors.primarySoft }]}>
+                <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>
+                  {initialsOf(userName)}
+                </Text>
+              </View>
               <View style={[styles.onlineBadge, { borderColor: themeColors.surface }]} />
             </View>
 
@@ -96,10 +180,117 @@ export function ProfileScreen() {
                 </Text>
               </View>
             </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('profile.edit.open')}
+              hitSlop={8}
+              onPress={() => setEditProfileVisible(true)}
+              style={[styles.editButton, { backgroundColor: themeColors.surfaceAlt }]}
+            >
+              <Ionicons name="create-outline" size={19} color={themeColors.primary} />
+            </Pressable>
           </View>
         </Card>
 
-        {/* 2. Become Station Owner Promotion Card */}
+        {/* Profile data belongs to ChargeOps; credentials and MFA remain in Keycloak. */}
+        <Card style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="person-outline" size={20} color={themeColors.primary} />
+            <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
+              {t('profile.account.sectionTitle')}
+            </Text>
+          </View>
+
+          <Pressable style={styles.menuRow} onPress={() => setEditProfileVisible(true)}>
+            <View style={[styles.menuIconTile, { backgroundColor: themeColors.primarySoft }]}>
+              <Ionicons name="call-outline" size={20} color={themeColors.primary} />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                {t('profile.account.phone')}
+              </Text>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+                {formatPhoneForDisplay(userPhone) || t('profile.account.notProvided')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
+          <View style={styles.menuRow}>
+            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#172554' : '#EFF6FF' }]}>
+              <Ionicons name="mail-outline" size={20} color={themeColors.info} />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                {t('profile.account.signInEmail')}
+              </Text>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]} numberOfLines={1}>
+                {userEmail}
+              </Text>
+            </View>
+            <Ionicons name="shield-checkmark-outline" size={18} color={themeColors.success} />
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
+          <Pressable
+            style={[styles.menuRow, openingSecurityAction && styles.menuRowDisabled]}
+            disabled={openingSecurityAction !== null}
+            onPress={() => void handleOpenSecurity('password')}
+          >
+            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#3B1D0B' : '#FFF7ED' }]}>
+              <Ionicons name="key-outline" size={20} color="#F97316" />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                {t('profile.security.passwordTitle')}
+              </Text>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+                {t('profile.security.passwordSubtitle')}
+              </Text>
+            </View>
+            {openingSecurityAction === 'password' ? (
+              <ActivityIndicator size="small" color={themeColors.primary} />
+            ) : (
+              <Ionicons name="open-outline" size={18} color={themeColors.textMuted} />
+            )}
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
+          <Pressable
+            style={[styles.menuRow, openingSecurityAction && styles.menuRowDisabled]}
+            disabled={openingSecurityAction !== null}
+            onPress={() => void handleOpenSecurity('twoFactor')}
+          >
+            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }]}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#6366F1" />
+            </View>
+            <View style={styles.menuTextContent}>
+              <View style={styles.menuTitleRow}>
+                <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                  {t('profile.security.twoFactorTitle')}
+                </Text>
+                <View style={[styles.providerBadge, { backgroundColor: themeColors.surfaceAlt }]}>
+                  <Text style={[styles.providerBadgeText, { color: themeColors.textMuted }]}>Keycloak</Text>
+                </View>
+              </View>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+                {t('profile.security.twoFactorSubtitle')}
+              </Text>
+            </View>
+            {openingSecurityAction === 'twoFactor' ? (
+              <ActivityIndicator size="small" color={themeColors.primary} />
+            ) : (
+              <Ionicons name="open-outline" size={18} color={themeColors.textMuted} />
+            )}
+          </Pressable>
+        </Card>
+
+        {/* 2. Station Owner Portal / Promotion Card */}
         <View
           style={[
             styles.ownerBanner,
@@ -111,24 +302,49 @@ export function ProfileScreen() {
         >
           <View style={styles.ownerHeader}>
             <Text style={[styles.ownerTitle, { color: themeColors.textStrong }]}>
-              {t('profile.ownerBanner.title')}
+              {t(
+                hasOwnerAccess
+                  ? 'profile.ownerBanner.portalTitle'
+                  : 'profile.ownerBanner.title',
+              )}
             </Text>
             <View style={[styles.ownerIconBadge, { backgroundColor: themeColors.primary }]}>
-              <Ionicons name="repeat-outline" size={18} color={themeColors.textInverse} />
+              <Ionicons
+                name={hasOwnerAccess ? 'business-outline' : 'repeat-outline'}
+                size={18}
+                color={themeColors.textInverse}
+              />
             </View>
           </View>
 
           <Text style={[styles.ownerSubtitle, { color: themeColors.textBody }]}>
-            {t('profile.ownerBanner.subtitle')}
+            {t(
+              hasOwnerAccess
+                ? 'profile.ownerBanner.portalSubtitle'
+                : 'profile.ownerBanner.subtitle',
+            )}
           </Text>
 
           <Pressable
-            style={[styles.ownerCtaBtn, { backgroundColor: themeColors.primary }]}
-            onPress={() => setOwnerModalVisible(true)}
+            style={[
+              styles.ownerCtaBtn,
+              { backgroundColor: themeColors.primary },
+              openingOwnerPortal && styles.ownerCtaBtnDisabled,
+            ]}
+            disabled={openingOwnerPortal}
+            onPress={() => void handleOwnerAction()}
           >
-            <Text style={[styles.ownerCtaText, { color: themeColors.textInverse }]}>
-              {t('profile.ownerBanner.cta')}
-            </Text>
+            {openingOwnerPortal ? (
+              <ActivityIndicator size="small" color={themeColors.textInverse} />
+            ) : (
+              <Text style={[styles.ownerCtaText, { color: themeColors.textInverse }]}>
+                {t(
+                  hasOwnerAccess
+                    ? 'profile.ownerBanner.portalCta'
+                    : 'profile.ownerBanner.cta',
+                )}
+              </Text>
+            )}
           </Pressable>
         </View>
 
@@ -217,7 +433,7 @@ export function ProfileScreen() {
           {/* List Item: Notifications */}
           <Pressable
             style={styles.menuRow}
-            onPress={() => Alert.alert(t('profile.appSettings.notifications'), t('profile.appSettings.notificationsSub'))}
+            onPress={() => void handleNotificationSettings()}
           >
             <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#431407' : '#FFF7ED' }]}>
               <Ionicons name="notifications-outline" size={20} color="#F97316" />
@@ -236,7 +452,13 @@ export function ProfileScreen() {
           <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
           {/* List Item: Language */}
-          <Pressable style={styles.menuRow} onPress={() => setSettingsVisible(true)}>
+          <Pressable
+            style={styles.menuRow}
+            onPress={() => {
+              setSettingsSection('language');
+              setSettingsVisible(true);
+            }}
+          >
             <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#2E1065' : '#F5F3FF' }]}>
               <Ionicons name="language-outline" size={20} color="#8B5CF6" />
             </View>
@@ -253,10 +475,34 @@ export function ProfileScreen() {
 
           <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
+          {/* Appearance */}
+          <Pressable
+            style={styles.menuRow}
+            onPress={() => {
+              setSettingsSection('appearance');
+              setSettingsVisible(true);
+            }}
+          >
+            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#312E81' : '#EEF2FF' }]}>
+              <Ionicons name="contrast-outline" size={20} color="#6366F1" />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                {t('profile.appSettings.appearance')}
+              </Text>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+                {t('profile.appSettings.appearanceSub')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
           {/* List Item: Help Center */}
           <Pressable
             style={styles.menuRow}
-            onPress={() => Alert.alert(t('profile.appSettings.helpCenter'), 'Hotline: 1900 6868\nEmail: support@chargeops.vn')}
+            onPress={() => void handleOpenSupport()}
           >
             <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}>
               <Ionicons name="help-circle-outline" size={20} color={isDark ? '#94A3B8' : '#64748B'} />
@@ -283,8 +529,17 @@ export function ProfileScreen() {
         <Text style={[styles.versionText, { color: themeColors.textMuted }]}>{t('profile.version')}</Text>
       </ScrollView>
 
-      {/* Settings Modal (Language, Appearance, Demo controls) */}
-      <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
+      {/* The global action shows everything; individual rows open only their own setting. */}
+      <SettingsModal
+        visible={settingsVisible}
+        section={settingsSection}
+        onClose={() => setSettingsVisible(false)}
+      />
+
+      <EditProfileModal
+        visible={editProfileVisible}
+        onClose={() => setEditProfileVisible(false)}
+      />
 
       {/* Wallet Balance Top-up Sheet */}
       <TopUpModal
@@ -355,6 +610,12 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: fontSizes.title,
+    fontWeight: fontWeights.bold,
   },
   onlineBadge: {
     position: 'absolute',
@@ -381,6 +642,13 @@ const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: fontSizes.body,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   goldBadge: {
     alignSelf: 'flex-start',
@@ -433,6 +701,9 @@ const styles = StyleSheet.create({
   ownerCtaText: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,
+  },
+  ownerCtaBtnDisabled: {
+    opacity: 0.7,
   },
 
   // 3 & 4. Section Card
@@ -496,6 +767,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
+  menuRowDisabled: { opacity: 0.65 },
   menuIconTile: {
     width: 40,
     height: 40,
@@ -511,6 +783,13 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
   },
+  menuTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  providerBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  providerBadgeText: { fontSize: 10, fontWeight: fontWeights.semibold },
   menuSub: {
     fontSize: fontSizes.caption,
   },
@@ -571,3 +850,17 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return `${parts[0]?.[0] ?? ''}${parts.length > 1 ? parts[parts.length - 1]?.[0] ?? '' : ''}`.toUpperCase();
+}
+
+function formatPhoneForDisplay(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('84') && digits.length === 11) {
+    return `+84 ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+  }
+  return phone;
+}

@@ -195,6 +195,7 @@ export interface Review {
 // --- Auth / account (mirrors the SRS `User` entity; see FR01, BR-ACC) ---
 
 export type UserRole = 'DRIVER' | 'OWNER' | 'ADMIN';
+export type GrantedRole = UserRole | 'STATION_STAFF';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING';
 
 export interface User {
@@ -202,7 +203,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role: UserRole; // immutable; always DRIVER in this app (BR-ACC-01)
+  role: UserRole; // active workspace role; always DRIVER in this app (BR-ACC-01)
   status: UserStatus;
 }
 
@@ -217,7 +218,25 @@ export interface AuthTokens {
 /** A logged-in session = the user plus their tokens. */
 export interface AuthSession {
   user: User;
+  /** All ChargeOps roles granted by Keycloak; mobile keeps DRIVER as its active workspace. */
+  grantedRoles: GrantedRole[];
   tokens: AuthTokens;
+}
+
+/** Backend-owned profile linked to the authenticated Keycloak subject. */
+export interface UserProfile {
+  id: string;
+  keycloakId: string;
+  email: string;
+  displayName: string | null;
+  phone: string | null;
+  status: UserStatus;
+  profileCompleted: boolean;
+}
+
+export interface UpdateUserProfileRequest {
+  displayName: string;
+  phone: string;
 }
 
 /** Payload sent to the register endpoint. Client sends `password`, never a hash. */

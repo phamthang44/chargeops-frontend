@@ -20,17 +20,33 @@ import { StatusBadge } from './StatusBadge';
 const PAYMENT_OUTCOMES: PaymentSimOutcome[] = ['SUCCESS', 'FAILED', 'CANCELLED', 'TIMEOUT', 'RANDOM'];
 const BOOKING_OUTCOMES: BookingSimOutcome[] = ['SUCCESS', 'RANGE_TAKEN', 'NETWORK_ERROR', 'RANDOM'];
 
-const APPEARANCE: { mode: AppearanceMode; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { mode: 'light', icon: 'sunny-outline' },
-  { mode: 'dark', icon: 'moon-outline' },
-  { mode: 'system', icon: 'phone-portrait-outline' },
+// Keep the simulation implementation available for development without exposing
+// it in the customer-facing settings sheet.
+const SHOW_DEMO_CONTROLS = false;
+
+const APPEARANCE: {
+  mode: AppearanceMode;
+  icon: keyof typeof Ionicons.glyphMap;
+  accent: string;
+  lightBackground: string;
+  darkBackground: string;
+}[] = [
+  { mode: 'light', icon: 'sunny', accent: '#F59E0B', lightBackground: '#FFFBEB', darkBackground: '#422006' },
+  { mode: 'dark', icon: 'moon', accent: '#8B5CF6', lightBackground: '#F5F3FF', darkBackground: '#2E1065' },
+  { mode: 'system', icon: 'phone-portrait', accent: '#3B82F6', lightBackground: '#EFF6FF', darkBackground: '#172554' },
 ];
 
 // Placeholder rows for future settings work.
-const FUTURE: { key: 'notifications' | 'help' | 'about'; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'notifications', icon: 'notifications-outline' },
-  { key: 'help', icon: 'help-circle-outline' },
-  { key: 'about', icon: 'information-circle-outline' },
+const FUTURE: {
+  key: 'notifications' | 'help' | 'about';
+  icon: keyof typeof Ionicons.glyphMap;
+  accent: string;
+  lightBackground: string;
+  darkBackground: string;
+}[] = [
+  { key: 'notifications', icon: 'notifications-outline', accent: '#F97316', lightBackground: '#FFF7ED', darkBackground: '#431407' },
+  { key: 'help', icon: 'chatbubbles-outline', accent: '#3B82F6', lightBackground: '#EFF6FF', darkBackground: '#172554' },
+  { key: 'about', icon: 'sparkles-outline', accent: '#8B5CF6', lightBackground: '#F5F3FF', darkBackground: '#2E1065' },
 ];
 
 interface SettingsModalProps {
@@ -103,7 +119,7 @@ export function SettingsModal({ visible, onClose, section = 'all' }: SettingsMod
                   {t('settings.appearance')}
                 </Text>
                 <View style={styles.appearanceRow}>
-                  {APPEARANCE.map(({ mode, icon }) => {
+                  {APPEARANCE.map(({ mode, icon, accent, lightBackground, darkBackground }) => {
                     const active = appearance === mode;
                     return (
                       <Pressable
@@ -112,20 +128,29 @@ export function SettingsModal({ visible, onClose, section = 'all' }: SettingsMod
                           styles.appearanceOption,
                           {
                             borderColor: active ? themeColors.primary : themeColors.border,
-                            backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                            backgroundColor: themeColors.surfaceAlt,
+                            borderWidth: active ? 2 : 1,
                           },
                         ]}
                         onPress={() => setAppearance(mode)}
                       >
-                        <Ionicons
-                          name={icon}
-                          size={22}
-                          color={active ? themeColors.primary : themeColors.textMuted}
-                        />
+                        <View
+                          style={[
+                            styles.appearanceIcon,
+                            { backgroundColor: isDark ? darkBackground : lightBackground },
+                          ]}
+                        >
+                          <Ionicons name={icon} size={22} color={accent} />
+                        </View>
+                        {active ? (
+                          <View style={[styles.activeCheck, { backgroundColor: themeColors.primary }]}>
+                            <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                          </View>
+                        ) : null}
                         <Text
                           style={[
                             styles.appearanceLabel,
-                            { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                            { color: active ? themeColors.primaryDark : themeColors.textBody },
                             active && styles.appearanceLabelActive,
                           ]}
                         >
@@ -140,89 +165,106 @@ export function SettingsModal({ visible, onClose, section = 'all' }: SettingsMod
 
             {section === 'all' ? (
               <>
-                {/* Demo / simulation (mock only) */}
-                <View style={styles.demoHeader}>
-                  <Ionicons name="flask-outline" size={16} color={themeColors.textMuted} />
-                  <Text style={[styles.sectionLabelInline, { color: themeColors.textMuted }]}>
-                    {t('settings.demo')}
-                  </Text>
-                </View>
-                <Text style={[styles.demoHint, { color: themeColors.textMuted }]}>{t('settings.demoHint')}</Text>
+                {SHOW_DEMO_CONTROLS ? (
+                  <>
+                    {/* Demo / simulation remains available for development. */}
+                    <View style={styles.demoHeader}>
+                      <Ionicons name="flask-outline" size={16} color={themeColors.textMuted} />
+                      <Text style={[styles.sectionLabelInline, { color: themeColors.textMuted }]}>
+                        {t('settings.demo')}
+                      </Text>
+                    </View>
+                    <Text style={[styles.demoHint, { color: themeColors.textMuted }]}>{t('settings.demoHint')}</Text>
 
-                <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
-                  {t('settings.demoPayment')}
-                </Text>
-                <View style={styles.chipRow}>
-                  {PAYMENT_OUTCOMES.map((o) => {
-                    const active = sim.payment === o;
-                    return (
-                      <Pressable
-                        key={o}
-                        style={[
-                          styles.chip,
-                          {
-                            borderColor: active ? themeColors.primary : themeColors.border,
-                            backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
-                          },
-                        ]}
-                        onPress={() => pickPayment(o)}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            { color: active ? themeColors.primaryDark : themeColors.textMuted },
-                            active && styles.chipTextActive,
-                          ]}
-                        >
-                          {t(`settings.simPayment.${o}`)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                    <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
+                      {t('settings.demoPayment')}
+                    </Text>
+                    <View style={styles.chipRow}>
+                      {PAYMENT_OUTCOMES.map((o) => {
+                        const active = sim.payment === o;
+                        return (
+                          <Pressable
+                            key={o}
+                            style={[
+                              styles.chip,
+                              {
+                                borderColor: active ? themeColors.primary : themeColors.border,
+                                backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                              },
+                            ]}
+                            onPress={() => pickPayment(o)}
+                          >
+                            <Text
+                              style={[
+                                styles.chipText,
+                                { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                                active && styles.chipTextActive,
+                              ]}
+                            >
+                              {t(`settings.simPayment.${o}`)}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
 
-                <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
-                  {t('settings.demoBooking')}
-                </Text>
-                <View style={styles.chipRow}>
-                  {BOOKING_OUTCOMES.map((o) => {
-                    const active = sim.booking === o;
-                    return (
-                      <Pressable
-                        key={o}
-                        style={[
-                          styles.chip,
-                          {
-                            borderColor: active ? themeColors.primary : themeColors.border,
-                            backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
-                          },
-                        ]}
-                        onPress={() => pickBooking(o)}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            { color: active ? themeColors.primaryDark : themeColors.textMuted },
-                            active && styles.chipTextActive,
-                          ]}
-                        >
-                          {t(`settings.simBooking.${o}`)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                    <Text style={[styles.demoSubLabel, { color: themeColors.textBody }]}>
+                      {t('settings.demoBooking')}
+                    </Text>
+                    <View style={styles.chipRow}>
+                      {BOOKING_OUTCOMES.map((o) => {
+                        const active = sim.booking === o;
+                        return (
+                          <Pressable
+                            key={o}
+                            style={[
+                              styles.chip,
+                              {
+                                borderColor: active ? themeColors.primary : themeColors.border,
+                                backgroundColor: active ? themeColors.primarySoft : themeColors.surfaceAlt,
+                              },
+                            ]}
+                            onPress={() => pickBooking(o)}
+                          >
+                            <Text
+                              style={[
+                                styles.chipText,
+                                { color: active ? themeColors.primaryDark : themeColors.textMuted },
+                                active && styles.chipTextActive,
+                              ]}
+                            >
+                              {t(`settings.simBooking.${o}`)}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </>
+                ) : null}
 
                 {/* Future work */}
                 <Text style={[styles.sectionLabel, { color: themeColors.textMuted }]}>{t('settings.more')}</Text>
                 <View style={styles.moreList}>
-                  {FUTURE.map(({ key, icon }) => (
-                    <View key={key} style={styles.moreRow}>
-                      <Ionicons name={icon} size={20} color={themeColors.textMuted} />
+                  {FUTURE.map(({ key, icon, accent, lightBackground, darkBackground }) => (
+                    <View
+                      key={key}
+                      style={[
+                        styles.moreRow,
+                        { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.moreIcon,
+                          { backgroundColor: isDark ? darkBackground : lightBackground },
+                        ]}
+                      >
+                        <Ionicons name={icon} size={20} color={accent} />
+                      </View>
                       <Text style={[styles.moreLabel, { color: themeColors.textBody }]}>
                         {t(`settings.${key}`)}
                       </Text>
-                      <StatusBadge variant="neutral" label={t('settings.comingSoon')} />
+                      <StatusBadge variant="warning" dot label={t('settings.comingSoon')} />
                     </View>
                   ))}
                 </View>
@@ -298,6 +340,24 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
+    position: 'relative',
+  },
+  appearanceIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeCheck: {
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
+    width: 20,
+    height: 20,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appearanceLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.medium },
   appearanceLabelActive: { fontWeight: fontWeights.semibold },
@@ -307,7 +367,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
+  moreIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   moreLabel: { flex: 1, fontSize: fontSizes.body },
 });

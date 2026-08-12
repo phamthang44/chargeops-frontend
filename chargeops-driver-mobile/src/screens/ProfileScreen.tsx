@@ -28,6 +28,7 @@ import {
   useTabBarInset,
 } from '@/components';
 import { EditProfileModal } from '@/components/EditProfileModal';
+import { SupportCenterModal } from '@/components/SupportCenterModal';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
@@ -50,6 +51,7 @@ export function ProfileScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [settingsSection, setSettingsSection] = useState<'all' | 'language' | 'appearance'>('all');
   const [topUpVisible, setTopUpVisible] = useState(false);
+  const [supportVisible, setSupportVisible] = useState(false);
   const [ownerModalVisible, setOwnerModalVisible] = useState(false);
   const [openingOwnerPortal, setOpeningOwnerPortal] = useState(false);
   const [openingSecurityAction, setOpeningSecurityAction] = useState<
@@ -115,17 +117,6 @@ export function ProfileScreen() {
         t('profile.appSettings.notifications'),
         t('profile.appSettings.openSettingsError'),
       );
-    }
-  }
-
-  async function handleOpenSupport() {
-    const supportUrl = `mailto:support@chargeops.vn?subject=${encodeURIComponent('ChargeOps support')}`;
-    try {
-      const supported = await Linking.canOpenURL(supportUrl);
-      if (!supported) throw new Error('Mail is unavailable.');
-      await Linking.openURL(supportUrl);
-    } catch {
-      Alert.alert(t('profile.appSettings.helpCenter'), 'support@chargeops.vn');
     }
   }
 
@@ -502,10 +493,10 @@ export function ProfileScreen() {
           {/* List Item: Help Center */}
           <Pressable
             style={styles.menuRow}
-            onPress={() => void handleOpenSupport()}
+            onPress={() => setSupportVisible(true)}
           >
-            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}>
-              <Ionicons name="help-circle-outline" size={20} color={isDark ? '#94A3B8' : '#64748B'} />
+            <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#172554' : '#EFF6FF' }]}>
+              <Ionicons name="help-buoy-outline" size={20} color="#3B82F6" />
             </View>
             <View style={styles.menuTextContent}>
               <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -520,7 +511,19 @@ export function ProfileScreen() {
         </Card>
 
         {/* 5. Logout Action */}
-        <Pressable style={styles.logoutBtn} onPress={signOut}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.logout')}
+          style={({ pressed }) => [
+            styles.logoutBtn,
+            {
+              backgroundColor: isDark ? '#3B1111' : '#FEF2F2',
+              borderColor: themeColors.error,
+            },
+            pressed && styles.logoutBtnPressed,
+          ]}
+          onPress={signOut}
+        >
           <Ionicons name="log-out-outline" size={20} color={themeColors.error} />
           <Text style={[styles.logoutText, { color: themeColors.error }]}>{t('profile.logout')}</Text>
         </Pressable>
@@ -539,6 +542,11 @@ export function ProfileScreen() {
       <EditProfileModal
         visible={editProfileVisible}
         onClose={() => setEditProfileVisible(false)}
+      />
+
+      <SupportCenterModal
+        visible={supportVisible}
+        onClose={() => setSupportVisible(false)}
       />
 
       {/* Wallet Balance Top-up Sheet */}
@@ -799,10 +807,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
     paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     marginTop: spacing.xs,
+    borderRadius: radius.md,
+    borderWidth: 1,
   },
+  logoutBtnPressed: { opacity: 0.72, transform: [{ scale: 0.99 }] },
   logoutText: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,

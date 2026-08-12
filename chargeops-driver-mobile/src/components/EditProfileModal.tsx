@@ -97,7 +97,10 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
         <BlurView intensity={28} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
         <Pressable style={StyleSheet.absoluteFill} onPress={submitting ? undefined : onClose} />
 
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
+        >
           <View
             style={[
               styles.sheet,
@@ -240,12 +243,14 @@ function toE164VietnamesePhone(value: string): string {
 
 const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
+  keyboardView: { flex: 1, justifyContent: 'flex-end' },
   sheet: {
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    maxHeight: '92%',
+    height: '88%',
+    maxHeight: '96%',
     gap: spacing.lg,
   },
   handle: { width: 40, height: 4, borderRadius: radius.full, alignSelf: 'center' },

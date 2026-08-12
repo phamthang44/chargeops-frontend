@@ -342,7 +342,31 @@
       "appearance": "Giao diện",
       "appearanceSub": "Sáng, tối hoặc theo hệ thống",
       "helpCenter": "Trung tâm trợ giúp",
-      "helpCenterSub": "Liên hệ support@chargeops.vn"
+      "helpCenterSub": "Hướng dẫn nhanh và trạng thái hỗ trợ"
+    },
+    "support": {
+      "title": "Trung tâm trợ giúp",
+      "subtitle": "Tự xử lý những vấn đề thường gặp ngay trong ChargeOps.",
+      "welcomeTitle": "Chúng tôi có thể giúp gì cho bạn?",
+      "welcomeBody": "Xem hướng dẫn nhanh bên dưới. ChargeOps không gửi email ra ngoài khi kênh hỗ trợ thật chưa được cấu hình.",
+      "quickHelp": "Hướng dẫn nhanh",
+      "topics": {
+        "account": {
+          "title": "Tài khoản và bảo mật",
+          "body": "Đổi mật khẩu, thiết lập 2FA và kiểm tra các thiết bị đang đăng nhập."
+        },
+        "booking": {
+          "title": "Đặt chỗ và sạc xe",
+          "body": "Kiểm tra lịch sử, trạng thái đặt chỗ và hướng dẫn check-in."
+        },
+        "payment": {
+          "title": "Thanh toán và hoàn tiền",
+          "body": "Xem trạng thái giao dịch và các bước xử lý khi thanh toán chưa hoàn tất."
+        }
+      },
+      "requestTitle": "Gửi yêu cầu hỗ trợ",
+      "requestBody": "Khi hoàn thiện, yêu cầu sẽ được gửi qua hệ thống ChargeOps. Môi trường demo sẽ tiếp nhận nội bộ mà không gửi email thật ra ngoài.",
+      "close": "Đã hiểu"
     },
     "logout": "Đăng xuất tài khoản",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",

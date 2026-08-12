@@ -342,7 +342,31 @@
       "appearance": "Appearance",
       "appearanceSub": "Light, dark, or system theme",
       "helpCenter": "Help center",
-      "helpCenterSub": "Contact support@chargeops.vn"
+      "helpCenterSub": "Quick guides and support status"
+    },
+    "support": {
+      "title": "Help center",
+      "subtitle": "Resolve common issues directly in ChargeOps.",
+      "welcomeTitle": "How can we help?",
+      "welcomeBody": "Start with the quick guides below. ChargeOps will not send external email until a real support channel is configured.",
+      "quickHelp": "Quick help",
+      "topics": {
+        "account": {
+          "title": "Account and security",
+          "body": "Change your password, set up 2FA, and review signed-in devices."
+        },
+        "booking": {
+          "title": "Bookings and charging",
+          "body": "Review history, booking status, and check-in guidance."
+        },
+        "payment": {
+          "title": "Payments and refunds",
+          "body": "Review transaction status and what to do when a payment is incomplete."
+        }
+      },
+      "requestTitle": "Send a support request",
+      "requestBody": "Once completed, requests will go through ChargeOps. The demo environment will capture them internally without sending real email.",
+      "close": "Got it"
     },
     "logout": "Log out account",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",

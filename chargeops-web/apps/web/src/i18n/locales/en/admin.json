@@ -79,6 +79,20 @@
     "confirmBtn": "Confirm Rejection",
     "processing": "Processing..."
   },
+  "approveModal": {
+    "title": "Confirm Station Approval",
+    "subtitle": "The station will be officially authorized and transitioned to ACTIVE status.",
+    "stationInfoTitle": "STATION INFORMATION",
+    "ownerLabel": "Owner",
+    "locationLabel": "Location",
+    "chargersLabel": "Planned Chargers",
+    "chargersVal": "{{count}} chargers",
+    "noteActive": "The station will become visible on the platform and ready for device provisioning and driver bookings.",
+    "licenseCheck": "Notice: An active operational License is required before approval.",
+    "cancelBtn": "Cancel",
+    "confirmBtn": "Confirm Approval",
+    "processing": "Approving…"
+  },
   "docModal": {
     "editTitle": "Edit Policy Document",
     "addTitle": "Add Policy Document",

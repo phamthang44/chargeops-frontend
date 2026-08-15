@@ -27,6 +27,7 @@ import type {
   StaffDashboard,
   Amenity,
   Station,
+  StationApprovalDetail,
   StationRegistration,
   StationStaffMember,
   StationStatusHistory,
@@ -98,11 +99,13 @@ export interface StationService {
   updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
   /** Admin: approval queue (status = pending). */
   approvals(params?: { pageNo?: number; pageSize?: number }): Promise<Station[]>;
+  /** Admin: get detailed approval request info including address, licenseSubmitted, assets. */
+  approvalDetail(id: string): Promise<StationApprovalDetail>;
   /** Admin: every approved station platform-wide. Filtering/search happens client-side. */
   all(): Promise<Station[]>;
-  approve(id: string): Promise<Station>;
-  reject(id: string, reason?: string): Promise<Station>;
-  suspend(id: string): Promise<Station>;
+  approve(id: string): Promise<void>;
+  reject(id: string, reason: string): Promise<void>;
+  suspend(id: string): Promise<void>;
   /** Audit log: list status transitions and approval history for a station. */
   statusHistory(stationId: string): Promise<StationStatusHistory[]>;
 }

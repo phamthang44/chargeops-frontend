@@ -176,14 +176,24 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
                       </div>
                     </div>
 
-                    <div className="mt-1 text-[12px] text-muted">
-                      {t('stations.timeline.performedBy')}:{' '}
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11.5px] text-muted">
+                      <span>{t('stations.timeline.performedBy')}:</span>
                       <span className="font-semibold text-ink">{item.performedByName}</span>
+                      {item.performedByEmail && (
+                        <span className="text-[11px] text-faint">({item.performedByEmail})</span>
+                      )}
                       {item.performedByRole && (
-                        <span className="ml-1.5 inline-block rounded-full bg-surface-2 px-2 py-0.5 text-[10.5px] font-medium text-faint">
+                        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-faint">
                           {item.performedByRole}
                         </span>
                       )}
+                    </div>
+
+                    {/* Status transition badge */}
+                    <div className="mt-2 flex items-center gap-1 text-[11px] font-mono text-faint">
+                      <span>{item.fromStatus || '—'}</span>
+                      <span>→</span>
+                      <span className="font-bold text-ink">{item.toStatus}</span>
                     </div>
 
                     {/* Rejection / Suspension reason callout */}

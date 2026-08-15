@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, useApi, type Station } from '@chargeops/api';
 import { Button, Card, IconClipboardCheck, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
 import { RejectModal } from '../features/approvals/RejectModal';
+import { ApproveModal } from '../features/approvals/ApproveModal';
 
 import { getApiErrorMessage } from '../../i18n';
 
@@ -15,6 +16,7 @@ export function Approvals() {
   const toast = useToast();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [approveOpen, setApproveOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['approvals'],
@@ -29,6 +31,7 @@ export function Approvals() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
       toast(t('approvals.toastApproved', { name: selected?.name || 'Trạm' }), 'success');
+      setApproveOpen(false);
       setSelectedId(null);
     },
     onError: (e) => toast(getApiErrorMessage(e), 'error'),
@@ -108,8 +111,25 @@ export function Approvals() {
           </Card>
 
           {/* detail panel */}
-          {selected && <ApprovalDetail station={selected} approving={approve.isPending} onApprove={() => approve.mutate(selected.id)} onReject={() => setRejectOpen(true)} />}
+          {selected && (
+            <ApprovalDetail
+              station={selected}
+              approving={approve.isPending}
+              onApprove={() => setApproveOpen(true)}
+              onReject={() => setRejectOpen(true)}
+            />
+          )}
         </div>
+      )}
+
+      {selected && (
+        <ApproveModal
+          open={approveOpen}
+          station={selected}
+          pending={approve.isPending}
+          onClose={() => setApproveOpen(false)}
+          onConfirm={() => approve.mutate(selected.id)}
+        />
       )}
 
       {selected && (
@@ -140,20 +160,27 @@ function ApprovalDetail({
   const api = useApi();
   const [showHistory, setShowHistory] = useState(false);
 
+  const { data: detail } = useQuery({
+    queryKey: ['approvals', 'detail', station.id],
+    queryFn: () => api.stations.approvalDetail(station.id),
+  });
+
   const { data: history, isLoading: historyLoading } = useQuery({
     queryKey: ['stations', 'history', station.id],
     queryFn: () => api.stations.statusHistory(station.id),
     enabled: showHistory,
   });
 
-  const owner = station.ownerDisplayName || station.ownerName || '—';
-  const city = station.provinceName || station.city || '';
-  const fullAddress =
-    station.address ||
-    [station.addressLine, station.wardName, station.provinceName].filter(Boolean).join(', ') ||
-    station.addressLine ||
-    '—';
-  const count = station.plannedChargePointCount ?? station.chargerCount ?? 0;
+  const owner = detail?.ownerDisplayName || station.ownerDisplayName || station.ownerName || '—';
+  const city = detail?.provinceName || station.provinceName || station.city || '';
+  const fullAddress = detail
+    ? [detail.addressLine, detail.wardName, detail.provinceName].filter(Boolean).join(', ')
+    : station.address ||
+      [station.addressLine, station.wardName, station.provinceName].filter(Boolean).join(', ') ||
+      station.addressLine ||
+      '—';
+  const count = detail?.plannedChargePointCount ?? station.plannedChargePointCount ?? station.chargerCount ?? 0;
+  const isLicenseSubmitted = detail ? detail.licenseSubmitted : true;
 
   return (
     <Card className="p-[17px]">
@@ -161,19 +188,65 @@ function ApprovalDetail({
         <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('approvals.detail.title', { id: station.stationCode || station.id })}</div>
         <StatusPill tone="warn" label={t('approvals.detail.statusPending')} />
       </div>
-      <div className="mt-1.5 text-[17px] font-bold">{station.name}</div>
+      <div className="mt-1.5 text-[17px] font-bold">{detail?.name || station.name}</div>
       <div className="mb-[15px] text-[13px] font-medium text-muted">
         {owner} {city ? `· ${city}` : ''}
       </div>
       <div className="mb-[15px] flex flex-col gap-[9px] text-[12.5px] font-medium">
         <DetailRow label={t('approvals.detail.address')} value={fullAddress} border />
         <DetailRow label={t('approvals.detail.proposedChargers')} value={t('approvals.detail.proposedChargersVal', { count })} border />
-        <DetailRow label={t('approvals.detail.license')} value={t('approvals.detail.submittedVal')} valueClass="font-semibold text-good" border />
-        <DetailRow label={t('approvals.detail.submittedAt')} value={station.submittedAt ? formatDateVn(station.submittedAt) : '—'} />
+        <DetailRow
+          label={t('approvals.detail.license')}
+          value={isLicenseSubmitted ? t('approvals.detail.submittedVal') : 'Chưa nộp'}
+          valueClass={isLicenseSubmitted ? 'font-semibold text-good' : 'font-semibold text-warn'}
+          border
+        />
+        <DetailRow
+          label={t('approvals.detail.submittedAt')}
+          value={detail?.submittedAt ? formatDateVn(detail.submittedAt) : station.submittedAt ? formatDateVn(station.submittedAt) : '—'}
+        />
       </div>
-      <div className="mb-3.5 flex h-[60px] items-center justify-center gap-[7px] rounded-[9px] border border-dashed border-line font-mono text-[11px] text-ghost">
-        <IconClipboardCheck size={15} className="text-ghost" />
-        {t('approvals.detail.documents')}
+
+      {/* Assets / Documents */}
+      <div className="mb-3.5 flex flex-col gap-2">
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-faint">
+          {t('approvals.detail.documents', { defaultValue: 'Hồ sơ & Tài liệu đính kèm' })}
+          {detail?.assets?.length ? ` (${detail.assets.length})` : ''}
+        </div>
+        {detail?.assets && detail.assets.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2">
+            {detail.assets.map((asset, idx) => (
+              <a
+                key={idx}
+                href={asset.assetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 rounded-[8px] border border-line bg-surface-2 p-2 text-[11.5px] transition-colors hover:border-brand hover:bg-surface-3"
+              >
+                {asset.assetType === 'IMAGE' ? (
+                  <img
+                    src={asset.assetUrl}
+                    alt={asset.altText || 'Station asset'}
+                    className="h-10 w-10 shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-brand/10 text-brand">
+                    <IconClipboardCheck size={18} />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold text-ink">{asset.altText || asset.assetType}</div>
+                  <div className="text-[10px] text-faint">{asset.isPrimary ? 'Ảnh chính' : asset.assetType}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] border border-dashed border-line font-mono text-[11px] text-ghost">
+            <IconClipboardCheck size={15} className="text-ghost" />
+            <span>Chưa có tài liệu đính kèm</span>
+          </div>
+        )}
       </div>
 
       {/* Audit & Status History Expandable Section */}
@@ -194,22 +267,48 @@ function ApprovalDetail({
             ) : !history || history.length === 0 ? (
               <div className="py-2 text-center text-faint">Chưa có lịch sử trạng thái</div>
             ) : (
-              history.map((h) => (
-                <div key={h.id} className="border-b border-hairline pb-2 last:border-0 last:pb-0">
-                  <div className="flex items-center justify-between font-semibold">
-                    <span className="text-ink">{h.eventType}</span>
-                    <span className="text-faint text-[10.5px]">{formatDateVn(h.performedAt)}</span>
-                  </div>
-                  <div className="text-muted text-[11px]">
-                    Bởi: {h.performedByName} {h.performedByRole ? `(${h.performedByRole})` : ''}
-                  </div>
-                  {h.reason && (
-                    <div className="mt-1 rounded bg-bad-soft p-1.5 text-bad-deep text-[11px]">
-                      Lý do: {h.reason}
+              history.map((h) => {
+                const eventLabels: Record<string, { label: string; tone: string }> = {
+                  SUBMITTED: { label: 'Đã nộp hồ sơ', tone: 'text-brand' },
+                  APPROVED: { label: 'Đã phê duyệt', tone: 'text-good' },
+                  REJECTED: { label: 'Từ chối duyệt', tone: 'text-bad-deep' },
+                  RESUBMITTED: { label: 'Đã nộp lại', tone: 'text-brand' },
+                  SUSPENDED: { label: 'Tạm ngưng', tone: 'text-warn-deep' },
+                  REACTIVATED: { label: 'Kích hoạt lại', tone: 'text-good' },
+                  WITHDRAWN: { label: 'Rút đơn', tone: 'text-faint' },
+                };
+                const ev = eventLabels[h.eventType] ?? { label: h.eventType, tone: 'text-ink' };
+
+                return (
+                  <div key={h.id} className="border-b border-hairline pb-2.5 last:border-0 last:pb-0">
+                    <div className="flex items-center justify-between">
+                      <span className={`font-bold ${ev.tone}`}>{ev.label}</span>
+                      <span className="font-mono text-[10.5px] text-faint">{formatDateVn(h.performedAt)}</span>
                     </div>
-                  )}
-                </div>
-              ))
+                    <div className="mt-0.5 text-[11px] text-muted">
+                      <span>Bởi: </span>
+                      <span className="font-semibold text-ink">{h.performedByName}</span>
+                      {h.performedByEmail && <span className="text-faint"> ({h.performedByEmail})</span>}
+                      {h.performedByRole && (
+                        <span className="ml-1 rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium text-faint">
+                          {h.performedByRole}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 flex items-center gap-1 font-mono text-[10.5px] text-faint">
+                      <span>{h.fromStatus || '—'}</span>
+                      <span>→</span>
+                      <span className="font-bold text-ink">{h.toStatus}</span>
+                    </div>
+                    {h.reason && (
+                      <div className="mt-1.5 rounded bg-bad-soft p-2 text-[11px] text-bad-deep">
+                        <span className="font-semibold">Lý do: </span>
+                        {h.reason}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         )}

@@ -5,7 +5,7 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
+import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationApprovalDetail, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
 
@@ -459,31 +459,66 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         return db.approvalQueue.filter((s) => s.status === 'pending');
       },
+      async approvalDetail(id): Promise<StationApprovalDetail> {
+        await delay();
+        const s =
+          db.approvalQueue.find((x) => x.id === id || x.stationCode === id) ||
+          db.ownerStations.find((x) => x.id === id || x.stationCode === id) ||
+          db.allStations.find((x) => x.id === id || x.stationCode === id);
+        if (!s) throw new Error(`Không tìm thấy hồ sơ ${id}`);
+
+        return {
+          id: s.id,
+          stationCode: s.stationCode || s.id,
+          name: s.name,
+          ownerDisplayName: s.ownerDisplayName || s.ownerName || 'Chủ trạm',
+          provinceName: s.provinceName || s.city || 'Hà Nội',
+          wardName: s.wardName || 'Phường Dịch Vọng Hậu',
+          addressLine: s.addressLine || s.address || '123 Cầu Giấy',
+          plannedChargePointCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
+          status: s.status,
+          submittedAt: s.submittedAt || new Date().toISOString(),
+          licenseSubmitted: s.licenseSubmitted ?? true,
+          assets: s.assets ?? [
+            {
+              assetType: 'IMAGE',
+              assetUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=600&q=80',
+              isPrimary: true,
+              displayOrder: 1,
+              altText: 'Mặt tiền trạm sạc',
+            },
+            {
+              assetType: 'DOCUMENT',
+              assetUrl: '#',
+              isPrimary: false,
+              displayOrder: 2,
+              altText: 'Giấy phép kinh doanh & PCCC.pdf',
+            },
+          ],
+        };
+      },
       async all() {
         await delay();
         return [...db.allStations];
       },
-      async approve(id) {
+      async approve(id): Promise<void> {
         await delay();
         const s = db.approvalQueue.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy hồ sơ ${id}`);
         s.status = 'active';
-        return { ...s };
       },
-      async reject(id, reason) {
+      async reject(id, reason): Promise<void> {
         await delay();
         const s = db.approvalQueue.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy hồ sơ ${id}`);
         s.status = 'rejected';
-        s.rejectionReason = reason ?? null;
-        return { ...s };
+        s.rejectionReason = reason;
       },
-      async suspend(id) {
+      async suspend(id): Promise<void> {
         await delay();
         const s = db.allStations.find((x) => x.id === id) || db.ownerStations.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy trạm ${id}`);
         s.status = 'suspended';
-        return { ...s };
       },
       async statusHistory(id) {
         await delay();

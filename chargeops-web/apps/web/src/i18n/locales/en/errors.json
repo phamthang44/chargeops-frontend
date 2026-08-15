@@ -3,15 +3,17 @@
     "STATION_001": "Station not found.",
     "STATION_002": "You do not have permission to manage this station.",
     "STATION_003": "Invalid station status transition.",
-    "STATION_004": "A rejection reason is required.",
     "STATION_005": "The station already has an active license.",
     "STATION_006": "License not found.",
     "STATION_007": "Charge point not found.",
     "STATION_008": "Charge point code already exists.",
     "STATION_009": "Connector not found.",
     "STATION_010": "Connector code already exists.",
-    "STATION_011": "An active license is required before approving this station.",
     "STATION_012": "A suspension reason is required.",
+
+    "APPROVAL_001": "Only stations pending approval can be approved or rejected.",
+    "APPROVAL_002": "A rejection reason is required.",
+    "APPROVAL_003": "An active license is required before approving this station.",
 
     "LOCATION_001": "Province not found.",
     "LOCATION_002": "Ward not found.",
@@ -42,15 +44,17 @@
     "error.station.notFound": "Station not found: {{0}}",
     "error.station.accessDenied": "You do not have permission to manage this station",
     "error.station.invalidStatusTransition": "Station status cannot change from {{0}} to {{1}}",
-    "error.station.rejectionReasonRequired": "A rejection reason is required",
     "error.station.activeLicenseAlreadyExists": "The station already has an active license",
     "error.station.licenseNotFound": "License not found: {{0}}",
     "error.station.chargePointNotFound": "Charge point not found: {{0}}",
     "error.station.chargePointCodeAlreadyExists": "Charge point code already exists: {{0}}",
     "error.station.connectorNotFound": "Connector not found: {{0}}",
     "error.station.connectorCodeAlreadyExists": "Connector code already exists: {{0}}",
-    "error.station.activeLicenseRequired": "An active license is required before approving this station",
     "error.station.suspensionReasonRequired": "A suspension reason is required",
+
+    "error.approval.stationNotPending": "Station {{0}} is not pending approval; current status is {{1}}",
+    "error.approval.rejectionReasonRequired": "A rejection reason is required",
+    "error.approval.activeLicenseRequired": "Station {{0}} requires an active license before approval",
 
     "error.location.provinceNotFound": "Province not found: {{0}}",
     "error.location.wardNotFound": "Ward not found: {{0}}",
@@ -95,6 +99,8 @@
     "validation.station.contactPhone.required": "Station contact phone is required",
     "validation.station.contactPhone.invalid": "Station contact phone is invalid",
     "validation.station.contactPhone.maxLength": "Station contact phone cannot exceed 20 characters",
-    "validation.station.plannedChargePointCount.min": "Planned charge point count must be greater than zero"
+    "validation.station.plannedChargePointCount.min": "Planned charge point count must be greater than zero",
+    "validation.approval.reason.required": "A rejection reason is required",
+    "validation.approval.reason.maxLength": "Rejection reason cannot exceed 500 characters"
   }
 }

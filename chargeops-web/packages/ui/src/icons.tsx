@@ -157,6 +157,13 @@ export const IconClock = make(
     <polyline points="12 7 12 12 15 14" />
   </>,
 );
+export const IconInfo = make(
+  <>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </>,
+);
 export const IconWrench = make(
   <path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7Z" />,
 );

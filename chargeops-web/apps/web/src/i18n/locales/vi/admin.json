@@ -79,6 +79,20 @@
     "confirmBtn": "Xác nhận từ chối",
     "processing": "Đang xử lý…"
   },
+  "approveModal": {
+    "title": "Xác nhận phê duyệt trạm sạc",
+    "subtitle": "Trạm sẽ chính thức được cấp phép và chuyển sang trạng thái HOẠT ĐỘNG.",
+    "stationInfoTitle": "THÔNG TIN TRẠM SẠC",
+    "ownerLabel": "Chủ sở hữu",
+    "locationLabel": "Địa điểm",
+    "chargersLabel": "Số trụ dự kiến",
+    "chargersVal": "{{count}} trụ",
+    "noteActive": "Trạm sẽ chuyển sang trạng thái Hoạt động và sẵn sàng tiếp nhận cấu hình trụ sạc.",
+    "licenseCheck": "Lưu ý: Hệ thống yêu cầu trạm phải có gói Giấy phép (License) hợp lệ trước khi kích hoạt.",
+    "cancelBtn": "Hủy bỏ",
+    "confirmBtn": "Xác nhận Phê duyệt",
+    "processing": "Đang phê duyệt…"
+  },
   "docModal": {
     "editTitle": "Sửa tài liệu chính sách",
     "addTitle": "Thêm tài liệu chính sách",

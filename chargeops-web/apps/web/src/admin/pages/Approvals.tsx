@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatDateVn, useApi, type Station } from '@chargeops/api';
+import { formatDateVn, formatDateTimeVn, useApi, type Station } from '@chargeops/api';
 import { Button, Card, IconClipboardCheck, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
 import { RejectModal } from '../features/approvals/RejectModal';
 import { ApproveModal } from '../features/approvals/ApproveModal';
@@ -283,7 +283,7 @@ function ApprovalDetail({
                   <div key={h.id} className="border-b border-hairline pb-2.5 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between">
                       <span className={`font-bold ${ev.tone}`}>{ev.label}</span>
-                      <span className="font-mono text-[10.5px] text-faint">{formatDateVn(h.performedAt)}</span>
+                      <span className="font-mono text-[10.5px] text-faint">{formatDateTimeVn(h.performedAt)}</span>
                     </div>
                     <div className="mt-0.5 text-[11px] text-muted">
                       <span>Bởi: </span>

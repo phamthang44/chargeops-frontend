@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   formatDateVn,
+  formatDateTimeVn,
   useApi,
   type Station,
   type StationStatusEventType,
@@ -172,7 +173,7 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
                         {t(cfg.titleKey, { defaultValue: item.eventType })}
                       </div>
                       <div className="text-[11px] font-medium text-faint">
-                        {formatDateVn(item.performedAt)}
+                        {formatDateTimeVn(item.performedAt)}
                       </div>
                     </div>
 

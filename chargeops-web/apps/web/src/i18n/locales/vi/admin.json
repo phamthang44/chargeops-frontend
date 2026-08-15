@@ -8,6 +8,11 @@
         "title": "Tổng quan nền tảng",
         "subtitle": "Toàn bộ trạm, đặt chỗ và doanh thu · Thứ Bảy, 28/06/2026"
       },
+      "notifications": {
+        "label": "Thông báo",
+        "title": "Trung tâm thông báo & Cảnh báo",
+        "subtitle": "Giám sát cảnh báo kỹ thuật, hồ sơ duyệt trạm và sự kiện toàn hệ thống."
+      },
       "approvals": {
         "label": "Duyệt trạm",
         "title": "Duyệt trạm",

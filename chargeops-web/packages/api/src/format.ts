@@ -17,18 +17,50 @@ export function formatVndCompact(n: number): string {
   return formatVnd(n);
 }
 
-/** "2026-06-28T14:00:00" → "28/06/2026" */
-export function formatDateVn(iso: string): string {
-  const d = new Date(iso);
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+/**
+ * Helper to ensure an ISO timestamp string from backend (Instant / UTC)
+ * is parsed correctly with fallback 'Z' if missing.
+ */
+function parseUtcDate(iso: string | Date): Date {
+  if (iso instanceof Date) return iso;
+  if (!iso) return new Date();
+  const str = String(iso).trim();
+  // If ISO string doesn't specify timezone offset or 'Z', append 'Z' to treat as UTC Instant
+  const normalized = str.includes('Z') || str.includes('+') || (str.includes('-') && str.length > 19)
+    ? str
+    : `${str}Z`;
+  const d = new Date(normalized);
+  return isNaN(d.getTime()) ? new Date(str) : d;
 }
 
-/** "2026-06-28T14:00:00" → "14:00" */
-export function formatTimeVn(iso: string): string {
-  const d = new Date(iso);
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+/** "2026-06-28T01:15:00Z" → "28/06/2026" (in Asia/Ho_Chi_Minh, UTC+7) */
+export function formatDateVn(iso: string | Date): string {
+  const d = parseUtcDate(iso);
+  return d.toLocaleDateString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+/** "2026-06-28T01:15:00Z" → "08:15" (in Asia/Ho_Chi_Minh, UTC+7) */
+export function formatTimeVn(iso: string | Date): string {
+  const d = parseUtcDate(iso);
+  return d.toLocaleTimeString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+/** "2026-06-28T01:15:00Z" → "08:15 · 28/06/2026" (in Asia/Ho_Chi_Minh, UTC+7) */
+export function formatDateTimeVn(iso: string | Date): string {
+  const d = parseUtcDate(iso);
+  const time = formatTimeVn(d);
+  const date = formatDateVn(d);
+  return `${time} · ${date}`;
 }
 
 /** 90 → "1h30", 60 → "1h00" */

@@ -8,6 +8,11 @@
         "title": "Platform Overview",
         "subtitle": "Total stations, bookings, and revenue · Saturday, 28/06/2026"
       },
+      "notifications": {
+        "label": "Notifications",
+        "title": "Notification & Alert Center",
+        "subtitle": "Monitor technical alarms, station approvals, and platform-wide events."
+      },
       "approvals": {
         "label": "Approvals",
         "title": "Station Approvals",

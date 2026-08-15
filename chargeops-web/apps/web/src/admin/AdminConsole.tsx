@@ -8,6 +8,7 @@ import {
   AppShell,
   ComingSoon,
   IconBarChart,
+  IconBell,
   IconBook,
   IconCalendar,
   IconCard,
@@ -22,6 +23,7 @@ import {
   type ShellNavItem,
 } from '@chargeops/ui';
 import { Dashboard } from './pages/Dashboard';
+import { Notifications } from './pages/Notifications';
 import { Approvals } from './pages/Approvals';
 import { Provisioning } from './pages/Provisioning';
 import { Users } from './pages/Users';
@@ -37,6 +39,7 @@ import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
   dashboard: Dashboard,
+  notifications: Notifications,
   approvals: Approvals,
   provisioning: Provisioning,
   bookings: Bookings,
@@ -60,6 +63,7 @@ export function AdminConsole({ base }: { base: string }) {
 
   const NAV: (ShellNavItem & { title: string })[] = [
     { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
+    { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
     { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
     { key: 'provisioning', label: t('console.nav.provisioning.label'), icon: <IconPlusCircle size={17} />, title: t('console.nav.provisioning.title') },
     { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
@@ -124,32 +128,52 @@ export function AdminConsole({ base }: { base: string }) {
       items.push({
         id: 'approvals',
         title: t('notifications.pendingStations', { count: q.pendingStations }),
+        subtitle: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.',
         tone: 'warn',
+        category: 'system',
+        badge: 'Chờ duyệt',
+        actionLabel: 'Duyệt trạm',
         onSelect: () => navigate(`${base}/approvals`),
+        onAction: () => navigate(`${base}/approvals`),
       });
     }
     if (q.expiringLicenses > 0) {
       items.push({
         id: 'expiring',
         title: t('notifications.expiringLicenses', { count: q.expiringLicenses, days: q.expiringDaysMin }),
+        subtitle: `Gói giấy phép trạm sẽ hết hạn trong ${q.expiringDaysMin} ngày tới.`,
         tone: 'warn',
+        category: 'system',
+        badge: 'Sắp hết hạn',
+        actionLabel: 'Xem giấy phép',
         onSelect: () => navigate(`${base}/licenses`),
+        onAction: () => navigate(`${base}/licenses`),
       });
     }
     if (q.expiredLicenses > 0) {
       items.push({
         id: 'expired',
         title: t('notifications.expiredLicenses', { count: q.expiredLicenses }),
+        subtitle: 'Giấy phép hoạt động trạm đã hết hạn sử dụng.',
         tone: 'bad',
+        category: 'alert',
+        badge: 'Hết hạn',
+        actionLabel: 'Xử lý ngay',
         onSelect: () => navigate(`${base}/licenses`),
+        onAction: () => navigate(`${base}/licenses`),
       });
     }
     if (q.reportedFaults > 0) {
       items.push({
         id: 'faults',
         title: t('notifications.reportedFaults', { count: q.reportedFaults }),
+        subtitle: 'Trụ sạc báo lỗi phần cứng hoặc quá nhiệt kết nối.',
         tone: 'bad',
+        category: 'alert',
+        badge: 'Sự cố trụ',
+        actionLabel: 'Kiểm tra',
         onSelect: () => navigate(`${base}/provisioning`),
+        onAction: () => navigate(`${base}/provisioning`),
       });
     }
     return items;
@@ -166,7 +190,13 @@ export function AdminConsole({ base }: { base: string }) {
         userName={user?.name ?? '···'}
         userEmail={user?.email}
         search={<HeaderSearch searchers={searchers} placeholder={t('console.searchPlaceholder')} />}
-        notifications={<NotificationBell items={notificationItems} emptyLabel={t('notifications.empty')} />}
+        notifications={
+          <NotificationBell
+            items={notificationItems}
+            emptyLabel={t('notifications.empty')}
+            onOpenCenter={() => navigate(`${base}/notifications`)}
+          />
+        }
         onSettings={() => navigate(`${base}/settings`)}
         onLogout={logout}
       >

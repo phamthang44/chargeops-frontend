@@ -54,6 +54,11 @@
         "label": "Trợ lý chính sách",
         "title": "Trợ lý chính sách",
         "subtitle": "Tra cứu quy định hủy, check-in, thanh toán."
+      },
+      "notifications": {
+        "label": "Thông báo",
+        "title": "Trung tâm Thông báo",
+        "subtitle": "Cảnh báo trạm, phiên sạc và thông báo hệ thống thời gian thực."
       }
     }
   },
@@ -452,6 +457,19 @@
       "addressPlaceholder": "Số nhà, đường, quận",
       "addressHelp": "Dùng để định vị trạm chính xác trên bản đồ tìm kiếm.",
       "city": "THÀNH PHỐ",
+      "province": "TỈNH / THÀNH PHỐ",
+      "provincePlaceholder": "Chọn tỉnh / thành phố",
+      "searchProvince": "Tìm tỉnh / thành phố...",
+      "ward": "PHƯỜNG / XÃ",
+      "wardPlaceholder": "Chọn phường / xã",
+      "searchWard": "Tìm phường / xã...",
+      "contactPhone": "SỐ ĐIỆN THOẠI LIÊN HỆ",
+      "contactPhonePlaceholder": "VD: 0912345678",
+      "contactPhoneRequired": "Vui lòng nhập số điện thoại liên hệ hợp lệ.",
+      "description": "MÔ TẢ (TÙY CHỌN)",
+      "descriptionPlaceholder": "Mô tả vị trí hoặc hướng dẫn tiếp cận trạm sạc",
+      "latitude": "VĨ ĐỘ",
+      "longitude": "KINH ĐỘ",
       "plannedChargers": "SỐ TRỤ DỰ KIẾN",
       "licenseHelp": "Giấy phép kinh doanh được xác minh ngoài nền tảng trước khi duyệt (không nộp tài liệu tại đây).",
       "cancelBtn": "Hủy bỏ",
@@ -478,6 +496,22 @@
       "save": "Lưu tiện ích",
       "saving": "Đang lưu…",
       "saved": "Đã cập nhật tiện ích."
+    },
+    "timeline": {
+      "title": "Tiến trình phê duyệt: {{name}}",
+      "loadError": "Không tải được lịch sử trạng thái: {{message}}",
+      "noHistory": "Chưa có ghi nhận lịch sử trạng thái nào cho trạm này.",
+      "performedBy": "Thực hiện bởi",
+      "reasonTitle": "Ghi chú / Lý do",
+      "events": {
+        "submitted": "Đã nộp hồ sơ đăng ký trạm",
+        "approved": "Đã phê duyệt hoạt động",
+        "rejected": "Hồ sơ bị từ chối",
+        "resubmitted": "Đã nộp lại hồ sơ",
+        "suspended": "Tạm ngưng hoạt động",
+        "reactivated": "Kích hoạt hoạt động trở lại",
+        "withdrawn": "Đã rút đơn đăng ký"
+      }
     }
   },
   "license": {

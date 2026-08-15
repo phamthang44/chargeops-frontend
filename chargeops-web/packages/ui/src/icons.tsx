@@ -255,3 +255,13 @@ export const IconSun = make(
     <line x1="18.1" y1="5.9" x2="19.8" y2="4.2" />
   </>,
 );
+
+export const IconRefreshCw = make(
+  <>
+    <path d="M21 2v6h-6" />
+    <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+    <path d="M3 22v-6h6" />
+    <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+  </>,
+);
+

@@ -54,6 +54,11 @@
         "label": "Policy Assistant",
         "title": "Policy Assistant",
         "subtitle": "Look up cancellation, check-in, and payment regulations."
+      },
+      "notifications": {
+        "label": "Notifications",
+        "title": "Notification Center",
+        "subtitle": "Real-time station alerts, charging sessions, and system notices."
       }
     }
   },
@@ -452,6 +457,19 @@
       "addressPlaceholder": "Street number, street name, district",
       "addressHelp": "Used to pin your station accurately on the search map.",
       "city": "CITY",
+      "province": "PROVINCE / CITY",
+      "provincePlaceholder": "Select province / city",
+      "searchProvince": "Search province / city...",
+      "ward": "WARD",
+      "wardPlaceholder": "Select ward",
+      "searchWard": "Search ward...",
+      "contactPhone": "CONTACT PHONE",
+      "contactPhonePlaceholder": "E.g. 0912345678",
+      "contactPhoneRequired": "Please enter a valid contact phone number.",
+      "description": "DESCRIPTION (OPTIONAL)",
+      "descriptionPlaceholder": "Location notes or access instructions",
+      "latitude": "LATITUDE",
+      "longitude": "LONGITUDE",
       "plannedChargers": "EST. CHARGER COUNT",
       "licenseHelp": "Business licenses are verified off-platform prior to approval (do not upload files here).",
       "cancelBtn": "Cancel",
@@ -478,6 +496,22 @@
       "save": "Save amenities",
       "saving": "Saving…",
       "saved": "Amenities updated."
+    },
+    "timeline": {
+      "title": "Approval Timeline: {{name}}",
+      "loadError": "Could not load status history: {{message}}",
+      "noHistory": "No status history recorded for this station yet.",
+      "performedBy": "Performed by",
+      "reasonTitle": "Note / Reason",
+      "events": {
+        "submitted": "Station Registration Submitted",
+        "approved": "Station Approved & Active",
+        "rejected": "Registration Rejected",
+        "resubmitted": "Registration Resubmitted",
+        "suspended": "Station Suspended",
+        "reactivated": "Station Reactivated",
+        "withdrawn": "Registration Withdrawn"
+      }
     }
   },
   "license": {

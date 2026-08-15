@@ -272,21 +272,21 @@ export function buildMockDb(): MockDb {
 
   /* ---- owner stations (FR12) ---- */
   const ownerStations: Station[] = [
-    { id: 'ST-1001', name: 'Trạm Hà Đông', city: 'Hà Nội', address: '210 Quang Trung, Hà Đông', ownerName: 'EVGo Co.', chargerCount: 5, onlineCount: 4, status: 'active', licenseSummary: 'Năm · hết hạn 12/09/2026', rejectionReason: null, bookingsToday: 24, revenueWeekVnd: 12_400_000, utilizationPct: 68, submittedAt: null, amenities: ['wifi', 'coffee', 'parking', 'restroom'] },
-    { id: 'ST-1018', name: 'Trạm Cầu Giấy', city: 'Hà Nội', address: '88 Trần Thái Tông, Cầu Giấy', ownerName: 'EVGo Co.', chargerCount: 6, onlineCount: 6, status: 'active', licenseSummary: 'Tháng · hết hạn 30/07/2026', rejectionReason: null, bookingsToday: 31, revenueWeekVnd: 15_800_000, utilizationPct: 74, submittedAt: null, amenities: ['wifi', 'food', 'security'] },
-    { id: 'ST-1056', name: 'Trạm Mỹ Đình', city: 'Hà Nội', address: '15 Phạm Hùng, Nam Từ Liêm', ownerName: 'EVGo Co.', chargerCount: 4, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },
-    { id: 'ST-1049', name: 'Trạm Gia Lâm', city: 'Hà Nội', address: '7 Ngô Gia Tự, Long Biên', ownerName: 'EVGo Co.', chargerCount: 3, onlineCount: 0, status: 'rejected', licenseSummary: null, rejectionReason: 'Thiếu giấy phép kinh doanh hợp lệ; vui lòng nộp lại bản công chứng.', bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-20' },
+    { id: 'ST-1001', stationCode: 'ST-1001', name: 'Trạm Hà Đông', city: 'Hà Nội', address: '210 Quang Trung, Hà Đông', ownerName: 'EVGo Co.', chargerCount: 5, onlineCount: 4, status: 'active', licenseSummary: 'Năm · hết hạn 12/09/2026', rejectionReason: null, bookingsToday: 24, revenueWeekVnd: 12_400_000, utilizationPct: 68, submittedAt: null, amenities: ['wifi', 'coffee', 'parking', 'restroom'] },
+    { id: 'ST-1018', stationCode: 'ST-1018', name: 'Trạm Cầu Giấy', city: 'Hà Nội', address: '88 Trần Thái Tông, Cầu Giấy', ownerName: 'EVGo Co.', chargerCount: 6, onlineCount: 6, status: 'active', licenseSummary: 'Tháng · hết hạn 30/07/2026', rejectionReason: null, bookingsToday: 31, revenueWeekVnd: 15_800_000, utilizationPct: 74, submittedAt: null, amenities: ['wifi', 'food', 'security'] },
+    { id: 'ST-1056', stationCode: 'ST-1056', name: 'Trạm Mỹ Đình', city: 'Hà Nội', address: '15 Phạm Hùng, Nam Từ Liêm', ownerName: 'EVGo Co.', chargerCount: 4, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },
+    { id: 'ST-1049', stationCode: 'ST-1049', name: 'Trạm Gia Lâm', city: 'Hà Nội', address: '7 Ngô Gia Tự, Long Biên', ownerName: 'EVGo Co.', chargerCount: 3, onlineCount: 0, status: 'rejected', licenseSummary: null, rejectionReason: 'Thiếu giấy phép kinh doanh hợp lệ; vui lòng nộp lại bản công chứng.', bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-20' },
   ];
 
   /* ---- admin approval queue ---- */
   // NB: ST-1042 is deliberately NOT here — it already has provisioned charge
   // points, which under FR14 can only happen after approval (step 2 → step 3).
   const approvalQueue: Station[] = [
-    { id: 'ST-1044', name: 'Trạm Tây Hồ', city: 'Hà Nội', address: '19 Lạc Long Quân', ownerName: 'CityVolt', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
-    { id: 'ST-1041', name: 'Trạm Đống Đa', city: 'Hà Nội', address: '45 Tây Sơn', ownerName: 'GreenVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
-    { id: 'ST-1039', name: 'Trạm Thủ Đức', city: 'TP.HCM', address: '88 Võ Văn Ngân', ownerName: 'SaigonCharge', chargerCount: 6, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },
-    { id: 'ST-1037', name: 'Trạm Hải Châu', city: 'Đà Nẵng', address: '12 Bạch Đằng', ownerName: 'DaNang EV', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-25' },
-    { id: 'ST-1034', name: 'Trạm Ninh Kiều', city: 'Cần Thơ', address: '5 Hai Bà Trưng', ownerName: 'MekongVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-24' },
+    { id: 'ST-1044', stationCode: 'ST-1044', name: 'Trạm Tây Hồ', city: 'Hà Nội', address: '19 Lạc Long Quân', ownerName: 'CityVolt', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
+    { id: 'ST-1041', stationCode: 'ST-1041', name: 'Trạm Đống Đa', city: 'Hà Nội', address: '45 Tây Sơn', ownerName: 'GreenVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
+    { id: 'ST-1039', stationCode: 'ST-1039', name: 'Trạm Thủ Đức', city: 'TP.HCM', address: '88 Võ Văn Ngân', ownerName: 'SaigonCharge', chargerCount: 6, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },
+    { id: 'ST-1037', stationCode: 'ST-1037', name: 'Trạm Hải Châu', city: 'Đà Nẵng', address: '12 Bạch Đằng', ownerName: 'DaNang EV', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-25' },
+    { id: 'ST-1034', stationCode: 'ST-1034', name: 'Trạm Ninh Kiều', city: 'Cần Thơ', address: '5 Hai Bà Trưng', ownerName: 'MekongVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-24' },
   ];
 
   /**
@@ -315,8 +315,10 @@ export function buildMockDb(): MockDb {
     for (const area of areas) {
       const owner = pick(operators);
       const chargerCount = 2 + Math.floor(R() * 6);
+      const code = 'ST-' + stationSeq++;
       generatedStations.push({
-        id: 'ST-' + stationSeq++,
+        id: code,
+        stationCode: code,
         name: `Trạm ${area}`,
         city,
         address: `${1 + Math.floor(R() * 200)} ${pick(streets)}, ${area}`,
@@ -336,7 +338,7 @@ export function buildMockDb(): MockDb {
 
   const allStations: Station[] = [
     // Long Biên is approved and mid-provisioning — it owns the CP-33xx records.
-    { id: 'ST-1042', name: 'Trạm Long Biên', city: 'Hà Nội', address: '123 Ngọc Lâm, Long Biên', ownerName: 'Minh Phát EV', chargerCount: 4, onlineCount: 1, status: 'active', licenseSummary: 'Năm · hết hạn 01/07/2027', rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: null },
+    { id: 'ST-1042', stationCode: 'ST-1042', name: 'Trạm Long Biên', city: 'Hà Nội', address: '123 Ngọc Lâm, Long Biên', ownerName: 'Minh Phát EV', chargerCount: 4, onlineCount: 1, status: 'active', licenseSummary: 'Năm · hết hạn 01/07/2027', rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: null },
     ...ownerStations.filter((s) => s.status === 'active'),
     ...generatedStations,
   ];

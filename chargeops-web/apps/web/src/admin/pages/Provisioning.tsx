@@ -176,8 +176,8 @@ function StationPicker({
     return rows.filter((r) => {
       if (!matches(r, filter)) return false;
       if (!q) return true;
-      const { name, city, address, ownerName, id } = r.station;
-      return [name, city, address, ownerName, id].some((v) => v.toLowerCase().includes(q));
+      const { name, city, address, ownerName, id, stationCode } = r.station;
+      return [name, city, address, ownerName, id, stationCode].filter(Boolean).some((v) => (v as string).toLowerCase().includes(q));
     });
   }, [rows, search, filter]);
 
@@ -240,7 +240,7 @@ function StationPicker({
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="text-[13.5px] font-semibold">{station.name}</span>
-                  <span className="font-mono text-[10.5px] font-semibold text-faint">{station.id}</span>
+                  <span className="font-mono text-[10.5px] font-semibold text-faint">{station.stationCode || station.id}</span>
                 </span>
                 {/* City + operator are what actually disambiguate near-identical names. */}
                 <span className="mt-0.5 block truncate text-[11.5px] font-medium text-muted">
@@ -315,7 +315,7 @@ function StationProvisioning({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-[17px] font-bold">{station.name}</span>
-            <span className="font-mono text-[11px] font-semibold text-faint">{station.id}</span>
+            <span className="font-mono text-[11px] font-semibold text-faint">{station.stationCode || station.id}</span>
           </div>
           <div className="mt-1 truncate text-[12px] font-medium text-muted">
             {station.city} · {station.address} · {station.ownerName}

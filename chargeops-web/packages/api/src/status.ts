@@ -48,6 +48,13 @@ export const STATION_STATUS: Record<StationStatus, StatusMeta> = {
   active: { label: 'Hoạt động', tone: 'good' },
   pending: { label: 'Chờ duyệt', tone: 'warn' },
   rejected: { label: 'Bị từ chối', tone: 'bad' },
+  suspended: { label: 'Tạm ngưng', tone: 'bad' },
+  withdrawn: { label: 'Đã rút hồ sơ', tone: 'bad' },
+  ACTIVE: { label: 'Hoạt động', tone: 'good' },
+  PENDING_APPROVAL: { label: 'Chờ duyệt', tone: 'warn' },
+  REJECTED: { label: 'Bị từ chối', tone: 'bad' },
+  SUSPENDED: { label: 'Tạm ngưng', tone: 'bad' },
+  WITHDRAWN: { label: 'Đã rút hồ sơ', tone: 'bad' },
 };
 
 export const LICENSE_STATUS: Record<LicenseStatus, StatusMeta> = {

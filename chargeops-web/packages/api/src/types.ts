@@ -160,29 +160,153 @@ export interface Connector {
   lastSeen: string;
 }
 
+/* ---------- location (administrative units) ---------- */
+
+export interface AdministrativeProvince {
+  code: string;
+  name: string;
+  fullName: string;
+}
+
+export interface AdministrativeWard {
+  code: string;
+  provinceCode: string;
+  name: string;
+  fullName: string;
+}
+
 /* ---------- stations ---------- */
 
-export type StationStatus = 'active' | 'pending' | 'rejected';
+export type StationStatus =
+  | 'active'
+  | 'pending'
+  | 'rejected'
+  | 'suspended'
+  | 'withdrawn'
+  | 'ACTIVE'
+  | 'PENDING_APPROVAL'
+  | 'REJECTED'
+  | 'SUSPENDED'
+  | 'WITHDRAWN';
+
+export interface LicenseSummary {
+  plan: 'MONTHLY' | 'YEARLY' | string;
+  expiresAt?: string | null;
+}
+
+export interface StationAsset {
+  assetType: 'IMAGE' | 'DOCUMENT' | string;
+  assetUrl: string;
+  isPrimary?: boolean;
+  storageKey?: string;
+  displayOrder?: number;
+  altText?: string;
+}
 
 export interface Station {
   id: string;
+  stationCode?: string;
   name: string;
-  city: string;
-  address: string;
-  ownerName: string;
-  chargerCount: number;
-  onlineCount: number;
+  city?: string;
+  provinceName?: string;
+  wardName?: string;
+  address?: string;
+  addressLine?: string;
+  ownerName?: string;
+  ownerDisplayName?: string;
+  chargerCount?: number;
+  plannedChargePointCount?: number;
+  onlineCount?: number;
   status: StationStatus;
-  /** e.g. "Năm · hết hạn 12/09/2026"; null while pending/rejected. */
-  licenseSummary: string | null;
-  rejectionReason: string | null;
-  bookingsToday: number;
-  revenueWeekVnd: number;
-  utilizationPct: number;
+  /** e.g. "Năm · hết hạn 12/09/2026", or object { plan, expiresAt }; null while pending/rejected. */
+  licenseSummary?: string | LicenseSummary | null;
+  licenseSubmitted?: boolean;
+  rejectionReason?: string | null;
+  bookingsToday?: number;
+  revenueWeekVnd?: number;
+  utilizationPct?: number;
   /** ISO date the registration was submitted (approval queue). */
-  submittedAt: string | null;
+  submittedAt?: string | null;
   /** Owner-advertised amenities shown to drivers (FR10-adjacent, owner self-service). */
   amenities?: Amenity[];
+  assets?: StationAsset[];
+}
+
+export interface OwnerStationSummary {
+  id: string;
+  stationCode: string;
+  name: string;
+  addressLine: string;
+  provinceName: string;
+  wardName: string;
+  plannedChargePointCount: number;
+  status: StationStatus;
+  licenseSummary?: string | LicenseSummary | null;
+}
+
+export interface StationApprovalSummary {
+  id: string;
+  stationCode: string;
+  name: string;
+  ownerDisplayName: string;
+  provinceName: string;
+  plannedChargePointCount: number;
+  submittedAt: string;
+  ownerName?: string;
+  city?: string;
+  chargerCount?: number;
+}
+
+export type StationStatusEventType =
+  | 'SUBMITTED'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'RESUBMITTED'
+  | 'SUSPENDED'
+  | 'REACTIVATED'
+  | 'WITHDRAWN';
+
+export interface StationStatusHistory {
+  id: string;
+  stationId: string;
+  stationCode?: string;
+  stationName?: string;
+  eventType: StationStatusEventType;
+  fromStatus?: StationStatus | null;
+  toStatus: StationStatus;
+  reason?: string | null;
+  performedById?: string;
+  performedByName: string;
+  performedByEmail?: string;
+  performedByRole?: string;
+  performedAt: string;
+}
+
+export interface StationApprovalDetail {
+  id: string;
+  stationCode: string;
+  name: string;
+  ownerDisplayName: string;
+  provinceName: string;
+  wardName?: string;
+  addressLine?: string;
+  plannedChargePointCount: number;
+  status: StationStatus;
+  submittedAt: string;
+  licenseSubmitted?: boolean;
+  assets?: StationAsset[];
+  ownerName?: string;
+  city?: string;
+  address?: string;
+  chargerCount?: number;
+}
+
+export interface StationCreatedResponse {
+  id: string;
+  stationCode: string;
+  name: string;
+  status: StationStatus;
+  submittedAt: string;
 }
 
 /* ---------- amenities (owner-managed) ---------- */
@@ -232,12 +356,25 @@ export const AMENITY_EMOJI: Record<Amenity, string> = {
   shop: '🛍️',
 };
 
-export interface StationRegistration {
+export interface RegisterStationRequest {
   name: string;
-  city: string;
-  address: string;
-  plannedChargers: number;
+  addressLine: string;
+  description?: string;
+  provinceCode: string;
+  wardCode: string;
+  latitude: number;
+  longitude: number;
+  contactPhone: string;
+  plannedChargePointCount: number;
+  /** @deprecated Backward-compatible alias for addressLine */
+  address?: string;
+  /** @deprecated Backward-compatible alias for provinceName / city */
+  city?: string;
+  /** @deprecated Backward-compatible alias for plannedChargePointCount */
+  plannedChargers?: number;
 }
+
+export interface StationRegistration extends RegisterStationRequest {}
 
 /* ---------- licenses ---------- */
 

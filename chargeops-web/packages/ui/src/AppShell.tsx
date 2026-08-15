@@ -1,14 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Avatar } from './Avatar';
 import { AvatarDropdown } from './AvatarDropdown';
-import { MoreMenu } from './MoreMenu';
 import {
   IconBolt,
+  IconCheck,
   IconChevronDown,
-  IconLogout,
   IconMenu,
-  IconSettings,
 } from './icons';
 
 export interface ShellNavItem {
@@ -25,6 +22,14 @@ export interface RolePill {
   fg: string;
 }
 
+export interface StationOption {
+  id: string;
+  name: string;
+  stationCode?: string;
+  city?: string;
+  status?: string;
+}
+
 export interface AppShellProps {
   nav: ShellNavItem[];
   activeKey: string;
@@ -34,6 +39,9 @@ export interface AppShellProps {
   rolePill: RolePill;
   /** Current station chip in the top bar (owner console). */
   station?: string;
+  stations?: StationOption[];
+  selectedStationId?: string;
+  onSelectStation?: (stationId: string) => void;
   /** Full name — the header Avatar derives its initials fallback from this. */
   userName: string;
   /** User's email address displayed in profile menu. */
@@ -55,6 +63,94 @@ const ACCENT = {
   owner: 'bg-owner-soft text-owner-deep',
 };
 
+function StationSelector({
+  stationName,
+  stations,
+  selectedStationId,
+  onSelectStation,
+}: {
+  stationName?: string;
+  stations: StationOption[];
+  selectedStationId?: string;
+  onSelectStation: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  if (!stations.length && !stationName) return null;
+
+  return (
+    <div ref={ref} className="relative hidden sm:block">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex cursor-pointer items-center gap-2 rounded-ctl border border-line bg-surface px-[11px] py-1.5 text-[13px] font-medium text-ink transition hover:border-line-hover hover:bg-canvas focus:ring-2 focus:ring-owner/15"
+      >
+        <span className="h-[7px] w-[7px] shrink-0 rounded-[2px] bg-good" />
+        <span className="max-w-[170px] truncate">{stationName || 'Chọn trạm'}</span>
+        {stations.length > 1 && (
+          <IconChevronDown
+            size={13}
+            strokeWidth={2.2}
+            className={`shrink-0 text-faint transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          />
+        )}
+      </button>
+
+      {open && stations.length > 0 && (
+        <div
+          role="listbox"
+          className="absolute left-0 top-full z-50 mt-1.5 min-w-[260px] max-w-[340px] overflow-y-auto rounded-[11px] border border-line-2 bg-surface py-1.5 shadow-[0_10px_30px_rgba(16,17,26,.12)]"
+        >
+          <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+            Trạm sạc của bạn
+          </div>
+          {stations.map((s) => {
+            const isSelected = s.id === selectedStationId;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onSelectStation(s.id);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[12.5px] transition ${
+                  isSelected ? 'bg-owner-soft text-owner-deep font-semibold' : 'text-body hover:bg-chip'
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="truncate">{s.name}</div>
+                  <div className="truncate font-mono text-[10.5px] text-faint">
+                    {s.stationCode || s.id} {s.city ? `· ${s.city}` : ''}
+                  </div>
+                </div>
+                {isSelected && <IconCheck size={14} strokeWidth={2.4} className="shrink-0 text-owner" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AppShell({
   nav,
   activeKey,
@@ -62,6 +158,9 @@ export function AppShell({
   accent,
   rolePill,
   station,
+  stations,
+  selectedStationId,
+  onSelectStation,
   userName,
   userEmail,
   search,
@@ -134,14 +233,22 @@ export function AppShell({
             </span>
             <span className="text-[15px] font-bold tracking-[-0.01em]">ChargeOps</span>
           </div>
-          {station && (
+          {(station || (stations && stations.length > 0)) && (
             <>
               <div className="hidden h-[22px] w-px bg-line-2 sm:block" />
-              <div className="hidden cursor-pointer items-center gap-2 rounded-ctl border border-line px-[11px] py-1.5 text-[13px] font-medium hover:bg-canvas sm:flex">
-                <span className="h-[7px] w-[7px] rounded-[2px] bg-good" />
-                {station}
-                <IconChevronDown size={13} strokeWidth={2.2} className="text-faint" />
-              </div>
+              {stations && onSelectStation ? (
+                <StationSelector
+                  stationName={station}
+                  stations={stations}
+                  selectedStationId={selectedStationId}
+                  onSelectStation={onSelectStation}
+                />
+              ) : (
+                <div className="hidden cursor-pointer items-center gap-2 rounded-ctl border border-line px-[11px] py-1.5 text-[13px] font-medium hover:bg-canvas sm:flex">
+                  <span className="h-[7px] w-[7px] rounded-[2px] bg-good" />
+                  {station}
+                </div>
+              )}
             </>
           )}
         </div>

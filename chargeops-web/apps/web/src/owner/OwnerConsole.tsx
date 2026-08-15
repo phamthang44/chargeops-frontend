@@ -1,4 +1,4 @@
-import { useMemo, type ComponentType } from 'react';
+import { useMemo, useState, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +14,7 @@ import {
   AppShell,
   ComingSoon,
   IconCalendar,
+  IconBell,
   IconBolt,
   IconCard,
   IconChat,
@@ -36,6 +37,7 @@ import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
 import { Revenue } from './pages/Revenue';
 import { Staff } from './pages/Staff';
+import { NotificationsShowcase } from './pages/NotificationsShowcase';
 import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
@@ -52,11 +54,13 @@ const PAGES: Record<string, ComponentType> = {
   license: License,
   assistant: Assistant,
   staff: Staff,
+  notifications: NotificationsShowcase,
   tickets: () => <TicketsRoute admin={false} />,
 };
 
 const NAV = [
   { key: 'dashboard', icon: <IconGrid size={17} /> },
+  { key: 'notifications', icon: <IconBell size={17} /> },
   { key: 'bookings', icon: <IconCalendar size={17} /> },
   { key: 'chargers', icon: <IconBolt size={17} /> },
   { key: 'tickets', icon: <IconLifebuoy size={17} /> },
@@ -155,6 +159,35 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
     return list;
   }, [base, navigate, reduced, services, t]);
 
+  // Query owner's stations for the top bar selector
+  const stationsQuery = useQuery({
+    queryKey: ['stations', 'mine'],
+    queryFn: () => services.stations.mine(),
+  });
+
+  const ownerStations = stationsQuery.data ?? [];
+  const [selectedStationId, setSelectedStationId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('chargeops_owner_selected_station') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const currentStation = useMemo(() => {
+    if (!ownerStations.length) return null;
+    return ownerStations.find((s) => s.id === selectedStationId) ?? ownerStations[0];
+  }, [ownerStations, selectedStationId]);
+
+  const handleSelectStation = (id: string) => {
+    setSelectedStationId(id);
+    try {
+      localStorage.setItem('chargeops_owner_selected_station', id);
+    } catch {
+      // ignore
+    }
+  };
+
   // Same queryKey/queryFn the Dashboard page itself uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery<OwnerDashboardData | StaffDashboardData>({
     queryKey: reduced ? ['dashboard', 'staff'] : ['dashboard', 'owner'],
@@ -206,11 +239,26 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
             ? { label: t('console.role.staff'), bg: 'var(--color-chip)', fg: 'var(--color-muted)' }
             : { label: t('console.role.owner'), bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' }
         }
-        station="Trạm Hà Đông"
+        station={currentStation ? `${currentStation.name} (${currentStation.stationCode || currentStation.id})` : undefined}
+        stations={ownerStations.map((s) => ({
+          id: s.id,
+          name: s.name,
+          stationCode: s.stationCode,
+          city: s.city,
+          status: s.status,
+        }))}
+        selectedStationId={currentStation?.id}
+        onSelectStation={handleSelectStation}
         userName={user?.name ?? '···'}
         userEmail={user?.email}
         search={<HeaderSearch searchers={searchers} accent="owner" />}
-        notifications={<NotificationBell items={notificationItems} emptyLabel={t('notifications.empty')} />}
+        notifications={
+          <NotificationBell
+            items={notificationItems}
+            emptyLabel={t('notifications.empty')}
+            onOpenCenter={() => navigate(`${base}/notifications`)}
+          />
+        }
         onSettings={() => navigate(`${base}/settings`)}
         onLogout={logout}
       >

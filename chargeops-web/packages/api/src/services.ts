@@ -5,6 +5,8 @@
  */
 import type {
   AdminDashboard,
+  AdministrativeProvince,
+  AdministrativeWard,
   AnalyticsOverview,
   AssistantAnswer,
   Booking,
@@ -21,11 +23,13 @@ import type {
   PolicyDoc,
   PricingConfig,
   ProvisioningStatus,
+  RegisterStationRequest,
   StaffDashboard,
   Amenity,
   Station,
   StationRegistration,
   StationStaffMember,
+  StationStatusHistory,
   Ticket,
   TicketListParams,
   TicketMessage,
@@ -37,6 +41,11 @@ import type {
   UserAccount,
   UserStatus,
 } from './types';
+
+export interface LocationService {
+  getProvinces(): Promise<AdministrativeProvince[]>;
+  getWards(provinceCode: string): Promise<AdministrativeWard[]>;
+}
 
 export interface DashboardService {
   owner(): Promise<OwnerDashboard>;
@@ -83,16 +92,19 @@ export interface ConnectorService {
 
 export interface StationService {
   /** Owner: own stations, any status. */
-  mine(): Promise<Station[]>;
-  register(input: StationRegistration): Promise<Station>;
+  mine(params?: { pageNo?: number; pageSize?: number }): Promise<Station[]>;
+  register(input: RegisterStationRequest | StationRegistration): Promise<Station>;
   /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
   updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
   /** Admin: approval queue (status = pending). */
-  approvals(): Promise<Station[]>;
+  approvals(params?: { pageNo?: number; pageSize?: number }): Promise<Station[]>;
   /** Admin: every approved station platform-wide. Filtering/search happens client-side. */
   all(): Promise<Station[]>;
   approve(id: string): Promise<Station>;
-  reject(id: string, reason: string): Promise<Station>;
+  reject(id: string, reason?: string): Promise<Station>;
+  suspend(id: string): Promise<Station>;
+  /** Audit log: list status transitions and approval history for a station. */
+  statusHistory(stationId: string): Promise<StationStatusHistory[]>;
 }
 
 export interface TransactionService {
@@ -166,6 +178,7 @@ export interface TicketService {
 }
 
 export interface Services {
+  location: LocationService;
   dashboard: DashboardService;
   analytics: AnalyticsService;
   bookings: BookingService;

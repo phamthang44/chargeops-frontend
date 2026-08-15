@@ -5,9 +5,49 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationStaffMember, TicketMessage, TicketStatus } from '../types';
+import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
+
+const MOCK_PROVINCES: AdministrativeProvince[] = [
+  { code: '01', name: 'Hà Nội', fullName: 'Thành phố Hà Nội' },
+  { code: '79', name: 'Hồ Chí Minh', fullName: 'Thành phố Hồ Chí Minh' },
+  { code: '48', name: 'Đà Nẵng', fullName: 'Thành phố Đà Nẵng' },
+  { code: '92', name: 'Cần Thơ', fullName: 'Thành phố Cần Thơ' },
+  { code: '31', name: 'Hải Phòng', fullName: 'Thành phố Hải Phòng' },
+];
+
+const MOCK_WARDS: Record<string, AdministrativeWard[]> = {
+  '01': [
+    { code: '00001', provinceCode: '01', name: 'Phúc Xá', fullName: 'Phường Phúc Xá' },
+    { code: '00004', provinceCode: '01', name: 'Trúc Bạch', fullName: 'Phường Trúc Bạch' },
+    { code: '00006', provinceCode: '01', name: 'Vĩnh Phúc', fullName: 'Phường Vĩnh Phúc' },
+    { code: '00028', provinceCode: '01', name: 'Hàng Bạc', fullName: 'Phường Hàng Bạc' },
+    { code: '00037', provinceCode: '01', name: 'Tràng Tiền', fullName: 'Phường Tràng Tiền' },
+  ],
+  '79': [
+    { code: '26734', provinceCode: '79', name: 'Bến Nghé', fullName: 'Phường Bến Nghé' },
+    { code: '26737', provinceCode: '79', name: 'Bến Thành', fullName: 'Phường Bến Thành' },
+    { code: '26740', provinceCode: '79', name: 'Cầu Kho', fullName: 'Phường Cầu Kho' },
+    { code: '26743', provinceCode: '79', name: 'Cầu Ông Lãnh', fullName: 'Phường Cầu Ông Lãnh' },
+    { code: '26746', provinceCode: '79', name: 'Cô Giang', fullName: 'Phường Cô Giang' },
+    { code: '26884', provinceCode: '79', name: 'Thảo Điền', fullName: 'Phường Thảo Điền' },
+  ],
+  '48': [
+    { code: '20194', provinceCode: '48', name: 'Hải Châu 1', fullName: 'Phường Hải Châu 1' },
+    { code: '20197', provinceCode: '48', name: 'Hải Châu 2', fullName: 'Phường Hải Châu 2' },
+    { code: '20200', provinceCode: '48', name: 'Thạch Thang', fullName: 'Phường Thạch Thang' },
+  ],
+  '92': [
+    { code: '31147', provinceCode: '92', name: 'Tân An', fullName: 'Phường Tân An' },
+    { code: '31150', provinceCode: '92', name: 'An Cư', fullName: 'Phường An Cư' },
+    { code: '31153', provinceCode: '92', name: 'An Hòa', fullName: 'Phường An Hòa' },
+  ],
+  '31': [
+    { code: '11383', provinceCode: '31', name: 'Hoàng Văn Thụ', fullName: 'Phường Hoàng Văn Thụ' },
+    { code: '11386', provinceCode: '31', name: 'Minh Khai', fullName: 'Phường Minh Khai' },
+  ],
+};
 
 /**
  * BR-CHG-01 — a Connector is only live if its Charge Point is ACTIVE. Derived
@@ -82,6 +122,17 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
   };
 
   return {
+    location: {
+      async getProvinces() {
+        await delay();
+        return [...MOCK_PROVINCES];
+      },
+      async getWards(provinceCode: string) {
+        await delay();
+        return [...(MOCK_WARDS[provinceCode] ?? [])];
+      },
+    },
+
     dashboard: {
       async owner() {
         await delay();
@@ -370,13 +421,20 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async register(input) {
         await delay();
+        const province = MOCK_PROVINCES.find((p) => p.code === input.provinceCode);
+        const ward = input.provinceCode ? MOCK_WARDS[input.provinceCode]?.find((w) => w.code === input.wardCode) : undefined;
+        const cityName = province?.name ?? input.city ?? 'Hà Nội';
+        const addressText = [input.addressLine || input.address, ward?.name, province?.name].filter(Boolean).join(', ') || input.addressLine || input.address || '';
+        const code = 'ST-' + (1057 + db.ownerStations.length);
+        const chargers = input.plannedChargePointCount ?? input.plannedChargers ?? 4;
         const st: Station = {
-          id: 'ST-' + (1057 + db.ownerStations.length),
+          id: code,
+          stationCode: code,
           name: input.name,
-          city: input.city,
-          address: input.address,
+          city: cityName,
+          address: addressText,
           ownerName: 'EVGo Co.',
-          chargerCount: input.plannedChargers,
+          chargerCount: chargers,
           onlineCount: 0,
           status: 'pending',
           licenseSummary: null,
@@ -384,7 +442,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           bookingsToday: 0,
           revenueWeekVnd: 0,
           utilizationPct: 0,
-          submittedAt: '2026-06-28',
+          submittedAt: new Date().toISOString().slice(0, 10),
         };
         db.ownerStations.push(st);
         return { ...st };
@@ -417,8 +475,100 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const s = db.approvalQueue.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy hồ sơ ${id}`);
         s.status = 'rejected';
-        s.rejectionReason = reason;
+        s.rejectionReason = reason ?? null;
         return { ...s };
+      },
+      async suspend(id) {
+        await delay();
+        const s = db.allStations.find((x) => x.id === id) || db.ownerStations.find((x) => x.id === id);
+        if (!s) throw new Error(`Không tìm thấy trạm ${id}`);
+        s.status = 'suspended';
+        return { ...s };
+      },
+      async statusHistory(id) {
+        await delay();
+        const station =
+          db.ownerStations.find((s) => s.id === id || s.stationCode === id) ||
+          db.approvalQueue.find((s) => s.id === id || s.stationCode === id) ||
+          db.allStations.find((s) => s.id === id || s.stationCode === id);
+
+        const list: StationStatusHistory[] = [];
+        const baseTime = new Date('2026-06-20T08:30:00Z').getTime();
+
+        list.push({
+          id: `hist-${id}-1`,
+          stationId: id,
+          stationCode: station?.stationCode ?? id,
+          stationName: station?.name ?? 'Trạm sạc',
+          eventType: 'SUBMITTED',
+          fromStatus: null,
+          toStatus: 'PENDING_APPROVAL',
+          reason: null,
+          performedByName: station?.ownerDisplayName || station?.ownerName || 'Chủ trạm (Nguyễn Văn An)',
+          performedByRole: 'STATION_OWNER',
+          performedAt: new Date(baseTime).toISOString(),
+        });
+
+        if (station) {
+          const st = (station.status || '').toLowerCase();
+          if (st === 'rejected' || station.rejectionReason) {
+            list.push({
+              id: `hist-${id}-2`,
+              stationId: id,
+              stationCode: station.stationCode ?? id,
+              stationName: station.name,
+              eventType: 'REJECTED',
+              fromStatus: 'PENDING_APPROVAL',
+              toStatus: 'REJECTED',
+              reason: station.rejectionReason || 'Hồ sơ chưa có giấy phép PCCC và gói dịch vụ License chưa kích hoạt.',
+              performedByName: 'Admin Hệ Thống (Trần Quản Trị)',
+              performedByRole: 'ADMIN',
+              performedAt: new Date(baseTime + 86400000 * 2).toISOString(),
+            });
+          } else if (st === 'active') {
+            list.push({
+              id: `hist-${id}-2`,
+              stationId: id,
+              stationCode: station.stationCode ?? id,
+              stationName: station.name,
+              eventType: 'APPROVED',
+              fromStatus: 'PENDING_APPROVAL',
+              toStatus: 'ACTIVE',
+              reason: null,
+              performedByName: 'Admin Hệ Thống (Trần Quản Trị)',
+              performedByRole: 'ADMIN',
+              performedAt: new Date(baseTime + 86400000).toISOString(),
+            });
+          } else if (st === 'suspended') {
+            list.push({
+              id: `hist-${id}-2`,
+              stationId: id,
+              stationCode: station.stationCode ?? id,
+              stationName: station.name,
+              eventType: 'APPROVED',
+              fromStatus: 'PENDING_APPROVAL',
+              toStatus: 'ACTIVE',
+              reason: null,
+              performedByName: 'Admin Hệ Thống (Trần Quản Trị)',
+              performedByRole: 'ADMIN',
+              performedAt: new Date(baseTime + 86400000).toISOString(),
+            });
+            list.push({
+              id: `hist-${id}-3`,
+              stationId: id,
+              stationCode: station.stationCode ?? id,
+              stationName: station.name,
+              eventType: 'SUSPENDED',
+              fromStatus: 'ACTIVE',
+              toStatus: 'SUSPENDED',
+              reason: 'Bảo trì khẩn cấp đường dây trung thế theo yêu cầu EVN.',
+              performedByName: 'Admin Hệ Thống (Lê Kiểm Soát)',
+              performedByRole: 'ADMIN',
+              performedAt: new Date(baseTime + 86400000 * 10).toISOString(),
+            });
+          }
+        }
+        return list;
       },
     },
 

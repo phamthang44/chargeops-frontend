@@ -10,6 +10,11 @@ import type { Services } from '../services';
 
 export function createRestServices(http: HttpClient): Services {
   return {
+    location: {
+      getProvinces: () => http.get('/administrative-units/provinces'),
+      getWards: (provinceCode: string) => http.get(`/administrative-units/provinces/${provinceCode}/wards`),
+    },
+
     dashboard: {
       owner: () => http.get('/dashboard/owner'),
       admin: () => http.get('/dashboard/admin'),
@@ -42,13 +47,15 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     stations: {
-      mine: () => http.get('/stations/mine'),
-      register: (input) => http.post('/stations', input),
+      mine: (params = {}) => http.get('/owner/stations/mine', params),
+      register: (input) => http.post('/owner/stations', input),
       updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
-      approvals: () => http.get('/admin/stations/approvals'),
+      approvals: (params = {}) => http.get('/admin/stations', params),
       all: () => http.get('/admin/stations'),
       approve: (id) => http.post(`/admin/stations/${id}/approve`),
-      reject: (id, reason) => http.post(`/admin/stations/${id}/reject`, { reason }),
+      reject: (id, reason) => http.post(`/admin/stations/${id}/reject`, reason ? { reason } : undefined),
+      suspend: (id) => http.post(`/admin/stations/${id}/suspend`),
+      statusHistory: (id) => http.get(`/stations/${id}/status-history`),
     },
 
     transactions: {

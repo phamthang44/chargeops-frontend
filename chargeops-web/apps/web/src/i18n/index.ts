@@ -25,6 +25,8 @@ import viOwner from './locales/vi/owner.json';
 import enOwner from './locales/en/owner.json';
 import viAdmin from './locales/vi/admin.json';
 import enAdmin from './locales/en/admin.json';
+import viErrors from './locales/vi/errors.json';
+import enErrors from './locales/en/errors.json';
 
 export const SUPPORTED_LANGUAGES = ['vi', 'en'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -53,6 +55,7 @@ i18n.use(initReactI18next).init({
       auth: viAuth,
       owner: viOwner,
       admin: viAdmin,
+      errors: viErrors,
     },
     en: {
       common: enCommon,
@@ -64,6 +67,7 @@ i18n.use(initReactI18next).init({
       auth: enAuth,
       owner: enOwner,
       admin: enAdmin,
+      errors: enErrors,
     },
   },
   lng: initialLanguage(),
@@ -75,5 +79,33 @@ i18n.use(initReactI18next).init({
 i18n.on('languageChanged', (lng) => {
   if (isLanguage(lng)) localStorage.setItem(STORAGE_KEY, lng);
 });
+
+/**
+ * Translates backend API error codes, messageKeys, or messages to the current UI language.
+ */
+export function getApiErrorMessage(error: unknown): string {
+  if (!error) return i18n.t('error.generic', { ns: 'common' });
+  if (typeof error === 'string') return error;
+
+  const err = error as {
+    code?: string;
+    messageKey?: string;
+    message?: string;
+    details?: unknown;
+  };
+
+  // 1. Try translating by code (e.g. STATION_011)
+  if (err.code && i18n.exists(`codes.${err.code}`, { ns: 'errors' })) {
+    return i18n.t(`codes.${err.code}`, { ns: 'errors' });
+  }
+
+  // 2. Try translating by messageKey (e.g. error.station.activeLicenseRequired)
+  if (err.messageKey && i18n.exists(`messages.${err.messageKey}`, { ns: 'errors' })) {
+    return i18n.t(`messages.${err.messageKey}`, { ns: 'errors' });
+  }
+
+  // 3. Fallback to server message or default
+  return err.message || i18n.t('error.generic', { ns: 'common' });
+}
 
 export default i18n;

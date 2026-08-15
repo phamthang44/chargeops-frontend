@@ -5,10 +5,10 @@ import type { Station } from '@chargeops/api';
 /** Four-metric strip above the station grid. */
 export function StationSummary({ stations }: { stations: Station[] }) {
   const { t } = useTranslation('owner');
-  const active = stations.filter((s) => s.status === 'active');
-  const pending = stations.filter((s) => s.status === 'pending').length;
-  const chargers = active.reduce((n, s) => n + s.chargerCount, 0);
-  const online = active.reduce((n, s) => n + s.onlineCount, 0);
+  const active = stations.filter((s) => s.status === 'active' || s.status === 'ACTIVE');
+  const pending = stations.filter((s) => s.status === 'pending' || s.status === 'PENDING_APPROVAL').length;
+  const chargers = active.reduce((n, s) => n + (s.chargerCount ?? s.plannedChargePointCount ?? 0), 0);
+  const online = active.reduce((n, s) => n + (s.onlineCount ?? 0), 0);
 
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">

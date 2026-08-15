@@ -6,6 +6,7 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly code: string,
     message: string,
+    public readonly messageKey?: string,
     public readonly details?: unknown,
   ) {
     super(message);
@@ -58,20 +59,37 @@ export class HttpClient {
     if (!res.ok) {
       let code = 'HTTP_' + res.status;
       let message = `Lỗi máy chủ (${res.status}).`;
+      let messageKey: string | undefined;
       let details: unknown;
       try {
-        const problem = (await res.json()) as { code?: string; message?: string; detail?: string };
-        code = problem.code ?? code;
-        message = problem.message ?? problem.detail ?? message;
-        details = problem;
+        const problem = (await res.json()) as {
+          error?: { code?: string; messageKey?: string; message?: string; details?: unknown };
+          code?: string;
+          message?: string;
+          detail?: string;
+        };
+        if (problem?.error) {
+          code = problem.error.code ?? code;
+          message = problem.error.message ?? message;
+          messageKey = problem.error.messageKey;
+          details = problem.error.details;
+        } else if (problem) {
+          code = problem.code ?? code;
+          message = problem.message ?? problem.detail ?? message;
+          details = problem;
+        }
       } catch {
         /* non-JSON error body — keep defaults */
       }
-      throw new ApiError(res.status, code, message, details);
+      throw new ApiError(res.status, code, message, messageKey, details);
     }
 
     if (res.status === 204) return undefined as T;
-    return (await res.json()) as T;
+    const body = (await res.json()) as { data?: T; meta?: unknown; error?: unknown };
+    if (body && typeof body === 'object' && 'data' in body && body.data !== undefined) {
+      return body.data as T;
+    }
+    return body as unknown as T;
   }
 
   get<T>(path: string, params?: Query): Promise<T> {

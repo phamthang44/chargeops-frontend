@@ -52,12 +52,17 @@ function DashboardBody({ data }: { data: OwnerDashboard }) {
         ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
         : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
 
-  const licenseStatusLabel =
-    license.status === 'active'
-      ? t('license.active')
-      : license.status === 'expiring'
-        ? t('license.expiring')
-        : t('license.expired');
+  const isLicActive = license.status === 'ACTIVE' || license.status === 'active';
+  const isLicExpired = license.status === 'EXPIRED' || license.status === 'expired';
+  const isLicExpiring = license.expiringSoon || license.status === 'expiring' || (license.daysLeft != null && license.daysLeft <= 30 && isLicActive);
+
+  const licenseStatusLabel = isLicExpiring
+    ? t('license.expiring', { defaultValue: 'Sắp hết hạn' })
+    : isLicActive
+      ? t('license.active', { defaultValue: 'Đang hoạt động' })
+      : isLicExpired
+        ? t('license.expired', { defaultValue: 'Đã hết hạn' })
+        : String(license.status);
 
   return (
     <>

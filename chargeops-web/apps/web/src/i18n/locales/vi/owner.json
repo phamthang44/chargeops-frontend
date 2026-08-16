@@ -74,8 +74,15 @@
     "empty": "Không có thông báo mới.",
     "openTickets": "{{count}} ticket đang chờ xử lý",
     "license": {
+      "active": "Giấy phép đang hoạt động",
       "expiring": "Giấy phép sắp hết hạn · còn {{days}} ngày",
-      "expired": "Giấy phép đã hết hạn"
+      "expired": "Giấy phép đã hết hạn",
+      "suspended": "Giấy phép đang tạm ngưng",
+      "ACTIVE": "Giấy phép đang hoạt động",
+      "PENDING": "Giấy phép chờ hiệu lực",
+      "SUSPENDED": "Giấy phép đang tạm ngưng",
+      "EXPIRED": "Giấy phép đã hết hạn",
+      "CANCELLED": "Giấy phép đã bị hủy"
     }
   },
   "assistant": {
@@ -515,16 +522,16 @@
     }
   },
   "license": {
-    "title": "Giấy phép",
-    "subtitle": "Trạng thái giấy phép vận hành của bạn.",
+    "title": "Giấy phép Vận hành (License)",
+    "subtitle": "Theo dõi hiệu lực các gói subscription License cho các trạm sạc của bạn.",
     "loadError": "Không tải được giấy phép: {{message}}",
     "plans": {
-      "yearly": "Gói Năm (Yearly)",
-      "monthly": "Gói Tháng (Monthly)"
+      "yearly": "Gói Năm (1 năm lịch)",
+      "monthly": "Gói Tháng (1 tháng lịch)"
     },
     "priceLabel": "{{price}} / {{period}}",
-    "periodYear": "năm",
-    "periodMonth": "tháng",
+    "periodYear": "1 năm",
+    "periodMonth": "1 tháng",
     "labels": {
       "start": "Bắt đầu",
       "expiry": "Hết hạn",
@@ -532,8 +539,8 @@
       "remainingVal": "{{days}} ngày"
     },
     "helpTitle": "Gia hạn sắp tới (còn {{days}} ngày).",
-    "helpBody": "Việc mua/gia hạn giấy phép được xử lý ngoài nền tảng; trạng thái sẽ được quản trị viên ghi nhận thủ công. Màn hình này chỉ hiển thị trạng thái.",
-    "warningTitle": "Khi giấy phép hết hạn",
-    "warningBody": "Trạm và các trụ sẽ bị ẩn khỏi tìm kiếm của tài xế cho tới khi gia hạn (BR-STA-01). Các đặt chỗ đang hoạt động không bị ảnh hưởng."
+    "helpBody": "Việc mua/gia hạn giấy phép được xử lý ngoài nền tảng; trạng thái sẽ được quản trị viên ghi nhận trên hệ thống. Màn hình này dùng để theo dõi hiệu lực.",
+    "warningTitle": "Quy định duy trì giấy phép",
+    "warningBody": "Khi giấy phép hết hạn hoặc bị tạm ngưng, trạm sạc sẽ tạm thời mất quyền nhận đặt chỗ mới cho tới khi gia hạn thành công (BR-STA-01)."
   }
 }

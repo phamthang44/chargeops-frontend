@@ -212,14 +212,35 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
       }
     } else {
       const d = dashboardQuery.data as OwnerDashboardData;
-      if (d.license.status !== 'active') {
+      const licStatus = String(d.license.status).toUpperCase();
+      const days = d.license.daysLeft ?? 0;
+      const isExpiring = d.license.expiringSoon || (licStatus === 'ACTIVE' && days <= 30);
+      const isExpired = licStatus === 'EXPIRED';
+      const isSuspended = licStatus === 'SUSPENDED';
+
+      if (isExpired) {
         items.push({
           id: 'license',
-          title: t(`notifications.license.${d.license.status}`, { days: d.license.daysLeft }),
-          tone: d.license.status === 'expired' ? 'bad' : 'warn',
+          title: t('notifications.license.expired', { defaultValue: 'Giấy phép vận hành đã hết hạn' }),
+          tone: 'bad',
+          onSelect: () => navigate(`${base}/license`),
+        });
+      } else if (isExpiring) {
+        items.push({
+          id: 'license',
+          title: t('notifications.license.expiring', { days, defaultValue: `Giấy phép sắp hết hạn · còn ${days} ngày` }),
+          tone: 'warn',
+          onSelect: () => navigate(`${base}/license`),
+        });
+      } else if (isSuspended) {
+        items.push({
+          id: 'license',
+          title: t('notifications.license.suspended', { defaultValue: 'Giấy phép vận hành đang tạm ngưng' }),
+          tone: 'warn',
           onSelect: () => navigate(`${base}/license`),
         });
       }
+
       if (d.kpis.offlineChargerNote) {
         items.push({ id: 'offline', title: d.kpis.offlineChargerNote, tone: 'bad', onSelect: () => navigate(`${base}/chargers`) });
       }

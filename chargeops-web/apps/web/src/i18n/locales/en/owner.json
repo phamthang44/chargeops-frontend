@@ -74,8 +74,15 @@
     "empty": "No new notifications.",
     "openTickets": "{{count}} tickets need attention",
     "license": {
+      "active": "License active",
       "expiring": "License expiring · {{days}} days left",
-      "expired": "License expired"
+      "expired": "License expired",
+      "suspended": "License suspended",
+      "ACTIVE": "License active",
+      "PENDING": "License pending start",
+      "SUSPENDED": "License suspended",
+      "EXPIRED": "License expired",
+      "CANCELLED": "License cancelled"
     }
   },
   "assistant": {
@@ -515,16 +522,16 @@
     }
   },
   "license": {
-    "title": "License",
-    "subtitle": "Status of your operational license.",
+    "title": "Operating License",
+    "subtitle": "Track the validity and subscription status of your charging stations.",
     "loadError": "Could not load license: {{message}}",
     "plans": {
-      "yearly": "Yearly Plan",
-      "monthly": "Monthly Plan"
+      "yearly": "Yearly Plan (1 calendar year)",
+      "monthly": "Monthly Plan (1 calendar month)"
     },
     "priceLabel": "{{price}} / {{period}}",
-    "periodYear": "year",
-    "periodMonth": "month",
+    "periodYear": "1 year",
+    "periodMonth": "1 month",
     "labels": {
       "start": "Starts",
       "expiry": "Expires",
@@ -532,8 +539,8 @@
       "remainingVal": "{{days}} days"
     },
     "helpTitle": "Renewal coming up ({{days}} days left).",
-    "helpBody": "Purchasing/renewing licenses is handled off-platform; statuses are updated manually by administrators. This page is read-only.",
-    "warningTitle": "When the license expires",
-    "warningBody": "The station and all its chargers will be hidden from driver searches until renewed (BR-STA-01). Active, ongoing sessions will not be affected."
+    "helpBody": "Purchasing/renewing licenses is handled off-platform; statuses are recorded by administrators on the system. This page tracks subscription validity.",
+    "warningTitle": "License Maintenance Policy",
+    "warningBody": "When the license expires or is suspended, the station and chargers will be hidden from driver searches until renewed (BR-STA-01)."
   }
 }

@@ -8,6 +8,7 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { QrDownload } from "@/components/QrDownload";
 import { Reveal } from "@/components/Reveal";
 import { BackToTop } from "@/components/BackToTop";
+import { OwnerPricing } from "@/components/OwnerPricing";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -36,6 +37,7 @@ export default function Home() {
         <Features />
         <Stats />
         <OwnerBand />
+        <OwnerPricing />
         <DownloadCta />
       </main>
       <SiteFooter />

@@ -10,6 +10,7 @@ const NAV = [
   { id: "tinh-nang", label: "Tính năng", href: "/#tinh-nang" },
   { id: "tram-sac", label: "Trạm sạc", href: "/tram-sac" },
   { id: "doi-tac", label: "Dành cho chủ trạm", href: "/#doi-tac" },
+  { id: "bang-gia-license", label: "Bảng giá", href: "/#bang-gia-license" },
 ];
 
 export function SiteHeader() {

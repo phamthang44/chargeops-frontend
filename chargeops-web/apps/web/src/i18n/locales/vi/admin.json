@@ -84,19 +84,39 @@
     "confirmBtn": "Xác nhận từ chối",
     "processing": "Đang xử lý…"
   },
+  "issueLicenseModal": {
+    "title": "Ghi nhận & Kích hoạt License",
+    "subtitle": "Ghi nhận gói subscription sau khi đã xác minh thông tin mua/thanh toán của chủ trạm ngoài nền tảng.",
+    "stationInfoTitle": "THÔNG TIN TRẠM SẠC",
+    "ownerLabel": "Chủ sở hữu",
+    "planLabel": "Gói subscription",
+    "planMonthly": "Gói Tháng",
+    "planMonthlyDesc": "Hiệu lực 1 tháng lịch",
+    "planYearly": "Gói Năm",
+    "planYearlyDesc": "Hiệu lực 1 năm lịch",
+    "feeLabel": "Phí License đã ghi nhận (VND)",
+    "errFeePositive": "Phí giấy phép phải là số không âm.",
+    "errVerificationRequired": "Vui lòng xác nhận đã đối chiếu thông tin mua/thanh toán ngoài nền tảng.",
+    "noticeImmediate": "License sẽ có hiệu lực ngay sau khi kích hoạt và chuyển sang trạng thái ACTIVE.",
+    "noticeApproveReady": "Sau khi kích hoạt license thành công, hồ sơ trạm sẽ đủ điều kiện để phê duyệt.",
+    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gói License của chủ trạm ngoài nền tảng.",
+    "cancelBtn": "Hủy bỏ",
+    "confirmBtn": "Xác nhận & kích hoạt",
+    "processing": "Đang ghi nhận…"
+  },
   "approveModal": {
-    "title": "Xác nhận phê duyệt trạm sạc",
-    "subtitle": "Trạm sẽ chính thức được cấp phép và chuyển sang trạng thái HOẠT ĐỘNG.",
+    "title": "Xác nhận duyệt hồ sơ trạm",
+    "subtitle": "Trạm sẽ được phê duyệt hành chính và cho phép tiếp tục cấu hình trụ sạc.",
     "stationInfoTitle": "THÔNG TIN TRẠM SẠC",
     "ownerLabel": "Chủ sở hữu",
     "locationLabel": "Địa điểm",
     "chargersLabel": "Số trụ dự kiến",
     "chargersVal": "{{count}} trụ",
-    "noteActive": "Trạm sẽ chuyển sang trạng thái Hoạt động và sẵn sàng tiếp nhận cấu hình trụ sạc.",
+    "noteActive": "Duyệt hồ sơ xác nhận thông tin hành chính và giấy phép của trạm đã hợp lệ để tiếp tục cấu hình trụ sạc.",
     "licenseCheck": "Lưu ý: Hệ thống yêu cầu trạm phải có gói Giấy phép (License) hợp lệ trước khi kích hoạt.",
     "cancelBtn": "Hủy bỏ",
-    "confirmBtn": "Xác nhận Phê duyệt",
-    "processing": "Đang phê duyệt…"
+    "confirmBtn": "Duyệt hồ sơ",
+    "processing": "Đang duyệt hồ sơ…"
   },
   "docModal": {
     "editTitle": "Sửa tài liệu chính sách",
@@ -148,8 +168,9 @@
     }
   },
   "approvals": {
-    "toastApproved": "Đã duyệt {{name}} → HOẠT ĐỘNG",
+    "toastApproved": "Đã duyệt hồ sơ {{name}}",
     "toastRejected": "Đã từ chối {{name}}",
+    "toastIssued": "Đã ghi nhận & kích hoạt License thành công cho {{name}}",
     "error": "Không tải được hồ sơ: {{message}}",
     "emptyTitle": "Hết hồ sơ chờ duyệt",
     "emptyDesc": "Tất cả trạm đăng ký đã được xử lý.",
@@ -170,9 +191,11 @@
       "proposedChargersVal": "{{count}} cổng",
       "license": "Giấy phép",
       "submittedAt": "Gửi lúc",
-      "submittedVal": "Đã nộp ✓",
+      "submittedVal": "Đang hoạt động ✓",
       "documents": "Hồ sơ & hình ảnh",
-      "approveBtn": "Duyệt → đặt HOẠT ĐỘNG",
+      "issueBtn": "Ghi nhận & kích hoạt license",
+      "issuing": "Đang ghi nhận…",
+      "approveBtn": "Duyệt hồ sơ",
       "approving": "Đang duyệt…",
       "rejectBtn": "Từ chối (cần lý do)"
     }

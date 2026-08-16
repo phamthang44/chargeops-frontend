@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button, IconCheckCircle, IconInfo, Modal } from '@chargeops/ui';
-import type { Station } from '@chargeops/api';
+import type { Station, StationApprovalSummary } from '@chargeops/api';
 
 export interface ApproveModalProps {
   open: boolean;
-  station: Station;
+  station: StationApprovalSummary | Station;
   pending: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -20,13 +20,15 @@ export function ApproveModal({
 }: ApproveModalProps) {
   const { t } = useTranslation('admin');
 
-  const owner = station.ownerDisplayName || station.ownerName || '—';
+  const s = station as any;
+  const owner = station.ownerDisplayName || s.ownerName || '—';
   const location =
-    station.address ||
-    [station.addressLine, station.wardName, station.provinceName].filter(Boolean).join(', ') ||
-    station.city ||
+    s.address ||
+    [s.addressLine, s.wardName, station.provinceName || s.city].filter(Boolean).join(', ') ||
+    station.provinceName ||
+    s.city ||
     '—';
-  const chargers = station.plannedChargePointCount ?? station.chargerCount ?? 0;
+  const chargers = station.plannedChargePointCount ?? s.chargerCount ?? 0;
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={460}>
@@ -36,11 +38,11 @@ export function ApproveModal({
         </div>
         <div className="flex-1">
           <div className="text-[17px] font-bold text-ink">
-            {t('approveModal.title', { defaultValue: 'Xác nhận phê duyệt trạm sạc' })}
+            {t('approveModal.title', { defaultValue: 'Xác nhận duyệt hồ sơ trạm' })}
           </div>
           <div className="mt-0.5 text-[12.5px] text-muted">
             {t('approveModal.subtitle', {
-              defaultValue: 'Trạm sẽ chính thức được cấp phép và chuyển sang trạng thái HOẠT ĐỘNG.',
+              defaultValue: 'Trạm sẽ được phê duyệt hành chính và cho phép tiếp tục cấu hình trụ sạc.',
             })}
           </div>
         </div>
@@ -79,7 +81,7 @@ export function ApproveModal({
         <div>
           <div>
             {t('approveModal.noteActive', {
-              defaultValue: 'Trạm sẽ chuyển sang trạng thái Hoạt động và sẵn sàng tiếp nhận cấu hình trụ sạc.',
+              defaultValue: 'Duyệt hồ sơ xác nhận thông tin hành chính và giấy phép của trạm đã hợp lệ để tiếp tục cấu hình trụ sạc.',
             })}
           </div>
           <div className="mt-1 text-[11px] opacity-90">
@@ -97,8 +99,8 @@ export function ApproveModal({
         </Button>
         <Button variant="primary" className="flex-1" onClick={onConfirm} disabled={pending}>
           {pending
-            ? t('approveModal.processing', { defaultValue: 'Đang duyệt…' })
-            : t('approveModal.confirmBtn', { defaultValue: 'Xác nhận Phê duyệt' })}
+            ? t('approveModal.processing', { defaultValue: 'Đang duyệt hồ sơ…' })
+            : t('approveModal.confirmBtn', { defaultValue: 'Duyệt hồ sơ' })}
         </Button>
       </div>
     </Modal>

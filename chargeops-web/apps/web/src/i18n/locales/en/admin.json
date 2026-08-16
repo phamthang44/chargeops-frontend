@@ -84,19 +84,39 @@
     "confirmBtn": "Confirm Rejection",
     "processing": "Processing..."
   },
+  "issueLicenseModal": {
+    "title": "Record & Activate License",
+    "subtitle": "Record a subscription license after verifying off-platform purchase/payment.",
+    "stationInfoTitle": "STATION INFORMATION",
+    "ownerLabel": "Owner",
+    "planLabel": "Subscription Plan",
+    "planMonthly": "Monthly Plan",
+    "planMonthlyDesc": "Valid for 1 calendar month",
+    "planYearly": "Yearly Plan",
+    "planYearlyDesc": "Valid for 1 calendar year",
+    "feeLabel": "Recorded License Fee (VND)",
+    "errFeePositive": "License fee must be non-negative.",
+    "errVerificationRequired": "Please verify that off-platform purchase/payment has been confirmed.",
+    "noticeImmediate": "The license will become ACTIVE immediately upon activation.",
+    "noticeApproveReady": "Once activated, the station registration becomes eligible for approval.",
+    "verificationCheckbox": "I have verified and confirmed the station owner's license purchase/payment off-platform.",
+    "cancelBtn": "Cancel",
+    "confirmBtn": "Confirm & Activate",
+    "processing": "Recording…"
+  },
   "approveModal": {
-    "title": "Confirm Station Approval",
-    "subtitle": "The station will be officially authorized and transitioned to ACTIVE status.",
+    "title": "Confirm Station Application Approval",
+    "subtitle": "The station will be administratively approved for subsequent charger configuration.",
     "stationInfoTitle": "STATION INFORMATION",
     "ownerLabel": "Owner",
     "locationLabel": "Location",
     "chargersLabel": "Planned Chargers",
     "chargersVal": "{{count}} chargers",
-    "noteActive": "The station will become visible on the platform and ready for device provisioning and driver bookings.",
+    "noteActive": "Approval confirms administrative validation and a valid license for subsequent charger setup.",
     "licenseCheck": "Notice: An active operational License is required before approval.",
     "cancelBtn": "Cancel",
-    "confirmBtn": "Confirm Approval",
-    "processing": "Approving…"
+    "confirmBtn": "Approve Application",
+    "processing": "Approving application…"
   },
   "docModal": {
     "editTitle": "Edit Policy Document",
@@ -134,7 +154,7 @@
       "connectionTypes": "Connector Type Distribution"
     },
     "kpis": {
-      "revenue12m": "12M REVENUE",
+      "revenue12m": "DOANH THU 12TH",
       "totalBookings": "TOTAL BOOKINGS",
       "activeStations": "ACTIVE STATIONS",
       "occupancyRate": "OCCUPANCY RATE",
@@ -148,8 +168,9 @@
     }
   },
   "approvals": {
-    "toastApproved": "Approved {{name}} → ACTIVE",
+    "toastApproved": "Approved application for {{name}}",
     "toastRejected": "Rejected {{name}}",
+    "toastIssued": "Successfully recorded & activated License for {{name}}",
     "error": "Failed to load profiles: {{message}}",
     "emptyTitle": "No pending registrations",
     "emptyDesc": "All registered stations have been processed.",
@@ -170,9 +191,11 @@
       "proposedChargersVal": "{{count}} ports",
       "license": "Business License",
       "submittedAt": "Submitted At",
-      "submittedVal": "Submitted ✓",
+      "submittedVal": "Active ✓",
       "documents": "Documents & Images",
-      "approveBtn": "Approve → Set ACTIVE",
+      "issueBtn": "Record & activate license",
+      "issuing": "Recording…",
+      "approveBtn": "Approve application",
       "approving": "Approving...",
       "rejectBtn": "Reject (reason required)"
     }

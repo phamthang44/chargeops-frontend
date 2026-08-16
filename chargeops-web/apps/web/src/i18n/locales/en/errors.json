@@ -5,6 +5,8 @@
     "STATION_003": "Invalid station status transition.",
     "STATION_005": "The station already has an active license.",
     "STATION_006": "License not found.",
+    "LICENSE_001": "License not found.",
+    "LICENSE_002": "The station already has an active license.",
     "STATION_007": "Charge point not found.",
     "STATION_008": "Charge point code already exists.",
     "STATION_009": "Connector not found.",
@@ -46,6 +48,8 @@
     "error.station.invalidStatusTransition": "Station status cannot change from {{0}} to {{1}}",
     "error.station.activeLicenseAlreadyExists": "The station already has an active license",
     "error.station.licenseNotFound": "License not found: {{0}}",
+    "error.license.activeLicenseAlreadyExists": "The station already has an active license",
+    "error.license.notFound": "License not found: {{0}}",
     "error.station.chargePointNotFound": "Charge point not found: {{0}}",
     "error.station.chargePointCodeAlreadyExists": "Charge point code already exists: {{0}}",
     "error.station.connectorNotFound": "Connector not found: {{0}}",
@@ -101,6 +105,9 @@
     "validation.station.contactPhone.maxLength": "Station contact phone cannot exceed 20 characters",
     "validation.station.plannedChargePointCount.min": "Planned charge point count must be greater than zero",
     "validation.approval.reason.required": "A rejection reason is required",
-    "validation.approval.reason.maxLength": "Rejection reason cannot exceed 500 characters"
+    "validation.approval.reason.maxLength": "Rejection reason cannot exceed 500 characters",
+    "validation.license.plan.required": "License plan is required",
+    "validation.license.feeAmount.required": "License fee is required",
+    "validation.license.feeAmount.min": "License fee cannot be negative"
   }
 }

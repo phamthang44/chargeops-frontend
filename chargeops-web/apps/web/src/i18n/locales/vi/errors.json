@@ -5,6 +5,8 @@
     "STATION_003": "Trạng thái trạm sạc không hợp lệ để thực hiện thao tác.",
     "STATION_005": "Trạm sạc này đã có gói giấy phép (License) đang hoạt động.",
     "STATION_006": "Không tìm thấy gói giấy phép.",
+    "LICENSE_001": "Không tìm thấy gói giấy phép.",
+    "LICENSE_002": "Trạm sạc này đã có gói giấy phép (License) đang hoạt động.",
     "STATION_007": "Không tìm thấy trụ sạc.",
     "STATION_008": "Mã trụ sạc đã tồn tại trên hệ thống.",
     "STATION_009": "Không tìm thấy cổng sạc.",
@@ -46,6 +48,8 @@
     "error.station.invalidStatusTransition": "Trạng thái trạm không thể chuyển từ {{0}} sang {{1}}.",
     "error.station.activeLicenseAlreadyExists": "Trạm sạc này đã có gói giấy phép (License) đang hoạt động.",
     "error.station.licenseNotFound": "Không tìm thấy gói giấy phép: {{0}}",
+    "error.license.activeLicenseAlreadyExists": "Trạm sạc này đã có gói giấy phép (License) đang hoạt động.",
+    "error.license.notFound": "Không tìm thấy gói giấy phép: {{0}}",
     "error.station.chargePointNotFound": "Không tìm thấy trụ sạc: {{0}}",
     "error.station.chargePointCodeAlreadyExists": "Mã trụ sạc đã tồn tại: {{0}}",
     "error.station.connectorNotFound": "Không tìm thấy cổng sạc: {{0}}",
@@ -101,6 +105,9 @@
     "validation.station.contactPhone.maxLength": "Số điện thoại không được vượt quá 20 ký tự.",
     "validation.station.plannedChargePointCount.min": "Số trụ sạc dự kiến phải lớn hơn 0.",
     "validation.approval.reason.required": "Vui lòng nhập lý do từ chối phê duyệt.",
-    "validation.approval.reason.maxLength": "Lý do từ chối không được vượt quá 500 ký tự."
+    "validation.approval.reason.maxLength": "Lý do từ chối không được vượt quá 500 ký tự.",
+    "validation.license.plan.required": "Vui lòng chọn gói giấy phép.",
+    "validation.license.feeAmount.required": "Vui lòng nhập phí giấy phép.",
+    "validation.license.feeAmount.min": "Phí giấy phép không được âm."
   }
 }

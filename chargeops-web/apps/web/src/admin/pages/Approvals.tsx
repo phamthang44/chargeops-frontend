@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatDateVn, formatDateTimeVn, useApi, type Station } from '@chargeops/api';
-import { Button, Card, IconClipboardCheck, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
+import { formatDateVn, formatDateTimeVn, useApi, type StationApprovalSummary } from '@chargeops/api';
+import { Button, Card, IconClipboardCheck, IconInfo, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
 import { RejectModal } from '../features/approvals/RejectModal';
 import { ApproveModal } from '../features/approvals/ApproveModal';
+import { IssueLicenseModal } from '../features/approvals/IssueLicenseModal';
 
 import { getApiErrorMessage } from '../../i18n';
 
@@ -17,6 +18,7 @@ export function Approvals() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
+  const [issueOpen, setIssueOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['approvals'],
@@ -30,6 +32,7 @@ export function Approvals() {
     mutationFn: (id: string) => api.stations.approve(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
+      qc.invalidateQueries({ queryKey: ['approvals', 'detail'] });
       toast(t('approvals.toastApproved', { name: selected?.name || 'Trạm' }), 'success');
       setApproveOpen(false);
       setSelectedId(null);
@@ -41,9 +44,23 @@ export function Approvals() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => api.stations.reject(id, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
+      qc.invalidateQueries({ queryKey: ['approvals', 'detail'] });
       toast(t('approvals.toastRejected', { name: selected?.name || 'Trạm' }), 'success');
       setRejectOpen(false);
       setSelectedId(null);
+    },
+    onError: (e) => toast(getApiErrorMessage(e), 'error'),
+  });
+
+  const issueLicense = useMutation({
+    mutationFn: ({ stationId, plan, feeAmount }: { stationId: string; plan: 'MONTHLY' | 'YEARLY'; feeAmount: number }) =>
+      api.licenses.issue(stationId, { plan, feeAmount }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['approvals'] });
+      qc.invalidateQueries({ queryKey: ['approvals', 'detail', selected?.id] });
+      qc.invalidateQueries({ queryKey: ['licenses'] });
+      toast(t('approvals.toastIssued', { defaultValue: `Đã ghi nhận & kích hoạt License thành công cho ${selected?.name || 'trạm'}` }), 'success');
+      setIssueOpen(false);
     },
     onError: (e) => toast(getApiErrorMessage(e), 'error'),
   });
@@ -115,11 +132,25 @@ export function Approvals() {
             <ApprovalDetail
               station={selected}
               approving={approve.isPending}
+              issuing={issueLicense.isPending}
               onApprove={() => setApproveOpen(true)}
               onReject={() => setRejectOpen(true)}
+              onIssue={() => setIssueOpen(true)}
             />
           )}
         </div>
+      )}
+
+      {selected && (
+        <IssueLicenseModal
+          open={issueOpen}
+          station={selected}
+          pending={issueLicense.isPending}
+          onClose={() => setIssueOpen(false)}
+          onConfirm={({ plan, feeAmount }) =>
+            issueLicense.mutate({ stationId: selected.id, plan, feeAmount })
+          }
+        />
       )}
 
       {selected && (
@@ -148,19 +179,23 @@ export function Approvals() {
 function ApprovalDetail({
   station,
   approving,
+  issuing,
   onApprove,
   onReject,
+  onIssue,
 }: {
-  station: Station;
+  station: StationApprovalSummary;
   approving: boolean;
+  issuing: boolean;
   onApprove: () => void;
   onReject: () => void;
+  onIssue: () => void;
 }) {
   const { t } = useTranslation('admin');
   const api = useApi();
   const [showHistory, setShowHistory] = useState(false);
 
-  const { data: detail } = useQuery({
+  const { data: detail, isLoading: detailLoading } = useQuery({
     queryKey: ['approvals', 'detail', station.id],
     queryFn: () => api.stations.approvalDetail(station.id),
   });
@@ -175,12 +210,22 @@ function ApprovalDetail({
   const city = detail?.provinceName || station.provinceName || station.city || '';
   const fullAddress = detail
     ? [detail.addressLine, detail.wardName, detail.provinceName].filter(Boolean).join(', ')
-    : station.address ||
-      [station.addressLine, station.wardName, station.provinceName].filter(Boolean).join(', ') ||
-      station.addressLine ||
-      '—';
+    : detailLoading
+      ? 'Đang tải địa chỉ…'
+      : [station.provinceName || station.city].filter(Boolean).join(', ') || '—';
   const count = detail?.plannedChargePointCount ?? station.plannedChargePointCount ?? station.chargerCount ?? 0;
-  const isLicenseSubmitted = detail ? detail.licenseSubmitted : true;
+  const hasActiveLicense = Boolean(detail?.licenseSubmitted);
+
+  const licenseValue = detailLoading
+    ? 'Đang kiểm tra…'
+    : hasActiveLicense
+      ? t('approvals.detail.submittedVal', { defaultValue: 'Đang hoạt động ✓' })
+      : 'Chưa có license đang hiệu lực';
+  const licenseClass = detailLoading
+    ? 'font-medium text-faint'
+    : hasActiveLicense
+      ? 'font-semibold text-good'
+      : 'font-semibold text-warn';
 
   return (
     <Card className="p-[17px]">
@@ -197,8 +242,8 @@ function ApprovalDetail({
         <DetailRow label={t('approvals.detail.proposedChargers')} value={t('approvals.detail.proposedChargersVal', { count })} border />
         <DetailRow
           label={t('approvals.detail.license')}
-          value={isLicenseSubmitted ? t('approvals.detail.submittedVal') : 'Chưa nộp'}
-          valueClass={isLicenseSubmitted ? 'font-semibold text-good' : 'font-semibold text-warn'}
+          value={licenseValue}
+          valueClass={licenseClass}
           border
         />
         <DetailRow
@@ -213,7 +258,11 @@ function ApprovalDetail({
           {t('approvals.detail.documents', { defaultValue: 'Hồ sơ & Tài liệu đính kèm' })}
           {detail?.assets?.length ? ` (${detail.assets.length})` : ''}
         </div>
-        {detail?.assets && detail.assets.length > 0 ? (
+        {detailLoading ? (
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] border border-line-2 bg-surface-2 font-mono text-[11px] text-faint">
+            <span>Đang tải danh sách tài liệu...</span>
+          </div>
+        ) : detail?.assets && detail.assets.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {detail.assets.map((asset, idx) => (
               <a
@@ -314,13 +363,38 @@ function ApprovalDetail({
         )}
       </div>
 
+      {/* Action Buttons Matrix per 4.1 & 9.1 */}
       <div className="flex flex-col gap-[9px]">
-        <Button fullWidth onClick={onApprove} disabled={approving}>
-          {approving ? t('approvals.detail.approving') : t('approvals.detail.approveBtn')}
-        </Button>
-        <Button variant="danger-soft" fullWidth onClick={onReject}>
-          {t('approvals.detail.rejectBtn')}
-        </Button>
+        {hasActiveLicense ? (
+          <>
+            <Button fullWidth onClick={onApprove} disabled={approving || detailLoading}>
+              {approving ? t('approvals.detail.approving') : t('approvals.detail.approveBtn')}
+            </Button>
+            <Button variant="danger-soft" fullWidth onClick={onReject}>
+              {t('approvals.detail.rejectBtn')}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button fullWidth variant="primary" onClick={onIssue} disabled={issuing || detailLoading}>
+              {issuing ? t('approvals.detail.issuing', { defaultValue: 'Đang ghi nhận…' }) : t('approvals.detail.issueBtn', { defaultValue: 'Ghi nhận & kích hoạt license' })}
+            </Button>
+            <div className="rounded-[8px] border border-warn-border bg-warn-soft/40 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
+              <div className="flex items-center gap-1.5 font-semibold">
+                <IconInfo size={14} className="shrink-0 text-warn" />
+                <span>Trạm chưa có active license</span>
+              </div>
+              <div className="mt-0.5 text-[11px] opacity-90">
+                {t('approvals.detail.licenseRequiredHint', {
+                  defaultValue: 'Cần cấp gói Giấy phép (License) trước khi có thể duyệt hồ sơ trạm.',
+                })}
+              </div>
+            </div>
+            <Button variant="danger-soft" fullWidth onClick={onReject}>
+              {t('approvals.detail.rejectBtn')}
+            </Button>
+          </>
+        )}
       </div>
     </Card>
   );

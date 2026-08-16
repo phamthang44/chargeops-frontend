@@ -20,10 +20,18 @@ export interface MoreMenuProps {
 /** Three-dot overflow menu for secondary actions — table rows, card headers, the header avatar. */
 export function MoreMenu({ items, trigger, align = 'right', className = '' }: MoreMenuProps) {
   const [open, setOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // If less than 190px below, pop open upwards
+      setOpenUpwards(spaceBelow < 190 && rect.top > 190);
+    }
+
     const onDocClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
@@ -40,7 +48,7 @@ export function MoreMenu({ items, trigger, align = 'right', className = '' }: Mo
     <div ref={ref} className={`relative ${className}`}>
       <div onClick={() => setOpen((v) => !v)} className="cursor-pointer" role="button" aria-haspopup="menu" aria-expanded={open}>
         {trigger ?? (
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg text-faint hover:bg-chip">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg text-faint hover:bg-chip transition-colors">
             <IconDots size={16} strokeWidth={2.2} />
           </span>
         )}
@@ -48,9 +56,9 @@ export function MoreMenu({ items, trigger, align = 'right', className = '' }: Mo
       {open && (
         <div
           role="menu"
-          className={`absolute top-full z-45 mt-1.5 min-w-[168px] overflow-hidden rounded-[11px] border border-line-2 bg-surface py-1.5 shadow-[0_10px_30px_rgba(16,17,26,.12)] ${
-            align === 'right' ? 'right-0' : 'left-0'
-          }`}
+          className={`absolute z-[60] min-w-[175px] overflow-hidden rounded-[11px] border border-line-2 bg-surface py-1.5 shadow-[0_12px_32px_rgba(0,0,0,.18)] ${
+            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          } ${align === 'right' ? 'right-0' : 'left-0'}`}
           style={{ animation: 'popIn .12s ease' }}
         >
           {items.map((it) => (
@@ -61,7 +69,7 @@ export function MoreMenu({ items, trigger, align = 'right', className = '' }: Mo
                 setOpen(false);
                 it.onClick();
               }}
-              className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] font-medium ${
+              className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] font-medium transition-colors ${
                 it.tone === 'danger' ? 'text-bad hover:bg-bad-soft' : 'text-body hover:bg-chip'
               }`}
             >
@@ -74,3 +82,4 @@ export function MoreMenu({ items, trigger, align = 'right', className = '' }: Mo
     </div>
   );
 }
+

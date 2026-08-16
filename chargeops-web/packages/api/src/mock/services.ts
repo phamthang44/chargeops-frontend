@@ -5,7 +5,7 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationApprovalDetail, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
+import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationApprovalDetail, StationApprovalSummary, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
 
@@ -187,9 +187,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           },
           actionQueue: {
             pendingStations: db.approvalQueue.length,
-            expiringLicenses: db.licenses.filter((l) => l.status === 'expiring').length,
+            expiringLicenses: db.licenses.filter((l) => l.expiringSoon || (l.daysLeft != null && l.daysLeft > 0 && l.daysLeft <= 15)).length,
             expiringDaysMin: 11,
-            expiredLicenses: db.licenses.filter((l) => l.status === 'expired').length,
+            expiredLicenses: db.licenses.filter((l) => l.status === 'EXPIRED' || l.status === 'expired' || (l.daysLeft != null && l.daysLeft < 0)).length,
             reportedFaults: db.connectors.reduce((n, c) => n + c.faultCount, 0),
           },
           topStations: [
@@ -455,9 +455,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         st.amenities = [...amenities];
         return { ...st };
       },
-      async approvals() {
+      async approvals(): Promise<StationApprovalSummary[]> {
         await delay();
-        return db.approvalQueue.filter((s) => s.status === 'pending');
+        return db.approvalQueue
+          .filter((s) => s.status === 'pending')
+          .map((s) => ({
+            id: s.id,
+            stationCode: s.stationCode || s.id,
+            name: s.name,
+            ownerDisplayName: s.ownerDisplayName || s.ownerName || 'Chủ trạm',
+            provinceName: s.provinceName || s.city || 'Hà Nội',
+            plannedChargePointCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
+            submittedAt: s.submittedAt || new Date().toISOString(),
+            ownerName: s.ownerDisplayName || s.ownerName,
+            city: s.provinceName || s.city,
+            chargerCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
+          }));
       },
       async approvalDetail(id): Promise<StationApprovalDetail> {
         await delay();
@@ -478,23 +491,8 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           plannedChargePointCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
           status: s.status,
           submittedAt: s.submittedAt || new Date().toISOString(),
-          licenseSubmitted: s.licenseSubmitted ?? true,
-          assets: s.assets ?? [
-            {
-              assetType: 'IMAGE',
-              assetUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=600&q=80',
-              isPrimary: true,
-              displayOrder: 1,
-              altText: 'Mặt tiền trạm sạc',
-            },
-            {
-              assetType: 'DOCUMENT',
-              assetUrl: '#',
-              isPrimary: false,
-              displayOrder: 2,
-              altText: 'Giấy phép kinh doanh & PCCC.pdf',
-            },
-          ],
+          licenseSubmitted: s.licenseSubmitted ?? false,
+          assets: s.assets ?? [],
         };
       },
       async all() {
@@ -505,6 +503,11 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const s = db.approvalQueue.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy hồ sơ ${id}`);
+        if (!s.licenseSubmitted) {
+          const err = new Error('Trạm cần có License còn hiệu lực trước khi được duyệt.');
+          (err as any).code = 'APPROVAL_003';
+          throw err;
+        }
         s.status = 'active';
       },
       async reject(id, reason): Promise<void> {
@@ -631,13 +634,14 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             const totalVnd = payments.filter((t) => t.method === m).reduce((s, t) => s + t.amountVnd, 0);
             return { method: m, totalVnd, pct: grossVnd ? Math.round((totalVnd / grossVnd) * 100) : 0 };
           })
-          .filter((m) => m.totalVnd > 0);
+          .filter((m) => m.totalVnd > 0)
+          .sort((a, b) => b.totalVnd - a.totalVnd);
 
-        // last 11 days of net revenue
-        const byDay = new Map<number, number>();
-        for (const t of rows) {
-          const day = Number(t.date.slice(8, 10));
-          byDay.set(day, (byDay.get(day) ?? 0) + t.amountVnd);
+        // rolling 11-day trend
+        const byDay = new Map<string, number>();
+        for (const t of payments) {
+          const d = t.date.slice(5); // MM-DD
+          byDay.set(d, (byDay.get(d) ?? 0) + t.amountVnd);
         }
         const dailyTrend = [...byDay.entries()]
           .sort((a, b) => a[0] - b[0])
@@ -658,20 +662,140 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     },
 
     licenses: {
-      async mine() {
+      async issue(stationId, input) {
         await delay();
+        const station =
+          db.approvalQueue.find((s) => s.id === stationId || s.stationCode === stationId) ||
+          db.ownerStations.find((s) => s.id === stationId || s.stationCode === stationId) ||
+          db.allStations.find((s) => s.id === stationId || s.stationCode === stationId);
+        if (!station) {
+          const err = new Error(`Không tìm thấy trạm ${stationId}`);
+          (err as any).code = 'LICENSE_001';
+          throw err;
+        }
+
+        const hasActive = db.licenses.some(
+          (l) => (l.stationId === stationId || l.stationId === station.id) && (l.status === 'ACTIVE' || l.status === 'active')
+        );
+        if (hasActive) {
+          const err = new Error('Trạm sạc này đã có gói giấy phép (License) đang hoạt động.');
+          (err as any).code = 'LICENSE_002';
+          throw err;
+        }
+
+        const now = new Date();
+        const startAt = now.toISOString();
+        const expDate = new Date(now);
+        if (input.plan === 'YEARLY' || (input.plan as any) === 'yearly') {
+          expDate.setFullYear(expDate.getFullYear() + 1);
+        } else {
+          expDate.setMonth(expDate.getMonth() + 1);
+        }
+        const expiresAt = expDate.toISOString();
+        const daysLeft = input.plan === 'YEARLY' || (input.plan as any) === 'yearly' ? 365 : 30;
+
+        const newLic: License = {
+          id: `lic-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          stationId: station.id,
+          stationName: station.name,
+          ownerName: station.ownerDisplayName || station.ownerName || 'Chủ trạm',
+          plan: input.plan,
+          feeAmount: input.feeAmount,
+          startAt,
+          expiresAt,
+          status: 'ACTIVE',
+          daysLeft,
+          expiringSoon: false,
+          priceVnd: input.feeAmount,
+          startDate: startAt.split('T')[0],
+          expiryDate: expiresAt.split('T')[0],
+        };
+
+        db.licenses.unshift(newLic);
+        station.licenseSubmitted = true;
+        station.licenseSummary = `${input.plan === 'YEARLY' ? 'Năm' : 'Tháng'} · hết hạn ${expiresAt.split('T')[0]}`;
+        return { ...newLic };
+      },
+      async mine(stationId?: string) {
+        await delay();
+        if (stationId) {
+          const lic = db.licenses.find((x) => x.stationId === stationId && (x.status === 'ACTIVE' || x.status === 'active')) || db.licenses.find((x) => x.stationId === stationId);
+          if (lic) return { ...lic };
+        }
         return { ...db.licenses[0] };
+      },
+      async history(stationId: string) {
+        await delay();
+        return db.licenses.filter((x) => x.stationId === stationId);
       },
       async list() {
         await delay();
         return [...db.licenses];
       },
-      async recordRenewal(stationId) {
+      async recordRenewal(stationId, input) {
         await delay();
-        const l = db.licenses.find((x) => x.stationId === stationId);
-        if (!l) throw new Error(`Không tìm thấy giấy phép ${stationId}`);
-        l.status = 'active';
-        l.daysLeft = l.plan === 'yearly' ? 365 : 30;
+        const old = db.licenses.find((x) => x.stationId === stationId);
+        if (!old) throw new Error(`Không tìm thấy giấy phép cho trạm ${stationId}`);
+        const plan = input?.plan || old.plan;
+        const fee = input?.feeAmount ?? old.feeAmount ?? 500000;
+
+        const isOldActive = old.status === 'ACTIVE' || old.status === 'active';
+        const startAt = isOldActive ? old.expiresAt : new Date().toISOString();
+        const startDateObj = new Date(startAt);
+        const expDateObj = new Date(startDateObj);
+        if (plan === 'YEARLY' || (plan as any) === 'yearly') {
+          expDateObj.setFullYear(expDateObj.getFullYear() + 1);
+        } else {
+          expDateObj.setMonth(expDateObj.getMonth() + 1);
+        }
+        const expiresAt = expDateObj.toISOString();
+        const daysLeft = plan === 'YEARLY' || (plan as any) === 'yearly' ? 365 : 30;
+
+        const newLic: License = {
+          id: `lic-renew-${Date.now()}`,
+          stationId: old.stationId,
+          stationName: old.stationName,
+          ownerName: old.ownerName,
+          plan,
+          feeAmount: fee,
+          startAt,
+          expiresAt,
+          status: isOldActive ? 'PENDING' : 'ACTIVE',
+          daysLeft,
+          expiringSoon: false,
+          priceVnd: fee,
+          startDate: startAt.split('T')[0],
+          expiryDate: expiresAt.split('T')[0],
+        };
+
+        db.licenses.unshift(newLic);
+        return { ...newLic };
+      },
+      async suspend(stationId, licenseId) {
+        await delay();
+        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        if (!l) throw new Error('Không tìm thấy license');
+        l.status = 'SUSPENDED';
+        const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
+        if (st) st.licenseSubmitted = false;
+        return { ...l };
+      },
+      async activate(stationId, licenseId) {
+        await delay();
+        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        if (!l) throw new Error('Không tìm thấy license');
+        l.status = 'ACTIVE';
+        const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
+        if (st) st.licenseSubmitted = true;
+        return { ...l };
+      },
+      async cancel(stationId, licenseId) {
+        await delay();
+        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        if (!l) throw new Error('Không tìm thấy license');
+        l.status = 'CANCELLED';
+        const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
+        if (st) st.licenseSubmitted = false;
         return { ...l };
       },
     },

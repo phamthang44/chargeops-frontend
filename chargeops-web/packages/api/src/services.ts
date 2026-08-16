@@ -16,7 +16,9 @@ import type {
   Connector,
   ConnectorRuntimeStatus,
   ConnectorType,
+  IssueLicenseRequest,
   License,
+  LicenseStatus,
   OwnerDashboard,
   Page,
   PaymentMethod,
@@ -28,6 +30,7 @@ import type {
   Amenity,
   Station,
   StationApprovalDetail,
+  StationApprovalSummary,
   StationRegistration,
   StationStaffMember,
   StationStatusHistory,
@@ -98,7 +101,7 @@ export interface StationService {
   /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
   updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
   /** Admin: approval queue (status = pending). */
-  approvals(params?: { pageNo?: number; pageSize?: number }): Promise<Station[]>;
+  approvals(params?: { pageNo?: number; pageSize?: number }): Promise<StationApprovalSummary[]>;
   /** Admin: get detailed approval request info including address, licenseSubmitted, assets. */
   approvalDetail(id: string): Promise<StationApprovalDetail>;
   /** Admin: every approved station platform-wide. Filtering/search happens client-side. */
@@ -121,12 +124,22 @@ export interface TransactionService {
 }
 
 export interface LicenseService {
+  /** Admin: issue an active license to a station (POST /stations/{stationId}/licenses). */
+  issue(stationId: string, input: IssueLicenseRequest): Promise<License>;
   /** Owner: own license (status display only — renewal handled off-platform). */
-  mine(): Promise<License>;
+  mine(stationId?: string): Promise<License>;
+  /** Station license history. */
+  history(stationId: string): Promise<License[]>;
   /** Admin: all licenses with expiry monitoring. */
-  list(): Promise<License[]>;
+  list(params?: { pageNo?: number; pageSize?: number; status?: LicenseStatus; stationId?: string }): Promise<License[]>;
   /** Admin: manually record an off-platform renewal. */
-  recordRenewal(stationId: string): Promise<License>;
+  recordRenewal(stationId: string, input?: IssueLicenseRequest): Promise<License>;
+  /** Admin: suspend license. */
+  suspend(stationId: string, licenseId: string): Promise<License>;
+  /** Admin: reactivate suspended license. */
+  activate(stationId: string, licenseId: string): Promise<License>;
+  /** Admin: cancel license. */
+  cancel(stationId: string, licenseId: string): Promise<License>;
 }
 
 export interface UserService {

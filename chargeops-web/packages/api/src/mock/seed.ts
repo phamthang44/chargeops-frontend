@@ -345,11 +345,11 @@ export function buildMockDb(): MockDb {
 
   /* ---- licenses ---- */
   const licenses: License[] = [
-    { stationId: 'ST-1001', stationName: 'Trạm Hà Đông', ownerName: 'EVGo Co.', plan: 'yearly', startDate: '2025-09-12', expiryDate: '2026-09-12', daysLeft: 76, status: 'active', priceVnd: 4_800_000 },
-    { stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', ownerName: 'VinCharge', plan: 'monthly', startDate: '2026-06-30', expiryDate: '2026-07-30', daysLeft: 31, status: 'active', priceVnd: 500_000 },
-    { stationId: 'ST-1023', stationName: 'Trạm Thanh Xuân', ownerName: 'GreenVolt', plan: 'yearly', startDate: '2025-07-10', expiryDate: '2026-07-10', daysLeft: 11, status: 'expiring', priceVnd: 4_800_000 },
-    { stationId: 'ST-1009', stationName: 'Trạm Đống Đa', ownerName: 'SaigonCharge', plan: 'monthly', startDate: '2026-05-02', expiryDate: '2026-06-02', daysLeft: -27, status: 'expired', priceVnd: 500_000 },
-    { stationId: 'ST-1031', stationName: 'Trạm Hoàn Kiếm', ownerName: 'CityVolt', plan: 'yearly', startDate: '2026-01-20', expiryDate: '2027-01-20', daysLeft: 205, status: 'active', priceVnd: 4_800_000 },
+    { id: 'lic-001', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', ownerName: 'EVGo Co.', plan: 'YEARLY', feeAmount: 4_800_000, startAt: '2025-09-12T00:00:00Z', expiresAt: '2026-09-12T00:00:00Z', startDate: '2025-09-12', expiryDate: '2026-09-12', daysLeft: 76, status: 'ACTIVE', priceVnd: 4_800_000 },
+    { id: 'lic-002', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', ownerName: 'VinCharge', plan: 'MONTHLY', feeAmount: 500_000, startAt: '2026-06-30T00:00:00Z', expiresAt: '2026-07-30T00:00:00Z', startDate: '2026-06-30', expiryDate: '2026-07-30', daysLeft: 31, status: 'ACTIVE', priceVnd: 500_000 },
+    { id: 'lic-003', stationId: 'ST-1023', stationName: 'Trạm Thanh Xuân', ownerName: 'GreenVolt', plan: 'YEARLY', feeAmount: 4_800_000, startAt: '2025-07-10T00:00:00Z', expiresAt: '2026-07-10T00:00:00Z', startDate: '2025-07-10', expiryDate: '2026-07-10', daysLeft: 11, status: 'ACTIVE', priceVnd: 4_800_000, expiringSoon: true },
+    { id: 'lic-004', stationId: 'ST-1009', stationName: 'Trạm Đống Đa', ownerName: 'SaigonCharge', plan: 'MONTHLY', feeAmount: 500_000, startAt: '2026-05-02T00:00:00Z', expiresAt: '2026-06-02T00:00:00Z', startDate: '2026-05-02', expiryDate: '2026-06-02', daysLeft: -27, status: 'EXPIRED', priceVnd: 500_000 },
+    { id: 'lic-005', stationId: 'ST-1031', stationName: 'Trạm Hoàn Kiếm', ownerName: 'CityVolt', plan: 'YEARLY', feeAmount: 4_800_000, startAt: '2026-01-20T00:00:00Z', expiresAt: '2027-01-20T00:00:00Z', startDate: '2026-01-20', expiryDate: '2027-01-20', daysLeft: 205, status: 'ACTIVE', priceVnd: 4_800_000 },
   ];
 
   /* ---- users (FR12) ---- */

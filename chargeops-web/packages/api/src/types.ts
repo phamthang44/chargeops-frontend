@@ -378,19 +378,45 @@ export interface StationRegistration extends RegisterStationRequest {}
 
 /* ---------- licenses ---------- */
 
-export type LicenseStatus = 'active' | 'expiring' | 'expired';
-export type LicensePlan = 'monthly' | 'yearly';
+export type LicenseStatus =
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'CANCELLED'
+  | 'EXPIRED'
+  | 'active'
+  | 'expiring'
+  | 'expired';
+
+export type LicensePlan = 'MONTHLY' | 'YEARLY' | 'monthly' | 'yearly';
 
 export interface License {
+  id: string;
   stationId: string;
-  stationName: string;
-  ownerName: string;
+  stationName?: string;
+  ownerName?: string;
   plan: LicensePlan;
-  startDate: string;
-  expiryDate: string;
-  daysLeft: number;
+  feeAmount: number;
+  startAt: string;
+  expiresAt: string;
   status: LicenseStatus;
-  priceVnd: number;
+  createdAt?: string;
+  recordedByName?: string;
+  daysLeft?: number;
+  expiringSoon?: boolean;
+  startDate?: string;
+  expiryDate?: string;
+  priceVnd?: number;
+}
+
+export interface IssueLicenseRequest {
+  plan: 'MONTHLY' | 'YEARLY';
+  feeAmount: number;
+}
+
+export interface RenewLicenseRequest {
+  plan: 'MONTHLY' | 'YEARLY';
+  feeAmount: number;
 }
 
 /* ---------- users ---------- */

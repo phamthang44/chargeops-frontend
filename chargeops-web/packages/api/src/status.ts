@@ -58,6 +58,11 @@ export const STATION_STATUS: Record<StationStatus, StatusMeta> = {
 };
 
 export const LICENSE_STATUS: Record<LicenseStatus, StatusMeta> = {
+  ACTIVE: { label: 'Đang hoạt động', tone: 'good' },
+  PENDING: { label: 'Chờ hiệu lực', tone: 'brand' },
+  SUSPENDED: { label: 'Tạm ngưng', tone: 'warn' },
+  CANCELLED: { label: 'Đã hủy', tone: 'bad' },
+  EXPIRED: { label: 'Đã hết hạn', tone: 'neutral' },
   active: { label: 'Đang hoạt động', tone: 'good' },
   expiring: { label: 'Sắp hết hạn', tone: 'warn' },
   expired: { label: 'Đã hết hạn', tone: 'bad' },

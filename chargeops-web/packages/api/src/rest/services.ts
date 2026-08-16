@@ -65,9 +65,14 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     licenses: {
-      mine: () => http.get('/licenses/mine'),
-      list: () => http.get('/admin/licenses'),
-      recordRenewal: (stationId) => http.post(`/admin/licenses/${stationId}/renew`),
+      issue: (stationId, input) => http.post(`/stations/${stationId}/licenses`, input),
+      mine: (stationId) => http.get('/owner/licenses', stationId ? { stationId } : undefined).catch(() => http.get('/licenses/mine', stationId ? { stationId } : undefined)),
+      history: (stationId) => http.get(`/stations/${stationId}/licenses`),
+      list: (params = {}) => http.get('/admin/licenses', params),
+      recordRenewal: (stationId, input) => http.post(`/stations/${stationId}/licenses/renew`, input).catch(() => http.post(`/admin/licenses/${stationId}/renew`)),
+      suspend: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/suspend`),
+      activate: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/activate`),
+      cancel: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/cancel`),
     },
 
     users: {

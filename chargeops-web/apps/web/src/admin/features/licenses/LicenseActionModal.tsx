@@ -31,7 +31,7 @@ export function LicenseActionModal({
     suspend: {
       title: 'Tạm ngưng License',
       subtitle: `Tạm ngưng quyền vận hành của License ${license.id} thuộc trạm ${license.stationName || license.stationId}.`,
-      notice: 'Lưu ý: Thời hạn hiệu lực của License vẫn tiếp tục chạy trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời mất license gate.',
+      notice: 'Lưu ý: Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường mà không bị hủy ngang.',
       confirmBtn: 'Xác nhận tạm ngưng',
       confirmVariant: 'danger' as const,
       tone: 'warn' as const,
@@ -39,7 +39,7 @@ export function LicenseActionModal({
     activate: {
       title: 'Kích hoạt lại License',
       subtitle: `Khôi phục trạng thái hoạt động cho License ${license.id} thuộc trạm ${license.stationName || license.stationId}.`,
-      notice: `Thời hạn của gói tiếp tục có hiệu lực đến ${expiry ? formatDateVn(expiry) : 'hết hạn theo quy định'}.`,
+      notice: `Thời hạn của gói tiếp tục có hiệu lực đến ${expiry ? formatDateVn(expiry) : 'hết hạn theo quy định'}. Trạm sẽ tự động hiển thị lại cho tài xế đặt chỗ nếu trạng thái trạm đang là Hoạt động.`,
       confirmBtn: 'Xác nhận kích hoạt lại',
       confirmVariant: 'primary' as const,
       tone: 'good' as const,
@@ -47,7 +47,7 @@ export function LicenseActionModal({
     cancel: {
       title: 'Hủy bỏ License (Không thể hoàn tác)',
       subtitle: `Chấm dứt hoàn toàn hiệu lực của License ${license.id} thuộc trạm ${license.stationName || license.stationId}.`,
-      notice: 'CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action) và không thể khôi phục lại gói này. Nếu muốn sử dụng lại, cần ghi nhận một subscription mới.',
+      notice: 'CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã xác nhận trước đó vẫn được phép hoàn tất.',
       confirmBtn: 'Xác nhận hủy License',
       confirmVariant: 'danger' as const,
       tone: 'bad' as const,

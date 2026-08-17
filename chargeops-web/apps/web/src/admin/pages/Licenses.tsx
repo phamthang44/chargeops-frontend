@@ -35,6 +35,7 @@ import {
 import { RenewLicenseModal } from '../features/licenses/RenewLicenseModal';
 import { LicenseActionModal, type LicenseActionType } from '../features/licenses/LicenseActionModal';
 import { LicenseHistoryDrawer } from '../features/licenses/LicenseHistoryDrawer';
+import { getApiErrorMessage } from '../../i18n';
 
 type FilterKey = 'all' | 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'EXPIRED' | 'CANCELLED';
 
@@ -68,7 +69,10 @@ export function Licenses() {
       toast(t('licenses.toastRenewal', { name: l.stationName || l.stationId, defaultValue: `Đã ghi nhận gia hạn License cho ${l.stationName || l.stationId}` }), 'success');
       setRenewLicense(null);
     },
-    onError: (e) => toast((e as Error).message, 'error'),
+    onError: (e) => {
+      qc.invalidateQueries({ queryKey: ['licenses'] });
+      toast(getApiErrorMessage(e), 'error');
+    },
   });
 
   const executeAction = useMutation({
@@ -88,7 +92,11 @@ export function Licenses() {
       toast('Thao tác cập nhật trạng thái License thành công.', 'success');
       setActionState(null);
     },
-    onError: (e) => toast((e as Error).message, 'error'),
+    onError: (e) => {
+      qc.invalidateQueries({ queryKey: ['licenses'] });
+      toast(getApiErrorMessage(e), 'error');
+      setActionState(null);
+    },
   });
 
   const all = data ?? [];

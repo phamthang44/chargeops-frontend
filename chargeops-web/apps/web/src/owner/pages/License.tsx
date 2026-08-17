@@ -237,13 +237,25 @@ function Body({ license, station, history }: { license: License; station: Statio
         </div>
       )}
 
+      {isSuspended && (
+        <div className="flex items-start gap-3 rounded-[11px] border border-warn-border bg-warn-soft p-4 text-[13px] leading-relaxed text-warn-deep shadow-sm">
+          <IconAlertTriangle size={20} className="mt-0.5 shrink-0 text-warn" />
+          <div>
+            <div className="font-bold text-ink">Gói Giấy phép đang bị tạm ngưng (Suspended)</div>
+            <div className="mt-0.5 text-muted">
+              Trạm đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế và tạm dừng nhận đặt chỗ mới. <span className="font-semibold text-ink">Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường mà không bị ảnh hưởng.</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isExpired && (
         <div className="flex items-start gap-3 rounded-[11px] border border-bad-border bg-bad-soft p-4 text-[13px] leading-relaxed text-bad-deep shadow-sm">
           <IconAlertTriangle size={20} className="mt-0.5 shrink-0 text-bad" />
           <div>
             <div className="font-bold">Giấy phép vận hành đã hết hạn</div>
             <div className="mt-0.5 text-bad-deep/90">
-              Trạm sạc đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế (theo quy tắc BR-STA-01). Vui lòng liên hệ Quản trị viên để ghi nhận kỳ hạn mới.
+              Trạm sạc đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế (theo quy tắc BR-STA-01). Các phiên sạc đang chạy vẫn được bảo đảm hoàn thành. Vui lòng liên hệ Quản trị viên để ghi nhận kỳ hạn mới.
             </div>
           </div>
         </div>

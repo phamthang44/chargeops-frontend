@@ -59,7 +59,7 @@ export function Approvals() {
       qc.invalidateQueries({ queryKey: ['approvals'] });
       qc.invalidateQueries({ queryKey: ['approvals', 'detail', selected?.id] });
       qc.invalidateQueries({ queryKey: ['licenses'] });
-      toast(t('approvals.toastIssued', { defaultValue: `Đã ghi nhận & kích hoạt License thành công cho ${selected?.name || 'trạm'}` }), 'success');
+      toast(t('approvals.toastIssued', { name: selected?.name || 'trạm', defaultValue: `Đã ghi nhận & kích hoạt License thành công cho ${selected?.name || 'trạm'}` }), 'success');
       setIssueOpen(false);
     },
     onError: (e) => toast(getApiErrorMessage(e), 'error'),

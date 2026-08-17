@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, FormField, IconInfo, IconShield, Modal } from '@chargeops/ui';
-import { formatVnd, type StationApprovalSummary, type Station } from '@chargeops/api';
+import { Button, IconInfo, IconShield, Modal } from '@chargeops/ui';
+import type { StationApprovalSummary, Station } from '@chargeops/api';
 
 export interface IssueLicenseModalProps {
   open: boolean;
@@ -20,7 +20,6 @@ export function IssueLicenseModal({
 }: IssueLicenseModalProps) {
   const { t } = useTranslation('admin');
   const [plan, setPlan] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
-  const [feeStr, setFeeStr] = useState<string>('500000');
   const [verified, setVerified] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +28,6 @@ export function IssueLicenseModal({
 
   const handlePlanChange = (newPlan: 'MONTHLY' | 'YEARLY') => {
     setPlan(newPlan);
-    if (newPlan === 'MONTHLY' && feeStr === '5000000') {
-      setFeeStr('500000');
-    } else if (newPlan === 'YEARLY' && feeStr === '500000') {
-      setFeeStr('5000000');
-    }
   };
 
   const handleClose = () => {
@@ -50,16 +44,10 @@ export function IssueLicenseModal({
       }));
       return;
     }
-    const fee = Number(feeStr.replace(/[^0-9]/g, ''));
-    if (isNaN(fee) || fee < 0) {
-      setError(t('issueLicenseModal.errFeePositive', { defaultValue: 'Phí giấy phép phải là số không âm.' }));
-      return;
-    }
+    const fee = plan === 'YEARLY' ? 5000000 : 500000;
     setError(null);
     onConfirm({ plan, feeAmount: fee });
   };
-
-  const feeNumber = Number(feeStr.replace(/[^0-9]/g, '')) || 0;
 
   return (
     <Modal open={open} onClose={handleClose} maxWidth={480}>
@@ -146,27 +134,12 @@ export function IssueLicenseModal({
           </div>
         </div>
 
-        {/* Fee Amount Input */}
-        <div className="mt-3.5">
-          <FormField
-            label={t('issueLicenseModal.feeLabel', { defaultValue: 'Phí License đã ghi nhận (VND)' })}
-            required
-            error={Boolean(error && !verified ? false : error)}
-            hint={error && !verified ? undefined : error || undefined}
-          >
-            <input
-              type="text"
-              value={feeStr}
-              onChange={(e) => setFeeStr(e.target.value)}
-              placeholder="500000"
-              className="h-[40px] w-full rounded-[9px] border border-line bg-surface px-3 text-[13.5px] font-medium transition-colors focus:border-brand"
-            />
-          </FormField>
-          {feeNumber > 0 && (
-            <div className="mt-1 text-right text-[11px] font-semibold text-brand">
-              {formatVnd(feeNumber)}
-            </div>
-          )}
+        {/* Standard Fee Summary Box */}
+        <div className="mt-3.5 flex items-center justify-between rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12.5px]">
+          <span className="text-muted font-medium">Mức phí niêm yết theo gói:</span>
+          <span className="font-mono font-bold text-ink text-[14px]">
+            {plan === 'YEARLY' ? '5.000.000 đ' : '500.000 đ'}
+          </span>
         </div>
 
         {/* Info Callout */}

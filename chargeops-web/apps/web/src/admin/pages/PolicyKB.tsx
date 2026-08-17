@@ -12,6 +12,7 @@ const CAT_KEYS: Record<string, string> = {
   'Giá': 'docModal.categories.pricing',
   'Trụ sạc': 'docModal.categories.chargers',
   'Tài khoản': 'docModal.categories.accounts',
+  'Giấy phép (License)': 'docModal.categories.licenses',
 };
 
 /** FR15 — admin CRUD over the policy knowledge base that powers the RAG assistant. */

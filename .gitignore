@@ -45,3 +45,7 @@ skills-lock.json
 
 design-console/
 .gitnexus
+
+# Design exports & internal project documents
+designs/
+documents/

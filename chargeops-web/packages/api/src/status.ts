@@ -94,3 +94,124 @@ export const USER_ROLE_BADGE: Record<'DRIVER' | 'OWNER' | 'ADMIN', { bg: string;
   OWNER: { bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' },
   ADMIN: { bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' },
 };
+
+/**
+ * Driver Eligibility calculation per solution-license-station-active.md:
+ * driverEligible(station, now) = station.status == ACTIVE && station has effectively active License at now.
+ */
+export function isStationDriverEligible(
+  stationStatus: StationStatus | string | null | undefined,
+  license?: {
+    status?: LicenseStatus | string | null;
+    startAt?: string | null;
+    expiresAt?: string | null;
+    daysLeft?: number;
+  } | string | null,
+  now = new Date(),
+): {
+  isEligible: boolean;
+  reason?: 'STATION_NOT_ACTIVE' | 'LICENSE_MISSING' | 'LICENSE_EXPIRED' | 'LICENSE_SUSPENDED' | 'LICENSE_CANCELLED' | 'LICENSE_NOT_STARTED';
+  label: string;
+  tone: Tone;
+  details?: string;
+} {
+  const normStation = String(stationStatus || '').toUpperCase();
+  const isStationActive = normStation === 'ACTIVE';
+
+  if (!isStationActive) {
+    return {
+      isEligible: false,
+      reason: 'STATION_NOT_ACTIVE',
+      label: 'Chưa công khai',
+      tone: 'neutral',
+      details: 'Trạm chưa được duyệt hoặc đang ở trạng thái không hoạt động.',
+    };
+  }
+
+  if (!license) {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_MISSING',
+      label: 'Thiếu Giấy phép',
+      tone: 'warn',
+      details: 'Trạm chưa được ghi nhận gói License hợp lệ.',
+    };
+  }
+
+  if (typeof license === 'string') {
+    const isExpiredText = license.toLowerCase().includes('hết hạn') && !license.toLowerCase().includes('· hết hạn 202');
+    if (isExpiredText) {
+      return {
+        isEligible: false,
+        reason: 'LICENSE_EXPIRED',
+        label: 'Tạm ẩn tìm kiếm',
+        tone: 'warn',
+        details: 'Gói License của trạm đã hết hạn.',
+      };
+    }
+    return {
+      isEligible: true,
+      label: 'Đang nhận khách',
+      tone: 'good',
+    };
+  }
+
+  const nowMs = now.getTime();
+  const normLicenseStatus = String(license.status || 'ACTIVE').toUpperCase();
+
+  if (normLicenseStatus === 'SUSPENDED') {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_SUSPENDED',
+      label: 'Tạm ẩn tìm kiếm',
+      tone: 'warn',
+      details: 'Gói License đang bị tạm ngưng. Trạm tạm thời không hiển thị cho tài xế tìm kiếm.',
+    };
+  }
+
+  if (normLicenseStatus === 'CANCELLED') {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_CANCELLED',
+      label: 'License đã hủy',
+      tone: 'bad',
+      details: 'Gói License đã bị hủy bỏ.',
+    };
+  }
+
+  if (normLicenseStatus === 'EXPIRED') {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_EXPIRED',
+      label: 'Tạm ẩn tìm kiếm',
+      tone: 'warn',
+      details: 'Gói License đã hết hạn. Vui lòng gia hạn để tiếp tục đón khách.',
+    };
+  }
+
+  if (license.startAt && new Date(license.startAt).getTime() > nowMs) {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_NOT_STARTED',
+      label: 'Chờ hiệu lực',
+      tone: 'neutral',
+      details: 'Gói License chưa tới thời điểm bắt đầu hiệu lực.',
+    };
+  }
+
+  if (license.expiresAt && new Date(license.expiresAt).getTime() <= nowMs) {
+    return {
+      isEligible: false,
+      reason: 'LICENSE_EXPIRED',
+      label: 'Tạm ẩn tìm kiếm',
+      tone: 'warn',
+      details: 'Gói License đã hết hạn hiệu lực.',
+    };
+  }
+
+  return {
+    isEligible: true,
+    label: 'Đang nhận khách',
+    tone: 'good',
+  };
+}

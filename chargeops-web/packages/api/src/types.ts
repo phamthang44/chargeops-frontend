@@ -190,8 +190,27 @@ export type StationStatus =
   | 'WITHDRAWN';
 
 export interface LicenseSummary {
+  id?: string;
   plan: 'MONTHLY' | 'YEARLY' | string;
+  status?: LicenseStatus;
+  startAt?: string | null;
   expiresAt?: string | null;
+  daysLeft?: number;
+}
+
+export type DriverEligibilityReason =
+  | 'STATION_NOT_ACTIVE'
+  | 'LICENSE_MISSING'
+  | 'LICENSE_EXPIRED'
+  | 'LICENSE_SUSPENDED'
+  | 'LICENSE_CANCELLED'
+  | 'LICENSE_NOT_STARTED';
+
+export interface StationDriverEligibility {
+  isEligible: boolean;
+  reason?: DriverEligibilityReason;
+  label: string;
+  tone: 'good' | 'warn' | 'bad' | 'neutral';
 }
 
 export interface StationAsset {

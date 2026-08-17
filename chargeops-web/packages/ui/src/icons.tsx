@@ -74,6 +74,13 @@ export const IconShieldCheck = make(
     <path d="m9 12 2 2 4-4" />
   </>,
 );
+export const IconShieldAlert = make(
+  <>
+    <path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3Z" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <circle cx="12" cy="16" r="0.9" fill="currentColor" stroke="none" />
+  </>,
+);
 export const IconChat = make(
   <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.6-.7L3 21l1.3-4.3A8.4 8.4 0 1 1 21 11.5Z" />,
 );

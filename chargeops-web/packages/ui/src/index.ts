@@ -32,5 +32,4 @@ export * from './NotificationBell';
 export * from './NotificationCenter';
 export * from './NotificationToastStack';
 export * from './AvatarDropdown';
-
-
+export * from './DriverEligibilityBadge';

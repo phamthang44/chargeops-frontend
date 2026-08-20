@@ -8,7 +8,7 @@ export interface RenewLicenseModalProps {
   license: License | null;
   pending: boolean;
   onClose: () => void;
-  onConfirm: (data: { stationId: string; plan: 'MONTHLY' | 'YEARLY'; feeAmount: number }) => void;
+  onConfirm: (data: { stationId: string; plan: 'MONTHLY' | 'YEARLY' }) => void;
 }
 
 export function RenewLicenseModal({
@@ -45,9 +45,8 @@ export function RenewLicenseModal({
       setError('Vui lòng xác nhận đã đối chiếu thông tin gia hạn ngoài nền tảng.');
       return;
     }
-    const fee = plan === 'YEARLY' ? 5000000 : 500000;
     setError(null);
-    onConfirm({ stationId: license.stationId, plan, feeAmount: fee });
+    onConfirm({ stationId: license.stationId, plan });
   };
 
   return (
@@ -77,11 +76,14 @@ export function RenewLicenseModal({
           <div className="flex flex-col gap-1.5 font-medium">
             <div className="flex justify-between">
               <span className="text-muted">Mã License:</span>
-              <span className="font-mono text-ink">{license.id}</span>
+              <span className="font-mono font-bold text-brand">{license.licenseCode || license.id}</span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
               <span className="text-muted">Trạm sạc:</span>
-              <span className="font-semibold text-ink">{license.stationName || license.stationId}</span>
+              <span className="font-semibold text-ink">
+                {license.stationName || license.stationId}{' '}
+                <span className="font-mono text-faint font-normal">({license.stationCode || license.stationId})</span>
+              </span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
               <span className="text-faint">Chủ sở hữu:</span>

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   formatDateVn,
   formatVnd,
@@ -16,8 +16,10 @@ import {
   EmptyState,
   FilterTabs,
   IconAlertTriangle,
+  IconCheck,
   IconCheckCircle,
   IconClock,
+  IconCopy,
   IconInfo,
   IconRefreshCw,
   IconShield,
@@ -25,6 +27,7 @@ import {
   MetricCard,
   MoreMenu,
   PageHeader,
+  Pagination,
   SearchInput,
   Skeleton,
   StatusPill,
@@ -34,40 +37,80 @@ import {
 } from '@chargeops/ui';
 import { RenewLicenseModal } from '../features/licenses/RenewLicenseModal';
 import { LicenseActionModal, type LicenseActionType } from '../features/licenses/LicenseActionModal';
-import { LicenseHistoryDrawer } from '../features/licenses/LicenseHistoryDrawer';
+import { LicenseDetailDrawer } from '../features/licenses/LicenseDetailDrawer';
 import { getApiErrorMessage } from '../../i18n';
 
 type FilterKey = 'all' | 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'EXPIRED' | 'CANCELLED';
 
-const GRID_COLS = '1.3fr 1.6fr 1.1fr 1fr 1.4fr 1fr 0.9fr 0.9fr';
+const GRID_COLS = '1.2fr 1.6fr 1.1fr 0.9fr 1.3fr 1fr 1.1fr';
+const PAGE_SIZE = 8;
 
-/** Admin license monitoring + manual renewal recording (purchase is off-platform). */
+/** Admin license monitoring + operational table + drawer detail & history. */
 export function Licenses() {
   const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
-  const [filter, setFilter] = useState<FilterKey>('all');
-  const [search, setSearch] = useState('');
 
-  // Modal states
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(0);
+
+  // Modal & Drawer states
+  const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
   const [renewLicense, setRenewLicense] = useState<License | null>(null);
   const [actionState, setActionState] = useState<{ type: LicenseActionType; license: License } | null>(null);
-  const [historyStation, setHistoryStation] = useState<{ id: string; name?: string } | null>(null);
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ['licenses'],
-    queryFn: () => api.licenses.list(),
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const handleFilterChange = (newFilter: FilterKey) => {
+    setFilter(newFilter);
+    setPage(0);
+  };
+
+  // Paginated and filtered query
+  const { data: pageData, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ['licenses', 'list', { filter, search: debouncedSearch, page, pageSize: PAGE_SIZE }],
+    queryFn: () =>
+      api.licenses.list({
+        status: filter === 'all' ? undefined : filter,
+        search: debouncedSearch || undefined,
+        pageNo: page,
+        pageSize: PAGE_SIZE,
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+  // Global summary for metrics and renewal queue
+  const { data: globalData } = useQuery({
+    queryKey: ['licenses', 'global-summary'],
+    queryFn: () => api.licenses.list({ pageSize: 100 }),
   });
 
   const recordRenewal = useMutation({
-    mutationFn: ({ stationId, plan, feeAmount }: { stationId: string; plan: 'MONTHLY' | 'YEARLY'; feeAmount: number }) =>
-      api.licenses.recordRenewal(stationId, { plan, feeAmount }),
+    mutationFn: ({ stationId, plan }: { stationId: string; plan: 'MONTHLY' | 'YEARLY' }) =>
+      api.licenses.recordRenewal(stationId, { plan }),
     onSuccess: (l) => {
       qc.invalidateQueries({ queryKey: ['licenses'] });
-      qc.invalidateQueries({ queryKey: ['licenses', 'history', l.stationId] });
-      toast(t('licenses.toastRenewal', { name: l.stationName || l.stationId, defaultValue: `Đã ghi nhận gia hạn License cho ${l.stationName || l.stationId}` }), 'success');
+      toast(
+        t('licenses.toastRenewal', {
+          name: l.stationName || l.stationId,
+          defaultValue: `Đã ghi nhận gia hạn License cho ${l.stationName || l.stationId}`,
+        }),
+        'success',
+      );
       setRenewLicense(null);
+      if (selectedLicense && selectedLicense.stationId === l.stationId) {
+        setSelectedLicense(l);
+      }
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: ['licenses'] });
@@ -76,20 +119,20 @@ export function Licenses() {
   });
 
   const executeAction = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (reason: string) => {
       if (!actionState) return;
       const { type, license } = actionState;
-      if (type === 'suspend') return api.licenses.suspend(license.stationId, license.id);
-      if (type === 'activate') return api.licenses.activate(license.stationId, license.id);
-      if (type === 'cancel') return api.licenses.cancel(license.stationId, license.id);
+      if (type === 'suspend') return api.licenses.suspend(license.stationId, license.id, reason);
+      if (type === 'activate') return api.licenses.activate(license.stationId, license.id, reason);
+      if (type === 'cancel') return api.licenses.cancel(license.stationId, license.id, reason);
     },
-    onSuccess: () => {
+    onSuccess: (updatedLic) => {
       qc.invalidateQueries({ queryKey: ['licenses'] });
-      if (actionState) {
-        qc.invalidateQueries({ queryKey: ['licenses', 'history', actionState.license.stationId] });
-        qc.invalidateQueries({ queryKey: ['approvals'] });
-      }
+      qc.invalidateQueries({ queryKey: ['approvals'] });
       toast('Thao tác cập nhật trạng thái License thành công.', 'success');
+      if (updatedLic && selectedLicense && selectedLicense.id === updatedLic.id) {
+        setSelectedLicense(updatedLic);
+      }
       setActionState(null);
     },
     onError: (e) => {
@@ -99,7 +142,9 @@ export function Licenses() {
     },
   });
 
-  const all = data ?? [];
+  const all = globalData?.items ?? [];
+  const rows = pageData?.items ?? [];
+  const total = pageData?.total ?? 0;
 
   const normalizeStatus = (status: LicenseStatus): 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'EXPIRED' | 'CANCELLED' => {
     const s = String(status).toUpperCase();
@@ -111,20 +156,7 @@ export function Licenses() {
     return 'ACTIVE';
   };
 
-  const q = search.trim().toLowerCase();
-  const rows = all.filter((l) => {
-    const st = normalizeStatus(l.status);
-    const matchesFilter = filter === 'all' || st === filter;
-    const matchesSearch =
-      !q ||
-      l.id.toLowerCase().includes(q) ||
-      l.stationId.toLowerCase().includes(q) ||
-      (l.stationName && l.stationName.toLowerCase().includes(q)) ||
-      (l.ownerName && l.ownerName.toLowerCase().includes(q));
-    return matchesFilter && matchesSearch;
-  });
-
-  // Renewal queue: ONLY active <= 30 days and expired licenses! (Section 3, 5.1, 12)
+  // Renewal queue: ONLY active <= 30 days and expired licenses
   const renewalQueue = all.filter((l) => {
     const st = normalizeStatus(l.status);
     if (st === 'EXPIRED') return true;
@@ -158,7 +190,7 @@ export function Licenses() {
   return (
     <>
       <div className="flex flex-col gap-4">
-        {/* Page Header with Action Button */}
+        {/* Page Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <PageHeader
             title={t('console.nav.licenses.title', { defaultValue: 'Quản lý Giấy phép (License)' })}
@@ -182,22 +214,13 @@ export function Licenses() {
           <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
             {t('licenses.error', { message: (error as Error).message })}
           </Card>
-        ) : isLoading || !data ? (
-          <div className="grid gap-3.5">
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-[96px] rounded-card" />
-              ))}
-            </div>
-            <Skeleton className="h-[360px] rounded-card" />
-          </div>
         ) : (
           <>
             {/* Top Metric Cards */}
             <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
               <MetricCard
                 label="Tổng số License"
-                value={String(all.length)}
+                value={String(all.length || total)}
                 accent="#5b54e8"
               />
               <MetricCard
@@ -256,9 +279,12 @@ export function Licenses() {
                                 <span className="truncate text-[12.5px] font-semibold text-ink">
                                   {l.stationName || l.stationId}
                                 </span>
-                                <span className="font-mono text-[10.5px] text-faint">({l.stationId})</span>
+                                <span className="font-mono text-[10.5px] text-faint">
+                                  ({l.stationCode || l.stationId})
+                                </span>
                               </div>
                               <div className="mt-0.5 text-[11px] text-muted">
+                                <span className="font-mono text-brand font-bold">{l.licenseCode || l.id}</span> ·{' '}
                                 {l.ownerName || 'Chủ trạm'} · {isYear ? 'Gói Năm' : 'Gói Tháng'}
                               </div>
                             </div>
@@ -314,23 +340,24 @@ export function Licenses() {
                 </div>
 
                 <div className="mt-3 rounded-[8px] border border-hairline bg-surface-2 p-2.5 text-[11px] text-faint">
-                  Tổng phí đã ghi nhận: <span className="font-semibold text-ink">{formatVnd(totalFeeRecorded)}</span>
+                  Tổng phí đã ghi nhận:{' '}
+                  <span className="font-semibold text-ink">{formatVnd(totalFeeRecorded)}</span>
                 </div>
               </Card>
             </div>
 
             {/* Filter Tabs & Search Controls */}
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <FilterTabs tabs={tabs} active={filter} onChange={setFilter} accent="brand" />
+              <FilterTabs tabs={tabs} active={filter} onChange={handleFilterChange} accent="brand" />
               <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Tìm theo trạm, chủ trạm, mã license…"
-                className="w-[280px]"
+                value={searchInput}
+                onChange={setSearchInput}
+                placeholder="Tìm mã License (LIC-...), trạm, chủ trạm…"
+                className="w-[300px]"
               />
             </div>
 
-            {/* Data Table */}
+            {/* Operational Summary Table */}
             <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <div className="min-w-[860px]">
@@ -342,18 +369,23 @@ export function Licenses() {
                     <span>TRẠM SẠC</span>
                     <span>CHỦ SỞ HỮU</span>
                     <span>GÓI</span>
-                    <span>THỜI HẠN HIỆU LỰC</span>
-                    <span>PHÍ GHI NHẬN</span>
+                    <span>HẾT HẠN</span>
                     <span>TRẠNG THÁI</span>
                     <span className="text-right">THAO TÁC</span>
                   </div>
 
-                  {rows.length === 0 ? (
+                  {isLoading ? (
+                    <div className="flex flex-col gap-2 p-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-12 w-full rounded-[8px]" />
+                      ))}
+                    </div>
+                  ) : rows.length === 0 ? (
                     <EmptyState
                       title="Không tìm thấy License"
                       description={
-                        search
-                          ? `Không có kết quả nào khớp với từ khóa "${search}".`
+                        debouncedSearch
+                          ? `Không có kết quả nào khớp với từ khóa "${debouncedSearch}".`
                           : 'Chưa có gói giấy phép nào trong mục này.'
                       }
                       className="py-12"
@@ -363,8 +395,8 @@ export function Licenses() {
                       <LicenseRow
                         key={l.id}
                         license={l}
+                        onSelect={() => setSelectedLicense(l)}
                         onRenew={() => setRenewLicense(l)}
-                        onViewHistory={() => setHistoryStation({ id: l.stationId, name: l.stationName })}
                         onSuspend={() => setActionState({ type: 'suspend', license: l })}
                         onActivate={() => setActionState({ type: 'activate', license: l })}
                         onCancel={() => setActionState({ type: 'cancel', license: l })}
@@ -373,10 +405,34 @@ export function Licenses() {
                   )}
                 </div>
               </div>
+
+              {/* Pagination Bar */}
+              {total > 0 && (
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={total}
+                  onPage={(p) => setPage(p)}
+                />
+              )}
             </Card>
           </>
         )}
       </div>
+
+      {/* License Detail Drawer */}
+      {selectedLicense && (
+        <LicenseDetailDrawer
+          open={Boolean(selectedLicense)}
+          licenseId={selectedLicense.id}
+          initialData={selectedLicense}
+          onClose={() => setSelectedLicense(null)}
+          onRenew={(lic) => setRenewLicense(lic)}
+          onSuspend={(lic) => setActionState({ type: 'suspend', license: lic })}
+          onActivate={(lic) => setActionState({ type: 'activate', license: lic })}
+          onCancel={(lic) => setActionState({ type: 'cancel', license: lic })}
+        />
+      )}
 
       {/* Renew Modal */}
       {renewLicense && (
@@ -397,17 +453,7 @@ export function Licenses() {
           license={actionState.license}
           pending={executeAction.isPending}
           onClose={() => setActionState(null)}
-          onConfirm={() => executeAction.mutate()}
-        />
-      )}
-
-      {/* History Drawer Modal */}
-      {historyStation && (
-        <LicenseHistoryDrawer
-          open={Boolean(historyStation)}
-          stationId={historyStation.id}
-          stationName={historyStation.name}
-          onClose={() => setHistoryStation(null)}
+          onConfirm={(reason) => executeAction.mutate(reason)}
         />
       )}
     </>
@@ -416,39 +462,49 @@ export function Licenses() {
 
 function LicenseRow({
   license: l,
+  onSelect,
   onRenew,
-  onViewHistory,
   onSuspend,
   onActivate,
   onCancel,
 }: {
   license: License;
+  onSelect: () => void;
   onRenew: () => void;
-  onViewHistory: () => void;
   onSuspend: () => void;
   onActivate: () => void;
   onCancel: () => void;
 }) {
-  const meta = LICENSE_STATUS[l.status] || { label: l.status, tone: 'neutral' };
+  const toast = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const normStatus = String(l.status).toUpperCase() as LicenseStatus;
+  const meta = LICENSE_STATUS[normStatus] || { label: normStatus, tone: 'neutral' };
   const isYear = String(l.plan).toUpperCase() === 'YEARLY';
-  const start = l.startAt || l.startDate;
   const expiry = l.expiresAt || l.expiryDate;
-  const fee = l.feeAmount ?? l.priceVnd ?? 0;
-  const normStatus = String(l.status).toUpperCase();
   const isExpired = normStatus === 'EXPIRED';
   const isActive = normStatus === 'ACTIVE';
   const isSuspended = normStatus === 'SUSPENDED';
   const isPending = normStatus === 'PENDING';
   const days = l.daysLeft ?? 999;
   const canRenew = isExpired || (isActive && (days <= 30 || l.expiringSoon));
+  const displayCode = l.licenseCode || l.id;
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(displayCode);
+    setCopied(true);
+    toast('Đã sao chép mã License', 'success');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const menuItems = useMemo<MoreMenuItem[]>(() => {
     const items: MoreMenuItem[] = [
       {
-        key: 'history',
-        label: 'Lịch sử trạm',
+        key: 'detail',
+        label: 'Xem chi tiết & Lịch sử',
         icon: <IconShield size={15} />,
-        onClick: onViewHistory,
+        onClick: onSelect,
       },
     ];
 
@@ -470,6 +526,15 @@ function LicenseRow({
       });
     }
 
+    if (isPending) {
+      items.push({
+        key: 'activate',
+        label: 'Kích hoạt License',
+        icon: <IconCheckCircle size={15} />,
+        onClick: onActivate,
+      });
+    }
+
     if (isActive || isPending || isSuspended) {
       items.push({
         key: 'cancel',
@@ -481,22 +546,31 @@ function LicenseRow({
     }
 
     return items;
-  }, [isActive, isPending, isSuspended, onViewHistory, onSuspend, onActivate, onCancel]);
+  }, [isActive, isPending, isSuspended, onSelect, onSuspend, onActivate, onCancel]);
 
   return (
     <div
-      className="grid items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium transition-colors hover:bg-row-hover"
+      onClick={onSelect}
+      className="grid items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium transition-colors hover:bg-row-hover cursor-pointer"
       style={{ gridTemplateColumns: GRID_COLS }}
     >
-      {/* License Code */}
-      <div>
-        <span className="font-mono text-[11.5px] font-bold text-brand">{l.id}</span>
+      {/* License Code & Quick Copy */}
+      <div className="flex items-center gap-1.5 min-w-0 pr-2">
+        <span className="font-mono text-[11.5px] font-bold text-brand truncate">{displayCode}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-faint hover:bg-chip hover:text-ink transition"
+          title="Sao chép mã"
+        >
+          {copied ? <IconCheck size={12} className="text-good" /> : <IconCopy size={12} />}
+        </button>
       </div>
 
       {/* Station Name & Code */}
       <div className="min-w-0 pr-2">
         <div className="truncate font-semibold text-ink">{l.stationName || l.stationId}</div>
-        <div className="font-mono text-[11px] text-faint">{l.stationId}</div>
+        <div className="font-mono text-[11px] text-faint truncate">{l.stationCode || l.stationId}</div>
       </div>
 
       {/* Owner Name */}
@@ -509,31 +583,32 @@ function LicenseRow({
         </span>
       </div>
 
-      {/* Validity Period */}
+      {/* Expiry & Remaining indicator */}
       <div className="text-[11.5px]">
-        <div className="text-body font-medium">
-          {start ? formatDateVn(start) : '—'} → <span className="font-semibold text-ink">{expiry ? formatDateVn(expiry) : '—'}</span>
-        </div>
+        <div className="text-body font-medium">{expiry ? formatDateVn(expiry) : '—'}</div>
         {isActive && days <= 30 && (
           <div className="mt-0.5 text-[10.5px] font-semibold text-warn-deep">
             {days < 0 ? `Quá hạn ${-days} ngày` : `Còn ${days} ngày`}
           </div>
         )}
+        {isExpired && (
+          <div className="mt-0.5 text-[10.5px] font-semibold text-bad-deep">
+            Đã hết hạn
+          </div>
+        )}
       </div>
 
-      {/* Fee Amount */}
-      <div className="font-mono font-bold text-ink">
-        {fee > 0 ? formatVnd(fee) : '—'}
-      </div>
-
-      {/* Status */}
+      {/* Status Pill */}
       <div>
         <StatusPill tone={meta.tone} label={meta.label} />
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-1.5">
-        {canRenew && (
+      {/* Contextual Actions */}
+      <div
+        className="flex items-center justify-end gap-1.5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {canRenew ? (
           <Button
             size="sm"
             variant="primary"
@@ -541,6 +616,15 @@ function LicenseRow({
             className="h-[28px] px-2.5 text-[11.5px]"
           >
             Gia hạn
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={onSelect}
+            className="h-[28px] px-2 text-[11.5px] text-faint hover:text-ink"
+          >
+            Chi tiết
           </Button>
         )}
 

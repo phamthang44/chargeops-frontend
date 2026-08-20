@@ -66,7 +66,7 @@ export function LicenseHistoryDrawer({
               <Card key={l.id} className="border border-line-2 bg-surface-2 p-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[12px] font-bold text-brand">{l.id}</span>
+                    <span className="font-mono text-[12px] font-bold text-brand">{l.licenseCode || l.id}</span>
                     <span className="rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-body">
                       {isYear ? 'Gói Năm (1 năm)' : 'Gói Tháng (1 tháng)'}
                     </span>

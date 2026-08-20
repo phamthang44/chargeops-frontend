@@ -5,7 +5,28 @@
  * live within a session.
  */
 import type { Services } from '../services';
-import type { AdministrativeProvince, AdministrativeWard, Booking, BookingStatus, BookingSummary, ChargePoint, Connector, PaymentMethod, Station, StationApprovalDetail, StationApprovalSummary, StationStaffMember, StationStatusHistory, TicketMessage, TicketStatus } from '../types';
+import type {
+  AdministrativeProvince,
+  AdministrativeWard,
+  Booking,
+  BookingStatus,
+  BookingSummary,
+  ChargePoint,
+  Connector,
+  License,
+  LicenseStatus,
+  LicenseStatusEventDto,
+  OwnerDashboard,
+  PaymentMethod,
+  Station,
+  StationApprovalDetail,
+  StationApprovalSummary,
+  StationStaffMember,
+  StationStatusHistory,
+  TicketMessage,
+  TicketStatus,
+  TransactionSummary,
+} from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
 
@@ -146,7 +167,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           .filter((b) => b.status === 'confirmed' || b.status === 'pending')
           .slice(0, 4);
         return {
-          license: { status: lic.status, expiryDate: lic.expiryDate, daysLeft: lic.daysLeft },
+          license: {
+            status: lic.status,
+            expiryDate: lic.expiryDate || lic.expiresAt?.split('T')[0] || '',
+            daysLeft: lic.daysLeft ?? 0,
+            expiringSoon: lic.expiringSoon ?? false,
+          },
           kpis: {
             bookingsToday: 24,
             bookingsDelta: 4,
@@ -644,7 +670,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           byDay.set(d, (byDay.get(d) ?? 0) + t.amountVnd);
         }
         const dailyTrend = [...byDay.entries()]
-          .sort((a, b) => a[0] - b[0])
+          .sort((a, b) => a[0].localeCompare(b[0]))
           .slice(-11)
           .map(([day, vnd]) => ({ day, vnd }));
 
@@ -693,25 +719,47 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         }
         const expiresAt = expDate.toISOString();
         const daysLeft = input.plan === 'YEARLY' || (input.plan as any) === 'yearly' ? 365 : 30;
+        const fee = input.plan === 'YEARLY' ? 5000000 : 500000;
+        const nextSeq = 1000 + db.licenses.length + 1;
+        const licId = `lic-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
         const newLic: License = {
-          id: `lic-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          id: licId,
+          licenseCode: `LIC-${String(nextSeq).padStart(6, '0')}`,
           stationId: station.id,
+          stationCode: station.stationCode || station.id,
           stationName: station.name,
           ownerName: station.ownerDisplayName || station.ownerName || 'Chủ trạm',
           plan: input.plan,
-          feeAmount: input.feeAmount,
+          feeAmount: fee,
           startAt,
           expiresAt,
           status: 'ACTIVE',
           daysLeft,
           expiringSoon: false,
-          priceVnd: input.feeAmount,
+          priceVnd: fee,
           startDate: startAt.split('T')[0],
           expiryDate: expiresAt.split('T')[0],
+          createdAt: now.toISOString(),
+          recordedByName: 'Quản trị hệ thống',
         };
 
         db.licenses.unshift(newLic);
+        if (!db.licenseStatusEvents[licId]) {
+          db.licenseStatusEvents[licId] = [];
+        }
+        db.licenseStatusEvents[licId].push({
+          id: `LSE-${Date.now()}-1`,
+          licenseId: licId,
+          eventType: 'ISSUED',
+          fromStatus: null,
+          toStatus: 'ACTIVE',
+          reason: 'Cấp mới License sau xác minh ngoài nền tảng',
+          actorType: 'USER',
+          performedByName: 'Quản trị hệ thống',
+          performedAt: now.toISOString(),
+        });
+
         station.licenseSubmitted = true;
         station.licenseSummary = `${input.plan === 'YEARLY' ? 'Năm' : 'Tháng'} · hết hạn ${expiresAt.split('T')[0]}`;
         return { ...newLic };
@@ -719,25 +767,121 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async mine(stationId?: string) {
         await delay();
         if (stationId) {
-          const lic = db.licenses.find((x) => x.stationId === stationId && (x.status === 'ACTIVE' || x.status === 'active')) || db.licenses.find((x) => x.stationId === stationId);
+          const lic = db.licenses.find((x) => (x.stationId === stationId || x.stationCode === stationId) && (x.status === 'ACTIVE' || x.status === 'active')) || db.licenses.find((x) => x.stationId === stationId || x.stationCode === stationId);
           if (lic) return { ...lic };
         }
         return { ...db.licenses[0] };
       },
       async history(stationId: string) {
         await delay();
-        return db.licenses.filter((x) => x.stationId === stationId);
+        return db.licenses.filter((x) => x.stationId === stationId || x.stationCode === stationId);
       },
-      async list() {
+      async list(params = {}) {
         await delay();
-        return [...db.licenses];
+        let items = [...db.licenses];
+
+        if (params.status && params.status !== 'all') {
+          const s = String(params.status).toUpperCase();
+          items = items.filter((l) => {
+            const st = String(l.status).toUpperCase();
+            if (s === 'EXPIRED') return st === 'EXPIRED' || st === 'expired';
+            return st === s;
+          });
+        }
+
+        if (params.stationId) {
+          items = items.filter((l) => l.stationId === params.stationId || l.stationCode === params.stationId);
+        }
+
+        if (params.search) {
+          const q = params.search.trim().toLowerCase();
+          items = items.filter((l) => {
+            return (
+              (l.licenseCode && l.licenseCode.toLowerCase().includes(q)) ||
+              (l.id && l.id.toLowerCase().includes(q)) ||
+              (l.stationId && l.stationId.toLowerCase().includes(q)) ||
+              (l.stationCode && l.stationCode.toLowerCase().includes(q)) ||
+              (l.stationName && l.stationName.toLowerCase().includes(q)) ||
+              (l.ownerName && l.ownerName.toLowerCase().includes(q))
+            );
+          });
+        }
+
+        const total = items.length;
+        const page = params.pageNo ?? 0;
+        const pageSize = params.pageSize ?? 10;
+        const start = page * pageSize;
+        const paginatedItems = items.slice(start, start + pageSize);
+
+        return {
+          items: paginatedItems,
+          total,
+          page,
+          pageSize,
+        };
+      },
+      async detail(licenseId: string) {
+        await delay();
+        const l = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
+        if (!l) throw new Error(`Không tìm thấy giấy phép ${licenseId}`);
+        return { ...l };
+      },
+      async statusEvents(licenseId: string) {
+        await delay();
+        const events = db.licenseStatusEvents[licenseId];
+        if (events && events.length > 0) {
+          return [...events];
+        }
+        const lic = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
+        if (!lic) return [];
+
+        const defaultEvents: LicenseStatusEventDto[] = [
+          {
+            id: `LSE-${licenseId}-1`,
+            licenseId: lic.id,
+            eventType: 'ISSUED',
+            fromStatus: null,
+            toStatus: lic.status === 'PENDING' ? 'PENDING' : 'ACTIVE',
+            reason: 'Ghi nhận cấp License từ quản trị viên',
+            actorType: 'USER',
+            performedByName: lic.recordedByName || 'Quản trị hệ thống',
+            performedAt: lic.createdAt || lic.startAt || new Date().toISOString(),
+          },
+        ];
+        if (lic.status === 'SUSPENDED') {
+          defaultEvents.push({
+            id: `LSE-${licenseId}-2`,
+            licenseId: lic.id,
+            eventType: 'SUSPENDED',
+            fromStatus: 'ACTIVE',
+            toStatus: 'SUSPENDED',
+            reason: 'Tạm ngưng quyền vận hành',
+            actorType: 'USER',
+            performedByName: 'Quản trị hệ thống',
+            performedAt: new Date().toISOString(),
+          });
+        } else if (lic.status === 'CANCELLED') {
+          defaultEvents.push({
+            id: `LSE-${licenseId}-2`,
+            licenseId: lic.id,
+            eventType: 'CANCELLED',
+            fromStatus: 'ACTIVE',
+            toStatus: 'CANCELLED',
+            reason: 'Hủy bỏ License',
+            actorType: 'USER',
+            performedByName: 'Quản trị hệ thống',
+            performedAt: new Date().toISOString(),
+          });
+        }
+        db.licenseStatusEvents[licenseId] = defaultEvents;
+        return defaultEvents;
       },
       async recordRenewal(stationId, input) {
         await delay();
-        const old = db.licenses.find((x) => x.stationId === stationId);
+        const old = db.licenses.find((x) => x.stationId === stationId || x.stationCode === stationId);
         if (!old) throw new Error(`Không tìm thấy giấy phép cho trạm ${stationId}`);
         const plan = input?.plan || old.plan;
-        const fee = input?.feeAmount ?? old.feeAmount ?? 500000;
+        const fee = plan === 'YEARLY' || (plan as any) === 'yearly' ? 5000000 : 500000;
 
         const isOldActive = old.status === 'ACTIVE' || old.status === 'active';
         const startAt = isOldActive ? old.expiresAt : new Date().toISOString();
@@ -750,52 +894,127 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         }
         const expiresAt = expDateObj.toISOString();
         const daysLeft = plan === 'YEARLY' || (plan as any) === 'yearly' ? 365 : 30;
+        const nextSeq = 1000 + db.licenses.length + 1;
+        const newLicId = `lic-renew-${Date.now()}`;
+        const newStatus = isOldActive ? 'PENDING' : 'ACTIVE';
 
         const newLic: License = {
-          id: `lic-renew-${Date.now()}`,
+          id: newLicId,
+          licenseCode: `LIC-${String(nextSeq).padStart(6, '0')}`,
           stationId: old.stationId,
+          stationCode: old.stationCode || old.stationId,
           stationName: old.stationName,
           ownerName: old.ownerName,
           plan,
           feeAmount: fee,
           startAt,
           expiresAt,
-          status: isOldActive ? 'PENDING' : 'ACTIVE',
+          status: newStatus,
           daysLeft,
           expiringSoon: false,
           priceVnd: fee,
           startDate: startAt.split('T')[0],
           expiryDate: expiresAt.split('T')[0],
+          createdAt: new Date().toISOString(),
+          recordedByName: 'Quản trị hệ thống',
         };
 
         db.licenses.unshift(newLic);
+        db.licenseStatusEvents[newLicId] = [
+          {
+            id: `LSE-${newLicId}-1`,
+            licenseId: newLicId,
+            eventType: 'ISSUED',
+            fromStatus: null,
+            toStatus: newStatus,
+            reason: `Ghi nhận gia hạn gói ${plan === 'YEARLY' ? 'Năm' : 'Tháng'} ngoài nền tảng`,
+            actorType: 'USER',
+            performedByName: 'Quản trị hệ thống',
+            performedAt: new Date().toISOString(),
+          },
+        ];
+
         return { ...newLic };
       },
-      async suspend(stationId, licenseId) {
+      async renew(licenseId: string, input) {
         await delay();
-        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        const old = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
+        if (!old) throw new Error(`Không tìm thấy giấy phép ${licenseId}`);
+        return this.recordRenewal(old.stationId, input);
+      },
+      async suspend(stationId, licenseId, reason) {
+        await delay();
+        const l = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
         if (!l) throw new Error('Không tìm thấy license');
+        const prevStatus = l.status;
         l.status = 'SUSPENDED';
         const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
         if (st) st.licenseSubmitted = false;
+
+        if (!db.licenseStatusEvents[l.id]) db.licenseStatusEvents[l.id] = [];
+        db.licenseStatusEvents[l.id].unshift({
+          id: `LSE-${Date.now()}`,
+          licenseId: l.id,
+          eventType: 'SUSPENDED',
+          fromStatus: prevStatus,
+          toStatus: 'SUSPENDED',
+          reason: reason || 'Tạm ngưng quyền vận hành',
+          actorType: 'USER',
+          performedByName: 'Admin Hệ Thống (Lê Kiểm Soát)',
+          performedAt: new Date().toISOString(),
+        });
+
         return { ...l };
       },
-      async activate(stationId, licenseId) {
+      async activate(stationId, licenseId, reason) {
         await delay();
-        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        const l = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
         if (!l) throw new Error('Không tìm thấy license');
+        const prevStatus = l.status;
         l.status = 'ACTIVE';
         const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
         if (st) st.licenseSubmitted = true;
+
+        const isReactivation = prevStatus === 'SUSPENDED';
+        const eventType = isReactivation ? 'REACTIVATED' : 'ACTIVATED';
+
+        if (!db.licenseStatusEvents[l.id]) db.licenseStatusEvents[l.id] = [];
+        db.licenseStatusEvents[l.id].unshift({
+          id: `LSE-${Date.now()}`,
+          licenseId: l.id,
+          eventType,
+          fromStatus: prevStatus,
+          toStatus: 'ACTIVE',
+          reason: reason || (isReactivation ? 'Khôi phục quyền vận hành' : null),
+          actorType: isReactivation ? 'USER' : 'SYSTEM',
+          performedByName: isReactivation ? 'Admin Hệ Thống (Lê Kiểm Soát)' : 'SYSTEM',
+          performedAt: new Date().toISOString(),
+        });
+
         return { ...l };
       },
-      async cancel(stationId, licenseId) {
+      async cancel(stationId, licenseId, reason) {
         await delay();
-        const l = db.licenses.find((x) => x.id === licenseId || x.stationId === stationId);
+        const l = db.licenses.find((x) => x.id === licenseId || x.licenseCode === licenseId);
         if (!l) throw new Error('Không tìm thấy license');
+        const prevStatus = l.status;
         l.status = 'CANCELLED';
         const st = db.allStations.find((s) => s.id === stationId) || db.approvalQueue.find((s) => s.id === stationId);
         if (st) st.licenseSubmitted = false;
+
+        if (!db.licenseStatusEvents[l.id]) db.licenseStatusEvents[l.id] = [];
+        db.licenseStatusEvents[l.id].unshift({
+          id: `LSE-${Date.now()}`,
+          licenseId: l.id,
+          eventType: 'CANCELLED',
+          fromStatus: prevStatus,
+          toStatus: 'CANCELLED',
+          reason: reason || 'Hủy bỏ License vĩnh viễn',
+          actorType: 'USER',
+          performedByName: 'Admin Hệ Thống (Trần Quản Trị)',
+          performedAt: new Date().toISOString(),
+        });
+
         return { ...l };
       },
     },

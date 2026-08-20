@@ -53,8 +53,8 @@ export function Approvals() {
   });
 
   const issueLicense = useMutation({
-    mutationFn: ({ stationId, plan, feeAmount }: { stationId: string; plan: 'MONTHLY' | 'YEARLY'; feeAmount: number }) =>
-      api.licenses.issue(stationId, { plan, feeAmount }),
+    mutationFn: ({ stationId, plan }: { stationId: string; plan: 'MONTHLY' | 'YEARLY' }) =>
+      api.licenses.issue(stationId, { plan }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['approvals'] });
       qc.invalidateQueries({ queryKey: ['approvals', 'detail', selected?.id] });
@@ -147,8 +147,8 @@ export function Approvals() {
           station={selected}
           pending={issueLicense.isPending}
           onClose={() => setIssueOpen(false)}
-          onConfirm={({ plan, feeAmount }) =>
-            issueLicense.mutate({ stationId: selected.id, plan, feeAmount })
+          onConfirm={({ plan }) =>
+            issueLicense.mutate({ stationId: selected.id, plan })
           }
         />
       )}

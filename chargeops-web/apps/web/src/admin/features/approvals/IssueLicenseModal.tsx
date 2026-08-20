@@ -8,7 +8,7 @@ export interface IssueLicenseModalProps {
   station: StationApprovalSummary | Station;
   pending: boolean;
   onClose: () => void;
-  onConfirm: (data: { plan: 'MONTHLY' | 'YEARLY'; feeAmount: number }) => void;
+  onConfirm: (data: { plan: 'MONTHLY' | 'YEARLY' }) => void;
 }
 
 export function IssueLicenseModal({
@@ -44,9 +44,8 @@ export function IssueLicenseModal({
       }));
       return;
     }
-    const fee = plan === 'YEARLY' ? 5000000 : 500000;
     setError(null);
-    onConfirm({ plan, feeAmount: fee });
+    onConfirm({ plan });
   };
 
   return (

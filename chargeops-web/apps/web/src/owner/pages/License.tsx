@@ -275,7 +275,7 @@ function Body({ license, station, history }: { license: License; station: Statio
                   <div className="text-[16px] font-bold text-ink">
                     {isYear ? 'Gói Năm (1 năm lịch)' : 'Gói Tháng (1 tháng lịch)'}
                   </div>
-                  <div className="text-[12px] font-mono text-faint">Mã License: {license.id}</div>
+                  <div className="text-[12px] font-mono text-faint">Mã License: <span className="font-bold text-brand">{license.licenseCode || license.id}</span></div>
                 </div>
               </div>
               <StatusPill tone={meta.tone} label={meta.label} />
@@ -367,7 +367,7 @@ function Body({ license, station, history }: { license: License; station: Statio
               return (
                 <div key={h.id} className="flex items-center justify-between px-4 py-3 text-[12.5px] transition-colors hover:bg-surface-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[11.5px] font-bold text-brand">{h.id}</span>
+                    <span className="font-mono text-[11.5px] font-bold text-brand">{h.licenseCode || h.id}</span>
                     <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-semibold text-body">
                       {hYear ? 'Gói Năm' : 'Gói Tháng'}
                     </span>

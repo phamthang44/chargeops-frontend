@@ -85,8 +85,25 @@ export class HttpClient {
     }
 
     if (res.status === 204) return undefined as T;
-    const body = (await res.json()) as { data?: T; meta?: unknown; error?: unknown };
+    const body = (await res.json()) as {
+      data?: T;
+      meta?: { page?: number; size?: number; totalElements?: number; totalPages?: number };
+      error?: unknown;
+    };
     if (body && typeof body === 'object' && 'data' in body && body.data !== undefined) {
+      if (
+        Array.isArray(body.data) &&
+        body.meta &&
+        typeof body.meta === 'object' &&
+        ('totalElements' in body.meta || 'totalPages' in body.meta)
+      ) {
+        return {
+          items: body.data,
+          total: Number(body.meta.totalElements ?? body.data.length),
+          page: Number(body.meta.page ?? 1),
+          pageSize: Number(body.meta.size ?? body.data.length),
+        } as unknown as T;
+      }
       return body.data as T;
     }
     return body as unknown as T;

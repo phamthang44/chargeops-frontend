@@ -7,6 +7,7 @@
  */
 import type { HttpClient } from '../http';
 import type { Services } from '../services';
+import type { License } from '../types';
 
 export function createRestServices(http: HttpClient): Services {
   return {
@@ -47,8 +48,8 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     stations: {
-      mine: (params = {}) => http.get('/owner/stations/mine', params),
-      register: (input) => http.post('/owner/stations', input),
+      mine: (params = {}) => http.get('/stations/mine', params),
+      register: (input) => http.post('/stations', input),
       updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
       approvals: (params = {}) => http.get('/admin/station-approvals', params),
       approvalDetail: (id) => http.get(`/admin/station-approvals/${id}`),
@@ -66,13 +67,31 @@ export function createRestServices(http: HttpClient): Services {
 
     licenses: {
       issue: (stationId, input) => http.post(`/stations/${stationId}/licenses`, input),
-      mine: (stationId) => http.get('/owner/licenses', stationId ? { stationId } : undefined).catch(() => http.get('/licenses/mine', stationId ? { stationId } : undefined)),
+      mine: (stationId) =>
+        http
+          .get<License>('/owner/licenses', stationId ? { stationId } : undefined)
+          .catch(() => http.get<License>('/licenses/mine', stationId ? { stationId } : undefined)),
       history: (stationId) => http.get(`/stations/${stationId}/licenses`),
       list: (params = {}) => http.get('/admin/licenses', params),
-      recordRenewal: (stationId, input) => http.post(`/stations/${stationId}/licenses/renew`, input).catch(() => http.post(`/admin/licenses/${stationId}/renew`)),
-      suspend: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/suspend`),
-      activate: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/activate`),
-      cancel: (stationId, licenseId) => http.post(`/stations/${stationId}/licenses/${licenseId}/cancel`),
+      detail: (licenseId) => http.get(`/admin/licenses/${licenseId}`),
+      statusEvents: (licenseId) => http.get(`/admin/licenses/${licenseId}/status-events`),
+      recordRenewal: (stationId, input) =>
+        http
+          .post<License>(`/stations/${stationId}/licenses/renew`, input)
+          .catch(() => http.post<License>(`/admin/licenses/${stationId}/renew`)),
+      renew: (licenseId, input) => http.post(`/admin/licenses/${licenseId}/renew`, input),
+      suspend: (stationId, licenseId, reason) =>
+        http
+          .post<License>(`/admin/licenses/${licenseId}/suspend`, { reason })
+          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/suspend`, { reason })),
+      activate: (stationId, licenseId, reason) =>
+        http
+          .post<License>(`/admin/licenses/${licenseId}/reactivate`, { reason })
+          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/activate`, { reason })),
+      cancel: (stationId, licenseId, reason) =>
+        http
+          .post<License>(`/admin/licenses/${licenseId}/cancel`, { reason })
+          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/cancel`, { reason })),
     },
 
     users: {

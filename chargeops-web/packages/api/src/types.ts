@@ -411,7 +411,9 @@ export type LicensePlan = 'MONTHLY' | 'YEARLY' | 'monthly' | 'yearly';
 
 export interface License {
   id: string;
+  licenseCode?: string;
   stationId: string;
+  stationCode?: string;
   stationName?: string;
   ownerName?: string;
   plan: LicensePlan;
@@ -428,14 +430,55 @@ export interface License {
   priceVnd?: number;
 }
 
+export type LicenseStatusEventType =
+  | 'ISSUED'
+  | 'ACTIVATED'
+  | 'SUSPENDED'
+  | 'REACTIVATED'
+  | 'CANCELLED'
+  | 'EXPIRED';
+
+export interface LicenseStatusEventDto {
+  id: string;
+  licenseId: string;
+  eventType: LicenseStatusEventType;
+  fromStatus?: LicenseStatus | null;
+  toStatus: LicenseStatus;
+  reason?: string | null;
+  actorType: 'USER' | 'SYSTEM';
+  performedByName?: string | null;
+  performedAt: string;
+}
+
+export interface AdminLicenseListItem {
+  id: string;
+  licenseCode: string;
+  stationId: string;
+  stationCode?: string;
+  stationName: string;
+  ownerName: string;
+  plan: 'MONTHLY' | 'YEARLY';
+  expiresAt: string;
+  status: LicenseStatus;
+  daysLeft?: number;
+  expiringSoon?: boolean;
+  feeAmount?: number;
+  startAt?: string;
+}
+
+export interface AdminLicenseDetail extends AdminLicenseListItem {
+  feeAmount: number;
+  startAt: string;
+  createdAt: string;
+  recordedByName?: string;
+}
+
 export interface IssueLicenseRequest {
   plan: 'MONTHLY' | 'YEARLY';
-  feeAmount: number;
 }
 
 export interface RenewLicenseRequest {
   plan: 'MONTHLY' | 'YEARLY';
-  feeAmount: number;
 }
 
 /* ---------- users ---------- */
@@ -498,8 +541,8 @@ export interface MethodBreakdown {
 }
 
 export interface DailyRevenuePoint {
-  /** Day-of-month label. */
-  day: number;
+  /** Day-of-month label or date string. */
+  day: number | string;
   vnd: number;
 }
 
@@ -672,7 +715,7 @@ export interface StaffDashboard {
 }
 
 export interface OwnerDashboard {
-  license: { status: LicenseStatus; expiryDate: string; daysLeft: number };
+  license: { status: LicenseStatus; expiryDate: string; daysLeft: number; expiringSoon?: boolean };
   kpis: {
     bookingsToday: number;
     bookingsDelta: number;

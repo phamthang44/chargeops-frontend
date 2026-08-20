@@ -19,6 +19,8 @@ import type {
   IssueLicenseRequest,
   License,
   LicenseStatus,
+  LicenseStatusEventDto,
+  RenewLicenseRequest,
   OwnerDashboard,
   Page,
   PaymentMethod,
@@ -128,18 +130,31 @@ export interface LicenseService {
   issue(stationId: string, input: IssueLicenseRequest): Promise<License>;
   /** Owner: own license (status display only — renewal handled off-platform). */
   mine(stationId?: string): Promise<License>;
-  /** Station license history. */
+  /** Station license history (all license periods for a station). */
   history(stationId: string): Promise<License[]>;
-  /** Admin: all licenses with expiry monitoring. */
-  list(params?: { pageNo?: number; pageSize?: number; status?: LicenseStatus; stationId?: string }): Promise<License[]>;
-  /** Admin: manually record an off-platform renewal. */
-  recordRenewal(stationId: string, input?: IssueLicenseRequest): Promise<License>;
+  /** Admin: all licenses with search, filter, and pagination. */
+  list(params?: {
+    pageNo?: number;
+    pageSize?: number;
+    search?: string;
+    status?: LicenseStatus | 'all';
+    stationId?: string;
+    sort?: string;
+  }): Promise<Page<License>>;
+  /** Admin: single license detail. */
+  detail(licenseId: string): Promise<License>;
+  /** Admin: status-event audit timeline for a license. */
+  statusEvents(licenseId: string): Promise<LicenseStatusEventDto[]>;
+  /** Admin: manually record an off-platform renewal by station. */
+  recordRenewal(stationId: string, input?: RenewLicenseRequest): Promise<License>;
+  /** Admin: renew a license by license ID. */
+  renew(licenseId: string, input?: RenewLicenseRequest): Promise<License>;
   /** Admin: suspend license. */
-  suspend(stationId: string, licenseId: string): Promise<License>;
+  suspend(stationId: string, licenseId: string, reason?: string): Promise<License>;
   /** Admin: reactivate suspended license. */
-  activate(stationId: string, licenseId: string): Promise<License>;
+  activate(stationId: string, licenseId: string, reason?: string): Promise<License>;
   /** Admin: cancel license. */
-  cancel(stationId: string, licenseId: string): Promise<License>;
+  cancel(stationId: string, licenseId: string, reason?: string): Promise<License>;
 }
 
 export interface UserService {

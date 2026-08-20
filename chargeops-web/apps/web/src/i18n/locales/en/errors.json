@@ -106,8 +106,6 @@
     "validation.station.plannedChargePointCount.min": "Planned charge point count must be greater than zero",
     "validation.approval.reason.required": "A rejection reason is required",
     "validation.approval.reason.maxLength": "Rejection reason cannot exceed 500 characters",
-    "validation.license.plan.required": "License plan is required",
-    "validation.license.feeAmount.required": "License fee is required",
-    "validation.license.feeAmount.min": "License fee cannot be negative"
+    "validation.license.plan.required": "License plan is required"
   }
 }

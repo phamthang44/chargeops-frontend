@@ -309,6 +309,32 @@
       "overdueVal": "Quá {{days}} ngày",
       "daysLeftVal": "{{days}} ngày",
       "renewBtn": "Gia hạn"
+    },
+    "actionModal": {
+      "reasonLabel": "Lý do thao tác",
+      "reasonRequired": "Vui lòng nhập lý do thực hiện thao tác này (tối thiểu 5 ký tự).",
+      "reasonPlaceholder": "Nhập lý do chi tiết hoặc chọn nhanh từ các gợi ý bên dưới…",
+      "presetSuggestions": "Gợi ý lý do chuẩn theo thẩm quyền vận hành:",
+      "presets": {
+        "suspend": {
+          "safety": "Vi phạm quy chuẩn an toàn vận hành trạm sạc",
+          "compliance": "Chờ bổ sung/xác minh hồ sơ pháp lý và kiểm định an toàn",
+          "authority": "Yêu cầu tạm dừng từ cơ quan chức năng/chính quyền địa phương",
+          "ownerRequest": "Chủ trạm chủ động yêu cầu tạm ngưng quyền kinh doanh",
+          "dispute": "Tranh chấp quyền khai thác mặt bằng hoặc vi phạm thỏa thuận dịch vụ"
+        },
+        "activate": {
+          "safetyFixed": "Trạm đã khắc phục xong vi phạm và vượt qua kiểm định an toàn",
+          "complianceCompleted": "Đã bổ sung đầy đủ hồ sơ pháp lý và giấy phép liên quan",
+          "authorityApproved": "Cơ quan chức năng đã cho phép trạm hoạt động trở lại",
+          "ownerReopen": "Chủ trạm hoàn tất xử lý và đề nghị khôi phục quyền kinh doanh"
+        },
+        "cancel": {
+          "contractTerminated": "Chủ trạm chấm dứt hợp đồng hợp tác vận hành ChargeOps",
+          "siteClosed": "Trạm dừng hoạt động vĩnh viễn do giải tỏa/thu hồi mặt bằng",
+          "severeViolation": "Vi phạm nghiêm trọng chính sách không thể khắc phục"
+        }
+      }
     }
   },
   "policyKB": {

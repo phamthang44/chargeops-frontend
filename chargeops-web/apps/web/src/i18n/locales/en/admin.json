@@ -309,6 +309,32 @@
       "overdueVal": "{{days}} days overdue",
       "daysLeftVal": "{{days}} days",
       "renewBtn": "Renew"
+    },
+    "actionModal": {
+      "reasonLabel": "Action Reason",
+      "reasonRequired": "Please enter a reason for this operation (at least 5 characters).",
+      "reasonPlaceholder": "Enter a detailed reason or pick from the preset suggestions below…",
+      "presetSuggestions": "Preset Operating Authority Reasons:",
+      "presets": {
+        "suspend": {
+          "safety": "Violation of charging station operational safety standards",
+          "compliance": "Pending supplementary verification of legal documents and safety certification",
+          "authority": "Suspension requested by regulatory authority / local government",
+          "ownerRequest": "Station owner proactively requested operational suspension",
+          "dispute": "Site lease dispute or breach of platform service agreement"
+        },
+        "activate": {
+          "safetyFixed": "Station resolved violations and passed safety certification",
+          "complianceCompleted": "Completed supplementary submission of legal records and permits",
+          "authorityApproved": "Regulatory authority approved resumption of operations",
+          "ownerReopen": "Station owner completed remediation and requested operational reactivation"
+        },
+        "cancel": {
+          "contractTerminated": "Station owner terminated ChargeOps platform partnership agreement",
+          "siteClosed": "Permanent closure due to land clearance / site relocation",
+          "severeViolation": "Irremediable severe policy violation"
+        }
+      }
     }
   },
   "policyKB": {

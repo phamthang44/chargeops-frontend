@@ -106,8 +106,6 @@
     "validation.station.plannedChargePointCount.min": "Số trụ sạc dự kiến phải lớn hơn 0.",
     "validation.approval.reason.required": "Vui lòng nhập lý do từ chối phê duyệt.",
     "validation.approval.reason.maxLength": "Lý do từ chối không được vượt quá 500 ký tự.",
-    "validation.license.plan.required": "Vui lòng chọn gói giấy phép.",
-    "validation.license.feeAmount.required": "Vui lòng nhập phí giấy phép.",
-    "validation.license.feeAmount.min": "Phí giấy phép không được âm."
+    "validation.license.plan.required": "Vui lòng chọn gói giấy phép."
   }
 }

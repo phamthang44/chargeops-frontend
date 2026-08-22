@@ -94,17 +94,44 @@ export function getApiErrorMessage(error: unknown): string {
     details?: unknown;
   };
 
-  // 1. Try translating by code (e.g. STATION_011)
+  const interpolationParams: Record<string, unknown> = {};
+  if (typeof err.details === 'object' && err.details !== null && !Array.isArray(err.details)) {
+    Object.assign(interpolationParams, err.details);
+  } else if (typeof err.details === 'string') {
+    interpolationParams['0'] = err.details;
+  }
+
+  // 1. Try translating by code (e.g. STATION_024)
+  if (err.code && i18n.exists(`codes.${err.code}`, { ns: 'errors' })) {
+    const translated = i18n.t(`codes.${err.code}`, {
+      ns: 'errors',
+      ...interpolationParams,
+      defaultValue: '',
+    });
+    if (translated && !/\{\{\s*[\w\d_]+\s*\}\}/.test(translated)) {
+      return translated;
+    }
+  }
+
+  // 2. Try translating by messageKey (e.g. error.station.invalidChargePointProvisioningTransition)
+  if (err.messageKey && i18n.exists(`messages.${err.messageKey}`, { ns: 'errors' })) {
+    const translated = i18n.t(`messages.${err.messageKey}`, {
+      ns: 'errors',
+      ...interpolationParams,
+      defaultValue: '',
+    });
+
+    if (translated && !/\{\{\s*[\w\d_]+\s*\}\}/.test(translated)) {
+      return translated;
+    }
+  }
+
+  // 3. Fallback to localized code definition if available
   if (err.code && i18n.exists(`codes.${err.code}`, { ns: 'errors' })) {
     return i18n.t(`codes.${err.code}`, { ns: 'errors' });
   }
 
-  // 2. Try translating by messageKey (e.g. error.station.activeLicenseRequired)
-  if (err.messageKey && i18n.exists(`messages.${err.messageKey}`, { ns: 'errors' })) {
-    return i18n.t(`messages.${err.messageKey}`, { ns: 'errors' });
-  }
-
-  // 3. Fallback to server message or default
+  // 4. Fallback to server message or default
   return err.message || i18n.t('error.generic', { ns: 'common' });
 }
 

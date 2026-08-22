@@ -13,6 +13,11 @@
         "title": "Notification & Alert Center",
         "subtitle": "Monitor technical alarms, station approvals, and platform-wide events."
       },
+      "stations": {
+        "label": "Stations",
+        "title": "Station Management",
+        "subtitle": "Monitor platform stations, hardware infrastructure, and operational interventions."
+      },
       "approvals": {
         "label": "Approvals",
         "title": "Station Approvals",
@@ -412,12 +417,22 @@
       "unclaimed": "Unclaimed",
       "active": "Active",
       "offline": "Offline",
-      "suspended": "Suspended"
+      "suspended": "Suspended",
+      "PENDING_ACTIVATION": "Pending Activation",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "AVAILABLE": "Available",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
     },
     "connectorStatus": {
       "available": "Available",
       "inuse": "In use",
-      "offline": "Offline"
+      "offline": "Offline",
+      "AVAILABLE": "Available",
+      "IN_USE": "In use",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
     },
     "toastDownloading": "Downloading QR for {{id}}... (demo)",
     "downloadQr": "Download QR"

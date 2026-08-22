@@ -13,6 +13,11 @@
         "title": "Trung tâm thông báo & Cảnh báo",
         "subtitle": "Giám sát cảnh báo kỹ thuật, hồ sơ duyệt trạm và sự kiện toàn hệ thống."
       },
+      "stations": {
+        "label": "Trạm sạc",
+        "title": "Quản lý Trạm Sạc",
+        "subtitle": "Giám sát danh mục trạm sạc toàn hệ thống, hạ tầng và can thiệp vận hành."
+      },
       "approvals": {
         "label": "Duyệt trạm",
         "title": "Duyệt trạm",
@@ -412,12 +417,22 @@
       "unclaimed": "Chưa gán",
       "active": "Hoạt động",
       "offline": "Ngoại tuyến",
-      "suspended": "Đình chỉ"
+      "suspended": "Đình chỉ",
+      "PENDING_ACTIVATION": "Chờ kích hoạt",
+      "ACTIVE": "Đã kích hoạt",
+      "SUSPENDED": "Đình chỉ",
+      "AVAILABLE": "Hoạt động",
+      "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì"
     },
     "connectorStatus": {
       "available": "Sẵn sàng",
       "inuse": "Đang sạc",
-      "offline": "Ngoại tuyến"
+      "offline": "Ngoại tuyến",
+      "AVAILABLE": "Sẵn sàng",
+      "IN_USE": "Đang sạc",
+      "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì"
     },
     "toastDownloading": "Đang tải QR cho {{id}}… (demo)",
     "downloadQr": "Tải QR"

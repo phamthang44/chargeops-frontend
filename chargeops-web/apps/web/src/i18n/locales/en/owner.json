@@ -188,7 +188,13 @@
       "unclaimed": "Unclaimed",
       "active": "Active",
       "offline": "Offline",
-      "suspended": "Suspended"
+      "suspended": "Suspended",
+      "PENDING_ACTIVATION": "Pending Activation",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "AVAILABLE": "Available",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
     },
     "connectorCount": "{{count}} connectors",
     "panel": {
@@ -275,7 +281,11 @@
     "status": {
       "available": "Available",
       "inuse": "In use",
-      "offline": "Offline"
+      "offline": "Offline",
+      "AVAILABLE": "Available",
+      "IN_USE": "In use",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
     },
     "stats": {
       "total": "TOTAL CONNECTORS",

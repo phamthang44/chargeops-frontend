@@ -188,7 +188,13 @@
       "unclaimed": "Chưa gán",
       "active": "Hoạt động",
       "offline": "Ngoại tuyến",
-      "suspended": "Đình chỉ"
+      "suspended": "Đình chỉ",
+      "PENDING_ACTIVATION": "Chờ kích hoạt",
+      "ACTIVE": "Đã kích hoạt",
+      "SUSPENDED": "Đình chỉ",
+      "AVAILABLE": "Hoạt động",
+      "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì"
     },
     "connectorCount": "{{count}} connector",
     "panel": {
@@ -258,11 +264,6 @@
     "impactRestores": "Trạng thái riêng của từng connector được ghi nhớ — khi hoạt động trở lại sẽ khôi phục đúng những gì bạn đã đặt trước đó.",
     "onlineBodyDevice": "{{returning}}/{{total}} connector sẽ nhận đặt chỗ trở lại.",
     "onlineBodyConnector": "Connector này sẽ nhận đặt chỗ trở lại và xuất hiện lại trong tìm kiếm của tài xế.",
-    "staysOffline": "Vẫn ngoại tuyến",
-    "staysOfflineHint": "{{count}} connector vẫn ngoại tuyến vì bạn đã tắt riêng từng cái. Hãy bật lại từ nút trạng thái của chính connector đó.",
-    "blockedBodyDevice": "{{count}} đặt chỗ trên trụ này vẫn đang ở trạng thái Đã xác nhận hoặc Đã check-in. Theo BR-CHG-05, không thể chuyển trụ sang Ngoại tuyến khi còn khung giờ đã thanh toán — tài xế có thể đang cắm sạc.",
-    "blockedBodyConnector": "{{count}} đặt chỗ trên connector này vẫn đang ở trạng thái Đã xác nhận hoặc Đã check-in. Theo BR-CHG-05, không thể chuyển sang Ngoại tuyến khi còn khung giờ đã thanh toán — tài xế có thể đang cắm sạc.",
-    "blockedHint": "Hãy đợi các đặt chỗ này kết thúc, hoặc huỷ chúng ở màn hình Đặt chỗ trước.",
     "confirmOffline": "Chuyển Ngoại tuyến",
     "confirmOnline": "Đưa vào hoạt động",
     "applying": "Đang áp dụng…",
@@ -275,7 +276,11 @@
     "status": {
       "available": "Sẵn sàng",
       "inuse": "Đang sạc",
-      "offline": "Ngoại tuyến"
+      "offline": "Ngoại tuyến",
+      "AVAILABLE": "Sẵn sàng",
+      "IN_USE": "Đang sạc",
+      "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì"
     },
     "stats": {
       "total": "TỔNG CONNECTOR",

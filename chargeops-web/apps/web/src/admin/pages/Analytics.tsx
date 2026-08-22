@@ -6,14 +6,14 @@ import { Card, KpiCard, PageHeader, ProgressBar, SegmentedControl, Skeleton } fr
 
 const CONNECTOR_COLOR: Record<string, string> = {
   CCS2: '#5b54e8',
-  CHAdeMO: '#12a150',
-  Type2AC: '#9a6b16',
+  CHADEMO: '#12a150',
+  TYPE2: '#9a6b16',
   GBT: '#c0392b',
 };
 const CONNECTOR_LABEL: Record<string, string> = {
   CCS2: 'CCS2',
-  CHAdeMO: 'CHAdeMO',
-  Type2AC: 'Type 2 AC',
+  CHADEMO: 'CHAdeMO',
+  TYPE2: 'Type 2 AC',
   GBT: 'GB/T',
 };
 

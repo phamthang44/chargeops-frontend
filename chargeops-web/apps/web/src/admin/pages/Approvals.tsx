@@ -25,7 +25,10 @@ export function Approvals() {
     queryFn: () => api.stations.approvals(),
   });
 
-  const rows = data ?? [];
+  const rows: StationApprovalSummary[] =
+    (Array.isArray(data)
+      ? data
+      : (data as { items?: StationApprovalSummary[] } | undefined)?.items) ?? [];
   const selected = rows.find((s) => s.id === selectedId) ?? rows[0] ?? null;
 
   const approve = useMutation({

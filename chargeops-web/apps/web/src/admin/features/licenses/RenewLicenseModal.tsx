@@ -8,7 +8,7 @@ export interface RenewLicenseModalProps {
   license: License | null;
   pending: boolean;
   onClose: () => void;
-  onConfirm: (data: { stationId: string; plan: 'MONTHLY' | 'YEARLY' }) => void;
+  onConfirm: (data: { licenseId: string; stationId: string; plan: 'MONTHLY' | 'YEARLY' }) => void;
 }
 
 export function RenewLicenseModal({
@@ -46,7 +46,7 @@ export function RenewLicenseModal({
       return;
     }
     setError(null);
-    onConfirm({ stationId: license.stationId, plan });
+    onConfirm({ licenseId: license.id, stationId: license.stationId, plan });
   };
 
   return (

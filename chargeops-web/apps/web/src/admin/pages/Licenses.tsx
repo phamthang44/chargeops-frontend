@@ -83,21 +83,15 @@ export function Licenses() {
       api.licenses.list({
         status: filter === 'all' ? undefined : filter,
         search: debouncedSearch || undefined,
-        pageNo: page,
+        pageNo: page + 1,
         pageSize: PAGE_SIZE,
       }),
     placeholderData: keepPreviousData,
   });
 
-  // Global summary for metrics and renewal queue
-  const { data: globalData } = useQuery({
-    queryKey: ['licenses', 'global-summary'],
-    queryFn: () => api.licenses.list({ pageSize: 100 }),
-  });
-
   const recordRenewal = useMutation({
-    mutationFn: ({ stationId, plan }: { stationId: string; plan: 'MONTHLY' | 'YEARLY' }) =>
-      api.licenses.recordRenewal(stationId, { plan }),
+    mutationFn: ({ licenseId, stationId, plan }: { licenseId: string; stationId: string; plan: 'MONTHLY' | 'YEARLY' }) =>
+      api.licenses.renew(licenseId, { plan }),
     onSuccess: (l) => {
       qc.invalidateQueries({ queryKey: ['licenses'] });
       toast(
@@ -142,7 +136,6 @@ export function Licenses() {
     },
   });
 
-  const all = globalData?.items ?? [];
   const rows = pageData?.items ?? [];
   const total = pageData?.total ?? 0;
 
@@ -156,8 +149,8 @@ export function Licenses() {
     return 'ACTIVE';
   };
 
-  // Renewal queue: ONLY active <= 30 days and expired licenses
-  const renewalQueue = all.filter((l) => {
+  // Renewal queue: active <= 30 days and expired licenses from current page
+  const renewalQueue = rows.filter((l) => {
     const st = normalizeStatus(l.status);
     if (st === 'EXPIRED') return true;
     if (st === 'ACTIVE') {
@@ -168,24 +161,22 @@ export function Licenses() {
   });
 
   const totalFeeRecorded = useMemo(
-    () => all.reduce((sum, l) => sum + (l.feeAmount ?? l.priceVnd ?? 0), 0),
-    [all],
+    () => rows.reduce((sum, l) => sum + (l.feeAmount ?? l.priceVnd ?? 0), 0),
+    [rows],
   );
 
-  const activeCount = all.filter((l) => normalizeStatus(l.status) === 'ACTIVE').length;
+  const activeCount = rows.filter((l) => normalizeStatus(l.status) === 'ACTIVE').length;
 
   const tabs = useMemo<FilterTab<FilterKey>[]>(() => {
-    const count = (k: FilterKey) =>
-      k === 'all' ? all.length : all.filter((l) => normalizeStatus(l.status) === k).length;
     return [
-      { key: 'all', label: 'Tất cả', count: count('all') },
-      { key: 'ACTIVE', label: 'Hoạt động', count: count('ACTIVE') },
-      { key: 'PENDING', label: 'Chờ hiệu lực', count: count('PENDING') },
-      { key: 'SUSPENDED', label: 'Tạm ngưng', count: count('SUSPENDED') },
-      { key: 'EXPIRED', label: 'Hết hạn', count: count('EXPIRED') },
-      { key: 'CANCELLED', label: 'Đã hủy', count: count('CANCELLED') },
+      { key: 'all', label: 'Tất cả', count: filter === 'all' ? total : undefined },
+      { key: 'ACTIVE', label: 'Hoạt động', count: filter === 'ACTIVE' ? total : undefined },
+      { key: 'PENDING', label: 'Chờ hiệu lực', count: filter === 'PENDING' ? total : undefined },
+      { key: 'SUSPENDED', label: 'Tạm ngưng', count: filter === 'SUSPENDED' ? total : undefined },
+      { key: 'EXPIRED', label: 'Hết hạn', count: filter === 'EXPIRED' ? total : undefined },
+      { key: 'CANCELLED', label: 'Đã hủy', count: filter === 'CANCELLED' ? total : undefined },
     ];
-  }, [all]);
+  }, [filter, total]);
 
   return (
     <>
@@ -220,7 +211,7 @@ export function Licenses() {
             <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
               <MetricCard
                 label="Tổng số License"
-                value={String(all.length || total)}
+                value={String(total)}
                 accent="#5b54e8"
               />
               <MetricCard

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -20,6 +20,7 @@ import {
 } from '@chargeops/ui';
 import {
   formatDateVn,
+  formatDateTimeVn,
   formatVnd,
   LICENSE_STATUS,
   useApi,
@@ -41,6 +42,55 @@ export interface LicenseDetailDrawerProps {
 
 type HistoryTab = 'status-events' | 'station-periods';
 
+const EVENT_ORDER: Record<string, number> = {
+  ISSUED: 1,
+  ACTIVATED: 2,
+  SUSPENDED: 3,
+  REACTIVATED: 4,
+  EXPIRED: 5,
+  CANCELLED: 6,
+};
+
+const EVENT_DISPLAY_CONFIG: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    tone: 'good' | 'warn' | 'bad' | 'brand';
+  }
+> = {
+  ISSUED: {
+    title: 'Cấp phát License',
+    description: 'Khởi tạo hồ sơ License ban đầu',
+    tone: 'brand',
+  },
+  ACTIVATED: {
+    title: 'Kích hoạt vận hành',
+    description: 'License bắt đầu hiệu lực hoạt động',
+    tone: 'good',
+  },
+  SUSPENDED: {
+    title: 'Tạm ngưng License',
+    description: 'Tạm dừng quyền vận hành của trạm',
+    tone: 'warn',
+  },
+  REACTIVATED: {
+    title: 'Kích hoạt lại License',
+    description: 'Khôi phục quyền kinh doanh',
+    tone: 'good',
+  },
+  CANCELLED: {
+    title: 'Hủy bỏ License',
+    description: 'Hủy giấy phép vĩnh viễn',
+    tone: 'bad',
+  },
+  EXPIRED: {
+    title: 'Hết hạn hiệu lực',
+    description: 'Kỳ hạn kết thúc',
+    tone: 'bad',
+  },
+};
+
 export function LicenseDetailDrawer({
   open,
   licenseId,
@@ -55,6 +105,7 @@ export function LicenseDetailDrawer({
   const api = useApi();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<HistoryTab>('status-events');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Fetch full detail of the selected license
@@ -79,6 +130,21 @@ export function LicenseDetailDrawer({
     queryFn: () => (licenseId ? api.licenses.statusEvents(licenseId) : Promise.resolve([])),
     enabled: Boolean(licenseId) && open,
   });
+
+  // Sort events deterministically: Chronological (ASC) by default (ISSUED -> ACTIVATED -> SUSPENDED)
+  const sortedEvents = useMemo(() => {
+    if (!statusEvents || statusEvents.length === 0) return [];
+    return [...statusEvents].sort((a, b) => {
+      const timeA = new Date(a.performedAt).getTime();
+      const timeB = new Date(b.performedAt).getTime();
+      if (timeA !== timeB) {
+        return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+      const rankA = EVENT_ORDER[a.eventType] ?? 99;
+      const rankB = EVENT_ORDER[b.eventType] ?? 99;
+      return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
+    });
+  }, [statusEvents, sortDirection]);
 
   // Fetch station subscription periods
   const {
@@ -310,73 +376,125 @@ export function LicenseDetailDrawer({
             {activeTab === 'status-events' ? (
               /* Tab 1: Status Events Audit Timeline */
               <div className="flex flex-col gap-2.5">
+                {/* Timeline Header with Sort Direction Control */}
+                <div className="flex items-center justify-between px-0.5 pb-1">
+                  <span className="text-[11.5px] font-semibold text-muted">
+                    {sortDirection === 'asc' ? 'Tiến trình vòng đời (Cũ → Mới):' : 'Nhật ký sự kiện (Mới nhất trước):'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                    className="flex items-center gap-1.5 rounded-[6px] border border-line-2 bg-surface-2 px-2 py-1 text-[11px] font-medium text-body transition hover:border-line hover:text-ink"
+                  >
+                    <IconRefreshCw size={11} className="text-faint" />
+                    <span>{sortDirection === 'asc' ? 'Đổi: Mới nhất trước' : 'Đổi: Cũ → Mới (Tiến trình)'}</span>
+                  </button>
+                </div>
+
                 {isEventsLoading ? (
                   <div className="flex flex-col gap-2">
                     <Skeleton className="h-16 w-full rounded-[8px]" />
                     <Skeleton className="h-16 w-full rounded-[8px]" />
                   </div>
-                ) : !statusEvents || statusEvents.length === 0 ? (
+                ) : !sortedEvents || sortedEvents.length === 0 ? (
                   <div className="rounded-[9px] border border-line-2 bg-surface-2 py-8 text-center text-[12.5px] text-faint">
                     Chưa có sự kiện trạng thái nào được ghi nhận cho License này.
                   </div>
                 ) : (
-                  <div className="relative pl-4 border-l-2 border-line-2 flex flex-col gap-3.5 my-1">
-                    {statusEvents.map((evt, idx) => {
-                      const isFirst = idx === 0;
-                      const eventBadgeTone =
-                        evt.eventType === 'ACTIVATED' || evt.eventType === 'REACTIVATED'
-                          ? 'good'
-                          : evt.eventType === 'SUSPENDED'
-                            ? 'warn'
-                            : evt.eventType === 'CANCELLED' || evt.eventType === 'EXPIRED'
-                              ? 'bad'
-                              : 'brand';
+                  <div className="relative pl-5 border-l-2 border-line-2 flex flex-col gap-4 my-1">
+                    {sortedEvents.map((evt, idx) => {
+                      const isCurrentState =
+                        sortDirection === 'asc'
+                          ? idx === sortedEvents.length - 1
+                          : idx === 0;
+
+                      const stepNumber =
+                        sortDirection === 'asc'
+                          ? idx + 1
+                          : sortedEvents.length - idx;
+
+                      const cfg = EVENT_DISPLAY_CONFIG[evt.eventType] || {
+                        title: evt.eventType,
+                        description: '',
+                        tone: 'brand' as const,
+                      };
 
                       return (
                         <div key={evt.id || idx} className="relative group">
-                          {/* Dot indicator */}
+                          {/* Step Circle indicator */}
                           <div
-                            className={`absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${
-                              eventBadgeTone === 'good'
-                                ? 'bg-good'
-                                : eventBadgeTone === 'warn'
-                                  ? 'bg-warn'
-                                  : eventBadgeTone === 'bad'
-                                    ? 'bg-bad'
-                                    : 'bg-brand'
+                            className={`absolute -left-[27px] top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-bold shadow-sm ${
+                              isCurrentState
+                                ? cfg.tone === 'good'
+                                  ? 'border-good bg-good text-white ring-4 ring-good/20'
+                                  : cfg.tone === 'warn'
+                                    ? 'border-warn bg-warn text-white ring-4 ring-warn/20'
+                                    : cfg.tone === 'bad'
+                                      ? 'border-bad bg-bad text-white ring-4 ring-bad/20'
+                                      : 'border-brand bg-brand text-white ring-4 ring-brand/20'
+                                : 'border-line-2 bg-surface-2 text-muted'
                             }`}
-                          />
+                          >
+                            {stepNumber}
+                          </div>
 
-                          <div className="rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12px] transition hover:border-line">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-ink text-[12.5px]">{evt.eventType}</span>
-                                {evt.fromStatus && (
-                                  <span className="text-[11px] text-muted">
-                                    ({evt.fromStatus} → <b className="text-ink">{evt.toStatus}</b>)
+                          <div
+                            className={`rounded-[10px] border p-3 text-[12px] transition ${
+                              isCurrentState
+                                ? 'border-brand/40 bg-surface shadow-sm ring-1 ring-brand/20'
+                                : 'border-line-2 bg-surface-2 hover:border-line'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-ink text-[13px]">
+                                    {cfg.title}
                                   </span>
+                                  <span className="font-mono text-[10.5px] font-semibold text-faint">
+                                    ({evt.eventType})
+                                  </span>
+                                  {isCurrentState && (
+                                    <span className="rounded bg-brand-soft px-1.5 py-0.2 text-[10px] font-bold text-brand">
+                                      Hiện tại
+                                    </span>
+                                  )}
+                                </div>
+
+                                {evt.fromStatus && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted">
+                                    <span>Chuyển trạng thái:</span>
+                                    <span className="font-mono font-semibold text-faint">{evt.fromStatus}</span>
+                                    <span className="text-faint">→</span>
+                                    <span className="font-mono font-bold text-ink">{evt.toStatus}</span>
+                                  </div>
                                 )}
                               </div>
-                              <span className="text-[11px] text-faint">{formatDateVn(evt.performedAt)}</span>
+
+                              <span className="shrink-0 text-[11px] font-medium text-faint">
+                                {formatDateTimeVn(evt.performedAt)}
+                              </span>
                             </div>
 
                             {evt.reason && (
-                              <div className="mt-1.5 rounded-[6px] bg-surface p-2 text-[11.5px] text-body">
-                                <span className="font-semibold text-faint">Lý do: </span>
-                                {evt.reason}
+                              <div className="mt-2.5 rounded-[7px] border border-line-2 bg-surface p-2.5 text-[11.5px] leading-relaxed text-body">
+                                <span className="font-semibold text-ink">Lý do: </span>
+                                <span>{evt.reason}</span>
                               </div>
                             )}
 
-                            <div className="mt-2 flex items-center justify-between text-[10.5px] text-faint border-t border-hairline pt-1.5">
+                            <div className="mt-2.5 flex items-center justify-between text-[11px] text-faint border-t border-hairline pt-2">
                               <span>
-                                Thực hiện bởi:{' '}
-                                <b className="text-body">
+                                Người thực hiện:{' '}
+                                <b className="text-body font-semibold">
                                   {evt.actorType === 'SYSTEM'
                                     ? 'Hệ thống tự động (SYSTEM)'
                                     : evt.performedByName || 'Quản trị viên'}
                                 </b>
                               </span>
-                              <span className="font-mono">{evt.actorType}</span>
+                              <span className="font-mono text-[10px] rounded bg-surface px-1.5 py-0.5 border border-hairline">
+                                {evt.actorType}
+                              </span>
                             </div>
                           </div>
                         </div>

@@ -15,6 +15,7 @@ import {
   IconClipboardCheck,
   IconGrid,
   IconLifebuoy,
+  IconPin,
   IconPlusCircle,
   IconShield,
   IconUsers,
@@ -24,6 +25,7 @@ import {
 } from '@chargeops/ui';
 import { Dashboard } from './pages/Dashboard';
 import { Notifications } from './pages/Notifications';
+import { Stations } from './pages/Stations';
 import { Approvals } from './pages/Approvals';
 import { Provisioning } from './pages/Provisioning';
 import { Users } from './pages/Users';
@@ -40,6 +42,7 @@ import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
 const PAGES: Record<string, ComponentType> = {
   dashboard: Dashboard,
   notifications: Notifications,
+  stations: Stations,
   approvals: Approvals,
   provisioning: Provisioning,
   bookings: Bookings,
@@ -64,8 +67,8 @@ export function AdminConsole({ base }: { base: string }) {
   const NAV: (ShellNavItem & { title: string })[] = [
     { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
     { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
+    { key: 'stations', label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
     { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
-    { key: 'provisioning', label: t('console.nav.provisioning.label'), icon: <IconPlusCircle size={17} />, title: t('console.nav.provisioning.title') },
     { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
     { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
     { key: 'transactions', label: t('console.nav.transactions.label'), icon: <IconCard size={17} />, title: t('console.nav.transactions.title') },

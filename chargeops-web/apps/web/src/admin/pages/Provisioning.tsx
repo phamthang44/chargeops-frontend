@@ -34,8 +34,8 @@ import {
 
 const CONNECTORS = [
   { value: 'CCS2', label: 'CCS2' },
-  { value: 'CHAdeMO', label: 'CHAdeMO' },
-  { value: 'Type2AC', label: 'Type 2 AC' },
+  { value: 'CHADEMO', label: 'CHAdeMO' },
+  { value: 'TYPE2', label: 'Type 2 AC' },
   { value: 'GBT', label: 'GB/T' },
 ];
 const POWERS = [22, 50, 60, 120, 150].map((p) => ({ value: String(p), label: `${p} kW` }));
@@ -87,7 +87,7 @@ export function Provisioning() {
       return {
         station,
         chargePoints: mine.length,
-        unclaimed: mine.filter((cp) => cp.status === 'unclaimed').length,
+        unclaimed: mine.filter((cp) => cp.provisioningStatus === 'PENDING_ACTIVATION').length,
       };
     });
   }, [stationsQ.data, chargePointsQ.data]);
@@ -381,8 +381,8 @@ function ChargePointCard({
   onDownloadQr: (c: Connector) => void;
 }) {
   const { t } = useTranslation('admin');
-  const meta = CHARGE_POINT_STATUS[cp.status];
-  const canActivate = cp.status === 'unclaimed' && connectors.length > 0;
+  const meta = CHARGE_POINT_STATUS[cp.provisioningStatus] || CHARGE_POINT_STATUS.PENDING_ACTIVATION;
+  const canActivate = cp.provisioningStatus === 'PENDING_ACTIVATION' && connectors.length > 0;
 
   return (
     <Card className="overflow-hidden">
@@ -405,7 +405,7 @@ function ChargePointCard({
             <span>{t('provisioning.connectorCount', { count: connectors.length })}</span>
           </div>
         </div>
-        <StatusPill tone={meta.tone} label={t(`provisioning.status.${cp.status}`, { defaultValue: meta.label })} />
+        <StatusPill tone={meta.tone} label={t(`provisioning.status.${cp.provisioningStatus}`, { defaultValue: meta.label })} />
       </div>
 
       <div className="border-t border-hairline bg-surface-2 px-3 py-2.5">
@@ -451,7 +451,7 @@ function ChargePointCard({
           {t('provisioning.connector.addBtn')}
         </Button>
 
-        {cp.status === 'unclaimed' ? (
+        {cp.provisioningStatus === 'PENDING_ACTIVATION' ? (
           <span className="flex items-center gap-2.5">
             {!canActivate && (
               <span className="text-[11px] font-medium text-faint">{t('provisioning.activateHint')}</span>
@@ -549,6 +549,7 @@ function AddConnectorModal({ chargePoint, onClose }: { chargePoint: ChargePoint;
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
+  const [connectorCode, setConnectorCode] = useState('C-01');
   const [connectorType, setConnectorType] = useState<ConnectorType>('CCS2');
   const [powerKw, setPowerKw] = useState(60);
   const [name, setName] = useState('');
@@ -557,6 +558,7 @@ function AddConnectorModal({ chargePoint, onClose }: { chargePoint: ChargePoint;
     mutationFn: () =>
       api.connectors.provision({
         chargePointId: chargePoint.id,
+        connectorCode: connectorCode.trim() || 'C-01',
         connectorType,
         powerKw,
         name: name.trim() || undefined,
@@ -564,7 +566,7 @@ function AddConnectorModal({ chargePoint, onClose }: { chargePoint: ChargePoint;
     onSuccess: (c) => {
       qc.invalidateQueries({ queryKey: ['connectors'] });
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
-      toast(t('provisioning.connector.toastSuccess', { id: c.id }), 'success');
+      toast(t('provisioning.connector.toastSuccess', { id: c.connectorCode || c.id }), 'success');
       onClose();
     },
     onError: (e) => toast((e as Error).message, 'error'),

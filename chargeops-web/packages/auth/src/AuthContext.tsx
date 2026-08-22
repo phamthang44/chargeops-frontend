@@ -47,12 +47,31 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
     setError(null);
 
     keycloak.onTokenExpired = () => {
-      void keycloak.updateToken(30).catch(() => {
-        if (cancelled) return;
-        setError('The Keycloak session expired. Please sign in again.');
-        setAuthenticated(false);
+      void keycloak.updateToken(70).catch((err) => {
+        console.warn('Keycloak token update attempt in background:', err);
       });
     };
+
+    // Proactive background heartbeat: refresh token if expires in under 70 seconds
+    const refreshInterval = window.setInterval(() => {
+      if (!cancelled && keycloak && keycloak.authenticated) {
+        keycloak.updateToken(70).catch(() => {
+          /* background silent refresh attempt */
+        });
+      }
+    }, 15_000);
+
+    // Multi-monitor & Tab-switch guard: immediately refresh token when user focuses or returns to the tab
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible' && !cancelled && keycloak && keycloak.authenticated) {
+        keycloak.updateToken(70).catch(() => {
+          /* silent background attempt */
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
 
     void initializeKeycloak()
       .then((isAuthenticated) => {
@@ -70,22 +89,24 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
 
     return () => {
       cancelled = true;
+      window.clearInterval(refreshInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
       keycloak.onTokenExpired = undefined;
     };
   }, [keycloak, mockUser, realMode, redirectMs]);
 
   const getToken = useCallback(async (): Promise<string | null> => {
-    if (!realMode || !keycloak || !authenticated) return null;
+    if (!realMode || !keycloak) return null;
 
     try {
       await keycloak.updateToken(30);
       return keycloak.token ?? null;
-    } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : 'Unable to refresh the Keycloak token.');
-      setAuthenticated(false);
-      return null;
+    } catch {
+      // Non-destructive fallback: return cached token and avoid destroying active session/UI state
+      return keycloak.token ?? null;
     }
-  }, [authenticated, keycloak, realMode]);
+  }, [keycloak, realMode]);
 
   const logout = useCallback(() => {
     if (realMode && keycloak) {

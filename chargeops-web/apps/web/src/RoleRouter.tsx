@@ -3,6 +3,7 @@ import { RequireRole, resolveHome, useAuth } from '@chargeops/auth';
 import { OwnerConsole } from './owner/OwnerConsole';
 import { AdminConsole } from './admin/AdminConsole';
 import { DriverNotice } from './DriverNotice';
+import { SimulatorPage } from './simulator/SimulatorPage';
 
 /**
  * The whole point of the single-app design: after Keycloak issues a token, the
@@ -24,6 +25,8 @@ export function RoleRouter() {
 
   return (
     <Routes>
+      <Route path="/simulator" element={<SimulatorPage />} />
+      <Route path="/simulator/:connectorId" element={<SimulatorPage />} />
       <Route
         path="/admin/*"
         element={

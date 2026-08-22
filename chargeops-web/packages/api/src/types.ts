@@ -14,7 +14,7 @@ export interface Page<T> {
   pageSize: number;
 }
 
-export type ConnectorType = 'CCS2' | 'CHAdeMO' | 'Type2AC' | 'GBT';
+export type ConnectorType = 'CCS2' | 'CHADEMO' | 'TYPE2' | 'GBT';
 export type PaymentMethod = 'VNPAY' | 'MOMO' | 'ATM';
 
 /* ---------- bookings ---------- */
@@ -111,30 +111,41 @@ export interface BookingSummary {
 /* ---------- charge points & connectors (FR10, FR14) ---------- */
 
 /**
- * Charge Point lifecycle (FR14 provisioning table). Admin owns UNCLAIMED→ACTIVE and
- * SUSPENDED; owner/staff may toggle ACTIVE<->OFFLINE (e.g. for maintenance — a reason,
- * not a separate stored state).
+ * Charge Point lifecycle (FR14 provisioning table). Admin owns PENDING_ACTIVATION→ACTIVE and
+ * SUSPENDED; owner/staff may toggle AVAILABLE<->OFFLINE (e.g. for maintenance).
  */
-export type ProvisioningStatus = 'unclaimed' | 'active' | 'offline' | 'suspended';
+export type ProvisioningStatus =
+  | 'PENDING_ACTIVATION'
+  | 'ACTIVE'
+  | 'SUSPENDED';
 
-/**
- * Connector runtime status (FR07). AVAILABLE<->IN_USE is system-driven by check-in /
- * session-complete; owner/staff may independently toggle a specific connector to OFFLINE
- * (BR-CHG-05) even while its Charge Point is ACTIVE.
- */
-export type ConnectorRuntimeStatus = 'available' | 'inuse' | 'offline';
+export type OperationalChargePointStatus =
+  | 'AVAILABLE'
+  | 'OFFLINE'
+  | 'MAINTENANCE';
+
+export type ConnectorRuntimeStatus =
+  | 'AVAILABLE'
+  | 'IN_USE'
+  | 'OFFLINE';
+
+export type ChargerType = 'AC' | 'DC' | 'ac' | 'dc';
 
 /** The physical device. Bookings never attach here directly — only to its Connectors. */
 export interface ChargePoint {
   id: string;
   stationId: string;
+  chargePointCode?: string;
   /** Owner-editable display name. */
   name: string;
   /** Free-text location hint shown to drivers, e.g. "near the entrance, row B" (FR10). */
   zoneLabel: string | null;
   /** Display-only aggregate; not an enforced booking constraint (BR-CHG-06). */
   maxPowerKw: number;
-  status: ProvisioningStatus;
+  provisioningStatus: ProvisioningStatus;
+  operationalStatus: OperationalChargePointStatus;
+  createdAt?: string;
+  connectors?: Connector[];
 }
 
 /**
@@ -146,18 +157,29 @@ export interface ChargePoint {
 export interface Connector {
   id: string;
   chargePointId: string;
-  name: string;
+  connectorCode: string;
+  name?: string;
   connectorType: ConnectorType;
   powerKw: number;
+  chargerType?: ChargerType;
+  slotMinutes?: number;
   runtimeStatus: ConnectorRuntimeStatus;
-  /** Static QR payload — never changes after provisioning (BR-CHG-04). */
-  qrToken: string;
-  utilizationPct: number;
-  sessionsToday: number;
-  uptime30dPct: number;
-  kwhToday: number;
-  faultCount: number;
-  lastSeen: string;
+  utilizationPct?: number;
+  sessionsToday?: number;
+  uptime30dPct?: number;
+  kwhToday?: number;
+  faultCount?: number;
+  lastSeen?: string;
+  createdAt?: string;
+}
+
+/* ---------- dynamic QR check-in challenge (FR07) ---------- */
+
+export interface CheckInChallengeResponse {
+  challengeToken: string;
+  expiresInSeconds: number;
+  connectorId?: string;
+  createdAt?: string;
 }
 
 /* ---------- location (administrative units) ---------- */
@@ -274,6 +296,61 @@ export interface StationApprovalSummary {
   ownerName?: string;
   city?: string;
   chargerCount?: number;
+}
+
+export interface AdminStationListItem {
+  id: string;
+  stationCode: string;
+  name: string;
+  addressLine: string;
+  provinceName: string;
+  wardName: string;
+  ownerId: string;
+  ownerDisplayName: string;
+  ownerEmail: string;
+  contactPhone: string;
+  plannedChargePointCount: number;
+  status: StationStatus;
+  createdAt: string;
+  licenseSummary?: LicenseSummary | null;
+}
+
+export interface StationOperatingPeriod {
+  id?: string;
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
+}
+
+export interface AdminStationDetail {
+  id: string;
+  stationCode: string;
+  name: string;
+  description?: string;
+  addressLine: string;
+  provinceName: string;
+  wardName: string;
+  latitude: number;
+  longitude: number;
+  contactPhone: string;
+  plannedChargePointCount: number;
+  status: StationStatus;
+  createdAt: string;
+  ownerId: string;
+  ownerDisplayName: string;
+  ownerEmail: string;
+  ownerPhoneNumber?: string;
+  assets?: StationAsset[];
+  operatingPeriods?: StationOperatingPeriod[];
+  licenseSummary?: LicenseSummary | null;
+}
+
+export interface AdminStationFilterParams {
+  search?: string;
+  status?: StationStatus;
+  provinceCode?: string;
+  pageNo?: number;
+  pageSize?: number;
 }
 
 export type StationStatusEventType =
@@ -767,4 +844,19 @@ export interface AdminDashboard {
     reportedFaults: number;
   };
   topStations: { name: string; revenueVnd: number }[];
+}
+
+export interface UserProfile {
+  id: string;
+  keycloakId: string;
+  email: string;
+  displayName?: string;
+  phone?: string;
+  status: UserStatus;
+  profileCompleted: boolean;
+}
+
+export interface UserProfileUpdateRequest {
+  displayName: string;
+  phone: string;
 }

@@ -38,9 +38,13 @@ export function SsoRedirectOverlay() {
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {
-  const { authenticated, error } = useAuth();
+  const { authenticated, error, initializing } = useAuth();
 
-  if (error) {
+  if (initializing) {
+    return <SsoRedirectOverlay />;
+  }
+
+  if (error && !authenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas p-8 text-center text-muted">
         {error}

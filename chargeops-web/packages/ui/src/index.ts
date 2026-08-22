@@ -21,6 +21,7 @@ export * from './FormField';
 export * from './EmptyState';
 export * from './ProgressBar';
 export * from './QrGlyph';
+export * from './QrCodeRenderer';
 export * from './Button';
 export * from './Select';
 export * from './Avatar';

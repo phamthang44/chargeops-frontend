@@ -112,8 +112,8 @@ export function buildMockDb(): MockDb {
   const conns: [ConnectorType, number, number][] = [
     ['CCS2', 60, 4200],
     ['CCS2', 120, 5000],
-    ['CHAdeMO', 50, 3800],
-    ['Type2AC', 22, 3000],
+    ['CHADEMO', 50, 3800],
+    ['TYPE2', 22, 3000],
   ];
   const statuses: BookingStatus[] = ['pending', 'confirmed', 'confirmed', 'checkedin', 'charging', 'completed', 'completed', 'completed', 'cancelled', 'cancelled'];
   const methods: PaymentMethod[] = ['VNPAY', 'VNPAY', 'MOMO', 'ATM'];
@@ -243,33 +243,34 @@ export function buildMockDb(): MockDb {
   }
 
   /* ---- charge points & connectors (owner's Trạm Hà Đông) — FR10/FR14 ---- */
+  /* ---- charge points & connectors (owner's Trạm Hà Đông) — FR10/FR14 ---- */
   const chargePoints: ChargePoint[] = [
-    { id: 'CP-01', stationId: 'ST-1001', name: 'Cổng A1', zoneLabel: 'Gần lối vào', maxPowerKw: 60, status: 'active' },
-    { id: 'CP-02', stationId: 'ST-1001', name: 'Cổng A2', zoneLabel: 'Gần lối vào', maxPowerKw: 60, status: 'active' },
-    { id: 'CP-03', stationId: 'ST-1001', name: 'Cổng B1', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 50, status: 'active' },
-    { id: 'CP-04', stationId: 'ST-1001', name: 'Cổng B2', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 22, status: 'active' },
-    { id: 'CP-05', stationId: 'ST-1001', name: 'Cổng C1', zoneLabel: 'Sát trạm biến áp', maxPowerKw: 120, status: 'active' },
+    { id: 'CP-01', stationId: 'ST-1001', name: 'Cổng A1', zoneLabel: 'Gần lối vào', maxPowerKw: 60, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-02', stationId: 'ST-1001', name: 'Cổng A2', zoneLabel: 'Gần lối vào', maxPowerKw: 60, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-03', stationId: 'ST-1001', name: 'Cổng B1', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 50, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-04', stationId: 'ST-1001', name: 'Cổng B2', zoneLabel: 'Khu vực B, hàng 2', maxPowerKw: 22, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-05', stationId: 'ST-1001', name: 'Cổng C1', zoneLabel: 'Sát trạm biến áp', maxPowerKw: 120, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
   ];
   const connectors: Connector[] = [
-    { id: 'CH-01', chargePointId: 'CP-01', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH01', utilizationPct: 72, sessionsToday: 14, uptime30dPct: 99.6, kwhToday: 248, faultCount: 0, lastSeen: '12 giây trước' },
-    { id: 'CH-02', chargePointId: 'CP-02', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH02', utilizationPct: 81, sessionsToday: 17, uptime30dPct: 99.9, kwhToday: 296, faultCount: 0, lastSeen: '4 giây trước' },
-    { id: 'CH-03', chargePointId: 'CP-03', name: 'Connector 1', connectorType: 'CHAdeMO', powerKw: 50, runtimeStatus: 'offline', qrToken: 'QR-CH03', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 92.1, kwhToday: 0, faultCount: 2, lastSeen: '2 giờ trước' },
-    { id: 'CH-04', chargePointId: 'CP-04', name: 'Connector 1', connectorType: 'Type2AC', powerKw: 22, runtimeStatus: 'offline', qrToken: 'QR-CH04', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 78.4, kwhToday: 0, faultCount: 1, lastSeen: '1 ngày trước' },
-    { id: 'CH-05', chargePointId: 'CP-05', name: 'Connector 1', connectorType: 'CCS2', powerKw: 120, runtimeStatus: 'available', qrToken: 'QR-CH05', utilizationPct: 64, sessionsToday: 11, uptime30dPct: 99.2, kwhToday: 372, faultCount: 0, lastSeen: '9 giây trước' },
+    { id: 'CH-01', chargePointId: 'CP-01', connectorCode: 'C-01', name: 'Súng CCS2 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'AVAILABLE', utilizationPct: 72, sessionsToday: 14, uptime30dPct: 99.6, kwhToday: 248, faultCount: 0, lastSeen: '12 giây trước' },
+    { id: 'CH-02', chargePointId: 'CP-02', connectorCode: 'C-01', name: 'Súng CCS2 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'AVAILABLE', utilizationPct: 81, sessionsToday: 17, uptime30dPct: 99.9, kwhToday: 296, faultCount: 0, lastSeen: '4 giây trước' },
+    { id: 'CH-03', chargePointId: 'CP-03', connectorCode: 'C-01', name: 'Súng CHAdeMO 1', connectorType: 'CHADEMO', powerKw: 50, runtimeStatus: 'OFFLINE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 92.1, kwhToday: 0, faultCount: 2, lastSeen: '2 giờ trước' },
+    { id: 'CH-04', chargePointId: 'CP-04', connectorCode: 'C-01', name: 'Súng AC 1', connectorType: 'TYPE2', powerKw: 22, runtimeStatus: 'OFFLINE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 78.4, kwhToday: 0, faultCount: 1, lastSeen: '1 ngày trước' },
+    { id: 'CH-05', chargePointId: 'CP-05', connectorCode: 'C-01', name: 'Súng CCS2 1', connectorType: 'CCS2', powerKw: 120, runtimeStatus: 'AVAILABLE', utilizationPct: 64, sessionsToday: 11, uptime30dPct: 99.2, kwhToday: 372, faultCount: 0, lastSeen: '9 giây trước' },
   ];
 
   /* ---- admin-provisioned records (unclaimed Charge Point + its Connectors) ---- */
   const provisionedChargePoints: ChargePoint[] = [
-    { id: 'CP-3303', stationId: 'ST-1042', name: 'Cổng A1', zoneLabel: null, maxPowerKw: 60, status: 'active' },
-    { id: 'CP-3302', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 60, status: 'unclaimed' },
-    { id: 'CP-3301', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 50, status: 'unclaimed' },
-    { id: 'CP-3300', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 22, status: 'unclaimed' },
+    { id: 'CP-3303', stationId: 'ST-1042', name: 'Cổng A1', zoneLabel: null, maxPowerKw: 60, provisioningStatus: 'ACTIVE', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-3302', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 60, provisioningStatus: 'PENDING_ACTIVATION', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-3301', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 50, provisioningStatus: 'PENDING_ACTIVATION', operationalStatus: 'AVAILABLE' },
+    { id: 'CP-3300', stationId: 'ST-1042', name: '—', zoneLabel: null, maxPowerKw: 22, provisioningStatus: 'PENDING_ACTIVATION', operationalStatus: 'AVAILABLE' },
   ];
   const provisionedConnectors: Connector[] = [
-    { id: 'CH-3303', chargePointId: 'CP-3303', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'available', qrToken: 'QR-CH3303', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 100, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3302', chargePointId: 'CP-3302', name: 'Connector 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'offline', qrToken: 'QR-CH3302', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3301', chargePointId: 'CP-3301', name: 'Connector 1', connectorType: 'CHAdeMO', powerKw: 50, runtimeStatus: 'offline', qrToken: 'QR-CH3301', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
-    { id: 'CH-3300', chargePointId: 'CP-3300', name: 'Connector 1', connectorType: 'Type2AC', powerKw: 22, runtimeStatus: 'offline', qrToken: 'QR-CH3300', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3303', chargePointId: 'CP-3303', connectorCode: 'C-01', name: 'Súng CCS2 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'AVAILABLE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 100, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3302', chargePointId: 'CP-3302', connectorCode: 'C-01', name: 'Súng CCS2 1', connectorType: 'CCS2', powerKw: 60, runtimeStatus: 'OFFLINE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3301', chargePointId: 'CP-3301', connectorCode: 'C-01', name: 'Súng CHAdeMO 1', connectorType: 'CHADEMO', powerKw: 50, runtimeStatus: 'OFFLINE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
+    { id: 'CH-3300', chargePointId: 'CP-3300', connectorCode: 'C-01', name: 'Súng AC 1', connectorType: 'TYPE2', powerKw: 22, runtimeStatus: 'OFFLINE', utilizationPct: 0, sessionsToday: 0, uptime30dPct: 0, kwhToday: 0, faultCount: 0, lastSeen: '—' },
   ];
 
   /* ---- owner stations (FR12) ---- */

@@ -26,6 +26,8 @@ import type {
   TicketMessage,
   TicketStatus,
   TransactionSummary,
+  UserProfile,
+  UserProfileUpdateRequest,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
@@ -77,7 +79,7 @@ const MOCK_WARDS: Record<string, AdministrativeWard[]> = {
  */
 function effectiveRuntimeStatus(c: Connector, chargePoints: ChargePoint[]): Connector['runtimeStatus'] {
   const cp = chargePoints.find((x) => x.id === c.chargePointId);
-  return cp?.status === 'active' ? c.runtimeStatus : 'offline';
+  return cp?.provisioningStatus === 'ACTIVE' && cp?.operationalStatus === 'AVAILABLE' ? c.runtimeStatus : 'OFFLINE';
 }
 
 /** BR-PAY-03 + FR08 grace-period override, evaluated at cancel moment. */
@@ -143,6 +145,33 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
   };
 
   return {
+    profile: {
+      async get(): Promise<UserProfile> {
+        await delay();
+        return {
+          id: '11111111-1111-1111-1111-111111111111',
+          keycloakId: 'keycloak-001',
+          email: 'admin@chargeops.com',
+          displayName: 'Admin ChargeOps',
+          phone: '0901234567',
+          status: 'active',
+          profileCompleted: true,
+        };
+      },
+      async update(req: UserProfileUpdateRequest): Promise<UserProfile> {
+        await delay();
+        return {
+          id: '11111111-1111-1111-1111-111111111111',
+          keycloakId: 'keycloak-001',
+          email: 'admin@chargeops.com',
+          displayName: req.displayName,
+          phone: req.phone,
+          status: 'active',
+          profileCompleted: true,
+        };
+      },
+    },
+
     location: {
       async getProvinces() {
         await delay();
@@ -161,8 +190,8 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         // OFFLINE connectors drop out; AVAILABLE/IN_USE both count as connected/online
         const mine = scopedConnectors();
         const live = mine.map((c) => ({ c, status: effectiveRuntimeStatus(c, db.chargePoints) }));
-        const online = live.filter((x) => x.status !== 'offline');
-        const offline = live.find((x) => x.status === 'offline')?.c;
+        const online = live.filter((x) => x.status !== 'OFFLINE');
+        const offline = live.find((x) => x.status === 'OFFLINE')?.c;
         const upcoming = scopedBookings()
           .filter((b) => b.status === 'confirmed' || b.status === 'pending')
           .slice(0, 4);
@@ -186,10 +215,10 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           },
           chargers: mine.map((c) => ({
             id: c.id,
-            name: c.name,
+            name: c.name || c.connectorCode || c.id,
             zoneLabel: db.chargePoints.find((cp) => cp.id === c.chargePointId)?.zoneLabel ?? null,
             runtimeStatus: effectiveRuntimeStatus(c, db.chargePoints),
-            utilizationPct: c.utilizationPct,
+            utilizationPct: c.utilizationPct ?? 0,
           })),
           upcomingBookings: upcoming.map((b) => ({
             id: b.id,
@@ -216,7 +245,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             expiringLicenses: db.licenses.filter((l) => l.expiringSoon || (l.daysLeft != null && l.daysLeft > 0 && l.daysLeft <= 15)).length,
             expiringDaysMin: 11,
             expiredLicenses: db.licenses.filter((l) => l.status === 'EXPIRED' || l.status === 'expired' || (l.daysLeft != null && l.daysLeft < 0)).length,
-            reportedFaults: db.connectors.reduce((n, c) => n + c.faultCount, 0),
+            reportedFaults: db.connectors.reduce((n, c) => n + (c.faultCount ?? 0), 0),
           },
           topStations: [
             { name: 'Trạm Cầu Giấy', revenueVnd: 15_800_000 },
@@ -231,8 +260,8 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         // OFFLINE connectors drop out; AVAILABLE/IN_USE both count as connected/online
         const mine = scopedConnectors();
         const live = mine.map((c) => ({ c, status: effectiveRuntimeStatus(c, db.chargePoints) }));
-        const online = live.filter((x) => x.status !== 'offline');
-        const offline = live.find((x) => x.status === 'offline')?.c;
+        const online = live.filter((x) => x.status !== 'OFFLINE');
+        const offline = live.find((x) => x.status === 'OFFLINE')?.c;
         const upcoming = scopedBookings()
           .filter((b) => b.status === 'confirmed' || b.status === 'pending')
           .slice(0, 4);
@@ -252,7 +281,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           },
           chargers: mine.map((c) => ({
             id: c.id,
-            name: c.name,
+            name: c.name || c.connectorCode || c.id,
             zoneLabel: db.chargePoints.find((cp) => cp.id === c.chargePointId)?.zoneLabel ?? null,
             runtimeStatus: effectiveRuntimeStatus(c, db.chargePoints),
           })),
@@ -296,8 +325,8 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           }),
           connectorMix: [
             { connector: 'CCS2', pct: 48 },
-            { connector: 'CHAdeMO', pct: 24 },
-            { connector: 'Type2AC', pct: 20 },
+            { connector: 'CHADEMO', pct: 24 },
+            { connector: 'TYPE2', pct: 20 },
             { connector: 'GBT', pct: 8 },
           ],
         };
@@ -377,7 +406,14 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
         if (patch.name !== undefined) cp.name = patch.name;
         if (patch.zoneLabel !== undefined) cp.zoneLabel = patch.zoneLabel;
-        if (patch.status !== undefined) cp.status = patch.status;
+        if (patch.maxPowerKw !== undefined) cp.maxPowerKw = patch.maxPowerKw;
+        return { ...cp };
+      },
+      async changeOperationalStatus(id, input) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        cp.operationalStatus = input.operationalStatus;
         return { ...cp };
       },
       async provision(input) {
@@ -387,8 +423,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           stationId: input.stationId,
           name: input.name || '—',
           zoneLabel: input.zoneLabel ?? null,
-          maxPowerKw: 0,
-          status: 'unclaimed',
+          maxPowerKw: input.maxPowerKw || 0,
+          provisioningStatus: 'PENDING_ACTIVATION',
+          operationalStatus: 'AVAILABLE',
         };
         db.chargePoints.unshift(rec);
         return { ...rec };
@@ -397,7 +434,27 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const cp = db.chargePoints.find((x) => x.id === id);
         if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
-        cp.status = 'active';
+        cp.provisioningStatus = 'ACTIVE';
+        return { ...cp };
+      },
+      async suspend(id) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        cp.provisioningStatus = 'SUSPENDED';
+        return { ...cp };
+      },
+      async reactivate(id) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        cp.provisioningStatus = 'ACTIVE';
+        return { ...cp };
+      },
+      async get(id) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
         return { ...cp };
       },
     },
@@ -418,14 +475,16 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async provision(input) {
         await delay();
+        const code = input.connectorCode || ('C-0' + (db.connectors.filter((c) => c.chargePointId === input.chargePointId).length + 1));
         const rec: Connector = {
           id: 'CH-' + seq++,
           chargePointId: input.chargePointId,
-          name: input.name || 'Connector ' + (db.connectors.filter((c) => c.chargePointId === input.chargePointId).length + 1),
+          connectorCode: code,
+          name: input.name || code,
           connectorType: input.connectorType,
           powerKw: input.powerKw,
-          runtimeStatus: 'offline',
-          qrToken: 'QR-' + seq,
+          slotMinutes: input.slotMinutes || 30,
+          runtimeStatus: 'OFFLINE',
           utilizationPct: 0,
           sessionsToday: 0,
           uptime30dPct: 0,
@@ -525,6 +584,80 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         return [...db.allStations];
       },
+      async adminList(params = {}) {
+        await delay();
+        let list = [...db.allStations];
+        if (params.status && (params.status as string) !== 'all') {
+          list = list.filter((s) => String(s.status).toUpperCase() === String(params.status).toUpperCase());
+        }
+        if (params.search) {
+          const q = params.search.toLowerCase();
+          list = list.filter((s) => s.name.toLowerCase().includes(q) || (s.stationCode || '').toLowerCase().includes(q));
+        }
+        const pageNo = params.pageNo ?? 1;
+        const pageSize = params.pageSize ?? 8;
+        const start = (pageNo - 1) * pageSize;
+        const items = list.slice(start, start + pageSize).map((s) => ({
+          id: s.id,
+          stationCode: s.stationCode || s.id,
+          name: s.name,
+          addressLine: s.addressLine || s.address || 'Hà Nội',
+          provinceName: s.provinceName || s.city || 'Hà Nội',
+          wardName: s.wardName || 'Phường Dịch Vọng Hậu',
+          ownerId: 'owner-1',
+          ownerDisplayName: s.ownerDisplayName || s.ownerName || 'Chủ trạm EVGo',
+          ownerEmail: 'owner@evgo.vn',
+          contactPhone: '0901234567',
+          plannedChargePointCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
+          status: s.status,
+          createdAt: s.submittedAt || new Date().toISOString(),
+          licenseSummary: typeof s.licenseSummary === 'object' ? s.licenseSummary : null,
+        }));
+        return {
+          items,
+          total: list.length,
+          page: pageNo,
+          pageSize,
+        };
+      },
+      async adminDetail(id) {
+        await delay();
+        const s =
+          db.allStations.find((x) => x.id === id || x.stationCode === id) ||
+          db.ownerStations.find((x) => x.id === id || x.stationCode === id) ||
+          db.approvalQueue.find((x) => x.id === id || x.stationCode === id);
+        if (!s) throw new Error(`Không tìm thấy trạm ${id}`);
+        return {
+          id: s.id,
+          stationCode: s.stationCode || s.id,
+          name: s.name,
+          description: 'Trạm sạc tiêu chuẩn ChargeOps.',
+          addressLine: s.addressLine || s.address || '123 Cầu Giấy',
+          provinceName: s.provinceName || s.city || 'Hà Nội',
+          wardName: s.wardName || 'Phường Dịch Vọng Hậu',
+          latitude: 21.028511,
+          longitude: 105.854444,
+          contactPhone: '0901234567',
+          plannedChargePointCount: s.plannedChargePointCount ?? s.chargerCount ?? 4,
+          status: s.status,
+          createdAt: s.submittedAt || new Date().toISOString(),
+          ownerId: 'owner-1',
+          ownerDisplayName: s.ownerDisplayName || s.ownerName || 'Chủ trạm EVGo',
+          ownerEmail: 'owner@evgo.vn',
+          ownerPhoneNumber: '0901234567',
+          assets: s.assets ?? [],
+          operatingPeriods: [
+            { id: 'p-1', dayOfWeek: 'MONDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-2', dayOfWeek: 'TUESDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-3', dayOfWeek: 'WEDNESDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-4', dayOfWeek: 'THURSDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-5', dayOfWeek: 'FRIDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-6', dayOfWeek: 'SATURDAY', openTime: '06:00', closeTime: '23:00' },
+            { id: 'p-7', dayOfWeek: 'SUNDAY', openTime: '06:00', closeTime: '23:00' },
+          ],
+          licenseSummary: typeof s.licenseSummary === 'object' ? s.licenseSummary : null,
+        };
+      },
       async approve(id): Promise<void> {
         await delay();
         const s = db.approvalQueue.find((x) => x.id === id);
@@ -543,11 +676,17 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         s.status = 'rejected';
         s.rejectionReason = reason;
       },
-      async suspend(id): Promise<void> {
+      async suspend(id, reason): Promise<void> {
         await delay();
         const s = db.allStations.find((x) => x.id === id) || db.ownerStations.find((x) => x.id === id);
         if (!s) throw new Error(`Không tìm thấy trạm ${id}`);
         s.status = 'suspended';
+      },
+      async reactivate(id, reason): Promise<void> {
+        await delay();
+        const s = db.allStations.find((x) => x.id === id) || db.ownerStations.find((x) => x.id === id);
+        if (!s) throw new Error(`Không tìm thấy trạm ${id}`);
+        s.status = 'active';
       },
       async statusHistory(id) {
         await delay();
@@ -1221,6 +1360,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         tk.assigneeName = 'Đội vận hành trung tâm';
         tk.updatedAt = new Date().toISOString();
         return { ...tk };
+      },
+    },
+
+    challenge: {
+      async create(connectorId: string) {
+        await delay(120);
+        const token =
+          typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+            ? crypto.randomUUID()
+            : 'chk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        return {
+          challengeToken: token,
+          expiresInSeconds: 60,
+          connectorId,
+          createdAt: new Date().toISOString(),
+        };
       },
     },
   };

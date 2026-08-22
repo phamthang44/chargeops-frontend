@@ -7,10 +7,77 @@
  */
 import type { HttpClient } from '../http';
 import type { Services } from '../services';
-import type { License } from '../types';
+import type {
+  ChargePoint,
+  Connector,
+  ConnectorRuntimeStatus,
+  CheckInChallengeResponse,
+  License,
+  OperationalChargePointStatus,
+  ProvisioningStatus,
+  Station,
+  UserProfile,
+} from '../types';
+
+function isAdminRoute(): boolean {
+  return typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+}
+
+function normalizeChargePoint(cp: any): ChargePoint {
+  if (!cp) return cp;
+  const provisioningStatus: ProvisioningStatus =
+    String(cp.provisioningStatus || 'PENDING_ACTIVATION').toUpperCase() as ProvisioningStatus;
+  const operationalStatus: OperationalChargePointStatus =
+    String(cp.operationalStatus || 'AVAILABLE').toUpperCase() as OperationalChargePointStatus;
+
+  return {
+    ...cp,
+    chargePointCode: cp.chargePointCode || cp.id,
+    name: cp.name || cp.chargePointCode || cp.id,
+    zoneLabel: cp.zoneLabel ?? null,
+    maxPowerKw: Number(cp.maxPowerKw) || 0,
+    provisioningStatus,
+    operationalStatus,
+  };
+}
+
+function normalizeConnector(c: any): Connector {
+  if (!c) return c;
+  const rStatus = String(c.runtimeStatus || 'AVAILABLE').toUpperCase().replace(/[-_]/g, '');
+  let runtimeStatus: ConnectorRuntimeStatus = 'AVAILABLE';
+  if (rStatus === 'INUSE' || rStatus === 'IN_USE') {
+    runtimeStatus = 'IN_USE';
+  } else if (rStatus === 'OFFLINE') {
+    runtimeStatus = 'OFFLINE';
+  } else {
+    runtimeStatus = 'AVAILABLE';
+  }
+
+  return {
+    ...c,
+    connectorCode: c.connectorCode || c.id,
+    name: c.name || c.connectorCode || `Cổng ${c.connectorType || 'Sạc'} (${c.powerKw || 0} kW)`,
+    connectorType: c.connectorType || 'CCS2',
+    powerKw: Number(c.powerKw) || 0,
+    chargerType: c.chargerType || 'DC',
+    slotMinutes: c.slotMinutes || 30,
+    runtimeStatus,
+    utilizationPct: Number(c.utilizationPct) || 0,
+    sessionsToday: Number(c.sessionsToday) || 0,
+    uptime30dPct: Number(c.uptime30dPct) || 99,
+    kwhToday: Number(c.kwhToday) || 0,
+    faultCount: Number(c.faultCount) || 0,
+    lastSeen: c.lastSeen || new Date().toISOString(),
+  };
+}
 
 export function createRestServices(http: HttpClient): Services {
   return {
+    profile: {
+      get: () => http.get<UserProfile>('/me/profile'),
+      update: (input) => http.put<UserProfile>('/me/profile', input),
+    },
+
     location: {
       getProvinces: () => http.get('/administrative-units/provinces'),
       getWards: (provinceCode: string) => http.get(`/administrative-units/provinces/${provinceCode}/wards`),
@@ -35,28 +102,199 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     chargePoints: {
-      list: (stationId) => http.get('/charge-points', { stationId }),
-      update: (id, patch) => http.patch(`/charge-points/${id}`, patch),
-      provision: (input) => http.post('/admin/charge-points', input),
-      activate: (id) => http.post(`/admin/charge-points/${id}/activate`),
+      async list(stationId) {
+        if (stationId) {
+          if (isAdminRoute()) {
+            const res = await http.get<ChargePoint[]>(`/admin/stations/${stationId}/charge-points`);
+            return (res ?? []).map(normalizeChargePoint);
+          }
+          const res = await http.get<ChargePoint[]>(`/owner/stations/${stationId}/charge-points`);
+          return (res ?? []).map(normalizeChargePoint);
+        }
+        if (isAdminRoute()) {
+          return [];
+        }
+        try {
+          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
+          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
+          if (stations.length === 0) return [];
+          const allCps = await Promise.all(
+            stations.map((s) =>
+              http
+                .get<ChargePoint[]>(`/owner/stations/${s.id}/charge-points`)
+                .catch(() => [] as ChargePoint[]),
+            ),
+          );
+          return allCps.flat().map(normalizeChargePoint);
+        } catch {
+          return [];
+        }
+      },
+      update: async (id, patch) => {
+        if (isAdminRoute()) {
+          if (patch.stationId) {
+            const res = await http.patch<ChargePoint>(`/admin/stations/${patch.stationId}/charge-points/${id}`, {
+              name: patch.name,
+              zoneLabel: patch.zoneLabel,
+              maxPowerKw: patch.maxPowerKw,
+            });
+            return normalizeChargePoint(res);
+          }
+          const res = await http.patch<ChargePoint>(`/admin/charge-points/${id}`, patch);
+          return normalizeChargePoint(res);
+        }
+        if (patch.stationId) {
+          const res = await http.patch<ChargePoint>(
+            `/owner/stations/${patch.stationId}/charge-points/${id}`,
+            { name: patch.name, zoneLabel: patch.zoneLabel },
+          );
+          return normalizeChargePoint(res);
+        }
+        const res = await http.patch<ChargePoint>(`/charge-points/${id}`, patch);
+        return normalizeChargePoint(res);
+      },
+      changeOperationalStatus: async (id, input) => {
+        const res = await http.patch<ChargePoint>(
+          `/owner/stations/${input.stationId}/charge-points/${id}/operational-status`,
+          { operationalStatus: input.operationalStatus, reason: input.reason },
+        );
+        return normalizeChargePoint(res);
+      },
+      provision: async (input) => {
+        const res = await http.post<ChargePoint>(`/admin/stations/${input.stationId}/charge-points`, input);
+        return normalizeChargePoint(res);
+      },
+      activate: async (id, stationId) => {
+        const res = await (stationId
+          ? http.post<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}/activate`)
+          : http.post<ChargePoint>(`/admin/charge-points/${id}/activate`));
+        return normalizeChargePoint(res);
+      },
+      suspend: async (id, stationId, reason) => {
+        const res = await http.post<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}/suspend`, { reason });
+        return normalizeChargePoint(res);
+      },
+      reactivate: async (id, stationId, reason) => {
+        const res = await http.post<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}/reactivate`, { reason });
+        return normalizeChargePoint(res);
+      },
+      get: async (id, stationId) => {
+        const res = await http.get<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}`);
+        return normalizeChargePoint(res);
+      },
     },
 
     connectors: {
-      list: (chargePointId) => http.get('/connectors', { chargePointId }),
-      update: (id, patch) => http.patch(`/connectors/${id}`, patch),
-      provision: (input) => http.post('/admin/connectors', input),
+      async list(chargePointId, stationId) {
+        if (isAdminRoute()) {
+          if (stationId && chargePointId) {
+            const res = await http.get<Connector[]>(`/admin/stations/${stationId}/charge-points/${chargePointId}/connectors`);
+            return (res ?? []).map(normalizeConnector);
+          }
+          if (chargePointId) {
+            const res = await http.get<Connector[]>(`/admin/charge-points/${chargePointId}/connectors`).catch(() => []);
+            return (res ?? []).map(normalizeConnector);
+          }
+          return [];
+        }
+        if (stationId && chargePointId) {
+          const res = await http.get<Connector[]>(`/owner/stations/${stationId}/charge-points/${chargePointId}/connectors`);
+          return (res ?? []).map(normalizeConnector);
+        }
+        if (stationId) {
+          try {
+            const cps = await http
+              .get<ChargePoint[]>(`/owner/stations/${stationId}/charge-points`)
+              .catch(() => [] as ChargePoint[]);
+            if (cps.length === 0) return [];
+            const connectorResults = await Promise.all(
+              cps.map((cp) =>
+                http
+                  .get<Connector[]>(`/owner/stations/${stationId}/charge-points/${cp.id}/connectors`)
+                  .catch(() => [] as Connector[]),
+              ),
+            );
+            return connectorResults.flat().map(normalizeConnector);
+          } catch {
+            return [];
+          }
+        }
+        try {
+          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
+          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
+          if (stations.length === 0) return [];
+          const allCpsResults = await Promise.all(
+            stations.map((s) =>
+              http
+                .get<ChargePoint[]>(`/owner/stations/${s.id}/charge-points`)
+                .catch(() => [] as ChargePoint[]),
+            ),
+          );
+          const allCps = allCpsResults.flat();
+          if (allCps.length === 0) return [];
+
+          const connectorResults = await Promise.all(
+            allCps.map((cp) =>
+              http
+                .get<Connector[]>(`/owner/stations/${cp.stationId}/charge-points/${cp.id}/connectors`)
+                .catch(() => [] as Connector[]),
+            ),
+          );
+          return connectorResults.flat().map(normalizeConnector);
+        } catch {
+          return [];
+        }
+      },
+      update: async (id, patch) => {
+        if (isAdminRoute()) {
+          const res = await http.patch<Connector>(
+            `/admin/stations/${patch.stationId}/charge-points/${patch.chargePointId}/connectors/${id}`,
+            patch,
+          );
+          return normalizeConnector(res);
+        }
+        const rawStatus = patch.runtimeStatus || (patch as any).status;
+        const runtimeStatus =
+          rawStatus === 'offline' || rawStatus === 'OFFLINE' ? 'OFFLINE' : 'AVAILABLE';
+        const res = await http.patch<Connector>(
+          `/owner/stations/${patch.stationId}/charge-points/${patch.chargePointId}/connectors/${id}/runtime-status`,
+          { runtimeStatus, reason: patch.reason || 'Owner connector runtime status update' },
+        );
+        return normalizeConnector(res);
+      },
+      provision: async (input) => {
+        const payload = {
+          connectorCode: input.connectorCode,
+          connectorType: input.connectorType,
+          powerKw: input.powerKw,
+          slotMinutes: input.slotMinutes ?? 30,
+        };
+        const res = await (input.stationId
+          ? http.post<Connector>(`/admin/stations/${input.stationId}/charge-points/${input.chargePointId}/connectors`, payload)
+          : http.post<Connector>(`/admin/connectors`, payload));
+        return normalizeConnector(res);
+      },
     },
 
     stations: {
-      mine: (params = {}) => http.get('/stations/mine', params),
-      register: (input) => http.post('/stations', input),
+      mine: (params = {}) =>
+        http
+          .get<Station[]>('/owner/stations/mine', params)
+          .catch(() => http.get<Station[]>('/stations/mine', params)),
+      register: (input) =>
+        http
+          .post<Station>('/owner/stations', input)
+          .catch(() => http.post<Station>('/stations', input)),
       updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
       approvals: (params = {}) => http.get('/admin/station-approvals', params),
       approvalDetail: (id) => http.get(`/admin/station-approvals/${id}`),
       all: () => http.get('/admin/stations'),
+      adminList: (params = {}) => http.get('/admin/stations', params),
+      adminDetail: (id) => http.get(`/admin/stations/${id}`),
       approve: (id) => http.post(`/admin/station-approvals/${id}/approve`),
       reject: (id, reason) => http.post(`/admin/station-approvals/${id}/reject`, { reason }),
-      suspend: (id) => http.post(`/admin/station-approvals/${id}/suspend`),
+      suspend: (id, reason) => http.post(`/admin/stations/${id}/suspend`, { reason }),
+      reactivate: (id, reason) => http.post(`/admin/stations/${id}/reactivate`, { reason }),
       statusHistory: (id) => http.get(`/stations/${id}/status-history`),
     },
 
@@ -66,32 +304,49 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     licenses: {
-      issue: (stationId, input) => http.post(`/stations/${stationId}/licenses`, input),
-      mine: (stationId) =>
+      issue: (stationId, input) =>
         http
-          .get<License>('/owner/licenses', stationId ? { stationId } : undefined)
-          .catch(() => http.get<License>('/licenses/mine', stationId ? { stationId } : undefined)),
-      history: (stationId) => http.get(`/stations/${stationId}/licenses`),
+          .post<License>(`/admin/stations/${stationId}/licenses`, input)
+          .catch(() => http.post<License>(`/stations/${stationId}/licenses`, input)),
+      mine: async (stationId) => {
+        if (stationId) {
+          return http.get<License>(`/owner/licenses/${stationId}`);
+        }
+        try {
+          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
+          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
+          if (stations.length > 0) {
+            return await http.get<License>(`/owner/licenses/${stations[0].id}`);
+          }
+        } catch {
+          /* fallback */
+        }
+        return null as any;
+      },
+      history: (stationId) =>
+        http
+          .get<License[]>(`/admin/stations/${stationId}/licenses`)
+          .catch(() => http.get<License[]>(`/stations/${stationId}/licenses`)),
       list: (params = {}) => http.get('/admin/licenses', params),
-      detail: (licenseId) => http.get(`/admin/licenses/${licenseId}`),
+      detail: (licenseId) => http.get<License>(`/admin/licenses/${licenseId}`),
       statusEvents: (licenseId) => http.get(`/admin/licenses/${licenseId}/status-events`),
-      recordRenewal: (stationId, input) =>
+      recordRenewal: (licenseIdOrStationId, input) =>
         http
-          .post<License>(`/stations/${stationId}/licenses/renew`, input)
-          .catch(() => http.post<License>(`/admin/licenses/${stationId}/renew`)),
+          .post<License>(`/admin/licenses/${licenseIdOrStationId}/renew`, input)
+          .catch(() => http.post<License>(`/stations/${licenseIdOrStationId}/licenses/renew`, input)),
       renew: (licenseId, input) => http.post(`/admin/licenses/${licenseId}/renew`, input),
-      suspend: (stationId, licenseId, reason) =>
-        http
-          .post<License>(`/admin/licenses/${licenseId}/suspend`, { reason })
-          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/suspend`, { reason })),
-      activate: (stationId, licenseId, reason) =>
-        http
-          .post<License>(`/admin/licenses/${licenseId}/reactivate`, { reason })
-          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/activate`, { reason })),
-      cancel: (stationId, licenseId, reason) =>
-        http
-          .post<License>(`/admin/licenses/${licenseId}/cancel`, { reason })
-          .catch(() => http.post<License>(`/stations/${stationId}/licenses/${licenseId}/cancel`, { reason })),
+      suspend: (stationId, licenseId, reason) => {
+        const id = licenseId || stationId;
+        return http.post<License>(`/admin/licenses/${id}/suspend`, { reason });
+      },
+      activate: (stationId, licenseId, reason) => {
+        const id = licenseId || stationId;
+        return http.post<License>(`/admin/licenses/${id}/reactivate`, { reason });
+      },
+      cancel: (stationId, licenseId, reason) => {
+        const id = licenseId || stationId;
+        return http.post<License>(`/admin/licenses/${id}/cancel`, { reason });
+      },
     },
 
     users: {
@@ -126,6 +381,11 @@ export function createRestServices(http: HttpClient): Services {
       setStatus: (id, status) => http.patch(`/tickets/${id}/status`, { status }),
       reassign: (id, stationName) => http.post(`/admin/tickets/${id}/reassign`, { stationName }),
       escalate: (id) => http.post(`/admin/tickets/${id}/escalate`),
+    },
+
+    challenge: {
+      create: (connectorId: string) =>
+        http.post<CheckInChallengeResponse>(`/internal/connectors/${connectorId}/check-in-challenge`),
     },
   };
 }

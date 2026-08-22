@@ -5,6 +5,9 @@
  */
 import type {
   AdminDashboard,
+  AdminStationDetail,
+  AdminStationFilterParams,
+  AdminStationListItem,
   AdministrativeProvince,
   AdministrativeWard,
   AnalyticsOverview,
@@ -13,6 +16,7 @@ import type {
   BookingListParams,
   BookingSummary,
   ChargePoint,
+  CheckInChallengeResponse,
   Connector,
   ConnectorRuntimeStatus,
   ConnectorType,
@@ -21,6 +25,7 @@ import type {
   LicenseStatus,
   LicenseStatusEventDto,
   RenewLicenseRequest,
+  OperationalChargePointStatus,
   OwnerDashboard,
   Page,
   PaymentMethod,
@@ -45,6 +50,8 @@ import type {
   TransactionSummary,
   TransactionType,
   UserAccount,
+  UserProfile,
+  UserProfileUpdateRequest,
   UserStatus,
 } from './types';
 
@@ -80,20 +87,65 @@ export interface BookingService {
 
 export interface ChargePointService {
   list(stationId?: string): Promise<ChargePoint[]>;
-  /** Owners may edit display name, zone label, and toggle ACTIVE<->OFFLINE. */
-  update(id: string, patch: { name?: string; zoneLabel?: string; status?: ProvisioningStatus }): Promise<ChargePoint>;
-  /** Admin: create an UNCLAIMED charge point for a station (FR14 step 1). */
-  provision(input: { stationId: string; name?: string; zoneLabel?: string }): Promise<ChargePoint>;
-  /** Admin: UNCLAIMED → ACTIVE once its connectors are provisioned and QR stickers installed. */
-  activate(id: string): Promise<ChargePoint>;
+  /** Owners/Admins may edit display name and zone label. */
+  update(
+    id: string,
+    patch: {
+      stationId?: string;
+      name?: string;
+      zoneLabel?: string;
+      maxPowerKw?: number;
+    },
+  ): Promise<ChargePoint>;
+  /** Owners/staff change operational status (AVAILABLE <-> OFFLINE). */
+  changeOperationalStatus(
+    id: string,
+    input: {
+      stationId: string;
+      operationalStatus: OperationalChargePointStatus;
+      reason: string;
+    },
+  ): Promise<ChargePoint>;
+  /** Admin: create a charge point for a station (FR14 step 1). */
+  provision(input: {
+    stationId: string;
+    name?: string;
+    zoneLabel?: string;
+    chargePointCode?: string;
+    maxPowerKw?: number;
+  }): Promise<ChargePoint>;
+  /** Admin: PENDING_ACTIVATION → ACTIVE once its connectors are provisioned and QR stickers installed. */
+  activate(id: string, stationId?: string): Promise<ChargePoint>;
+  /** Admin: suspend an active charge point (FR14). */
+  suspend(id: string, stationId: string, reason: string): Promise<ChargePoint>;
+  /** Admin: reactivate a suspended charge point (FR14). */
+  reactivate(id: string, stationId: string, reason: string): Promise<ChargePoint>;
+  /** Admin: get single charge point detail. */
+  get(id: string, stationId: string): Promise<ChargePoint>;
 }
 
 export interface ConnectorService {
-  list(chargePointId?: string): Promise<Connector[]>;
+  list(chargePointId?: string, stationId?: string): Promise<Connector[]>;
   /** Owner/staff may only toggle runtime status (AVAILABLE<->OFFLINE); hardware attrs are locked (BR-CHG-03). */
-  update(id: string, patch: { runtimeStatus?: ConnectorRuntimeStatus }): Promise<Connector>;
+  update(
+    id: string,
+    patch: {
+      stationId?: string;
+      chargePointId?: string;
+      runtimeStatus?: ConnectorRuntimeStatus;
+      reason?: string;
+    },
+  ): Promise<Connector>;
   /** Admin: create a connector under a charge point — connector type/power fixed at provisioning (FR14 step 2). */
-  provision(input: { chargePointId: string; connectorType: ConnectorType; powerKw: number; name?: string }): Promise<Connector>;
+  provision(input: {
+    stationId?: string;
+    chargePointId: string;
+    connectorCode: string;
+    connectorType: ConnectorType;
+    powerKw: number;
+    slotMinutes?: number;
+    name?: string;
+  }): Promise<Connector>;
 }
 
 export interface StationService {
@@ -108,9 +160,14 @@ export interface StationService {
   approvalDetail(id: string): Promise<StationApprovalDetail>;
   /** Admin: every approved station platform-wide. Filtering/search happens client-side. */
   all(): Promise<Station[]>;
+  /** Admin: paginated station list platform-wide with server-side filters. */
+  adminList(params?: AdminStationFilterParams): Promise<Page<AdminStationListItem>>;
+  /** Admin: 360° station detail. */
+  adminDetail(stationId: string): Promise<AdminStationDetail>;
   approve(id: string): Promise<void>;
   reject(id: string, reason: string): Promise<void>;
-  suspend(id: string): Promise<void>;
+  suspend(id: string, reason?: string): Promise<void>;
+  reactivate(id: string, reason?: string): Promise<void>;
   /** Audit log: list status transitions and approval history for a station. */
   statusHistory(stationId: string): Promise<StationStatusHistory[]>;
 }
@@ -208,7 +265,18 @@ export interface TicketService {
   escalate(id: string): Promise<Ticket>;
 }
 
+export interface ProfileService {
+  get(): Promise<UserProfile>;
+  update(request: UserProfileUpdateRequest): Promise<UserProfile>;
+}
+
+export interface ChallengeService {
+  /** Request dynamic QR check-in challenge token for physical connector display (60s TTL). */
+  create(connectorId: string): Promise<CheckInChallengeResponse>;
+}
+
 export interface Services {
+  profile: ProfileService;
   location: LocationService;
   dashboard: DashboardService;
   analytics: AnalyticsService;
@@ -223,4 +291,5 @@ export interface Services {
   pricing: PricingService;
   policies: PolicyService;
   tickets: TicketService;
+  challenge: ChallengeService;
 }

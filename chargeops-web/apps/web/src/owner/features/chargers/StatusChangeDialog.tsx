@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import {
   BOOKING_STATUS,
   formatTimeVn,
@@ -8,14 +8,16 @@ import {
   type Booking,
   type ChargePoint,
   type Connector,
+  type ConnectorRuntimeStatus,
+  type OperationalChargePointStatus,
 } from '@chargeops/api';
-import { Button, IconAlertTriangle, IconBolt, IconLock, Modal, Skeleton, StatusPill } from '@chargeops/ui';
+import { Button, IconAlertTriangle, IconBolt, IconClock, IconLock, Modal, Skeleton, StatusPill } from '@chargeops/ui';
 import { effectiveConnectorStatus } from './chargerStatus';
 
 /** What the owner is about to do. `target` carries the affected connectors either way. */
 export type StatusIntent =
-  | { kind: 'chargePoint'; chargePoint: ChargePoint; connectors: Connector[]; next: 'active' | 'offline' }
-  | { kind: 'connector'; chargePoint: ChargePoint; connector: Connector; next: 'available' | 'offline' };
+  | { kind: 'chargePoint'; chargePoint: ChargePoint; connectors: Connector[]; next: OperationalChargePointStatus; reason?: string }
+  | { kind: 'connector'; chargePoint: ChargePoint; connector: Connector; next: ConnectorRuntimeStatus; reason?: string };
 
 export interface StatusChangeDialogProps {
   intent: StatusIntent | null;
@@ -29,29 +31,40 @@ function affectedConnectors(intent: StatusIntent): Connector[] {
 }
 
 function isGoingDown(intent: StatusIntent): boolean {
-  return intent.next === 'offline';
+  return intent.next === 'OFFLINE' || intent.next === 'MAINTENANCE';
 }
+
+const REASON_PRESETS: Record<string, string[]> = {
+  MAINTENANCE: [
+    'Bảo trì định kỳ phần cứng',
+    'Kiểm tra an toàn đường dây & trạm biến áp',
+    'Bảo dưỡng và vệ sinh đầu súng sạc',
+    'Nâng cấp firmware / phần mềm điều khiển',
+  ],
+  OFFLINE: [
+    'Tạm ngắt nguồn điện',
+    'Sự cố thiết bị phần cứng',
+    'Tạm đóng cửa khu vực trạm sạc',
+    'Khu vực thi công / sửa chữa hạ tầng',
+  ],
+};
 
 /**
  * Confirmation gate for every operational status change on this screen.
- *
- * Going offline is the consequential direction, so it gets a hard stop first:
- * BR-CHG-05 forbids taking a connector (or the charge point above it) offline
- * while it still holds Confirmed/Checked-In bookings — that slot is paid for and
- * the driver may already be plugged in. When such bookings exist the dialog
- * refuses the change outright rather than warning; otherwise it spells out the
- * blast radius before committing.
- *
- * Coming back online is safe, but it still confirms, because the restore is not
- * obvious: connectors the owner disabled individually stay offline (see
- * effectiveConnectorStatus), so the dialog shows exactly which ports return.
+ * Requires mandatory reason when switching to OFFLINE or MAINTENANCE.
  */
 export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: StatusChangeDialogProps) {
   const { t } = useTranslation('owner');
   const api = useApi();
+  const [reason, setReason] = useState(intent?.reason ?? '');
+
+  useEffect(() => {
+    setReason(intent?.reason ?? '');
+  }, [intent]);
 
   const connectors = intent ? affectedConnectors(intent) : [];
   const goingDown = intent ? isGoingDown(intent) : false;
+  const isMaint = intent?.next === 'MAINTENANCE';
 
   // Only an offline transition can be blocked, so only look bookings up then.
   const blockersQ = useQuery({
@@ -65,25 +78,37 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
   const name =
     intent.kind === 'chargePoint'
       ? intent.chargePoint.name
-      : `${intent.connector.id} · ${intent.connector.name}`;
+      : `${intent.connector.connectorCode || intent.connector.id} (${intent.connector.connectorType})`;
 
   const blockers = blockersQ.data ?? [];
   const checking = goingDown && blockersQ.isLoading;
   const blocked = goingDown && blockers.length > 0;
+  const requiresReason = goingDown;
+  const isReasonValid = !requiresReason || reason.trim().length >= 3;
+
+  const presets = isMaint ? REASON_PRESETS.MAINTENANCE : REASON_PRESETS.OFFLINE;
 
   return (
-    <Modal open onClose={onClose} maxWidth={blocked ? 520 : 460}>
+    <Modal open onClose={onClose} maxWidth={blocked ? 520 : 480}>
       {/* ---- header ---- */}
       <div className="mb-3 flex items-start gap-3">
         <span
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] ${
-            blocked ? 'bg-bad-soft' : goingDown ? 'bg-warn-soft' : 'bg-owner-soft'
+            blocked
+              ? 'bg-bad-soft'
+              : isMaint
+                ? 'bg-warn-soft'
+                : goingDown
+                  ? 'bg-bad-soft'
+                  : 'bg-owner-soft'
           }`}
         >
           {blocked ? (
             <IconLock size={18} className="text-bad" />
+          ) : isMaint ? (
+            <IconClock size={18} className="text-warn" />
           ) : goingDown ? (
-            <IconAlertTriangle size={18} className="text-warn" />
+            <IconAlertTriangle size={18} className="text-bad" />
           ) : (
             <IconBolt size={18} className="text-owner" />
           )}
@@ -92,9 +117,11 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
           <div className="text-[15.5px] font-bold leading-snug">
             {blocked
               ? t('statusDialog.blockedTitle', { name })
-              : goingDown
-                ? t('statusDialog.offlineTitle', { name })
-                : t('statusDialog.onlineTitle', { name })}
+              : isMaint
+                ? `Chuyển Bảo trì · ${name}`
+                : goingDown
+                  ? t('statusDialog.offlineTitle', { name })
+                  : t('statusDialog.onlineTitle', { name })}
           </div>
         </div>
       </div>
@@ -107,9 +134,41 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
       ) : blocked ? (
         <BlockedBody intent={intent} blockers={blockers} />
       ) : goingDown ? (
-        <OfflineBody intent={intent} connectors={connectors} />
+        <OfflineBody intent={intent} connectors={connectors} isMaintenance={isMaint} />
       ) : (
         <OnlineBody intent={intent} connectors={connectors} />
+      )}
+
+      {/* ---- mandatory reason input when going offline / maintenance ---- */}
+      {!blocked && !checking && requiresReason && (
+        <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] border border-line-2 bg-surface-2 p-3">
+          <label className="text-[11.5px] font-bold text-ink">
+            Lý do thay đổi trạng thái <span className="text-bad">*</span>
+          </label>
+          <div className="flex flex-wrap gap-1.5 mb-1">
+            {presets.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setReason(p)}
+                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition ${
+                  reason === p
+                    ? 'border-owner bg-owner text-white font-semibold'
+                    : 'border-line-2 bg-surface text-body hover:border-line-3'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          <textarea
+            rows={2}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Nhập chi tiết lý do (bắt buộc, tối thiểu 3 ký tự)..."
+            className="w-full rounded-[8px] border border-line bg-surface px-3 py-2 text-[12px] font-medium text-ink focus:border-owner focus:outline-none"
+          />
+        </div>
       )}
 
       {/* ---- actions ---- */}
@@ -120,15 +179,17 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
         {!blocked && !checking && (
           <Button
             accent="owner"
-            variant={goingDown ? 'danger' : 'primary'}
-            onClick={() => onConfirm(intent)}
-            disabled={saving}
+            variant={isMaint ? 'primary' : goingDown ? 'danger' : 'primary'}
+            onClick={() => onConfirm({ ...intent, reason: reason.trim() })}
+            disabled={saving || !isReasonValid}
           >
             {saving
               ? t('statusDialog.applying')
-              : goingDown
-                ? t('statusDialog.confirmOffline')
-                : t('statusDialog.confirmOnline')}
+              : isMaint
+                ? 'Xác nhận Bảo trì'
+                : goingDown
+                  ? t('statusDialog.confirmOffline')
+                  : t('statusDialog.confirmOnline')}
           </Button>
         )}
       </div>
@@ -177,15 +238,19 @@ function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: Boo
   );
 }
 
-/** Spell out the blast radius before going offline. */
-function OfflineBody({ intent, connectors }: { intent: StatusIntent; connectors: Connector[] }) {
+/** Spell out the blast radius before going offline / maintenance. */
+function OfflineBody({ intent, connectors, isMaintenance }: { intent: StatusIntent; connectors: Connector[]; isMaintenance?: boolean }) {
   const { t } = useTranslation('owner');
   return (
     <>
       <p className="text-[12.5px] leading-[1.55] text-body">
-        {intent.kind === 'chargePoint'
-          ? t('statusDialog.offlineBodyDevice', { count: connectors.length })
-          : t('statusDialog.offlineBodyConnector')}
+        {isMaintenance
+          ? intent.kind === 'chargePoint'
+            ? `Chuyển trụ sạc sang chế độ Bảo trì sẽ tạm dừng phục vụ trên tất cả ${connectors.length} cổng sạc con.`
+            : 'Chuyển cổng sạc sang chế độ Bảo trì kỹ thuật.'
+          : intent.kind === 'chargePoint'
+            ? t('statusDialog.offlineBodyDevice', { count: connectors.length })
+            : t('statusDialog.offlineBodyConnector')}
       </p>
 
       <ul className="mt-3 flex flex-col gap-2 rounded-card border border-line-3 p-3.5">
@@ -222,8 +287,8 @@ function OnlineBody({ intent, connectors }: { intent: StatusIntent; connectors: 
     );
   }
 
-  const returning = connectors.filter((c) => c.runtimeStatus !== 'offline');
-  const staying = connectors.filter((c) => c.runtimeStatus === 'offline');
+  const returning = connectors.filter((c) => c.runtimeStatus !== 'OFFLINE');
+  const staying = connectors.filter((c) => c.runtimeStatus === 'OFFLINE');
 
   return (
     <>
@@ -233,7 +298,7 @@ function OnlineBody({ intent, connectors }: { intent: StatusIntent; connectors: 
 
       <div className="mt-3 flex flex-col gap-1.5 rounded-card border border-line-3 p-3.5">
         {connectors.map((c) => {
-          const back = c.runtimeStatus !== 'offline';
+          const back = c.runtimeStatus !== 'OFFLINE';
           return (
             <div key={c.id} className="flex items-center justify-between gap-2 text-[12px]">
               <span className="flex min-w-0 items-center gap-2">
@@ -243,7 +308,7 @@ function OnlineBody({ intent, connectors }: { intent: StatusIntent; connectors: 
               </span>
               <span className={`shrink-0 font-medium ${back ? 'text-good' : 'text-faint'}`}>
                 {back
-                  ? t(`connectors.status.${effectiveConnectorStatus('active', c.runtimeStatus)}`)
+                  ? t(`connectors.status.${effectiveConnectorStatus('ACTIVE', 'AVAILABLE', c.runtimeStatus)}`)
                   : t('statusDialog.staysOffline')}
               </span>
             </div>

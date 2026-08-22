@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi, formatDateVn, type StationStaffMember } from '@chargeops/api';
+import { useApi, formatDateVn, type StationStaffMember, type Station } from '@chargeops/api';
 import {
   Button,
   Card,
@@ -39,13 +39,15 @@ export function Staff() {
   const stationsQ = useQuery({ queryKey: ['stations', 'mine'], queryFn: () => api.stations.mine() });
 
   /** Staff may only be assigned to approved stations the owner actually operates. */
-  const stationOptions = useMemo(
-    () =>
-      (stationsQ.data ?? [])
-        .filter((s) => s.status === 'active')
-        .map((s) => ({ value: s.id, label: s.name })),
-    [stationsQ.data],
-  );
+  const stationOptions = useMemo(() => {
+    const list: Station[] =
+      (Array.isArray(stationsQ.data)
+        ? stationsQ.data
+        : (stationsQ.data as { items?: Station[] } | undefined)?.items) ?? [];
+    return list
+      .filter((s) => s.status === 'active' || s.status === 'ACTIVE')
+      .map((s) => ({ value: s.id, label: s.name }));
+  }, [stationsQ.data]);
   const effectiveStationId = stationId || stationOptions[0]?.value || '';
 
   const invite = useMutation({

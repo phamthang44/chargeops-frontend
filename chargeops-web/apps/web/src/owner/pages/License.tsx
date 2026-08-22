@@ -26,6 +26,8 @@ import {
   type SelectOption,
 } from '@chargeops/ui';
 
+import { useOwnerStation } from '../context/OwnerStationContext';
+
 /**
  * FR12 — owner license, status display only. Purchase/renewal happens
  * off-platform; the admin records status manually.
@@ -33,16 +35,8 @@ import {
 export function License() {
   const { t } = useTranslation('owner');
   const api = useApi();
-  const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
-
-  const { data: stations, isLoading: stationsLoading } = useQuery({
-    queryKey: ['stations', 'mine'],
-    queryFn: () => api.stations.mine(),
-  });
-
-  const stationList = stations ?? [];
-  const currentStationId = selectedStationId || (stationList[0]?.id ?? null);
-  const currentStation = stationList.find((s) => s.id === currentStationId) ?? stationList[0] ?? null;
+  const { stations: stationList, selectedStationId, setSelectedStationId, currentStation, isLoading: stationsLoading } = useOwnerStation();
+  const currentStationId = currentStation?.id ?? selectedStationId ?? null;
 
   const { data: license, isLoading: licenseLoading, error } = useQuery({
     queryKey: ['license', 'mine', currentStationId],

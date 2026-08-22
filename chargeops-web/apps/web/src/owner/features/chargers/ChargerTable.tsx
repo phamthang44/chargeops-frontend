@@ -3,8 +3,9 @@ import { useState } from 'react';
 import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
 import { IconAlertTriangle, IconBolt, IconCard, IconLock, IconPin, ProgressBar } from '@chargeops/ui';
 import {
-  CHARGE_POINT_PILL,
-  CONNECTOR_PILL,
+  getChargePointPill,
+  getConnectorPill,
+  canToggleChargePoint,
   canToggleConnector,
   effectiveConnectorStatus,
   utilColor,
@@ -83,7 +84,8 @@ function ChargePointCard({
     setEditing(false);
   };
 
-  const pill = CHARGE_POINT_PILL[cp.status];
+  const pill = getChargePointPill(cp.provisioningStatus, cp.operationalStatus);
+  const canToggle = canToggleChargePoint(cp.provisioningStatus);
 
   return (
     <div
@@ -147,24 +149,28 @@ function ChargePointCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onCycleStatus(cp);
+            if (canToggle) {
+              onCycleStatus(cp);
+            }
           }}
-          className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95"
+          disabled={!canToggle}
+          title={!canToggle ? 'Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng' : undefined}
+          className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:opacity-80"
           style={{ background: pill.bg, color: pill.fg }}
         >
           <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`chargePoints.status.${cp.status}`)}
+          {pill.label}
         </button>
       </div>
 
       {/* ---- connectors ---- */}
       <div className="border-t border-hairline bg-surface-2 px-3 py-2.5">
         {/* BR-CHG-01 — say once, for the whole group, why every port below is down */}
-        {cp.status !== 'active' && connectors.length > 0 && (
+        {(cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE') && connectors.length > 0 && (
           <div className="mb-2 flex items-start gap-1.5 rounded-[9px] border border-warn-border bg-warn-soft px-2.5 py-2 text-[11px] leading-[1.45] font-medium text-warn-deep">
             <IconAlertTriangle size={13} strokeWidth={2} className="mt-px shrink-0" />
             <span>
-              {t('connectors.card.deviceDown', { status: t(`chargePoints.status.${cp.status}`) })}
+              {t('connectors.card.deviceDown', { status: pill.label })}
             </span>
           </div>
         )}
@@ -179,7 +185,7 @@ function ChargePointCard({
               <ConnectorRow
                 key={c.id}
                 connector={c}
-                chargePointStatus={cp.status}
+                chargePoint={cp}
                 onCycleStatus={onCycleConnectorStatus}
                 onDownloadQr={onDownloadQr}
               />
@@ -193,28 +199,28 @@ function ChargePointCard({
 
 function ConnectorRow({
   connector: c,
-  chargePointStatus,
+  chargePoint: cp,
   onCycleStatus,
   onDownloadQr,
 }: {
   connector: Connector;
-  chargePointStatus: ProvisioningStatus;
+  chargePoint: ChargePoint;
   onCycleStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
 }) {
   const { t } = useTranslation('owner');
-  const effective = effectiveConnectorStatus(chargePointStatus, c.runtimeStatus);
-  const canToggle = canToggleConnector(chargePointStatus, c.runtimeStatus);
-  const pill = CONNECTOR_PILL[effective];
-  const inheritedDown = chargePointStatus !== 'active';
+  const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
+  const canToggle = canToggleConnector(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
+  const pill = getConnectorPill(effective);
+  const inheritedDown = cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
 
   return (
     <div className={`rounded-[10px] border border-line-3 bg-surface px-3 py-2.5 ${inheritedDown ? 'opacity-70' : ''}`}>
       {/* identity + runtime status */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="font-mono text-[11.5px] font-semibold text-brand">{c.id}</span>
-          <span className="truncate text-[12.5px] font-semibold">{c.name}</span>
+          <span className="font-mono text-[11.5px] font-semibold text-brand">{c.connectorCode || c.id}</span>
+          <span className="truncate text-[12.5px] font-semibold">{c.name || `Cổng sạc ${c.connectorType}`}</span>
         </div>
         <button
           onClick={() => onCycleStatus(c)}
@@ -224,7 +230,7 @@ function ConnectorRow({
           style={{ background: pill.bg, color: pill.fg }}
         >
           <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`connectors.status.${effective}`)}
+          {t(`connectors.status.${effective}`, { defaultValue: pill.label })}
         </button>
       </div>
 
@@ -240,26 +246,28 @@ function ConnectorRow({
             {t('connectors.card.util')}
           </span>
           <ProgressBar
-            value={c.utilizationPct}
-            color={utilColor({ runtimeStatus: effective, utilizationPct: c.utilizationPct })}
+            value={c.utilizationPct ?? 0}
+            color={utilColor({ runtimeStatus: effective, utilizationPct: c.utilizationPct ?? 0 })}
             className="min-w-[40px] flex-1"
           />
           <span className="w-8 shrink-0 text-right font-mono text-[11px] text-muted">
-            {c.utilizationPct}%
+            {c.utilizationPct ?? 0}%
           </span>
         </span>
 
         <span className="text-[11.5px] font-medium text-muted">
-          {t('connectors.card.sessions', { count: c.sessionsToday })}
+          {t('connectors.card.sessions', { count: c.sessionsToday ?? 0 })}
         </span>
 
-        <button
-          onClick={() => onDownloadQr(c)}
+        <a
+          href={`/simulator?connectorId=${c.id}`}
+          target="_blank"
+          rel="noreferrer"
           className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border-[1.5px] border-owner-border px-2.5 py-[5px] text-[11px] font-semibold text-owner-deep hover:bg-owner-soft"
         >
           <IconCard size={13} strokeWidth={1.9} />
-          {t('connectors.table.downloadQr')}
-        </button>
+          ⚡ Simulator
+        </a>
       </div>
     </div>
   );

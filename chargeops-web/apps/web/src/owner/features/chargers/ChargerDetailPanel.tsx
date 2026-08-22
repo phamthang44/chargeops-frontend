@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type ReactNode } from 'react';
-import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
+import type { ChargePoint, Connector, OperationalChargePointStatus, ProvisioningStatus } from '@chargeops/api';
 
-import { Button, Card, IconBolt, IconClock, IconLock, IconX, QrGlyph } from '@chargeops/ui';
+import { Button, Card, IconBolt, IconClock, IconLock, IconX } from '@chargeops/ui';
 import {
-  CHARGE_POINT_PILL,
-  CONNECTOR_PILL,
-  OWNER_CHARGE_POINT_CYCLE,
+  getChargePointPill,
+  getConnectorPill,
+  PROVISIONING_STATUS_PILL,
   canToggleConnector,
   effectiveConnectorStatus,
 } from './chargerStatus';
@@ -16,31 +16,37 @@ export interface ChargerDetailPanelProps {
   connectors: Connector[];
   saving: boolean;
   onClose: () => void;
-  onSave: (id: string, patch: { name: string; zoneLabel: string; status: ProvisioningStatus }) => void;
+  onSave: (id: string, patch: { name: string; zoneLabel: string }) => void;
+  onCycleStatus: (cp: ChargePoint, target?: OperationalChargePointStatus) => void;
   onCycleConnectorStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
 }
 
-/** Right-hand editor: Charge Point identity/zone/status on top, its Connectors (locked specs, own QR) below. */
+/** Right-hand editor: Charge Point identity/zone on top, operational status toggle, its Connectors below. */
 export function ChargerDetailPanel({
   chargePoint,
   connectors,
   saving,
   onClose,
   onSave,
+  onCycleStatus,
   onCycleConnectorStatus,
   onDownloadQr,
 }: ChargerDetailPanelProps) {
   const { t } = useTranslation('owner');
   const [name, setName] = useState(chargePoint.name);
   const [zoneLabel, setZoneLabel] = useState(chargePoint.zoneLabel ?? '');
-  const [status, setStatus] = useState<ProvisioningStatus>(chargePoint.status);
 
   useEffect(() => {
     setName(chargePoint.name);
     setZoneLabel(chargePoint.zoneLabel ?? '');
-    setStatus(chargePoint.status);
-  }, [chargePoint.id, chargePoint.name, chargePoint.zoneLabel, chargePoint.status]);
+  }, [chargePoint.id, chargePoint.name, chargePoint.zoneLabel]);
+
+  const provPill = PROVISIONING_STATUS_PILL[chargePoint.provisioningStatus] || PROVISIONING_STATUS_PILL.PENDING_ACTIVATION;
+  const isProvActive = chargePoint.provisioningStatus === 'ACTIVE';
+  const operPill = getChargePointPill(chargePoint.provisioningStatus, chargePoint.operationalStatus);
+
+  const operStatuses: OperationalChargePointStatus[] = ['AVAILABLE', 'OFFLINE', 'MAINTENANCE'];
 
   return (
     <Card className="p-[18px]">
@@ -90,42 +96,84 @@ export function ChargerDetailPanel({
         <p className="mt-[7px] text-[11px] leading-[1.5] text-faint">{t('chargePoints.panel.zoneHelp')}</p>
       </div>
 
-      {/* status */}
-      <SectionTitle className="mt-[18px]" icon={<IconClock size={15} className="text-owner" />}>
-        {t('chargePoints.panel.operationGroup')}
-      </SectionTitle>
-      <div className="flex gap-[7px]">
-        {OWNER_CHARGE_POINT_CYCLE.map((s) => {
-          const pill = CHARGE_POINT_PILL[s];
-          const on = s === status;
-          return (
-            <button
-              key={s}
-              onClick={() => setStatus(s)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border-[1.5px] px-1 py-2.5 text-[12px] font-semibold transition"
-              style={{
-                borderColor: on ? pill.fg : 'var(--color-line)',
-                background: on ? pill.bg : 'var(--color-surface)',
-                color: on ? pill.fg : 'var(--color-muted)',
-              }}
-            >
-              <span className="h-[7px] w-[7px] rounded-full" style={{ background: pill.fg }} />
-              {t(`chargePoints.status.${s}`)}
-            </button>
-          );
-        })}
-      </div>
-
       <Button
         accent="owner"
         size="lg"
         fullWidth
         className="mt-4"
-        onClick={() => onSave(chargePoint.id, { name: name.trim() || chargePoint.name, zoneLabel: zoneLabel.trim(), status })}
+        onClick={() => onSave(chargePoint.id, { name: name.trim() || chargePoint.name, zoneLabel: zoneLabel.trim() })}
         disabled={saving}
       >
         {saving ? t('chargePoints.panel.saving') : t('chargePoints.panel.saveBtn')}
       </Button>
+
+      {/* status lifecycle section */}
+      <SectionTitle className="mt-[20px]" icon={<IconClock size={15} className="text-owner" />}>
+        {t('chargePoints.panel.operationGroup')}
+      </SectionTitle>
+
+      {/* Provisioning Status (Admin) */}
+      <div className="mb-2.5 flex items-center justify-between rounded-[10px] border border-line-3 bg-surface-2 p-3">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+            Cấp phép hạ tầng (Admin)
+          </div>
+          <div className="mt-0.5 text-[12px] font-bold text-ink">
+            {provPill.label}
+          </div>
+        </div>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+          style={{ background: provPill.bg, color: provPill.fg }}
+        >
+          <span className="h-[6px] w-[6px] rounded-full" style={{ background: provPill.fg }} />
+          {chargePoint.provisioningStatus}
+        </span>
+      </div>
+
+      {/* Operational Status (Owner selector) */}
+      <div className="rounded-[10px] border border-line-3 bg-surface-2 p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+              Trạng thái vận hành (Owner)
+            </div>
+            <div className="mt-0.5 text-[12px] font-bold text-ink">
+              {operPill.label}
+            </div>
+          </div>
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+            style={{ background: operPill.bg, color: operPill.fg }}
+          >
+            <span className="h-[6px] w-[6px] rounded-full" style={{ background: operPill.fg }} />
+            {chargePoint.operationalStatus}
+          </span>
+        </div>
+
+        {/* 3 Operational Action Buttons */}
+        <div className="mt-2.5 grid grid-cols-3 gap-1.5 border-t border-hairline pt-2.5">
+          {operStatuses.map((st) => {
+            const isCurrent = chargePoint.operationalStatus === st;
+            const label = st === 'AVAILABLE' ? 'Hoạt động' : st === 'MAINTENANCE' ? 'Bảo trì' : 'Offline';
+            return (
+              <button
+                key={st}
+                type="button"
+                onClick={() => onCycleStatus(chargePoint, st)}
+                disabled={!isProvActive || isCurrent}
+                className={`flex items-center justify-center rounded-[7px] py-1.5 text-[11px] font-bold transition ${
+                  isCurrent
+                    ? 'border border-line bg-surface text-ink shadow-sm'
+                    : 'bg-surface text-muted hover:text-ink hover:bg-chip disabled:cursor-not-allowed disabled:opacity-40'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* connectors */}
       <SectionTitle className="mt-[22px]" icon={<IconBolt size={15} className="text-owner" />}>
@@ -136,7 +184,7 @@ export function ChargerDetailPanel({
           <ConnectorCard
             key={c.id}
             connector={c}
-            chargePointStatus={chargePoint.status}
+            chargePoint={chargePoint}
             onCycleStatus={onCycleConnectorStatus}
             onDownloadQr={onDownloadQr}
           />
@@ -148,36 +196,37 @@ export function ChargerDetailPanel({
 
 function ConnectorCard({
   connector: c,
-  chargePointStatus,
+  chargePoint: cp,
   onCycleStatus,
   onDownloadQr,
 }: {
   connector: Connector;
-  chargePointStatus: ProvisioningStatus;
+  chargePoint: ChargePoint;
   onCycleStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
 }) {
   const { t } = useTranslation('owner');
-  const effective = effectiveConnectorStatus(chargePointStatus, c.runtimeStatus);
-  const canToggle = canToggleConnector(chargePointStatus, c.runtimeStatus);
-  const pill = CONNECTOR_PILL[effective];
+  const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
+  const canToggle = canToggleConnector(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
+  const pill = getConnectorPill(effective);
+  const inheritedDown = cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
 
   return (
     <div className="rounded-card border border-line-3 p-3.5">
       <div className="mb-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[12px] font-semibold text-brand">{c.id}</span>
-          <span className="text-[12.5px] font-semibold">{c.name}</span>
+          <span className="font-mono text-[12px] font-semibold text-brand">{c.connectorCode || c.id}</span>
+          <span className="text-[12.5px] font-semibold">{c.name || `Cổng sạc ${c.connectorType}`}</span>
         </div>
         <button
           onClick={() => onCycleStatus(c)}
           disabled={!canToggle}
-          title={chargePointStatus !== 'active' ? t('connectors.card.lockedByDevice') : undefined}
+          title={inheritedDown ? t('connectors.card.lockedByDevice') : undefined}
           className="inline-flex items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
           style={{ background: pill.bg, color: pill.fg }}
         >
           <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`connectors.status.${effective}`)}
+          {t(`connectors.status.${effective}`, { defaultValue: pill.label })}
         </button>
       </div>
 
@@ -199,17 +248,24 @@ function ConnectorCard({
         <PerfStat label={t('connectors.panel.kwh')} value={String(c.kwhToday)} />
       </div>
 
-      <div className="flex items-center gap-[11px] rounded-card border border-line-3 bg-surface-2 p-3">
-        <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
-          <QrGlyph size={38} />
-        </span>
-        <div className="min-w-0 flex-1 text-[11px] leading-[1.4] text-faint">{t('connectors.panel.qrHelp')}</div>
-        <button
-          onClick={() => onDownloadQr(c)}
-          className="flex shrink-0 items-center gap-1.5 rounded-[9px] border-[1.5px] border-owner-border px-[11px] py-[7px] text-[11.5px] font-semibold text-owner-deep hover:bg-owner-soft"
+      <div className="flex items-center justify-between gap-3 rounded-card border border-line-3 bg-surface-2 p-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
+            <IconBolt size={22} className="text-owner" />
+          </span>
+          <div className="min-w-0 flex flex-col">
+            <span className="text-[12px] font-bold text-ink">Dynamic QR Check-in</span>
+            <span className="text-[11px] text-muted">Mã challenge 60s trên màn hình trụ</span>
+          </div>
+        </div>
+        <a
+          href={`/simulator?connectorId=${c.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex shrink-0 items-center justify-center gap-1 rounded-[9px] bg-emerald-600 px-3 py-1.5 text-[11.5px] font-bold text-white hover:bg-emerald-500 shadow-sm transition"
         >
-          {t('connectors.panel.downloadQrBtn')}
-        </button>
+          ⚡ Mở Simulator
+        </a>
       </div>
     </div>
   );

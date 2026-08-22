@@ -49,12 +49,14 @@ function DashboardBody({
   const { t } = useTranslation('staffDashboard');
   const { kpis, chargers, upcomingBookings, recentTickets } = data;
 
-  const chargerRow = (c: StaffDashboardData['chargers'][number]): SidePanelRow =>
-    c.runtimeStatus === 'available'
+  const chargerRow = (c: StaffDashboardData['chargers'][number]): SidePanelRow => {
+    const status = String(c.runtimeStatus || '').toUpperCase().replace(/[-_]/g, '');
+    return status === 'AVAILABLE'
       ? { label: `${c.id} · ${c.name}`, value: t('charger.available'), dotClass: 'bg-good', valueClass: 'text-good' }
-      : c.runtimeStatus === 'inuse'
+      : status === 'INUSE'
         ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
         : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
+  };
 
   const TONE_CLASS: Record<string, string> = { good: 'text-good', warn: 'text-warn', bad: 'text-bad', brand: 'text-brand', neutral: 'text-muted', ink: 'text-ink' };
 

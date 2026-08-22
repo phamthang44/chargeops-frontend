@@ -8,6 +8,7 @@ import {
   formatTimeVn,
   type OwnerDashboard as OwnerDashboardData,
   type StaffDashboard as StaffDashboardData,
+  type Station,
 } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
@@ -87,10 +88,91 @@ const STAFF_KEYS = new Set(['dashboard', 'bookings', 'chargers', 'tickets']);
  * menu is trimmed to the staff subset — owner-only pages have no route, so a
  * hand-typed URL falls through to the dashboard.
  */
+import { OwnerStationProvider, useOwnerStation } from './context/OwnerStationContext';
+
+function OwnerConsoleContent({
+  base,
+  reduced,
+  nav,
+  activeKey,
+  searchers,
+  notificationItems,
+}: {
+  base: string;
+  reduced: boolean;
+  nav: (ShellNavItem & { title: string; subtitle: string })[];
+  activeKey: string;
+  searchers: Searcher[];
+  notificationItems: NotificationItem[];
+}) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { t } = useTranslation('owner');
+  const { stations, selectedStationId, setSelectedStationId, currentStation } = useOwnerStation();
+
+  return (
+    <AppShell
+      nav={nav}
+      activeKey={activeKey}
+      onNavigate={(key) => navigate(`${base}/${key}`)}
+      accent="owner"
+      rolePill={
+        reduced
+          ? { label: t('console.role.staff'), bg: 'var(--color-chip)', fg: 'var(--color-muted)' }
+          : { label: t('console.role.owner'), bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' }
+      }
+      station={currentStation ? `${currentStation.name} (${currentStation.stationCode || currentStation.id})` : undefined}
+      stations={stations.map((s) => ({
+        id: s.id,
+        name: s.name,
+        stationCode: s.stationCode,
+        city: s.city,
+        status: s.status,
+      }))}
+      selectedStationId={selectedStationId}
+      onSelectStation={setSelectedStationId}
+      userName={user?.name ?? '···'}
+      userEmail={user?.email}
+      search={<HeaderSearch searchers={searchers} accent="owner" />}
+      notifications={
+        <NotificationBell
+          items={notificationItems}
+          emptyLabel={t('notifications.empty')}
+          onOpenCenter={() => navigate(`${base}/notifications`)}
+        />
+      }
+      onSettings={() => navigate(`${base}/settings`)}
+      onLogout={logout}
+    >
+      <Routes>
+        <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
+        {nav.map((n) => {
+          const Page = n.key === 'dashboard' && reduced ? StaffDashboard : PAGES[n.key];
+          return (
+            <Route
+              key={n.key}
+              path={`${n.key}/*`}
+              element={Page ? <Page /> : <ComingSoon title={n.title} />}
+            />
+          );
+        })}
+        {/* Settings lives behind the header avatar menu, not the sidebar. */}
+        <Route path="settings" element={<SettingsPage accent="owner" />} />
+        <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
+      </Routes>
+    </AppShell>
+  );
+}
+
+/**
+ * Owner console, mounted at `base` (`/owner` or `/staff`). When `reduced`, the
+ * menu is trimmed to the staff subset — owner-only pages have no route, so a
+ * hand-typed URL falls through to the dashboard.
+ */
 export function OwnerConsole({ base, reduced = false }: { base: string; reduced?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, getToken } = useAuth();
+  const { getToken } = useAuth();
   const { t } = useTranslation('owner');
   const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
 
@@ -159,35 +241,6 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
     return list;
   }, [base, navigate, reduced, services, t]);
 
-  // Query owner's stations for the top bar selector
-  const stationsQuery = useQuery({
-    queryKey: ['stations', 'mine'],
-    queryFn: () => services.stations.mine(),
-  });
-
-  const ownerStations = stationsQuery.data ?? [];
-  const [selectedStationId, setSelectedStationId] = useState<string>(() => {
-    try {
-      return localStorage.getItem('chargeops_owner_selected_station') || '';
-    } catch {
-      return '';
-    }
-  });
-
-  const currentStation = useMemo(() => {
-    if (!ownerStations.length) return null;
-    return ownerStations.find((s) => s.id === selectedStationId) ?? ownerStations[0];
-  }, [ownerStations, selectedStationId]);
-
-  const handleSelectStation = (id: string) => {
-    setSelectedStationId(id);
-    try {
-      localStorage.setItem('chargeops_owner_selected_station', id);
-    } catch {
-      // ignore
-    }
-  };
-
   // Same queryKey/queryFn the Dashboard page itself uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery<OwnerDashboardData | StaffDashboardData>({
     queryKey: reduced ? ['dashboard', 'staff'] : ['dashboard', 'owner'],
@@ -250,56 +303,16 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
 
   return (
     <ApiProvider services={services}>
-      <AppShell
-        nav={nav}
-        activeKey={activeKey}
-        onNavigate={(key) => navigate(`${base}/${key}`)}
-        accent="owner"
-        rolePill={
-          reduced
-            ? { label: t('console.role.staff'), bg: 'var(--color-chip)', fg: 'var(--color-muted)' }
-            : { label: t('console.role.owner'), bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' }
-        }
-        station={currentStation ? `${currentStation.name} (${currentStation.stationCode || currentStation.id})` : undefined}
-        stations={ownerStations.map((s) => ({
-          id: s.id,
-          name: s.name,
-          stationCode: s.stationCode,
-          city: s.city,
-          status: s.status,
-        }))}
-        selectedStationId={currentStation?.id}
-        onSelectStation={handleSelectStation}
-        userName={user?.name ?? '···'}
-        userEmail={user?.email}
-        search={<HeaderSearch searchers={searchers} accent="owner" />}
-        notifications={
-          <NotificationBell
-            items={notificationItems}
-            emptyLabel={t('notifications.empty')}
-            onOpenCenter={() => navigate(`${base}/notifications`)}
-          />
-        }
-        onSettings={() => navigate(`${base}/settings`)}
-        onLogout={logout}
-      >
-        <Routes>
-          <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
-          {nav.map((n) => {
-            const Page = n.key === 'dashboard' && reduced ? StaffDashboard : PAGES[n.key];
-            return (
-              <Route
-                key={n.key}
-                path={`${n.key}/*`}
-                element={Page ? <Page /> : <ComingSoon title={n.title} />}
-              />
-            );
-          })}
-          {/* Settings lives behind the header avatar menu, not the sidebar. */}
-          <Route path="settings" element={<SettingsPage accent="owner" />} />
-          <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
-        </Routes>
-      </AppShell>
+      <OwnerStationProvider>
+        <OwnerConsoleContent
+          base={base}
+          reduced={reduced}
+          nav={nav}
+          activeKey={activeKey}
+          searchers={searchers}
+          notificationItems={notificationItems}
+        />
+      </OwnerStationProvider>
     </ApiProvider>
   );
 }

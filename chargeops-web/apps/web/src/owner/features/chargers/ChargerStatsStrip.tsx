@@ -15,17 +15,17 @@ export function ChargerStatsStrip({ groups }: { groups: ChargePointGroup[] }) {
   const connectors = groups.flatMap(({ chargePoint, connectors: list }) =>
     list.map((c) => ({
       ...c,
-      runtimeStatus: effectiveConnectorStatus(chargePoint.status, c.runtimeStatus),
+      runtimeStatus: effectiveConnectorStatus(chargePoint.provisioningStatus, chargePoint.operationalStatus, c.runtimeStatus),
     })),
   );
 
-  const available = connectors.filter((c) => c.runtimeStatus === 'available');
-  const inuse = connectors.filter((c) => c.runtimeStatus === 'inuse').length;
-  const offline = connectors.filter((c) => c.runtimeStatus === 'offline').length;
+  const available = connectors.filter((c) => c.runtimeStatus === 'AVAILABLE');
+  const inuse = connectors.filter((c) => c.runtimeStatus === 'IN_USE').length;
+  const offline = connectors.filter((c) => c.runtimeStatus === 'OFFLINE').length;
   const avgUtil = available.length
-    ? Math.round(available.reduce((s, c) => s + c.utilizationPct, 0) / available.length)
+    ? Math.round(available.reduce((s, c) => s + (c.utilizationPct ?? 0), 0) / available.length)
     : 0;
-  const sessions = connectors.reduce((s, c) => s + c.sessionsToday, 0);
+  const sessions = connectors.reduce((s, c) => s + (c.sessionsToday ?? 0), 0);
 
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">

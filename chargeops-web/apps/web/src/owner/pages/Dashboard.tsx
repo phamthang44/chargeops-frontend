@@ -45,12 +45,14 @@ function DashboardBody({ data }: { data: OwnerDashboard }) {
   const { t } = useTranslation('ownerDashboard');
   const { license, kpis, chargers, upcomingBookings } = data;
 
-  const chargerRow = (c: OwnerDashboard['chargers'][number]): SidePanelRow =>
-    c.runtimeStatus === 'available'
+  const chargerRow = (c: OwnerDashboard['chargers'][number]): SidePanelRow => {
+    const status = String(c.runtimeStatus || '').toUpperCase().replace(/[-_]/g, '');
+    return status === 'AVAILABLE'
       ? { label: `${c.id} · ${c.name}`, value: `${c.utilizationPct}%`, dotClass: 'bg-good' }
-      : c.runtimeStatus === 'inuse'
+      : status === 'INUSE'
         ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
         : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
+  };
 
   const isLicActive = license.status === 'ACTIVE' || license.status === 'active';
   const isLicExpired = license.status === 'EXPIRED' || license.status === 'expired';

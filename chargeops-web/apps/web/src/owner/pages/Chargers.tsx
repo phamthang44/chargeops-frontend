@@ -1,30 +1,41 @@
 import { useTranslation } from 'react-i18next';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi, type ChargePoint, type Connector, type ProvisioningStatus } from '@chargeops/api';
+import {
+  useApi,
+  type ChargePoint,
+  type Connector,
+  type OperationalChargePointStatus,
+} from '@chargeops/api';
 import { Card, IconLock, PageHeader, Skeleton, useToast } from '@chargeops/ui';
+import { getApiErrorMessage } from '../../i18n';
 import { ChargerStatsStrip } from '../features/chargers/ChargerStatsStrip';
 import { ChargerTable, type ChargePointGroup } from '../features/chargers/ChargerTable';
 import { ChargerDetailPanel } from '../features/chargers/ChargerDetailPanel';
 import { StatusChangeDialog, type StatusIntent } from '../features/chargers/StatusChangeDialog';
-import { nextChargePointStatus, nextConnectorStatus } from '../features/chargers/chargerStatus';
+import { nextOperationalStatus, nextConnectorStatus } from '../features/chargers/chargerStatus';
+
+import { useOwnerStation } from '../context/OwnerStationContext';
 
 export function Chargers() {
   const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
+  const { selectedStationId, currentStation } = useOwnerStation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** Pending operational status change awaiting confirmation (null = dialog closed). */
   const [intent, setIntent] = useState<StatusIntent | null>(null);
 
   const chargePointsQ = useQuery({
-    queryKey: ['chargePoints', 'mine'],
-    queryFn: () => api.chargePoints.list(),
+    queryKey: ['chargePoints', 'station', selectedStationId],
+    queryFn: () => (selectedStationId ? api.chargePoints.list(selectedStationId) : Promise.resolve([])),
+    enabled: Boolean(selectedStationId),
   });
   const connectorsQ = useQuery({
-    queryKey: ['connectors', 'all'],
-    queryFn: () => api.connectors.list(),
+    queryKey: ['connectors', 'station', selectedStationId],
+    queryFn: () => (selectedStationId ? api.connectors.list(undefined, selectedStationId) : Promise.resolve([])),
+    enabled: Boolean(selectedStationId),
   });
 
   const isLoading = chargePointsQ.isLoading || connectorsQ.isLoading;
@@ -40,56 +51,105 @@ export function Chargers() {
   }, [chargePointsQ.data, connectorsQ.data]);
 
   const updateChargePoint = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: { name?: string; zoneLabel?: string; status?: ProvisioningStatus } }) =>
-      api.chargePoints.update(id, patch),
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: { stationId?: string; name?: string; zoneLabel?: string };
+    }) => api.chargePoints.update(id, patch),
     onSuccess: (cp) => {
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
       toast(t('chargePoints.updateSuccess', { id: cp.id }), 'success');
     },
-    onError: (e) => toast((e as Error).message, 'error'),
+    onError: (e) => toast(getApiErrorMessage(e), 'error'),
+  });
+
+  const changeOperationalStatus = useMutation({
+    mutationFn: ({
+      id,
+      stationId,
+      operationalStatus,
+      reason,
+    }: {
+      id: string;
+      stationId: string;
+      operationalStatus: OperationalChargePointStatus;
+      reason: string;
+    }) => api.chargePoints.changeOperationalStatus(id, { stationId, operationalStatus, reason }),
+    onSuccess: (cp) => {
+      qc.invalidateQueries({ queryKey: ['chargePoints'] });
+      toast(t('chargePoints.updateSuccess', { id: cp.id }), 'success');
+    },
+    onError: (e) => toast(getApiErrorMessage(e), 'error'),
   });
 
   const updateConnector = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: { runtimeStatus?: Connector['runtimeStatus'] } }) =>
-      api.connectors.update(id, patch),
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: { stationId?: string; chargePointId?: string; runtimeStatus?: Connector['runtimeStatus']; reason?: string };
+    }) => api.connectors.update(id, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['connectors'] }),
-    onError: (e) => toast((e as Error).message, 'error'),
+    onError: (e) => toast(getApiErrorMessage(e), 'error'),
   });
 
-  const downloadQr = (c: Connector) => toast(t('connectors.downloadToast', { id: c.id }), 'info');
+  const downloadQr = (c: Connector) => toast(t('connectors.downloadToast', { id: c.connectorCode || c.id }), 'info');
 
   const selected = groups.find((g) => g.chargePoint.id === selectedId) ?? null;
 
   /** Status controls never mutate directly — they raise an intent for confirmation. */
-  const askChargePoint = (cp: ChargePoint) => {
-    const next = nextChargePointStatus(cp.status);
-    if (next === cp.status) return; // unclaimed/suspended are admin-only
+  const askChargePoint = (cp: ChargePoint, target?: OperationalChargePointStatus) => {
+    if (cp.provisioningStatus !== 'ACTIVE') return;
+    const next = target && target !== cp.operationalStatus ? target : nextOperationalStatus(cp.operationalStatus);
     setIntent({
       kind: 'chargePoint',
       chargePoint: cp,
       connectors: groups.find((g) => g.chargePoint.id === cp.id)?.connectors ?? [],
-      next: next as 'active' | 'offline',
+      next,
     });
   };
 
   const askConnector = (cp: ChargePoint, c: Connector) => {
     const next = nextConnectorStatus(c.runtimeStatus);
-    if (next === c.runtimeStatus) return;
-    setIntent({ kind: 'connector', chargePoint: cp, connector: c, next: next as 'available' | 'offline' });
+    setIntent({ kind: 'connector', chargePoint: cp, connector: c, next });
   };
 
   const applyIntent = (i: StatusIntent) => {
+    const reasonText =
+      i.reason?.trim() ||
+      (i.next === 'MAINTENANCE'
+        ? 'Bảo trì thiết bị'
+        : i.next === 'OFFLINE'
+          ? 'Tạm ngắt vận hành'
+          : 'Mở hoạt động thiết bị');
+
     if (i.kind === 'chargePoint') {
-      updateChargePoint.mutate(
-        { id: i.chargePoint.id, patch: { status: i.next } },
+      changeOperationalStatus.mutate(
+        {
+          id: i.chargePoint.id,
+          stationId: i.chargePoint.stationId,
+          operationalStatus: i.next,
+          reason: reasonText,
+        },
         { onSuccess: () => setIntent(null) },
       );
     } else {
       updateConnector.mutate(
-        { id: i.connector.id, patch: { runtimeStatus: i.next } },
+        {
+          id: i.connector.id,
+          patch: {
+            stationId: i.chargePoint.stationId,
+            chargePointId: i.chargePoint.id,
+            runtimeStatus: i.next,
+            reason: reasonText,
+          },
+        },
         {
           onSuccess: () => {
-            toast(t('connectors.updateSuccess', { id: i.connector.id }), 'success');
+            toast(t('connectors.updateSuccess', { id: i.connector.connectorCode || i.connector.id }), 'success');
             setIntent(null);
           },
         },
@@ -99,7 +159,14 @@ export function Chargers() {
 
   return (
     <>
-      <PageHeader title={t('chargers.title')} subtitle={t('chargers.subtitle')} />
+      <PageHeader
+        title={t('chargers.title')}
+        subtitle={
+          currentStation
+            ? `${t('chargers.subtitle')} · ${currentStation.name}`
+            : t('chargers.subtitle')
+        }
+      />
 
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
@@ -124,7 +191,15 @@ export function Chargers() {
               groups={groups}
               selectedId={selectedId}
               onSelect={(cp) => setSelectedId(cp.id)}
-              onRename={(id, name) => updateChargePoint.mutate({ id, patch: { name } })}
+              onRename={(id, name) =>
+                updateChargePoint.mutate({
+                  id,
+                  patch: {
+                    stationId: groups.find((g) => g.chargePoint.id === id)?.chargePoint.stationId,
+                    name,
+                  },
+                })
+              }
               onCycleStatus={askChargePoint}
               onCycleConnectorStatus={(c) => {
                 const cp = groups.find((g) => g.connectors.some((x) => x.id === c.id))?.chargePoint;
@@ -137,9 +212,18 @@ export function Chargers() {
               <ChargerDetailPanel
                 chargePoint={selected.chargePoint}
                 connectors={selected.connectors}
-                saving={updateChargePoint.isPending}
+                saving={updateChargePoint.isPending || changeOperationalStatus.isPending}
                 onClose={() => setSelectedId(null)}
-                onSave={(id, patch) => updateChargePoint.mutate({ id, patch })}
+                onSave={(id, patch) =>
+                  updateChargePoint.mutate({
+                    id,
+                    patch: {
+                      ...patch,
+                      stationId: selected.chargePoint.stationId,
+                    },
+                  })
+                }
+                onCycleStatus={askChargePoint}
                 onCycleConnectorStatus={(c) => askConnector(selected.chargePoint, c)}
                 onDownloadQr={downloadQr}
               />
@@ -150,7 +234,7 @@ export function Chargers() {
 
       <StatusChangeDialog
         intent={intent}
-        saving={updateChargePoint.isPending || updateConnector.isPending}
+        saving={updateChargePoint.isPending || changeOperationalStatus.isPending || updateConnector.isPending}
         onClose={() => setIntent(null)}
         onConfirm={applyIntent}
       />

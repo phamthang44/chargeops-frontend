@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '@chargeops/api';
+import { useApi, type Station } from '@chargeops/api';
 import { Button, Card, IconPlusCircle, PageHeader, Skeleton } from '@chargeops/ui';
 import { StationSummary } from '../features/stations/StationSummary';
 import { StationCard } from '../features/stations/StationCard';
@@ -16,6 +16,9 @@ export function Stations() {
     queryKey: ['stations', 'mine'],
     queryFn: () => api.stations.mine(),
   });
+
+  const stationList: Station[] =
+    (Array.isArray(data) ? data : (data as { items?: Station[] } | undefined)?.items) ?? [];
 
   return (
     <>
@@ -37,9 +40,9 @@ export function Stations() {
         <StationsSkeleton />
       ) : (
         <>
-          <StationSummary stations={data} />
+          <StationSummary stations={stationList} />
           <div className="grid gap-[13px] md:grid-cols-2">
-            {data.map((st) => (
+            {stationList.map((st) => (
               <StationCard key={st.id} station={st} />
             ))}
           </div>

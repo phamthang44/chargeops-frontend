@@ -196,6 +196,11 @@
       "OFFLINE": "Offline",
       "MAINTENANCE": "Maintenance"
     },
+    "operationalStatus": {
+      "AVAILABLE": "Available",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
+    },
     "connectorCount": "{{count}} connectors",
     "panel": {
       "editTitle": "EDIT CHARGE POINT",
@@ -208,7 +213,14 @@
       "zoneLabel": "ZONE / LOCATION HINT",
       "zonePlaceholder": "E.g. Near the entrance, row B",
       "zoneHelp": "Shown to drivers on the station detail page.",
+      "statusGroup": "Equipment & Operational Status",
       "operationGroup": "Operational Status",
+      "provStatus": "Infrastructure Provisioning (Admin)",
+      "provPendingHelp": "Pending Admin inspection & activation",
+      "provSuspendedHelp": "Suspended by Administrator",
+      "operStatus": "Operational Status (Owner)",
+      "operHelp": "Toggle status to pause charging during maintenance or station closure.",
+      "operLocked": "Charge point is not active or suspended by Admin; operational status cannot be changed.",
       "saveBtn": "Save Changes",
       "saving": "Saving..."
     }
@@ -302,6 +314,7 @@
       "util": "Util",
       "sessions": "{{count}} sessions",
       "deviceDown": "Charge point is {{status}} — none of its connectors can accept bookings until it is back online.",
+      "pendingActivation": "Charge point is Pending Activation — none of its connectors can accept bookings until initial activation.",
       "lockedByDevice": "Bring the charge point back online to change this connector's status."
     },
     "panel": {

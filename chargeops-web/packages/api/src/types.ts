@@ -136,11 +136,11 @@ export interface ChargePoint {
   id: string;
   stationId: string;
   chargePointCode?: string;
-  /** Owner-editable display name. */
+  /** Neutral display label/location identifier; hardware facts belong to connectors. */
   name: string;
   /** Free-text location hint shown to drivers, e.g. "near the entrance, row B" (FR10). */
   zoneLabel: string | null;
-  /** Display-only aggregate; not an enforced booking constraint (BR-CHG-06). */
+  /** Derived as the highest connector power; not entered independently. */
   maxPowerKw: number;
   provisioningStatus: ProvisioningStatus;
   operationalStatus: OperationalChargePointStatus;
@@ -161,8 +161,8 @@ export interface Connector {
   name?: string;
   connectorType: ConnectorType;
   powerKw: number;
+
   chargerType?: ChargerType;
-  slotMinutes?: number;
   runtimeStatus: ConnectorRuntimeStatus;
   utilizationPct?: number;
   sessionsToday?: number;
@@ -172,6 +172,41 @@ export interface Connector {
   lastSeen?: string;
   createdAt?: string;
 }
+
+export interface ConnectorProvisioningGroup {
+  connectorType: ConnectorType;
+  powerKw: number;
+  quantity: number;
+}
+
+export type EquipmentStatusActorType = 'ADMIN' | 'OWNER' | 'SYSTEM';
+export type ChargePointStatusDimension = 'PROVISIONING' | 'OPERATIONAL';
+
+export interface ChargePointStatusEvent {
+  id: string;
+  statusDimension: ChargePointStatusDimension;
+  fromStatus: string;
+  toStatus: string;
+  reason?: string | null;
+  actorType: EquipmentStatusActorType;
+  performedById?: string | null;
+  performedByDisplayName?: string | null;
+  performedAt: string;
+}
+
+export interface ConnectorStatusEvent {
+  id: string;
+  fromStatus: ConnectorRuntimeStatus | string;
+  toStatus: ConnectorRuntimeStatus | string;
+  reason?: string | null;
+  actorType: EquipmentStatusActorType;
+  performedById?: string | null;
+  performedByDisplayName?: string | null;
+  performedAt: string;
+}
+
+/** Platform-wide booking boundary/increment. It is not a Connector attribute. */
+export const BOOKING_INTERVAL_MINUTES = 30 as const;
 
 /* ---------- dynamic QR check-in challenge (FR07) ---------- */
 

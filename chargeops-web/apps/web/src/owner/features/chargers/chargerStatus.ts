@@ -3,7 +3,7 @@ import type { ConnectorRuntimeStatus, OperationalChargePointStatus, Provisioning
 export const PROVISIONING_STATUS_PILL: Record<ProvisioningStatus, { bg: string; fg: string; label: string }> = {
   PENDING_ACTIVATION: { bg: 'var(--color-chip)', fg: 'var(--color-muted)', label: 'Chờ kích hoạt' },
   ACTIVE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', label: 'Đã kích hoạt' },
-  SUSPENDED: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Đình chỉ' },
+  SUSPENDED: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Tạm ngưng vận hành' },
 };
 
 export const OPERATIONAL_STATUS_PILL: Record<OperationalChargePointStatus, { bg: string; fg: string; label: string }> = {

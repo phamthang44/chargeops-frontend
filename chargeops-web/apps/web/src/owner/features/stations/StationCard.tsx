@@ -60,7 +60,11 @@ export function StationCard({ station }: { station: Station }) {
   const isRejected = station.status === 'rejected' || station.status === 'REJECTED';
 
   const licenseInfo = formatLicense(station.licenseSummary);
-  const eligibility = isStationDriverEligible(station.status, station.licenseSummary);
+  const actualChargers = station.chargerCount ?? 0;
+  const eligibility = isStationDriverEligible(station.status, station.licenseSummary, new Date(), {
+    chargerCount: actualChargers,
+    onlineCount: onlineChargers,
+  });
 
   return (
     <Card className="p-[17px] flex flex-col justify-between">

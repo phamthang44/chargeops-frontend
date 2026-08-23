@@ -14,6 +14,10 @@ import { ChargerTable, type ChargePointGroup } from '../features/chargers/Charge
 import { ChargerDetailPanel } from '../features/chargers/ChargerDetailPanel';
 import { StatusChangeDialog, type StatusIntent } from '../features/chargers/StatusChangeDialog';
 import { nextOperationalStatus, nextConnectorStatus } from '../features/chargers/chargerStatus';
+import {
+  EquipmentStatusHistoryDrawer,
+  type EquipmentStatusTarget,
+} from '../../shared/equipment/EquipmentStatusHistoryDrawer';
 
 import { useOwnerStation } from '../context/OwnerStationContext';
 
@@ -26,6 +30,7 @@ export function Chargers() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** Pending operational status change awaiting confirmation (null = dialog closed). */
   const [intent, setIntent] = useState<StatusIntent | null>(null);
+  const [historyTarget, setHistoryTarget] = useState<EquipmentStatusTarget | null>(null);
 
   const chargePointsQ = useQuery({
     queryKey: ['chargePoints', 'station', selectedStationId],
@@ -206,6 +211,24 @@ export function Chargers() {
                 if (cp) askConnector(cp, c);
               }}
               onDownloadQr={downloadQr}
+              onViewCpHistory={(cp) =>
+                setHistoryTarget({
+                  type: 'chargePoint',
+                  chargePointId: cp.id,
+                  chargePointName: cp.name,
+                  chargePointCode: cp.chargePointCode,
+                })
+              }
+              onViewConnectorHistory={(c) => {
+                const cp = groups.find((g) => g.connectors.some((x) => x.id === c.id))?.chargePoint;
+                setHistoryTarget({
+                  type: 'connector',
+                  chargePointId: c.chargePointId || cp?.id || '',
+                  chargePointName: cp?.name,
+                  connectorId: c.id,
+                  connectorCode: c.connectorCode,
+                });
+              }}
             />
 
             {selected && (
@@ -226,6 +249,23 @@ export function Chargers() {
                 onCycleStatus={askChargePoint}
                 onCycleConnectorStatus={(c) => askConnector(selected.chargePoint, c)}
                 onDownloadQr={downloadQr}
+                onViewCpHistory={(cp) =>
+                  setHistoryTarget({
+                    type: 'chargePoint',
+                    chargePointId: cp.id,
+                    chargePointName: cp.name,
+                    chargePointCode: cp.chargePointCode,
+                  })
+                }
+                onViewConnectorHistory={(c) =>
+                  setHistoryTarget({
+                    type: 'connector',
+                    chargePointId: selected.chargePoint.id,
+                    chargePointName: selected.chargePoint.name,
+                    connectorId: c.id,
+                    connectorCode: c.connectorCode,
+                  })
+                }
               />
             )}
           </div>
@@ -237,6 +277,13 @@ export function Chargers() {
         saving={updateChargePoint.isPending || changeOperationalStatus.isPending || updateConnector.isPending}
         onClose={() => setIntent(null)}
         onConfirm={applyIntent}
+      />
+
+      <EquipmentStatusHistoryDrawer
+        open={Boolean(historyTarget)}
+        onClose={() => setHistoryTarget(null)}
+        stationId={selectedStationId || ''}
+        target={historyTarget}
       />
     </>
   );

@@ -188,12 +188,17 @@
       "unclaimed": "Chưa gán",
       "active": "Hoạt động",
       "offline": "Ngoại tuyến",
-      "suspended": "Đình chỉ",
+      "suspended": "Tạm ngưng",
       "PENDING_ACTIVATION": "Chờ kích hoạt",
       "ACTIVE": "Đã kích hoạt",
-      "SUSPENDED": "Đình chỉ",
+      "SUSPENDED": "Tạm ngưng vận hành",
       "AVAILABLE": "Hoạt động",
       "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì"
+    },
+    "operationalStatus": {
+      "AVAILABLE": "Hoạt động",
+      "OFFLINE": "Offline",
       "MAINTENANCE": "Bảo trì"
     },
     "connectorCount": "{{count}} connector",
@@ -208,7 +213,14 @@
       "zoneLabel": "KHU VỰC / GỢI Ý VỊ TRÍ",
       "zonePlaceholder": "VD: Gần lối vào, hàng B",
       "zoneHelp": "Hiển thị cho tài xế trên trang chi tiết trạm.",
+      "statusGroup": "Trạng thái thiết bị & vận hành",
       "operationGroup": "Trạng thái vận hành",
+      "provStatus": "Cấp phép hạ tầng (Admin)",
+      "provPendingHelp": "Đang chờ Admin nghiệm thu & kích hoạt",
+      "provSuspendedHelp": "Tạm đình chỉ bởi Quản trị viên",
+      "operStatus": "Trạng thái vận hành (Owner)",
+      "operHelp": "Chuyển trạng thái để tạm dừng nhận sạc khi bảo trì hoặc đóng trạm.",
+      "operLocked": "Trụ sạc chưa kích hoạt hoặc đang bị đình chỉ bởi Admin, không thể đổi trạng thái vận hành.",
       "saveBtn": "Lưu thay đổi",
       "saving": "Đang lưu…"
     }
@@ -297,6 +309,7 @@
       "util": "Sử dụng",
       "sessions": "{{count}} phiên",
       "deviceDown": "Trụ sạc đang {{status}} — mọi connector của trụ đều không nhận đặt chỗ cho đến khi trụ hoạt động trở lại.",
+      "pendingActivation": "Trụ sạc đang Chờ kích hoạt — các súng sạc chưa thể tiếp nhận đặt chỗ cho đến khi hoàn tất kích hoạt lần đầu.",
       "lockedByDevice": "Đưa trụ sạc về trạng thái Hoạt động để đổi trạng thái connector này."
     },
     "panel": {

@@ -484,8 +484,8 @@ export function StationDetailDrawer({
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isPending && <StatusPill tone="neutral" label="Chờ kích hoạt" />}
-                          {isActive && <StatusPill tone="good" label="Hoạt động" />}
-                          {isSuspended && <StatusPill tone="bad" label="Tạm ngưng" />}
+                          {isActive && <StatusPill tone="good" label="Đang hoạt động" />}
+                          {isSuspended && <StatusPill tone="warn" label="Tạm ngưng vận hành" />}
                         </div>
                       </div>
 
@@ -496,9 +496,15 @@ export function StationDetailDrawer({
                           <div className="grid gap-1.5 sm:grid-cols-2">
                             {cpConnectors.map((c) => {
                               const rStatus = String(c.runtimeStatus || 'AVAILABLE').toUpperCase();
-                              let cTone: 'good' | 'brand' | 'bad' = 'good';
+                              let cTone: 'good' | 'brand' | 'bad' | 'neutral' | 'warn' = 'good';
                               let cLabel = 'Sẵn sàng';
-                              if (rStatus === 'IN_USE' || rStatus === 'INUSE') {
+                              if (isPending) {
+                                cTone = 'neutral';
+                                cLabel = 'Chưa mở sạc';
+                              } else if (isSuspended) {
+                                cTone = 'neutral';
+                                cLabel = 'Tạm dừng theo trụ';
+                              } else if (rStatus === 'IN_USE' || rStatus === 'INUSE') {
                                 cTone = 'brand';
                                 cLabel = 'Đang sạc';
                               } else if (rStatus === 'OFFLINE') {

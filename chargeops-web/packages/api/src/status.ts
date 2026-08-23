@@ -107,9 +107,23 @@ export function isStationDriverEligible(
     daysLeft?: number;
   } | string | null,
   now = new Date(),
+  hardwareInfo?: {
+    totalChargers?: number;
+    onlineChargers?: number;
+    chargerCount?: number;
+    onlineCount?: number;
+  } | null,
 ): {
   isEligible: boolean;
-  reason?: 'STATION_NOT_ACTIVE' | 'LICENSE_MISSING' | 'LICENSE_EXPIRED' | 'LICENSE_SUSPENDED' | 'LICENSE_CANCELLED' | 'LICENSE_NOT_STARTED';
+  reason?:
+    | 'STATION_NOT_ACTIVE'
+    | 'LICENSE_MISSING'
+    | 'LICENSE_EXPIRED'
+    | 'LICENSE_SUSPENDED'
+    | 'LICENSE_CANCELLED'
+    | 'LICENSE_NOT_STARTED'
+    | 'NO_ACTIVE_CHARGERS'
+    | 'ALL_CHARGERS_OFFLINE';
   label: string;
   tone: Tone;
   details?: string;
@@ -134,6 +148,30 @@ export function isStationDriverEligible(
       label: 'Thiếu Giấy phép',
       tone: 'warn',
       details: 'Trạm chưa được ghi nhận gói License hợp lệ.',
+    };
+  }
+
+  // Check hardware provision & online status if available
+  const totalCount = hardwareInfo?.totalChargers ?? hardwareInfo?.chargerCount;
+  const onlineCount = hardwareInfo?.onlineChargers ?? hardwareInfo?.onlineCount;
+
+  if (totalCount !== undefined && totalCount === 0) {
+    return {
+      isEligible: false,
+      reason: 'NO_ACTIVE_CHARGERS',
+      label: 'Chưa cấp trụ sạc',
+      tone: 'neutral',
+      details: 'Trạm đã duyệt nhưng chưa có trụ sạc hoặc súng sạc nào được kích hoạt.',
+    };
+  }
+
+  if (totalCount !== undefined && totalCount > 0 && onlineCount !== undefined && onlineCount === 0) {
+    return {
+      isEligible: false,
+      reason: 'ALL_CHARGERS_OFFLINE',
+      label: 'Tạm ngưng sạc',
+      tone: 'warn',
+      details: 'Tất cả trụ sạc của trạm đang tạm dừng, chờ kích hoạt hoặc ngoại tuyến.',
     };
   }
 

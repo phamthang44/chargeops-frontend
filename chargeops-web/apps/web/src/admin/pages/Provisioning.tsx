@@ -20,6 +20,7 @@ import {
   IconLock,
   IconPin,
   IconPlusCircle,
+  IconTrash,
   Modal,
   PageHeader,
   Pagination,
@@ -31,6 +32,10 @@ import {
   useToast,
   type FilterTab,
 } from '@chargeops/ui';
+import {
+  ActivateChargePointModal,
+  ConfirmDeleteModal,
+} from '../features/stations/StationProvisioningWorkspace';
 
 const CONNECTORS = [
   { value: 'CCS2', label: 'CCS2' },
@@ -291,11 +296,42 @@ function StationProvisioning({
   const toast = useToast();
   const [addingTo, setAddingTo] = useState<ChargePoint | null>(null);
   const [creatingCp, setCreatingCp] = useState(false);
+  const [activatingTarget, setActivatingTarget] = useState<{ cp: ChargePoint; connectorCount: number } | null>(null);
+  const [deletingTarget, setDeletingTarget] = useState<{
+    type: 'chargePoint' | 'connector';
+    chargePoint: ChargePoint;
+    connector?: Connector;
+  } | null>(null);
+
+  const removeCp = useMutation({
+    mutationFn: (id: string) => api.chargePoints.remove(id, station.id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['chargePoints'] });
+      qc.invalidateQueries({ queryKey: ['connectors'] });
+      setDeletingTarget(null);
+      toast('Đã xóa bản nháp Trụ sạc và các Súng bên trong.', 'success');
+    },
+    onError: (e) => toast((e as Error).message, 'error'),
+  });
+
+  const removeConnector = useMutation({
+    mutationFn: ({ id, chargePointId }: { id: string; chargePointId: string }) =>
+      api.connectors.remove(id, station.id, chargePointId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['chargePoints'] });
+      qc.invalidateQueries({ queryKey: ['connectors'] });
+      setDeletingTarget(null);
+      toast('Đã xóa Súng sạc bản nháp.', 'success');
+    },
+    onError: (e) => toast((e as Error).message, 'error'),
+  });
 
   const activate = useMutation({
-    mutationFn: (id: string) => api.chargePoints.activate(id),
+    mutationFn: ({ id, expectedConnectorCount }: { id: string; expectedConnectorCount: number }) =>
+      api.chargePoints.activate(id, station.id, expectedConnectorCount),
     onSuccess: (cp) => {
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
+      setActivatingTarget(null);
       toast(t('provisioning.activateSuccess', { id: cp.id }), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
@@ -346,7 +382,14 @@ function StationProvisioning({
               connectors={connectors.filter((c) => c.chargePointId === cp.id)}
               activating={activate.isPending}
               onAddConnector={() => setAddingTo(cp)}
-              onActivate={() => activate.mutate(cp.id)}
+              onDeleteCp={() => setDeletingTarget({ type: 'chargePoint', chargePoint: cp })}
+              onDeleteConnector={(connector) =>
+                setDeletingTarget({ type: 'connector', chargePoint: cp, connector })
+              }
+              onActivate={() => setActivatingTarget({
+                cp,
+                connectorCount: connectors.filter((connector) => connector.chargePointId === cp.id).length,
+              })}
               onDownloadQr={(c) => toast(t('provisioning.toastDownloading', { id: c.id }), 'info')}
             />
           ))}
@@ -361,6 +404,40 @@ function StationProvisioning({
         />
       )}
       {addingTo && <AddConnectorModal chargePoint={addingTo} onClose={() => setAddingTo(null)} />}
+      {activatingTarget && (
+        <ActivateChargePointModal
+          chargePoint={activatingTarget.cp}
+          actualConnectorCount={activatingTarget.connectorCount}
+          isSubmitting={activate.isPending}
+          onSubmit={(expectedConnectorCount) => activate.mutate({
+            id: activatingTarget.cp.id,
+            expectedConnectorCount,
+          })}
+          onClose={() => setActivatingTarget(null)}
+        />
+      )}
+
+      {/* Custom Confirm Delete Modal */}
+      {deletingTarget && (
+        <ConfirmDeleteModal
+          open
+          type={deletingTarget.type}
+          chargePoint={deletingTarget.chargePoint}
+          connector={deletingTarget.connector}
+          isSubmitting={removeCp.isPending || removeConnector.isPending}
+          onConfirm={() => {
+            if (deletingTarget.type === 'chargePoint') {
+              removeCp.mutate(deletingTarget.chargePoint.id);
+            } else if (deletingTarget.connector) {
+              removeConnector.mutate({
+                id: deletingTarget.connector.id,
+                chargePointId: deletingTarget.chargePoint.id,
+              });
+            }
+          }}
+          onClose={() => setDeletingTarget(null)}
+        />
+      )}
     </>
   );
 }
@@ -370,6 +447,8 @@ function ChargePointCard({
   connectors,
   activating,
   onAddConnector,
+  onDeleteCp,
+  onDeleteConnector,
   onActivate,
   onDownloadQr,
 }: {
@@ -377,6 +456,8 @@ function ChargePointCard({
   connectors: Connector[];
   activating: boolean;
   onAddConnector: () => void;
+  onDeleteCp: () => void;
+  onDeleteConnector: (connector: Connector) => void;
   onActivate: () => void;
   onDownloadQr: (c: Connector) => void;
 }) {
@@ -432,9 +513,21 @@ function ChargePointCard({
                   {c.connectorType} · {c.powerKw} kW
                   <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
                 </span>
-                <Button variant="secondary" size="sm" className="ml-auto" onClick={() => onDownloadQr(c)}>
-                  {t('provisioning.downloadQr')}
-                </Button>
+                <span className="ml-auto flex items-center gap-1.5">
+                  <Button variant="secondary" size="sm" onClick={() => onDownloadQr(c)}>
+                    {t('provisioning.downloadQr')}
+                  </Button>
+                  {cp.provisioningStatus === 'PENDING_ACTIVATION' && (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      icon={<IconTrash size={12} strokeWidth={2.2} />}
+                      onClick={() => onDeleteConnector(c)}
+                    >
+                      Xóa
+                    </Button>
+                  )}
+                </span>
               </div>
             ))}
           </div>
@@ -442,14 +535,27 @@ function ChargePointCard({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline px-4 py-3">
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<IconPlusCircle size={14} strokeWidth={2} />}
-          onClick={onAddConnector}
-        >
-          {t('provisioning.connector.addBtn')}
-        </Button>
+        <span className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<IconPlusCircle size={14} strokeWidth={2} />}
+            onClick={onAddConnector}
+            disabled={cp.provisioningStatus !== 'PENDING_ACTIVATION'}
+          >
+            {t('provisioning.connector.addBtn')}
+          </Button>
+          {cp.provisioningStatus === 'PENDING_ACTIVATION' && (
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<IconTrash size={12} strokeWidth={2.2} />}
+              onClick={onDeleteCp}
+            >
+              Xóa bản nháp
+            </Button>
+          )}
+        </span>
 
         {cp.provisioningStatus === 'PENDING_ACTIVATION' ? (
           <span className="flex items-center gap-2.5">
@@ -486,6 +592,9 @@ function CreateChargePointModal({
   const toast = useToast();
   const [name, setName] = useState('');
   const [zoneLabel, setZoneLabel] = useState('');
+  const [connectorType, setConnectorType] = useState<ConnectorType>('CCS2');
+  const [powerKw, setPowerKw] = useState(120);
+  const [quantity, setQuantity] = useState(2);
 
   const create = useMutation({
     mutationFn: () =>
@@ -493,6 +602,7 @@ function CreateChargePointModal({
         stationId,
         name: name.trim() || undefined,
         zoneLabel: zoneLabel.trim() || undefined,
+        connectorGroups: [{ connectorType, powerKw, quantity }],
       }),
     onSuccess: (cp) => {
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
@@ -515,7 +625,7 @@ function CreateChargePointModal({
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('provisioning.chargePoint.namePlaceholder')}
+            placeholder="Ví dụ: Trụ A, Khu B, Tầng hầm 1"
             className="w-full rounded-[9px] border border-line px-[11px] py-[9px] text-[13px] focus:border-brand"
           />
         </Field>
@@ -527,8 +637,19 @@ function CreateChargePointModal({
             className="w-full rounded-[9px] border border-line px-[11px] py-[9px] text-[13px] focus:border-brand"
           />
         </Field>
+        <div className="grid grid-cols-3 gap-2.5">
+          <Field label="Chuẩn sạc">
+            <Select value={connectorType} onChange={(value) => setConnectorType(value as ConnectorType)} options={CONNECTORS} />
+          </Field>
+          <Field label="Công suất mỗi súng">
+            <Select value={String(powerKw)} onChange={(value) => setPowerKw(Number(value))} options={POWERS} />
+          </Field>
+          <Field label="Số lượng súng">
+            <input type="number" min={1} max={8} value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className="w-full rounded-[9px] border border-line px-[11px] py-[9px] text-[13px] focus:border-brand" />
+          </Field>
+        </div>
         <p className="rounded-[9px] bg-chip px-3 py-2.5 text-[11.5px] leading-[1.5] text-muted">
-          {t('provisioning.chargePoint.createHelp')}
+          Tạo Trụ và toàn bộ Súng sạc cùng một lần. Mã C-01… và công suất tối đa của Trụ được hệ thống tự suy ra.
         </p>
       </div>
 
@@ -557,6 +678,7 @@ function AddConnectorModal({ chargePoint, onClose }: { chargePoint: ChargePoint;
   const create = useMutation({
     mutationFn: () =>
       api.connectors.provision({
+        stationId: chargePoint.stationId,
         chargePointId: chargePoint.id,
         connectorCode: connectorCode.trim() || 'C-01',
         connectorType,

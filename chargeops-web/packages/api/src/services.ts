@@ -16,9 +16,12 @@ import type {
   BookingListParams,
   BookingSummary,
   ChargePoint,
+  ChargePointStatusEvent,
+  ConnectorProvisioningGroup,
   CheckInChallengeResponse,
   Connector,
   ConnectorRuntimeStatus,
+  ConnectorStatusEvent,
   ConnectorType,
   IssueLicenseRequest,
   License,
@@ -94,7 +97,6 @@ export interface ChargePointService {
       stationId?: string;
       name?: string;
       zoneLabel?: string;
-      maxPowerKw?: number;
     },
   ): Promise<ChargePoint>;
   /** Owners/staff change operational status (AVAILABLE <-> OFFLINE). */
@@ -106,32 +108,41 @@ export interface ChargePointService {
       reason: string;
     },
   ): Promise<ChargePoint>;
-  /** Admin: create a charge point for a station (FR14 step 1). */
+  /** Admin: atomically create a draft charge point and its connector inventory. */
   provision(input: {
     stationId: string;
     name?: string;
     zoneLabel?: string;
     chargePointCode?: string;
-    maxPowerKw?: number;
+    connectorGroups: ConnectorProvisioningGroup[];
   }): Promise<ChargePoint>;
-  /** Admin: PENDING_ACTIVATION → ACTIVE once its connectors are provisioned and QR stickers installed. */
-  activate(id: string, stationId?: string): Promise<ChargePoint>;
+  /** Admin: seal connector inventory and activate the charge point (FR14 step 3). */
+  activate(id: string, stationId: string, expectedConnectorCount: number): Promise<ChargePoint>;
   /** Admin: suspend an active charge point (FR14). */
   suspend(id: string, stationId: string, reason: string): Promise<ChargePoint>;
   /** Admin: reactivate a suspended charge point (FR14). */
   reactivate(id: string, stationId: string, reason: string): Promise<ChargePoint>;
   /** Admin: get single charge point detail. */
   get(id: string, stationId: string): Promise<ChargePoint>;
+  /** Admin: remove a mistaken draft. ACTIVE/SUSPENDED records are retained. */
+  remove(id: string, stationId: string): Promise<void>;
+  /** Admin/Owner: get status transition event history. */
+  statusHistory(id: string, stationId: string): Promise<ChargePointStatusEvent[]>;
 }
 
 export interface ConnectorService {
   list(chargePointId?: string, stationId?: string): Promise<Connector[]>;
-  /** Owner/staff may only toggle runtime status (AVAILABLE<->OFFLINE); hardware attrs are locked (BR-CHG-03). */
+  /**
+   * Owner: toggle runtime status (AVAILABLE<->OFFLINE).
+   * Admin: edit hardware properties (connectorType, powerKw) while CP is PENDING_ACTIVATION.
+   */
   update(
     id: string,
     patch: {
       stationId?: string;
       chargePointId?: string;
+      connectorType?: ConnectorType;
+      powerKw?: number;
       runtimeStatus?: ConnectorRuntimeStatus;
       reason?: string;
     },
@@ -143,9 +154,12 @@ export interface ConnectorService {
     connectorCode: string;
     connectorType: ConnectorType;
     powerKw: number;
-    slotMinutes?: number;
     name?: string;
   }): Promise<Connector>;
+  /** Admin: remove a mistaken connector while its charge point is still a draft. */
+  remove(id: string, stationId: string, chargePointId: string): Promise<void>;
+  /** Admin/Owner: get connector status transition event history. */
+  statusHistory(id: string, stationId: string, chargePointId: string): Promise<ConnectorStatusEvent[]>;
 }
 
 export interface StationService {

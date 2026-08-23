@@ -406,7 +406,6 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
         if (patch.name !== undefined) cp.name = patch.name;
         if (patch.zoneLabel !== undefined) cp.zoneLabel = patch.zoneLabel;
-        if (patch.maxPowerKw !== undefined) cp.maxPowerKw = patch.maxPowerKw;
         return { ...cp };
       },
       async changeOperationalStatus(id, input) {
@@ -418,22 +417,55 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async provision(input) {
         await delay();
+        const id = 'CP-' + seq++;
+        const maxPowerKw = Math.max(...input.connectorGroups.map((group) => group.powerKw));
         const rec: ChargePoint = {
-          id: 'CP-' + seq++,
+          id,
           stationId: input.stationId,
-          name: input.name || '—',
+          name: input.name || input.chargePointCode || id,
           zoneLabel: input.zoneLabel ?? null,
-          maxPowerKw: input.maxPowerKw || 0,
+          maxPowerKw,
           provisioningStatus: 'PENDING_ACTIVATION',
           operationalStatus: 'AVAILABLE',
         };
         db.chargePoints.unshift(rec);
+        let connectorNumber = 1;
+        input.connectorGroups.forEach((group) => {
+          for (let index = 0; index < group.quantity; index += 1) {
+            const connectorCode = `C-${String(connectorNumber++).padStart(2, '0')}`;
+            db.connectors.unshift({
+              id: 'CH-' + seq++,
+              chargePointId: id,
+              connectorCode,
+              name: connectorCode,
+              connectorType: group.connectorType,
+              powerKw: group.powerKw,
+              runtimeStatus: 'AVAILABLE',
+              utilizationPct: 0,
+              sessionsToday: 0,
+              uptime30dPct: 0,
+              kwhToday: 0,
+              faultCount: 0,
+              lastSeen: '—',
+            });
+          }
+        });
         return { ...rec };
       },
-      async activate(id) {
+      async activate(id, _stationId, expectedConnectorCount) {
         await delay();
         const cp = db.chargePoints.find((x) => x.id === id);
         if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        if (cp.provisioningStatus !== 'PENDING_ACTIVATION') {
+          throw new Error('Chỉ trụ đang chờ kích hoạt mới có thể được kích hoạt.');
+        }
+        const actualConnectorCount = db.connectors.filter((c) => c.chargePointId === id).length;
+        if (actualConnectorCount === 0) {
+          throw new Error('Trụ sạc cần ít nhất một súng sạc trước khi kích hoạt.');
+        }
+        if (actualConnectorCount !== expectedConnectorCount) {
+          throw new Error(`Số súng xác nhận (${expectedConnectorCount}) không khớp tồn kho (${actualConnectorCount}).`);
+        }
         cp.provisioningStatus = 'ACTIVE';
         return { ...cp };
       },
@@ -457,6 +489,36 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (!cp) throw new Error(`Không tìm thấy trụ sạc ${id}`);
         return { ...cp };
       },
+      async remove(id) {
+        await delay();
+        const index = db.chargePoints.findIndex((cp) => cp.id === id);
+        if (index < 0) throw new Error(`Không tìm thấy trụ sạc ${id}`);
+        if (db.chargePoints[index].provisioningStatus !== 'PENDING_ACTIVATION') {
+          throw new Error('Chỉ có thể xóa trụ đang chờ kích hoạt.');
+        }
+        db.chargePoints.splice(index, 1);
+        for (let i = db.connectors.length - 1; i >= 0; i -= 1) {
+          if (db.connectors[i].chargePointId === id) db.connectors.splice(i, 1);
+        }
+      },
+      async statusHistory(id) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === id);
+        if (!cp) return [];
+        return [
+          {
+            id: 'CP-EVT-1',
+            statusDimension: 'PROVISIONING' as const,
+            fromStatus: 'PENDING_ACTIVATION',
+            toStatus: cp.provisioningStatus,
+            reason: cp.provisioningStatus === 'SUSPENDED' ? 'Tạm ngưng kiểm tra kỹ thuật' : 'Kích hoạt hoàn tất nghiệm thu',
+            actorType: 'ADMIN' as const,
+            performedById: 'usr-admin-1',
+            performedByDisplayName: 'Admin Quản trị',
+            performedAt: new Date().toISOString(),
+          },
+        ];
+      },
     },
 
     connectors: {
@@ -471,10 +533,17 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const c = db.connectors.find((x) => x.id === id);
         if (!c) throw new Error(`Không tìm thấy connector ${id}`);
         if (patch.runtimeStatus !== undefined) c.runtimeStatus = patch.runtimeStatus;
+        if (patch.connectorType !== undefined) c.connectorType = patch.connectorType;
+        if (patch.powerKw !== undefined) c.powerKw = patch.powerKw;
         return { ...c };
       },
       async provision(input) {
         await delay();
+        const cp = db.chargePoints.find((c) => c.id === input.chargePointId);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${input.chargePointId}`);
+        if (cp.provisioningStatus !== 'PENDING_ACTIVATION') {
+          throw new Error('Không thể thêm súng sạc sau khi trụ đã kích hoạt.');
+        }
         const code = input.connectorCode || ('C-0' + (db.connectors.filter((c) => c.chargePointId === input.chargePointId).length + 1));
         const rec: Connector = {
           id: 'CH-' + seq++,
@@ -483,8 +552,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           name: input.name || code,
           connectorType: input.connectorType,
           powerKw: input.powerKw,
-          slotMinutes: input.slotMinutes || 30,
-          runtimeStatus: 'OFFLINE',
+          runtimeStatus: 'AVAILABLE',
           utilizationPct: 0,
           sessionsToday: 0,
           uptime30dPct: 0,
@@ -493,9 +561,38 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           lastSeen: '—',
         };
         db.connectors.unshift(rec);
-        const cp = db.chargePoints.find((c) => c.id === input.chargePointId);
-        if (cp) cp.maxPowerKw = Math.max(cp.maxPowerKw, input.powerKw);
+        cp.maxPowerKw = Math.max(cp.maxPowerKw, input.powerKw);
         return { ...rec };
+      },
+      async remove(id, _stationId, chargePointId) {
+        await delay();
+        const cp = db.chargePoints.find((item) => item.id === chargePointId);
+        if (!cp) throw new Error(`Không tìm thấy trụ sạc ${chargePointId}`);
+        if (cp.provisioningStatus !== 'PENDING_ACTIVATION') {
+          throw new Error('Chỉ có thể xóa súng của trụ đang chờ kích hoạt.');
+        }
+        const index = db.connectors.findIndex((connector) => connector.id === id);
+        if (index < 0) throw new Error(`Không tìm thấy connector ${id}`);
+        db.connectors.splice(index, 1);
+        const remaining = db.connectors.filter((connector) => connector.chargePointId === chargePointId);
+        cp.maxPowerKw = remaining.length ? Math.max(...remaining.map((connector) => connector.powerKw)) : 0;
+      },
+      async statusHistory(id) {
+        await delay();
+        const c = db.connectors.find((x) => x.id === id);
+        if (!c) return [];
+        return [
+          {
+            id: 'CONN-EVT-1',
+            fromStatus: 'AVAILABLE' as const,
+            toStatus: c.runtimeStatus,
+            reason: 'Thay đổi trạng thái vận hành súng sạc',
+            actorType: 'OWNER' as const,
+            performedById: 'usr-owner-1',
+            performedByDisplayName: 'Chủ trạm',
+            performedAt: new Date().toISOString(),
+          },
+        ];
       },
     },
 

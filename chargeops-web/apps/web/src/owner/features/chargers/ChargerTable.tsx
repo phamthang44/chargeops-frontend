@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
-import { IconAlertTriangle, IconBolt, IconCard, IconLock, IconPin, ProgressBar } from '@chargeops/ui';
+import { IconAlertTriangle, IconBolt, IconCard, IconHistory, IconLock, IconPin, ProgressBar } from '@chargeops/ui';
 import {
   getChargePointPill,
   getConnectorPill,
@@ -27,6 +27,8 @@ export interface ChargerTableProps {
   /** Cycle a single Connector available <-> offline. */
   onCycleConnectorStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
+  onViewCpHistory: (cp: ChargePoint) => void;
+  onViewConnectorHistory: (c: Connector) => void;
 }
 
 /**
@@ -44,6 +46,8 @@ export function ChargerTable({
   onCycleStatus,
   onCycleConnectorStatus,
   onDownloadQr,
+  onViewCpHistory,
+  onViewConnectorHistory,
 }: ChargerTableProps) {
   return (
     <div className="flex flex-col gap-[11px]">
@@ -57,6 +61,8 @@ export function ChargerTable({
           onCycleStatus={onCycleStatus}
           onCycleConnectorStatus={onCycleConnectorStatus}
           onDownloadQr={onDownloadQr}
+          onViewCpHistory={onViewCpHistory}
+          onViewConnectorHistory={onViewConnectorHistory}
         />
       ))}
     </div>
@@ -71,6 +77,8 @@ function ChargePointCard({
   onCycleStatus,
   onCycleConnectorStatus,
   onDownloadQr,
+  onViewCpHistory,
+  onViewConnectorHistory,
 }: {
   group: ChargePointGroup;
   selected: boolean;
@@ -146,21 +154,36 @@ function ChargePointCard({
           </div>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (canToggle) {
-              onCycleStatus(cp);
-            }
-          }}
-          disabled={!canToggle}
-          title={!canToggle ? 'Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng' : undefined}
-          className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:opacity-80"
-          style={{ background: pill.bg, color: pill.fg }}
-        >
-          <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {pill.label}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewCpHistory(cp);
+            }}
+            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            title="Xem lịch sử thay đổi trạng thái trụ sạc"
+          >
+            <IconHistory size={12} strokeWidth={2} />
+            <span>Lịch sử</span>
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canToggle) {
+                onCycleStatus(cp);
+              }
+            }}
+            disabled={!canToggle}
+            title={!canToggle ? 'Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng' : undefined}
+            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:opacity-80"
+            style={{ background: pill.bg, color: pill.fg }}
+          >
+            <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
+            {pill.label}
+          </button>
+        </div>
       </div>
 
       {/* ---- connectors ---- */}
@@ -170,7 +193,9 @@ function ChargePointCard({
           <div className="mb-2 flex items-start gap-1.5 rounded-[9px] border border-warn-border bg-warn-soft px-2.5 py-2 text-[11px] leading-[1.45] font-medium text-warn-deep">
             <IconAlertTriangle size={13} strokeWidth={2} className="mt-px shrink-0" />
             <span>
-              {t('connectors.card.deviceDown', { status: pill.label })}
+              {cp.provisioningStatus === 'PENDING_ACTIVATION'
+                ? t('connectors.card.pendingActivation')
+                : t('connectors.card.deviceDown', { status: pill.label })}
             </span>
           </div>
         )}
@@ -188,6 +213,7 @@ function ChargePointCard({
                 chargePoint={cp}
                 onCycleStatus={onCycleConnectorStatus}
                 onDownloadQr={onDownloadQr}
+                onViewConnectorHistory={onViewConnectorHistory}
               />
             ))}
           </div>
@@ -202,11 +228,13 @@ function ConnectorRow({
   chargePoint: cp,
   onCycleStatus,
   onDownloadQr,
+  onViewConnectorHistory,
 }: {
   connector: Connector;
   chargePoint: ChargePoint;
   onCycleStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
+  onViewConnectorHistory: (c: Connector) => void;
 }) {
   const { t } = useTranslation('owner');
   const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
@@ -259,15 +287,27 @@ function ConnectorRow({
           {t('connectors.card.sessions', { count: c.sessionsToday ?? 0 })}
         </span>
 
-        <a
-          href={`/simulator?connectorId=${c.id}`}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border-[1.5px] border-owner-border px-2.5 py-[5px] text-[11px] font-semibold text-owner-deep hover:bg-owner-soft"
-        >
-          <IconCard size={13} strokeWidth={1.9} />
-          ⚡ Simulator
-        </a>
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onViewConnectorHistory(c)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-[8px] border border-line-2 bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            title="Xem lịch sử trạng thái súng sạc"
+          >
+            <IconHistory size={12} strokeWidth={2} />
+            <span>Lịch sử</span>
+          </button>
+
+          <a
+            href={`/simulator?connectorId=${c.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border-[1.5px] border-owner-border px-2.5 py-[5px] text-[11px] font-semibold text-owner-deep hover:bg-owner-soft"
+          >
+            <IconCard size={13} strokeWidth={1.9} />
+            ⚡ Simulator
+          </a>
+        </div>
       </div>
     </div>
   );

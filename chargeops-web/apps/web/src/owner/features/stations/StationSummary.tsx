@@ -6,7 +6,12 @@ import { isStationDriverEligible, type Station } from '@chargeops/api';
 export function StationSummary({ stations }: { stations: Station[] }) {
   const { t } = useTranslation('owner');
   const active = stations.filter((s) => s.status === 'active' || s.status === 'ACTIVE');
-  const eligibleCount = stations.filter((s) => isStationDriverEligible(s.status, s.licenseSummary).isEligible).length;
+  const eligibleCount = stations.filter((s) =>
+    isStationDriverEligible(s.status, s.licenseSummary, new Date(), {
+      chargerCount: s.chargerCount ?? 0,
+      onlineCount: s.onlineCount ?? 0,
+    }).isEligible,
+  ).length;
   const pending = stations.filter((s) => s.status === 'pending' || s.status === 'PENDING_APPROVAL').length;
   const chargers = active.reduce((n, s) => n + (s.chargerCount ?? s.plannedChargePointCount ?? 0), 0);
   const online = active.reduce((n, s) => n + (s.onlineCount ?? 0), 0);

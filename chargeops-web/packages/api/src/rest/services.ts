@@ -9,8 +9,10 @@ import type { HttpClient } from '../http';
 import type { Services } from '../services';
 import type {
   ChargePoint,
+  ChargePointStatusEvent,
   Connector,
   ConnectorRuntimeStatus,
+  ConnectorStatusEvent,
   CheckInChallengeResponse,
   License,
   OperationalChargePointStatus,
@@ -60,7 +62,6 @@ function normalizeConnector(c: any): Connector {
     connectorType: c.connectorType || 'CCS2',
     powerKw: Number(c.powerKw) || 0,
     chargerType: c.chargerType || 'DC',
-    slotMinutes: c.slotMinutes || 30,
     runtimeStatus,
     utilizationPct: Number(c.utilizationPct) || 0,
     sessionsToday: Number(c.sessionsToday) || 0,
@@ -136,7 +137,6 @@ export function createRestServices(http: HttpClient): Services {
             const res = await http.patch<ChargePoint>(`/admin/stations/${patch.stationId}/charge-points/${id}`, {
               name: patch.name,
               zoneLabel: patch.zoneLabel,
-              maxPowerKw: patch.maxPowerKw,
             });
             return normalizeChargePoint(res);
           }
@@ -164,10 +164,11 @@ export function createRestServices(http: HttpClient): Services {
         const res = await http.post<ChargePoint>(`/admin/stations/${input.stationId}/charge-points`, input);
         return normalizeChargePoint(res);
       },
-      activate: async (id, stationId) => {
-        const res = await (stationId
-          ? http.post<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}/activate`)
-          : http.post<ChargePoint>(`/admin/charge-points/${id}/activate`));
+      activate: async (id, stationId, expectedConnectorCount) => {
+        const res = await http.post<ChargePoint>(
+          `/admin/stations/${stationId}/charge-points/${id}/activate`,
+          { expectedConnectorCount },
+        );
         return normalizeChargePoint(res);
       },
       suspend: async (id, stationId, reason) => {
@@ -181,6 +182,12 @@ export function createRestServices(http: HttpClient): Services {
       get: async (id, stationId) => {
         const res = await http.get<ChargePoint>(`/admin/stations/${stationId}/charge-points/${id}`);
         return normalizeChargePoint(res);
+      },
+      remove: (id, stationId) =>
+        http.delete<void>(`/admin/stations/${stationId}/charge-points/${id}`),
+      statusHistory: (id, stationId) => {
+        const prefix = isAdminRoute() ? '/admin' : '/owner';
+        return http.get<ChargePointStatusEvent[]>(`${prefix}/stations/${stationId}/charge-points/${id}/status-history`);
       },
     },
 
@@ -247,9 +254,13 @@ export function createRestServices(http: HttpClient): Services {
       },
       update: async (id, patch) => {
         if (isAdminRoute()) {
+          const payload = {
+            connectorType: patch.connectorType,
+            powerKw: patch.powerKw,
+          };
           const res = await http.patch<Connector>(
             `/admin/stations/${patch.stationId}/charge-points/${patch.chargePointId}/connectors/${id}`,
-            patch,
+            payload,
           );
           return normalizeConnector(res);
         }
@@ -258,7 +269,7 @@ export function createRestServices(http: HttpClient): Services {
           rawStatus === 'offline' || rawStatus === 'OFFLINE' ? 'OFFLINE' : 'AVAILABLE';
         const res = await http.patch<Connector>(
           `/owner/stations/${patch.stationId}/charge-points/${patch.chargePointId}/connectors/${id}/runtime-status`,
-          { runtimeStatus, reason: patch.reason || 'Owner connector runtime status update' },
+          { runtimeStatus, reason: patch.reason },
         );
         return normalizeConnector(res);
       },
@@ -267,12 +278,19 @@ export function createRestServices(http: HttpClient): Services {
           connectorCode: input.connectorCode,
           connectorType: input.connectorType,
           powerKw: input.powerKw,
-          slotMinutes: input.slotMinutes ?? 30,
         };
         const res = await (input.stationId
           ? http.post<Connector>(`/admin/stations/${input.stationId}/charge-points/${input.chargePointId}/connectors`, payload)
           : http.post<Connector>(`/admin/connectors`, payload));
         return normalizeConnector(res);
+      },
+      remove: (id, stationId, chargePointId) =>
+        http.delete<void>(`/admin/stations/${stationId}/charge-points/${chargePointId}/connectors/${id}`),
+      statusHistory: (id, stationId, chargePointId) => {
+        const prefix = isAdminRoute() ? '/admin' : '/owner';
+        return http.get<ConnectorStatusEvent[]>(
+          `${prefix}/stations/${stationId}/charge-points/${chargePointId}/connectors/${id}/status-history`,
+        );
       },
     },
 

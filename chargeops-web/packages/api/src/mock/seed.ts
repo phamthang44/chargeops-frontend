@@ -865,6 +865,7 @@ export function buildMockDb(): MockDb {
   /* ---- pricing & hours (FR11) ---- */
   const pricing: PricingConfig = {
     minBookingDurationMin: 60,
+    bufferMinutes: 10,
     basePriceVnd: 3400,
     hours: [
       { day: 'T2', open: '06:00', close: '23:00', open24: true },
@@ -880,7 +881,7 @@ export function buildMockDb(): MockDb {
       { id: 'TOU-2', name: 'Giờ thường', days: 'daily', from: '05:00', to: '17:00', rateVnd: 3400 },
       { id: 'TOU-3', name: 'Giờ thấp điểm', days: 'daily', from: '21:00', to: '05:00', rateVnd: 2800 },
     ],
-    availability: { autoLock: true, maxAdvanceDays: 7, nightDiscount: false },
+    availability: { autoLock: true, maxAdvanceDays: 2, bufferMinutes: 10 },
   };
 
   return {

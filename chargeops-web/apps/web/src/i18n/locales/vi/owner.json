@@ -125,7 +125,7 @@
     "estEnergy": "Năng lượng ước tính",
     "total": "Tổng",
     "refundedLabel": "Đã hoàn tiền{{percent}}",
-    "refundPolicy": "CHÍNH SÁCH HOÀN TIỀN (BR-PAY-03)",
+    "refundPolicy": "CHÍNH SÁCH HOÀN TIỀN",
     "graceHint": "Miễn phí hủy đến {{time}} · còn lại",
     "policyGrace": "Trong vòng 5 phút kể từ khi đặt (ân hạn)",
     "refundGrace": "Hoàn 100%",
@@ -276,6 +276,11 @@
     "impactRestores": "Trạng thái riêng của từng connector được ghi nhớ — khi hoạt động trở lại sẽ khôi phục đúng những gì bạn đã đặt trước đó.",
     "onlineBodyDevice": "{{returning}}/{{total}} connector sẽ nhận đặt chỗ trở lại.",
     "onlineBodyConnector": "Connector này sẽ nhận đặt chỗ trở lại và xuất hiện lại trong tìm kiếm của tài xế.",
+    "staysOffline": "Vẫn ngoại tuyến",
+    "staysOfflineHint": "{{count}} connector vẫn ở trạng thái Ngoại tuyến do đã bị tắt riêng lẻ trước đó. Bạn có thể bật lại từng connector khi cần.",
+    "blockedBodyDevice": "Đang có {{count}} lượt đặt chỗ trên trụ sạc này ở trạng thái Đã xác nhận hoặc Đã check-in. Theo quy tắc vận hành, không thể ngắt thiết bị khi đang có phiên sạc hoặc đặt chỗ có hiệu lực — tài xế có thể đã cắm sạc.",
+    "blockedBodyConnector": "Đang có {{count}} lượt đặt chỗ trên cổng sạc này ở trạng thái Đã xác nhận hoặc Đã check-in. Theo quy tắc vận hành, không thể ngắt cổng sạc khi đang có phiên sạc hoặc đặt chỗ có hiệu lực — tài xế có thể đã cắm sạc.",
+    "blockedHint": "Vui lòng đợi các lượt đặt chỗ này hoàn tất, hoặc huỷ chúng từ màn hình Đặt chỗ trước khi chuyển trạng thái.",
     "confirmOffline": "Chuyển Ngoại tuyến",
     "confirmOnline": "Đưa vào hoạt động",
     "applying": "Đang áp dụng…",
@@ -335,13 +340,14 @@
     "steps": {
       "step1": {
         "title": "Cấu hình cơ bản",
-        "groupTitle": "Thời lượng đặt & giá gốc",
-        "groupHelp": "Khoảng thời gian ngắn nhất tài xế có thể đặt, cũng là bước nhảy thời lượng.",
-        "durationLabel": "THỜI LƯỢNG ĐẶT TỐI THIỂU",
+        "groupTitle": "Thời lượng đặt tối thiểu & Bước nhảy",
+        "groupHelp": "Tài xế chọn thời điểm bắt đầu bất kỳ (VD: 09:51). Thời lượng sạc sẽ được đề xuất theo các bội số tối thiểu (VD: 30p → kết thúc 10:21).",
+        "durationLabel": "THỜI LƯỢNG ĐẶT TỐI THIỂU (DURATION)",
         "durationVal": "{{minutes}} phút",
+        "basePriceGroupTitle": "Giá sạc mặc định (Base Price)",
         "basePriceLabel": "GIÁ SẠC MẶC ĐỊNH",
         "basePriceSub": "Giá gốc",
-        "basePriceHelp": "Giá này áp dụng cho mọi khung giờ không nằm trong khung giá bên dưới."
+        "basePriceHelp": "Mức giá này áp dụng cho mọi khung giờ không nằm trong các quy tắc giờ cao điểm/thấp điểm bên dưới."
       },
       "step2": {
         "title": "Giờ hoạt động",
@@ -358,20 +364,24 @@
         "tipText": "Tăng giá khung 18:00 – 21:00 có thể giúp tăng tới 15% doanh thu hàng tháng."
       },
       "step4": {
-        "title": "Quy tắc khả dụng",
-        "lockTitle": "Tự động thu hồi khi no-show",
-        "lockDesc": "Thu hồi khoảng thời gian đã đặt sau 15 phút nếu tài xế không check-in.",
-        "advanceTitle": "Cho phép đặt trước tối đa",
-        "advanceDesc": "Tài xế được đặt trước bao lâu.",
-        "advanceDays": "{{days}} ngày",
-        "nightTitle": "Giá ưu tiên sạc đêm",
-        "nightDesc": "Giảm 10% cho khung 00:00 – 05:00.",
-        "validConfig": "Cấu hình hợp lệ",
-        "validConfigHelp": "Tất cả khung giá đã kiểm tra, không trùng lặp."
+        "title": "Quy chuẩn Khả dụng & Vận hành",
+        "lockTitle": "Tự động thu hồi khi vắng mặt (No-Show)",
+        "lockDesc": "Hệ thống tự động hủy giữ chỗ và giải phóng cổng sạc sau 15 phút nếu tài xế không thực hiện check-in đúng giờ.",
+        "advanceTitle": "Phạm vi đặt trước ngắn hạn (Short-term Horizon)",
+        "advanceDesc": "Chỉ mở nhận đặt chỗ cho Hôm nay và Ngày mai (~48 giờ) để bảo đảm lịch hẹn luôn chuẩn xác và không bị treo slot.",
+        "validConfig": "Cấu hình khả dụng chuẩn hóa toàn sàn",
+        "validConfigHelp": "Toàn bộ quy chuẩn vận hành được đồng bộ nhất quán theo tiêu chuẩn SLA của nền tảng ChargeOps."
       }
+    },
+    "confirmModal": {
+      "title": "Xác nhận thay đổi Giá & Giờ hoạt động",
+      "subtitle": "Vui lòng kiểm tra lại các thông số cấu hình trước khi áp dụng cho trạm sạc.",
+      "cancelBtn": "Tiếp tục chỉnh sửa",
+      "confirmBtn": "Xác nhận & Áp dụng"
     },
     "addRule": {
       "title": "Thêm khung giá",
+      "editTitle": "Chỉnh sửa khung giá",
       "subtitle": "Mức giá riêng áp dụng cho các lượt đặt rơi vào khung giờ này.",
       "ruleName": "TÊN QUY TẮC",
       "namePlaceholder": "VD: Giờ cao điểm tối",
@@ -381,7 +391,8 @@
       "to": "ĐẾN",
       "validationError": "Vui lòng nhập tên quy tắc, mức giá và khung giờ hợp lệ (HH:mm).",
       "cancelBtn": "Hủy bỏ",
-      "saveBtn": "Lưu khung giá"
+      "saveBtn": "Lưu khung giá",
+      "updateBtn": "Cập nhật khung giá"
     },
     "days": {
       "daily": "Mỗi ngày",
@@ -447,9 +458,22 @@
   },
   "stations": {
     "title": "Trạm của tôi",
-    "subtitle": "Đăng ký trạm mới và theo dõi trạng thái duyệt.",
+    "subtitle": "Đăng ký trạm mới, theo dõi trạng thái duyệt và quản lý toàn bộ thông tin chi tiết từng trạm.",
     "registerBtn": "Đăng ký trạm mới",
     "loadError": "Không tải được danh sách trạm: {{message}}",
+    "searchPlaceholder": "Tìm theo tên, mã trạm, địa chỉ…",
+    "emptyTitle": "Không tìm thấy trạm nào",
+    "emptySearch": "Không có trạm nào khớp với từ khóa tìm kiếm.",
+    "emptyFilter": "Không có trạm nào ở trạng thái đã chọn.",
+    "amenitiesUpdateSuccess": "Cập nhật tiện ích thành công!",
+    "amenitiesUpdateError": "Không thể cập nhật tiện ích",
+    "filters": {
+      "all": "Tất cả",
+      "active": "Đang hoạt động",
+      "pending": "Chờ duyệt",
+      "suspended": "Tạm ngưng",
+      "rejected": "Bị từ chối"
+    },
     "summary": {
       "total": "TỔNG TRẠM",
       "active": "ĐANG HOẠT ĐỘNG",
@@ -467,7 +491,10 @@
       "amenitiesLabel": "Tiện ích",
       "editAmenities": "Chỉnh sửa",
       "addAmenities": "Thêm tiện ích",
-      "noAmenities": "Chưa có tiện ích nào"
+      "noAmenities": "Chưa có tiện ích nào",
+      "viewDetailBtn": "Xem chi tiết trạm",
+      "selectBtn": "Chọn quản lý",
+      "selectedBadge": "Đang chọn"
     },
     "register": {
       "title": "Đăng ký trạm mới",
@@ -559,6 +586,6 @@
     "helpTitle": "Gia hạn sắp tới (còn {{days}} ngày).",
     "helpBody": "Việc mua/gia hạn giấy phép được xử lý ngoài nền tảng; trạng thái sẽ được quản trị viên ghi nhận trên hệ thống. Màn hình này dùng để theo dõi hiệu lực.",
     "warningTitle": "Quy định duy trì giấy phép",
-    "warningBody": "Khi giấy phép hết hạn hoặc bị tạm ngưng, trạm sạc sẽ tạm thời mất quyền nhận đặt chỗ mới cho tới khi gia hạn thành công (BR-STA-01)."
+    "warningBody": "Khi giấy phép hết hạn hoặc bị tạm ngưng, trạm sạc sẽ tạm thời mất quyền nhận đặt chỗ mới cho tới khi gia hạn thành công."
   }
 }

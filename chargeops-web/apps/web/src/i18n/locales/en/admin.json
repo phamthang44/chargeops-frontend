@@ -405,7 +405,7 @@
       "addBtn": "Add connector",
       "createTitle": "Add connector",
       "createSub": "Adding to",
-      "createHelp": "Connector type and power are locked after provisioning (BR-CHG-03). This generates one Charger ID and one QR image for this port.",
+      "createHelp": "Connector type and power are locked after provisioning. This generates one Charger ID and one QR image for this port.",
       "connectorLabel": "CONNECTOR TYPE",
       "powerLabel": "POWER (kW)",
       "displayNameLabel": "DISPLAY NAME (optional)",

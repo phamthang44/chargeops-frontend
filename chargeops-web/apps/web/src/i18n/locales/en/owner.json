@@ -125,7 +125,7 @@
     "estEnergy": "Est. Energy",
     "total": "Total",
     "refundedLabel": "Refunded{{percent}}",
-    "refundPolicy": "REFUND POLICY (BR-PAY-03)",
+    "refundPolicy": "REFUND POLICY",
     "graceHint": "Free cancellation until {{time}} · time left",
     "policyGrace": "Within 5 mins of booking creation (grace period)",
     "refundGrace": "100% Refund",
@@ -278,8 +278,8 @@
     "onlineBodyConnector": "This connector will start accepting bookings again and reappear in driver search.",
     "staysOffline": "Stays offline",
     "staysOfflineHint": "{{count}} connector(s) stay offline because you disabled them individually. Turn them back on from their own status control.",
-    "blockedBodyDevice": "{{count}} booking(s) on this charge point are still Confirmed or Checked-In. Under BR-CHG-05 the device cannot go offline while a paid booking is live — the driver may already be plugged in.",
-    "blockedBodyConnector": "{{count}} booking(s) on this connector are still Confirmed or Checked-In. Under BR-CHG-05 it cannot go offline while a paid booking is live — the driver may already be plugged in.",
+    "blockedBodyDevice": "{{count}} booking(s) on this charge point are still Confirmed or Checked-In. Under system operational rules, the device cannot go offline while a paid booking is live — the driver may already be plugged in.",
+    "blockedBodyConnector": "{{count}} booking(s) on this connector are still Confirmed or Checked-In. Under system operational rules, it cannot go offline while a paid booking is live — the driver may already be plugged in.",
     "blockedHint": "Wait until these bookings reach a final state, or cancel them from the Bookings screen first.",
     "confirmOffline": "Take offline",
     "confirmOnline": "Bring online",
@@ -340,13 +340,14 @@
     "steps": {
       "step1": {
         "title": "Basic Config",
-        "groupTitle": "Booking duration & base price",
-        "groupHelp": "The shortest window a driver can book, and the increment they step in.",
-        "durationLabel": "MINIMUM BOOKING DURATION",
+        "groupTitle": "Minimum booking duration & step increment",
+        "groupHelp": "Drivers can choose any start time (e.g. 09:51). Duration options step by the minimum amount (e.g. 30m → ends at 10:21).",
+        "durationLabel": "MINIMUM BOOKING DURATION (DURATION)",
         "durationVal": "{{minutes}} mins",
+        "basePriceGroupTitle": "Default Charging Price (Base Price)",
         "basePriceLabel": "DEFAULT CHARGING PRICE",
         "basePriceSub": "Base price",
-        "basePriceHelp": "This price applies to any hours not covered by a rate window below."
+        "basePriceHelp": "This price applies to any hours not covered by a custom TOU rate window below."
       },
       "step2": {
         "title": "Operating Hours",
@@ -363,20 +364,24 @@
         "tipText": "Raising the rate for the 18:00 – 21:00 window could lift monthly revenue by up to 15%."
       },
       "step4": {
-        "title": "Availability Rules",
+        "title": "Availability & Operational Standards",
         "lockTitle": "Auto-release no-shows",
-        "lockDesc": "Release the booked time range after 15 mins if the driver does not check in.",
-        "advanceTitle": "Max Advance Booking",
-        "advanceDesc": "How far ahead drivers can book a time range.",
-        "advanceDays": "{{days}} days",
-        "nightTitle": "Night Charging Special",
-        "nightDesc": "10% discount for the 00:00 – 05:00 window.",
-        "validConfig": "Valid Configuration",
-        "validConfigHelp": "All rate windows verified and free of overlaps."
+        "lockDesc": "System automatically cancels holding and releases connector after 15 mins if driver does not check in on time.",
+        "advanceTitle": "Short-term Reservation Horizon",
+        "advanceDesc": "Only accepts reservations for Today and Tomorrow (~48 hours) to ensure schedule predictability.",
+        "validConfig": "Platform Standardized Availability",
+        "validConfigHelp": "All operational policies are standardized across the platform according to ChargeOps SLA."
       }
+    },
+    "confirmModal": {
+      "title": "Confirm Pricing & Hours Configuration",
+      "subtitle": "Please review the updated configuration parameters before applying them to your station.",
+      "cancelBtn": "Keep Editing",
+      "confirmBtn": "Confirm & Apply"
     },
     "addRule": {
       "title": "Add rate window",
+      "editTitle": "Edit rate window",
       "subtitle": "Define a custom rate that applies to bookings falling in this window.",
       "ruleName": "RULE NAME",
       "namePlaceholder": "E.g. Evening peak",
@@ -386,7 +391,8 @@
       "to": "TO",
       "validationError": "Please input a valid rule name, price, and time window (HH:mm).",
       "cancelBtn": "Cancel",
-      "saveBtn": "Save rate window"
+      "saveBtn": "Save rate window",
+      "updateBtn": "Update rate window"
     },
     "days": {
       "daily": "Daily",
@@ -452,9 +458,22 @@
   },
   "stations": {
     "title": "My Stations",
-    "subtitle": "Register new stations and track approval status.",
+    "subtitle": "Register new stations, track approval status, and view all related station details.",
     "registerBtn": "Register New Station",
     "loadError": "Could not load stations: {{message}}",
+    "searchPlaceholder": "Search by name, code, address…",
+    "emptyTitle": "No stations found",
+    "emptySearch": "No stations matched your search query.",
+    "emptyFilter": "No stations found with the selected status.",
+    "amenitiesUpdateSuccess": "Station amenities updated successfully!",
+    "amenitiesUpdateError": "Could not update amenities",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending Approval",
+      "suspended": "Suspended",
+      "rejected": "Rejected"
+    },
     "summary": {
       "total": "TOTAL STATIONS",
       "active": "ACTIVE",
@@ -472,7 +491,10 @@
       "amenitiesLabel": "Amenities",
       "editAmenities": "Edit",
       "addAmenities": "Add amenities",
-      "noAmenities": "No amenities yet"
+      "noAmenities": "No amenities yet",
+      "viewDetailBtn": "View Station Details",
+      "selectBtn": "Select Station",
+      "selectedBadge": "Active"
     },
     "register": {
       "title": "Register New Station",
@@ -564,6 +586,6 @@
     "helpTitle": "Renewal coming up ({{days}} days left).",
     "helpBody": "Purchasing/renewing licenses is handled off-platform; statuses are recorded by administrators on the system. This page tracks subscription validity.",
     "warningTitle": "License Maintenance Policy",
-    "warningBody": "When the license expires or is suspended, the station and chargers will be hidden from driver searches until renewed (BR-STA-01)."
+    "warningBody": "When the license expires or is suspended, the station and chargers will be hidden from driver searches until renewed."
   }
 }

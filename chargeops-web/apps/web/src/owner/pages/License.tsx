@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
+  DOMAIN_POLICIES,
   formatDateVn,
   formatVnd,
   LICENSE_STATUS,
@@ -249,7 +250,7 @@ function Body({ license, station, history }: { license: License; station: Statio
           <div>
             <div className="font-bold">Giấy phép vận hành đã hết hạn</div>
             <div className="mt-0.5 text-bad-deep/90">
-              Trạm sạc đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế (theo quy tắc BR-STA-01). Các phiên sạc đang chạy vẫn được bảo đảm hoàn thành. Vui lòng liên hệ Quản trị viên để ghi nhận kỳ hạn mới.
+              Trạm sạc đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế (quy tắc {DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY}). Các phiên sạc đang chạy vẫn được bảo đảm hoàn thành. Vui lòng liên hệ Quản trị viên để ghi nhận kỳ hạn mới.
             </div>
           </div>
         </div>
@@ -330,7 +331,7 @@ function Body({ license, station, history }: { license: License; station: Statio
               <div className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
                 <span>
-                  <b>Quyền hiển thị tìm kiếm:</b> Khi License hết hạn, trạm sẽ tạm thời ngưng nhận đặt chỗ mới cho tới khi gia hạn thành công (BR-STA-01).
+                  <b>Quyền hiển thị tìm kiếm:</b> Khi License hết hạn, trạm sẽ tạm thời ngưng nhận đặt chỗ mới cho tới khi gia hạn thành công ({DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY}).
                 </span>
               </div>
             </div>

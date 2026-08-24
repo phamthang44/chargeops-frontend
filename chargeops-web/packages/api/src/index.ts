@@ -8,6 +8,7 @@ export * from './types';
 export * from './format';
 export * from './status';
 export * from './services';
+export * from './domainPolicies';
 export * from './react';
 export { ApiError, HttpClient } from './http';
 export { resolveConfig, type ApiConfig } from './config';

@@ -112,24 +112,7 @@ export function createRestServices(http: HttpClient): Services {
           const res = await http.get<ChargePoint[]>(`/owner/stations/${stationId}/charge-points`);
           return (res ?? []).map(normalizeChargePoint);
         }
-        if (isAdminRoute()) {
-          return [];
-        }
-        try {
-          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
-          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
-          if (stations.length === 0) return [];
-          const allCps = await Promise.all(
-            stations.map((s) =>
-              http
-                .get<ChargePoint[]>(`/owner/stations/${s.id}/charge-points`)
-                .catch(() => [] as ChargePoint[]),
-            ),
-          );
-          return allCps.flat().map(normalizeChargePoint);
-        } catch {
-          return [];
-        }
+        return [];
       },
       update: async (id, patch) => {
         if (isAdminRoute()) {
@@ -226,31 +209,7 @@ export function createRestServices(http: HttpClient): Services {
             return [];
           }
         }
-        try {
-          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
-          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
-          if (stations.length === 0) return [];
-          const allCpsResults = await Promise.all(
-            stations.map((s) =>
-              http
-                .get<ChargePoint[]>(`/owner/stations/${s.id}/charge-points`)
-                .catch(() => [] as ChargePoint[]),
-            ),
-          );
-          const allCps = allCpsResults.flat();
-          if (allCps.length === 0) return [];
-
-          const connectorResults = await Promise.all(
-            allCps.map((cp) =>
-              http
-                .get<Connector[]>(`/owner/stations/${cp.stationId}/charge-points/${cp.id}/connectors`)
-                .catch(() => [] as Connector[]),
-            ),
-          );
-          return connectorResults.flat().map(normalizeConnector);
-        } catch {
-          return [];
-        }
+        return [];
       },
       update: async (id, patch) => {
         if (isAdminRoute()) {
@@ -329,15 +288,6 @@ export function createRestServices(http: HttpClient): Services {
       mine: async (stationId) => {
         if (stationId) {
           return http.get<License>(`/owner/licenses/${stationId}`);
-        }
-        try {
-          const stationsRes = await http.get<Station[] | { items: Station[] }>('/owner/stations/mine');
-          const stations = Array.isArray(stationsRes) ? stationsRes : (stationsRes as { items?: Station[] })?.items ?? [];
-          if (stations.length > 0) {
-            return await http.get<License>(`/owner/licenses/${stations[0].id}`);
-          }
-        } catch {
-          /* fallback */
         }
         return null as any;
       },

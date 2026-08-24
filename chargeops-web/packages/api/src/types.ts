@@ -692,12 +692,12 @@ export interface TouRule {
 }
 
 export interface AvailabilityRules {
-  /** Auto-lock a slot 15 min after start if the driver hasn't checked in (POL-04). */
-  autoLock: boolean;
-  /** How many days ahead a driver may book. */
-  maxAdvanceDays: number;
-  /** −10% for the 00:00–05:00 window. */
-  nightDiscount: boolean;
+  /** Auto-release a slot 15 min after start if the driver hasn't checked in (POL-04). */
+  autoLock?: boolean;
+  /** How many days ahead a driver may book (System standard: 2 days). */
+  maxAdvanceDays?: number;
+  /** Safe transition gap (minutes) required between consecutive bookings on the same connector. */
+  bufferMinutes?: number;
 }
 
 export interface PricingConfig {
@@ -708,6 +708,8 @@ export interface PricingConfig {
    * never materialises fixed slots to hand out.
    */
   minBookingDurationMin: number;
+  /** Safe buffer (minutes) enforced between consecutive bookings: booking[i+1].startAt >= booking[i].endAt + bufferMinutes */
+  bufferMinutes?: number;
   basePriceVnd: number; // per kWh, applies to any window without a TOU rule
   hours: OperatingHour[];
   touRules: TouRule[];

@@ -1,17 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  AMENITY_EMOJI,
   STATION_STATUS,
   formatDateVn,
   isStationDriverEligible,
   type LicenseSummary,
   type Station,
 } from '@chargeops/api';
-import { Card, DriverEligibilityBadge, DriverEligibilityBanner, IconAlertTriangle, IconClock, IconShieldAlert, StatusPill } from '@chargeops/ui';
-import { AmenitiesModal } from './AmenitiesModal';
-import { StationTimelineModal } from './StationTimelineModal';
+import {
+  Button,
+  Card,
+  DriverEligibilityBadge,
+  IconCheck,
+  IconClock,
+  IconPin,
+  IconShieldAlert,
+  StatusPill,
+} from '@chargeops/ui';
 
 function formatLicense(license: string | LicenseSummary | null | undefined): {
   text: string;
@@ -21,7 +25,8 @@ function formatLicense(license: string | LicenseSummary | null | undefined): {
   if (!license) return { text: 'Chưa có License' };
   if (typeof license === 'string') return { text: license };
   if (typeof license === 'object') {
-    const planText = license.plan === 'YEARLY' ? 'Gói Năm' : license.plan === 'MONTHLY' ? 'Gói Tháng' : license.plan || '—';
+    const planText =
+      license.plan === 'YEARLY' ? 'Gói Năm' : license.plan === 'MONTHLY' ? 'Gói Tháng' : license.plan || '—';
     if (license.expiresAt) {
       const expDate = new Date(license.expiresAt);
       const isExpired = expDate.getTime() <= Date.now();
@@ -37,14 +42,25 @@ function formatLicense(license: string | LicenseSummary | null | undefined): {
   return { text: '—' };
 }
 
-/** One station card — active shows stats; pending/rejected show a status note. */
-export function StationCard({ station }: { station: Station }) {
+export interface StationCardProps {
+  station: Station;
+  isActiveContext?: boolean;
+  onSelectStation?: (stationId: string) => void;
+  onOpenDetail?: (station: Station) => void;
+}
+
+/** One station card with fast actions and detail hub trigger. */
+export function StationCard({
+  station,
+  isActiveContext = false,
+  onSelectStation,
+  onOpenDetail,
+}: StationCardProps) {
   const { t } = useTranslation('owner');
-  const navigate = useNavigate();
-  const meta = STATION_STATUS[station.status] ?? { label: station.status, tone: 'neutral' as const };
-  const [editAmenities, setEditAmenities] = useState(false);
-  const [viewTimeline, setViewTimeline] = useState(false);
-  const amenities = station.amenities ?? [];
+  if (!station) return null;
+
+  const rawStatus = station.status || 'ACTIVE';
+  const meta = STATION_STATUS[rawStatus] ?? { label: String(rawStatus), tone: 'neutral' as const };
 
   const cityName = station.city || station.provinceName || '';
   const fullAddress =
@@ -55,23 +71,38 @@ export function StationCard({ station }: { station: Station }) {
 
   const totalChargers = station.chargerCount ?? station.plannedChargePointCount ?? 0;
   const onlineChargers = station.onlineCount ?? 0;
-  const isActive = station.status === 'active' || station.status === 'ACTIVE';
-  const isPending = station.status === 'pending' || station.status === 'PENDING_APPROVAL';
-  const isRejected = station.status === 'rejected' || station.status === 'REJECTED';
+  const isActive = rawStatus === 'active' || rawStatus === 'ACTIVE';
+  const isPending = rawStatus === 'pending' || rawStatus === 'PENDING_APPROVAL';
+  const isRejected = rawStatus === 'rejected' || rawStatus === 'REJECTED';
 
   const licenseInfo = formatLicense(station.licenseSummary);
   const actualChargers = station.chargerCount ?? 0;
-  const eligibility = isStationDriverEligible(station.status, station.licenseSummary, new Date(), {
+  const eligibility = isStationDriverEligible(rawStatus, station.licenseSummary as any, new Date(), {
     chargerCount: actualChargers,
     onlineCount: onlineChargers,
   });
 
   return (
-    <Card className="p-[17px] flex flex-col justify-between">
+    <Card
+      className={`p-[18px] flex flex-col justify-between transition-shadow hover:shadow-md ${
+        isActiveContext ? 'ring-2 ring-owner/30 border-owner' : ''
+      }`}
+    >
       <div>
+        {/* Header */}
         <div className="mb-3 flex items-start justify-between gap-2.5">
           <div>
-            <div className="text-[16px] font-bold text-ink">{station.name}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[16px] font-bold text-ink hover:text-owner transition-colors cursor-pointer" onClick={() => onOpenDetail?.(station)}>
+                {station.name}
+              </span>
+              {isActiveContext && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10px] font-bold text-owner-deep">
+                  <IconCheck size={11} strokeWidth={2.4} />
+                  <span>Đang chọn</span>
+                </span>
+              )}
+            </div>
             <div className="mt-0.5 font-mono text-[12px] text-faint">
               {station.stationCode || station.id} {cityName ? `· ${cityName}` : ''}
             </div>
@@ -86,6 +117,7 @@ export function StationCard({ station }: { station: Station }) {
           </div>
         </div>
 
+        {/* Metrics row when active */}
         {isActive && (
           <div className="mb-[13px] grid grid-cols-3 gap-[9px]">
             <MiniStat label={t('stations.card.bookingsToday')} value={String(station.bookingsToday ?? 0)} />
@@ -94,37 +126,34 @@ export function StationCard({ station }: { station: Station }) {
           </div>
         )}
 
-        {/* Warning Callout when Station is Active but License is Inactive (Section 2 & 5.1) */}
+        {/* Warning Callout when Station is Active but License is Inactive */}
         {isActive && !eligibility.isEligible && (
           <div className="mb-3 rounded-[9px] border border-warn-border bg-warn-soft/50 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
             <div className="flex items-center gap-1.5 font-bold text-ink">
               <IconShieldAlert size={15} className="shrink-0 text-warn" />
-              <span>Trạm đang tạm ẩn khỏi tìm kiếm của tài xế</span>
+              <span>Trạm đang tạm ẩn khỏi tìm kiếm tài xế</span>
             </div>
             <div className="mt-1 text-muted">
-              {eligibility.details || 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.'}{' '}
-              <span className="font-semibold text-ink">Các phiên sạc đang chạy vẫn được bảo đảm hoàn thành.</span>
+              {eligibility.details || 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.'}
             </div>
-            <button
-              type="button"
-              onClick={() => navigate('/owner/license')}
-              className="mt-2 inline-flex items-center gap-1 rounded-[6px] bg-warn-pill px-2.5 py-1 text-[11px] font-bold text-warn-deep hover:bg-warn/20 transition-colors"
-            >
-              <span>Xem thông tin License & Gia hạn</span>
-              <span>→</span>
-            </button>
           </div>
         )}
 
+        {/* Details snippet */}
         <div className="flex flex-col gap-2 text-[12.5px] font-medium text-body">
           <div className="flex justify-between border-b border-hairline pb-[7px]">
-            <span className="text-faint">{t('stations.card.addressLabel')}</span>
-            <span className="text-right truncate max-w-[240px]">{fullAddress}</span>
+            <span className="text-faint flex items-center gap-1">
+              <IconPin size={13} className="text-faint" />
+              {t('stations.card.addressLabel')}
+            </span>
+            <span className="text-right truncate max-w-[230px] font-normal" title={fullAddress}>
+              {fullAddress}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-faint">{t('stations.card.licenseLabel')}</span>
             <div className="flex items-center gap-1.5">
-              <span>{licenseInfo.text}</span>
+              <span className="font-normal">{licenseInfo.text}</span>
               {licenseInfo.daysLeft !== undefined && licenseInfo.daysLeft <= 30 && licenseInfo.daysLeft > 0 && (
                 <span className="rounded-full bg-warn-soft px-2 py-0.2 text-[10px] font-bold text-warn-deep">
                   Còn {licenseInfo.daysLeft} ngày
@@ -134,44 +163,9 @@ export function StationCard({ station }: { station: Station }) {
           </div>
         </div>
 
-        {/* Owner-managed amenities (FR10-adjacent self-service) */}
-        {isActive && (
-          <div className="mt-3 border-t border-hairline pt-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
-                {t('stations.card.amenitiesLabel')}
-              </span>
-              <button
-                type="button"
-                onClick={() => setEditAmenities(true)}
-                className="text-[12px] font-semibold text-owner hover:underline"
-              >
-                {amenities.length ? t('stations.card.editAmenities') : t('stations.card.addAmenities')}
-              </button>
-            </div>
-            {amenities.length === 0 ? (
-              <span className="text-[12px] text-faint">{t('stations.card.noAmenities')}</span>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {amenities.map((a) => (
-                  <span
-                    key={a}
-                    className="inline-flex items-center gap-1 rounded-full border border-line-3 bg-surface-2 px-2.5 py-1 text-[11.5px] font-medium text-body"
-                  >
-                    <span className="text-[13px] leading-none">{AMENITY_EMOJI[a]}</span>
-                    {t(`stations.amenities.${a}`)}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {isRejected && station.rejectionReason && (
           <div className="mt-3 flex gap-2 rounded-[9px] border border-bad-border bg-bad-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-bad-deep">
-            <span>
-              {t('stations.card.rejectionReason', { reason: station.rejectionReason })}
-            </span>
+            <span>{t('stations.card.rejectionReason', { reason: station.rejectionReason })}</span>
           </div>
         )}
         {isPending && (
@@ -182,18 +176,28 @@ export function StationCard({ station }: { station: Station }) {
         )}
       </div>
 
-      {/* Button to view approval/status timeline */}
-      <button
-        type="button"
-        onClick={() => setViewTimeline(true)}
-        className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-line-2 bg-surface-2 py-2 text-[12px] font-semibold text-body transition-colors hover:border-brand hover:bg-surface-3 hover:text-brand"
-      >
-        <IconClock size={14} className="text-muted" />
-        <span>{t('stations.card.viewTimeline', { defaultValue: 'Xem tiến trình duyệt & lịch sử' })}</span>
-      </button>
+      {/* Card Action Buttons */}
+      <div className="mt-4 flex items-center gap-2 border-t border-hairline pt-3">
+        <Button
+          accent="owner"
+          size="sm"
+          className="flex-1"
+          onClick={() => onOpenDetail?.(station)}
+        >
+          {t('stations.card.viewDetailBtn', { defaultValue: 'Xem chi tiết trạm' })}
+        </Button>
 
-      <AmenitiesModal station={station} open={editAmenities} onClose={() => setEditAmenities(false)} />
-      <StationTimelineModal station={station} open={viewTimeline} onClose={() => setViewTimeline(false)} />
+        {!isActiveContext && onSelectStation && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onSelectStation(station.id)}
+            title="Chọn trạm này làm ngữ cảnh hoạt động hiện tại"
+          >
+            {t('stations.card.selectBtn', { defaultValue: 'Chọn quản lý' })}
+          </Button>
+        )}
+      </div>
     </Card>
   );
 }
@@ -202,7 +206,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[9px] border border-line-3 p-2.5">
       <div className="text-[9px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
-      <div className="mt-[3px] text-[17px] font-bold">{value}</div>
+      <div className="mt-[3px] text-[17px] font-bold text-ink">{value}</div>
     </div>
   );
 }

@@ -13,11 +13,12 @@ import { OperatingHoursStep } from '../features/pricing/OperatingHoursStep';
 import { TouPricingStep } from '../features/pricing/TouPricingStep';
 import { AvailabilityStep } from '../features/pricing/AvailabilityStep';
 import { AddRuleModal } from '../features/pricing/AddRuleModal';
+import { PricingConfirmModal } from '../features/pricing/PricingConfirmModal';
 
 /**
  * Pricing & Hours (FR11). All four steps edit a single local draft; "Lưu thay
- * đổi" persists the whole config. Changes only affect NEW bookings — existing
- * bookings keep their snapshotted price (POL-06 / BookingPriceLine).
+ * đổi" triggers the Confirmation Modal with change comparison before saving.
+ * Changes only affect NEW bookings — existing bookings keep their snapshotted price (POL-06).
  */
 export function Pricing() {
   const { t } = useTranslation('owner');
@@ -25,7 +26,9 @@ export function Pricing() {
   const qc = useQueryClient();
   const toast = useToast();
   const [draft, setDraft] = useState<PricingConfig | null>(null);
-  const [ruleModal, setRuleModal] = useState(false);
+  const [ruleModalOpen, setRuleModalOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<TouRule | null>(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['pricing'],
@@ -41,9 +44,12 @@ export function Pricing() {
     mutationFn: (config: PricingConfig) => api.pricing.save(config),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pricing'] });
-      toast(t('pricing.saveSuccess'), 'success');
+      setConfirmModalOpen(false);
+      toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình giá & giờ hoạt động thành công!' }), 'success');
     },
-    onError: (e) => toast((e as Error).message, 'error'),
+    onError: (e) => {
+      toast((e as Error).message, 'error');
+    },
   });
 
   const patch = (p: Partial<PricingConfig>) => setDraft((d) => (d ? { ...d, ...p } : d));
@@ -61,16 +67,45 @@ export function Pricing() {
         : d,
     );
 
-  const addRule = (rule: Omit<TouRule, 'id'>) =>
-    setDraft((d) => (d ? { ...d, touRules: [...d.touRules, { ...rule, id: `TOU-${Date.now()}` }] } : d));
+  const handleSaveRule = (rule: Omit<TouRule, 'id'>, editId?: string) => {
+    setDraft((d) => {
+      if (!d) return d;
+      if (editId) {
+        // Edit existing rule
+        return {
+          ...d,
+          touRules: d.touRules.map((r) => (r.id === editId ? { ...rule, id: editId } : r)),
+        };
+      }
+      // Add new rule
+      return {
+        ...d,
+        touRules: [...d.touRules, { ...rule, id: `TOU-${Date.now()}` }],
+      };
+    });
+    setEditingRule(null);
+  };
+
   const removeRule = (id: string) =>
     setDraft((d) => (d ? { ...d, touRules: d.touRules.filter((r) => r.id !== id) } : d));
+
+  const handleOpenAddRule = () => {
+    setEditingRule(null);
+    setRuleModalOpen(true);
+  };
+
+  const handleOpenEditRule = (rule: TouRule) => {
+    setEditingRule(rule);
+    setRuleModalOpen(true);
+  };
 
   return (
     <>
       <PageHeader
-        title={t('pricing.title')}
-        subtitle={t('pricing.subtitle')}
+        title={t('pricing.title', { defaultValue: 'Giá & Giờ hoạt động' })}
+        subtitle={t('pricing.subtitle', {
+          defaultValue: 'Cấu hình thời lượng đặt, giá gốc, giờ mở cửa và các khung giờ cao điểm/thấp điểm.',
+        })}
       />
 
       {error ? (
@@ -81,33 +116,75 @@ export function Pricing() {
         <PricingSkeleton />
       ) : (
         <div className="mx-auto flex max-w-[880px] flex-col gap-[22px]">
+          {/* Step 1: Base Config & Duration (Owner configurable: 30/60/90) */}
           <BaseConfigStep
             minBookingDurationMin={draft.minBookingDurationMin}
             basePriceVnd={draft.basePriceVnd}
             onMinDuration={(minBookingDurationMin) => patch({ minBookingDurationMin })}
             onBasePrice={(basePriceVnd) => patch({ basePriceVnd })}
           />
+
+          {/* Step 2: Operating Hours */}
           <OperatingHoursStep hours={draft.hours} onToggleDay={toggleDay} onSet247={set247} />
+
+          {/* Step 3: TOU Pricing */}
           <TouPricingStep
             rules={draft.touRules}
             basePriceVnd={draft.basePriceVnd}
-            onAdd={() => setRuleModal(true)}
+            onAdd={handleOpenAddRule}
+            onEdit={handleOpenEditRule}
             onRemove={removeRule}
           />
+
+          {/* Step 4: Availability & Overstay Policy */}
           <AvailabilityStep rules={draft.availability} onChange={patchAvailability} />
 
+          {/* Action Bar */}
           <div className="flex justify-end gap-[11px] pb-1.5 pt-0.5">
-            <Button variant="secondary" size="lg" onClick={() => data && setDraft(data)}>
-              {t('pricing.cancelBtn')}
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => {
+                if (data) setDraft(data);
+                toast('Đã khôi phục cấu hình ban đầu', 'info');
+              }}
+            >
+              {t('pricing.cancelBtn', { defaultValue: 'Hủy thay đổi' })}
             </Button>
-            <Button accent="owner" size="lg" onClick={() => draft && save.mutate(draft)} disabled={save.isPending}>
-              {save.isPending ? t('pricing.saving') : t('pricing.saveBtn')}
+            <Button
+              accent="owner"
+              size="lg"
+              onClick={() => setConfirmModalOpen(true)}
+              disabled={save.isPending}
+            >
+              {t('pricing.saveBtn', { defaultValue: 'Lưu thay đổi…' })}
             </Button>
           </div>
         </div>
       )}
 
-      <AddRuleModal open={ruleModal} onClose={() => setRuleModal(false)} onAdd={addRule} />
+      {/* Add / Edit TOU Rule Modal */}
+      <AddRuleModal
+        open={ruleModalOpen}
+        initialRule={editingRule}
+        onClose={() => {
+          setRuleModalOpen(false);
+          setEditingRule(null);
+        }}
+        onSave={handleSaveRule}
+      />
+
+      {/* Confirmation & Summary Preview Modal */}
+      <PricingConfirmModal
+        open={confirmModalOpen}
+        initialConfig={data ?? null}
+        draftConfig={draft}
+        isSaving={save.isPending}
+        onClose={() => setConfirmModalOpen(false)}
+        onConfirm={() => {
+          if (draft) save.mutate(draft);
+        }}
+      />
     </>
   );
 }

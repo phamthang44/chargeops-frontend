@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  DOMAIN_POLICIES,
   formatDateVn,
   formatVnd,
   formatVndCompact,
@@ -324,7 +325,7 @@ export function Licenses() {
                     <div className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
                       <span>
-                        <b>Hiệu lực:</b> Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới theo quy định BR-STA-01.
+                        <b>Hiệu lực:</b> Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới ({DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY}).
                       </span>
                     </div>
                   </div>

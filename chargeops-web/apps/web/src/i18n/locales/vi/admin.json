@@ -405,7 +405,7 @@
       "addBtn": "Thêm connector",
       "createTitle": "Thêm connector",
       "createSub": "Thêm vào",
-      "createHelp": "Loại đầu cắm và công suất bị khoá sau khi cấp phát (BR-CHG-03). Thao tác này tạo một Charger ID và một ảnh QR riêng cho cổng sạc này.",
+      "createHelp": "Loại đầu cắm và công suất sẽ bị khoá cố định sau khi cấp phát phần cứng. Thao tác này tạo một Charger ID và một ảnh QR riêng cho cổng sạc này.",
       "connectorLabel": "LOẠI ĐẦU CẮM",
       "powerLabel": "CÔNG SUẤT (kW)",
       "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",

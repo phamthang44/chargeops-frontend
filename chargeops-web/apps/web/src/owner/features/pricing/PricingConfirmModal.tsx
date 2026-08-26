@@ -25,6 +25,19 @@ export function PricingConfirmModal({
   const basePriceChanged = initialConfig && initialConfig.basePriceVnd !== draftConfig.basePriceVnd;
   const minDurationChanged = initialConfig && initialConfig.minBookingDurationMin !== draftConfig.minBookingDurationMin;
   const touCountChanged = initialConfig && initialConfig.touRules.length !== draftConfig.touRules.length;
+  const operatingHoursChanged =
+    Boolean(initialConfig) &&
+    JSON.stringify({
+      open24Hours: initialConfig?.open24Hours,
+      hours: initialConfig?.hours,
+    }) !==
+      JSON.stringify({
+        open24Hours: draftConfig.open24Hours,
+        hours: draftConfig.hours,
+      });
+  const touRulesChanged =
+    Boolean(initialConfig) &&
+    JSON.stringify(initialConfig?.touRules) !== JSON.stringify(draftConfig.touRules);
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={520}>
@@ -84,6 +97,17 @@ export function PricingConfirmModal({
             </div>
           </div>
 
+          <div className="flex items-center justify-between py-1 border-b border-hairline">
+            <span className="text-muted">Giờ hoạt động:</span>
+            <span className={`font-semibold ${operatingHoursChanged ? 'text-owner-deep' : 'text-ink'}`}>
+              {draftConfig.open24Hours
+                ? 'Mở cửa 24/7'
+                : operatingHoursChanged
+                  ? 'Đã điều chỉnh theo ngày'
+                  : 'Không thay đổi'}
+            </span>
+          </div>
+
           {/* TOU Rules count */}
           <div className="flex items-center justify-between py-1 border-b border-hairline">
             <span className="text-muted">Số khung giá theo giờ (TOU):</span>
@@ -94,8 +118,9 @@ export function PricingConfirmModal({
                   <span className="text-faint">→</span>
                 </>
               )}
-              <span className={`font-bold ${touCountChanged ? 'text-owner-deep font-extrabold' : 'text-ink'}`}>
+              <span className={`font-bold ${touRulesChanged ? 'text-owner-deep font-extrabold' : 'text-ink'}`}>
                 {draftConfig.touRules.length} khung giá
+                {touRulesChanged && !touCountChanged ? ' · nội dung đã đổi' : ''}
               </span>
             </div>
           </div>

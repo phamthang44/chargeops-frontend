@@ -711,6 +711,8 @@ export interface PricingConfig {
   /** Safe buffer (minutes) enforced between consecutive bookings: booking[i+1].startAt >= booking[i].endAt + bufferMinutes */
   bufferMinutes?: number;
   basePriceVnd: number; // per kWh, applies to any window without a TOU rule
+  /** Whole-station 24/7 shortcut. When true, per-day open/close values are ignored. */
+  open24Hours?: boolean;
   hours: OperatingHour[];
   touRules: TouRule[];
   availability: AvailabilityRules;

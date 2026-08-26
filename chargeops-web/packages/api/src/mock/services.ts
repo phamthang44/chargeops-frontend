@@ -1329,14 +1329,14 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     },
 
     pricing: {
-      async get() {
+      async get(stationId) {
         await delay();
-        return structuredClone(db.pricing);
+        return structuredClone(db.pricingByStation[stationId] ?? db.pricing);
       },
-      async save(config) {
+      async save(stationId, config) {
         await delay();
-        db.pricing = structuredClone(config);
-        return structuredClone(db.pricing);
+        db.pricingByStation[stationId] = structuredClone(config);
+        return structuredClone(db.pricingByStation[stationId]);
       },
     },
 

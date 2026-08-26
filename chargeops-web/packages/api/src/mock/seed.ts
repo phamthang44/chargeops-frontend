@@ -41,6 +41,8 @@ export interface MockDb {
   /** Keyed by ticket id, oldest-first. */
   ticketMessages: Record<string, TicketMessage[]>;
   pricing: PricingConfig;
+  /** Independent Owner override per Station; pricing remains the fallback seed. */
+  pricingByStation: Record<string, PricingConfig>;
   /** Station ids owned by the mock owner account. */
   ownerStationIds: string[];
   /** Every known station id/name — admin's reassign target list. */
@@ -867,6 +869,7 @@ export function buildMockDb(): MockDb {
     minBookingDurationMin: 60,
     bufferMinutes: 10,
     basePriceVnd: 3400,
+    open24Hours: false,
     hours: [
       { day: 'T2', open: '06:00', close: '23:00', open24: true },
       { day: 'T3', open: '06:00', close: '23:00', open24: true },
@@ -878,8 +881,7 @@ export function buildMockDb(): MockDb {
     ],
     touRules: [
       { id: 'TOU-1', name: 'Giờ cao điểm', days: 'weekdays', from: '17:00', to: '21:00', rateVnd: 4200 },
-      { id: 'TOU-2', name: 'Giờ thường', days: 'daily', from: '05:00', to: '17:00', rateVnd: 3400 },
-      { id: 'TOU-3', name: 'Giờ thấp điểm', days: 'daily', from: '21:00', to: '05:00', rateVnd: 2800 },
+      { id: 'TOU-2', name: 'Giờ thấp điểm', days: 'daily', from: '21:00', to: '05:00', rateVnd: 2800 },
     ],
     availability: { autoLock: true, maxAdvanceDays: 2, bufferMinutes: 10 },
   };
@@ -900,6 +902,10 @@ export function buildMockDb(): MockDb {
     tickets,
     ticketMessages,
     pricing,
+    pricingByStation: {
+      'ST-1001': structuredClone(pricing),
+      'ST-1018': structuredClone(pricing),
+    },
     ownerStationIds: ['ST-1001', 'ST-1018'],
     stationsDirectory,
   };

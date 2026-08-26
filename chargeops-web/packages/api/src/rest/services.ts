@@ -16,10 +16,100 @@ import type {
   CheckInChallengeResponse,
   License,
   OperationalChargePointStatus,
+  PricingConfig,
   ProvisioningStatus,
   Station,
   UserProfile,
 } from '../types';
+
+const STATION_DAY_TO_UI: Record<string, string> = {
+  MONDAY: 'T2',
+  TUESDAY: 'T3',
+  WEDNESDAY: 'T4',
+  THURSDAY: 'T5',
+  FRIDAY: 'T6',
+  SATURDAY: 'T7',
+  SUNDAY: 'CN',
+};
+
+const UI_DAY_TO_STATION: Record<string, string> = Object.fromEntries(
+  Object.entries(STATION_DAY_TO_UI).map(([stationDay, uiDay]) => [uiDay, stationDay]),
+);
+
+const TOU_DAY_TO_UI = {
+  DAILY: 'daily',
+  WEEKDAY: 'weekdays',
+  WEEKEND: 'weekends',
+} as const;
+
+const UI_DAY_TO_TOU = {
+  daily: 'DAILY',
+  weekdays: 'WEEKDAY',
+  weekends: 'WEEKEND',
+} as const;
+
+function hhmm(value: unknown): string {
+  return typeof value === 'string' ? value.slice(0, 5) : '';
+}
+
+function normalizePricing(raw: any): PricingConfig {
+  const open24Hours = Boolean(raw?.open24Hours);
+  return {
+    minBookingDurationMin: Number(raw?.minBookingDurationMin) || 30,
+    bufferMinutes: Number(raw?.availability?.bufferMinutes) || 10,
+    basePriceVnd: Number(raw?.basePriceVnd) || 3400,
+    open24Hours,
+    hours: (raw?.hours ?? []).map((hour: any) => ({
+      day: STATION_DAY_TO_UI[String(hour.day)] ?? String(hour.day),
+      open: open24Hours ? '00:00' : hhmm(hour.openTime),
+      close: open24Hours ? '00:00' : hhmm(hour.closeTime),
+      open24: Boolean(hour.enabled),
+    })),
+    touRules: (raw?.touRules ?? []).map((rule: any) => ({
+      id: String(rule.id),
+      name: String(rule.name),
+      days: TOU_DAY_TO_UI[String(rule.dayType) as keyof typeof TOU_DAY_TO_UI] ?? 'daily',
+      from: hhmm(rule.startTime),
+      to: hhmm(rule.endTime),
+      rateVnd: Number(rule.rateVnd),
+    })),
+    availability: {
+      autoLock: Boolean(raw?.availability?.autoLock),
+      maxAdvanceDays: Number(raw?.availability?.maxAdvanceDays) || 2,
+      bufferMinutes: Number(raw?.availability?.bufferMinutes) || 10,
+    },
+  };
+}
+
+function pricingRequest(config: PricingConfig) {
+  const open24Hours = Boolean(config.open24Hours);
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return {
+    minBookingDurationMin: config.minBookingDurationMin,
+    basePriceVnd: config.basePriceVnd,
+    open24Hours,
+    hours: config.hours.map((hour) => ({
+      day: UI_DAY_TO_STATION[hour.day] ?? hour.day,
+      openTime: !open24Hours && hour.open24 ? hour.open : null,
+      closeTime: !open24Hours && hour.open24 ? hour.close : null,
+      enabled: open24Hours || hour.open24,
+    })),
+    touRules: config.touRules.map((rule) => ({
+      id: uuid.test(rule.id) ? rule.id : null,
+      name: rule.name,
+      periodCode:
+        rule.rateVnd > config.basePriceVnd
+          ? 'PEAK'
+          : rule.rateVnd < config.basePriceVnd
+            ? 'OFF_PEAK'
+            : 'NORMAL',
+      dayType: UI_DAY_TO_TOU[rule.days],
+      startTime: rule.from,
+      endTime: rule.to,
+      rateVnd: rule.rateVnd,
+    })),
+  };
+}
 
 function isAdminRoute(): boolean {
   return typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
@@ -329,8 +419,15 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     pricing: {
-      get: () => http.get('/pricing'),
-      save: (config) => http.put('/pricing', config),
+      get: async (stationId) =>
+        normalizePricing(await http.get(`/owner/stations/${stationId}/pricing`)),
+      save: async (stationId, config) =>
+        normalizePricing(
+          await http.put(
+            `/owner/stations/${stationId}/pricing`,
+            pricingRequest(config),
+          ),
+        ),
     },
 
     policies: {

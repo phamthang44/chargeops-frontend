@@ -250,9 +250,9 @@ export interface StaffService {
 }
 
 export interface PricingService {
-  /** Owner's pricing & hours config for the active station (FR11). */
-  get(): Promise<PricingConfig>;
-  save(config: PricingConfig): Promise<PricingConfig>;
+  /** Owner's pricing & hours config for one explicitly selected station (FR11). */
+  get(stationId: string): Promise<PricingConfig>;
+  save(stationId: string, config: PricingConfig): Promise<PricingConfig>;
 }
 
 export interface PolicyService {

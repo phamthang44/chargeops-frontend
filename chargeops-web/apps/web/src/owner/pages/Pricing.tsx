@@ -14,6 +14,7 @@ import { TouPricingStep } from '../features/pricing/TouPricingStep';
 import { AvailabilityStep } from '../features/pricing/AvailabilityStep';
 import { AddRuleModal } from '../features/pricing/AddRuleModal';
 import { PricingConfirmModal } from '../features/pricing/PricingConfirmModal';
+import { useOwnerStation } from '../context/OwnerStationContext';
 
 /**
  * Pricing & Hours (FR11). All four steps edit a single local draft; "Lưu thay
@@ -25,14 +26,16 @@ export function Pricing() {
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
+  const { selectedStationId } = useOwnerStation();
   const [draft, setDraft] = useState<PricingConfig | null>(null);
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<TouRule | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['pricing'],
-    queryFn: () => api.pricing.get(),
+    queryKey: ['pricing', selectedStationId],
+    queryFn: () => api.pricing.get(selectedStationId),
+    enabled: Boolean(selectedStationId),
   });
 
   // Hydrate the editable draft once the config loads.
@@ -41,9 +44,9 @@ export function Pricing() {
   }, [data]);
 
   const save = useMutation({
-    mutationFn: (config: PricingConfig) => api.pricing.save(config),
+    mutationFn: (config: PricingConfig) => api.pricing.save(selectedStationId, config),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['pricing'] });
+      qc.invalidateQueries({ queryKey: ['pricing', selectedStationId] });
       setConfirmModalOpen(false);
       toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình giá & giờ hoạt động thành công!' }), 'success');
     },
@@ -58,14 +61,73 @@ export function Pricing() {
 
   const toggleDay = (day: string) =>
     setDraft((d) =>
-      d ? { ...d, hours: d.hours.map((h) => (h.day === day ? { ...h, open24: !h.open24 } : h)) } : d,
+      d
+        ? {
+            ...d,
+            open24Hours: false,
+            hours: d.hours.map((h) =>
+              h.day === day
+                ? {
+                    ...h,
+                    open24: !h.open24,
+                    open: !h.open24 ? h.open || '06:00' : '',
+                    close: !h.open24 ? h.close || '23:00' : '',
+                  }
+                : h,
+            ),
+          }
+        : d,
+    );
+  const changeHour = (day: string, field: 'open' | 'close', value: string) =>
+    setDraft((d) =>
+      d
+        ? {
+            ...d,
+            open24Hours: false,
+            hours: d.hours.map((h) => (h.day === day ? { ...h, [field]: value } : h)),
+          }
+        : d,
     );
   const set247 = () =>
     setDraft((d) =>
       d
-        ? { ...d, hours: d.hours.map((h) => ({ ...h, open24: true, open: '00:00', close: '24:00' })) }
+        ? d.open24Hours
+          ? {
+              ...d,
+              open24Hours: false,
+              hours: d.hours.map((h) => ({
+                ...h,
+                open24: true,
+                open: '06:00',
+                close: '23:00',
+              })),
+            }
+          : {
+              ...d,
+              open24Hours: true,
+              hours: d.hours.map((h) => ({ ...h, open24: true, open: '00:00', close: '00:00' })),
+            }
         : d,
     );
+
+  const copyMondayToAll = () => {
+    setDraft((d) => {
+      if (!d) return d;
+      const mon = d.hours.find((h) => h.day === 'T2' || h.day === 'MONDAY');
+      if (!mon) return d;
+      return {
+        ...d,
+        open24Hours: false,
+        hours: d.hours.map((h) => ({
+          ...h,
+          open24: mon.open24,
+          open: mon.open,
+          close: mon.close,
+        })),
+      };
+    });
+    toast('Đã sao chép khung giờ Thứ 2 cho cả tuần', 'info');
+  };
 
   const handleSaveRule = (rule: Omit<TouRule, 'id'>, editId?: string) => {
     setDraft((d) => {
@@ -80,7 +142,13 @@ export function Pricing() {
       // Add new rule
       return {
         ...d,
-        touRules: [...d.touRules, { ...rule, id: `TOU-${Date.now()}` }],
+        touRules: [
+          ...d.touRules,
+          {
+            ...rule,
+            id: globalThis.crypto?.randomUUID?.() ?? `draft-${Date.now()}`,
+          },
+        ],
       };
     });
     setEditingRule(null);
@@ -125,7 +193,14 @@ export function Pricing() {
           />
 
           {/* Step 2: Operating Hours */}
-          <OperatingHoursStep hours={draft.hours} onToggleDay={toggleDay} onSet247={set247} />
+          <OperatingHoursStep
+            hours={draft.hours}
+            isOpen247={Boolean(draft.open24Hours)}
+            onToggleDay={toggleDay}
+            onChangeTime={changeHour}
+            onSet247={set247}
+            onCopyMondayToAll={copyMondayToAll}
+          />
 
           {/* Step 3: TOU Pricing */}
           <TouPricingStep
@@ -167,6 +242,7 @@ export function Pricing() {
       <AddRuleModal
         open={ruleModalOpen}
         initialRule={editingRule}
+        existingRules={draft?.touRules ?? []}
         onClose={() => {
           setRuleModalOpen(false);
           setEditingRule(null);

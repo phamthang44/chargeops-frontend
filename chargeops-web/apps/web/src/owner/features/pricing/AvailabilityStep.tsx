@@ -75,7 +75,8 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
               • <b>Xe sạc lố giờ (`Overstay`):</b> Tính phí phạt đỗ quá giờ riêng, <b>tuyệt đối không tự ý đẩy lùi lịch</b> của lượt đặt tiếp theo.
             </div>
             <div>
-              • <b>Giờ hoạt động là giới hạn:</b> Đổi giờ hoạt động chỉ áp dụng cho booking mới; hệ thống sẽ ngăn thay đổi nếu làm ảnh hưởng đến các booking đã xác nhận.
+              • <b>Giờ hoạt động là giới hạn:</b> Cấu hình mới chỉ áp dụng cho booking tạo sau
+              thời điểm lưu; booking đã thanh toán giữ nguyên giá và khoảng thời gian đã cam kết.
             </div>
           </div>
         </div>

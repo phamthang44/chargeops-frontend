@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import type { TouDays, TouRule } from '@chargeops/api';
-import { Button, FormField, IconClock, Modal, Select, TextInput } from '@chargeops/ui';
+import { Button, FormField, IconClock, Modal, Select, TextInput, TimeSelect } from '@chargeops/ui';
+import { hasTouOverlap } from './touDays';
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -9,11 +10,18 @@ export interface AddRuleModalProps {
   open: boolean;
   onClose: () => void;
   initialRule?: TouRule | null;
+  existingRules: TouRule[];
   onSave: (rule: Omit<TouRule, 'id'>, editId?: string) => void;
 }
 
 /** Add or edit a time-of-use pricing window. Local validation; the parent persists on save. */
-export function AddRuleModal({ open, onClose, initialRule, onSave }: AddRuleModalProps) {
+export function AddRuleModal({
+  open,
+  onClose,
+  initialRule,
+  existingRules,
+  onSave,
+}: AddRuleModalProps) {
   const { t } = useTranslation('owner');
   const [name, setName] = useState('');
   const [days, setDays] = useState<TouDays>('daily');
@@ -46,7 +54,20 @@ export function AddRuleModal({ open, onClose, initialRule, onSave }: AddRuleModa
   ];
 
   const rateNum = Number(rate.replace(/\D/g, ''));
-  const invalid = !name.trim() || !rateNum || !HHMM.test(from) || !HHMM.test(to);
+  const candidate = { name: name.trim(), days, from, to, rateVnd: rateNum };
+  const invalidTimeRange = HHMM.test(from) && HHMM.test(to) && from === to;
+  const overlaps =
+    !invalidTimeRange &&
+    HHMM.test(from) &&
+    HHMM.test(to) &&
+    hasTouOverlap(existingRules, candidate, initialRule?.id);
+  const invalid =
+    !name.trim() ||
+    !rateNum ||
+    !HHMM.test(from) ||
+    !HHMM.test(to) ||
+    invalidTimeRange ||
+    overlaps;
 
   const close = () => {
     setName('');
@@ -64,7 +85,7 @@ export function AddRuleModal({ open, onClose, initialRule, onSave }: AddRuleModa
       return;
     }
     onSave(
-      { name: name.trim(), days, from, to, rateVnd: rateNum },
+      candidate,
       initialRule?.id,
     );
     close();
@@ -125,32 +146,36 @@ export function AddRuleModal({ open, onClose, initialRule, onSave }: AddRuleModa
         <div className="flex gap-[11px]">
           <div className="flex-1">
             <FormField label={t('pricing.addRule.from', { defaultValue: 'TỪ GIỜ (HH:mm)' })}>
-              <TextInput
+              <TimeSelect
                 value={from}
                 onChange={setFrom}
                 placeholder="17:00"
-                mono
-                invalid={showErrors && !HHMM.test(from)}
+                stepMinutes={15}
+                accent="owner"
               />
             </FormField>
           </div>
           <div className="flex-1">
             <FormField label={t('pricing.addRule.to', { defaultValue: 'ĐẾN GIỜ (HH:mm)' })}>
-              <TextInput
+              <TimeSelect
                 value={to}
                 onChange={setTo}
                 placeholder="21:00"
-                mono
-                invalid={showErrors && !HHMM.test(to)}
+                stepMinutes={15}
+                accent="owner"
               />
             </FormField>
           </div>
         </div>
         {showErrors && invalid && (
           <div className="text-[11.5px] font-medium text-bad">
-            {t('pricing.addRule.validationError', {
-              defaultValue: 'Vui lòng nhập đầy đủ tên, giá và định dạng giờ hợp lệ (HH:mm).',
-            })}
+            {invalidTimeRange
+              ? 'Giờ bắt đầu và kết thúc không được trùng nhau.'
+              : overlaps
+                ? 'Khung giá này chồng lên một quy tắc đã có trên cùng ngày áp dụng.'
+                : t('pricing.addRule.validationError', {
+                    defaultValue: 'Vui lòng nhập đầy đủ tên, giá và định dạng giờ hợp lệ (HH:mm).',
+                  })}
           </div>
         )}
       </div>

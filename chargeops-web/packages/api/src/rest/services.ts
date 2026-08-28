@@ -413,9 +413,22 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     staff: {
-      list: () => http.get('/staff'),
-      invite: (input) => http.post('/staff', input),
-      revoke: (userId, stationId) => http.delete(`/staff/${stationId}/${userId}`),
+      currentContext: () => http.get('/me/staff-context'),
+      list: async (stationId, params = {}) => {
+        if (!stationId) return [];
+        const res = await http.get<StationStaffMember[] | { items?: StationStaffMember[] }>(
+          `/owner/stations/${stationId}/staffs`,
+          params,
+        );
+        if (Array.isArray(res)) return res;
+        return (res as { items?: StationStaffMember[] })?.items ?? [];
+      },
+      lookup: (stationId, email) =>
+        http.get(`/owner/stations/${stationId}/staffs/lookup`, { email }),
+      assign: (stationId, input) =>
+        http.post(`/owner/stations/${stationId}/staffs`, input),
+      revoke: (stationId, assignmentId) =>
+        http.delete(`/owner/stations/${stationId}/staffs/${assignmentId}`),
     },
 
     pricing: {

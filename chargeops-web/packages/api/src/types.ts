@@ -608,28 +608,68 @@ export interface UserAccount {
   status: UserStatus;
 }
 
-/* ---------- station staff (FR17) ---------- */
+/* ---------- station staff (FR17 & V19) ---------- */
+
+export type StaffAssignmentStatus = 'ACTIVE' | 'REVOKED';
+
+export type StaffLookupStatus =
+  | 'ELIGIBLE'
+  | 'NOT_FOUND'
+  | 'SELF_ASSIGNMENT'
+  | 'ACCOUNT_INACTIVE'
+  | 'ROLE_NOT_ALLOWED'
+  | 'ALREADY_ASSIGNED';
+
+export interface StaffStationSummary {
+  id: string;
+  stationCode: string;
+  name: string;
+}
+
+export interface CurrentStaffContextResponse {
+  staff: boolean;
+  assignmentId: string | null;
+  assignmentStatus: StaffAssignmentStatus | null;
+  station: StaffStationSummary | null;
+}
+
+export interface StaffLookupResponse {
+  exists: boolean;
+  userId?: string;
+  email?: string;
+  displayName?: string;
+  maskedPhone?: string;
+  assignable: boolean;
+  status: StaffLookupStatus;
+}
+
+export interface AssignStationStaffRequest {
+  email: string;
+  note?: string;
+}
 
 /**
- * A STATION_STAFF grant, scoped to one station. Mirrors the SRS StationStaff
- * join entity (user_id + station_id composite key) with the display fields the
- * console needs denormalized onto it.
- *
- * Roles are additive (BR-ACC-01): `primaryRole` is what the account registered
- * as — usually DRIVER — and STATION_STAFF sits on top of it. Revoking deletes
- * this assignment only, never the account or any other role it holds.
+ * Historical station-to-staff assignment record.
+ * Mirrors backend StationStaffResponse.
  */
 export interface StationStaffMember {
-  userId: string;
+  assignmentId: string;
   stationId: string;
   stationName: string;
-  name: string;
+  userId: string;
   email: string;
-  primaryRole: UserRole;
-  /** True when the invite provisioned a brand-new account rather than granting to an existing one. */
-  provisioned: boolean;
-  /** ISO date the assignment was created. */
-  createdAt: string;
+  displayName: string;
+  maskedPhone?: string;
+  status: StaffAssignmentStatus;
+  note?: string;
+  assignedBy: string;
+  assignedAt: string;
+  revokedBy?: string;
+  revokedAt?: string;
+  /** Compatibility fields */
+  name?: string;
+  primaryRole?: UserRole;
+  createdAt?: string;
 }
 
 /* ---------- transactions ---------- */

@@ -227,42 +227,82 @@
   },
   "staff": {
     "title": "Station Staff",
-    "subtitle": "Grant and revoke staff access to your stations.",
-    "revokeBtn": "Revoke",
-    "revokeToast": "Revoked {{name}}'s access to {{station}}",
-    "invite": {
-      "title": "Add staff member",
-      "emailLabel": "EMAIL ADDRESS",
-      "emailPlaceholder": "name@example.com",
+    "subtitle": "Assign and manage operational staff directly assigned to your charging stations.",
+    "assignSuccess": "Assigned {{name}} to {{station}}",
+    "revokeToast": "Revoked {{name}}'s staff access to {{station}}",
+    "assign": {
+      "title": "Assign Staff Member",
+      "emailLabel": "STAFF EMAIL ADDRESS",
+      "emailPlaceholder": "staff.email@example.com",
       "stationLabel": "ASSIGN TO STATION",
-      "submitBtn": "Grant staff access",
-      "submitting": "Granting...",
-      "help": "Invite by email only — there is no platform-wide user directory. If the address already has a ChargeOps account, it keeps its existing role and gains STATION_STAFF on top. If not, a new account is provisioned with a temporary password. Access takes effect immediately.",
-      "toastGranted": "{{name}} now has staff access to {{station}}",
-      "toastProvisioned": "Provisioned a new account for {{email}} with staff access to {{station}}"
+      "noteLabel": "SHIFT / ROLE NOTE (OPTIONAL)",
+      "notePlaceholder": "e.g. Morning Shift (06:00 - 14:00), Maintenance Technician...",
+      "noteQuickPresets": "Quick presets:",
+      "presets": {
+        "morning": "Morning Shift (06:00 - 14:00)",
+        "afternoon": "Afternoon Shift (14:00 - 22:00)",
+        "night": "Night Shift (22:00 - 06:00)",
+        "tech": "Maintenance & Hardware Technician",
+        "coordinator": "Queue & Customer Support",
+        "fulltime": "Full-time Operations Staff"
+      },
+      "submitBtn": "Assign to Station",
+      "submitting": "Assigning…",
+      "help": "Enter the user's email to verify account. If eligible, staff permissions for the selected station take effect immediately.",
+      "userFound": "Verified Account",
+      "driverRole": "Driver / User",
+      "activeStatus": "Active"
+    },
+    "lookup": {
+      "searching": "Checking account eligibility…",
+      "notFound": "Account not found on ChargeOps",
+      "notFoundHelp": "This email is not registered yet. Please instruct the staff member to download the app or register on ChargeOps before assigning them.",
+      "selfAssignment": "Cannot self-assign",
+      "selfAssignmentHelp": "You are the owner of this station and cannot assign yourself as station staff.",
+      "alreadyAssigned": "Staff member already assigned",
+      "alreadyAssignedHelp": "This user currently holds an active assignment at another station (or this station). Each staff member can only be assigned to one station at a time.",
+      "roleNotAllowed": "Ineligible Role",
+      "roleNotAllowedHelp": "This account holds an Admin or Owner role and cannot be assigned as station staff.",
+      "accountInactive": "Account is suspended",
+      "accountInactiveHelp": "This account is currently suspended on the platform and cannot be assigned tasks."
+    },
+    "revokeModal": {
+      "title": "Revoke Staff Access",
+      "warning": "Are you sure you want to revoke staff access for {{name}} at {{station}}?",
+      "consequence": "Once revoked, this staff member will immediately lose access to the operational console, live bookings, connector controls, and station tickets.",
+      "auditNote": "Historical operational activity and resolved tickets remain preserved for auditing purposes.",
+      "cancelBtn": "Cancel",
+      "confirmBtn": "Confirm Revoke",
+      "revoking": "Revoking…"
     },
     "matrix": {
-      "title": "What staff can do",
-      "help": "Staff hold a strict subset of your operational permissions. Business functions stay owner-only.",
+      "title": "Staff Permission Matrix",
+      "help": "Station staff hold an operational subset of permissions. Business, revenue, and pricing settings remain exclusive to the Station Owner.",
       "capability": "Capability",
       "owner": "Owner",
       "staff": "Staff",
       "rows": {
-        "viewStation": "View station details, bookings, connector status",
+        "viewStation": "View station details, live bookings, connector status",
         "toggleConnector": "Toggle connector status (Available / Offline)",
-        "handleTickets": "Handle support tickets for the station",
+        "handleTickets": "Handle and reply to station support tickets",
         "pricing": "Configure operating hours & TOU pricing",
-        "revenue": "View revenue dashboard & analytics",
-        "manageStaff": "Manage staff — add / remove"
+        "revenue": "View revenue dashboard & financial analytics",
+        "manageStaff": "Manage staff — assign / revoke permissions"
       }
     },
     "list": {
-      "title": "Current assignments",
-      "count": "{{count}} assignments",
-      "empty": "No staff assigned yet. Add someone by email to get started.",
-      "since": "since {{date}}",
-      "provisioned": "New account",
-      "revokeNote": "Revoking removes access to that station only — it never deletes the account or any other role the person holds (they keep their driver account and bookings)."
+      "title": "Staff Members",
+      "count": "{{count}} staff",
+      "searchPlaceholder": "Search by name, email, note…",
+      "allStations": "All Stations",
+      "filterStation": "Filter by Station",
+      "empty": "No staff assigned yet. Enter an email in the form on the left to assign a staff member.",
+      "noSearchResult": "No staff members match the filter criteria.",
+      "since": "Assigned: {{date}}",
+      "note": "Note",
+      "activeBadge": "Active Duty",
+      "revokeBtn": "Revoke Access",
+      "revokeNote": "Revoking removes station operational access only — the user's personal driver account, charging history, and credentials remain completely intact."
     }
   },
   "statusDialog": {

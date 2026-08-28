@@ -1,27 +1,36 @@
+import { useMemo } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { RequireRole, resolveHome, useAuth } from '@chargeops/auth';
+import { RequireRole, SsoRedirectOverlay, useAuth } from '@chargeops/auth';
 import { OwnerConsole } from './owner/OwnerConsole';
 import { AdminConsole } from './admin/AdminConsole';
 import { DriverNotice } from './DriverNotice';
 import { SimulatorPage } from './simulator/SimulatorPage';
+import { RequireStaffAssignment, useStaffContext } from './staff/RequireStaffAssignment';
 
 /**
- * The whole point of the single-app design: after Keycloak issues a token, the
- * signed roles — not any user choice — decide where you land.
- *
- *   /            → redirect to the highest-privilege console for this token
- *   /admin/*     → platform_admin only
- *   /owner/*     → station_owner only
- *   /staff/*     → station_staff only (owner shell, reduced menu)
- *   /driver-notice → driver-only tokens
- *
- * Typing `/admin` without the ADMIN role does NOT grant access: <RequireRole>
- * renders the "no access" screen, and the backend rejects every admin API call
- * the token isn't entitled to. The URL is a destination, not a permission.
+ * Authentication and routing decision tree:
+ *   ADMIN                     → /admin
+ *   OWNER                     → /owner
+ *   Active staff context      → /staff
+ *   Remaining (driver-only)   → /driver-notice
  */
 export function RoleRouter() {
   const { user } = useAuth();
-  const home = resolveHome(user?.roles ?? []);
+  const isOwner = user?.roles.includes('station_owner');
+  const isAdmin = user?.roles.includes('platform_admin');
+  const staffQ = useStaffContext();
+
+  const home = useMemo(() => {
+    if (isAdmin) return '/admin';
+    if (isOwner) return '/owner';
+    if (staffQ.isLoading) return null;
+    if (staffQ.data?.staff && staffQ.data?.assignmentStatus === 'ACTIVE') return '/staff';
+    return '/driver-notice';
+  }, [isAdmin, isOwner, staffQ.data, staffQ.isLoading]);
+
+  if (home === null) {
+    return <SsoRedirectOverlay />;
+  }
 
   return (
     <Routes>
@@ -46,9 +55,9 @@ export function RoleRouter() {
       <Route
         path="/staff/*"
         element={
-          <RequireRole role="station_staff">
+          <RequireStaffAssignment>
             <OwnerConsole base="/staff" reduced />
-          </RequireRole>
+          </RequireStaffAssignment>
         }
       />
       <Route path="/driver-notice" element={<DriverNotice />} />
@@ -57,3 +66,4 @@ export function RoleRouter() {
     </Routes>
   );
 }
+

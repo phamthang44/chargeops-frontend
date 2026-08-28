@@ -14,19 +14,27 @@ const OwnerStationContext = createContext<OwnerStationContextValue | null>(null)
 
 const STORAGE_KEY = 'chargeops_owner_selected_station';
 
-export function OwnerStationProvider({ children }: { children: ReactNode }) {
+export function OwnerStationProvider({
+  reduced = false,
+  children,
+}: {
+  reduced?: boolean;
+  children: ReactNode;
+}) {
   const api = useApi();
 
+  // Owner mode queries all owned stations; staff mode queries only the single assigned staff context
   const stationsQuery = useQuery({
     queryKey: ['stations', 'mine'],
     queryFn: () => api.stations.mine(),
+    enabled: !reduced,
   });
 
-  const stations: Station[] = useMemo(() => {
-    const raw = stationsQuery.data;
-    if (Array.isArray(raw)) return raw;
-    return (raw as { items?: Station[] } | undefined)?.items ?? [];
-  }, [stationsQuery.data]);
+  const staffContextQuery = useQuery({
+    queryKey: ['staff', 'current-context'],
+    queryFn: () => api.staff.currentContext(),
+    enabled: reduced,
+  });
 
   const [selectedStationId, setSelectedStationIdState] = useState<string>(() => {
     try {
@@ -35,6 +43,26 @@ export function OwnerStationProvider({ children }: { children: ReactNode }) {
       return '';
     }
   });
+
+  const stations: Station[] = useMemo(() => {
+    if (reduced) {
+      const st = staffContextQuery.data?.station;
+      if (!st) return [];
+      return [
+        {
+          id: st.id,
+          name: st.name,
+          stationCode: st.stationCode,
+          status: 'active',
+          chargerCount: 0,
+          onlineCount: 0,
+        } as Station,
+      ];
+    }
+    const raw = stationsQuery.data;
+    if (Array.isArray(raw)) return raw;
+    return (raw as { items?: Station[] } | undefined)?.items ?? [];
+  }, [reduced, staffContextQuery.data?.station, stationsQuery.data]);
 
   // Ensure selectedStationId matches an existing station, fallback to first
   useEffect(() => {
@@ -52,6 +80,7 @@ export function OwnerStationProvider({ children }: { children: ReactNode }) {
   }, [stations, selectedStationId]);
 
   const setSelectedStationId = (id: string) => {
+    if (reduced) return; // Staff assignment is fixed to single station
     setSelectedStationIdState(id);
     try {
       localStorage.setItem(STORAGE_KEY, id);
@@ -71,9 +100,9 @@ export function OwnerStationProvider({ children }: { children: ReactNode }) {
       selectedStationId: currentStation?.id ?? selectedStationId,
       setSelectedStationId,
       currentStation,
-      isLoading: stationsQuery.isLoading,
+      isLoading: reduced ? staffContextQuery.isLoading : stationsQuery.isLoading,
     }),
-    [stations, currentStation, selectedStationId, stationsQuery.isLoading],
+    [stations, currentStation, selectedStationId, reduced, staffContextQuery.isLoading, stationsQuery.isLoading],
   );
 
   return <OwnerStationContext.Provider value={value}>{children}</OwnerStationContext.Provider>;

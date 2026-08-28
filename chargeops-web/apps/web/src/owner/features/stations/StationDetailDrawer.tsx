@@ -118,8 +118,8 @@ export function StationDetailDrawer({
 
   // 3. Staff members
   const staffQ = useQuery({
-    queryKey: ['staff', 'mine'],
-    queryFn: () => api.staff.list(),
+    queryKey: ['staff', 'station', stationId],
+    queryFn: () => (stationId ? api.staff.list(stationId) : Promise.resolve([])),
     enabled: Boolean(stationId) && open && activeTab === 'staff',
   });
 
@@ -682,26 +682,29 @@ export function StationDetailDrawer({
             ) : stationStaff.length === 0 ? (
               <EmptyState
                 title="Chưa có nhân viên phụ trách"
-                description="Trạm chưa được gán nhân viên vận hành nào. Bạn có thể mời nhân viên bằng email."
+                description="Trạm chưa được gán nhân viên vận hành nào. Bạn có thể phân công nhân viên từ trang Quản lý nhân viên."
               />
             ) : (
               <div className="flex flex-col gap-2.5">
-                {stationStaff.map((m: StationStaffMember) => (
-                  <Card key={m.userId} className="p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-3 text-[12px] font-bold text-ink">
-                        {m.name ? m.name.charAt(0).toUpperCase() : 'U'}
+                {stationStaff.map((m: StationStaffMember) => {
+                  const staffName = m.displayName || m.name || m.email;
+                  return (
+                    <Card key={m.assignmentId || m.userId} className="p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-3 text-[12px] font-bold text-ink">
+                          {staffName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-bold text-[13px] text-ink">{staffName}</div>
+                          <div className="text-[11.5px] text-faint">{m.email}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-[13px] text-ink">{m.name}</div>
-                        <div className="text-[11.5px] text-faint">{m.email}</div>
-                      </div>
-                    </div>
-                    <span className="rounded bg-chip px-2 py-0.5 text-[11px] font-semibold text-muted">
-                      {m.primaryRole || 'STATION_STAFF'}
-                    </span>
-                  </Card>
-                ))}
+                      <span className="rounded bg-good-soft px-2 py-0.5 text-[11px] font-semibold text-good">
+                        {m.status === 'ACTIVE' ? 'Đang trực' : 'Đã thu hồi'}
+                      </span>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -21,6 +21,8 @@ import type {
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
+  StaffAssignmentStatus,
+  CurrentStaffContextResponse,
   StationStaffMember,
   StationStatusHistory,
   TicketMessage,
@@ -1274,57 +1276,187 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     },
 
     staff: {
-      async list() {
+      async currentContext(): Promise<CurrentStaffContextResponse> {
+        await delay(150);
+        const as = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('as') : null;
+        if (as === 'staff') {
+          const active = db.stationStaff.find((s) => s.status === 'ACTIVE') || {
+            assignmentId: 'ASG-1001',
+            stationId: 'ST-1001',
+            stationName: 'Trạm Hà Đông',
+            status: 'ACTIVE' as StaffAssignmentStatus,
+          };
+          return {
+            staff: true,
+            assignmentId: active.assignmentId,
+            assignmentStatus: 'ACTIVE',
+            station: {
+              id: active.stationId,
+              stationCode: 'ST-1001',
+              name: active.stationName,
+            },
+          };
+        }
+        return {
+          staff: false,
+          assignmentId: null,
+          assignmentStatus: null,
+          station: null,
+        };
+      },
+
+      async list(stationId?: string, params?: { pageNo?: number; pageSize?: number; assignmentStatus?: StaffAssignmentStatus }) {
         await delay();
         // BR-ACC-05: owner sees assignments for their own stations only.
         return db.stationStaff
-          .filter((s) => db.ownerStationIds.includes(s.stationId))
-          .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+          .filter((s) => {
+            if (stationId && s.stationId !== stationId) return false;
+            if (!stationId && !db.ownerStationIds.includes(s.stationId)) return false;
+            if (params?.assignmentStatus && s.status !== params.assignmentStatus) return false;
+            if (!params?.assignmentStatus && s.status !== 'ACTIVE') return false;
+            return true;
+          })
+          .sort((a, b) => (a.assignedAt < b.assignedAt ? 1 : -1));
       },
-      async invite({ email, stationId }) {
+
+      async lookup(stationId: string, email: string) {
+        await delay(250);
+        const clean = email.trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) {
+          return { exists: false, email: clean, assignable: false, status: 'NOT_FOUND' };
+        }
+
+        // Check if Owner's own email
+        if (clean === 'ops@evgo.vn' || clean === 'owner@chargeops.vn') {
+          return {
+            exists: true,
+            email: clean,
+            displayName: 'EVGo Co. (Vũ A.)',
+            maskedPhone: '090****111',
+            assignable: false,
+            status: 'SELF_ASSIGNMENT',
+          };
+        }
+
+        const user = db.users.find((u) => u.email.toLowerCase() === clean);
+        if (!user) {
+          return {
+            exists: false,
+            email: clean,
+            assignable: false,
+            status: 'NOT_FOUND',
+          };
+        }
+
+        if (user.status === 'suspended') {
+          return {
+            exists: true,
+            userId: user.id,
+            email: user.email,
+            displayName: user.name,
+            maskedPhone: '098****321',
+            assignable: false,
+            status: 'ACCOUNT_INACTIVE',
+          };
+        }
+
+        if (user.role === 'ADMIN' || user.role === 'OWNER') {
+          return {
+            exists: true,
+            userId: user.id,
+            email: user.email,
+            displayName: user.name,
+            maskedPhone: '098****888',
+            assignable: false,
+            status: 'ROLE_NOT_ALLOWED',
+          };
+        }
+
+        // Check if already active at ANY station (V19 constraint: one active per user globally)
+        const currentActive = db.stationStaff.find(
+          (s) => (s.userId === user.id || s.email.toLowerCase() === clean) && s.status === 'ACTIVE',
+        );
+        if (currentActive) {
+          return {
+            exists: true,
+            userId: user.id,
+            email: user.email,
+            displayName: user.name,
+            maskedPhone: currentActive.maskedPhone || '098****123',
+            assignable: false,
+            status: 'ALREADY_ASSIGNED',
+          };
+        }
+
+        // Eligible user
+        return {
+          exists: true,
+          userId: user.id,
+          email: user.email,
+          displayName: user.name,
+          maskedPhone: '098****567',
+          assignable: true,
+          status: 'ELIGIBLE',
+        };
+      },
+
+      async assign(stationId: string, { email, note }: { email: string; note?: string }) {
         await delay();
         const clean = email.trim().toLowerCase();
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) throw new Error('Email không hợp lệ');
-
         const station = db.ownerStations.find((s) => s.id === stationId);
         if (!station) throw new Error(`Không tìm thấy trạm ${stationId}`);
-        if (db.stationStaff.some((s) => s.email.toLowerCase() === clean && s.stationId === stationId)) {
-          throw new Error(`${email} đã là nhân viên của ${station.name}`);
+
+        const lookupResult = await this.lookup(stationId, clean);
+        if (!lookupResult.assignable || !lookupResult.userId) {
+          if (lookupResult.status === 'NOT_FOUND') {
+            throw new Error('Tài khoản chưa tồn tại. Vui lòng yêu cầu nhân viên đăng ký tài khoản trước.');
+          }
+          if (lookupResult.status === 'SELF_ASSIGNMENT') {
+            throw new Error('Bạn là chủ sở hữu trạm, không thể tự phân công làm nhân viên.');
+          }
+          if (lookupResult.status === 'ALREADY_ASSIGNED') {
+            throw new Error('Nhân viên này hiện đang có nhiệm vụ tại một trạm khác hoặc chính trạm này.');
+          }
+          if (lookupResult.status === 'ROLE_NOT_ALLOWED') {
+            throw new Error('Tài khoản có vai trò Quản trị hoặc Chủ trạm, không thể gán làm nhân viên trạm.');
+          }
+          if (lookupResult.status === 'ACCOUNT_INACTIVE') {
+            throw new Error('Tài khoản này đang bị khóa hoặc tạm dừng hoạt động.');
+          }
+          throw new Error('Không thể phân công tài khoản này.');
         }
 
-        // FR17: grant additively to an existing account, else provision a new one.
-        const existing = db.users.find((u) => u.email.toLowerCase() === clean);
-        const created = !existing;
         const member: StationStaffMember = {
-          userId: existing?.id ?? 'U-' + seq++,
+          assignmentId: 'ASG-' + seq++,
           stationId,
           stationName: station.name,
-          name: existing?.name ?? clean,
-          email: existing?.email ?? clean,
-          primaryRole: existing?.role ?? 'DRIVER',
-          provisioned: created,
+          userId: lookupResult.userId,
+          displayName: lookupResult.displayName || clean,
+          name: lookupResult.displayName || clean,
+          email: lookupResult.email || clean,
+          maskedPhone: lookupResult.maskedPhone || '098****000',
+          status: 'ACTIVE',
+          note: note?.trim() || undefined,
+          assignedBy: 'U-2038',
+          assignedAt: new Date().toISOString(),
+          primaryRole: 'DRIVER',
           createdAt: new Date().toISOString().slice(0, 10),
         };
+
         db.stationStaff.unshift(member);
-        if (created) {
-          db.users.push({
-            id: member.userId,
-            name: member.name,
-            email: member.email,
-            role: 'DRIVER',
-            joined: member.createdAt,
-            bookingCount: 0,
-            status: 'active',
-          });
-        }
-        return { member: { ...member }, created };
+        return member;
       },
-      async revoke(userId, stationId) {
+
+      async revoke(stationId: string, assignmentId: string) {
         await delay();
-        const i = db.stationStaff.findIndex((s) => s.userId === userId && s.stationId === stationId);
+        const i = db.stationStaff.findIndex((s) => s.assignmentId === assignmentId && (!stationId || s.stationId === stationId));
         if (i < 0) throw new Error('Không tìm thấy phân công này');
-        // Deletes the assignment row only — the account and its other roles survive (FR17).
-        db.stationStaff.splice(i, 1);
+
+        // Mark as REVOKED per lifecycle
+        db.stationStaff[i].status = 'REVOKED';
+        db.stationStaff[i].revokedAt = new Date().toISOString();
+        db.stationStaff[i].revokedBy = 'U-2038';
+        return db.stationStaff[i];
       },
     },
 

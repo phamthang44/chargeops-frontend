@@ -63,10 +63,10 @@ The public API (`useAuth`, `AuthGate`, `RequireRole`, `resolveHome`, `rolesFromR
 in both modes.
 
 - Keycloak realm `chargeops`, **one public client `chargeops-web`** (PKCE) — not one per console.
-- Realm roles `ADMIN` / `OWNER` / `STATION_STAFF` / `DRIVER` → canonical roles via `rolesFromRealm`;
-  `resolveHome(roles)` picks the landing console (admin > owner > staff > driver). Access is checked
-  by `RequireRole` in the UI and (authoritatively) by the Spring Boot backend on every REST call —
-  typing `/admin` without the role hits the no-access screen, never the data.
+- Realm roles `ADMIN` / `OWNER` / `DRIVER` → canonical roles via `rolesFromRealm`.
+  Staff context is DB-backed (`GET /api/v1/me/staff-context`) rather than a Keycloak realm role.
+  Landing destination order: Admin (`/admin`) > Owner (`/owner`) > Active Staff (`/staff`) > Driver notice (`/driver-notice`).
+  Access is checked by `RequireRole` and `RequireStaffAssignment` in the UI and (authoritatively) by the backend on every REST call.
 - No app ever sees a password: credentials are entered on Keycloak's hosted login page. That login
   page is a **Keycloak custom theme** (`login.ftl` + CSS), not a React component in this app.
 - Copy `apps/web/.env.example` to `apps/web/.env`, set `VITE_KEYCLOAK_ENABLED=true`, and use

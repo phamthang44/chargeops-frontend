@@ -744,11 +744,56 @@ export function buildMockDb(): MockDb {
     { id: 'U-2002', name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', role: 'ADMIN', joined: '2025-01-01', bookingCount: 0, status: 'active' },
   ];
 
-  /* ---- station staff (FR17) — assignments across the owner's two stations ---- */
+  /* ---- station staff (FR17 & V19) — assignments across the owner's stations ---- */
   const stationStaff: StationStaffMember[] = [
-    { userId: 'U-2041', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', name: 'Nguyễn Văn An', email: 'an.nguyen@gmail.com', primaryRole: 'DRIVER', provisioned: false, createdAt: '2026-05-14' },
-    { userId: 'U-2035', stationId: 'ST-1001', stationName: 'Trạm Hà Đông', name: 'Trần Minh Hà', email: 'ha.tran@gmail.com', primaryRole: 'DRIVER', provisioned: false, createdAt: '2026-06-02' },
-    { userId: 'U-2088', stationId: 'ST-1018', stationName: 'Trạm Cầu Giấy', name: 'ca.truc@evgo.vn', email: 'ca.truc@evgo.vn', primaryRole: 'DRIVER', provisioned: true, createdAt: '2026-06-19' },
+    {
+      assignmentId: 'ASG-1001',
+      stationId: 'ST-1001',
+      stationName: 'Trạm Hà Đông',
+      userId: 'U-2041',
+      displayName: 'Nguyễn Văn An',
+      name: 'Nguyễn Văn An',
+      email: 'an.nguyen@gmail.com',
+      maskedPhone: '098****123',
+      status: 'ACTIVE',
+      note: 'Kỹ thuật viên ca sáng (06:00 - 14:00)',
+      assignedBy: 'U-2038',
+      assignedAt: '2026-05-14T08:00:00Z',
+      primaryRole: 'DRIVER',
+      createdAt: '2026-05-14',
+    },
+    {
+      assignmentId: 'ASG-1002',
+      stationId: 'ST-1001',
+      stationName: 'Trạm Hà Đông',
+      userId: 'U-2035',
+      displayName: 'Trần Minh Hà',
+      name: 'Trần Minh Hà',
+      email: 'ha.tran@gmail.com',
+      maskedPhone: '091****888',
+      status: 'ACTIVE',
+      note: 'Trực vận hành & giám sát cổng sạc',
+      assignedBy: 'U-2038',
+      assignedAt: '2026-06-02T09:30:00Z',
+      primaryRole: 'DRIVER',
+      createdAt: '2026-06-02',
+    },
+    {
+      assignmentId: 'ASG-1003',
+      stationId: 'ST-1018',
+      stationName: 'Trạm Cầu Giấy',
+      userId: 'U-2011',
+      displayName: 'Đỗ Hải Long',
+      name: 'Đỗ Hải Long',
+      email: 'long.do@gmail.com',
+      maskedPhone: '097****999',
+      status: 'ACTIVE',
+      note: 'Quản lý kỹ thuật trạm Cầu Giấy',
+      assignedBy: 'U-2038',
+      assignedAt: '2026-06-19T14:00:00Z',
+      primaryRole: 'DRIVER',
+      createdAt: '2026-06-19',
+    },
   ];
 
   /* ---- policy KB (FR15) ---- */

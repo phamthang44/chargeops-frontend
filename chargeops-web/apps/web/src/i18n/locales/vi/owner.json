@@ -227,42 +227,82 @@
   },
   "staff": {
     "title": "Nhân viên trạm",
-    "subtitle": "Cấp và thu hồi quyền nhân viên cho các trạm của bạn.",
-    "revokeBtn": "Thu hồi",
+    "subtitle": "Phân công và quản lý nhân viên vận hành trực tiếp tại các trạm sạc của bạn.",
+    "assignSuccess": "Đã gán {{name}} vào {{station}}",
     "revokeToast": "Đã thu hồi quyền của {{name}} tại {{station}}",
-    "invite": {
-      "title": "Thêm nhân viên",
-      "emailLabel": "ĐỊA CHỈ EMAIL",
-      "emailPlaceholder": "ten@example.com",
-      "stationLabel": "PHÂN CÔNG VÀO TRẠM",
-      "submitBtn": "Cấp quyền nhân viên",
-      "submitting": "Đang cấp quyền…",
-      "help": "Chỉ mời qua email — hệ thống không có danh bạ người dùng toàn nền tảng. Nếu email đã có tài khoản ChargeOps, tài khoản giữ nguyên vai trò hiện tại và được cấp thêm STATION_STAFF. Nếu chưa có, hệ thống tạo tài khoản mới kèm mật khẩu tạm. Quyền có hiệu lực ngay.",
-      "toastGranted": "{{name}} đã có quyền nhân viên tại {{station}}",
-      "toastProvisioned": "Đã tạo tài khoản mới cho {{email}} với quyền nhân viên tại {{station}}"
+    "assign": {
+      "title": "Phân công nhân viên",
+      "emailLabel": "ĐỊA CHỈ EMAIL NHÂN VIÊN",
+      "emailPlaceholder": "nhap.email@example.com",
+      "stationLabel": "CHỌN TRẠM PHÂN CÔNG",
+      "noteLabel": "GHI CHÚ CA TRỰC / VỊ TRÍ (TÙY CHỌN)",
+      "notePlaceholder": "VD: Ca trực sáng (06:00 - 14:00), Kỹ thuật viên bảo trì...",
+      "noteQuickPresets": "Gợi ý nhanh:",
+      "presets": {
+        "morning": "Ca sáng (06:00 - 14:00)",
+        "afternoon": "Ca chiều (14:00 - 22:00)",
+        "night": "Ca đêm (22:00 - 06:00)",
+        "tech": "Kỹ thuật viên bảo trì trụ",
+        "coordinator": "Điều phối & hỗ trợ khách hàng",
+        "fulltime": "Nhân viên vận hành toàn thời gian"
+      },
+      "submitBtn": "Phân công vào trạm",
+      "submitting": "Đang phân công…",
+      "help": "Nhập email của người dùng để tra cứu thông tin. Nếu hợp lệ, hệ thống sẽ gán quyền nhân viên trạm ngay lập tức.",
+      "userFound": "Đã xác thực tài khoản",
+      "driverRole": "Tài xế / Người dùng",
+      "activeStatus": "Hoạt động"
+    },
+    "lookup": {
+      "searching": "Đang kiểm tra thông tin tài khoản…",
+      "notFound": "Tài khoản chưa tồn tại trên ChargeOps",
+      "notFoundHelp": "Email này chưa đăng ký tài khoản. Vui lòng yêu cầu nhân viên tải ứng dụng hoặc truy cập trang web ChargeOps để đăng ký tài khoản trước khi thực hiện phân công.",
+      "selfAssignment": "Không thể tự phân công",
+      "selfAssignmentHelp": "Bạn là chủ sở hữu của trạm này, không thể tự phân công mình làm nhân viên vận hành.",
+      "alreadyAssigned": "Người dùng đang được gán tại một trạm khác",
+      "alreadyAssignedHelp": "Người dùng này hiện đang được gán tại một trạm sạc khác (hoặc chính trạm này). Mỗi nhân viên chỉ có thể trực tại một trạm tại một thời điểm.",
+      "roleNotAllowed": "Vai trò không hợp lệ",
+      "roleNotAllowedHelp": "Tài khoản này có vai trò Quản trị viên hoặc Chủ trạm, không thể phân công làm nhân viên vận hành.",
+      "accountInactive": "Tài khoản đang bị tạm khóa",
+      "accountInactiveHelp": "Tài khoản này đang bị tạm dừng hoặc khóa trên hệ thống, không thể phân công nhiệm vụ."
+    },
+    "revokeModal": {
+      "title": "Thu hồi quyền nhân viên",
+      "warning": "Bạn có chắc chắn muốn thu hồi quyền nhân viên của {{name}} tại trạm {{station}}?",
+      "consequence": "Sau khi thu hồi, nhân viên sẽ lập tức mất quyền truy cập vào bảng điều khiển vận hành, không thể xem lịch đặt chỗ, đổi trạng thái trụ hoặc tiếp nhận ticket hỗ trợ tại trạm này.",
+      "auditNote": "Lịch sử xử lý công việc và nhật ký vận hành trước đây của nhân viên tại trạm vẫn được lưu trữ cho mục đích đối soát.",
+      "cancelBtn": "Hủy bỏ",
+      "confirmBtn": "Xác nhận thu hồi",
+      "revoking": "Đang thu hồi…"
     },
     "matrix": {
-      "title": "Nhân viên được làm gì",
-      "help": "Nhân viên chỉ có một phần quyền vận hành của bạn. Các chức năng kinh doanh vẫn thuộc riêng chủ trạm.",
+      "title": "Ma trận phân quyền nhân viên",
+      "help": "Nhân viên trạm chỉ có quyền hạn vận hành thường nhật. Các tính năng kinh doanh, doanh thu và cấu hình giá thuộc độc quyền của Chủ trạm.",
       "capability": "Chức năng",
-      "owner": "Chủ",
-      "staff": "NV",
+      "owner": "Chủ trạm",
+      "staff": "Nhân viên",
       "rows": {
-        "viewStation": "Xem thông tin trạm, đặt chỗ, trạng thái connector",
-        "toggleConnector": "Đổi trạng thái connector (Sẵn sàng / Ngoại tuyến)",
-        "handleTickets": "Xử lý ticket hỗ trợ của trạm",
-        "pricing": "Cấu hình giờ hoạt động & giá TOU",
-        "revenue": "Xem doanh thu & phân tích",
-        "manageStaff": "Quản lý nhân viên — thêm / xoá"
+        "viewStation": "Xem thông tin trạm, danh sách đặt chỗ, trạng thái cổng sạc",
+        "toggleConnector": "Đổi trạng thái cổng sạc (Sẵn sàng / Ngoại tuyến)",
+        "handleTickets": "Tiếp nhận và xử lý ticket hỗ trợ của trạm",
+        "pricing": "Cấu hình giờ hoạt động & biểu giá sạc TOU",
+        "revenue": "Xem báo cáo doanh thu & phân tích tài chính",
+        "manageStaff": "Quản lý nhân sự — phân công / thu hồi quyền"
       }
     },
     "list": {
-      "title": "Phân công hiện tại",
-      "count": "{{count}} phân công",
-      "empty": "Chưa có nhân viên nào. Thêm một người qua email để bắt đầu.",
-      "since": "từ {{date}}",
-      "provisioned": "Tài khoản mới",
-      "revokeNote": "Thu hồi chỉ gỡ quyền tại trạm đó — không bao giờ xoá tài khoản hay các vai trò khác của người đó (họ vẫn giữ tài khoản tài xế và lịch sử đặt chỗ)."
+      "title": "Danh sách nhân viên",
+      "count": "{{count}} nhân viên",
+      "searchPlaceholder": "Tìm theo tên, email, ghi chú…",
+      "allStations": "Tất cả các trạm",
+      "filterStation": "Lọc theo trạm",
+      "empty": "Chưa có nhân viên nào được phân công. Hãy nhập email ở khung bên trái để phân công nhân viên.",
+      "noSearchResult": "Không tìm thấy nhân viên nào phù hợp với bộ lọc.",
+      "since": "Phân công: {{date}}",
+      "note": "Ghi chú",
+      "activeBadge": "Đang trực",
+      "revokeBtn": "Thu hồi quyền",
+      "revokeNote": "Thu hồi phân công chỉ gỡ bỏ quyền vận hành tại trạm tương ứng — tài khoản cá nhân, lịch sử sạc xe và vai trò tài xế của người dùng vẫn được bảo toàn nguyên vẹn."
     }
   },
   "statusDialog": {

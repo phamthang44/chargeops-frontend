@@ -24,8 +24,8 @@ const terms: LegalPageContent = {
       title: "1. Tài khoản và phân quyền người dùng",
       body: [
         "Người dùng đăng ký bằng họ tên, email, số điện thoại và mật khẩu. Driver dùng ứng dụng mobile; Station Owner và Admin dùng web console theo đúng vai trò được cấp.",
-        "Station Staff không tự đăng ký công khai. Tài khoản staff được chủ trạm mời hoặc cấp quyền quản lý trong phạm vi trạm được giao.",
-        "Hệ thống kiểm soát truy cập bằng token OIDC và mô hình phân quyền theo vai trò (RBAC) nghiêm ngặt giữa DRIVER, OWNER, ADMIN và STATION_STAFF.",
+        "Nhân viên vận hành trạm được Chủ trạm gán trực tiếp theo từng trạm cụ thể trong hệ thống.",
+        "Hệ thống kiểm soát truy cập bằng token OIDC và mô hình phân quyền chặt chẽ theo vai trò (RBAC) cùng phân công theo trạm.",
       ],
     },
     {

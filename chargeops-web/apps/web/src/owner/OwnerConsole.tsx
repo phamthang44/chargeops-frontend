@@ -273,15 +273,19 @@ function OwnerConsoleContent({
           : { label: t('console.role.owner'), bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' }
       }
       station={currentStation ? `${currentStation.name} (${currentStation.stationCode || currentStation.id})` : undefined}
-      stations={stations.map((s) => ({
-        id: s.id,
-        name: s.name,
-        stationCode: s.stationCode,
-        city: s.city || s.provinceName,
-        status: s.status,
-      }))}
-      selectedStationId={selectedStationId}
-      onSelectStation={setSelectedStationId}
+      stations={
+        reduced
+          ? undefined
+          : stations.map((s) => ({
+              id: s.id,
+              name: s.name,
+              stationCode: s.stationCode,
+              city: s.city || s.provinceName,
+              status: s.status,
+            }))
+      }
+      selectedStationId={reduced ? undefined : selectedStationId}
+      onSelectStation={reduced ? undefined : setSelectedStationId}
       userName={user?.name ?? '···'}
       userEmail={user?.email}
       search={<HeaderSearch searchers={searchers} accent="owner" />}
@@ -339,7 +343,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
 
   return (
     <ApiProvider services={services}>
-      <OwnerStationProvider>
+      <OwnerStationProvider reduced={reduced}>
         <OwnerConsoleContent
           base={base}
           reduced={reduced}

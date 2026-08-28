@@ -37,6 +37,10 @@ import type {
   ProvisioningStatus,
   RegisterStationRequest,
   StaffDashboard,
+  StaffLookupResponse,
+  StaffAssignmentStatus,
+  CurrentStaffContextResponse,
+  AssignStationStaffRequest,
   Amenity,
   Station,
   StationApprovalDetail,
@@ -234,19 +238,16 @@ export interface UserService {
 }
 
 export interface StaffService {
-  /** Owner: STATION_STAFF assignments across the stations they own (BR-ACC-05 scopes this server-side). */
-  list(): Promise<StationStaffMember[]>;
-  /**
-   * FR17 invite-by-email. Email is the only handle by design — the SRS
-   * deliberately exposes no platform-wide user search or directory browsing.
-   * Grants STATION_STAFF additively to an existing account, or provisions a new
-   * one via the identity provider's admin API. `created` distinguishes the two
-   * so the UI can say which happened. Effective immediately: v1 has no
-   * invitation-acceptance step (documented simplification in FR17).
-   */
-  invite(input: { email: string; stationId: string }): Promise<{ member: StationStaffMember; created: boolean }>;
-  /** Revokes this station assignment only — never deletes the account or its other roles. */
-  revoke(userId: string, stationId: string): Promise<void>;
+  /** Get current user's DB-backed staff assignment context. */
+  currentContext(): Promise<CurrentStaffContextResponse>;
+  /** Owner: Station staff assignments for a specific station (or across owner's stations). */
+  list(stationId?: string, params?: { pageNo?: number; pageSize?: number; assignmentStatus?: StaffAssignmentStatus }): Promise<StationStaffMember[]>;
+  /** Lookup user by email for a station to verify existence and eligibility before assignment. */
+  lookup(stationId: string, email: string): Promise<StaffLookupResponse>;
+  /** Assign an existing eligible user to a station as station staff. */
+  assign(stationId: string, input: AssignStationStaffRequest): Promise<StationStaffMember>;
+  /** Revokes station staff assignment by stationId and assignmentId. */
+  revoke(stationId: string, assignmentId: string): Promise<StationStaffMember | void>;
 }
 
 export interface PricingService {

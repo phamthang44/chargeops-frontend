@@ -195,7 +195,7 @@ export interface Review {
 // --- Auth / account (mirrors the SRS `User` entity; see FR01, BR-ACC) ---
 
 export type UserRole = 'DRIVER' | 'OWNER' | 'ADMIN';
-export type GrantedRole = UserRole | 'STATION_STAFF';
+export type GrantedRole = UserRole;
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING';
 
 export interface User {

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type Role = 'platform_admin' | 'station_owner' | 'station_staff' | 'driver';
+export type Role = 'platform_admin' | 'station_owner' | 'driver';
 
 export interface AuthUser {
   name: string;

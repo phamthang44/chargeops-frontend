@@ -15,7 +15,7 @@ import { Platform } from 'react-native';
 import type { AuthSession as AppAuthSession, GrantedRole, User } from '@/types';
 
 const DRIVER_ROLE = 'DRIVER';
-const CHARGEOPS_ROLES = new Set<GrantedRole>(['DRIVER', 'OWNER', 'ADMIN', 'STATION_STAFF']);
+const CHARGEOPS_ROLES = new Set<GrantedRole>(['DRIVER', 'OWNER', 'ADMIN']);
 const WEB_AUTH_TRANSACTION_KEY = 'chargeops.keycloak.webAuthTransaction';
 
 export const keycloakConfig = {

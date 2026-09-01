@@ -112,6 +112,9 @@ export function isStationDriverEligible(
     onlineChargers?: number;
     chargerCount?: number;
     onlineCount?: number;
+    actualChargePointCount?: number;
+    onlineChargePointCount?: number;
+    onlineActualChargePointCount?: number;
   } | null,
 ): {
   isEligible: boolean;
@@ -152,8 +155,16 @@ export function isStationDriverEligible(
   }
 
   // Check hardware provision & online status if available
-  const totalCount = hardwareInfo?.totalChargers ?? hardwareInfo?.chargerCount;
-  const onlineCount = hardwareInfo?.onlineChargers ?? hardwareInfo?.onlineCount;
+  const totalCount =
+    hardwareInfo?.actualChargePointCount ??
+    hardwareInfo?.totalChargers ??
+    hardwareInfo?.chargerCount;
+
+  const onlineCount =
+    hardwareInfo?.onlineActualChargePointCount ??
+    hardwareInfo?.onlineChargePointCount ??
+    hardwareInfo?.onlineChargers ??
+    hardwareInfo?.onlineCount;
 
   if (totalCount !== undefined && totalCount === 0) {
     return {

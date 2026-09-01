@@ -8,13 +8,21 @@ export function StationSummary({ stations }: { stations: Station[] }) {
   const active = stations.filter((s) => s.status === 'active' || s.status === 'ACTIVE');
   const eligibleCount = stations.filter((s) =>
     isStationDriverEligible(s.status, s.licenseSummary, new Date(), {
-      chargerCount: s.chargerCount ?? 0,
-      onlineCount: s.onlineCount ?? 0,
+      actualChargePointCount: s.actualChargePointCount ?? s.chargerCount,
+      onlineChargePointCount: s.onlineActualChargePointCount ?? s.onlineChargePointCount ?? s.onlineCount,
+      chargerCount: s.actualChargePointCount ?? s.chargerCount,
+      onlineCount: s.onlineActualChargePointCount ?? s.onlineChargePointCount ?? s.onlineCount,
     }).isEligible,
   ).length;
   const pending = stations.filter((s) => s.status === 'pending' || s.status === 'PENDING_APPROVAL').length;
-  const chargers = active.reduce((n, s) => n + (s.chargerCount ?? s.plannedChargePointCount ?? 0), 0);
-  const online = active.reduce((n, s) => n + (s.onlineCount ?? 0), 0);
+  const chargers = active.reduce(
+    (n, s) => n + (s.actualChargePointCount ?? s.chargerCount ?? s.plannedChargePointCount ?? 0),
+    0,
+  );
+  const online = active.reduce(
+    (n, s) => n + (s.onlineActualChargePointCount ?? s.onlineChargePointCount ?? s.onlineCount ?? 0),
+    0,
+  );
 
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">

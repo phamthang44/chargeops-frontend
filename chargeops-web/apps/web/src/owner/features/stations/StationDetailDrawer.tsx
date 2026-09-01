@@ -157,13 +157,21 @@ export function StationDetailDrawer({
     station.addressLine ||
     '—';
 
-  const actualChargers = chargePointsQ.data?.length ?? station.chargerCount ?? 0;
+  const actualChargers =
+    chargePointsQ.data?.length ??
+    station.actualChargePointCount ??
+    station.chargerCount ??
+    0;
   const onlineChargers =
     chargePointsQ.data?.filter((c) => c.operationalStatus === 'AVAILABLE').length ??
+    station.onlineActualChargePointCount ??
+    station.onlineChargePointCount ??
     station.onlineCount ??
     0;
 
   const eligibility = isStationDriverEligible(station.status, station.licenseSummary, new Date(), {
+    actualChargePointCount: actualChargers,
+    onlineChargePointCount: onlineChargers,
     chargerCount: actualChargers,
     onlineCount: onlineChargers,
   });

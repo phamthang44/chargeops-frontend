@@ -292,7 +292,10 @@ export interface Station {
   ownerDisplayName?: string;
   chargerCount?: number;
   plannedChargePointCount?: number;
+  actualChargePointCount?: number;
   onlineCount?: number;
+  onlineChargePointCount?: number;
+  onlineActualChargePointCount?: number;
   status: StationStatus;
   /** e.g. "Năm · hết hạn 12/09/2026", or object { plan, expiresAt }; null while pending/rejected. */
   licenseSummary?: string | LicenseSummary | null;
@@ -316,6 +319,11 @@ export interface OwnerStationSummary {
   provinceName: string;
   wardName: string;
   plannedChargePointCount: number;
+  actualChargePointCount?: number;
+  chargerCount?: number;
+  onlineCount?: number;
+  onlineChargePointCount?: number;
+  onlineActualChargePointCount?: number;
   status: StationStatus;
   licenseSummary?: string | LicenseSummary | null;
 }

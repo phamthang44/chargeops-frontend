@@ -19,6 +19,7 @@ import type {
   PricingConfig,
   ProvisioningStatus,
   Station,
+  StationStaffMember,
   UserProfile,
 } from '../types';
 

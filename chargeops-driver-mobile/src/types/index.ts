@@ -57,6 +57,8 @@ export interface Station {
   isOpen?: boolean; // derived open/closed state (vs operatingHours)
   hasFastCharging?: boolean; // has at least one DC connector (for list filtering)
   minRatePerKwh?: number; // cheapest đ/kWh rate label (info only, "Giá từ")
+  maxPowerKw?: number; // maximum charging power in kW (e.g. 180kW) from backend
+  connectorTypes?: ConnectorType[]; // available connector types at this station
   amenities?: Amenity[]; // shown on the station detail screen
 }
 
@@ -252,3 +254,19 @@ export interface LoginRequest {
   email: string;
   password: string;
 }
+
+export type {
+  BackendChargePointResponse,
+  BackendConnectorResponse,
+  BackendOperatingHour,
+  BackendPriceRangeResponse,
+  BackendStationAsset,
+  BackendStationAvailabilityResponse,
+  BackendStationDiscoveryDetail,
+  BackendStationDiscoveryItem,
+  BackendStationDiscoverySort,
+  BackendTimeRangeResponse,
+} from '@/services/stationAdapter';
+
+
+

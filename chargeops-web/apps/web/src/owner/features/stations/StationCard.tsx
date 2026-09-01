@@ -69,15 +69,28 @@ export function StationCard({
     station.addressLine ||
     '—';
 
-  const totalChargers = station.chargerCount ?? station.plannedChargePointCount ?? 0;
-  const onlineChargers = station.onlineCount ?? 0;
+  const totalChargers =
+    station.actualChargePointCount ??
+    station.chargerCount ??
+    station.plannedChargePointCount ??
+    0;
+  const onlineChargers =
+    station.onlineActualChargePointCount ??
+    station.onlineChargePointCount ??
+    station.onlineCount ??
+    0;
   const isActive = rawStatus === 'active' || rawStatus === 'ACTIVE';
   const isPending = rawStatus === 'pending' || rawStatus === 'PENDING_APPROVAL';
   const isRejected = rawStatus === 'rejected' || rawStatus === 'REJECTED';
 
   const licenseInfo = formatLicense(station.licenseSummary);
-  const actualChargers = station.chargerCount ?? 0;
+  const actualChargers =
+    station.actualChargePointCount ??
+    station.chargerCount;
+
   const eligibility = isStationDriverEligible(rawStatus, station.licenseSummary as any, new Date(), {
+    actualChargePointCount: actualChargers,
+    onlineChargePointCount: onlineChargers,
     chargerCount: actualChargers,
     onlineCount: onlineChargers,
   });

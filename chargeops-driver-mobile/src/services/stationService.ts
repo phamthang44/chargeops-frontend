@@ -1,19 +1,71 @@
+import { Platform } from 'react-native';
+
 import { chargePointsMock, connectorsMock, reviewsMock, stationsMock } from '@/mock/stations.mock';
 import type { ChargePoint, Connector, ConnectorType, Review, Station } from '@/types';
 import { effectiveConnectorStatus } from '@/utils/connectors';
+import {
+  adaptChargePointsFromDetail,
+  adaptConnectorsFromDetail,
+  adaptStationDiscoveryDetail,
+  adaptStationDiscoveryItem,
+  adaptStationList,
+  buildStationDiscoveryQueryParams,
+  deriveHasFastCharging,
+  mapFrontendSortToBackend,
+  type BackendChargePointResponse,
+  type BackendConnectorResponse,
+  type BackendPriceRangeResponse,
+  type BackendStationAvailabilityResponse,
+  type BackendStationDiscoveryDetail,
+  type BackendStationDiscoveryItem,
+  type BackendStationDiscoverySort,
+  type BackendTimeRangeResponse,
+} from './stationAdapter';
+
+export {
+  adaptChargePointsFromDetail,
+  adaptConnectorsFromDetail,
+  adaptStationDiscoveryDetail,
+  adaptStationDiscoveryItem,
+  adaptStationList,
+  buildStationDiscoveryQueryParams,
+  deriveHasFastCharging,
+  mapFrontendSortToBackend,
+  type BackendChargePointResponse,
+  type BackendConnectorResponse,
+  type BackendPriceRangeResponse,
+  type BackendStationAvailabilityResponse,
+  type BackendStationDiscoveryDetail,
+  type BackendStationDiscoveryItem,
+  type BackendStationDiscoverySort,
+  type BackendTimeRangeResponse,
+};
+
+const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+
+export const apiBaseUrl =
+  configuredBaseUrl ??
+  (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081');
 
 /**
  * Station data layer.
  *
  * The UI must call ONLY these functions — never the mock data directly.
  * Every function is async so that swapping the internals to a real REST API
- * later does NOT change these signatures or any calling UI.
+ * does NOT change these signatures or any calling UI.
  *
- * NOW:   returns mock data.
- * LATER: replace each body with a real fetch(), keep the signature identical.
+ * Integrates Backend -> Frontend Adapter:
+ * - primaryImageUrl          -> imageUrl
+ * - priceFromVndPerKwh       -> minRatePerKwh (list)
+ * - currentPriceVndPerKwh    -> minRatePerKwh (detail)
+ * - chargePoints[].connectors[] -> total/available connectors & charge points/connectors
+ * - availableConnectorCount  -> availableConnectors
+ * - totalConnectorCount      -> totalConnectors
+ * - openNow                  -> isOpen
+ * - hasFastCharging          -> derived on frontend
  */
 
-/** Simulate network latency so the UI behaves like it will with a real API. */
+/** Simulate network latency for mock fallback. */
 function simulateNetwork<T>(data: T, delayMs = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
 }
@@ -30,26 +82,32 @@ export interface StationFilter {
   availableOnly?: boolean;
   /** Only stations that are open right now. */
   openOnly?: boolean;
+  /** Minimum charging power in kW (e.g. 50, 100, 150). */
+  minPowerKw?: number;
+  /** Province code filter (e.g. "VN-SG", "VN-HN"). */
+  provinceCode?: string;
+  /** User latitude for distance computation. */
+  latitude?: number;
+  /** User longitude for distance computation. */
+  longitude?: number;
   /** Only stations within this many km. */
   maxDistanceKm?: number;
   /** Result ordering (defaults to nearest). */
   sort?: StationSort;
 }
 
-/** How the station list is ordered. */
-export type StationSort = 'nearest' | 'cheapest' | 'rating' | 'available';
+/** How the station list is ordered. Rating sort is removed per SRS spec. */
+export type StationSort = 'nearest' | 'cheapest' | 'available';
 
-/**
- * One page of stations plus the cursor for the next page. Cursor-based (not
- * offset) paging: `nextCursor` is the last item's id, and the next request
- * returns the items that follow it in the same sorted order — stable even as
- * the underlying set grows. `null` means there are no more.
- */
+/** One page of stations. `page` is one-based to match the public API contract. */
 export interface StationPage {
   items: Station[];
-  nextCursor: string | null;
+  page: number;
+  size: number;
   /** Total matching the filter (for a "showing X of N" style count). */
   total: number;
+  totalPages: number;
+  hasNextPage: boolean;
 }
 
 /** Default page size for the discovery list. */
@@ -58,11 +116,11 @@ export const STATION_PAGE_SIZE = 12;
 function sortStations(list: Station[], sort: StationSort): Station[] {
   const by = [...list];
   if (sort === 'cheapest') by.sort((a, b) => (a.minRatePerKwh ?? Infinity) - (b.minRatePerKwh ?? Infinity));
-  else if (sort === 'rating') by.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   else if (sort === 'available') by.sort((a, b) => b.availableConnectors - a.availableConnectors);
   else by.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
   return by;
 }
+
 
 /** Charge Points a driver is allowed to see: UNCLAIMED/SUSPENDED are hidden (BR-CHG-01). */
 function driverVisibleChargePoints(stationId: string): ChargePoint[] {
@@ -108,29 +166,102 @@ function matchesFilter(station: Station, filter: StationFilter): boolean {
 }
 
 /**
- * Search, filter and page stations (FR02). All filtering + ordering happens here
- * so the cursor stays consistent across pages. Results are sorted per
- * `filter.sort` (nearest by default), then a `cursor`-anchored slice is returned.
- * NOW: pages the mock locally. LATER: GET /stations/nearby?lat=&lng=&cursor=&… —
- * the backend returns the same {items, nextCursor} shape from a DB keyset query.
+ * Search, filter and page stations (FR02).
+ * Adapts backend responses from `/api/v1/stations` using `adaptStationDiscoveryItem`.
+ * Falls back to mock data if API is unavailable.
  */
 export async function getNearbyStations(
   filter: StationFilter = {},
-  page: { cursor?: string | null; limit?: number } = {},
+  pagination: { page?: number; size?: number } = {},
+  options?: { accessToken?: string | null },
 ): Promise<StationPage> {
-  const { cursor = null, limit = STATION_PAGE_SIZE } = page;
+  const requestedPage = Math.max(1, pagination.page ?? 1);
+  const requestedSize = Math.min(100, Math.max(1, pagination.size ?? STATION_PAGE_SIZE));
+
+  // Try real API first if endpoint is available
+  try {
+    const params = buildStationDiscoveryQueryParams(filter, {
+      page: requestedPage,
+      size: requestedSize,
+    });
+
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (options?.accessToken) {
+      headers.Authorization = `Bearer ${options.accessToken}`;
+    }
+
+    const response = await fetch(`${apiBaseUrl}/api/v1/stations?${params.toString()}`, {
+      headers,
+    });
+
+    if (response.ok) {
+      const payload = await response.json();
+      const rawItems: BackendStationDiscoveryItem[] | undefined =
+        payload?.data?.content ?? payload?.data?.items ?? payload?.data ?? payload?.content;
+
+      if (Array.isArray(rawItems)) {
+        const items = adaptStationList(rawItems);
+        const meta = payload?.meta ?? payload?.data?.meta ?? {};
+        const page = Math.max(1, Number(meta.page ?? requestedPage) || requestedPage);
+        const size = Math.max(1, Number(meta.size ?? requestedSize) || requestedSize);
+        const total = Math.max(0, Number(meta.totalElements ?? payload?.total ?? items.length) || 0);
+        const totalPages = Math.max(0, Number(meta.totalPages ?? Math.ceil(total / size)) || 0);
+        return { items, page, size, total, totalPages, hasNextPage: page < totalPages };
+      }
+    }
+  } catch {
+    // Graceful fallback to mock data on network error
+  }
+
+  // Fallback to local mock data
   const sorted = sortStations(
     stationsMock.filter((s) => matchesFilter(s, filter)),
     filter.sort ?? 'nearest',
   );
-  const start = cursor ? sorted.findIndex((s) => s.id === cursor) + 1 : 0;
-  const items = sorted.slice(start, start + limit);
-  const nextCursor = start + limit < sorted.length && items.length > 0 ? items[items.length - 1].id : null;
-  return simulateNetwork({ items, nextCursor, total: sorted.length });
+  const start = (requestedPage - 1) * requestedSize;
+  const items = sorted.slice(start, start + requestedSize);
+  const total = sorted.length;
+  const totalPages = Math.ceil(total / requestedSize);
+  return simulateNetwork({
+    items,
+    page: requestedPage,
+    size: requestedSize,
+    total,
+    totalPages,
+    hasNextPage: requestedPage < totalPages,
+  });
 }
 
-export async function getStationById(id: string): Promise<Station | null> {
-  // NOW: return mock. LATER: GET /stations/:id
+/**
+ * Get station detail by ID.
+ * Adapts backend detail response from `/api/v1/stations/:id` using `adaptStationDiscoveryDetail`.
+ * Falls back to mock data if API is unavailable.
+ */
+export async function getStationById(
+  id: string,
+  options?: { accessToken?: string | null },
+): Promise<Station | null> {
+  try {
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (options?.accessToken) {
+      headers.Authorization = `Bearer ${options.accessToken}`;
+    }
+
+    const response = await fetch(`${apiBaseUrl}/api/v1/stations/${id}`, {
+      headers,
+    });
+
+    if (response.ok) {
+      const payload = await response.json();
+      const rawDetail: BackendStationDiscoveryDetail = payload?.data ?? payload;
+      if (rawDetail && rawDetail.id) {
+        return adaptStationDiscoveryDetail(rawDetail);
+      }
+    }
+  } catch {
+    // Fallback to mock
+  }
+
   const station = stationsMock.find((s) => s.id === id) ?? null;
   return simulateNetwork(station);
 }

@@ -11,6 +11,29 @@ export interface PricingConfirmModalProps {
   draftConfig: PricingConfig | null;
 }
 
+const DAY_NAMES: Record<string, string> = {
+  T2: 'Thứ Hai',
+  T3: 'Thứ Ba',
+  T4: 'Thứ Tư',
+  T5: 'Thứ Năm',
+  T6: 'Thứ Sáu',
+  T7: 'Thứ Bảy',
+  CN: 'Chủ Nhật',
+  MONDAY: 'Thứ Hai',
+  TUESDAY: 'Thứ Ba',
+  WEDNESDAY: 'Thứ Tư',
+  THURSDAY: 'Thứ Năm',
+  FRIDAY: 'Thứ Sáu',
+  SATURDAY: 'Thứ Bảy',
+  SUNDAY: 'Chủ Nhật',
+};
+
+interface DayDiff {
+  dayLabel: string;
+  fromText: string;
+  toText: string;
+}
+
 export function PricingConfirmModal({
   open,
   onClose,
@@ -25,25 +48,55 @@ export function PricingConfirmModal({
   const basePriceChanged = initialConfig && initialConfig.basePriceVnd !== draftConfig.basePriceVnd;
   const minDurationChanged = initialConfig && initialConfig.minBookingDurationMin !== draftConfig.minBookingDurationMin;
   const touCountChanged = initialConfig && initialConfig.touRules.length !== draftConfig.touRules.length;
-  const operatingHoursChanged =
-    Boolean(initialConfig) &&
-    JSON.stringify({
-      open24Hours: initialConfig?.open24Hours,
-      hours: initialConfig?.hours,
-    }) !==
-      JSON.stringify({
-        open24Hours: draftConfig.open24Hours,
-        hours: draftConfig.hours,
+
+  const hoursDiffs: DayDiff[] = [];
+  if (initialConfig) {
+    if (Boolean(initialConfig.open24Hours) !== Boolean(draftConfig.open24Hours)) {
+      if (draftConfig.open24Hours) {
+        hoursDiffs.push({
+          dayLabel: 'Toàn trạm',
+          fromText: 'Cấu hình theo ngày',
+          toText: 'Mở liên tục 24/7',
+        });
+      } else {
+        hoursDiffs.push({
+          dayLabel: 'Toàn trạm',
+          fromText: 'Mở 24/7',
+          toText: 'Chuyển sang cấu hình theo ngày',
+        });
+      }
+    }
+
+    if (!draftConfig.open24Hours) {
+      draftConfig.hours.forEach((draftH) => {
+        const initH = initialConfig.hours.find((h) => h.day === draftH.day);
+        if (!initH) return;
+        const initOpen = Boolean(initH.open24);
+        const draftOpen = Boolean(draftH.open24);
+        const initTime = `${initH.open || '06:00'} – ${initH.close || '23:00'}`;
+        const draftTime = `${draftH.open || '06:00'} – ${draftH.close || '23:00'}`;
+
+        if (initOpen !== draftOpen || (draftOpen && initTime !== draftTime)) {
+          hoursDiffs.push({
+            dayLabel: DAY_NAMES[draftH.day] ?? draftH.day,
+            fromText: initOpen ? initTime : 'Đóng cửa',
+            toText: draftOpen ? draftTime : 'Đóng cửa',
+          });
+        }
       });
+    }
+  }
+
+  const operatingHoursChanged = hoursDiffs.length > 0;
   const touRulesChanged =
     Boolean(initialConfig) &&
     JSON.stringify(initialConfig?.touRules) !== JSON.stringify(draftConfig.touRules);
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth={520}>
+    <Modal open={open} onClose={onClose} maxWidth={540}>
       <div>
         {/* Header */}
-        <div className="mb-4 flex items-start gap-3 border-b border-hairline pb-3.5">
+        <div className="mb-3.5 flex items-start gap-3 border-b border-hairline pb-3.5">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-owner-soft">
             <IconClock size={20} className="text-owner-deep" />
           </span>
@@ -57,6 +110,15 @@ export function PricingConfirmModal({
               })}
             </div>
           </div>
+        </div>
+
+        {/* Effective Time Banner */}
+        <div className="mb-3 flex items-center justify-between rounded-[9px] border border-owner-border/70 bg-owner-soft/70 px-3.5 py-2 text-[12.5px] font-medium text-owner-deep">
+          <div className="flex items-center gap-2">
+            <IconClock size={16} className="text-owner-deep shrink-0" />
+            <span>Thời điểm áp dụng:</span>
+          </div>
+          <span className="font-bold text-ink">Ngay sau khi xác nhận lưu</span>
         </div>
 
         {/* Change Comparison Summary */}
@@ -97,15 +159,32 @@ export function PricingConfirmModal({
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-1 border-b border-hairline">
-            <span className="text-muted">Giờ hoạt động:</span>
-            <span className={`font-semibold ${operatingHoursChanged ? 'text-owner-deep' : 'text-ink'}`}>
-              {draftConfig.open24Hours
-                ? 'Mở cửa 24/7'
-                : operatingHoursChanged
-                  ? 'Đã điều chỉnh theo ngày'
-                  : 'Không thay đổi'}
-            </span>
+          {/* Operating Hours & Day-by-Day Diffs */}
+          <div className="flex flex-col py-1 border-b border-hairline gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-muted">Giờ hoạt động hàng tuần:</span>
+              <span className={`font-semibold ${operatingHoursChanged ? 'text-owner-deep font-bold' : 'text-ink'}`}>
+                {draftConfig.open24Hours
+                  ? 'Mở cửa 24/7'
+                  : operatingHoursChanged
+                    ? `Đã điều chỉnh (${hoursDiffs.length} ngày thay đổi)`
+                    : 'Không thay đổi'}
+              </span>
+            </div>
+            {hoursDiffs.length > 0 && (
+              <div className="mt-1 flex flex-col gap-1 rounded-[8px] bg-surface p-2.5 border border-hairline text-[11.5px]">
+                {hoursDiffs.map((diff, i) => (
+                  <div key={i} className="flex items-center justify-between py-0.5">
+                    <span className="font-semibold text-ink">{diff.dayLabel}:</span>
+                    <div className="flex items-center gap-1.5 font-mono">
+                      <span className="text-faint line-through">{diff.fromText}</span>
+                      <span className="text-faint">→</span>
+                      <span className="font-bold text-owner-deep">{diff.toText}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* TOU Rules count */}
@@ -127,7 +206,7 @@ export function PricingConfirmModal({
 
           {/* System Safety Buffer */}
           <div className="flex items-center justify-between py-1 text-faint text-[11.5px]">
-            <span>Đệm an toàn giữa 2 lượt (System Buffer):</span>
+            <span>Thời gian giãn ca giữa 2 lượt:</span>
             <span className="font-mono font-medium">{SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định</span>
           </div>
         </div>
@@ -136,10 +215,10 @@ export function PricingConfirmModal({
         <div className="mb-5 rounded-[10px] border border-warn-border bg-warn-soft/60 p-3 text-[12px] leading-relaxed text-warn-deep">
           <div className="flex items-center gap-1.5 font-bold text-ink">
             <IconAlertTriangle size={16} className="text-warn shrink-0" />
-            <span>Quy định bảo toàn lịch hẹn (Booking Stability Policy)</span>
+            <span>Quy định bảo toàn lịch hẹn đã xác nhận</span>
           </div>
           <div className="mt-1 text-muted">
-            Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ <b>phát sinh sau thời điểm lưu</b>. Các booking đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và cam kết lịch hẹn ban đầu.
+            Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ <b>phát sinh sau thời điểm lưu</b>. Các lịch đặt đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và khung giờ cam kết ban đầu.
           </div>
         </div>
 
@@ -157,7 +236,7 @@ export function PricingConfirmModal({
           >
             {isSaving
               ? t('pricing.saving', { defaultValue: 'Đang lưu…' })
-              : t('pricing.confirmModal.confirmBtn', { defaultValue: 'Xác nhận & Áp dụng' })}
+              : t('pricing.confirmModal.confirmBtn', { defaultValue: 'Lưu & áp dụng ngay' })}
           </Button>
         </div>
       </div>

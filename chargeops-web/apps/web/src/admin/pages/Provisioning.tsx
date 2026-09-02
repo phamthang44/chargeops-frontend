@@ -309,7 +309,7 @@ function StationProvisioning({
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
       qc.invalidateQueries({ queryKey: ['connectors'] });
       setDeletingTarget(null);
-      toast('Đã xóa bản nháp Trụ sạc và các Súng bên trong.', 'success');
+      toast(t('provisioning.draftDeleteSuccess', { defaultValue: 'Đã xóa bản nháp Trụ sạc và các Súng bên trong.' }), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
@@ -321,7 +321,7 @@ function StationProvisioning({
       qc.invalidateQueries({ queryKey: ['chargePoints'] });
       qc.invalidateQueries({ queryKey: ['connectors'] });
       setDeletingTarget(null);
-      toast('Đã xóa Súng sạc bản nháp.', 'success');
+      toast(t('provisioning.draftConnectorDeleteSuccess', { defaultValue: 'Đã xóa Súng sạc bản nháp.' }), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });

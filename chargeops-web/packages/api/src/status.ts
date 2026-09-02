@@ -8,6 +8,7 @@ import type {
   ConnectorRuntimeStatus,
   LicenseStatus,
   ProvisioningStatus,
+  StationOperatingState,
   StationStatus,
   TicketCategory,
   TicketStatus,
@@ -44,12 +45,12 @@ export const CONNECTOR_STATUS: Record<ConnectorRuntimeStatus, StatusMeta> = {
 };
 
 export const STATION_STATUS: Record<StationStatus, StatusMeta> = {
-  active: { label: 'Hoạt động', tone: 'good' },
+  active: { label: 'Đã kích hoạt', tone: 'good' },
   pending: { label: 'Chờ duyệt', tone: 'warn' },
   rejected: { label: 'Bị từ chối', tone: 'bad' },
   suspended: { label: 'Tạm ngưng', tone: 'bad' },
   withdrawn: { label: 'Đã rút hồ sơ', tone: 'bad' },
-  ACTIVE: { label: 'Hoạt động', tone: 'good' },
+  ACTIVE: { label: 'Đã kích hoạt', tone: 'good' },
   PENDING_APPROVAL: { label: 'Chờ duyệt', tone: 'warn' },
   REJECTED: { label: 'Bị từ chối', tone: 'bad' },
   SUSPENDED: { label: 'Tạm ngưng', tone: 'bad' },
@@ -199,7 +200,7 @@ export function isStationDriverEligible(
     }
     return {
       isEligible: true,
-      label: 'Đang nhận khách',
+      label: 'Hiển thị với tài xế',
       tone: 'good',
     };
   }
@@ -259,7 +260,38 @@ export function isStationDriverEligible(
 
   return {
     isEligible: true,
-    label: 'Đang nhận khách',
+    label: 'Hiển thị với tài xế',
     tone: 'good',
   };
+}
+
+export const OPERATING_STATE_META: Record<StationOperatingState, StatusMeta> = {
+  OPEN: { label: 'Đang mở', tone: 'good' },
+  CLOSED_BY_SCHEDULE: { label: 'Đóng theo lịch', tone: 'warn' },
+  SCHEDULE_NOT_CONFIGURED: { label: 'Chưa cấu hình lịch', tone: 'neutral' },
+};
+
+/**
+ * Resolves granular operatingState for station:
+ * - Direct backend operatingState (if present)
+ * - OPEN if openNow is true or open24Hours is true
+ * - CLOSED_BY_SCHEDULE if active schedule exists but currently closed
+ * - SCHEDULE_NOT_CONFIGURED if no schedule has been configured yet
+ */
+export function resolveOperatingState(
+  station?: {
+    operatingState?: StationOperatingState;
+    openNow?: boolean;
+    open24Hours?: boolean;
+    scheduleStatus?: string;
+  } | null,
+): StationOperatingState {
+  if (!station) return 'SCHEDULE_NOT_CONFIGURED';
+  if (station.operatingState) return station.operatingState;
+  if (station.openNow === true) return 'OPEN';
+  if (station.scheduleStatus === 'ACTIVE') {
+    return station.openNow ? 'OPEN' : 'CLOSED_BY_SCHEDULE';
+  }
+  if (station.open24Hours) return 'OPEN';
+  return 'SCHEDULE_NOT_CONFIGURED';
 }

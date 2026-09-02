@@ -384,15 +384,30 @@
         "groupHelp": "Tài xế chọn thời điểm bắt đầu bất kỳ (VD: 09:51). Thời lượng sạc sẽ được đề xuất theo các bội số tối thiểu (VD: 30p → kết thúc 10:21).",
         "durationLabel": "THỜI LƯỢNG ĐẶT TỐI THIỂU (DURATION)",
         "durationVal": "{{minutes}} phút",
-        "basePriceGroupTitle": "Giá sạc mặc định (Base Price)",
-        "basePriceLabel": "GIÁ SẠC MẶC ĐỊNH",
+        "basePriceGroupTitle": "Giá sạc cơ bản",
+        "basePriceLabel": "GIÁ SẠC CƠ BẢN",
         "basePriceSub": "Giá gốc",
-        "basePriceHelp": "Mức giá này áp dụng cho mọi khung giờ không nằm trong các quy tắc giờ cao điểm/thấp điểm bên dưới."
+        "basePriceHelp": "Mức giá này áp dụng cho mọi khung giờ không nằm trong các quy tắc giờ cao điểm/thấp điểm bên dưới.",
+        "stepLabel": "BƯỚC TĂNG THỜI GIAN",
+        "bufferLabel": "THỜI GIAN GIÃN CA (ĐỔI XE)",
+        "maxDurationLabel": "THỜI LƯỢNG SẠC TỐI ĐA"
       },
       "step2": {
         "title": "Giờ hoạt động",
         "toggle247": "Đặt mở 24/7",
-        "helpText": "Giờ hoạt động ảnh hưởng đến khả năng hiển thị của trạm trên bản đồ tìm kiếm của tài xế."
+        "helpText": "Giờ hoạt động ảnh hưởng đến khả năng hiển thị của trạm trên bản đồ tìm kiếm của tài xế.",
+        "historyTooltip": "Xem nhật ký các phiên bản giờ mở/đóng đã áp dụng",
+        "viewHistory": "Xem lịch sử thay đổi",
+        "copyMondayTooltip": "Sao chép khung giờ Thứ 2 cho tất cả các ngày khác",
+        "copyMonday": "Sao chép T2 cho cả tuần",
+        "is247": "✓ Đang mở 24/7",
+        "activeSchedule": "Đang áp dụng",
+        "effectiveFrom": "Có hiệu lực từ:",
+        "defaultSchedule": "Đang áp dụng lịch mặc định hệ thống",
+        "effectiveImmediately": "Các thay đổi sẽ có hiệu lực ngay sau khi bạn xác nhận lưu.",
+        "keepExistingBookings": "Các lịch đặt đã được xác nhận trước đó vẫn giữ nguyên vẹn khung giờ và mức giá cam kết.",
+        "closed": "Đóng cửa",
+        "openAllDay": "Mở 24/24"
       },
       "step3": {
         "title": "Giá theo khung giờ",
@@ -401,16 +416,35 @@
         "deleteBtn": "Xóa",
         "vsBase": "SO VỚI GIÁ GỐC",
         "tipTitle": "Mẹo tối ưu doanh thu",
-        "tipText": "Tăng giá khung 18:00 – 21:00 có thể giúp tăng tới 15% doanh thu hàng tháng."
+        "tipText": "Tăng giá khung 18:00 – 21:00 có thể giúp tăng tới 15% doanh thu hàng tháng.",
+        "timelineTitle": "Biểu đồ phân bổ giá theo khung giờ (24h)",
+        "legendLow": "Thấp điểm",
+        "legendBase": "Giá cơ bản",
+        "legendPeak": "Cao điểm",
+        "weekdaysTrack": "🏢 Ngày trong tuần",
+        "weekdaysBadge": "Thứ 2 – Thứ 6",
+        "weekendsTrack": "🏖️ Cuối tuần",
+        "weekendsBadge": "Thứ 7 – Chủ Nhật",
+        "dailyTrack": "📅 Cả tuần",
+        "dailyBadge": "Thứ 2 – Chủ Nhật",
+        "deleteConfirmTitle": "Xác nhận xóa khung giá",
+        "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa khung giá này? Sau khi xóa, các lượt đặt trong khung giờ này sẽ được tính theo giá cơ bản."
       },
       "step4": {
         "title": "Quy chuẩn Khả dụng & Vận hành",
-        "lockTitle": "Tự động thu hồi khi vắng mặt (No-Show)",
+        "lockTitle": "Tự động hủy khi quá giờ hẹn (Không đến nhận chỗ)",
         "lockDesc": "Hệ thống tự động hủy giữ chỗ và giải phóng cổng sạc sau 15 phút nếu tài xế không thực hiện check-in đúng giờ.",
-        "advanceTitle": "Phạm vi đặt trước ngắn hạn (Short-term Horizon)",
+        "advanceTitle": "Khung thời gian mở đặt trước",
         "advanceDesc": "Chỉ mở nhận đặt chỗ cho Hôm nay và Ngày mai (~48 giờ) để bảo đảm lịch hẹn luôn chuẩn xác và không bị treo slot.",
         "validConfig": "Cấu hình khả dụng chuẩn hóa toàn sàn",
-        "validConfigHelp": "Toàn bộ quy chuẩn vận hành được đồng bộ nhất quán theo tiêu chuẩn SLA của nền tảng ChargeOps."
+        "validConfigHelp": "Toàn bộ quy chuẩn vận hành được đồng bộ nhất quán theo tiêu chuẩn SLA của nền tảng ChargeOps.",
+        "bufferTitle": "Thời gian giãn ca giữa 2 lượt sạc",
+        "bufferDesc": "Khoảng nghỉ cố định bắt buộc sau mỗi lượt sạc để xe trước rút sạc, di chuyển ra khỏi vị trí an toàn trước khi lượt kế tiếp bắt đầu.",
+        "philosophyTitle": "Nguyên tắc vận hành cốt lõi: Lịch đặt chỗ & Lượt sạc thực tế",
+        "philosophyBooking": "Lịch đặt chỗ là cam kết: Quyền sử dụng theo khung giờ đã chốt với tài xế. Xe trước sạc xong sớm không tự ý đẩy lịch của người sau lên sớm hơn mà tạo thêm khoảng nghỉ an toàn.",
+        "philosophyBuffer": "10 phút giãn ca là thời gian đổi xe: Đảm bảo xe trước rút sạc và lái ra khỏi vị trí an toàn trước khi xe sau tiến vào.",
+        "philosophyOverstay": "Tài xế đỗ xe quá giờ hẹn: Hệ thống tính phí phạt đỗ quá giờ riêng, tuyệt đối không tự ý dời hay đè lịch của lượt đặt chỗ tiếp theo.",
+        "philosophySchedule": "Lịch hoạt động áp dụng cho lượt đặt mới: Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu."
       }
     },
     "confirmModal": {
@@ -445,6 +479,45 @@
       "T6": "T6",
       "T7": "T7",
       "CN": "CN"
+    },
+    "copyMondaySuccess": "Đã sao chép khung giờ Thứ 2 cho cả tuần",
+    "resetSuccess": "Đã khôi phục cấu hình ban đầu",
+    "open247": {
+      "title": "Kích hoạt chế độ mở cửa liên tục 24/7?",
+      "subtitle": "Trạm sẽ tiếp nhận lịch sạc xuyên đêm (00:00 – 24:00) cả 7 ngày trong tuần. Vui lòng rà soát các cam kết vận hành dưới đây:",
+      "item1Title": "Lối vào & barie tiếp cận xuyên đêm",
+      "item1Desc": "Đảm bảo cổng vào bãi xe và khu vực trụ sạc không bị khóa cổng hay rào chắn sau 22:00. Tài xế có thể đặt lịch và tự do tiếp cận vào ban đêm (01:00 – 05:00 sáng).",
+      "item2Title": "Cam kết khả dụng & Xử lý vi phạm SLA",
+      "item2Desc": "Nếu tài xế đến sạc theo booking hợp lệ nhưng trạm đóng cửa hoặc không tiếp cận được, trạm sẽ bị tính vi phạm SLA và bồi hoàn điểm uy tín trên sàn ChargeOps.",
+      "item3Title": "Khuyến nghị biểu giá sạc giờ thấp điểm (TOU)",
+      "item3Desc": "Khung giờ đêm (22:00 – 04:00) có giá điện lưới EVN rẻ nhất. Bạn nên cấu hình thêm khung giá TOU ca đêm ở Bước 3 để thu hút khách và tối ưu biên lợi nhuận.",
+      "cancelBtn": "Để tôi kiểm tra lại",
+      "confirmBtn": "Tôi hiểu & Bật chế độ 24/7"
+    },
+    "history": {
+      "title": "Lịch sử giờ hoạt động",
+      "subtitle": "Nhật ký các phiên bản giờ mở/đóng đã áp dụng cho trạm",
+      "calloutTitle": "Quy cách chu kỳ giờ hoạt động:",
+      "calloutDesc": "Giờ mở/đóng là lịch lặp lại hàng tuần. Khi bạn xác nhận Lưu & áp dụng ngay, phiên bản cũ sẽ chốt mốc dừng, và phiên bản mới này sẽ duy trì hiệu lực xuyên suốt các tuần cho đến lần chỉnh sửa tiếp theo.",
+      "activeBadge": "Đang áp dụng (Lặp lại hàng tuần)",
+      "activeHint": "Phiên bản này đang chạy và sẽ tự động lặp lại mỗi tuần cho đến khi bạn cập nhật lịch mới.",
+      "expired": "Đã hết hiệu lực",
+      "version": "Phiên bản #{{count}}",
+      "validityPeriod": "Thời hạn hiệu lực:",
+      "appliedAt": "Thời điểm kích hoạt:",
+      "endedAt": "Được thay thế lúc:",
+      "duration": "Thời gian đã vận hành: ",
+      "updatedBy": "Người cập nhật:",
+      "sevenDaysHours": "Khung giờ từng ngày:",
+      "open247AllDays": "Cả tuần: Mở liên tục 24/7 (00:00 – 24:00)",
+      "closed": "Đóng cửa",
+      "empty": "Chưa có lịch sử thay đổi nào cho trạm này.",
+      "loadError": "Không thể tải lịch sử giờ hoạt động: ",
+      "durationUnderOneHour": "Dưới 1 giờ",
+      "durationDaysHours": "{{days}} ngày {{hours}} giờ",
+      "durationDays": "{{days}} ngày",
+      "durationHours": "{{hours}} giờ",
+      "durationMinutes": "{{minutes}} phút"
     }
   },
   "revenue": {
@@ -516,9 +589,10 @@
     },
     "summary": {
       "total": "TỔNG TRẠM",
-      "active": "ĐANG HOẠT ĐỘNG",
+      "active": "ĐÃ KÍCH HOẠT",
       "pending": "CHỜ DUYỆT",
-      "online": "TRỤ ONLINE"
+      "online": "TRỤ ONLINE",
+      "driverEligible": "HIỂN THỊ VỚI TÀI XẾ"
     },
     "card": {
       "bookingsToday": "ĐẶT HÔM NAY",
@@ -604,6 +678,11 @@
         "reactivated": "Kích hoạt hoạt động trở lại",
         "withdrawn": "Đã rút đơn đăng ký"
       }
+    },
+    "operatingBadge": {
+      "OPEN": "Đang mở",
+      "CLOSED_BY_SCHEDULE": "Đóng theo lịch",
+      "SCHEDULE_NOT_CONFIGURED": "Chưa cấu hình lịch"
     }
   },
   "license": {

@@ -13,43 +13,55 @@ export interface TouPricingStepProps {
   onRemove: (id: string) => void;
 }
 
-/** Helper to render a 24h visual timeline bar based on TOU rules. */
-function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVnd: number }) {
-  // 24 segments from 00:00 to 24:00
+/** Helper to render a single 24h timeline track for a specific day group */
+function TimelineTrack({
+  title,
+  badge,
+  rules,
+  basePriceVnd,
+  targetDayType,
+}: {
+  title: string;
+  badge: string;
+  rules: TouRule[];
+  basePriceVnd: number;
+  targetDayType: 'weekdays' | 'weekends' | 'daily';
+}) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const getHourRate = (hour: number) => {
-    // Find matching rule for this hour
-    const matching = rules.find((r) => {
+    // Ưu tiên rule đặc thù cho ngày cụ thể (weekdays hoặc weekends) trước rule 'daily'
+    const specificMatch = rules.find((r) => {
+      if (r.days !== targetDayType) return false;
       const fromH = parseInt(r.from.split(':')[0] || '0', 10);
       const toH = parseInt(r.to.split(':')[0] || '0', 10);
       if (fromH <= toH) {
         return hour >= fromH && hour < toH;
       }
-      // Overnight rule (e.g. 21:00 to 05:00)
       return hour >= fromH || hour < toH;
     });
-    return matching;
+
+    if (specificMatch) return specificMatch;
+
+    // Fallback sang rule 'daily'
+    return rules.find((r) => {
+      if (r.days !== 'daily') return false;
+      const fromH = parseInt(r.from.split(':')[0] || '0', 10);
+      const toH = parseInt(r.to.split(':')[0] || '0', 10);
+      if (fromH <= toH) {
+        return hour >= fromH && hour < toH;
+      }
+      return hour >= fromH || hour < toH;
+    });
   };
 
   return (
-    <div className="mb-4 rounded-[10px] border border-line-3 bg-surface-2 p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-faint">
-          Biểu đồ phân bổ giá 24 giờ trong ngày
-        </span>
-        <div className="flex items-center gap-3 text-[10.5px]">
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-owner-deep" />
-            <span className="text-muted">Thấp điểm</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-brand" />
-            <span className="text-muted">Giờ thường (gốc)</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-warn" />
-            <span className="text-muted">Cao điểm</span>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between text-[11.5px]">
+        <div className="flex items-center gap-1.5">
+          <span className="font-semibold text-ink">{title}</span>
+          <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-mono font-bold text-muted border border-hairline">
+            {badge}
           </span>
         </div>
       </div>
@@ -58,17 +70,17 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         {hours.map((h) => {
           const match = getHourRate(h);
           let bg = 'bg-surface-3';
-          let title = `${h}:00 - ${h + 1}:00: ${formatVnd(basePriceVnd)}/kWh (Giá gốc)`;
+          let title = `${h}:00 – ${h + 1}:00: ${formatVnd(basePriceVnd)}/kWh (Giá cơ bản)`;
           if (match) {
             const pct = pricePctVsBase(match.rateVnd, basePriceVnd);
             if (pct > 0) {
-              bg = 'bg-warn/80';
+              bg = 'bg-warn/85';
             } else if (pct < 0) {
-              bg = 'bg-owner/80';
+              bg = 'bg-owner/85';
             } else {
               bg = 'bg-brand/70';
             }
-            title = `${h}:00 - ${h + 1}:00: ${match.name} · ${formatVnd(match.rateVnd)}/kWh (${match.from}–${match.to})`;
+            title = `${h}:00 – ${h + 1}:00: ${match.name} · ${formatVnd(match.rateVnd)}/kWh (${match.from}–${match.to})`;
           }
           return (
             <div
@@ -80,13 +92,77 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         })}
       </div>
 
-      <div className="mt-1 flex justify-between font-mono text-[9.5px] text-faint">
+      <div className="flex justify-between font-mono text-[9px] text-faint px-0.5">
         <span>00:00</span>
         <span>06:00</span>
         <span>12:00</span>
         <span>18:00</span>
         <span>24:00</span>
       </div>
+    </div>
+  );
+}
+
+/** Helper to render 24h visual timeline bars based on TOU rules (supporting separate Weekdays & Weekends). */
+function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVnd: number }) {
+  const hasWeekdaySpecific = rules.some((r) => r.days === 'weekdays');
+  const hasWeekendSpecific = rules.some((r) => r.days === 'weekends');
+  const hasDaySplit = hasWeekdaySpecific || hasWeekendSpecific;
+
+  return (
+    <div className="mb-4 rounded-[10px] border border-line-3 bg-surface-2 p-3.5 flex flex-col gap-3">
+      {/* Header & Legend */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2.5">
+        <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-faint">
+          Biểu đồ phân bổ giá theo khung giờ (24h)
+        </span>
+        <div className="flex items-center gap-3 text-[11px]">
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-owner-deep" />
+            <span className="text-muted">Thấp điểm</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-surface-3 border border-line-2" />
+            <span className="text-muted">Giá cơ bản</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-warn" />
+            <span className="text-muted">Cao điểm</span>
+          </span>
+        </div>
+      </div>
+
+      {hasDaySplit ? (
+        <div className="flex flex-col gap-3.5 divide-y divide-hairline">
+          {/* Weekday track */}
+          <TimelineTrack
+            title="🏢 Ngày trong tuần"
+            badge="Thứ 2 – Thứ 6"
+            rules={rules}
+            basePriceVnd={basePriceVnd}
+            targetDayType="weekdays"
+          />
+
+          {/* Weekend track */}
+          <div className="pt-3">
+            <TimelineTrack
+              title="🏖️ Cuối tuần"
+              badge="Thứ 7 – Chủ Nhật"
+              rules={rules}
+              basePriceVnd={basePriceVnd}
+              targetDayType="weekends"
+            />
+          </div>
+        </div>
+      ) : (
+        <TimelineTrack
+          title="📅 Cả tuần"
+          badge="Thứ 2 – Chủ Nhật"
+          rules={rules}
+          basePriceVnd={basePriceVnd}
+          targetDayType="daily"
+        />
+      )}
     </div>
   );
 }

@@ -279,6 +279,11 @@ export interface StationAsset {
   altText?: string;
 }
 
+export type StationOperatingState =
+  | 'OPEN'
+  | 'CLOSED_BY_SCHEDULE'
+  | 'SCHEDULE_NOT_CONFIGURED';
+
 export interface Station {
   id: string;
   stationCode?: string;
@@ -297,6 +302,8 @@ export interface Station {
   onlineChargePointCount?: number;
   onlineActualChargePointCount?: number;
   status: StationStatus;
+  operatingState?: StationOperatingState;
+  openNow?: boolean;
   /** e.g. "Năm · hết hạn 12/09/2026", or object { plan, expiresAt }; null while pending/rejected. */
   licenseSummary?: string | LicenseSummary | null;
   licenseSubmitted?: boolean;
@@ -325,6 +332,8 @@ export interface OwnerStationSummary {
   onlineChargePointCount?: number;
   onlineActualChargePointCount?: number;
   status: StationStatus;
+  operatingState?: StationOperatingState;
+  openNow?: boolean;
   licenseSummary?: string | LicenseSummary | null;
 }
 
@@ -764,6 +773,21 @@ export interface PricingConfig {
   hours: OperatingHour[];
   touRules: TouRule[];
   availability: AvailabilityRules;
+  /** Active schedule version metadata */
+  scheduleEffectiveFrom?: string | null;
+  scheduleEffectiveTo?: string | null;
+  scheduleStatus?: 'ACTIVE' | 'DEFAULT' | string;
+}
+
+export interface StationScheduleHistoryItem {
+  scheduleId: string;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  status: 'ACTIVE' | 'EXPIRED';
+  open24Hours: boolean;
+  hours: OperatingHour[];
+  changedByName: string;
+  changedAt: string;
 }
 
 /* ---------- policy KB (FR15) ---------- */

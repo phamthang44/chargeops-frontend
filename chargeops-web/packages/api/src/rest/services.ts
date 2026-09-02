@@ -79,6 +79,9 @@ function normalizePricing(raw: any): PricingConfig {
       maxAdvanceDays: Number(raw?.availability?.maxAdvanceDays) || 2,
       bufferMinutes: Number(raw?.availability?.bufferMinutes) || 10,
     },
+    scheduleEffectiveFrom: raw?.scheduleEffectiveFrom ?? null,
+    scheduleEffectiveTo: raw?.scheduleEffectiveTo ?? null,
+    scheduleStatus: raw?.scheduleStatus ?? (raw?.scheduleEffectiveFrom ? 'ACTIVE' : 'DEFAULT'),
   };
 }
 
@@ -442,6 +445,25 @@ export function createRestServices(http: HttpClient): Services {
             pricingRequest(config),
           ),
         ),
+      history: async (stationId) => {
+        const res: any = await http.get(`/owner/stations/${stationId}/pricing/schedule-history`);
+        const list = Array.isArray(res) ? res : res?.data ?? [];
+        return list.map((item: any) => ({
+          scheduleId: String(item.scheduleId),
+          effectiveFrom: String(item.effectiveFrom),
+          effectiveTo: item.effectiveTo ? String(item.effectiveTo) : null,
+          status: item.status === 'ACTIVE' ? 'ACTIVE' : 'EXPIRED',
+          open24Hours: Boolean(item.open24Hours),
+          hours: (item.hours ?? []).map((hour: any) => ({
+            day: STATION_DAY_TO_UI[String(hour.day)] ?? String(hour.day),
+            open: item.open24Hours ? '00:00' : hhmm(hour.openTime),
+            close: item.open24Hours ? '00:00' : hhmm(hour.closeTime),
+            open24: Boolean(hour.enabled),
+          })),
+          changedByName: String(item.changedByName || 'Hệ thống'),
+          changedAt: String(item.changedAt || item.effectiveFrom),
+        }));
+      },
     },
 
     policies: {

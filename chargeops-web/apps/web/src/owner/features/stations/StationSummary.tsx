@@ -28,7 +28,7 @@ export function StationSummary({ stations }: { stations: Station[] }) {
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">
       <MetricCard label={t('stations.summary.total', { defaultValue: 'Tổng số trạm' })} value={String(stations.length)} accent="#5b54e8" />
       <MetricCard
-        label={t('stations.summary.driverEligible', { defaultValue: 'Đang nhận khách' })}
+        label={t('stations.summary.driverEligible', { defaultValue: 'Hiển thị với tài xế' })}
         value={`${eligibleCount}/${active.length}`}
         accent="#0d8a5a"
       />

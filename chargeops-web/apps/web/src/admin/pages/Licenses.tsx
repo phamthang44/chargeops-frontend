@@ -124,7 +124,7 @@ export function Licenses() {
     onSuccess: (updatedLic) => {
       qc.invalidateQueries({ queryKey: ['licenses'] });
       qc.invalidateQueries({ queryKey: ['approvals'] });
-      toast('Thao tác cập nhật trạng thái License thành công.', 'success');
+      toast(t('licenses.updateSuccess', { defaultValue: 'Thao tác cập nhật trạng thái License thành công.' }), 'success');
       if (updatedLic && selectedLicense && selectedLicense.id === updatedLic.id) {
         setSelectedLicense(updatedLic);
       }
@@ -467,6 +467,7 @@ function LicenseRow({
   onActivate: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation('admin');
   const toast = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -486,7 +487,7 @@ function LicenseRow({
     e.stopPropagation();
     navigator.clipboard.writeText(displayCode);
     setCopied(true);
-    toast('Đã sao chép mã License', 'success');
+    toast(t('licenses.copiedCode', { code: displayCode, defaultValue: 'Đã sao chép mã License' }), 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 

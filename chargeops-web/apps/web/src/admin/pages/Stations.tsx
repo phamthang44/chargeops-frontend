@@ -379,6 +379,7 @@ function StationRow({
   onSuspend: () => void;
   onReactivate: () => void;
 }) {
+  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const toast = useToast();
   const [copied, setCopied] = useState(false);
@@ -395,7 +396,7 @@ function StationRow({
     const code = s.stationCode || s.id;
     navigator.clipboard.writeText(code);
     setCopied(true);
-    toast('Đã sao chép mã trạm', 'success');
+    toast(t('stations.copiedCode', { code, defaultValue: 'Đã sao chép mã trạm' }), 'success');
     setTimeout(() => setCopied(false), 1500);
   };
 

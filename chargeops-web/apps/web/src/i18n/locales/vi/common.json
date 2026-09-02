@@ -1,6 +1,22 @@
 {
   "language": "Ngôn ngữ",
   "loading": "Đang tải…",
+  "saving": "Đang lưu…",
+  "close": "Đóng",
+  "cancel": "Hủy bỏ",
+  "confirm": "Xác nhận",
+  "save": "Lưu thay đổi",
+  "edit": "Chỉnh sửa",
+  "delete": "Xóa",
+  "retry": "Thử lại",
+  "back": "Quay lại",
+  "all": "Tất cả",
+  "status": "Trạng thái",
+  "action": "Hành động",
+  "notes": "Ghi chú",
+  "system": "Hệ thống",
+  "copied": "Đã sao chép vào bộ nhớ tạm",
+  "copiedCode": "Đã sao chép mã {{code}}",
   "error": {
     "generic": "Đã có lỗi xảy ra"
   }

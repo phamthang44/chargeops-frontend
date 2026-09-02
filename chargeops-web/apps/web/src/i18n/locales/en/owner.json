@@ -384,15 +384,30 @@
         "groupHelp": "Drivers can choose any start time (e.g. 09:51). Duration options step by the minimum amount (e.g. 30m → ends at 10:21).",
         "durationLabel": "MINIMUM BOOKING DURATION (DURATION)",
         "durationVal": "{{minutes}} mins",
-        "basePriceGroupTitle": "Default Charging Price (Base Price)",
-        "basePriceLabel": "DEFAULT CHARGING PRICE",
+        "basePriceGroupTitle": "Base Charging Price",
+        "basePriceLabel": "BASE CHARGING PRICE",
         "basePriceSub": "Base price",
-        "basePriceHelp": "This price applies to any hours not covered by a custom TOU rate window below."
+        "basePriceHelp": "This price applies to any hours not covered by a custom TOU rate window below.",
+        "stepLabel": "DURATION STEP INCREMENT",
+        "bufferLabel": "TURNAROUND BUFFER",
+        "maxDurationLabel": "MAX CHARGING DURATION"
       },
       "step2": {
         "title": "Operating Hours",
-        "toggle247": "Open 24/7",
-        "helpText": "Operating hours affect your station's visibility on the drivers' search map."
+        "toggle247": "Set 24/7",
+        "helpText": "Operating hours affect your station's visibility on the drivers' search map.",
+        "historyTooltip": "View change log of operating hour versions",
+        "viewHistory": "View History",
+        "copyMondayTooltip": "Copy Monday hours to all other days",
+        "copyMonday": "Copy Mon to All",
+        "is247": "✓ Open 24/7",
+        "activeSchedule": "Active Now",
+        "effectiveFrom": "Effective since:",
+        "defaultSchedule": "Using system default schedule",
+        "effectiveImmediately": "Changes will take effect immediately upon saving.",
+        "keepExistingBookings": "Previously confirmed bookings retain their original schedule and rates.",
+        "closed": "Closed",
+        "openAllDay": "Open 24h"
       },
       "step3": {
         "title": "TOU pricing",
@@ -401,16 +416,35 @@
         "deleteBtn": "Delete",
         "vsBase": "VS. BASE PRICE",
         "tipTitle": "Revenue Optimization Tip",
-        "tipText": "Raising the rate for the 18:00 – 21:00 window could lift monthly revenue by up to 15%."
+        "tipText": "Raising the rate for the 18:00 – 21:00 window could lift monthly revenue by up to 15%.",
+        "timelineTitle": "24-Hour Rate Distribution Timeline",
+        "legendLow": "Off-peak",
+        "legendBase": "Base Rate",
+        "legendPeak": "Peak Rate",
+        "weekdaysTrack": "🏢 Weekdays",
+        "weekdaysBadge": "Mon – Fri",
+        "weekendsTrack": "🏖️ Weekends",
+        "weekendsBadge": "Sat – Sun",
+        "dailyTrack": "📅 All Week",
+        "dailyBadge": "Mon – Sun",
+        "deleteConfirmTitle": "Delete Rate Window",
+        "deleteConfirmDesc": "Are you sure you want to delete this rate window? Bookings falling into this window will revert to the base price."
       },
       "step4": {
         "title": "Availability & Operational Standards",
-        "lockTitle": "Auto-release no-shows",
-        "lockDesc": "System automatically cancels holding and releases connector after 15 mins if driver does not check in on time.",
-        "advanceTitle": "Short-term Reservation Horizon",
-        "advanceDesc": "Only accepts reservations for Today and Tomorrow (~48 hours) to ensure schedule predictability.",
+        "lockTitle": "Auto-cancel No-shows",
+        "lockDesc": "System automatically cancels holding and frees connector after 15 mins if driver fails to check in.",
+        "advanceTitle": "Reservation Horizon Window",
+        "advanceDesc": "Only opens reservations for Today and Tomorrow (~48h) to ensure schedule stability.",
         "validConfig": "Platform Standardized Availability",
-        "validConfigHelp": "All operational policies are standardized across the platform according to ChargeOps SLA."
+        "validConfigHelp": "All operational policies are standardized across the platform according to ChargeOps SLA.",
+        "bufferTitle": "Turnaround Safety Buffer",
+        "bufferDesc": "Mandatory safety interval after each session for departure before the next booking arrives.",
+        "philosophyTitle": "Core Operational Principles: Reservations & Real Charging Sessions",
+        "philosophyBooking": "Reservations are commitments: Guaranteed time slots with drivers. Early completions create safe buffers without advancing downstream schedules.",
+        "philosophyBuffer": "10-minute buffer is vehicle exchange time: Ensures departing car unplugs and clears space before arriving car enters.",
+        "philosophyOverstay": "Drivers overstaying: Subject to separate idle fees, never unilaterally pushing back downstream reservations.",
+        "philosophySchedule": "Schedule applies to new bookings: Configuration changes apply only to bookings created after saving; confirmed bookings retain original commitments."
       }
     },
     "confirmModal": {
@@ -445,6 +479,45 @@
       "T6": "Fri",
       "T7": "Sat",
       "CN": "Sun"
+    },
+    "copyMondaySuccess": "Copied Monday schedule to all days",
+    "resetSuccess": "Restored initial configuration",
+    "open247": {
+      "title": "Activate 24/7 Continuous Operation?",
+      "subtitle": "The station will accept overnight charging bookings (00:00 – 24:00) 7 days a week. Please review the following operational commitments:",
+      "item1Title": "Overnight Access & Barriers",
+      "item1Desc": "Ensure entry gates and parking barriers are not locked after 22:00. Drivers can book and access freely at night (01:00 – 05:00 AM).",
+      "item2Title": "Availability Commitment & SLA Penalties",
+      "item2Desc": "If a driver arrives with a valid booking but cannot access or the station is closed, an SLA violation is recorded affecting your platform rating.",
+      "item3Title": "Recommended Off-Peak TOU Pricing",
+      "item3Desc": "Night hours (22:00 – 04:00) feature the lowest EVN grid electricity tariffs. We recommend adding off-peak rates in Step 3 to maximize margin.",
+      "cancelBtn": "Let me double-check",
+      "confirmBtn": "I Understand & Enable 24/7"
+    },
+    "history": {
+      "title": "Operating Hours History",
+      "subtitle": "Change log of operating hour versions applied to this station",
+      "calloutTitle": "Operating Schedule Cycle Specification:",
+      "calloutDesc": "Opening hours follow a weekly recurring cycle. Once you confirm Save & Apply Now, previous versions will be archived and this schedule remains active continuously until edited again.",
+      "activeBadge": "Currently Active (Repeats Weekly)",
+      "activeHint": "This version is currently active and repeats weekly until a new schedule is saved.",
+      "expired": "Expired",
+      "version": "Version #{{count}}",
+      "validityPeriod": "Validity Period:",
+      "appliedAt": "Effective From:",
+      "endedAt": "Replaced At:",
+      "duration": "Active Duration: ",
+      "updatedBy": "Updated By:",
+      "sevenDaysHours": "7-Day Schedule Breakdown:",
+      "open247AllDays": "Open 24/7 all 7 days of the week",
+      "closed": "Closed",
+      "empty": "No schedule change history found for this station.",
+      "loadError": "Could not load schedule history: ",
+      "durationUnderOneHour": "Under 1 hour",
+      "durationDaysHours": "{{days}} days {{hours}} hours",
+      "durationDays": "{{days}} days",
+      "durationHours": "{{hours}} hours",
+      "durationMinutes": "{{minutes}} mins"
     }
   },
   "revenue": {
@@ -516,9 +589,10 @@
     },
     "summary": {
       "total": "TOTAL STATIONS",
-      "active": "ACTIVE",
+      "active": "ACTIVATED",
       "pending": "PENDING",
-      "online": "CHARGERS ONLINE"
+      "online": "CHARGERS ONLINE",
+      "driverEligible": "DRIVER VISIBLE"
     },
     "card": {
       "bookingsToday": "BOOKINGS TODAY",
@@ -604,6 +678,11 @@
         "reactivated": "Station Reactivated",
         "withdrawn": "Registration Withdrawn"
       }
+    },
+    "operatingBadge": {
+      "OPEN": "Open",
+      "CLOSED_BY_SCHEDULE": "Closed by schedule",
+      "SCHEDULE_NOT_CONFIGURED": "No schedule"
     }
   },
   "license": {

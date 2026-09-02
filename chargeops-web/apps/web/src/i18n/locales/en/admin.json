@@ -77,7 +77,29 @@
     "pendingStations": "{{count}} station registrations pending",
     "expiringLicenses": "{{count}} licenses expiring · {{days}} days left",
     "expiredLicenses": "{{count}} licenses expired",
-    "reportedFaults": "{{count}} reported charger faults"
+    "reportedFaults": "{{count}} reported charger faults",
+    "items": {
+      "pendingStations": {
+        "subtitle": "New station registration profiles pending review.",
+        "badge": "Pending",
+        "action": "Review"
+      },
+      "expiringLicenses": {
+        "subtitle": "Station licenses expiring within {{days}} days.",
+        "badge": "Expiring",
+        "action": "View Licenses"
+      },
+      "expiredLicenses": {
+        "subtitle": "Station operating licenses have expired.",
+        "badge": "Expired",
+        "action": "Action Now"
+      },
+      "reportedFaults": {
+        "subtitle": "Charge points reported hardware failure or overheating.",
+        "badge": "Faulted",
+        "action": "Inspect"
+      }
+    }
   },
   "rejectModal": {
     "title": "Reject Station Registration",
@@ -202,7 +224,9 @@
       "issuing": "Recording…",
       "approveBtn": "Approve application",
       "approving": "Approving...",
-      "rejectBtn": "Reject (reason required)"
+      "rejectBtn": "Reject (reason required)",
+      "auditHistory": "Status Transition History",
+      "licenseRequiredHint": "License issuance is required before approving this station profile."
     }
   },
   "bookings": {
@@ -340,7 +364,9 @@
           "severeViolation": "Irremediable severe policy violation"
         }
       }
-    }
+    },
+    "updateSuccess": "License status updated successfully.",
+    "copiedCode": "Copied License code"
   },
   "policyKB": {
     "toastSaved": "Saved & regenerated embeddings",
@@ -399,7 +425,9 @@
       "zoneLabel": "ZONE / LOCATION HINT (optional)",
       "zonePlaceholder": "e.g., Near the entrance, row B",
       "submitBtn": "Create charge point",
-      "toastSuccess": "Created Charge Point {{id}} (Unclaimed)"
+      "toastSuccess": "Created Charge Point {{id}} (Unclaimed)",
+      "activateBtn": "Activate Charger",
+      "activating": "Activating…"
     },
     "connector": {
       "addBtn": "Add connector",
@@ -435,13 +463,18 @@
       "MAINTENANCE": "Maintenance"
     },
     "toastDownloading": "Downloading QR for {{id}}... (demo)",
-    "downloadQr": "Download QR"
+    "downloadQr": "Download QR",
+    "suspendSuccess": "Charger {{id}} has been suspended successfully.",
+    "reactivateSuccess": "Charger {{id}} has been reactivated successfully.",
+    "draftDeleteSuccess": "Deleted draft Charge Point and all contained connectors.",
+    "draftConnectorDeleteSuccess": "Deleted draft connector."
   },
   "transactions": {
     "methods": {
       "ATM": "ATM Card",
       "MOMO": "Momo",
-      "VNPAY": "VNPay"
+      "VNPAY": "VNPay",
+      "title": "By Payment Method"
     },
     "types": {
       "all": "All",
@@ -467,9 +500,20 @@
         "type": "TYPE",
         "method": "METHOD",
         "amount": "AMOUNT",
-        "date": "DATE"
+        "date": "DATE",
+        "txId": "TX ID"
       },
       "empty": "No transactions match the filters."
+    },
+    "metrics": {
+      "gross": "GROSS REVENUE",
+      "payCountVal": "{{count}} payments",
+      "refunded": "REFUNDED",
+      "refundCountVal": "{{count}} refunds",
+      "net": "NET REVENUE",
+      "netDelta": "gross − refund",
+      "avg": "AVG TICKET",
+      "avgDelta": "per transaction"
     }
   },
   "users": {
@@ -511,5 +555,17 @@
       "suspendAccount": "Suspend Account",
       "activateAccount": "Activate Account"
     }
+  },
+  "renewModal": {
+    "title": "Record License Renewal",
+    "subtitle": "Create a new License term after verifying off-platform renewal payment.",
+    "currentInfoTitle": "CURRENT LICENSE INFORMATION",
+    "planLabel": "New renewal plan",
+    "cancelBtn": "Cancel",
+    "processing": "Recording…",
+    "confirmBtn": "Confirm Renewal"
+  },
+  "stations": {
+    "copiedCode": "Copied station code"
   }
 }

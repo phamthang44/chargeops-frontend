@@ -18,17 +18,17 @@ import {
   IconUsers,
   SegmentedControl,
   Skeleton,
+  StationStatusBadge,
   StatusPill,
   useToast,
-  DriverEligibilityBadge,
 } from '@chargeops/ui';
 import {
   AMENITY_CATALOG,
   AMENITY_EMOJI,
-  STATION_STATUS,
   formatDateVn,
   formatDateTimeVn,
   isStationDriverEligible,
+  resolveOperatingState,
   useApi,
   type Amenity,
   type ChargePoint,
@@ -146,11 +146,6 @@ export function StationDetailDrawer({
 
   if (!station) return null;
 
-  const statusMeta = STATION_STATUS[station.status] ?? {
-    label: station.status,
-    tone: 'neutral' as const,
-  };
-
   const fullAddress =
     station.address ||
     [station.addressLine, station.wardName, station.provinceName].filter(Boolean).join(', ') ||
@@ -194,6 +189,9 @@ export function StationDetailDrawer({
     (m: StationStaffMember) => m.stationId === station.id || m.stationName === station.name,
   );
 
+  const operatingState = resolveOperatingState(station);
+  const isActive = station.status === 'active' || station.status === 'ACTIVE';
+
   return (
     <Drawer
       open={open}
@@ -202,11 +200,11 @@ export function StationDetailDrawer({
         <div className="flex flex-col gap-0.5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[16px] font-bold text-ink">{station.name}</span>
-            <StatusPill tone={statusMeta.tone} label={statusMeta.label} />
-            <DriverEligibilityBadge
-              isEligible={eligibility.isEligible}
-              label={eligibility.label}
-              tone={eligibility.tone as any}
+            <StationStatusBadge
+              status={station.status}
+              eligibility={eligibility}
+              operatingState={operatingState}
+              variant="detailed"
             />
           </div>
           <div className="text-[12px] font-mono text-faint">

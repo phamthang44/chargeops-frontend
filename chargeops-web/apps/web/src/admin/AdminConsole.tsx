@@ -131,11 +131,11 @@ export function AdminConsole({ base }: { base: string }) {
       items.push({
         id: 'approvals',
         title: t('notifications.pendingStations', { count: q.pendingStations }),
-        subtitle: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.',
+        subtitle: t('notifications.items.pendingStations.subtitle', { defaultValue: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.' }),
         tone: 'warn',
         category: 'system',
-        badge: 'Chờ duyệt',
-        actionLabel: 'Duyệt trạm',
+        badge: t('notifications.items.pendingStations.badge', { defaultValue: 'Chờ duyệt' }),
+        actionLabel: t('notifications.items.pendingStations.action', { defaultValue: 'Duyệt trạm' }),
         onSelect: () => navigate(`${base}/approvals`),
         onAction: () => navigate(`${base}/approvals`),
       });
@@ -144,11 +144,14 @@ export function AdminConsole({ base }: { base: string }) {
       items.push({
         id: 'expiring',
         title: t('notifications.expiringLicenses', { count: q.expiringLicenses, days: q.expiringDaysMin }),
-        subtitle: `Gói giấy phép trạm sẽ hết hạn trong ${q.expiringDaysMin} ngày tới.`,
+        subtitle: t('notifications.items.expiringLicenses.subtitle', {
+          days: q.expiringDaysMin,
+          defaultValue: `Gói giấy phép trạm sẽ hết hạn trong ${q.expiringDaysMin} ngày tới.`,
+        }),
         tone: 'warn',
         category: 'system',
-        badge: 'Sắp hết hạn',
-        actionLabel: 'Xem giấy phép',
+        badge: t('notifications.items.expiringLicenses.badge', { defaultValue: 'Sắp hết hạn' }),
+        actionLabel: t('notifications.items.expiringLicenses.action', { defaultValue: 'Xem giấy phép' }),
         onSelect: () => navigate(`${base}/licenses`),
         onAction: () => navigate(`${base}/licenses`),
       });
@@ -157,11 +160,11 @@ export function AdminConsole({ base }: { base: string }) {
       items.push({
         id: 'expired',
         title: t('notifications.expiredLicenses', { count: q.expiredLicenses }),
-        subtitle: 'Giấy phép hoạt động trạm đã hết hạn sử dụng.',
+        subtitle: t('notifications.items.expiredLicenses.subtitle', { defaultValue: 'Giấy phép hoạt động trạm đã hết hạn sử dụng.' }),
         tone: 'bad',
         category: 'alert',
-        badge: 'Hết hạn',
-        actionLabel: 'Xử lý ngay',
+        badge: t('notifications.items.expiredLicenses.badge', { defaultValue: 'Hết hạn' }),
+        actionLabel: t('notifications.items.expiredLicenses.action', { defaultValue: 'Xử lý ngay' }),
         onSelect: () => navigate(`${base}/licenses`),
         onAction: () => navigate(`${base}/licenses`),
       });
@@ -170,11 +173,11 @@ export function AdminConsole({ base }: { base: string }) {
       items.push({
         id: 'faults',
         title: t('notifications.reportedFaults', { count: q.reportedFaults }),
-        subtitle: 'Trụ sạc báo lỗi phần cứng hoặc quá nhiệt kết nối.',
+        subtitle: t('notifications.items.reportedFaults.subtitle', { defaultValue: 'Trụ sạc báo lỗi phần cứng hoặc quá nhiệt kết nối.' }),
         tone: 'bad',
         category: 'alert',
-        badge: 'Sự cố trụ',
-        actionLabel: 'Kiểm tra',
+        badge: t('notifications.items.reportedFaults.badge', { defaultValue: 'Sự cố trụ' }),
+        actionLabel: t('notifications.items.reportedFaults.action', { defaultValue: 'Kiểm tra' }),
         onSelect: () => navigate(`${base}/provisioning`),
         onAction: () => navigate(`${base}/provisioning`),
       });

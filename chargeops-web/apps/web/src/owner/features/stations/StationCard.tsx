@@ -1,20 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import {
-  STATION_STATUS,
   formatDateVn,
   isStationDriverEligible,
+  resolveOperatingState,
   type LicenseSummary,
   type Station,
 } from '@chargeops/api';
 import {
   Button,
   Card,
-  DriverEligibilityBadge,
   IconCheck,
   IconClock,
   IconPin,
   IconShieldAlert,
-  StatusPill,
+  StationStatusBadge,
 } from '@chargeops/ui';
 
 function formatLicense(license: string | LicenseSummary | null | undefined): {
@@ -60,7 +59,6 @@ export function StationCard({
   if (!station) return null;
 
   const rawStatus = station.status || 'ACTIVE';
-  const meta = STATION_STATUS[rawStatus] ?? { label: String(rawStatus), tone: 'neutral' as const };
 
   const cityName = station.city || station.provinceName || '';
   const fullAddress =
@@ -95,6 +93,8 @@ export function StationCard({
     onlineCount: onlineChargers,
   });
 
+  const operatingState = resolveOperatingState(station);
+
   return (
     <Card
       className={`p-[18px] flex flex-col justify-between transition-shadow hover:shadow-md ${
@@ -104,28 +104,32 @@ export function StationCard({
       <div>
         {/* Header */}
         <div className="mb-3 flex items-start justify-between gap-2.5">
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-[16px] font-bold text-ink hover:text-owner transition-colors cursor-pointer" onClick={() => onOpenDetail?.(station)}>
+              <span
+                className="text-[16px] font-bold text-ink hover:text-owner transition-colors cursor-pointer truncate"
+                onClick={() => onOpenDetail?.(station)}
+                title={station.name}
+              >
                 {station.name}
               </span>
               {isActiveContext && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10px] font-bold text-owner-deep">
+                <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10px] font-bold text-owner-deep shrink-0 border border-owner-border/40">
                   <IconCheck size={11} strokeWidth={2.4} />
                   <span>Đang chọn</span>
                 </span>
               )}
             </div>
-            <div className="mt-0.5 font-mono text-[12px] text-faint">
+            <div className="mt-0.5 font-mono text-[12px] text-faint truncate">
               {station.stationCode || station.id} {cityName ? `· ${cityName}` : ''}
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-1.5">
-            <StatusPill tone={meta.tone} label={meta.label} />
-            <DriverEligibilityBadge
-              isEligible={eligibility.isEligible}
-              label={eligibility.label}
-              tone={eligibility.tone as any}
+          <div className="shrink-0 flex items-center justify-end">
+            <StationStatusBadge
+              status={rawStatus}
+              eligibility={eligibility}
+              operatingState={operatingState}
+              variant="detailed"
             />
           </div>
         </div>

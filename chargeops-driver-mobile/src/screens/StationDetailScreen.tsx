@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -17,13 +17,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton, GlassButton, StarRating, StatusBadge } from '@/components';
+import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
-  getChargePointsByStation,
-  getConnectorsByStation,
   getReviewsByStation,
-  getStationById,
+  getStationDetail,
 } from '@/services/stationService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Amenity, ChargePoint, Connector, Review, Station } from '@/types';
@@ -64,6 +63,7 @@ export function StationDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { isFavorite, toggleFavorite, themeColors, isDark } = usePreferences();
+  const { getAccessToken } = useAuth();
 
   const [station, setStation] = useState<Station | null>(null);
   const [chargePoints, setChargePoints] = useState<ChargePoint[]>([]);
@@ -74,31 +74,46 @@ export function StationDetailScreen() {
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     let active = true;
+    setLoading(true);
+
+    const token = getAccessToken();
+
     Promise.all([
-      getStationById(params.stationId),
-      getChargePointsByStation(params.stationId),
-      getConnectorsByStation(params.stationId),
+      getStationDetail(params.stationId, { accessToken: token }),
       getReviewsByStation(params.stationId),
-    ]).then(([st, cps, conns, revs]) => {
-      if (!active) return;
-      setStation(st);
-      setChargePoints(cps);
-      setConnectors(conns);
-      setReviews(revs);
+    ])
+      .then(([detail, revs]) => {
+        if (!active) return;
+        if (detail) {
+          setStation(detail.station);
+          setChargePoints(detail.chargePoints);
+          setConnectors(detail.connectors);
+          setReviews(revs);
 
-      const firstAvail = conns.find((c) => c.runtimeStatus === 'AVAILABLE');
-      if (firstAvail) setSelectedConnectorId(firstAvail.id);
-      else if (conns[0]) setSelectedConnectorId(conns[0].id);
-
-      setLoading(false);
-    });
+          const firstAvail = detail.connectors.find((c) => c.runtimeStatus === 'AVAILABLE');
+          if (firstAvail) setSelectedConnectorId(firstAvail.id);
+          else if (detail.connectors[0]) setSelectedConnectorId(detail.connectors[0].id);
+        } else {
+          setStation(null);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setStation(null);
+        setLoading(false);
+      });
 
     return () => {
       active = false;
     };
-  }, [params.stationId]);
+  }, [params.stationId, getAccessToken]);
+
+  useEffect(() => {
+    return loadData();
+  }, [loadData]);
 
   const fav = isFavorite(params.stationId);
 
@@ -132,7 +147,7 @@ export function StationDetailScreen() {
     </View>
   );
 
-  if (loading || !station) {
+  if (loading) {
     return (
       <View style={[styles.container, { backgroundColor: themeColors.background }]}>
         <View style={[styles.hero, { backgroundColor: themeColors.surfaceAlt }]} />
@@ -142,15 +157,79 @@ export function StationDetailScreen() {
     );
   }
 
-  const unavailable = !station.isOpen || station.availableConnectors === 0;
-  const canBook = !unavailable && !!selectedConnectorId;
-  const gateHint = !station.isOpen
-    ? t('stationDetail.closedHint')
-    : station.availableConnectors === 0
-      ? t('stationDetail.fullHint')
-      : !selectedConnectorId
-        ? t('stationDetail.selectConnectorHint')
-        : null;
+  if (!station) {
+    return (
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: themeColors.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: spacing.xl,
+          },
+        ]}
+      >
+        {floatingHeader}
+        <Ionicons name="alert-circle-outline" size={54} color={themeColors.error} />
+        <Text
+          style={{
+            marginTop: spacing.md,
+            fontSize: fontSizes.body,
+            color: themeColors.textStrong,
+            textAlign: 'center',
+            fontWeight: fontWeights.semibold,
+          }}
+        >
+          Không thể tải thông tin trạm sạc
+        </Text>
+        <Text
+          style={{
+            marginTop: spacing.xs,
+            fontSize: fontSizes.caption,
+            color: themeColors.textMuted,
+            textAlign: 'center',
+            maxWidth: 280,
+          }}
+        >
+          Trạm sạc không tồn tại hoặc phiên đăng nhập của bạn đã hết hạn. Vui lòng thử lại.
+        </Text>
+        <Pressable
+          onPress={() => loadData()}
+          style={{
+            marginTop: spacing.lg,
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.xl,
+            backgroundColor: themeColors.primary,
+            borderRadius: radius.md,
+          }}
+        >
+          <Text style={{ color: '#FFFFFF', fontWeight: fontWeights.semibold }}>Thử lại</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const opState = station.operatingState || (station.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+  const isNoSchedule = opState === 'SCHEDULE_NOT_CONFIGURED';
+  const isClosedBySchedule = opState === 'CLOSED_BY_SCHEDULE';
+
+  // Future bookings are allowed when CLOSED_BY_SCHEDULE as long as connectors exist!
+  // Only locked out if no schedule configured or no connector selected.
+  const canBook = !isNoSchedule && station.totalConnectors > 0 && !!selectedConnectorId;
+  const bookButtonLabel = isClosedBySchedule
+    ? 'Đặt lịch trước'
+    : t('stationDetail.bookNow', 'Đặt chỗ ngay');
+
+  const gateHint = isNoSchedule
+    ? 'Trạm chưa cấu hình giờ hoạt động nên tạm thời chưa thể đặt lịch'
+    : isClosedBySchedule
+      ? 'Trạm đang đóng cửa lúc này. Bạn có thể chọn khung giờ mở cửa kế tiếp để đặt trước.'
+      : station.availableConnectors === 0
+        ? t('stationDetail.fullHint')
+        : !selectedConnectorId
+          ? t('stationDetail.selectConnectorHint')
+          : null;
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -190,7 +269,7 @@ export function StationDetailScreen() {
             )}
             {station.reviewCount !== undefined && (
               <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>
-                {t('stationDetail.reviews', { count: station.reviewCount })}
+                ({station.reviewCount})
               </Text>
             )}
             {station.distanceKm !== undefined && (
@@ -200,9 +279,30 @@ export function StationDetailScreen() {
               </>
             )}
             <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>·</Text>
-            <Text style={[styles.metaStrong, { color: station.isOpen ? themeColors.primary : themeColors.error }]}>
-              {station.isOpen ? t('stationDetail.open') : t('stationDetail.closed')}
+            <Text
+              style={[
+                styles.metaStrong,
+                {
+                  color:
+                    opState === 'OPEN'
+                      ? themeColors.primary
+                      : isClosedBySchedule
+                        ? themeColors.warning
+                        : themeColors.textMuted,
+                },
+              ]}
+            >
+              {opState === 'OPEN'
+                ? t('stationDetail.open', 'Đang mở cửa')
+                : isClosedBySchedule
+                  ? 'Đóng cửa theo lịch'
+                  : 'Chưa cấu hình giờ hoạt động'}
             </Text>
+            {station.operatingHours && (
+              <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>
+                ({station.operatingHours})
+              </Text>
+            )}
           </View>
 
           <View style={styles.addressRow}>
@@ -396,11 +496,20 @@ export function StationDetailScreen() {
           <Text style={[styles.bottomValue, { color: themeColors.textStrong }]} numberOfLines={1}>
             {selectedConn ? `${selectedConn.name} (${selectedConn.connectorType})` : t('stationDetail.none')}
           </Text>
-          {gateHint && <Text style={[styles.bottomHint, { color: themeColors.error }]}>{gateHint}</Text>}
+          {gateHint && (
+            <Text
+              style={[
+                styles.bottomHint,
+                { color: isClosedBySchedule ? themeColors.warning : themeColors.error },
+              ]}
+            >
+              {gateHint}
+            </Text>
+          )}
         </View>
 
         <AppButton
-          label={t('stationDetail.bookNow')}
+          label={bookButtonLabel}
           disabled={!canBook}
           onPress={() =>
             navigation.navigate('TimeRangePicker', {

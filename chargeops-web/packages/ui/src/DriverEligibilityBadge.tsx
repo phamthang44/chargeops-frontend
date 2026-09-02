@@ -13,7 +13,7 @@ export function DriverEligibilityBadge({
   tone = isEligible ? 'good' : 'warn',
   className = '',
 }: DriverEligibilityBadgeProps) {
-  const displayLabel = label || (isEligible ? 'Đang nhận khách' : 'Tạm ẩn tìm kiếm');
+  const displayLabel = label || (isEligible ? 'Hiển thị với tài xế' : 'Tạm ẩn tìm kiếm');
 
   if (isEligible) {
     return (

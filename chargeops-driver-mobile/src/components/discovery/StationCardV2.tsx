@@ -33,7 +33,29 @@ export function StationCardV2({
 }: StationCardV2Props) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+
+  const operatingState = station.operatingState || (station.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+  const isNoSchedule = operatingState === 'SCHEDULE_NOT_CONFIGURED';
+  const isClosedBySchedule = operatingState === 'CLOSED_BY_SCHEDULE';
   const full = station.availableConnectors === 0;
+
+  // Future bookings are allowed when CLOSED_BY_SCHEDULE as long as connectors exist.
+  // Only locked out if no schedule configured or full.
+  const canBook = !isNoSchedule && !full;
+
+  let actionLabel = 'Đặt chỗ ngay';
+  let actionIcon: keyof typeof Ionicons.glyphMap = 'flash';
+
+  if (isNoSchedule) {
+    actionLabel = 'Chưa có lịch';
+    actionIcon = 'calendar-outline';
+  } else if (full) {
+    actionLabel = t('stationList.full', 'Hết chỗ');
+    actionIcon = 'close-circle-outline';
+  } else if (isClosedBySchedule) {
+    actionLabel = 'Đặt lịch';
+    actionIcon = 'calendar';
+  }
 
   return (
     <Pressable
@@ -62,7 +84,7 @@ export function StationCardV2({
         )}
 
         <View style={styles.topBody}>
-          {/* Badge Row (Power + Rating) */}
+          {/* Badge Row (Power + Rating + Closed status) */}
           <View style={styles.badgeRow}>
             <PowerBadge
               powerKw={station.maxPowerKw}
@@ -88,6 +110,38 @@ export function StationCardV2({
                     ({station.reviewCount})
                   </Text>
                 )}
+              </View>
+            )}
+            {isClosedBySchedule && (
+              <View
+                style={[
+                  styles.closedPill,
+                  {
+                    backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7',
+                    borderColor: isDark ? '#B45309' : '#FCD34D',
+                  },
+                ]}
+              >
+                <Ionicons name="time-outline" size={10} color={themeColors.warning} />
+                <Text style={[styles.closedText, { color: themeColors.warning }]}>
+                  Đóng cửa theo lịch
+                </Text>
+              </View>
+            )}
+            {isNoSchedule && (
+              <View
+                style={[
+                  styles.closedPill,
+                  {
+                    backgroundColor: isDark ? 'rgba(100, 116, 139, 0.15)' : '#F1F5F9',
+                    borderColor: isDark ? '#475569' : '#CBD5E1',
+                  },
+                ]}
+              >
+                <Ionicons name="settings-outline" size={10} color={themeColors.textMuted} />
+                <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
+                  Chưa cấu hình giờ hoạt động
+                </Text>
               </View>
             )}
           </View>
@@ -165,30 +219,33 @@ export function StationCardV2({
           style={({ pressed }) => [
             styles.primaryActionBtn,
             {
-              backgroundColor: full
+              backgroundColor: !canBook
                 ? isDark
                   ? '#2A312F'
                   : '#E5E7EB'
-                : themeColors.primary,
+                : isClosedBySchedule
+                  ? isDark
+                    ? '#0F766E'
+                    : '#0D9488'
+                  : themeColors.primary,
               opacity: pressed ? 0.9 : 1,
             },
           ]}
-          onPress={onQuickBook || onOpen}
-          disabled={full}
+          onPress={canBook ? (onQuickBook || onOpen) : onOpen}
           hitSlop={4}
         >
           <Ionicons
-            name="flash"
+            name={actionIcon}
             size={15}
-            color={full ? themeColors.textMuted : '#FFFFFF'}
+            color={!canBook ? themeColors.textMuted : '#FFFFFF'}
           />
           <Text
             style={[
               styles.primaryActionText,
-              { color: full ? themeColors.textMuted : '#FFFFFF' },
+              { color: !canBook ? themeColors.textMuted : '#FFFFFF' },
             ]}
           >
-            {full ? t('stationList.full') : 'Đặt chỗ ngay'}
+            {actionLabel}
           </Text>
         </Pressable>
       </View>
@@ -237,6 +294,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     height: 22,
     borderWidth: 1,
+  },
+  closedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  closedText: {
+    fontSize: 10.5,
+    fontWeight: fontWeights.bold,
+    lineHeight: 14,
+    includeFontPadding: false,
   },
   ratingText: {
     fontSize: fontSizes.caption,

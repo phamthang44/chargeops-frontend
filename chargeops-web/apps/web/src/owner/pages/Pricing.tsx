@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   useApi,
   type AvailabilityRules,
+  type OperatingHour,
   type PricingConfig,
   type TouRule,
 } from '@chargeops/api';
@@ -14,6 +15,7 @@ import { TouPricingStep } from '../features/pricing/TouPricingStep';
 import { AvailabilityStep } from '../features/pricing/AvailabilityStep';
 import { AddRuleModal } from '../features/pricing/AddRuleModal';
 import { PricingConfirmModal } from '../features/pricing/PricingConfirmModal';
+import { ScheduleHistoryDrawer } from '../features/pricing/ScheduleHistoryDrawer';
 import { useOwnerStation } from '../context/OwnerStationContext';
 
 /**
@@ -28,9 +30,11 @@ export function Pricing() {
   const toast = useToast();
   const { selectedStationId } = useOwnerStation();
   const [draft, setDraft] = useState<PricingConfig | null>(null);
+  const [backupHours, setBackupHours] = useState<OperatingHour[] | null>(null);
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<TouRule | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['pricing', selectedStationId],
@@ -47,8 +51,9 @@ export function Pricing() {
     mutationFn: (config: PricingConfig) => api.pricing.save(selectedStationId, config),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pricing', selectedStationId] });
+      qc.invalidateQueries({ queryKey: ['pricing-history', selectedStationId] });
       setConfirmModalOpen(false);
-      toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình giá & giờ hoạt động thành công!' }), 'success');
+      toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình và áp dụng thành công!' }), 'success');
     },
     onError: (e) => {
       toast((e as Error).message, 'error');
@@ -89,26 +94,32 @@ export function Pricing() {
         : d,
     );
   const set247 = () =>
-    setDraft((d) =>
-      d
-        ? d.open24Hours
-          ? {
-              ...d,
-              open24Hours: false,
-              hours: d.hours.map((h) => ({
-                ...h,
-                open24: true,
-                open: '06:00',
-                close: '23:00',
-              })),
-            }
-          : {
-              ...d,
-              open24Hours: true,
-              hours: d.hours.map((h) => ({ ...h, open24: true, open: '00:00', close: '00:00' })),
-            }
-        : d,
-    );
+    setDraft((d) => {
+      if (!d) return d;
+      if (d.open24Hours) {
+        // Tắt 24/7: Khôi phục lại giờ cũ trước đó nếu có, nếu không thì dùng mặc định 06:00 - 23:00
+        return {
+          ...d,
+          open24Hours: false,
+          hours:
+            backupHours ??
+            d.hours.map((h) => ({
+              ...h,
+              open24: true,
+              open: '06:00',
+              close: '23:00',
+            })),
+        };
+      } else {
+        // Bật 24/7: Ghi nhớ lại cấu hình giờ từng ngày hiện tại
+        setBackupHours(d.hours);
+        return {
+          ...d,
+          open24Hours: true,
+          hours: d.hours.map((h) => ({ ...h, open24: true, open: '00:00', close: '00:00' })),
+        };
+      }
+    });
 
   const copyMondayToAll = () => {
     setDraft((d) => {
@@ -126,7 +137,7 @@ export function Pricing() {
         })),
       };
     });
-    toast('Đã sao chép khung giờ Thứ 2 cho cả tuần', 'info');
+    toast(t('pricing.copyMondaySuccess', { defaultValue: 'Đã sao chép khung giờ Thứ 2 cho cả tuần' }), 'info');
   };
 
   const handleSaveRule = (rule: Omit<TouRule, 'id'>, editId?: string) => {
@@ -196,10 +207,14 @@ export function Pricing() {
           <OperatingHoursStep
             hours={draft.hours}
             isOpen247={Boolean(draft.open24Hours)}
+            effectiveFrom={data?.scheduleEffectiveFrom}
+            effectiveTo={data?.scheduleEffectiveTo}
+            scheduleStatus={data?.scheduleStatus}
             onToggleDay={toggleDay}
             onChangeTime={changeHour}
             onSet247={set247}
             onCopyMondayToAll={copyMondayToAll}
+            onOpenHistory={() => setHistoryDrawerOpen(true)}
           />
 
           {/* Step 3: TOU Pricing */}
@@ -221,7 +236,7 @@ export function Pricing() {
               size="lg"
               onClick={() => {
                 if (data) setDraft(data);
-                toast('Đã khôi phục cấu hình ban đầu', 'info');
+                toast(t('pricing.resetSuccess', { defaultValue: 'Đã khôi phục cấu hình ban đầu' }), 'info');
               }}
             >
               {t('pricing.cancelBtn', { defaultValue: 'Hủy thay đổi' })}
@@ -232,7 +247,7 @@ export function Pricing() {
               onClick={() => setConfirmModalOpen(true)}
               disabled={save.isPending}
             >
-              {t('pricing.saveBtn', { defaultValue: 'Lưu thay đổi…' })}
+              {t('pricing.saveBtn', { defaultValue: 'Lưu & áp dụng ngay' })}
             </Button>
           </div>
         </div>
@@ -260,6 +275,13 @@ export function Pricing() {
         onConfirm={() => {
           if (draft) save.mutate(draft);
         }}
+      />
+
+      {/* Schedule History Slide-over Drawer */}
+      <ScheduleHistoryDrawer
+        open={historyDrawerOpen}
+        onClose={() => setHistoryDrawerOpen(false)}
+        stationId={selectedStationId}
       />
     </>
   );

@@ -1,15 +1,21 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { OperatingHour } from '@chargeops/api';
+import { formatDateTimeVn, type OperatingHour } from '@chargeops/api';
 import { IconClock, IconCopy, Toggle, TimeSelect } from '@chargeops/ui';
 import { StepHeader } from './StepHeader';
+import { Open247WarningModal } from './Open247WarningModal';
 
 export interface OperatingHoursStepProps {
   hours: OperatingHour[];
   isOpen247: boolean;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  scheduleStatus?: string | null;
   onToggleDay: (day: string) => void;
   onChangeTime: (day: string, field: 'open' | 'close', value: string) => void;
   onSet247: () => void;
   onCopyMondayToAll?: () => void;
+  onOpenHistory?: () => void;
 }
 
 const DAY_LABELS: Record<string, { full: string; short: string; isWeekend?: boolean }> = {
@@ -36,36 +42,61 @@ const DAY_LABELS: Record<string, { full: string; short: string; isWeekend?: bool
 export function OperatingHoursStep({
   hours,
   isOpen247,
+  effectiveFrom,
+  scheduleStatus,
   onToggleDay,
   onChangeTime,
   onSet247,
   onCopyMondayToAll,
+  onOpenHistory,
 }: OperatingHoursStepProps) {
   const { t } = useTranslation('owner');
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
 
   const openDaysCount = hours.filter((h) => h.open24).length;
+
+  const handleToggle247 = () => {
+    if (isOpen247) {
+      // Đang 24/7 tắt đi thì không cần cảnh báo
+      onSet247();
+    } else {
+      // Bật 24/7 thì mở modal cảnh báo cam kết
+      setWarningModalOpen(true);
+    }
+  };
 
   return (
     <div>
       <StepHeader
         n={2}
-        title={t('pricing.steps.step2.title', { defaultValue: 'Giờ hoạt động' })}
+        title={t('pricing.steps.step2.title', { defaultValue: 'Giờ hoạt động hàng tuần' })}
         action={
           <div className="flex items-center gap-2">
+            {onOpenHistory && (
+              <button
+                type="button"
+                onClick={onOpenHistory}
+                className="flex items-center gap-1.5 rounded-[7px] border border-line bg-surface px-2.5 py-1 text-[11.5px] font-medium text-body transition hover:border-line-hover hover:bg-surface-2 cursor-pointer"
+                title={t('pricing.steps.step2.historyTooltip', { defaultValue: 'Xem nhật ký các phiên bản giờ mở/đóng đã áp dụng' })}
+              >
+                <IconClock size={12} className="text-owner-deep" />
+                <span>{t('pricing.steps.step2.viewHistory', { defaultValue: 'Xem lịch sử thay đổi' })}</span>
+              </button>
+            )}
             {!isOpen247 && onCopyMondayToAll && (
               <button
                 type="button"
                 onClick={onCopyMondayToAll}
                 className="flex items-center gap-1 rounded-[7px] border border-line bg-surface px-2.5 py-1 text-[11.5px] font-medium text-body transition hover:border-line-hover hover:bg-surface-2 cursor-pointer"
-                title="Sao chép khung giờ Thứ 2 cho tất cả các ngày khác"
+                title={t('pricing.steps.step2.copyMondayTooltip', { defaultValue: 'Sao chép khung giờ Thứ 2 cho tất cả các ngày khác' })}
               >
                 <IconCopy size={12} className="text-muted" />
-                <span>Sao chép T2 cho cả tuần</span>
+                <span>{t('pricing.steps.step2.copyMonday', { defaultValue: 'Sao chép T2 cho cả tuần' })}</span>
               </button>
             )}
             <button
               type="button"
-              onClick={onSet247}
+              onClick={handleToggle247}
               className={`flex items-center gap-1.5 rounded-[7px] px-2.5 py-1 text-[12px] font-semibold transition cursor-pointer ${
                 isOpen247
                   ? 'border border-owner-border bg-owner-soft text-owner-deep ring-1 ring-owner/20'
@@ -73,13 +104,50 @@ export function OperatingHoursStep({
               }`}
             >
               <IconClock size={13} strokeWidth={2.2} />
-              <span>{isOpen247 ? '✓ Đang mở 24/7' : t('pricing.steps.step2.toggle247', { defaultValue: 'Đặt mở 24/7' })}</span>
+              <span>
+                {isOpen247
+                  ? t('pricing.steps.step2.is247', { defaultValue: '✓ Đang mở 24/7' })
+                  : t('pricing.steps.step2.toggle247', { defaultValue: 'Đặt mở 24/7' })}
+              </span>
             </button>
           </div>
         }
       />
 
       <div className="rounded-panel border border-line-2 bg-surface p-5 flex flex-col gap-3.5">
+        {/* Effective Version Status & Reassurance Policies */}
+        <div className="flex flex-col gap-2 rounded-[10px] border border-line-2 bg-surface-2/70 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-bold text-emerald-600 border border-emerald-500/25">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {t('pricing.steps.step2.activeSchedule', { defaultValue: 'Đang áp dụng' })}
+              </span>
+              {effectiveFrom ? (
+                <span className="inline-flex items-center gap-1 text-[12px] text-muted font-mono">
+                  {t('pricing.steps.step2.effectiveFrom', { defaultValue: 'Có hiệu lực từ:' })}{' '}
+                  <strong className="text-ink font-semibold">{formatDateTimeVn(effectiveFrom)}</strong>
+                </span>
+              ) : (
+                <span className="text-[12px] text-muted italic">
+                  {t('pricing.steps.step2.defaultSchedule', { defaultValue: 'Đang áp dụng lịch mặc định hệ thống' })}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1 border-t border-hairline pt-2 text-[11.5px] leading-relaxed text-muted">
+            <div className="flex items-center gap-1.5 text-ink font-medium">
+              <span className="text-owner-deep shrink-0 font-bold">⚡</span>
+              <span>{t('pricing.steps.step2.effectiveImmediately', { defaultValue: 'Các thay đổi sẽ có hiệu lực ngay sau khi bạn xác nhận lưu.' })}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-faint">
+              <span className="text-muted shrink-0">🛡️</span>
+              <span>{t('pricing.steps.step2.keepExistingBookings', { defaultValue: 'Các lịch đặt đã được xác nhận trước đó vẫn giữ nguyên vẹn khung giờ và mức giá cam kết.' })}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Subheader info bar */}
         <div className="flex items-center justify-between border-b border-hairline pb-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">
           <div className="w-[110px]">Ngày trong tuần</div>
@@ -176,6 +244,13 @@ export function OperatingHoursStep({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Warning Modal when activating 24/7 */}
+      <Open247WarningModal
+        open={warningModalOpen}
+        onClose={() => setWarningModalOpen(false)}
+        onConfirm={onSet247}
+      />
     </div>
   );
 }

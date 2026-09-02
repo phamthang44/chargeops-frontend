@@ -93,26 +93,26 @@ export function BaseConfigStep({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Đệm an toàn (Buffer)</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Thời gian giãn ca (đổi xe)</div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút</div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Khoảng nghỉ sau mỗi booking để xe trước rút sạc & rời vị trí.
+                Khoảng nghỉ sau mỗi lượt sạc để xe trước rút sạc & rời vị trí an toàn.
               </div>
             </div>
 
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Bước nhảy thời lượng (Step)</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Bước tăng thời gian</div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} phút</div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Bước tăng thời gian sạc trên ứng dụng đặt chỗ của tài xế.
+                Khoảng thời gian tăng dần khi tài xế chọn thời lượng sạc.
               </div>
             </div>
 
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Thời lượng tối đa</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Thời lượng sạc tối đa</div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES} phút (3h)</div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Giới hạn tối đa cho một phiên đặt chỗ để tránh chiếm dụng trụ.
+                Giới hạn tối đa cho một lượt sạc để tránh chiếm dụng trụ quá lâu.
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export function BaseConfigStep({
             </span>
             <div>
               <div className="text-[14px] font-semibold text-ink">
-                {t('pricing.steps.step1.basePriceGroupTitle', { defaultValue: 'Giá sạc mặc định (Base Price)' })}
+                {t('pricing.steps.step1.basePriceGroupTitle', { defaultValue: 'Giá sạc cơ bản' })}
               </div>
               <div className="mt-0.5 text-[12px] text-faint">
                 {t('pricing.steps.step1.basePriceHelp', {
@@ -137,7 +137,7 @@ export function BaseConfigStep({
           </div>
 
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
-            {t('pricing.steps.step1.basePriceLabel', { defaultValue: 'GIÁ SẠC MẶC ĐỊNH' })}
+            {t('pricing.steps.step1.basePriceLabel', { defaultValue: 'GIÁ SẠC CƠ BẢN' })}
           </div>
           <div className="flex h-[48px] items-center gap-[11px] rounded-[11px] border border-line px-3.5 bg-surface">
             <span className="font-mono text-[16px] font-semibold text-faint">₫</span>

@@ -36,6 +36,12 @@ export type BookingStatus =
 /** Why a CANCELLED booking ended that way — drives the history badge + refund copy. */
 export type CancelReason = 'DRIVER' | 'NO_SHOW' | 'PAYMENT_TIMEOUT';
 
+/** Operating schedule status: open now vs closed by active schedule vs no schedule set. */
+export type StationOperatingState =
+  | 'OPEN'
+  | 'CLOSED_BY_SCHEDULE'
+  | 'SCHEDULE_NOT_CONFIGURED';
+
 export interface Station {
   id: string;
   name: string;
@@ -55,6 +61,7 @@ export interface Station {
   rating?: number; // average rating, e.g. 4.8 (shown in station list/detail)
   reviewCount?: number; // number of ratings, optional
   isOpen?: boolean; // derived open/closed state (vs operatingHours)
+  operatingState?: StationOperatingState; // granular backend operating state
   hasFastCharging?: boolean; // has at least one DC connector (for list filtering)
   minRatePerKwh?: number; // cheapest đ/kWh rate label (info only, "Giá từ")
   maxPowerKw?: number; // maximum charging power in kW (e.g. 180kW) from backend

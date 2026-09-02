@@ -1463,12 +1463,50 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     pricing: {
       async get(stationId) {
         await delay();
-        return structuredClone(db.pricingByStation[stationId] ?? db.pricing);
+        const base = structuredClone(db.pricingByStation[stationId] ?? db.pricing);
+        if (!base.scheduleEffectiveFrom) {
+          base.scheduleEffectiveFrom = '2026-08-15T08:00:00Z';
+          base.scheduleStatus = 'ACTIVE';
+        }
+        return base;
       },
       async save(stationId, config) {
         await delay();
-        db.pricingByStation[stationId] = structuredClone(config);
-        return structuredClone(db.pricingByStation[stationId]);
+        const now = new Date().toISOString();
+        const updated = {
+          ...structuredClone(config),
+          scheduleEffectiveFrom: now,
+          scheduleStatus: 'ACTIVE',
+        };
+        db.pricingByStation[stationId] = updated;
+        return structuredClone(updated);
+      },
+      async history(stationId) {
+        await delay();
+        const current = db.pricingByStation[stationId] ?? db.pricing;
+        const currentFrom = current.scheduleEffectiveFrom || '2026-08-15T08:00:00Z';
+        return [
+          {
+            scheduleId: `sched-${stationId}-1`,
+            effectiveFrom: currentFrom,
+            effectiveTo: null,
+            status: 'ACTIVE',
+            open24Hours: Boolean(current.open24Hours),
+            hours: current.hours,
+            changedByName: 'Nguyễn Văn Chủ Trạm',
+            changedAt: currentFrom,
+          },
+          {
+            scheduleId: `sched-${stationId}-0`,
+            effectiveFrom: '2026-07-01T00:00:00Z',
+            effectiveTo: currentFrom,
+            status: 'EXPIRED',
+            open24Hours: false,
+            hours: current.hours,
+            changedByName: 'Hệ thống khởi tạo',
+            changedAt: '2026-07-01T00:00:00Z',
+          },
+        ];
       },
     },
 

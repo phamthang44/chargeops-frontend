@@ -49,6 +49,28 @@ export function MapStationPeekSheet({
 
   if (!station) return null;
 
+  const operatingState = station.operatingState || (station.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+  const isNoSchedule = operatingState === 'SCHEDULE_NOT_CONFIGURED';
+  const isClosedBySchedule = operatingState === 'CLOSED_BY_SCHEDULE';
+  const full = station.availableConnectors === 0;
+
+  // Future booking allowed when CLOSED_BY_SCHEDULE as long as connectors exist.
+  const canBook = !isNoSchedule && !full;
+
+  let actionLabel = t('stationList.card.bookNow', 'Đặt chỗ ngay');
+  let actionIcon: keyof typeof Ionicons.glyphMap = 'flash';
+
+  if (isNoSchedule) {
+    actionLabel = 'Chưa có lịch';
+    actionIcon = 'calendar-outline';
+  } else if (full) {
+    actionLabel = t('stationList.full', 'Hết chỗ');
+    actionIcon = 'close-circle-outline';
+  } else if (isClosedBySchedule) {
+    actionLabel = 'Đặt lịch';
+    actionIcon = 'calendar';
+  }
+
   return (
     <View
       style={[
@@ -109,7 +131,7 @@ export function MapStationPeekSheet({
               </Pressable>
             </View>
 
-            {/* Badges: Power & Rating */}
+            {/* Badges: Power & Rating & Closed status */}
             <View style={styles.badgeRow}>
               <PowerBadge
                 powerKw={station.maxPowerKw}
@@ -129,6 +151,38 @@ export function MapStationPeekSheet({
                   <Ionicons name="star" size={11} color={themeColors.warning} />
                   <Text style={[styles.ratingText, { color: themeColors.textStrong }]}>
                     {station.rating.toFixed(1)}
+                  </Text>
+                </View>
+              )}
+              {isClosedBySchedule && (
+                <View
+                  style={[
+                    styles.closedPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7',
+                      borderColor: isDark ? '#B45309' : '#FCD34D',
+                    },
+                  ]}
+                >
+                  <Ionicons name="time-outline" size={10} color={themeColors.warning} />
+                  <Text style={[styles.closedText, { color: themeColors.warning }]}>
+                    Đóng cửa theo lịch
+                  </Text>
+                </View>
+              )}
+              {isNoSchedule && (
+                <View
+                  style={[
+                    styles.closedPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(100, 116, 139, 0.15)' : '#F1F5F9',
+                      borderColor: isDark ? '#475569' : '#CBD5E1',
+                    },
+                  ]}
+                >
+                  <Ionicons name="settings-outline" size={10} color={themeColors.textMuted} />
+                  <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
+                    Chưa cấu hình giờ hoạt động
                   </Text>
                 </View>
               )}
@@ -197,14 +251,31 @@ export function MapStationPeekSheet({
             style={[
               styles.btnPrimary,
               {
-                backgroundColor: themeColors.primary,
+                backgroundColor: !canBook
+                  ? isDark
+                    ? '#2A312F'
+                    : '#E5E7EB'
+                  : isClosedBySchedule
+                    ? isDark
+                      ? '#0F766E'
+                      : '#0D9488'
+                    : themeColors.primary,
               },
             ]}
-            onPress={() => onQuickBook(station.id)}
+            onPress={() => (canBook ? onQuickBook(station.id) : onOpenDetail(station.id))}
           >
-            <Ionicons name="flash" size={16} color="#FFFFFF" />
-            <Text style={styles.btnPrimaryText}>
-              {t('stationList.card.bookNow', 'Đặt chỗ ngay')}
+            <Ionicons
+              name={actionIcon}
+              size={16}
+              color={!canBook ? themeColors.textMuted : '#FFFFFF'}
+            />
+            <Text
+              style={[
+                styles.btnPrimaryText,
+                { color: !canBook ? themeColors.textMuted : '#FFFFFF' },
+              ]}
+            >
+              {actionLabel}
             </Text>
           </Pressable>
         </View>
@@ -278,6 +349,21 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: radius.full,
     borderWidth: 1,
+  },
+  closedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  closedText: {
+    fontSize: 10.5,
+    fontWeight: fontWeights.bold,
+    lineHeight: 14,
+    includeFontPadding: false,
   },
   ratingText: {
     fontSize: 11,

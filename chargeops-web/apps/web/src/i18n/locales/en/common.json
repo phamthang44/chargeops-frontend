@@ -1,6 +1,22 @@
 {
   "language": "Language",
   "loading": "Loading…",
+  "saving": "Saving…",
+  "close": "Close",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save changes",
+  "edit": "Edit",
+  "delete": "Delete",
+  "retry": "Retry",
+  "back": "Back",
+  "all": "All",
+  "status": "Status",
+  "action": "Action",
+  "notes": "Notes",
+  "system": "System",
+  "copied": "Copied to clipboard",
+  "copiedCode": "Copied code {{code}}",
   "error": {
     "generic": "Something went wrong"
   }

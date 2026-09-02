@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   Button,
@@ -79,6 +80,7 @@ export function StationDetailDrawer({
   onManageLicense,
   onManageProvisioning,
 }: StationDetailDrawerProps) {
+  const { t } = useTranslation(['admin', 'common']);
   const api = useApi();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<StationTab>('overview');
@@ -124,7 +126,7 @@ export function StationDetailDrawer({
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
-    toast('Đã sao chép vào bộ nhớ tạm', 'success');
+    toast(t('common:copied', { defaultValue: 'Đã sao chép vào bộ nhớ tạm' }), 'success');
     setTimeout(() => setCopiedKey(null), 1500);
   };
 

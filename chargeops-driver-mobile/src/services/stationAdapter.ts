@@ -6,6 +6,7 @@ import type {
   ConnectorType,
   ProvisioningStatus,
   Station,
+  StationOperatingState,
 } from '@/types';
 
 /**
@@ -64,6 +65,7 @@ export interface BackendStationDiscoveryItem {
   totalConnectorCount?: number;
   availableConnectorCount?: number;
   openNow?: boolean;
+  operatingState?: StationOperatingState | string;
 }
 
 export interface BackendStationDiscoveryDetail {
@@ -83,6 +85,7 @@ export interface BackendStationDiscoveryDetail {
   basePriceVndPerKwh?: number; // fallback
   open24Hours?: boolean;
   openNow?: boolean;
+  operatingState?: StationOperatingState | string;
   operatingHours?: BackendOperatingHour[];
   chargePoints?: BackendChargePointResponse[]; // Real nested structure: chargePoints[].connectors[]
   totalConnectorCount?: number;
@@ -231,6 +234,10 @@ export function adaptStationDiscoveryItem(dto: BackendStationDiscoveryItem): Sta
         ? Number(dto.basePriceVndPerKwh)
         : undefined;
 
+  const operatingState: StationOperatingState =
+    (dto.operatingState as StationOperatingState) ||
+    (dto.openNow ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+
   return {
     id: String(dto.id),
     name: dto.name || '',
@@ -243,7 +250,8 @@ export function adaptStationDiscoveryItem(dto: BackendStationDiscoveryItem): Sta
     closesAtMin: 1440,
     availableConnectors: Number(dto.availableConnectorCount ?? 0),
     totalConnectors: Number(dto.totalConnectorCount ?? 0),
-    isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : true,
+    isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : operatingState === 'OPEN',
+    operatingState,
     hasFastCharging: deriveHasFastCharging(dto),
     maxPowerKw: dto.maxPowerKw !== undefined && dto.maxPowerKw !== null ? Number(dto.maxPowerKw) : undefined,
     connectorTypes: dto.connectorTypes ? (Array.from(dto.connectorTypes) as ConnectorType[]) : undefined,
@@ -259,6 +267,7 @@ export function adaptStationDiscoveryItem(dto: BackendStationDiscoveryItem): Sta
  * - currentPriceVndPerKwh    -> minRatePerKwh
  * - chargePoints[].connectors[] -> calculates totalConnectors & availableConnectors
  * - openNow                  -> isOpen
+ * - operatingState           -> maps backend operatingState directly, or derives CLOSED_BY_SCHEDULE vs SCHEDULE_NOT_CONFIGURED
  * - hasFastCharging          -> derived from chargePoints / maxPowerKw
  */
 export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail): Station {
@@ -298,6 +307,18 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
         ? Number(dto.basePriceVndPerKwh)
         : undefined;
 
+  const hasSchedule =
+    Boolean(dto.open24Hours) ||
+    (Array.isArray(dto.operatingHours) && dto.operatingHours.length > 0);
+
+  const operatingState: StationOperatingState =
+    (dto.operatingState as StationOperatingState) ||
+    (dto.openNow
+      ? 'OPEN'
+      : hasSchedule
+        ? 'CLOSED_BY_SCHEDULE'
+        : 'SCHEDULE_NOT_CONFIGURED');
+
   return {
     id: String(dto.id),
     name: dto.name || '',
@@ -312,7 +333,8 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
     closesAtMin,
     availableConnectors: Number(availableConnectors),
     totalConnectors: Number(totalConnectors),
-    isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : Boolean(dto.open24Hours),
+    isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : operatingState === 'OPEN',
+    operatingState,
     hasFastCharging: deriveHasFastCharging(dto),
     minRatePerKwh: price,
   };

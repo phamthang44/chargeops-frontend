@@ -24,6 +24,7 @@ import {
   getCurrentProfile,
   updateCurrentProfile,
 } from '@/services/profileService';
+import { setStationApiTokenProvider } from '@/services/stationService';
 
 export type ProfileStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -54,6 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>('idle');
   const [profileError, setProfileError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    setStationApiTokenProvider(() => session?.tokens.accessToken ?? null);
+    return () => {
+      setStationApiTokenProvider(() => null);
+    };
+  }, [session]);
 
   useEffect(() => {
     let alive = true;

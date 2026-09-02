@@ -34,6 +34,7 @@ import type {
   PaymentMethod,
   PolicyDoc,
   PricingConfig,
+  StationScheduleHistoryItem,
   ProvisioningStatus,
   RegisterStationRequest,
   StaffDashboard,
@@ -254,6 +255,8 @@ export interface PricingService {
   /** Owner's pricing & hours config for one explicitly selected station (FR11). */
   get(stationId: string): Promise<PricingConfig>;
   save(stationId: string, config: PricingConfig): Promise<PricingConfig>;
+  /** Operating hours version history for a station. */
+  history(stationId: string): Promise<StationScheduleHistoryItem[]>;
 }
 
 export interface PolicyService {

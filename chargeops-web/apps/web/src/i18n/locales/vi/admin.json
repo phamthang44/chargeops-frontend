@@ -77,7 +77,29 @@
     "pendingStations": "{{count}} hồ sơ trạm chờ duyệt",
     "expiringLicenses": "{{count}} giấy phép sắp hết hạn · còn {{days}} ngày",
     "expiredLicenses": "{{count}} giấy phép đã hết hạn",
-    "reportedFaults": "{{count}} trụ lỗi được báo cáo"
+    "reportedFaults": "{{count}} trụ lỗi được báo cáo",
+    "items": {
+      "pendingStations": {
+        "subtitle": "Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.",
+        "badge": "Chờ duyệt",
+        "action": "Duyệt trạm"
+      },
+      "expiringLicenses": {
+        "subtitle": "Gói giấy phép trạm sẽ hết hạn trong {{days}} ngày tới.",
+        "badge": "Sắp hết hạn",
+        "action": "Xem giấy phép"
+      },
+      "expiredLicenses": {
+        "subtitle": "Giấy phép hoạt động trạm đã hết hạn sử dụng.",
+        "badge": "Hết hạn",
+        "action": "Xử lý ngay"
+      },
+      "reportedFaults": {
+        "subtitle": "Trụ sạc báo lỗi phần cứng hoặc quá nhiệt kết nối.",
+        "badge": "Sự cố trụ",
+        "action": "Kiểm tra"
+      }
+    }
   },
   "rejectModal": {
     "title": "Từ chối đăng ký trạm",
@@ -202,7 +224,9 @@
       "issuing": "Đang ghi nhận…",
       "approveBtn": "Duyệt hồ sơ",
       "approving": "Đang duyệt…",
-      "rejectBtn": "Từ chối (cần lý do)"
+      "rejectBtn": "Từ chối (cần lý do)",
+      "auditHistory": "Lịch sử thay đổi trạng thái",
+      "licenseRequiredHint": "Cần cấp gói Giấy phép (License) trước khi có thể duyệt hồ sơ trạm."
     }
   },
   "bookings": {
@@ -340,7 +364,9 @@
           "severeViolation": "Vi phạm nghiêm trọng chính sách không thể khắc phục"
         }
       }
-    }
+    },
+    "updateSuccess": "Thao tác cập nhật trạng thái License thành công.",
+    "copiedCode": "Đã sao chép mã License"
   },
   "policyKB": {
     "toastSaved": "Đã lưu & tái tạo embedding",
@@ -399,7 +425,9 @@
       "zoneLabel": "KHU VỰC / GỢI Ý VỊ TRÍ (tùy chọn)",
       "zonePlaceholder": "VD: Gần lối vào, hàng B",
       "submitBtn": "Tạo trụ sạc",
-      "toastSuccess": "Đã tạo Trụ sạc {{id}} (Chưa gán)"
+      "toastSuccess": "Đã tạo Trụ sạc {{id}} (Chưa gán)",
+      "activateBtn": "Kích hoạt mở trụ",
+      "activating": "Đang kích hoạt…"
     },
     "connector": {
       "addBtn": "Thêm connector",
@@ -435,13 +463,18 @@
       "MAINTENANCE": "Bảo trì"
     },
     "toastDownloading": "Đang tải QR cho {{id}}… (demo)",
-    "downloadQr": "Tải QR"
+    "downloadQr": "Tải QR",
+    "suspendSuccess": "Trụ {{id}} đã tạm ngưng thành công.",
+    "reactivateSuccess": "Trụ {{id}} đã được kích hoạt lại.",
+    "draftDeleteSuccess": "Đã xóa bản nháp Trụ sạc và các Súng bên trong.",
+    "draftConnectorDeleteSuccess": "Đã xóa Súng sạc bản nháp."
   },
   "transactions": {
     "methods": {
       "ATM": "Thẻ ATM",
       "MOMO": "Momo",
-      "VNPAY": "VNPay"
+      "VNPAY": "VNPay",
+      "title": "Theo phương thức thanh toán"
     },
     "types": {
       "all": "Tất cả",
@@ -467,9 +500,20 @@
         "type": "LOẠI",
         "method": "P.THỨC",
         "amount": "SỐ TIỀN",
-        "date": "NGÀY"
+        "date": "NGÀY",
+        "txId": "MÃ GD"
       },
       "empty": "Không có giao dịch nào khớp bộ lọc."
+    },
+    "metrics": {
+      "gross": "TỔNG THU",
+      "payCountVal": "{{count}} giao dịch",
+      "refunded": "ĐÃ HOÀN",
+      "refundCountVal": "{{count}} lượt hoàn",
+      "net": "DOANH THU RÒNG",
+      "netDelta": "thu − hoàn",
+      "avg": "GIÁ TRỊ TB",
+      "avgDelta": "mỗi giao dịch"
     }
   },
   "users": {
@@ -511,5 +555,17 @@
       "suspendAccount": "Tạm khóa tài khoản",
       "activateAccount": "Kích hoạt tài khoản"
     }
+  },
+  "renewModal": {
+    "title": "Ghi nhận gia hạn License",
+    "subtitle": "Tạo một kỳ hạn License mới sau khi xác minh thanh toán gia hạn ngoài nền tảng.",
+    "currentInfoTitle": "THÔNG TIN LICENSE HIỆN TẠI",
+    "planLabel": "Gói gia hạn mới",
+    "cancelBtn": "Hủy bỏ",
+    "processing": "Đang ghi nhận…",
+    "confirmBtn": "Xác nhận ghi nhận gia hạn"
+  },
+  "stations": {
+    "copiedCode": "Đã sao chép mã trạm"
   }
 }

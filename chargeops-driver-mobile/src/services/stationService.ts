@@ -47,6 +47,21 @@ export const apiBaseUrl =
   configuredBaseUrl ??
   (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081');
 
+let activeAccessTokenGetter: (() => string | null) | null = null;
+
+/**
+ * Configure global token provider so all station service calls automatically
+ * send Authorization: Bearer <token> without requiring manual injection on every screen.
+ */
+export function setStationApiTokenProvider(getter: () => string | null) {
+  activeAccessTokenGetter = getter;
+}
+
+export function resolveAccessToken(explicit?: string | null): string | null {
+  if (explicit !== undefined && explicit !== null) return explicit;
+  return activeAccessTokenGetter ? activeAccessTokenGetter() : null;
+}
+
 /**
  * Station data layer.
  *
@@ -185,9 +200,10 @@ export async function getNearbyStations(
       size: requestedSize,
     });
 
+    const token = resolveAccessToken(options?.accessToken);
     const headers: Record<string, string> = { Accept: 'application/json' };
-    if (options?.accessToken) {
-      headers.Authorization = `Bearer ${options.accessToken}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
     const response = await fetch(`${apiBaseUrl}/api/v1/stations?${params.toString()}`, {
@@ -232,19 +248,26 @@ export async function getNearbyStations(
   });
 }
 
+export interface StationDetailBundle {
+  station: Station;
+  chargePoints: ChargePoint[];
+  connectors: Connector[];
+}
+
 /**
- * Get station detail by ID.
- * Adapts backend detail response from `/api/v1/stations/:id` using `adaptStationDiscoveryDetail`.
- * Falls back to mock data if API is unavailable.
+ * Get comprehensive station detail by ID.
+ * Returns station, charge points, and connectors adapted directly from Backend API
+ * or falls back to mock data if offline/unavailable.
  */
-export async function getStationById(
+export async function getStationDetail(
   id: string,
   options?: { accessToken?: string | null },
-): Promise<Station | null> {
+): Promise<StationDetailBundle | null> {
   try {
+    const token = resolveAccessToken(options?.accessToken);
     const headers: Record<string, string> = { Accept: 'application/json' };
-    if (options?.accessToken) {
-      headers.Authorization = `Bearer ${options.accessToken}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
     const response = await fetch(`${apiBaseUrl}/api/v1/stations/${id}`, {
@@ -255,7 +278,10 @@ export async function getStationById(
       const payload = await response.json();
       const rawDetail: BackendStationDiscoveryDetail = payload?.data ?? payload;
       if (rawDetail && rawDetail.id) {
-        return adaptStationDiscoveryDetail(rawDetail);
+        const station = adaptStationDiscoveryDetail(rawDetail);
+        const chargePoints = adaptChargePointsFromDetail(rawDetail);
+        const connectors = adaptConnectorsFromDetail(rawDetail, station.minRatePerKwh);
+        return { station, chargePoints, connectors };
       }
     }
   } catch {
@@ -263,7 +289,26 @@ export async function getStationById(
   }
 
   const station = stationsMock.find((s) => s.id === id) ?? null;
-  return simulateNetwork(station);
+  if (!station) return null;
+
+  return simulateNetwork({
+    station,
+    chargePoints: driverVisibleChargePoints(id),
+    connectors: visibleConnectors(id),
+  });
+}
+
+/**
+ * Get station detail by ID.
+ * Adapts backend detail response from `/api/v1/stations/:id` using `adaptStationDiscoveryDetail`.
+ * Falls back to mock data if API is unavailable.
+ */
+export async function getStationById(
+  id: string,
+  options?: { accessToken?: string | null },
+): Promise<Station | null> {
+  const bundle = await getStationDetail(id, options);
+  return bundle?.station ?? null;
 }
 
 export async function getChargePointsByStation(stationId: string): Promise<ChargePoint[]> {

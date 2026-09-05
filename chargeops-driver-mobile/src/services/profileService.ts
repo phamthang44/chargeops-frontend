@@ -105,3 +105,18 @@ export function updateCurrentProfile(
     body: JSON.stringify(request),
   });
 }
+
+export function updateProfileAvatar(
+  accessToken: string,
+  avatarUrl: string | null,
+  avatarStorageKey?: string | null,
+  currentProfile?: UserProfile | null,
+): Promise<UserProfile> {
+  return updateCurrentProfile(accessToken, {
+    displayName: currentProfile?.displayName || 'ChargeOps Driver',
+    phone: currentProfile?.phone || '',
+    avatarUrl: avatarUrl ?? '',
+    avatarStorageKey: avatarStorageKey ?? '',
+  });
+}
+

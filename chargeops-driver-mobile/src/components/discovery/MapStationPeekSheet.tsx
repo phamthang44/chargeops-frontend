@@ -13,6 +13,7 @@ import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Station } from '@/types';
 import { formatRate } from '@/utils/format';
+import { getStationThumbUrl } from '@/utils/imagekit';
 import { PortSlotIndicator } from './PortSlotIndicator';
 import { PowerBadge } from './PowerBadge';
 
@@ -108,7 +109,7 @@ export function MapStationPeekSheet({
         {/* Header Section: Image + Info + Close */}
         <View style={styles.topRow}>
           {station.imageUrl ? (
-            <Image source={{ uri: station.imageUrl }} style={styles.thumb} resizeMode="cover" />
+            <Image source={{ uri: getStationThumbUrl(station.imageUrl, 200) }} style={styles.thumb} resizeMode="cover" />
           ) : (
             <View
               style={[

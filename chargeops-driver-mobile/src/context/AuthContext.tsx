@@ -39,6 +39,7 @@ interface AuthContextValue {
   getAccessToken: () => string | null;
   retryProfile: () => Promise<void>;
   completeProfile: (request: UpdateUserProfileRequest) => Promise<UserProfile>;
+  updateAvatar: (avatarUrl: string | null, avatarStorageKey?: string | null) => Promise<UserProfile>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -188,6 +189,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [session],
   );
 
+  const updateAvatar = useCallback(
+    async (avatarUrl: string | null, avatarStorageKey?: string | null): Promise<UserProfile> => {
+      if (!session) {
+        throw new Error('Authentication is required to update avatar.');
+      }
+
+      const updatedProfile = session.tokens.accessToken.startsWith('mock-')
+        ? {
+            ...(profile ?? profileFromMockSession(session)),
+            avatarUrl: avatarUrl ?? null,
+            avatarStorageKey: avatarStorageKey ?? null,
+          }
+        : await updateCurrentProfile(session.tokens.accessToken, {
+            displayName: profile?.displayName || session.user.name || 'ChargeOps Driver',
+            phone: profile?.phone || session.user.phone || '',
+            avatarUrl: avatarUrl ?? '',
+            avatarStorageKey: avatarStorageKey ?? '',
+          });
+
+      setProfile(updatedProfile);
+      setProfileStatus('ready');
+      setProfileError(null);
+      setSession((current) => syncSessionWithProfile(current, updatedProfile));
+      return updatedProfile;
+    },
+    [profile, session],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -218,6 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       getAccessToken: () => session?.tokens.accessToken ?? null,
       retryProfile,
       completeProfile,
+      updateAvatar,
     }),
     [
       completeProfile,
@@ -227,6 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileStatus,
       retryProfile,
       session,
+      updateAvatar,
     ],
   );
 
@@ -251,6 +282,8 @@ function profileFromMockSession(session: AuthSession): UserProfile {
     phone: session.user.phone || null,
     status: session.user.status,
     profileCompleted: Boolean(session.user.name.trim() && session.user.phone.trim()),
+    avatarUrl: session.user.avatarUrl || null,
+    avatarStorageKey: null,
   };
 }
 
@@ -271,6 +304,7 @@ function syncSessionWithProfile(
       email: profile.email,
       phone: profile.phone ?? '',
       status: profile.status,
+      avatarUrl: profile.avatarUrl ?? session.user.avatarUrl,
     },
   };
 }

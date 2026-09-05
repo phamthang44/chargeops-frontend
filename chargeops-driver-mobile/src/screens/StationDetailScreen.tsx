@@ -113,7 +113,10 @@ export function StationDetailScreen() {
   const fav = isFavorite(params.stationId);
 
   const onGalleryScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setSlide(Math.round(e.nativeEvent.contentOffset.x / width));
+    const slideWidth = e.nativeEvent.layoutMeasurement?.width || width;
+    if (slideWidth > 0) {
+      setSlide(Math.round(e.nativeEvent.contentOffset.x / slideWidth));
+    }
   };
 
   const groups = useMemo<GroupedPoint[]>(() => {
@@ -316,6 +319,7 @@ export function StationDetailScreen() {
         <StationHeroGallery
           title={t('stationDetail.title')}
           imageUrl={station.imageUrl}
+          images={station.images}
           slide={slide}
           onScroll={onGalleryScroll}
           isFav={fav}

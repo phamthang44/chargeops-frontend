@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Dimensions,
   Image,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -15,19 +15,14 @@ import {
 import { GlassButton } from '@/components/GlassButton';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
-
-const { width } = Dimensions.get('window');
-const GALLERY: Array<React.ComponentProps<typeof Ionicons>['name']> = [
-  'flash',
-  'car-sport',
-  'shield-checkmark',
-];
+import { getStationHeroUrl } from '@/utils/imagekit';
 
 interface StationHeroGalleryProps {
   title?: string;
   imageUrl?: string | null;
-  slide: number;
-  onScroll: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  images?: string[];
+  slide?: number;
+  onScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
   isFav: boolean;
   onToggleFav: () => void;
   onBack: () => void;
@@ -37,6 +32,7 @@ interface StationHeroGalleryProps {
 export function StationHeroGallery({
   title,
   imageUrl,
+  images,
   slide,
   onScroll,
   isFav,
@@ -46,6 +42,38 @@ export function StationHeroGallery({
 }: StationHeroGalleryProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const { width } = useWindowDimensions();
+
+  const displayImages =
+    images && images.length > 0
+      ? images
+      : imageUrl
+        ? [imageUrl]
+        : [];
+
+  const [currentSlide, setCurrentSlide] = useState(slide ?? 0);
+
+  useEffect(() => {
+    if (slide !== undefined && slide !== currentSlide) {
+      setCurrentSlide(slide);
+    }
+  }, [slide]);
+
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const slideWidth = e.nativeEvent.layoutMeasurement?.width || width;
+      if (slideWidth > 0 && displayImages.length > 0) {
+        const offset = e.nativeEvent.contentOffset.x;
+        const newSlide = Math.max(
+          0,
+          Math.min(displayImages.length - 1, Math.round(offset / slideWidth)),
+        );
+        setCurrentSlide(newSlide);
+      }
+      onScroll?.(e);
+    },
+    [width, displayImages.length, onScroll],
+  );
 
   return (
     <View style={[styles.hero, { backgroundColor: isDark ? '#121615' : '#E2E8F0' }]}>
@@ -72,39 +100,46 @@ export function StationHeroGallery({
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onScroll}
+        scrollEventThrottle={16}
+        onScroll={handleScroll}
+        onMomentumScrollEnd={handleScroll}
       >
-        {GALLERY.map((icon, i) => (
-          <View key={i} style={[styles.slide, { width }]}>
-            {i === 0 ? (
-              imageUrl ? (
-                <Image source={{ uri: imageUrl }} style={styles.heroImage} resizeMode="cover" />
-              ) : (
-                <Image
-                  source={require('../../../assets/header-background.png')}
-                  style={styles.heroImage}
-                  resizeMode="cover"
-                />
-              )
-            ) : (
-              <>
-                <Ionicons name={icon} size={64} color={themeColors.textMuted} />
-                <Text style={[styles.heroHint, { color: themeColors.textMuted }]}>
-                  {t('stationDetail.photoPending')}
-                </Text>
-              </>
-            )}
+        {displayImages.length > 0 ? (
+          displayImages.map((imgUri, i) => (
+            <View key={i} style={[styles.slide, { width }]}>
+              <Image
+                source={{ uri: getStationHeroUrl(imgUri, 750) }}
+                style={styles.heroImage}
+                resizeMode="cover"
+              />
+              <View style={styles.heroShade} />
+            </View>
+          ))
+        ) : (
+          <View style={[styles.slide, { width }]}>
+            <Image
+              source={require('../../../assets/header-background.png')}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
             <View style={styles.heroShade} />
           </View>
-        ))}
+        )}
       </ScrollView>
 
-      {/* Pagination dots */}
-      <View style={styles.dots}>
-        {GALLERY.map((_, i) => (
-          <View key={i} style={[styles.dot, i === slide && styles.dotActive]} />
-        ))}
-      </View>
+      {/* Pagination dots capsule elevated above overlapping sheet */}
+      {displayImages.length > 1 && (
+        <View style={styles.dotsWrapper}>
+          <View style={styles.dotsPill}>
+            {displayImages.map((_, i) => (
+              <View
+                key={i}
+                style={[styles.dot, i === currentSlide && styles.dotActive]}
+              />
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -131,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.42)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
-    maxWidth: width * 0.56,
+    maxWidth: 220,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -145,7 +180,6 @@ const styles = StyleSheet.create({
     height: 260,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
   },
   heroImage: {
     width: '100%',
@@ -155,26 +189,35 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.12)',
   },
-  heroHint: {
-    fontSize: fontSizes.caption,
-  },
-  dots: {
+  dotsWrapper: {
     position: 'absolute',
-    bottom: spacing.lg,
+    bottom: 28,
     left: 0,
     right: 0,
-    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 5,
+    pointerEvents: 'none',
+  },
+  dotsPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.xs,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.full,
   },
   dot: {
     width: 6,
     height: 6,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
   },
   dotActive: {
     width: 16,
+    height: 6,
+    borderRadius: radius.full,
     backgroundColor: '#FFFFFF',
   },
 });

@@ -12,11 +12,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   AppHeader,
   FloatingViewSwitch,
+  HeaderActionBtn,
   MapStationPeekSheet,
   NotificationSheet,
   SettingsModal,
@@ -138,70 +138,44 @@ export function MapScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Top Header */}
       <AppHeader
         title="Charge"
         accent="Ops"
+        icon="flash"
+        slogan={[t('stationList.slogan1', 'Sạc xanh hơn'), t('stationList.slogan2', 'Hành trình xa hơn')]}
         trailing={
-          <View style={styles.headerActions}>
-            <Pressable
-              style={[
-                styles.iconBtn,
-                {
-                  backgroundColor: isDark ? '#161B1A' : themeColors.surface,
-                  borderColor: isDark ? '#2A312F' : themeColors.border,
-                },
-              ]}
-              hitSlop={8}
+          <>
+            <HeaderActionBtn
+              icon="settings-outline"
               onPress={() => setSettingsOpen(true)}
               accessibilityLabel={t('settings.title')}
-            >
-              <Ionicons name="settings-outline" size={19} color={themeColors.textBody} />
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.iconBtn,
-                {
-                  backgroundColor: isDark ? '#161B1A' : themeColors.surface,
-                  borderColor: isDark ? '#2A312F' : themeColors.border,
-                },
-              ]}
-              hitSlop={8}
+            />
+            <HeaderActionBtn
+              icon="notifications-outline"
+              badgeCount={unreadCount}
               onPress={() => setNotifOpen(true)}
               accessibilityLabel={t('stationList.notificationsTitle')}
-            >
-              <Ionicons name="notifications-outline" size={20} color={themeColors.textBody} />
-              {unreadCount > 0 && (
-                <View
-                  style={[
-                    styles.notifBadge,
-                    { backgroundColor: themeColors.error, borderColor: themeColors.surface },
-                  ]}
-                >
-                  <Text style={styles.notifBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
-                </View>
-              )}
-            </Pressable>
-          </View>
+            />
+          </>
         }
-      />
+      >
+        {/* Modern Capsule Search Bar */}
+        <StationSearchBar
+          value={query}
+          onChangeText={setQuery}
+          placeholder={t('map.searchPlaceholder', 'Tìm trạm trên bản đồ...')}
+        />
 
-      {/* Modern Capsule Search Bar */}
-      <StationSearchBar
-        value={query}
-        onChangeText={setQuery}
-        placeholder={t('map.searchPlaceholder', 'Tìm trạm trên bản đồ...')}
-      />
-
-      {/* Quick Filter Capsule Bar */}
-      <StationFilterCapsuleBar
-        filters={filterState}
-        onUpdateFilters={setFilterState}
-        onOpenDrawer={() => setDrawerOpen(true)}
-        onClearAll={handleClearFilters}
-      />
+        {/* Quick Filter Capsule Bar */}
+        <StationFilterCapsuleBar
+          filters={filterState}
+          onUpdateFilters={setFilterState}
+          onOpenDrawer={() => setDrawerOpen(true)}
+          onClearAll={handleClearFilters}
+        />
+      </AppHeader>
 
       {/* Map Content View */}
       <View style={styles.mapWrap}>
@@ -282,7 +256,7 @@ export function MapScreen() {
         onReset={handleClearFilters}
         totalResults={stations.length}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

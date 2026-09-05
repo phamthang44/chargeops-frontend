@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -19,7 +20,9 @@ import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import { ProfileApiError } from '@/services/profileService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { buildImageKitUrl, getAvatarUrl } from '@/utils/imagekit';
 import { AppButton } from './AppButton';
+import { AvatarUploadModal } from './AvatarUploadModal';
 import { PhoneField } from './PhoneField';
 import { TextField } from './TextField';
 
@@ -44,6 +47,17 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+
+  const userAvatar = profile?.avatarUrl ?? session?.user.avatarUrl ?? null;
+  const initials = displayName
+    ? displayName
+        .trim()
+        .split(/\s+/)
+        .map((p) => p[0]?.toUpperCase() ?? '')
+        .slice(-2)
+        .join('')
+    : 'EV';
 
   useEffect(() => {
     if (!visible) return;
@@ -137,6 +151,44 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.form}
             >
+              {/* Avatar Preview & Edit Button */}
+              <View style={styles.avatarRow}>
+                <Pressable
+                  style={styles.avatarCircle}
+                  onPress={() => setAvatarModalOpen(true)}
+                  hitSlop={6}
+                >
+                  {userAvatar ? (
+                    <Image
+                      source={{
+                        uri: getAvatarUrl(userAvatar, 160),
+                      }}
+                      style={styles.avatarImg}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.avatarPlaceholder, { backgroundColor: themeColors.primarySoft }]}>
+                      <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>{initials}</Text>
+                    </View>
+                  )}
+                  <View
+                    style={[
+                      styles.avatarBadge,
+                      { backgroundColor: themeColors.primary, borderColor: themeColors.surface },
+                    ]}
+                  >
+                    <Ionicons name="camera" size={11} color="#FFFFFF" />
+                  </View>
+                </Pressable>
+                <Pressable onPress={() => setAvatarModalOpen(true)} hitSlop={8}>
+                  <Text style={[styles.changeAvatarText, { color: themeColors.primary }]}>
+                    {userAvatar
+                      ? t('profile.changeAvatar', 'Thay đổi ảnh đại diện')
+                      : t('profile.uploadAvatar', 'Tải ảnh đại diện')}
+                  </Text>
+                </Pressable>
+              </View>
+
               <TextField
                 label={t('profile.edit.displayNameLabel')}
                 value={displayName}
@@ -198,6 +250,13 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
           </View>
         </KeyboardAvoidingView>
       </View>
+
+      <AvatarUploadModal
+        visible={avatarModalOpen}
+        onClose={() => setAvatarModalOpen(false)}
+        currentAvatarUrl={userAvatar}
+        displayName={displayName}
+      />
     </Modal>
   );
 }
@@ -285,4 +344,49 @@ const styles = StyleSheet.create({
   },
   errorText: { flex: 1, fontSize: fontSizes.caption, lineHeight: lineHeights.caption },
   actions: { gap: spacing.sm },
+  avatarRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  avatarCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    overflow: 'hidden',
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: fontSizes.title,
+    fontWeight: fontWeights.bold,
+  },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    zIndex: 2,
+  },
+  changeAvatarText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+  },
 });

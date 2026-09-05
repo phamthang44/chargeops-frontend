@@ -4,9 +4,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader, BookingCard, EmptyState, LiveDot, useTabBarInset } from '@/components';
+import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { getActiveBookings } from '@/services/bookingService';
@@ -292,8 +291,33 @@ export function BookingsScreen() {
   const isEmpty = !hero && !chargingHero && list.length === 0;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top']}>
-      <AppHeader title={t('bookings.title')} />
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <AppHeader
+        title={t('bookings.title')}
+        icon="flash"
+        slogan={[t('bookings.slogan1', 'Sạc đúng giờ'), t('bookings.slogan2', 'Không chờ đợi')]}
+        trailing={
+          <>
+            <HeaderActionBtn
+              icon="qr-code-outline"
+              onPress={() => {
+                const confirmed = upcoming.find((b) => b.status === 'CONFIRMED');
+                if (confirmed) {
+                  navigation.navigate('QRCheckIn', { bookingId: confirmed.id });
+                } else {
+                  navigation.navigate('QRCheckIn', { bookingId: '' });
+                }
+              }}
+              accessibilityLabel={t('nav.qrCheckIn', 'Quét QR')}
+            />
+            <HeaderActionBtn
+              icon="time-outline"
+              onPress={() => navigation.navigate('Tabs', { screen: 'BookingHistory' })}
+              accessibilityLabel={t('nav.history', 'Lịch sử')}
+            />
+          </>
+        }
+      />
 
       {/* Segmented tabs */}
       <View style={[styles.segment, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
@@ -361,7 +385,7 @@ export function BookingsScreen() {
           ))}
         </ScrollView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

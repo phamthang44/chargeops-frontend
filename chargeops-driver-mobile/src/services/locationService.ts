@@ -1,4 +1,4 @@
-import { apiBaseUrl } from './stationService';
+import { apiBaseUrl, resolveAccessToken } from './stationService';
 
 export interface AdministrativeProvince {
   code: string;
@@ -23,7 +23,9 @@ let inflightPromise: Promise<AdministrativeProvince[]> | null = null;
  * Fetch all administrative provinces from backend LocationController (/api/v1/administrative-units/provinces).
  * Leverages in-memory caching and inflight deduplication so UI never lags.
  */
-export async function getAdministrativeProvinces(): Promise<AdministrativeProvince[]> {
+export async function getAdministrativeProvinces(options?: {
+  accessToken?: string | null;
+}): Promise<AdministrativeProvince[]> {
   if (cachedProvinces && cachedProvinces.length > 0) {
     return cachedProvinces;
   }
@@ -34,8 +36,14 @@ export async function getAdministrativeProvinces(): Promise<AdministrativeProvin
 
   inflightPromise = (async () => {
     try {
+      const token = resolveAccessToken(options?.accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${apiBaseUrl}/api/v1/administrative-units/provinces`, {
-        headers: { Accept: 'application/json' },
+        headers,
       });
 
       if (response.ok) {

@@ -20,9 +20,14 @@ import type {
 
 export interface BackendStationAsset {
   id?: string;
-  url: string;
+  assetUrl?: string; // Standard property from backend StationAssetResponse
+  url?: string; // Fallback / mock compatibility
+  primary?: boolean; // Jackson serialization convention
   isPrimary?: boolean;
   assetType?: string;
+  storageKey?: string;
+  displayOrder?: number;
+  altText?: string;
 }
 
 export interface BackendOperatingHour {
@@ -337,10 +342,22 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
   const totalConnectors = dto.totalConnectorCount ?? calculatedTotal;
   const availableConnectors = dto.availableConnectorCount ?? calculatedAvailable;
 
+  const rawAssets = Array.isArray(dto.assets) ? dto.assets : [];
+  const imageAssets = rawAssets
+    .filter((a) => !a.assetType || a.assetType === 'IMAGE')
+    .map((a) => a.assetUrl || a.url)
+    .filter((url): url is string => Boolean(url));
+
+  const primaryAsset = rawAssets.find(
+    (a) => (a.primary || a.isPrimary) && (a.assetUrl || a.url),
+  );
   const primaryImage =
     dto.primaryImageUrl ||
-    dto.assets?.find((a) => a.isPrimary)?.url ||
-    dto.assets?.[0]?.url;
+    primaryAsset?.assetUrl ||
+    primaryAsset?.url ||
+    imageAssets[0];
+
+  const images = imageAssets.length > 0 ? imageAssets : primaryImage ? [primaryImage] : [];
 
   const { operatingHoursText, opensAtMin, closesAtMin } = formatOperatingHours(
     dto.open24Hours,
@@ -383,6 +400,7 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
     latitude: Number(dto.latitude),
     longitude: Number(dto.longitude),
     imageUrl: primaryImage,
+    images,
     contactPhone: dto.contactPhone,
     operatingHours: operatingHoursText,
     open24Hours: Boolean(dto.open24Hours),

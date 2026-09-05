@@ -7,6 +7,7 @@ import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Station } from '@/types';
 import { formatRate } from '@/utils/format';
+import { getStationThumbUrl } from '@/utils/imagekit';
 import { PortSlotIndicator } from './PortSlotIndicator';
 import { PowerBadge } from './PowerBadge';
 
@@ -89,7 +90,7 @@ export function StationCardV2({
       {/* Top Media & Header Section */}
       <View style={styles.topSection}>
         {station.imageUrl ? (
-          <Image source={{ uri: station.imageUrl }} style={styles.imageThumb} />
+          <Image source={{ uri: getStationThumbUrl(station.imageUrl, 160) }} style={styles.imageThumb} />
         ) : (
           <StationThumb size={72} radius={radius.md} />
         )}

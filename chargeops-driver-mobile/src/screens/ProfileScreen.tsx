@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   Modal,
   Platform,
@@ -16,13 +17,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import {
   AppButton,
   AppHeader,
+  AvatarUploadModal,
+  AvatarViewerModal,
   Card,
   GlassButton,
+  HeaderActionBtn,
   SettingsModal,
   TopUpModal,
   useTabBarInset,
@@ -35,6 +37,7 @@ import type { RootStackParamList } from '@/navigation/types';
 import { openKeycloakSecuritySettings } from '@/services/accountNavigation';
 import { openOwnerPortal } from '@/services/portalNavigation';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { buildImageKitUrl, getAvatarUrl } from '@/utils/imagekit';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -48,6 +51,8 @@ export function ProfileScreen() {
 
   const [walletBalance, setWalletBalance] = useState(2450000);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const [avatarViewerVisible, setAvatarViewerVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [settingsSection, setSettingsSection] = useState<'all' | 'language' | 'appearance'>('all');
   const [topUpVisible, setTopUpVisible] = useState(false);
@@ -120,23 +125,24 @@ export function ProfileScreen() {
     }
   }
 
+  const userAvatar = profile?.avatarUrl ?? session?.user.avatarUrl ?? null;
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.surfaceAlt }]} edges={['top']}>
-      {/* AppHeader with Liquid Glass "More" Button */}
+    <View style={[styles.container, { backgroundColor: themeColors.surfaceAlt }]}>
+      {/* AppHeader with EV Superapp Visuals */}
       <AppHeader
         title={t('profile.title')}
+        icon="person-outline"
+        slogan={[t('profile.slogan1', 'Thành viên ChargeOps'), t('profile.slogan2', 'Tiện ích toàn diện')]}
         trailing={
-          <GlassButton
-            size={36}
+          <HeaderActionBtn
+            icon="settings-outline"
             onPress={() => {
               setSettingsSection('all');
               setSettingsVisible(true);
             }}
             accessibilityLabel={t('settings.title')}
-            fallbackColor={themeColors.surfaceAlt}
-          >
-            <Ionicons name="ellipsis-vertical" size={20} color={themeColors.textStrong} />
-          </GlassButton>
+          />
         }
       />
 
@@ -147,15 +153,51 @@ export function ProfileScreen() {
         {/* 1. User Profile Header Card */}
         <Card style={[styles.userCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.userRow}>
-            {/* Initials avatar uses real profile data and avoids a hardcoded remote photo. */}
-            <View style={styles.avatarWrapper}>
+            {/* Initials or Real Photo avatar */}
+            <Pressable
+              style={styles.avatarWrapper}
+              onPress={() => {
+                if (userAvatar) {
+                  setAvatarViewerVisible(true);
+                } else {
+                  setAvatarModalVisible(true);
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={userAvatar ? 'Xem ảnh đại diện' : t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
+            >
               <View style={[styles.avatar, { backgroundColor: themeColors.primarySoft }]}>
-                <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>
-                  {initialsOf(userName)}
-                </Text>
+                {userAvatar ? (
+                  <Image
+                    source={{
+                      uri: getAvatarUrl(userAvatar, 160),
+                    }}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>
+                    {initialsOf(userName)}
+                  </Text>
+                )}
               </View>
+              <Pressable
+                style={[
+                  styles.cameraBadge,
+                  { backgroundColor: themeColors.primary, borderColor: themeColors.surface },
+                ]}
+                hitSlop={8}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setAvatarModalVisible(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
+              >
+                <Ionicons name="camera" size={11} color="#FFFFFF" />
+              </Pressable>
               <View style={[styles.onlineBadge, { borderColor: themeColors.surface }]} />
-            </View>
+            </Pressable>
 
             {/* Name, Email & Member Tier */}
             <View style={styles.userInfo}>
@@ -192,6 +234,26 @@ export function ProfileScreen() {
               {t('profile.account.sectionTitle')}
             </Text>
           </View>
+
+          {/* Avatar Settings Row */}
+          <Pressable style={styles.menuRow} onPress={() => setAvatarModalVisible(true)}>
+            <View style={[styles.menuIconTile, { backgroundColor: themeColors.primarySoft }]}>
+              <Ionicons name="image-outline" size={20} color={themeColors.primary} />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                {t('profile.account.avatar', 'Ảnh đại diện')}
+              </Text>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+                {userAvatar
+                  ? t('profile.account.hasAvatar', 'Nhấn để thay đổi hoặc gỡ ảnh')
+                  : t('profile.account.noAvatar', 'Chưa có ảnh đại diện')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+          </Pressable>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
           <Pressable style={styles.menuRow} onPress={() => setEditProfileVisible(true)}>
             <View style={[styles.menuIconTile, { backgroundColor: themeColors.primarySoft }]}>
@@ -544,6 +606,21 @@ export function ProfileScreen() {
         onClose={() => setEditProfileVisible(false)}
       />
 
+      <AvatarUploadModal
+        visible={avatarModalVisible}
+        onClose={() => setAvatarModalVisible(false)}
+        currentAvatarUrl={userAvatar}
+        displayName={userName}
+      />
+
+      <AvatarViewerModal
+        visible={avatarViewerVisible}
+        onClose={() => setAvatarViewerVisible(false)}
+        avatarUrl={userAvatar}
+        displayName={userName}
+        onEdit={() => setAvatarModalVisible(true)}
+      />
+
       <SupportCenterModal
         visible={supportVisible}
         onClose={() => setSupportVisible(false)}
@@ -587,7 +664,7 @@ export function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -620,14 +697,31 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   avatarText: {
     fontSize: fontSizes.title,
     fontWeight: fontWeights.bold,
   },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    zIndex: 2,
+  },
   onlineBadge: {
     position: 'absolute',
-    bottom: 2,
+    top: 2,
     right: 2,
     width: 14,
     height: 14,

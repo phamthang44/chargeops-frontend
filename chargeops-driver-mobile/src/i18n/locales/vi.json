@@ -252,6 +252,8 @@
   "bookings": {
     "title": "Đặt chỗ",
     "role": "TÀI XẾ",
+    "slogan1": "Sạc đúng giờ",
+    "slogan2": "Không chờ đợi",
     "tabUpcoming": "Sắp tới",
     "tabUpcomingCount": "Sắp tới ({{count}})",
     "tabCharging": "Đang sạc",
@@ -278,6 +280,8 @@
   "history": {
     "title": "Lịch sử đặt chỗ",
     "role": "TÀI XẾ",
+    "slogan1": "Minh bạch chi phí",
+    "slogan2": "Tiết kiệm tối đa",
     "statSessions": "Lượt sạc",
     "statHours": "Giờ sạc",
     "statSpent": "Đã chi",
@@ -331,14 +335,23 @@
   },
   "profile": {
     "title": "Hồ sơ & Cài đặt",
+    "slogan1": "Thành viên ChargeOps",
+    "slogan2": "Tiện ích toàn diện",
     "placeholder": "Màn hình hồ sơ người dùng (placeholder)",
-    "role": "Vai trò: {{role}}",
+    "role": "TÀI XẾ",
     "signOut": "Đăng xuất",
     "notSignedIn": "Chưa đăng nhập.",
     "goldMember": "THÀNH VIÊN VÀNG",
+    "changeAvatar": "Thay đổi ảnh đại diện",
+    "uploadAvatar": "Tải ảnh đại diện",
+    "avatarModalTitle": "Ảnh đại diện",
+    "avatarModalSubtitle": "Cập nhật ảnh hiển thị cho tài khoản tài xế của bạn.",
     "account": {
       "sectionTitle": "Tài khoản cá nhân",
       "unknownName": "Người dùng ChargeOps",
+      "avatar": "Ảnh đại diện",
+      "hasAvatar": "Nhấn để thay đổi hoặc gỡ ảnh",
+      "noAvatar": "Chưa có ảnh đại diện",
       "phone": "Số điện thoại",
       "signInEmail": "Email đăng nhập",
       "notProvided": "Chưa cập nhật"

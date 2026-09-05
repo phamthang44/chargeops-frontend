@@ -14,9 +14,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader, EmptyState, useTabBarInset } from '@/components';
+import { AppHeader, EmptyState, HeaderActionBtn, useTabBarInset } from '@/components';
 import { HistoryBookingCard } from '@/components/HistoryBookingCard';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
@@ -407,11 +406,19 @@ export function BookingHistoryScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
-      edges={['top']}
-    >
-      <AppHeader title={t('history.title')} />
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <AppHeader
+        title={t('history.title')}
+        icon="time-outline"
+        slogan={[t('history.slogan1', 'Minh bạch chi phí'), t('history.slogan2', 'Tiết kiệm tối đa')]}
+        trailing={
+          <HeaderActionBtn
+            icon="refresh-outline"
+            onPress={() => setReloadKey((current) => current + 1)}
+            accessibilityLabel={t('common.retry', 'Làm mới')}
+          />
+        }
+      />
 
       <SectionList
         sections={sections}
@@ -498,7 +505,7 @@ export function BookingHistoryScreen() {
           )
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

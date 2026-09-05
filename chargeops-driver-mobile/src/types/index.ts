@@ -62,6 +62,7 @@ export interface Station {
   longitude: number;
   distanceKm?: number; // computed client-side
   imageUrl?: string;
+  images?: string[];
   contactPhone?: string;
   operatingHours?: string;
   open24Hours?: boolean;
@@ -244,6 +245,7 @@ export interface User {
   phone: string;
   role: UserRole; // active workspace role; always DRIVER in this app (BR-ACC-01)
   status: UserStatus;
+  avatarUrl?: string | null;
 }
 
 /** OAuth credentials held only in React memory. */
@@ -271,11 +273,15 @@ export interface UserProfile {
   phone: string | null;
   status: UserStatus;
   profileCompleted: boolean;
+  avatarUrl?: string | null;
+  avatarStorageKey?: string | null;
 }
 
 export interface UpdateUserProfileRequest {
   displayName: string;
   phone: string;
+  avatarUrl?: string | null;
+  avatarStorageKey?: string | null;
 }
 
 /** Payload sent to the register endpoint. Client sends `password`, never a hash. */

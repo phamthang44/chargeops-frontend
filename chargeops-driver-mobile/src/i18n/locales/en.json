@@ -252,6 +252,8 @@
   "bookings": {
     "title": "Bookings",
     "role": "DRIVER",
+    "slogan1": "Charge on time",
+    "slogan2": "No more waiting",
     "tabUpcoming": "Upcoming",
     "tabUpcomingCount": "Upcoming ({{count}})",
     "tabCharging": "Charging",
@@ -278,6 +280,8 @@
   "history": {
     "title": "Booking history",
     "role": "DRIVER",
+    "slogan1": "Cost transparency",
+    "slogan2": "Maximized savings",
     "statSessions": "Sessions",
     "statHours": "Hours",
     "statSpent": "Spent",
@@ -331,14 +335,23 @@
   },
   "profile": {
     "title": "Profile & Settings",
+    "slogan1": "ChargeOps Member",
+    "slogan2": "All-in-one perks",
     "placeholder": "User profile screen (placeholder)",
-    "role": "Role: {{role}}",
+    "role": "DRIVER",
     "signOut": "Sign out",
     "notSignedIn": "Not signed in.",
     "goldMember": "GOLD MEMBER",
+    "changeAvatar": "Change avatar",
+    "uploadAvatar": "Upload avatar",
+    "avatarModalTitle": "Profile Photo",
+    "avatarModalSubtitle": "Update your driver account display photo.",
     "account": {
       "sectionTitle": "Personal account",
       "unknownName": "ChargeOps user",
+      "avatar": "Profile photo",
+      "hasAvatar": "Tap to change or remove photo",
+      "noAvatar": "No photo uploaded",
       "phone": "Phone number",
       "signInEmail": "Sign-in email",
       "notProvided": "Not provided"

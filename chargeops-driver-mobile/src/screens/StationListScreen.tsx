@@ -6,8 +6,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
-  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -16,7 +14,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   getAdministrativeProvinces,
@@ -35,6 +32,7 @@ import {
   BottomSheet,
   EmptyState,
   FloatingViewSwitch,
+  HeaderActionBtn,
   NotificationSheet,
   SettingsModal,
   StationCardV2,
@@ -98,7 +96,6 @@ function SkeletonCard() {
  */
 export function StationListScreen() {
   const navigation = useNavigation<Nav>();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
   const { getAccessToken } = useAuth();
@@ -141,7 +138,7 @@ export function StationListScreen() {
   useEffect(() => {
     let active = true;
     Promise.allSettled([
-      getAdministrativeProvinces(),
+      getAdministrativeProvinces({ accessToken: getAccessToken() }),
       getUnreadCount(),
     ]).then(([provResult, notifResult]) => {
       if (!active) return;
@@ -272,89 +269,28 @@ export function StationListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      {/* Top Header with header-background.png */}
-      <View
-        style={[
-          styles.headerBackground,
-          {
-            paddingTop: Math.max(insets.top, 12) + spacing.xs,
-            backgroundColor: isDark ? '#0D1412' : '#EAF7F1',
-          },
-        ]}
-      >
-        {/* Right-anchored background illustration so EV car & charging post are 100% visible */}
-        <Image
-          source={require('../../assets/header-background.png')}
-          style={styles.headerBgIllustration}
-          resizeMode="contain"
-        />
-        {isDark && <View style={styles.darkOverlay} pointerEvents="none" />}
-
-        {/* Row 1: Brand & Role (Left) + Slogan (Center) + Actions (Right) */}
-        <View style={styles.headerTopRow}>
-          <View style={styles.headerLeftCol}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconSquircle}>
-                <Ionicons name="flash" size={22} color="#FFFFFF" />
-              </View>
-              <View style={styles.brandTextCol}>
-                <Text style={[styles.brandWordmark, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
-                  Charge<Text style={styles.brandWordmarkAccent}>Ops</Text>
-                </Text>
-                <Text style={[styles.brandRoleText, { color: isDark ? '#94A3B8' : '#64748B' }]}>{t('common.role', 'TÀI XẾ')}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Slogan in Center matching design */}
-          <View style={styles.sloganCol}>
-            <Text style={[styles.sloganText, { color: isDark ? '#A7F3D0' : '#00875A' }]}>
-              {t('stationList.slogan1', 'Sạc xanh hơn')}
-            </Text>
-            <Text style={[styles.sloganText, { color: isDark ? '#A7F3D0' : '#00875A' }]}>
-              {t('stationList.slogan2', 'Hành trình xa hơn')}
-            </Text>
-            <View style={[styles.sloganLine, { backgroundColor: isDark ? '#34D399' : '#00B074' }]} />
-          </View>
-
-          {/* Trailing Actions: Settings & Notifications */}
-          <View style={styles.headerActions}>
-            <Pressable
-              style={[
-                styles.circleActionBtn,
-                {
-                  backgroundColor: isDark ? 'rgba(25, 36, 32, 0.92)' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(52, 211, 153, 0.25)' : 'rgba(226, 232, 240, 0.9)',
-                },
-              ]}
-              hitSlop={8}
+      {/* Top Header with EV Superapp Visual Design */}
+      <AppHeader
+        title="Charge"
+        accent="Ops"
+        icon="flash"
+        slogan={[t('stationList.slogan1', 'Sạc xanh hơn'), t('stationList.slogan2', 'Hành trình xa hơn')]}
+        trailing={
+          <>
+            <HeaderActionBtn
+              icon="settings-outline"
               onPress={() => setSettingsOpen(true)}
               accessibilityLabel={t('settings.title')}
-            >
-              <Ionicons name="settings-outline" size={20} color={isDark ? '#F1F5F9' : '#334155'} />
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.circleActionBtn,
-                {
-                  backgroundColor: isDark ? 'rgba(25, 36, 32, 0.92)' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(52, 211, 153, 0.25)' : 'rgba(226, 232, 240, 0.9)',
-                },
-              ]}
-              hitSlop={8}
+            />
+            <HeaderActionBtn
+              icon="notifications-outline"
+              badgeCount={unreadCount}
               onPress={() => setNotifOpen(true)}
               accessibilityLabel={t('stationList.notificationsTitle')}
-            >
-              <Ionicons name="notifications-outline" size={20} color={isDark ? '#F1F5F9' : '#334155'} />
-              <View style={[styles.notifBadge, isDark && { borderColor: '#192420' }]}>
-                <Text style={styles.notifBadgeText}>
-                  {unreadCount > 0 ? (unreadCount > 9 ? '9+' : unreadCount) : '2'}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        </View>
+            />
+          </>
+        }
+      >
 
         {/* Row 2: Prominent & Touch-friendly Location Selector Bar */}
         <Pressable
@@ -425,7 +361,7 @@ export function StationListScreen() {
           onOpenDrawer={() => setDrawerOpen(true)}
           onClearAll={handleClearFilters}
         />
-      </View>
+      </AppHeader>
 
       {/* Station List with StationCardV2 */}
       <FlatList

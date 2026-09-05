@@ -67,14 +67,23 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const barOffset = useBarOffset();
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: barOffset }]}>
+    <View style={[styles.wrapper, { paddingBottom: barOffset, pointerEvents: 'box-none' }]}>
       <View
         style={[
           styles.bar,
           {
             backgroundColor: isDark ? 'rgba(22,27,26,0.92)' : 'rgba(255,255,255,0.92)',
             borderColor: isDark ? 'rgba(42,49,47,0.6)' : 'rgba(229,231,235,0.6)',
-            shadowColor: isDark ? '#000' : '#6B7280',
+            ...Platform.select({
+              web: {
+                boxShadow: isDark
+                  ? '0 8px 24px rgba(0,0,0,0.45)'
+                  : '0 8px 24px rgba(107,114,128,0.18)',
+              },
+              default: {
+                shadowColor: isDark ? '#000' : '#6B7280',
+              },
+            }),
           },
         ]}
       >
@@ -196,7 +205,14 @@ function CenterTab({
           styles.fab,
           {
             backgroundColor: themeColors.primary,
-            shadowColor: themeColors.primary,
+            ...Platform.select({
+              web: {
+                boxShadow: '0 4px 14px rgba(0, 176, 116, 0.45)',
+              },
+              default: {
+                shadowColor: themeColors.primary,
+              },
+            }),
             transform: [{ scale: scaleAnim }],
           },
         ]}
@@ -239,9 +255,14 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
     // Shadow
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
+    ...Platform.select({
+      web: {},
+      default: {
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+      },
+    }),
     elevation: 12,
   },
 
@@ -285,9 +306,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     // Glow shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
+    ...Platform.select({
+      web: {},
+      default: {
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+      },
+    }),
     elevation: 10,
   },
   centerLabel: {

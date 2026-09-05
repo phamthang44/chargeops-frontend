@@ -37,6 +37,7 @@ import { Transactions } from './pages/Transactions';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
+import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -196,6 +197,7 @@ export function AdminConsole({ base }: { base: string }) {
         userName={user?.name ?? '···'}
         userEmail={user?.email}
         search={<HeaderSearch searchers={searchers} placeholder={t('console.searchPlaceholder')} />}
+        platformSwitcher={<PlatformSwitcher />}
         notifications={
           <NotificationBell
             items={notificationItems}

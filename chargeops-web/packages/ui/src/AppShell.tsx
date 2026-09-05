@@ -48,6 +48,8 @@ export interface AppShellProps {
   userEmail?: string;
   /** The whole search box (HeaderSearch) — console-specific, since what's searchable differs by role. */
   search: ReactNode;
+  /** Optional platform/perspective switcher element in the top bar. */
+  platformSwitcher?: ReactNode;
   /** The whole notification bell (NotificationBell) — console-specific data source. */
   notifications: ReactNode;
   /** Clicking the logo (e.g. back to the portal). */
@@ -164,6 +166,7 @@ export function AppShell({
   userName,
   userEmail,
   search,
+  platformSwitcher,
   notifications,
   onBrand,
   onSettings,
@@ -254,6 +257,7 @@ export function AppShell({
         </div>
         <div className="flex items-center gap-2.5">
           {search}
+          {platformSwitcher}
           <span
             className="rounded-full px-[11px] py-[5px] text-[10.5px] font-bold tracking-[0.04em]"
             style={{ background: rolePill.bg, color: rolePill.fg }}

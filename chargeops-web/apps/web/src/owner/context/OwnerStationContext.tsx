@@ -38,7 +38,12 @@ export function OwnerStationProvider({
 
   const [selectedStationId, setSelectedStationIdState] = useState<string>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) || '';
+      const saved = localStorage.getItem(STORAGE_KEY) || '';
+      // If we are in real API mode (VITE_USE_MOCKS === 'false'), mock IDs like 'ST-1001' are invalid
+      if (import.meta.env.VITE_USE_MOCKS === 'false' && saved.startsWith('ST-')) {
+        return '';
+      }
+      return saved;
     } catch {
       return '';
     }
@@ -64,6 +69,11 @@ export function OwnerStationProvider({
     return (raw as { items?: Station[] } | undefined)?.items ?? [];
   }, [reduced, staffContextQuery.data?.station, stationsQuery.data]);
 
+  const currentStation = useMemo(() => {
+    if (!stations.length) return null;
+    return stations.find((s) => s.id === selectedStationId) ?? stations[0] ?? null;
+  }, [stations, selectedStationId]);
+
   // Ensure selectedStationId matches an existing station, fallback to first
   useEffect(() => {
     if (stations.length > 0) {
@@ -76,8 +86,17 @@ export function OwnerStationProvider({
           // ignore
         }
       }
+    } else if (!stationsQuery.isLoading && !staffContextQuery.isLoading) {
+      if (selectedStationId) {
+        setSelectedStationIdState('');
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+      }
     }
-  }, [stations, selectedStationId]);
+  }, [stations, selectedStationId, stationsQuery.isLoading, staffContextQuery.isLoading]);
 
   const setSelectedStationId = (id: string) => {
     if (reduced) return; // Staff assignment is fixed to single station
@@ -89,20 +108,15 @@ export function OwnerStationProvider({
     }
   };
 
-  const currentStation = useMemo(() => {
-    if (!stations.length) return null;
-    return stations.find((s) => s.id === selectedStationId) ?? stations[0] ?? null;
-  }, [stations, selectedStationId]);
-
   const value = useMemo(
     () => ({
       stations,
-      selectedStationId: currentStation?.id ?? selectedStationId,
+      selectedStationId: currentStation?.id ?? '',
       setSelectedStationId,
       currentStation,
       isLoading: reduced ? staffContextQuery.isLoading : stationsQuery.isLoading,
     }),
-    [stations, currentStation, selectedStationId, reduced, staffContextQuery.isLoading, stationsQuery.isLoading],
+    [stations, currentStation, reduced, staffContextQuery.isLoading, stationsQuery.isLoading],
   );
 
   return <OwnerStationContext.Provider value={value}>{children}</OwnerStationContext.Provider>;

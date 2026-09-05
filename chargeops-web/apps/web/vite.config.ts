@@ -6,5 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 // src/RoleRouter.tsx, not in separate deployments.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    allowedHosts: true,
+  },
 });

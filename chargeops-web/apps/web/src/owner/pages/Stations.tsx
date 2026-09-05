@@ -18,6 +18,7 @@ import { StationSummary } from '../features/stations/StationSummary';
 import { StationCard } from '../features/stations/StationCard';
 import { StationDetailDrawer } from '../features/stations/StationDetailDrawer';
 import { RegisterStationModal } from '../features/stations/RegisterStationModal';
+import { ChangeOperationalStatusModal } from '../features/stations/ChangeOperationalStatusModal';
 import { useOwnerStation } from '../context/OwnerStationContext';
 
 type StatusFilterKey = 'all' | 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'REJECTED';
@@ -31,6 +32,7 @@ export function Stations() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const [operationalModalStation, setOperationalModalStation] = useState<Station | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilterKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -211,6 +213,7 @@ export function Stations() {
                   isActiveContext={st.id === selectedStationId}
                   onSelectStation={(id) => setSelectedStationId(id)}
                   onOpenDetail={(targetStation) => setSelectedStation(targetStation)}
+                  onChangeOperationalStatus={(target) => setOperationalModalStation(target)}
                 />
               ))}
             </div>
@@ -220,6 +223,13 @@ export function Stations() {
 
       {/* Registration Modal */}
       <RegisterStationModal open={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {/* Operational Status Modal */}
+      <ChangeOperationalStatusModal
+        open={Boolean(operationalModalStation)}
+        station={operationalModalStation}
+        onClose={() => setOperationalModalStation(null)}
+      />
 
       {/* Station Detail Drawer */}
       <StationDetailDrawer

@@ -282,7 +282,23 @@ export interface StationAsset {
 export type StationOperatingState =
   | 'OPEN'
   | 'CLOSED_BY_SCHEDULE'
-  | 'SCHEDULE_NOT_CONFIGURED';
+  | 'PAUSED_BY_OWNER'
+  | 'MAINTENANCE'
+  | 'SCHEDULE_NOT_CONFIGURED'
+  | 'UNAVAILABLE_BY_PLATFORM';
+
+export type StationOperationalStatus = 'OPERATING' | 'PAUSED' | 'MAINTENANCE';
+
+export interface ChangeStationOperationalStatusRequest {
+  operationalStatus: StationOperationalStatus;
+  reason?: string;
+}
+
+export interface StationOperationalStatusResponse {
+  stationId: string;
+  operationalStatus: StationOperationalStatus;
+  reason?: string;
+}
 
 export interface Station {
   id: string;
@@ -302,8 +318,11 @@ export interface Station {
   onlineChargePointCount?: number;
   onlineActualChargePointCount?: number;
   status: StationStatus;
+  operationalStatus?: StationOperationalStatus;
+  operationalStatusReason?: string | null;
   operatingState?: StationOperatingState;
   openNow?: boolean;
+  scheduleConfigured?: boolean;
   /** e.g. "Năm · hết hạn 12/09/2026", or object { plan, expiresAt }; null while pending/rejected. */
   licenseSummary?: string | LicenseSummary | null;
   licenseSubmitted?: boolean;
@@ -332,8 +351,11 @@ export interface OwnerStationSummary {
   onlineChargePointCount?: number;
   onlineActualChargePointCount?: number;
   status: StationStatus;
+  operationalStatus?: StationOperationalStatus;
+  operationalStatusReason?: string | null;
   operatingState?: StationOperatingState;
   openNow?: boolean;
+  scheduleConfigured?: boolean;
   licenseSummary?: string | LicenseSummary | null;
 }
 

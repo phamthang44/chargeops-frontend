@@ -19,6 +19,7 @@ import type {
   PricingConfig,
   ProvisioningStatus,
   Station,
+  StationOperationalStatusResponse,
   StationStaffMember,
   UserProfile,
 } from '../types';
@@ -357,6 +358,8 @@ export function createRestServices(http: HttpClient): Services {
           .post<Station>('/owner/stations', input)
           .catch(() => http.post<Station>('/stations', input)),
       updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
+      changeOperationalStatus: (stationId, input) =>
+        http.patch<StationOperationalStatusResponse>(`/owner/stations/${stationId}/operational-status`, input),
       approvals: (params = {}) => http.get('/admin/station-approvals', params),
       approvalDetail: (id) => http.get(`/admin/station-approvals/${id}`),
       all: () => http.get('/admin/stations'),

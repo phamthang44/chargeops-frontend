@@ -681,8 +681,32 @@
     },
     "operatingBadge": {
       "OPEN": "Open",
-      "CLOSED_BY_SCHEDULE": "Closed by schedule",
-      "SCHEDULE_NOT_CONFIGURED": "No schedule"
+      "CLOSED_BY_SCHEDULE": "Outside operating hours",
+      "PAUSED_BY_OWNER": "Paused by owner",
+      "MAINTENANCE": "Under maintenance",
+      "SCHEDULE_NOT_CONFIGURED": "No schedule configured",
+      "UNAVAILABLE_BY_PLATFORM": "Unavailable on platform"
+    },
+    "operationalStatus": {
+      "OPERATING": "Operating (Accepting drivers)",
+      "PAUSED": "Paused",
+      "MAINTENANCE": "Maintenance"
+    },
+    "operationalModal": {
+      "title": "Manage Station Operational Status",
+      "successToast": "Updated station operational status successfully.",
+      "reasonRequired": "Please provide a reason for pausing or maintenance (min 3 chars).",
+      "operatingDesc": "Station opens for drivers and accepts bookings according to configured schedule.",
+      "pausedDesc": "Temporarily stop accepting new bookings. Ongoing charging sessions and confirmed bookings remain respected.",
+      "maintenanceDesc": "Under hardware repair, electrical grid servicing, or facility maintenance.",
+      "reasonLabel": "Reason for status change (Required):",
+      "reasonPlaceholder": "Provide a clear explanation so drivers are properly informed…",
+      "quickSuggestions": "Quick suggestions:",
+      "operatingNotice": "When switching to 'Operating', the station immediately becomes ready for bookings (requires ACTIVE approval, valid license, and configured schedule).",
+      "pausedNotice": "Drivers will see your pause explanation on mobile apps. New charging bookings are blocked until you reopen.",
+      "changeStatusBtn": "Change Operational Status",
+      "currentOperationalStatus": "Operational Status",
+      "reason": "Reason:"
     }
   },
   "license": {

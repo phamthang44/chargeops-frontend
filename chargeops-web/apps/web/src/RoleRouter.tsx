@@ -47,7 +47,7 @@ export function RoleRouter() {
       <Route
         path="/owner/*"
         element={
-          <RequireRole role="station_owner">
+          <RequireRole roles={['station_owner', 'platform_admin']}>
             <OwnerConsole base="/owner" />
           </RequireRole>
         }

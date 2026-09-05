@@ -57,96 +57,230 @@ export function SimulatorPage() {
     setLogs((prev) => [item, ...prev.slice(0, 49)]);
   };
 
-  // 1. Initial Load of Stations and Connectors
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081/api/v1';
+
+const isUUID = (str: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+const FALLBACK_MOCK_STATIONS: Station[] = [
+  {
+    id: 'mock-st-01',
+    stationCode: 'HN-01',
+    name: 'Trạm Sạc Mô Phỏng ChargeOps',
+    status: 'ACTIVE',
+    chargerCount: 2,
+    onlineCount: 2,
+    address: 'Khu Công nghệ cao Hòa Lạc, Hà Nội',
+  } as Station,
+];
+
+const FALLBACK_MOCK_CONNECTORS: Connector[] = [
+  {
+    id: 'mock-conn-01',
+    chargePointId: 'mock-cp-01',
+    connectorCode: 'C-01',
+    name: 'Trụ DC-01 · Súng C-01 (CCS2)',
+    connectorType: 'CCS2',
+    powerKw: 120,
+    runtimeStatus: 'AVAILABLE',
+    utilizationPct: 0,
+    sessionsToday: 0,
+    uptime30dPct: 100,
+    kwhToday: 0,
+    faultCount: 0,
+    lastSeen: new Date().toISOString(),
+  },
+  {
+    id: 'mock-conn-02',
+    chargePointId: 'mock-cp-01',
+    connectorCode: 'C-02',
+    name: 'Trụ DC-01 · Súng C-02 (Type 2)',
+    connectorType: 'TYPE2',
+    powerKw: 22,
+    runtimeStatus: 'AVAILABLE',
+    utilizationPct: 0,
+    sessionsToday: 0,
+    uptime30dPct: 100,
+    kwhToday: 0,
+    faultCount: 0,
+    lastSeen: new Date().toISOString(),
+  },
+];
+
+  // Helper gọi fetch tự động kèm Bearer Token từ Keycloak session
+  const authFetch = async (path: string, init: RequestInit = {}) => {
+    let token: string | null = null;
+    try {
+      token = await getToken();
+    } catch {
+      // ignore
+    }
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      ...((init.headers as Record<string, string>) || {}),
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+    });
+  };
+
+  // 1. Initial Load of Stations (thuần túy gọi Public Discovery API GET /stations)
   useEffect(() => {
     let active = true;
-    async function loadData() {
+    async function loadStations() {
       try {
-        addLog('Đang khởi tạo Charger Simulator...', 'info');
-        const stList = await services.stations.all().catch(() => []);
+        addLog('Đang kết nối lấy danh sách trạm qua Discovery API...', 'info');
+
+        let stList: Station[] = [];
+        try {
+          const discRes = await authFetch('/stations?page=1&size=50');
+          if (discRes.ok) {
+            const json = await discRes.json();
+            const items = json?.data?.items || json?.data || [];
+            if (Array.isArray(items) && items.length > 0) {
+              stList = items.map((it: any) => ({
+                id: it.id,
+                stationCode: it.stationCode,
+                name: it.name,
+                status: it.status || 'ACTIVE',
+                address: it.address,
+                chargerCount: it.totalConnectors || 0,
+                onlineCount: it.availableConnectors || 0,
+              } as Station));
+            }
+          } else if (discRes.status === 401) {
+            addLog('API /stations trả về 401: Token chưa sẵn sàng hoặc phiên hết hạn.', 'warn');
+          }
+        } catch {
+          // Bỏ qua lỗi mạng
+        }
+
+        // Nếu backend chưa có trạm hoặc đang offline, dùng dữ liệu mô phỏng cục bộ
+        // Tuyệt đối KHÔNG gọi API quản trị /admin/stations
+        if (stList.length === 0) {
+          stList = FALLBACK_MOCK_STATIONS;
+        }
+
         if (!active) return;
         setStations(stList);
 
-        const initialStationId =
-          searchParams.get('stationId') || (stList.length > 0 ? stList[0].id : 'ST-01');
-        setSelectedStationId(initialStationId);
-
-        // Fetch connectors
-        const connList = await services.connectors.list().catch(() => []);
-        if (!active) return;
-        setConnectors(connList);
-
-        const targetConnectorId =
-          searchParams.get('connectorId') ||
-          (connList.length > 0 ? connList[0].id : 'CCS2-01');
-        setSelectedConnectorId(targetConnectorId);
-
-        addLog(`Đã tải ${stList.length} trạm và ${connList.length} súng sạc.`, 'success');
-      } catch {
-        // Fallback default connectors
-        const mockConns: Connector[] = [
-          {
-            id: 'CCS2-01',
-            chargePointId: 'CP-01',
-            connectorCode: 'C-01',
-            name: 'Súng DC 1 (CCS2)',
-            connectorType: 'CCS2',
-            powerKw: 120,
-            runtimeStatus: 'AVAILABLE',
-            utilizationPct: 65,
-            sessionsToday: 12,
-            uptime30dPct: 99.8,
-            kwhToday: 240,
-            faultCount: 0,
-            lastSeen: new Date().toISOString(),
-          },
-          {
-            id: 'CCS2-02',
-            chargePointId: 'CP-01',
-            connectorCode: 'C-02',
-            name: 'Súng DC 2 (CCS2)',
-            connectorType: 'CCS2',
-            powerKw: 120,
-            runtimeStatus: 'AVAILABLE',
-            utilizationPct: 45,
-            sessionsToday: 8,
-            uptime30dPct: 99.5,
-            kwhToday: 180,
-            faultCount: 0,
-            lastSeen: new Date().toISOString(),
-          },
-          {
-            id: 'Type2-01',
-            chargePointId: 'CP-02',
-            connectorCode: 'C-01',
-            name: 'Súng AC 1 (Type 2)',
-            connectorType: 'TYPE2',
-            powerKw: 22,
-            runtimeStatus: 'AVAILABLE',
-            utilizationPct: 30,
-            sessionsToday: 5,
-            uptime30dPct: 100,
-            kwhToday: 60,
-            faultCount: 0,
-            lastSeen: new Date().toISOString(),
-          },
-        ];
-        if (active) {
-          setConnectors(mockConns);
-          setSelectedConnectorId('CCS2-01');
+        if (stList.length > 0) {
+          const urlStationId = searchParams.get('stationId');
+          const matchedStation = stList.find((s) => s.id === urlStationId);
+          const initialStationId = matchedStation ? matchedStation.id : stList[0].id;
+          setSelectedStationId(initialStationId);
+          addLog(`Đã tải ${stList.length} trạm sạc từ API hệ thống.`, 'success');
+        } else {
+          addLog('Không tìm thấy trạm sạc nào trong hệ thống.', 'warn');
         }
+      } catch (err) {
+        addLog('Không thể tải danh sách trạm: ' + (err as Error).message, 'error');
       }
     }
-    loadData();
+
+    loadStations();
     return () => {
       active = false;
     };
-  }, []);
+  }, [getToken]);
 
-  // 2. Fetch Challenge Token
+  // 2. Load connectors thật qua Public Station Detail API: GET /stations/{stationId}
+  useEffect(() => {
+    if (!selectedStationId) return;
+    let active = true;
+
+    async function loadConnectors() {
+      try {
+        addLog(`Đang tải súng sạc qua API /stations/${selectedStationId}...`, 'info');
+        let conns: Connector[] = [];
+
+        // Thử lấy chi tiết trạm từ API discovery: GET /stations/{selectedStationId}
+        if (isUUID(selectedStationId)) {
+          try {
+            const res = await authFetch(`/stations/${selectedStationId}`);
+            if (res.ok) {
+              const json = await res.json();
+              const detail = json?.data || json;
+              if (detail?.chargePoints && Array.isArray(detail.chargePoints)) {
+                for (const cp of detail.chargePoints) {
+                  if (cp.connectors && Array.isArray(cp.connectors)) {
+                    for (const c of cp.connectors) {
+                      conns.push({
+                        id: c.id,
+                        chargePointId: cp.id,
+                        connectorCode: c.connectorCode,
+                        name: `Trụ ${cp.name || cp.chargePointCode} · Cổng ${c.connectorCode} (${c.connectorType || 'CCS2'})`,
+                        connectorType: c.connectorType || 'CCS2',
+                        powerKw: Number(c.powerKw || cp.maxPowerKw) || 0,
+                        runtimeStatus: c.runtimeStatus || 'AVAILABLE',
+                        utilizationPct: 0,
+                        sessionsToday: 0,
+                        uptime30dPct: 100,
+                        kwhToday: 0,
+                        faultCount: 0,
+                        lastSeen: new Date().toISOString(),
+                      });
+                    }
+                  }
+                }
+              }
+            } else if (res.status === 401) {
+              addLog(`API /stations/${selectedStationId} trả về 401 Unauthorized.`, 'warn');
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        // Tuyệt đối KHÔNG gọi API /owner hay /admin
+        // Nếu trạm không có cổng hoặc trạm mock, fallback sang danh sách mock cục bộ
+        if (conns.length === 0) {
+          conns = FALLBACK_MOCK_CONNECTORS;
+        }
+
+        if (!active) return;
+        setConnectors(conns);
+
+        if (conns.length > 0) {
+          const urlConnId = routeParams.connectorId || searchParams.get('connectorId');
+          const matched = conns.find((c) => c.id === urlConnId || c.connectorCode === urlConnId);
+          const nextConnId = matched ? matched.id : conns[0].id;
+          setSelectedConnectorId(nextConnId);
+          addLog(`Đã nạp ${conns.length} súng sạc. Đang chọn: ${matched?.name || conns[0].name}`, 'success');
+        } else {
+          setSelectedConnectorId('');
+          addLog('Trạm này chưa có cổng sạc nào được cấu hình.', 'warn');
+        }
+      } catch (err) {
+        addLog('Lỗi tải danh sách súng sạc: ' + (err as Error).message, 'error');
+      }
+    }
+
+    loadConnectors();
+    return () => {
+      active = false;
+    };
+  }, [selectedStationId]);
+
+  // 3. Fetch Challenge Token từ Backend
   const fetchChallenge = async (connId: string) => {
     if (!connId) return;
     setLoadingToken(true);
+
+    // Kiểm tra định dạng UUID: tránh gửi ID giả như CCS2-01 gây lỗi crash Spring Boot
+    if (!isUUID(connId)) {
+      addLog(`[Bỏ qua] Mã "${connId}" không phải UUID cổng sạc hợp lệ. Dùng token mô phỏng...`, 'warn');
+      const fallbackToken = 'chk_' + Math.random().toString(36).substring(2, 12);
+      setChallengeToken(fallbackToken);
+      setRemainingSeconds(60);
+      setLoadingToken(false);
+      return;
+    }
+
     try {
       addLog(`[API] POST /internal/connectors/${connId}/check-in-challenge...`, 'info');
       const res = await services.challenge.create(connId);
@@ -156,18 +290,18 @@ export function SimulatorPage() {
         `[Challenge] Nhận token thành công: ${res.challengeToken.slice(0, 16)}... (TTL ${res.expiresInSeconds}s)`,
         'success',
       );
-    } catch {
-      // Fallback in case of network issue
+    } catch (err) {
+      const msg = (err as Error)?.message || 'Không thể tạo mã challenge';
+      addLog(`[Lỗi Backend] ${msg}. Sử dụng token mô phỏng tạm thời.`, 'warn');
       const fallbackToken = 'chk_' + Math.random().toString(36).substring(2, 12);
       setChallengeToken(fallbackToken);
       setRemainingSeconds(60);
-      addLog(`[Fallback] Tạo token cục bộ: ${fallbackToken}`, 'warn');
     } finally {
       setLoadingToken(false);
     }
   };
 
-  // On selected connector change -> fetch fresh challenge
+  // Tự động lấy challenge khi đổi connector
   useEffect(() => {
     if (selectedConnectorId) {
       fetchChallenge(selectedConnectorId);
@@ -203,7 +337,7 @@ export function SimulatorPage() {
   // Handlers
   const handleSelectStation = (stId: string) => {
     setSelectedStationId(stId);
-    setSearchParams({ stationId: stId, connectorId: selectedConnectorId, mode: viewMode });
+    setSearchParams({ stationId: stId, mode: viewMode });
   };
 
   const handleSelectConnector = (cId: string) => {

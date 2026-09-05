@@ -37,6 +37,7 @@ import {
   type StationStatusHistory,
   type StationStaffMember,
 } from '@chargeops/api';
+import { ChangeOperationalStatusModal } from './ChangeOperationalStatusModal';
 
 export interface StationDetailDrawerProps {
   open: boolean;
@@ -80,6 +81,7 @@ export function StationDetailDrawer({
 
   const [activeTab, setActiveTab] = useState<StationTab>('overview');
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [changeOperationalStatusOpen, setChangeOperationalStatusOpen] = useState(false);
 
   // Local state for amenities editing in tab 3
   const [selectedAmenities, setSelectedAmenities] = useState<Amenity[]>([]);
@@ -261,6 +263,52 @@ export function StationDetailDrawer({
         {/* ==================== TAB 1: OVERVIEW ==================== */}
         {activeTab === 'overview' && (
           <div className="flex flex-col gap-4">
+            {/* Operational Status Control Card */}
+            {(station.status === 'ACTIVE' || station.status === 'active') && (
+              <Card className="p-4 flex flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-bold text-ink">
+                      {t('stations.operationalModal.currentOperationalStatus', { defaultValue: 'Trạng thái vận hành trạm' })}
+                    </span>
+                    {station.operationalStatus === 'PAUSED' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-bold text-rose-600 border border-rose-500/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                        Tạm dừng đón khách
+                      </span>
+                    ) : station.operationalStatus === 'MAINTENANCE' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 border border-amber-500/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        Đang bảo trì
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Đang vận hành bình thường
+                      </span>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setChangeOperationalStatusOpen(true)}
+                  >
+                    {t('stations.operationalModal.changeStatusBtn', { defaultValue: 'Đổi trạng thái vận hành' })}
+                  </Button>
+                </div>
+
+                {station.operationalStatus !== 'OPERATING' && station.operationalStatus && (
+                  <div className="rounded-[8px] border border-line-2 bg-surface-2 p-2.5 text-[12px] leading-relaxed text-muted">
+                    <span className="font-semibold text-ink">
+                      {t('stations.operationalModal.reason', { defaultValue: 'Lý do:' })}{' '}
+                    </span>
+                    <span>{station.operationalStatusReason || 'Chủ trạm tạm thời dừng tiếp nhận đặt chỗ mới.'}</span>
+                  </div>
+                )}
+              </Card>
+            )}
+
             {/* Warning Callout when Station is Active but not Driver-Eligible */}
             {(station.status === 'ACTIVE' || station.status === 'active') && !eligibility.isEligible && (
               <div className="rounded-[10px] border border-warn-border bg-warn-soft/60 p-3 text-[12px] leading-relaxed text-warn-deep">
@@ -776,6 +824,12 @@ export function StationDetailDrawer({
           </div>
         )}
       </div>
+
+      <ChangeOperationalStatusModal
+        open={changeOperationalStatusOpen}
+        station={station}
+        onClose={() => setChangeOperationalStatusOpen(false)}
+      />
     </Drawer>
   );
 }

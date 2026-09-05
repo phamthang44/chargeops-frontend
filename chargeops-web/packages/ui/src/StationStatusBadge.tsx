@@ -181,6 +181,33 @@ export function resolveStationBadgeConfig(
   // 3. Active Station, Healthy & Eligible -> Operating Schedule State
   const normOperatingState = String(operatingState || '').toUpperCase();
 
+  if (normOperatingState === 'PAUSED_BY_OWNER') {
+    return {
+      label: 'Tạm ngừng đón khách',
+      tone: 'bad',
+      pulse: false,
+      tooltip: 'Chủ trạm đang chủ động tạm dừng tiếp nhận đặt chỗ mới.',
+    };
+  }
+
+  if (normOperatingState === 'MAINTENANCE') {
+    return {
+      label: 'Đang bảo trì',
+      tone: 'warn',
+      pulse: false,
+      tooltip: 'Trạm đang trong quá trình bảo trì kỹ thuật.',
+    };
+  }
+
+  if (normOperatingState === 'UNAVAILABLE_BY_PLATFORM') {
+    return {
+      label: 'Không khả dụng',
+      tone: 'neutral',
+      pulse: false,
+      tooltip: 'Trạm chưa đủ điều kiện hiển thị trên nền tảng.',
+    };
+  }
+
   if (normOperatingState === 'OPEN') {
     return {
       label: variant === 'compact' ? 'Đang mở' : 'Đang mở · Đón khách',
@@ -192,7 +219,7 @@ export function resolveStationBadgeConfig(
 
   if (normOperatingState === 'CLOSED_BY_SCHEDULE') {
     return {
-      label: 'Đóng theo lịch',
+      label: 'Ngoài giờ hoạt động',
       tone: 'warn',
       tooltip: 'Trạm đang ngoài khung giờ hoạt động theo lịch đã cài đặt (vẫn đủ điều kiện hiển thị trên app).',
     };

@@ -43,9 +43,11 @@ import type {
   CurrentStaffContextResponse,
   AssignStationStaffRequest,
   Amenity,
+  ChangeStationOperationalStatusRequest,
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
+  StationOperationalStatusResponse,
   StationRegistration,
   StationStaffMember,
   StationStatusHistory,
@@ -173,6 +175,11 @@ export interface StationService {
   register(input: RegisterStationRequest | StationRegistration): Promise<Station>;
   /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
   updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
+  /** Owner: change operational status (OPERATING, PAUSED, MAINTENANCE). */
+  changeOperationalStatus(
+    stationId: string,
+    input: ChangeStationOperationalStatusRequest,
+  ): Promise<StationOperationalStatusResponse>;
   /** Admin: approval queue (status = pending). */
   approvals(params?: { pageNo?: number; pageSize?: number }): Promise<StationApprovalSummary[]>;
   /** Admin: get detailed approval request info including address, licenseSubmitted, assets. */

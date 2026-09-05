@@ -9,6 +9,7 @@ import type {
   LicenseStatus,
   ProvisioningStatus,
   StationOperatingState,
+  StationOperationalStatus,
   StationStatus,
   TicketCategory,
   TicketStatus,
@@ -265,15 +266,25 @@ export function isStationDriverEligible(
   };
 }
 
+export const STATION_OPERATIONAL_STATUS: Record<StationOperationalStatus, StatusMeta> = {
+  OPERATING: { label: 'Đang vận hành', tone: 'good' },
+  PAUSED: { label: 'Tạm dừng đón khách', tone: 'bad' },
+  MAINTENANCE: { label: 'Bảo trì trạm', tone: 'warn' },
+};
+
 export const OPERATING_STATE_META: Record<StationOperatingState, StatusMeta> = {
-  OPEN: { label: 'Đang mở', tone: 'good' },
-  CLOSED_BY_SCHEDULE: { label: 'Đóng theo lịch', tone: 'warn' },
+  OPEN: { label: 'Đang mở cửa', tone: 'good' },
+  CLOSED_BY_SCHEDULE: { label: 'Ngoài giờ hoạt động', tone: 'warn' },
+  PAUSED_BY_OWNER: { label: 'Tạm ngừng đón khách', tone: 'bad' },
+  MAINTENANCE: { label: 'Đang bảo trì', tone: 'warn' },
   SCHEDULE_NOT_CONFIGURED: { label: 'Chưa cấu hình lịch', tone: 'neutral' },
+  UNAVAILABLE_BY_PLATFORM: { label: 'Không đủ điều kiện hiển thị', tone: 'neutral' },
 };
 
 /**
  * Resolves granular operatingState for station:
  * - Direct backend operatingState (if present)
+ * - OperationalStatus check (PAUSED / MAINTENANCE)
  * - OPEN if openNow is true or open24Hours is true
  * - CLOSED_BY_SCHEDULE if active schedule exists but currently closed
  * - SCHEDULE_NOT_CONFIGURED if no schedule has been configured yet
@@ -281,6 +292,7 @@ export const OPERATING_STATE_META: Record<StationOperatingState, StatusMeta> = {
 export function resolveOperatingState(
   station?: {
     operatingState?: StationOperatingState;
+    operationalStatus?: StationOperationalStatus;
     openNow?: boolean;
     open24Hours?: boolean;
     scheduleStatus?: string;
@@ -288,6 +300,8 @@ export function resolveOperatingState(
 ): StationOperatingState {
   if (!station) return 'SCHEDULE_NOT_CONFIGURED';
   if (station.operatingState) return station.operatingState;
+  if (station.operationalStatus === 'PAUSED') return 'PAUSED_BY_OWNER';
+  if (station.operationalStatus === 'MAINTENANCE') return 'MAINTENANCE';
   if (station.openNow === true) return 'OPEN';
   if (station.scheduleStatus === 'ACTIVE') {
     return station.openNow ? 'OPEN' : 'CLOSED_BY_SCHEDULE';

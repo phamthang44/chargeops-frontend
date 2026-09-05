@@ -56,11 +56,22 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+export function RequireRole({
+  role,
+  roles,
+  children,
+}: {
+  role?: Role;
+  roles?: Role[];
+  children: ReactNode;
+}) {
   const { t } = useTranslation('auth');
   const { hasRole, user } = useAuth();
 
-  if (!hasRole(role)) {
+  const allowed = roles ?? (role ? [role] : []);
+  const authorized = allowed.length === 0 || allowed.some((r) => hasRole(r));
+
+  if (!authorized) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-canvas p-8 text-center">
         <div className="text-[17px] font-bold">{t('requireRole.title')}</div>
@@ -68,7 +79,7 @@ export function RequireRole({ role, children }: { role: Role; children: ReactNod
           <Trans
             t={t}
             i18nKey="requireRole.body"
-            values={{ email: user?.email ?? '—', role }}
+            values={{ email: user?.email ?? '—', role: allowed.join(' / ') }}
             components={{ bold: <b /> }}
           />
         </div>

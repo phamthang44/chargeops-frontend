@@ -46,6 +46,7 @@ export interface StationCardProps {
   isActiveContext?: boolean;
   onSelectStation?: (stationId: string) => void;
   onOpenDetail?: (station: Station) => void;
+  onChangeOperationalStatus?: (station: Station) => void;
 }
 
 /** One station card with fast actions and detail hub trigger. */
@@ -54,6 +55,7 @@ export function StationCard({
   isActiveContext = false,
   onSelectStation,
   onOpenDetail,
+  onChangeOperationalStatus,
 }: StationCardProps) {
   const { t } = useTranslation('owner');
   if (!station) return null;
@@ -156,6 +158,53 @@ export function StationCard({
           </div>
         )}
 
+        {/* Operational Status Callout when PAUSED or MAINTENANCE */}
+        {isActive && station.operationalStatus === 'PAUSED' && (
+          <div className="mb-3 rounded-[9px] border border-bad-border bg-bad-soft/60 p-2.5 text-[11.5px] leading-relaxed text-bad-deep">
+            <div className="flex items-center justify-between font-bold text-ink">
+              <div className="flex items-center gap-1.5">
+                <span>⏸️</span>
+                <span>{t('stations.operationalStatus.PAUSED', { defaultValue: 'Trạm đang tạm dừng đón khách' })}</span>
+              </div>
+              {onChangeOperationalStatus && (
+                <button
+                  type="button"
+                  onClick={() => onChangeOperationalStatus(station)}
+                  className="text-[11px] font-semibold text-bad-deep underline hover:opacity-80 cursor-pointer"
+                >
+                  {t('stations.operationalModal.changeStatusBtn', { defaultValue: 'Đổi trạng thái' })}
+                </button>
+              )}
+            </div>
+            <div className="mt-1 text-muted">
+              {station.operationalStatusReason || t('stations.operationalModal.pausedDesc', { defaultValue: 'Chủ trạm tạm ngừng đón khách.' })}
+            </div>
+          </div>
+        )}
+
+        {isActive && station.operationalStatus === 'MAINTENANCE' && (
+          <div className="mb-3 rounded-[9px] border border-warn-border bg-warn-soft/60 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
+            <div className="flex items-center justify-between font-bold text-ink">
+              <div className="flex items-center gap-1.5">
+                <span>🛠️</span>
+                <span>{t('stations.operationalStatus.MAINTENANCE', { defaultValue: 'Trạm đang bảo trì' })}</span>
+              </div>
+              {onChangeOperationalStatus && (
+                <button
+                  type="button"
+                  onClick={() => onChangeOperationalStatus(station)}
+                  className="text-[11px] font-semibold text-warn-deep underline hover:opacity-80 cursor-pointer"
+                >
+                  {t('stations.operationalModal.changeStatusBtn', { defaultValue: 'Đổi trạng thái' })}
+                </button>
+              )}
+            </div>
+            <div className="mt-1 text-muted">
+              {station.operationalStatusReason || t('stations.operationalModal.maintenanceDesc', { defaultValue: 'Trạm đang trong quá trình bảo trì kỹ thuật.' })}
+            </div>
+          </div>
+        )}
+
         {/* Details snippet */}
         <div className="flex flex-col gap-2 text-[12.5px] font-medium text-body">
           <div className="flex justify-between border-b border-hairline pb-[7px]">
@@ -204,9 +253,20 @@ export function StationCard({
           {t('stations.card.viewDetailBtn', { defaultValue: 'Xem chi tiết trạm' })}
         </Button>
 
-        {!isActiveContext && onSelectStation && (
+        {isActive && onChangeOperationalStatus && (
           <Button
             variant="secondary"
+            size="sm"
+            onClick={() => onChangeOperationalStatus(station)}
+            title="Đổi trạng thái vận hành trạm (Operating / Paused / Maintenance)"
+          >
+            {t('stations.operationalModal.changeStatusBtn', { defaultValue: 'Vận hành' })}
+          </Button>
+        )}
+
+        {!isActiveContext && onSelectStation && (
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => onSelectStation(station.id)}
             title="Chọn trạm này làm ngữ cảnh hoạt động hiện tại"

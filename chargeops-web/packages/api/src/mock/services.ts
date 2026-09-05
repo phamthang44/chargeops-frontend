@@ -639,6 +639,29 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         st.amenities = [...amenities];
         return { ...st };
       },
+      async changeOperationalStatus(stationId, input) {
+        await delay();
+        const st = db.ownerStations.find((s) => s.id === stationId);
+        if (st) {
+          st.operationalStatus = input.operationalStatus;
+          st.operationalStatusReason = input.reason || null;
+          if (input.operationalStatus === 'PAUSED') {
+            st.operatingState = 'PAUSED_BY_OWNER';
+            st.openNow = false;
+          } else if (input.operationalStatus === 'MAINTENANCE') {
+            st.operatingState = 'MAINTENANCE';
+            st.openNow = false;
+          } else if (input.operationalStatus === 'OPERATING') {
+            st.operatingState = 'OPEN';
+            st.openNow = true;
+          }
+        }
+        return {
+          stationId,
+          operationalStatus: input.operationalStatus,
+          reason: input.reason,
+        };
+      },
       async approvals(): Promise<StationApprovalSummary[]> {
         await delay();
         return db.approvalQueue

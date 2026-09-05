@@ -28,7 +28,7 @@ export function Pricing() {
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
-  const { selectedStationId } = useOwnerStation();
+  const { selectedStationId, stations, isLoading: stationsLoading } = useOwnerStation();
   const [draft, setDraft] = useState<PricingConfig | null>(null);
   const [backupHours, setBackupHours] = useState<OperatingHour[] | null>(null);
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
@@ -190,6 +190,13 @@ export function Pricing() {
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
           {t('pricing.loadError', { message: (error as Error).message })}
+        </Card>
+      ) : !stationsLoading && stations.length === 0 ? (
+        <Card className="p-8 text-center border-line-2">
+          <div className="text-[16px] font-bold text-ink">Chưa có trạm sạc nào</div>
+          <p className="mt-1.5 text-[13px] text-muted max-w-[440px] mx-auto">
+            Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động.
+          </p>
         </Card>
       ) : isLoading || !draft ? (
         <PricingSkeleton />

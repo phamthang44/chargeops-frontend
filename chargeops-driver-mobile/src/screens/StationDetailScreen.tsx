@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -6,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Dimensions,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,46 +16,34 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppButton, GlassButton, StarRating, StatusBadge } from '@/components';
+import {
+  CallConfirmationModal,
+  ChargePointGroupList,
+  StationAmenitiesList,
+  StationBentoMetrics,
+  StationBookingBottomBar,
+  StationHeaderInfo,
+  StationHeroGallery,
+  StationNoticeBanner,
+  StationPolicyCard,
+  StationReviewsSection,
+  type GroupedPoint,
+} from '@/components/station-detail';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import {
-  getReviewsByStation,
-  getStationDetail,
-} from '@/services/stationService';
-import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { Amenity, ChargePoint, Connector, Review, Station } from '@/types';
-import { formatDate, formatRate } from '@/utils/format';
+import { getReviewsByStation, getStationDetail } from '@/services/stationService';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+import type { ChargePoint, Connector, Review, Station } from '@/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'StationDetail'>;
 type Route = RouteProp<RootStackParamList, 'StationDetail'>;
 
 const { width } = Dimensions.get('window');
 
-const GALLERY: (keyof typeof Ionicons.glyphMap)[] = ['flash', 'map', 'business'];
-
-const AMENITY_ICON: Record<Amenity, keyof typeof Ionicons.glyphMap> = {
-  RESTROOM: 'man-outline',
-  CAFE: 'cafe-outline',
-  WIFI: 'wifi-outline',
-  PARKING: 'car-outline',
-  CONVENIENCE_STORE: 'basket-outline',
-  SHOPPING: 'cart-outline',
-  restroom: 'man-outline',
-  food: 'cafe-outline',
-  wifi: 'wifi-outline',
-  parking: 'car-outline',
-  security: 'shield-checkmark-outline',
-};
-
-interface GroupedPoint {
-  cp: ChargePoint;
-  connectors: Connector[];
-}
-
 /**
- * "Chi tiết trạm sạc" screen — dynamic theme aware for light & dark modes.
+ * "Chi tiết trạm sạc" screen — refactored for clean code & modular architecture.
+ * Theme-aware (light/dark) with real-time operational state & availability integration.
  */
 export function StationDetailScreen() {
   const navigation = useNavigation<Nav>();
@@ -73,6 +61,7 @@ export function StationDetailScreen() {
   const [slide, setSlide] = useState(0);
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
+  const [callConfirmVisible, setCallConfirmVisible] = useState(false);
 
   const loadData = useCallback(() => {
     let active = true;
@@ -115,6 +104,12 @@ export function StationDetailScreen() {
     return loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: station?.name ? `${station.name} · ${t('stationDetail.title')}` : t('stationDetail.title'),
+    });
+  }, [navigation, station?.name, t]);
+
   const fav = isFavorite(params.stationId);
 
   const onGalleryScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -122,36 +117,165 @@ export function StationDetailScreen() {
   };
 
   const groups = useMemo<GroupedPoint[]>(() => {
+    if (chargePoints.length === 0 && connectors.length > 0) {
+      return [
+        {
+          cp: {
+            id: 'default',
+            stationId: params.stationId,
+            name: station?.name || t('stationDetail.defaultChargePoint'),
+            zoneLabel: null,
+            maxPowerKw: 0,
+            status: 'ACTIVE',
+          },
+          connectors,
+        },
+      ];
+    }
     return chargePoints.map((cp) => ({
       cp,
       connectors: connectors.filter((c) => c.chargePointId === cp.id),
     }));
-  }, [chargePoints, connectors]);
+  }, [chargePoints, connectors, params.stationId, station?.name, t]);
 
   const selectedConn = useMemo(
     () => connectors.find((c) => c.id === selectedConnectorId),
     [connectors, selectedConnectorId],
   );
 
-  const floatingHeader = (
-    <View style={[styles.floatingHeader, { top: insets.top + spacing.sm }]} pointerEvents="box-none">
-      <GlassButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
-      </GlassButton>
-      <GlassButton
-        accessibilityLabel={t(fav ? 'stationDetail.saved' : 'stationDetail.save')}
-        onPress={() => toggleFavorite(params.stationId)}
-      >
-        <Ionicons name={fav ? 'heart' : 'heart-outline'} size={22} color={fav ? themeColors.error : '#FFFFFF'} />
-      </GlassButton>
-    </View>
+  const maxPowerKw = useMemo(
+    () => station?.maxPowerKw ?? Math.max(0, ...connectors.map((c) => c.powerKw)),
+    [connectors, station?.maxPowerKw],
   );
+
+  const connectorTypesList = useMemo(
+    () => Array.from(new Set(connectors.map((c) => c.connectorType).filter(Boolean))),
+    [connectors],
+  );
+
+  const opState = station?.operatingState || (station?.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+  const isPaused = opState === 'PAUSED_BY_OWNER';
+  const isMaintenance = opState === 'MAINTENANCE';
+  const isNoSchedule = opState === 'SCHEDULE_NOT_CONFIGURED';
+  const isClosedBySchedule = opState === 'CLOSED_BY_SCHEDULE';
+  const isUnavailable = opState === 'UNAVAILABLE_BY_PLATFORM';
+
+  const isOperatingAllowed = opState === 'OPEN' || isClosedBySchedule;
+  const canBook = isOperatingAllowed && (station?.totalConnectors ?? 0) > 0 && !!selectedConnectorId;
+
+  const bookButtonLabel = isPaused
+    ? t('stationDetail.action.paused')
+    : isMaintenance
+      ? t('stationDetail.action.maintenance')
+      : isUnavailable
+        ? t('stationDetail.action.unavailable')
+        : isClosedBySchedule
+          ? t('stationDetail.action.scheduleAhead')
+          : t('stationDetail.findAvailability');
+
+  const gateHint = isPaused
+    ? t('stationDetail.pausedNotice', {
+        reason: station?.operationalStatusReason || t('stationDetail.pausedDefaultReason'),
+      })
+    : isMaintenance
+      ? t('stationDetail.maintenanceNotice', {
+          reason: station?.operationalStatusReason || t('stationDetail.maintenanceDefaultReason'),
+        })
+      : isNoSchedule
+        ? t('stationDetail.noScheduleNotice')
+        : isUnavailable
+          ? t('stationDetail.unavailableNotice')
+          : isClosedBySchedule
+            ? t('stationDetail.closedNotice')
+            : (station?.availableConnectors ?? 0) === 0
+              ? t('stationDetail.fullHint')
+              : !selectedConnectorId
+                ? t('stationDetail.selectConnectorHint')
+                : null;
+
+  const areaLabel = station
+    ? [station.wardName, station.provinceName].filter(Boolean).join(', ')
+    : '';
+
+  const displayDistance = params.distanceKm !== undefined ? params.distanceKm : station?.distanceKm;
+
+  let statusMeta = {
+    color: themeColors.textMuted,
+    bg: themeColors.surfaceAlt,
+    borderColor: themeColors.border,
+    label: t('stationDetail.operatingState.SCHEDULE_NOT_CONFIGURED'),
+  };
+
+  if (opState === 'OPEN') {
+    const hoursLabel = station?.operatingHours || t('stationDetail.allDay');
+    statusMeta = {
+      color: '#10B981',
+      bg: isDark ? 'rgba(16, 185, 129, 0.12)' : '#ECFDF5',
+      borderColor: isDark ? 'rgba(16, 185, 129, 0.3)' : '#A7F3D0',
+      label: `${t('stationDetail.openNow')} · ${hoursLabel}`,
+    };
+  } else if (isClosedBySchedule) {
+    statusMeta = {
+      color: '#F59E0B',
+      bg: isDark ? 'rgba(245, 158, 11, 0.12)' : '#FFFBEB',
+      borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+      label: station?.operatingHours
+        ? `${t('stationDetail.operatingState.CLOSED_BY_SCHEDULE')} · ${station.operatingHours}`
+        : t('stationDetail.operatingState.CLOSED_BY_SCHEDULE'),
+    };
+  } else if (isPaused) {
+    statusMeta = {
+      color: '#EF4444',
+      bg: isDark ? 'rgba(239, 68, 68, 0.12)' : '#FEF2F2',
+      borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#FECACA',
+      label: t('stationDetail.operatingState.PAUSED_BY_OWNER'),
+    };
+  } else if (isMaintenance) {
+    statusMeta = {
+      color: '#F59E0B',
+      bg: isDark ? 'rgba(245, 158, 11, 0.12)' : '#FFFBEB',
+      borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+      label: t('stationDetail.operatingState.MAINTENANCE'),
+    };
+  } else if (isUnavailable) {
+    statusMeta = {
+      color: themeColors.textMuted,
+      bg: themeColors.surfaceAlt,
+      borderColor: themeColors.border,
+      label: t('stationDetail.operatingState.UNAVAILABLE_BY_PLATFORM'),
+    };
+  }
+
+  const openDirections = () => {
+    if (!station) return;
+    const query = encodeURIComponent(`${station.latitude},${station.longitude}`);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
+  };
+
+  const callStation = () => {
+    if (!station?.contactPhone) return;
+    setCallConfirmVisible(true);
+  };
+
+  const executeCall = () => {
+    setCallConfirmVisible(false);
+    if (station?.contactPhone) {
+      Linking.openURL(`tel:${station.contactPhone}`);
+    }
+  };
+
+  const handleBook = () => {
+    if (!canBook || !selectedConnectorId) return;
+    navigation.navigate('TimeRangePicker', {
+      stationId: params.stationId,
+      connectorId: selectedConnectorId,
+    });
+  };
 
   if (loading) {
     return (
       <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-        <View style={[styles.hero, { backgroundColor: themeColors.surfaceAlt }]} />
-        {floatingHeader}
+        <View style={[styles.heroSkeleton, { backgroundColor: themeColors.surfaceAlt }]} />
         <ActivityIndicator color={themeColors.primary} style={styles.centerLoader} />
       </View>
     );
@@ -162,530 +286,162 @@ export function StationDetailScreen() {
       <View
         style={[
           styles.container,
-          {
-            backgroundColor: themeColors.background,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: spacing.xl,
-          },
+          styles.centerEmpty,
+          { backgroundColor: themeColors.background, paddingHorizontal: spacing.xl },
         ]}
       >
-        {floatingHeader}
-        <Ionicons name="alert-circle-outline" size={54} color={themeColors.error} />
-        <Text
-          style={{
-            marginTop: spacing.md,
-            fontSize: fontSizes.body,
-            color: themeColors.textStrong,
-            textAlign: 'center',
-            fontWeight: fontWeights.semibold,
-          }}
-        >
-          Không thể tải thông tin trạm sạc
+        <Text style={[styles.errorTitle, { color: themeColors.textStrong }]}>
+          {t('stationDetail.errorLoadTitle')}
         </Text>
-        <Text
-          style={{
-            marginTop: spacing.xs,
-            fontSize: fontSizes.caption,
-            color: themeColors.textMuted,
-            textAlign: 'center',
-            maxWidth: 280,
-          }}
-        >
-          Trạm sạc không tồn tại hoặc phiên đăng nhập của bạn đã hết hạn. Vui lòng thử lại.
+        <Text style={[styles.errorDesc, { color: themeColors.textMuted }]}>
+          {t('stationDetail.errorLoadDesc')}
         </Text>
         <Pressable
           onPress={() => loadData()}
-          style={{
-            marginTop: spacing.lg,
-            paddingVertical: spacing.sm,
-            paddingHorizontal: spacing.xl,
-            backgroundColor: themeColors.primary,
-            borderRadius: radius.md,
-          }}
+          style={[styles.retryBtn, { backgroundColor: themeColors.primary }]}
         >
-          <Text style={{ color: '#FFFFFF', fontWeight: fontWeights.semibold }}>Thử lại</Text>
+          <Text style={styles.retryBtnText}>{t('common.retry', 'Thử lại')}</Text>
         </Pressable>
       </View>
     );
   }
 
-  const opState = station.operatingState || (station.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
-  const isNoSchedule = opState === 'SCHEDULE_NOT_CONFIGURED';
-  const isClosedBySchedule = opState === 'CLOSED_BY_SCHEDULE';
-
-  // Future bookings are allowed when CLOSED_BY_SCHEDULE as long as connectors exist!
-  // Only locked out if no schedule configured or no connector selected.
-  const canBook = !isNoSchedule && station.totalConnectors > 0 && !!selectedConnectorId;
-  const bookButtonLabel = isClosedBySchedule
-    ? 'Đặt lịch trước'
-    : t('stationDetail.bookNow', 'Đặt chỗ ngay');
-
-  const gateHint = isNoSchedule
-    ? 'Trạm chưa cấu hình giờ hoạt động nên tạm thời chưa thể đặt lịch'
-    : isClosedBySchedule
-      ? 'Trạm đang đóng cửa lúc này. Bạn có thể chọn khung giờ mở cửa kế tiếp để đặt trước.'
-      : station.availableConnectors === 0
-        ? t('stationDetail.fullHint')
-        : !selectedConnectorId
-          ? t('stationDetail.selectConnectorHint')
-          : null;
-
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Swipeable hero gallery */}
-        <View style={[styles.hero, { backgroundColor: isDark ? '#121615' : '#E2E8F0' }]}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={onGalleryScroll}
-          >
-            {GALLERY.map((icon, i) => (
-              <View key={i} style={[styles.slide, { width }]}>
-                <Ionicons name={icon} size={64} color={themeColors.textMuted} />
-                <Text style={[styles.heroHint, { color: themeColors.textMuted }]}>{t('stationDetail.photoPending')}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <View style={styles.dots}>
-            {GALLERY.map((_, i) => (
-              <View key={i} style={[styles.dot, i === slide && styles.dotActive]} />
-            ))}
-          </View>
-        </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        {/* Hero Gallery with Floating Back, Title Pill & Favorite Buttons */}
+        <StationHeroGallery
+          title={t('stationDetail.title')}
+          imageUrl={station.imageUrl}
+          slide={slide}
+          onScroll={onGalleryScroll}
+          isFav={fav}
+          onToggleFav={() => toggleFavorite(params.stationId)}
+          onBack={() => navigation.goBack()}
+          insetsTop={insets.top}
+        />
 
-        {/* Content sheet overlapping hero */}
-        <View style={[styles.sheet, { backgroundColor: themeColors.surface }]}>
-          <Text style={[styles.name, { color: themeColors.textStrong }]}>{station.name}</Text>
+        {/* Content Sheet Overlapping Hero with seamless background extending to bottom */}
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: themeColors.surface,
+              paddingBottom: 140 + insets.bottom,
+            },
+          ]}
+        >
+          {/* Station Name, Code, Address & Directions */}
+          <StationHeaderInfo
+            station={station}
+            statusMeta={statusMeta}
+            distanceKm={displayDistance}
+            areaLabel={areaLabel}
+            onOpenDirections={openDirections}
+            onCallStation={callStation}
+          />
 
-          <View style={styles.metaRow}>
-            {station.rating !== undefined && (
-              <View style={[styles.inlineMeta, { backgroundColor: themeColors.surfaceAlt }]}>
-                <Ionicons name="star" size={14} color={themeColors.warning} />
-                <Text style={[styles.metaStrong, { color: themeColors.textStrong }]}>{station.rating.toFixed(1)}</Text>
-              </View>
-            )}
-            {station.reviewCount !== undefined && (
-              <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>
-                ({station.reviewCount})
-              </Text>
-            )}
-            {station.distanceKm !== undefined && (
-              <>
-                <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>·</Text>
-                <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>{station.distanceKm} km</Text>
-              </>
-            )}
-            <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>·</Text>
-            <Text
-              style={[
-                styles.metaStrong,
-                {
-                  color:
-                    opState === 'OPEN'
-                      ? themeColors.primary
-                      : isClosedBySchedule
-                        ? themeColors.warning
-                        : themeColors.textMuted,
-                },
-              ]}
-            >
-              {opState === 'OPEN'
-                ? t('stationDetail.open', 'Đang mở cửa')
-                : isClosedBySchedule
-                  ? 'Đóng cửa theo lịch'
-                  : 'Chưa cấu hình giờ hoạt động'}
-            </Text>
-            {station.operatingHours && (
-              <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>
-                ({station.operatingHours})
-              </Text>
-            )}
-          </View>
+          {/* Operational Status Callout when PAUSED or MAINTENANCE */}
+          <StationNoticeBanner
+            isPaused={isPaused}
+            isMaintenance={isMaintenance}
+            reason={station.operationalStatusReason}
+          />
 
-          <View style={styles.addressRow}>
-            <Ionicons name="location" size={16} color={themeColors.primary} />
-            <Text style={[styles.address, { color: themeColors.textBody }]}>{station.address}</Text>
-          </View>
+          {/* Symmetrical 3-Column Bento Metric Card */}
+          <StationBentoMetrics
+            availableConnectors={station.availableConnectors}
+            totalConnectors={station.totalConnectors}
+            maxPowerKw={maxPowerKw}
+            minRatePerKwh={station.minRatePerKwh}
+            connectorTypes={connectorTypesList}
+          />
 
-          {station.description && <Text style={[styles.desc, { color: themeColors.textBody }]}>{station.description}</Text>}
+          {/* Amenities Horizontal Strip */}
+          <StationAmenitiesList amenities={station.amenities} />
 
-          {/* Amenities */}
-          {station.amenities && station.amenities.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.amenityRow}
-              style={styles.amenityScroll}
-            >
-              {station.amenities.map((a) => (
-                <View key={a} style={[styles.amenity, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
-                  <View style={styles.amenityIcon}>
-                    <Ionicons name={AMENITY_ICON[a]} size={20} color={themeColors.primary} />
-                  </View>
-                  <Text style={[styles.amenityLabel, { color: themeColors.textStrong }]}>{t(`stationDetail.amenities.${a}`)}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          )}
+          {/* Cancellation & Refund Policy */}
+          <StationPolicyCard cancellationPolicy={station.cancellationPolicy} />
 
-          {/* Connector selection */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="flash-outline" size={18} color={themeColors.primary} />
-            <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>{t('stationDetail.selectConnector')}</Text>
-          </View>
-          <Text style={[styles.sectionSubtitle, { color: themeColors.textMuted }]}>{t('stationDetail.connectorHint')}</Text>
+          {/* Charge Points (with Zone) & Connectors Grid */}
+          <ChargePointGroupList
+            groups={groups}
+            selectedConnectorId={selectedConnectorId}
+            onSelectConnector={setSelectedConnectorId}
+          />
 
-          {groups.map(({ cp, connectors: conns }) => (
-            <View key={cp.id} style={styles.groupCard}>
-              <View style={styles.groupHeader}>
-                <View style={[styles.groupIcon, { backgroundColor: themeColors.surfaceAlt }]}>
-                  <Ionicons name="hardware-chip-outline" size={18} color={themeColors.primary} />
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.groupName, { color: themeColors.textStrong }]}>{cp.name}</Text>
-                  {cp.zoneLabel ? (
-                    <View style={styles.zoneRow}>
-                      <Ionicons name="location-outline" size={13} color={themeColors.textMuted} />
-                      <Text style={[styles.zoneLabel, { color: themeColors.textMuted }]}>{cp.zoneLabel}</Text>
-                    </View>
-                  ) : null}
-                </View>
-              </View>
-
-              {conns.map((c) => {
-                const isSelected = selectedConnectorId === c.id;
-                const isAvail = c.runtimeStatus === 'AVAILABLE';
-
-                return (
-                  <Pressable
-                    key={c.id}
-                    disabled={!isAvail}
-                    onPress={() => setSelectedConnectorId(c.id)}
-                    style={[
-                      styles.connectorRow,
-                      {
-                        backgroundColor: isSelected
-                          ? themeColors.primarySoft
-                          : themeColors.surfaceAlt,
-                        borderColor: isSelected ? themeColors.primary : themeColors.border,
-                      },
-                      !isAvail && styles.connectorRowDisabled,
-                    ]}
-                  >
-                    <View style={[styles.connectorIcon, { backgroundColor: themeColors.surface }]}>
-                      <Ionicons name="flash" size={20} color={isSelected ? themeColors.primary : themeColors.textMuted} />
-                    </View>
-
-                    <View style={styles.connectorBody}>
-                      <Text style={[styles.connectorName, { color: themeColors.textStrong }]}>{c.name}</Text>
-                      <Text style={[styles.connectorMeta, { color: themeColors.textMuted }]}>
-                        {c.connectorType} · {c.powerKw} kW
-                      </Text>
-                    </View>
-
-                    <View style={styles.connectorRight}>
-                      <StatusBadge
-                        variant={c.runtimeStatus === 'AVAILABLE' ? 'success' : 'neutral'}
-                        label={t(`stationDetail.status.${c.runtimeStatus}`)}
-                      />
-                      {c.ratePerKwh !== undefined && (
-                        <Text style={[styles.connectorRate, { color: themeColors.textStrong }]}>{formatRate(c.ratePerKwh)}</Text>
-                      )}
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          ))}
-
-          {/* Map snippet */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="map-outline" size={18} color={themeColors.primary} />
-            <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>{t('stationDetail.locationTitle')}</Text>
-          </View>
-          <View style={[styles.mapCard, { borderColor: themeColors.border }]}>
-            <View style={[styles.mapCanvas, { backgroundColor: isDark ? '#121615' : '#F1F5F9' }]}>
-              <Ionicons name="location-sharp" size={32} color={themeColors.primary} />
-            </View>
-            <View style={[styles.mapFooter, { backgroundColor: themeColors.surfaceAlt }]}>
-              <Ionicons name="navigate-outline" size={16} color={themeColors.primary} />
-              <Text style={[styles.mapFooterText, { color: themeColors.primary }]}>{t('stationDetail.getDirections')}</Text>
-            </View>
-          </View>
-
-          {/* Driver reviews (FR04) — rating summary then the latest comments */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="chatbubble-ellipses-outline" size={18} color={themeColors.primary} />
-            <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-              {t('stationDetail.reviewsTitle')}
-            </Text>
-          </View>
-
-          {reviews.length === 0 ? (
-            <Text style={[styles.metaMuted, { color: themeColors.textMuted }]}>
-              {t('stationDetail.noReviews')}
-            </Text>
-          ) : (
-            <View style={styles.reviewList}>
-              {station.rating !== undefined && (
-                <View style={[styles.ratingSummary, { backgroundColor: themeColors.surfaceAlt }]}>
-                  <View style={styles.ratingScoreBlock}>
-                    <Text style={[styles.ratingBig, { color: themeColors.textStrong }]}>
-                      {station.rating.toFixed(1)}
-                    </Text>
-                    <Text style={[styles.ratingOutOf, { color: themeColors.textMuted }]}>/5</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <StarRating rating={station.rating} size={16} />
-                    {station.reviewCount !== undefined && (
-                      <Text style={[styles.ratingCount, { color: themeColors.textMuted }]}>
-                        {t('stationDetail.reviews', { count: station.reviewCount })}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
-
-              {reviews.slice(0, 3).map((r) => (
-                <View key={r.id} style={[styles.reviewCard, { borderColor: themeColors.border }]}>
-                  <View style={styles.reviewHead}>
-                    <View style={styles.reviewWho}>
-                      <View style={[styles.avatar, { backgroundColor: themeColors.surfaceAlt }]}>
-                        <Text style={[styles.avatarText, { color: themeColors.textStrong }]}>
-                          {r.authorName.charAt(0)}
-                        </Text>
-                      </View>
-                      <View>
-                        <Text style={[styles.reviewName, { color: themeColors.textStrong }]}>
-                          {r.authorName}
-                        </Text>
-                        <Text style={[styles.reviewDate, { color: themeColors.textMuted }]}>
-                          {formatDate(r.createdAt)}
-                        </Text>
-                      </View>
-                    </View>
-                    <StarRating rating={r.rating} size={12} />
-                  </View>
-                  <Text style={[styles.reviewComment, { color: themeColors.textBody }]}>{r.comment}</Text>
-                </View>
-              ))}
-
-              {reviews.length > 3 && (
-                <Pressable style={[styles.viewAllBtn, { borderColor: themeColors.border }]}>
-                  <Text style={[styles.viewAllText, { color: themeColors.primary }]}>
-                    {t('stationDetail.viewAll')}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={15} color={themeColors.primary} />
-                </Pressable>
-              )}
-            </View>
-          )}
+          {/* Driver Reviews */}
+          <StationReviewsSection station={station} reviews={reviews} />
         </View>
       </ScrollView>
 
-      {floatingHeader}
+      {/* Floating Bottom Sticky Bar */}
+      <StationBookingBottomBar
+        selectedConn={selectedConn}
+        canBook={canBook}
+        gateHint={gateHint}
+        isClosedBySchedule={isClosedBySchedule}
+        bookButtonLabel={bookButtonLabel}
+        onBook={handleBook}
+        insetsBottom={insets.bottom}
+      />
 
-      {/* Floating Bottom Booking Bar */}
-      <View style={[styles.bottomBar, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
-        <View style={styles.bottomMeta}>
-          <Text style={[styles.bottomLabel, { color: themeColors.textMuted }]}>{t('stationDetail.selectedConn')}</Text>
-          <Text style={[styles.bottomValue, { color: themeColors.textStrong }]} numberOfLines={1}>
-            {selectedConn ? `${selectedConn.name} (${selectedConn.connectorType})` : t('stationDetail.none')}
-          </Text>
-          {gateHint && (
-            <Text
-              style={[
-                styles.bottomHint,
-                { color: isClosedBySchedule ? themeColors.warning : themeColors.error },
-              ]}
-            >
-              {gateHint}
-            </Text>
-          )}
-        </View>
-
-        <AppButton
-          label={bookButtonLabel}
-          disabled={!canBook}
-          onPress={() =>
-            navigation.navigate('TimeRangePicker', {
-              stationId: params.stationId,
-              connectorId: selectedConnectorId!,
-            })
-          }
-        />
-      </View>
+      {/* Call Confirmation In-App Modal */}
+      <CallConfirmationModal
+        visible={callConfirmVisible}
+        phone={station.contactPhone}
+        onClose={() => setCallConfirmVisible(false)}
+        onConfirm={executeCall}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centerLoader: { flex: 1 },
-
-  floatingHeader: {
-    position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+  },
+  heroSkeleton: {
+    height: 260,
+  },
+  centerLoader: {
+    flex: 1,
+  },
+  centerEmpty: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    zIndex: 10,
-  },
-
-  hero: { height: 260, position: 'relative' },
-  slide: { height: 260, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
-  heroHint: { fontSize: fontSizes.caption },
-  dots: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing.xs,
   },
-  dot: { width: 6, height: 6, borderRadius: radius.full, backgroundColor: 'rgba(255, 255, 255, 0.4)' },
-  dotActive: { width: 16, backgroundColor: '#FFFFFF' },
-
+  errorTitle: {
+    fontSize: fontSizes.heading,
+    fontWeight: fontWeights.bold,
+    textAlign: 'center',
+  },
+  errorDesc: {
+    marginTop: spacing.xs,
+    fontSize: fontSizes.caption,
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  retryBtn: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.md,
+  },
+  retryBtnText: {
+    color: '#FFFFFF',
+    fontWeight: fontWeights.semibold,
+  },
   sheet: {
-    marginTop: -radius.lg,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  name: { fontSize: fontSizes.title, fontWeight: fontWeights.bold },
-
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
-  inlineMeta: { flexDirection: 'row', alignItems: 'center', gap: 2, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 2 },
-  metaStrong: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold },
-  metaMuted: { fontSize: fontSizes.caption },
-
-  addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  address: { flex: 1, fontSize: fontSizes.body },
-  desc: { fontSize: fontSizes.body, lineHeight: lineHeights.body },
-
-  amenityScroll: { marginHorizontal: -spacing.lg },
-  amenityRow: { paddingHorizontal: spacing.lg, gap: spacing.sm },
-  amenity: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderWidth: 1,
-  },
-  amenityIcon: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
-  amenityLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
-
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.sm },
-  sectionTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
-  sectionSubtitle: { fontSize: fontSizes.caption, marginTop: -spacing.xs },
-
-  groupCard: { gap: spacing.sm },
-  groupHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  groupIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  groupName: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
-  zoneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
-  zoneLabel: { fontSize: fontSizes.caption },
-
-  connectorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  connectorRowDisabled: { opacity: 0.5 },
-  connectorIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  connectorBody: { flex: 1, gap: 2 },
-  connectorName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-  connectorMeta: { fontSize: fontSizes.caption },
-  connectorRight: { alignItems: 'flex-end', gap: spacing.xs },
-  connectorRate: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
-
-  mapCard: {
-    borderWidth: 1,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    marginTop: -spacing.sm,
-  },
-  mapCanvas: { height: 120, alignItems: 'center', justifyContent: 'center' },
-  mapFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md },
-  mapFooterText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-
-  // Reviews
-  reviewList: { gap: spacing.md },
-  ratingSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-  },
-  ratingScoreBlock: { flexDirection: 'row', alignItems: 'baseline' },
-  ratingBig: { fontSize: fontSizes.display, fontWeight: fontWeights.bold },
-  ratingOutOf: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-  ratingCount: { fontSize: fontSizes.caption, marginTop: 2 },
-  reviewCard: { borderWidth: 1, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.sm },
-  reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  reviewWho: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
-  reviewName: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-  reviewDate: { fontSize: fontSizes.caption, marginTop: 1 },
-  reviewComment: { fontSize: fontSizes.body, lineHeight: lineHeights.body },
-  viewAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    minHeight: 44,
-    borderRadius: radius.full,
-    borderWidth: 1,
-  },
-  viewAllText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    marginTop: -20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+    paddingTop: spacing.lg,
+    gap: spacing.lg,
+    flexGrow: 1,
   },
-  bottomMeta: { flex: 1 },
-  bottomLabel: { fontSize: fontSizes.caption },
-  bottomValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
-  bottomHint: { fontSize: fontSizes.caption, marginTop: 2 },
 });

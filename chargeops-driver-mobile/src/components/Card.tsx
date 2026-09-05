@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
 import { radius, spacing } from '@/theme';
@@ -20,7 +20,7 @@ export function Card({ children, style }: CardProps) {
         {
           backgroundColor: themeColors.surface,
           borderColor: themeColors.border,
-          shadowColor: themeColors.textStrong,
+          ...(Platform.OS !== 'web' ? { shadowColor: themeColors.textStrong } : {}),
         },
         style,
       ]}
@@ -35,10 +35,16 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    // subtle elevation
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.05)',
+      },
+      default: {
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      },
+    }),
   },
 });

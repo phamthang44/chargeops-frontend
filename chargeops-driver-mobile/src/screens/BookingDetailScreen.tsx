@@ -401,10 +401,12 @@ export function BookingDetailScreen() {
             </View>
           ))}
 
-          <View style={styles.invoiceRow}>
-            <Text style={[styles.invoiceSub, { color: themeColors.textMuted }]}>{t('bookingDetail.serviceFee')}</Text>
-            <Text style={[styles.invoiceValue, { color: themeColors.textStrong }]}>{formatVnd(booking.serviceFee)}</Text>
-          </View>
+          {Boolean(booking.serviceFee && booking.serviceFee > 0) && (
+            <View style={styles.invoiceRow}>
+              <Text style={[styles.invoiceSub, { color: themeColors.textMuted }]}>{t('bookingDetail.serviceFee')}</Text>
+              <Text style={[styles.invoiceValue, { color: themeColors.textStrong }]}>{formatVnd(booking.serviceFee)}</Text>
+            </View>
+          )}
 
           <View style={[styles.totalPanel, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
             <View>

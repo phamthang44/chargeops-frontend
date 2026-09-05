@@ -18,7 +18,7 @@ import {
 } from '@/services/stationService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
-import { formatDate, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
+import { formatDate, formatEquipmentName, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
 import { PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
 import { quoteBooking } from '@/utils/pricing';
 
@@ -32,7 +32,7 @@ type Route = RouteProp<RootStackParamList, 'BookingConfirmation'>;
 export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
   const [station, setStation] = useState<Station | null>(null);
@@ -151,7 +151,7 @@ export function BookingConfirmationScreen() {
           <View style={[styles.connectorPill, { backgroundColor: themeColors.surfaceAlt }]}>
             <Ionicons name="flash-outline" size={14} color={themeColors.primary} />
             <Text style={[styles.connectorText, { color: themeColors.textStrong }]}>
-              {chargePoint?.name ?? ''} · {connector.name} ({connector.connectorType}) · {connector.powerKw} kW
+              {chargePoint?.name ? `${formatEquipmentName(chargePoint.name, i18n.language)} · ` : ''}{formatEquipmentName(connector.name, i18n.language)} ({connector.connectorType}) · {connector.powerKw} kW
             </Text>
           </View>
         </View>
@@ -232,10 +232,12 @@ export function BookingConfirmationScreen() {
             </View>
           ))}
 
-          <View style={styles.invoiceRow}>
-            <Text style={[styles.invoiceFeeLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.serviceFee')}</Text>
-            <Text style={[styles.invoiceFeeAmount, { color: themeColors.textStrong }]}>{formatVnd(quote.serviceFee)}</Text>
-          </View>
+          {quote.serviceFee > 0 && (
+            <View style={styles.invoiceRow}>
+              <Text style={[styles.invoiceFeeLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.serviceFee')}</Text>
+              <Text style={[styles.invoiceFeeAmount, { color: themeColors.textStrong }]}>{formatVnd(quote.serviceFee)}</Text>
+            </View>
+          )}
 
           <View style={[styles.invoiceTotalRow, { borderTopColor: themeColors.border }]}>
             <Text style={[styles.totalLabel, { color: themeColors.textStrong }]}>{t('bookingConfirmation.total')}</Text>

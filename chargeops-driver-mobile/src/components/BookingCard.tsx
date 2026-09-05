@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -51,7 +51,7 @@ export function BookingCard({ booking: b, onPress, action, banner, accentColor }
         {
           backgroundColor: themeColors.surface,
           borderColor: themeColors.border,
-          shadowColor: themeColors.textStrong,
+          ...(Platform.OS !== 'web' ? { shadowColor: themeColors.textStrong } : {}),
         },
         accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : null,
       ]}
@@ -106,10 +106,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: spacing.lg,
     gap: spacing.sm,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.05)',
+      },
+      default: {
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      },
+    }),
   },
   banner: { marginBottom: spacing.xs },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },

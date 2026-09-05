@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useEffect, useRef, type ReactNode } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
@@ -30,7 +30,7 @@ export function BottomSheet({ visible, onClose, title, children, animation = 'sl
   useEffect(() => {
     if (visible && animation === 'slide') {
       rise.setValue(28);
-      Animated.timing(rise, { toValue: 0, duration: 220, useNativeDriver: true }).start();
+      Animated.timing(rise, { toValue: 0, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start();
     } else {
       rise.setValue(0);
     }

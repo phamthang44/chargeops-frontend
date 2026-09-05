@@ -16,7 +16,7 @@ const LABELS: Record<SupportedLanguage, string> = {
  */
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
-  const { themeColors } = usePreferences();
+  const { themeColors, setLanguage } = usePreferences();
   const current = (i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage;
 
   return (
@@ -31,7 +31,7 @@ export function LanguageSwitcher() {
               active && { backgroundColor: themeColors.primary },
             ]}
             onPress={() => {
-              if (!active) i18n.changeLanguage(lng);
+              if (!active) setLanguage(lng);
             }}
           >
             <Text

@@ -11,6 +11,9 @@ import {
   adaptStationList,
   buildStationDiscoveryQueryParams,
   deriveHasFastCharging,
+  findPriceRangeForTime,
+  isRangeBusy,
+  isRangeInOperatingWindows,
   mapFrontendSortToBackend,
   type BackendChargePointResponse,
   type BackendConnectorResponse,
@@ -30,6 +33,9 @@ export {
   adaptStationList,
   buildStationDiscoveryQueryParams,
   deriveHasFastCharging,
+  findPriceRangeForTime,
+  isRangeBusy,
+  isRangeInOperatingWindows,
   mapFrontendSortToBackend,
   type BackendChargePointResponse,
   type BackendConnectorResponse,
@@ -174,6 +180,16 @@ function matchesFilter(station: Station, filter: StationFilter): boolean {
     if (!connectors.some((c) => c.effectiveStatus === 'AVAILABLE')) return false;
   }
   if (filter.openOnly && !station.isOpen) return false;
+  if (filter.provinceCode && filter.provinceCode !== 'all') {
+    const code = filter.provinceCode;
+    const addr = `${station.address} ${station.name}`.toLowerCase();
+    const isHcm = code === '79' && (addr.includes('tp.hcm') || addr.includes('hồ chí minh') || addr.includes('hcm'));
+    const isHn = code === '01' && addr.includes('hà nội');
+    const isDn = code === '48' && addr.includes('đà nẵng');
+    const isHp = code === '31' && addr.includes('hải phòng');
+    const isCt = code === '92' && addr.includes('cần thơ');
+    if (!isHcm && !isHn && !isDn && !isHp && !isCt) return false;
+  }
   if (filter.maxDistanceKm !== undefined) {
     if ((station.distanceKm ?? Number.POSITIVE_INFINITY) > filter.maxDistanceKm) return false;
   }
@@ -309,6 +325,98 @@ export async function getStationById(
 ): Promise<Station | null> {
   const bundle = await getStationDetail(id, options);
   return bundle?.station ?? null;
+}
+
+/**
+ * Get station availability for a specific connector on a specific date (FR04 / FR11).
+ * Calls `GET /api/v1/stations/:stationId/availability?connectorId=:connectorId&date=:date`.
+ * Falls back to realistic mock response if API is offline.
+ */
+export async function getStationAvailability(
+  stationId: string,
+  connectorId: string,
+  date: string, // YYYY-MM-DD
+  options?: { accessToken?: string | null },
+): Promise<BackendStationAvailabilityResponse | null> {
+  try {
+    const token = resolveAccessToken(options?.accessToken);
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const url = `${apiBaseUrl}/api/v1/stations/${stationId}/availability?connectorId=${encodeURIComponent(connectorId)}&date=${encodeURIComponent(date)}`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    if (response.ok) {
+      const payload = await response.json();
+      const rawAvailability: BackendStationAvailabilityResponse | undefined =
+        payload?.data ?? payload;
+      if (rawAvailability && rawAvailability.stationId) {
+        return rawAvailability;
+      }
+    }
+  } catch {
+    // Fallback to mock on network error
+  }
+
+  // Fallback mock availability
+  return simulateNetwork({
+    stationId,
+    connectorId,
+    date,
+    timezone: 'Asia/Ho_Chi_Minh',
+    generatedAt: new Date().toISOString(),
+    minDurationMinutes: 30,
+    durationStepMinutes: 30,
+    maxDurationMinutes: 180,
+    operatingWindows: [
+      {
+        startAt: `${date}T06:00:00+07:00`,
+        endAt: `${date}T22:00:00+07:00`,
+      },
+    ],
+    busyRanges: [
+      {
+        startAt: `${date}T09:00:00+07:00`,
+        endAt: `${date}T10:30:00+07:00`,
+      },
+      {
+        startAt: `${date}T14:00:00+07:00`,
+        endAt: `${date}T15:00:00+07:00`,
+      },
+    ],
+    priceRanges: [
+      {
+        startAt: `${date}T00:00:00+07:00`,
+        endAt: `${date}T05:00:00+07:00`,
+        rateVndPerKwh: 2800,
+        periodCode: 'OFF_PEAK',
+      },
+      {
+        startAt: `${date}T05:00:00+07:00`,
+        endAt: `${date}T17:00:00+07:00`,
+        rateVndPerKwh: 3400,
+        periodCode: 'NORMAL',
+      },
+      {
+        startAt: `${date}T17:00:00+07:00`,
+        endAt: `${date}T21:00:00+07:00`,
+        rateVndPerKwh: 4200,
+        periodCode: 'PEAK',
+      },
+      {
+        startAt: `${date}T21:00:00+07:00`,
+        endAt: `${date}T23:59:59+07:00`,
+        rateVndPerKwh: 2800,
+        periodCode: 'OFF_PEAK',
+      },
+    ],
+  });
 }
 
 export async function getChargePointsByStation(stationId: string): Promise<ChargePoint[]> {

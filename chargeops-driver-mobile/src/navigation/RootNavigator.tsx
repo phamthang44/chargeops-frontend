@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
@@ -33,6 +34,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * screens never need to imperatively navigate to/from the tabs.
  */
 export function RootNavigator() {
+  const { t } = useTranslation();
   const { initializing, session, profile, profileStatus } = useAuth();
   const { themeColors } = usePreferences();
   const hasKeycloakCallback =
@@ -91,71 +93,91 @@ export function RootNavigator() {
       >
         {session ? profileCompleted ? (
           <>
-            <Stack.Screen name="Tabs" component={BottomTabs} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="Tabs"
+              component={BottomTabs}
+              options={{ headerShown: false, title: t('nav.stationList') }}
+            />
             <Stack.Screen
               name="StationDetail"
               component={StationDetailScreen}
               // Header hidden: the screen draws its own glass back button over the hero image.
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: t('nav.stationDetail') }}
             />
             <Stack.Screen
               name="TimeRangePicker"
               component={TimeRangePickerScreen}
               // Custom in-screen header (own back button) for reliable touch handling.
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: t('nav.timeRangePicker') }}
             />
             <Stack.Screen
               name="BookingConfirmation"
               component={BookingConfirmationScreen}
               // Custom in-screen header (own back button), matching TimeRangePicker.
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: t('bookingConfirmation.title') }}
             />
             <Stack.Screen
               name="PaymentProcessing"
               component={PaymentProcessingScreen}
               // Blocking "waiting for payment" state; no back/swipe mid-transaction.
-              options={{ headerShown: false, gestureEnabled: false }}
+              options={{ headerShown: false, gestureEnabled: false, title: t('paymentProcessing.processingTitle') }}
             />
             <Stack.Screen
               name="BookingSuccess"
               component={BookingSuccessScreen}
               // Full-screen success state; no back button (can't undo a payment).
-              options={{ headerShown: false, gestureEnabled: false }}
+              options={{ headerShown: false, gestureEnabled: false, title: t('bookingSuccess.title') }}
             />
             <Stack.Screen
               name="BookingDetail"
               component={BookingDetailScreen}
               // Custom in-screen header drawn over the station hero image.
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: t('bookingDetail.title') }}
             />
             <Stack.Screen
               name="QRCheckIn"
               component={QRCheckInScreen}
               // Full-screen dark scanner; custom in-screen close button.
-              options={{ headerShown: false, presentation: 'modal' }}
+              options={{ headerShown: false, presentation: 'modal', title: t('nav.qrCheckIn') }}
             />
             <Stack.Screen
               name="ChargingSession"
               component={ChargingSessionScreen}
               // Custom in-screen header; no swipe-back (session is in progress).
-              options={{ headerShown: false, gestureEnabled: false }}
+              options={{
+                headerShown: false,
+                gestureEnabled: false,
+                title: t('chargingSession.title', { defaultValue: 'Phiên sạc' }),
+              }}
             />
           </>
         ) : (
           <Stack.Screen
             name="CompleteProfile"
             component={CompleteProfileScreen}
-            options={{ headerShown: false, gestureEnabled: false }}
+            options={{ headerShown: false, gestureEnabled: false, title: t('completeProfile.title') }}
           />
         ) : (
           <>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Login" component={KeycloakLoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="Welcome"
+              component={WelcomeScreen}
+              options={{ headerShown: false, title: t('welcome.title') }}
+            />
+            <Stack.Screen
+              name="Login"
+              component={KeycloakLoginScreen}
+              options={{ headerShown: false, title: t('login.headerTitle') }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+              options={{ headerShown: false, title: t('register.headerTitle') }}
+            />
             <Stack.Screen
               name="OtpVerification"
               component={OtpVerificationScreen}
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: t('otp.headerTitle') }}
             />
           </>
         )}

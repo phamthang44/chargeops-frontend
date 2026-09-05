@@ -27,8 +27,8 @@ const BAND_BOUNDARIES = [STANDARD_FROM, PEAK_FROM, PEAK_TO, 24 * 60];
  */
 const ENERGY_FACTOR = 0.62;
 
-/** Flat platform fee added on top of the price lines (VND). */
-export const SERVICE_FEE = 5000;
+/** Flat platform fee added on top of the price lines (VND). Set to 0 (no booking service fee). */
+export const SERVICE_FEE = 0;
 
 export function bandOf(totalMin: number): RateKind {
   const m = ((totalMin % 1440) + 1440) % 1440;
@@ -92,9 +92,63 @@ export interface Quote {
  * Price a time range on a connector. Pure — the same connector/start/duration
  * always yields the same quote, which is what lets the confirmation screen and
  * the created booking agree without a round trip.
+ * Supports optional backend priceRanges for exact rate alignment with backend availability.
  */
-export function quoteBooking(connector: Connector, startAt: string, durationMin: number): Quote {
+export function quoteBooking(
+  connector: Connector,
+  startAt: string,
+  durationMin: number,
+  backendPriceRanges?: { startAt: string; endAt: string; rateVndPerKwh: number; periodCode?: string }[],
+): Quote {
   const start = new Date(startAt);
+
+  if (backendPriceRanges && backendPriceRanges.length > 0) {
+    const startMs = start.getTime();
+    const endMs = startMs + durationMin * 60_000;
+
+    const intersecting = backendPriceRanges
+      .map((r) => {
+        const rStartMs = new Date(r.startAt).getTime();
+        const rEndMs = new Date(r.endAt).getTime();
+        const overlapStart = Math.max(startMs, rStartMs);
+        const overlapEnd = Math.min(endMs, rEndMs);
+        const segMin = (overlapEnd - overlapStart) / 60_000;
+        const kind: RateKind =
+          r.periodCode === 'PEAK' ? 'PEAK' : r.periodCode === 'OFF_PEAK' || r.periodCode === 'OFFPEAK' ? 'OFFPEAK' : 'STANDARD';
+        return {
+          fromAt: new Date(overlapStart).toISOString(),
+          toAt: new Date(overlapEnd).toISOString(),
+          durationMin: segMin,
+          rateKind: kind,
+          rateVndPerKwh: r.rateVndPerKwh,
+        };
+      })
+      .filter((r) => r.durationMin > 0);
+
+    if (intersecting.length > 0) {
+      const priceLines: BookingPriceLine[] = intersecting.map((seg) => {
+        const energyKwh = +(connector.powerKw * (seg.durationMin / 60) * ENERGY_FACTOR).toFixed(1);
+        return {
+          fromAt: seg.fromAt,
+          toAt: seg.toAt,
+          rateKind: seg.rateKind,
+          rateVndPerKwh: seg.rateVndPerKwh,
+          energyKwh,
+          amount: Math.round((energyKwh * seg.rateVndPerKwh) / 1000) * 1000,
+        };
+      });
+      const energyKwh = +priceLines.reduce((sum, l) => sum + l.energyKwh, 0).toFixed(1);
+      const chargingFee = priceLines.reduce((sum, l) => sum + l.amount, 0);
+      return {
+        priceLines,
+        energyKwh,
+        chargingFee,
+        serviceFee: SERVICE_FEE,
+        totalPrice: chargingFee + SERVICE_FEE,
+      };
+    }
+  }
+
   const startTot = minutesOfDay(start);
 
   const priceLines: BookingPriceLine[] = splitIntoBands(startTot, durationMin).map((seg) => {

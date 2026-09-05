@@ -34,7 +34,9 @@ export interface Colors {
   transparent: string;
 }
 
-export const lightColors: Colors = {
+export type PalettePreset = 'balanced' | 'classic';
+
+export const classicLightColors: Colors = {
   primary: '#10B981',
   primaryDark: '#059669',
   primaryLight: '#34D399',
@@ -59,7 +61,7 @@ export const lightColors: Colors = {
   transparent: 'transparent',
 };
 
-export const darkColors: Colors = {
+export const classicDarkColors: Colors = {
   primary: '#10B981',
   primaryDark: '#34D399',
   primaryLight: '#6EE6A0',
@@ -84,11 +86,74 @@ export const darkColors: Colors = {
   transparent: 'transparent',
 };
 
-/** Default fallback color tokens for static imports. */
-export const colors: Colors = lightColors;
+/**
+ * Balanced Emerald-Zen Palette (V2) - Refined contrast, subtle surfaces, balanced greens.
+ */
+export const balancedDarkColors: Colors = {
+  primary: '#10C98A',
+  primaryDark: '#1F8F6A',
+  primaryLight: '#4AE2AC',
+  primarySoft: '#0E2A22',
 
-export function getThemeColors(mode: 'light' | 'dark' | 'system', systemScheme?: 'light' | 'dark' | null): Colors {
-  if (mode === 'dark') return darkColors;
-  if (mode === 'light') return lightColors;
-  return systemScheme === 'dark' ? darkColors : lightColors;
+  background: '#0B0F0E',
+  surface: '#121917',
+  surfaceAlt: '#17201D',
+  border: '#27312E',
+
+  success: '#10C98A',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+
+  textStrong: '#F4F7F6',
+  textBody: '#C4CECA',
+  textMuted: '#8E9A96',
+  textInverse: '#0B0F0E',
+
+  overlay: 'rgba(0, 0, 0, 0.75)',
+  transparent: 'transparent',
+};
+
+export const balancedLightColors: Colors = {
+  primary: '#0E9F6E',
+  primaryDark: '#087A54',
+  primaryLight: '#31C48D',
+  primarySoft: '#E6F7F0',
+
+  background: '#F7F9F8',
+  surface: '#FFFFFF',
+  surfaceAlt: '#EDF2F0',
+  border: '#DFE5E2',
+
+  success: '#0E9F6E',
+  warning: '#D97706',
+  error: '#DC2626',
+  info: '#2563EB',
+
+  textStrong: '#111816',
+  textBody: '#34403B',
+  textMuted: '#5E6D68',
+  textInverse: '#FFFFFF',
+
+  overlay: 'rgba(17, 24, 22, 0.5)',
+  transparent: 'transparent',
+};
+
+/** Default active palettes (defaults to balanced palette) */
+export const lightColors: Colors = balancedLightColors;
+export const darkColors: Colors = balancedDarkColors;
+
+/** Default fallback color tokens for static imports. */
+export const colors: Colors = balancedLightColors;
+
+export function getThemeColors(
+  mode: 'light' | 'dark' | 'system',
+  systemScheme?: 'light' | 'dark' | null,
+  preset: PalettePreset = 'balanced',
+): Colors {
+  const isDark = mode === 'dark' || (mode === 'system' && systemScheme === 'dark');
+  if (preset === 'classic') {
+    return isDark ? classicDarkColors : classicLightColors;
+  }
+  return isDark ? balancedDarkColors : balancedLightColors;
 }

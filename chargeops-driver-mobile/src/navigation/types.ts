@@ -30,7 +30,7 @@ export type RootStackParamList = {
   CompleteProfile: undefined;
   // App stack (signed in)
   Tabs: NavigatorScreenParams<BottomTabParamList> | undefined;
-  StationDetail: { stationId: string };
+  StationDetail: { stationId: string; distanceKm?: number };
   // Pick a date, a start time and a duration on one Connector (FR05/FR11).
   TimeRangePicker: { stationId: string; connectorId?: string };
   // Review the chosen window + pick a payment method, then create the booking.

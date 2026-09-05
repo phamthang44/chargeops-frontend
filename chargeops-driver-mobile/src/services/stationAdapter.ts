@@ -1,5 +1,6 @@
 import type {
   Amenity,
+  CancellationPolicy,
   ChargePoint,
   Connector,
   ConnectorRuntimeStatus,
@@ -7,6 +8,7 @@ import type {
   ProvisioningStatus,
   Station,
   StationOperatingState,
+  StationOperationalStatus,
 } from '@/types';
 
 /**
@@ -54,6 +56,7 @@ export interface BackendStationDiscoveryItem {
   id: string;
   name: string;
   address: string;
+  provinceName?: string;
   latitude: number;
   longitude: number;
   distanceKm?: number;
@@ -66,6 +69,9 @@ export interface BackendStationDiscoveryItem {
   availableConnectorCount?: number;
   openNow?: boolean;
   operatingState?: StationOperatingState | string;
+  operationalStatus?: StationOperationalStatus | string;
+  operationalStatusReason?: string;
+  scheduleConfigured?: boolean;
 }
 
 export interface BackendStationDiscoveryDetail {
@@ -86,12 +92,29 @@ export interface BackendStationDiscoveryDetail {
   open24Hours?: boolean;
   openNow?: boolean;
   operatingState?: StationOperatingState | string;
+  operationalStatus?: StationOperationalStatus | string;
+  operationalStatusReason?: string;
+  scheduleConfigured?: boolean;
   operatingHours?: BackendOperatingHour[];
+  cancellationPolicy?: BackendCancellationPolicyResponse | null;
   chargePoints?: BackendChargePointResponse[]; // Real nested structure: chargePoints[].connectors[]
   totalConnectorCount?: number;
   availableConnectorCount?: number;
   maxPowerKw?: number;
   connectorTypes?: (ConnectorType | string)[];
+}
+
+export interface BackendCancellationPolicyResponse {
+  gracePeriodMinutes?: number;
+  refundRules?: BackendRefundRuleResponse[];
+}
+
+export interface BackendRefundRuleResponse {
+  tier?: string;
+  refundPercent?: number;
+  minMinutesBeforeStartInclusive?: number | null;
+  maxMinutesBeforeStartExclusive?: number | null;
+  appliesToNoShow?: boolean;
 }
 
 /**
@@ -215,6 +238,22 @@ function formatOperatingHours(
   };
 }
 
+function adaptCancellationPolicy(
+  policy?: BackendCancellationPolicyResponse | null,
+): CancellationPolicy | undefined {
+  if (!policy) return undefined;
+  return {
+    gracePeriodMinutes: Number(policy.gracePeriodMinutes ?? 0),
+    refundRules: (policy.refundRules ?? []).map((rule) => ({
+      tier: rule.tier ?? '',
+      refundPercent: Number(rule.refundPercent ?? 0),
+      minMinutesBeforeStartInclusive: rule.minMinutesBeforeStartInclusive ?? null,
+      maxMinutesBeforeStartExclusive: rule.maxMinutesBeforeStartExclusive ?? null,
+      appliesToNoShow: Boolean(rule.appliesToNoShow),
+    })),
+  };
+}
+
 /**
  * Adapter: Maps Backend Discovery Item Response -> Frontend Station
  *
@@ -236,12 +275,19 @@ export function adaptStationDiscoveryItem(dto: BackendStationDiscoveryItem): Sta
 
   const operatingState: StationOperatingState =
     (dto.operatingState as StationOperatingState) ||
-    (dto.openNow ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+    (dto.operationalStatus === 'PAUSED'
+      ? 'PAUSED_BY_OWNER'
+      : dto.operationalStatus === 'MAINTENANCE'
+        ? 'MAINTENANCE'
+        : dto.openNow
+          ? 'OPEN'
+          : 'CLOSED_BY_SCHEDULE');
 
   return {
     id: String(dto.id),
     name: dto.name || '',
     address: dto.address || '',
+    provinceName: dto.provinceName,
     latitude: Number(dto.latitude),
     longitude: Number(dto.longitude),
     distanceKm: dto.distanceKm !== undefined && dto.distanceKm !== null ? Number(dto.distanceKm) : undefined,
@@ -252,6 +298,9 @@ export function adaptStationDiscoveryItem(dto: BackendStationDiscoveryItem): Sta
     totalConnectors: Number(dto.totalConnectorCount ?? 0),
     isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : operatingState === 'OPEN',
     operatingState,
+    operationalStatus: dto.operationalStatus as StationOperationalStatus | undefined,
+    operationalStatusReason: dto.operationalStatusReason,
+    scheduleConfigured: dto.scheduleConfigured,
     hasFastCharging: deriveHasFastCharging(dto),
     maxPowerKw: dto.maxPowerKw !== undefined && dto.maxPowerKw !== null ? Number(dto.maxPowerKw) : undefined,
     connectorTypes: dto.connectorTypes ? (Array.from(dto.connectorTypes) as ConnectorType[]) : undefined,
@@ -313,29 +362,43 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
 
   const operatingState: StationOperatingState =
     (dto.operatingState as StationOperatingState) ||
-    (dto.openNow
-      ? 'OPEN'
-      : hasSchedule
-        ? 'CLOSED_BY_SCHEDULE'
-        : 'SCHEDULE_NOT_CONFIGURED');
+    (dto.operationalStatus === 'PAUSED'
+      ? 'PAUSED_BY_OWNER'
+      : dto.operationalStatus === 'MAINTENANCE'
+        ? 'MAINTENANCE'
+        : dto.openNow
+          ? 'OPEN'
+          : hasSchedule
+            ? 'CLOSED_BY_SCHEDULE'
+            : 'SCHEDULE_NOT_CONFIGURED');
 
   return {
     id: String(dto.id),
+    stationCode: dto.stationCode,
     name: dto.name || '',
     address: fullAddress,
+    wardName: dto.wardName,
+    provinceName: dto.provinceName,
     description: dto.description,
     latitude: Number(dto.latitude),
     longitude: Number(dto.longitude),
     imageUrl: primaryImage,
     contactPhone: dto.contactPhone,
     operatingHours: operatingHoursText,
+    open24Hours: Boolean(dto.open24Hours),
     opensAtMin,
     closesAtMin,
     availableConnectors: Number(availableConnectors),
     totalConnectors: Number(totalConnectors),
     isOpen: dto.openNow !== undefined ? Boolean(dto.openNow) : operatingState === 'OPEN',
     operatingState,
+    operationalStatus: dto.operationalStatus as StationOperationalStatus | undefined,
+    operationalStatusReason: dto.operationalStatusReason,
+    scheduleConfigured: dto.scheduleConfigured,
     hasFastCharging: deriveHasFastCharging(dto),
+    maxPowerKw: dto.maxPowerKw !== undefined && dto.maxPowerKw !== null ? Number(dto.maxPowerKw) : undefined,
+    connectorTypes: dto.connectorTypes ? (Array.from(dto.connectorTypes) as ConnectorType[]) : undefined,
+    cancellationPolicy: adaptCancellationPolicy(dto.cancellationPolicy),
     minRatePerKwh: price,
   };
 }
@@ -459,4 +522,70 @@ export function buildStationDiscoveryQueryParams(filter: {
 export function adaptStationList(items: BackendStationDiscoveryItem[]): Station[] {
   if (!Array.isArray(items)) return [];
   return items.map(adaptStationDiscoveryItem);
+}
+
+/**
+ * Helper: Find matching price range for a given ISO time string.
+ */
+export function findPriceRangeForTime(
+  priceRanges: BackendPriceRangeResponse[] | undefined,
+  timeIso: string,
+  fallbackRate = 3400,
+): { rateVndPerKwh: number; periodCode: 'NORMAL' | 'PEAK' | 'OFF_PEAK' | string } {
+  if (!priceRanges || priceRanges.length === 0) {
+    return { rateVndPerKwh: fallbackRate, periodCode: 'NORMAL' };
+  }
+  const targetMs = new Date(timeIso).getTime();
+  const matched = priceRanges.find((r) => {
+    const startMs = new Date(r.startAt).getTime();
+    const endMs = new Date(r.endAt).getTime();
+    return targetMs >= startMs && targetMs < endMs;
+  });
+  if (matched) {
+    return {
+      rateVndPerKwh: matched.rateVndPerKwh,
+      periodCode: matched.periodCode || 'NORMAL',
+    };
+  }
+  return {
+    rateVndPerKwh: priceRanges[0].rateVndPerKwh,
+    periodCode: priceRanges[0].periodCode || 'NORMAL',
+  };
+}
+
+/**
+ * Check if a time range [startIso, endIso) overlaps with any busy range.
+ */
+export function isRangeBusy(
+  busyRanges: BackendTimeRangeResponse[] | undefined,
+  startIso: string,
+  endIso: string,
+): boolean {
+  if (!busyRanges || busyRanges.length === 0) return false;
+  const startMs = new Date(startIso).getTime();
+  const endMs = new Date(endIso).getTime();
+  return busyRanges.some((range) => {
+    const bStartMs = new Date(range.startAt).getTime();
+    const bEndMs = new Date(range.endAt).getTime();
+    return startMs < bEndMs && endMs > bStartMs;
+  });
+}
+
+/**
+ * Check if a time range [startIso, endIso) is within operating windows.
+ * If operatingWindows is empty or not configured, returns false if station is closed.
+ */
+export function isRangeInOperatingWindows(
+  operatingWindows: BackendTimeRangeResponse[] | undefined,
+  startIso: string,
+  endIso: string,
+): boolean {
+  if (!operatingWindows || operatingWindows.length === 0) return true;
+  const startMs = new Date(startIso).getTime();
+  const endMs = new Date(endIso).getTime();
+  return operatingWindows.some((win) => {
+    const wStartMs = new Date(win.startAt).getTime();
+    const wEndMs = new Date(win.endAt).getTime();
+    return startMs >= wStartMs && endMs <= wEndMs;
+  });
 }

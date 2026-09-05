@@ -19,6 +19,9 @@ export type Amenity =
   | 'security'
   | 'restroom';
 
+/** Type alias for Amenity compatibility across components */
+export type AmenityCode = Amenity;
+
 /**
  * Booking lifecycle (SRS Section 4). There is no NO_SHOW state: a driver who
  * fails to check in is auto-CANCELLED at 0% refund (BR-BOK-05) — the reason is
@@ -36,16 +39,24 @@ export type BookingStatus =
 /** Why a CANCELLED booking ended that way — drives the history badge + refund copy. */
 export type CancelReason = 'DRIVER' | 'NO_SHOW' | 'PAYMENT_TIMEOUT';
 
-/** Operating schedule status: open now vs closed by active schedule vs no schedule set. */
+/** Operating schedule status: open now vs closed by active schedule vs no schedule set vs owner paused. */
 export type StationOperatingState =
   | 'OPEN'
   | 'CLOSED_BY_SCHEDULE'
-  | 'SCHEDULE_NOT_CONFIGURED';
+  | 'PAUSED_BY_OWNER'
+  | 'MAINTENANCE'
+  | 'SCHEDULE_NOT_CONFIGURED'
+  | 'UNAVAILABLE_BY_PLATFORM';
+
+export type StationOperationalStatus = 'OPERATING' | 'PAUSED' | 'MAINTENANCE';
 
 export interface Station {
   id: string;
+  stationCode?: string;
   name: string;
   address: string;
+  wardName?: string;
+  provinceName?: string;
   description?: string;
   latitude: number;
   longitude: number;
@@ -53,6 +64,7 @@ export interface Station {
   imageUrl?: string;
   contactPhone?: string;
   operatingHours?: string;
+  open24Hours?: boolean;
   /** Opening/closing minutes from midnight; used to clamp the bookable window (FR11). */
   opensAtMin: number;
   closesAtMin: number; // 1440 = open until midnight (24/7 stations use 0–1440)
@@ -62,11 +74,28 @@ export interface Station {
   reviewCount?: number; // number of ratings, optional
   isOpen?: boolean; // derived open/closed state (vs operatingHours)
   operatingState?: StationOperatingState; // granular backend operating state
+  operationalStatus?: StationOperationalStatus;
+  operationalStatusReason?: string;
+  scheduleConfigured?: boolean;
   hasFastCharging?: boolean; // has at least one DC connector (for list filtering)
   minRatePerKwh?: number; // cheapest đ/kWh rate label (info only, "Giá từ")
   maxPowerKw?: number; // maximum charging power in kW (e.g. 180kW) from backend
   connectorTypes?: ConnectorType[]; // available connector types at this station
   amenities?: Amenity[]; // shown on the station detail screen
+  cancellationPolicy?: CancellationPolicy;
+}
+
+export interface CancellationPolicy {
+  gracePeriodMinutes: number;
+  refundRules: RefundRule[];
+}
+
+export interface RefundRule {
+  tier: string;
+  refundPercent: number;
+  minMinutesBeforeStartInclusive: number | null;
+  maxMinutesBeforeStartExclusive: number | null;
+  appliesToNoShow: boolean;
 }
 
 /**
@@ -196,6 +225,7 @@ export interface Review {
   id: string;
   stationId: string;
   authorName: string;
+  userName?: string; // fallback alias for UI display
   rating: number; // 1..5
   comment: string;
   createdAt: string; // ISO datetime
@@ -274,6 +304,5 @@ export type {
   BackendStationDiscoverySort,
   BackendTimeRangeResponse,
 } from '@/services/stationAdapter';
-
 
 

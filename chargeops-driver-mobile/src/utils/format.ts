@@ -35,9 +35,12 @@ export function formatTime(iso: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-/** Format a start/end ISO pair as a 24h time range, e.g. "14:00 - 15:00". */
+/** Format a start/end ISO pair as a 24h time range, e.g. "14:00 - 15:00" or "23:00 - 02:00 (+1)". */
 export function formatTimeRange(startIso: string, endIso: string): string {
-  return `${formatTime(startIso)} - ${formatTime(endIso)}`;
+  const s = new Date(startIso);
+  const e = new Date(endIso);
+  const isDiffDay = s.getFullYear() !== e.getFullYear() || s.getMonth() !== e.getMonth() || s.getDate() !== e.getDate();
+  return `${formatTime(startIso)} - ${formatTime(endIso)}${isDiffDay ? ' (+1)' : ''}`;
 }
 
 /** Format an ISO datetime as a short day/month, e.g. "20/06". */
@@ -90,3 +93,23 @@ export function formatRelativeTime(iso: string, t?: any): string {
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays} ngày trước`;
 }
+
+/**
+ * Formats equipment names (ChargePoint, Connector) dynamically based on current locale.
+ * Converts Vietnamese prefixes like "Trụ A" -> "Post A", "Trụ sạc A" -> "Charge Point A",
+ * "Cổng 1" -> "Port 1", "Súng 1" -> "Connector 1".
+ */
+export function formatEquipmentName(name?: string | null, lang: string = 'vi'): string {
+  if (!name) return '';
+  const isEn = typeof lang === 'string' && lang.toLowerCase().startsWith('en');
+  if (!isEn) return name;
+
+  return name
+    .replace(/(^|[\s·\-\/])Trụ sạc\s+/gi, '$1Charge Point ')
+    .replace(/(^|[\s·\-\/])Trụ\s+/gi, '$1Charge Point ')
+    .replace(/(^|[\s·\-\/])Cổng sạc\s+/gi, '$1Port ')
+    .replace(/(^|[\s·\-\/])Cổng\s+/gi, '$1Port ')
+    .replace(/(^|[\s·\-\/])Súng sạc\s+/gi, '$1Connector ')
+    .replace(/(^|[\s·\-\/])Súng\s+/gi, '$1Connector ');
+}
+

@@ -59,7 +59,7 @@ interface SettingsModalProps {
 export function SettingsModal({ visible, onClose, section = 'all' }: SettingsModalProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { appearance, setAppearance, themeColors, isDark } = usePreferences();
+  const { appearance, setAppearance, palette, setPalette, themeColors, isDark } = usePreferences();
   const [sim, setSim] = useState(getSimConfig);
   const showLanguage = section === 'all' || section === 'language';
   const showAppearance = section === 'all' || section === 'appearance';
@@ -159,6 +159,79 @@ export function SettingsModal({ visible, onClose, section = 'all' }: SettingsMod
                       </Pressable>
                     );
                   })}
+                </View>
+
+                {/* Color Palette Variant Switcher (for visual comparison) */}
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={[styles.sectionLabel, { color: themeColors.textMuted }]}>
+                    {t('settings.palette')}
+                  </Text>
+                  <Text style={[styles.sectionHint, { color: themeColors.textMuted }]}>
+                    {t('settings.paletteDesc')}
+                  </Text>
+                </View>
+                <View style={styles.paletteRow}>
+                  <Pressable
+                    style={[
+                      styles.paletteCard,
+                      {
+                        borderColor: palette === 'balanced' ? themeColors.primary : themeColors.border,
+                        backgroundColor: themeColors.surfaceAlt,
+                        borderWidth: palette === 'balanced' ? 2 : 1,
+                      },
+                    ]}
+                    onPress={() => setPalette('balanced')}
+                  >
+                    <View style={styles.palettePreviewRow}>
+                      <View style={[styles.colorDot, { backgroundColor: '#10C98A' }]} />
+                      <View style={[styles.colorDot, { backgroundColor: '#121917', borderColor: '#27312E', borderWidth: 1 }]} />
+                      <View style={[styles.colorDot, { backgroundColor: '#0B0F0E', borderColor: '#27312E', borderWidth: 1 }]} />
+                    </View>
+                    <Text
+                      style={[
+                        styles.paletteTitle,
+                        { color: palette === 'balanced' ? themeColors.primaryDark : themeColors.textStrong },
+                      ]}
+                    >
+                      {t('settings.paletteOptions.balanced')}
+                    </Text>
+                    {palette === 'balanced' && (
+                      <View style={[styles.activeCheck, { backgroundColor: themeColors.primary }]}>
+                        <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                      </View>
+                    )}
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.paletteCard,
+                      {
+                        borderColor: palette === 'classic' ? themeColors.primary : themeColors.border,
+                        backgroundColor: themeColors.surfaceAlt,
+                        borderWidth: palette === 'classic' ? 2 : 1,
+                      },
+                    ]}
+                    onPress={() => setPalette('classic')}
+                  >
+                    <View style={styles.palettePreviewRow}>
+                      <View style={[styles.colorDot, { backgroundColor: '#10B981' }]} />
+                      <View style={[styles.colorDot, { backgroundColor: '#161B1A', borderColor: '#2A312F', borderWidth: 1 }]} />
+                      <View style={[styles.colorDot, { backgroundColor: '#FFFFFF', borderColor: '#E5E7EB', borderWidth: 1 }]} />
+                    </View>
+                    <Text
+                      style={[
+                        styles.paletteTitle,
+                        { color: palette === 'classic' ? themeColors.primaryDark : themeColors.textStrong },
+                      ]}
+                    >
+                      {t('settings.paletteOptions.classic')}
+                    </Text>
+                    {palette === 'classic' && (
+                      <View style={[styles.activeCheck, { backgroundColor: themeColors.primary }]}>
+                        <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                      </View>
+                    )}
+                  </Pressable>
                 </View>
               </>
             ) : null}
@@ -361,6 +434,42 @@ const styles = StyleSheet.create({
   },
   appearanceLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.medium },
   appearanceLabelActive: { fontWeight: fontWeights.semibold },
+
+  sectionHeaderRow: {
+    gap: 2,
+    marginTop: spacing.md,
+  },
+  sectionHint: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  paletteRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  paletteCard: {
+    flex: 1,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    gap: spacing.xs,
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  palettePreviewRow: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  colorDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+  },
+  paletteTitle: {
+    fontSize: 12.5,
+    fontWeight: fontWeights.semibold,
+  },
 
   moreList: { gap: spacing.xs },
   moreRow: {

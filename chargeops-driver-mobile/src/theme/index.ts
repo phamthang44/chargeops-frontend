@@ -2,8 +2,17 @@
  * Theme barrel export.
  * Usage: import { colors, spacing, radius, typography } from '@/theme';
  */
-export { colors, lightColors, darkColors, getThemeColors } from './colors';
-export type { Colors } from './colors';
+export {
+  colors,
+  lightColors,
+  darkColors,
+  classicLightColors,
+  classicDarkColors,
+  balancedLightColors,
+  balancedDarkColors,
+  getThemeColors,
+} from './colors';
+export type { Colors, PalettePreset } from './colors';
 
 export { spacing, radius } from './spacing';
 export type { Spacing, Radius } from './spacing';

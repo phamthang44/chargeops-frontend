@@ -21,6 +21,7 @@ import type {
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
+  StationAsset,
   StaffAssignmentStatus,
   CurrentStaffContextResponse,
   StationStaffMember,
@@ -895,6 +896,55 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         }
         return list;
       },
+      async getAssets(stationId) {
+        await delay();
+        const s = db.ownerStations.find((x) => x.id === stationId) || db.allStations.find((x) => x.id === stationId);
+        return s?.assets ?? [];
+      },
+      async registerAsset(stationId, input) {
+        await delay();
+        const s = db.ownerStations.find((x) => x.id === stationId) || db.allStations.find((x) => x.id === stationId);
+        if (!s) throw new Error(`Không tìm thấy trạm ${stationId}`);
+        if (!s.assets) s.assets = [];
+        const isPrimary = Boolean(input.primary) || s.assets.length === 0;
+        if (isPrimary) {
+          s.assets.forEach((a) => (a.isPrimary = false));
+        }
+        const newAsset: StationAsset = {
+          id: `asset-${Date.now()}`,
+          assetUrl: input.assetUrl,
+          storageKey: input.storageKey,
+          assetType: input.assetType || 'IMAGE',
+          altText: input.altText || s.name,
+          isPrimary,
+          displayOrder: s.assets.length,
+        };
+        s.assets.push(newAsset);
+        return newAsset;
+      },
+      async deleteAsset(stationId, assetId) {
+        await delay();
+        const s = db.ownerStations.find((x) => x.id === stationId) || db.allStations.find((x) => x.id === stationId);
+        if (s && s.assets) {
+          s.assets = s.assets.filter((a) => a.id !== assetId && a.storageKey !== assetId);
+        }
+      },
+      async setPrimaryAsset(stationId, assetId) {
+        await delay();
+        const s = db.ownerStations.find((x) => x.id === stationId) || db.allStations.find((x) => x.id === stationId);
+        if (!s || !s.assets) throw new Error(`Không tìm thấy ảnh ${assetId}`);
+        let target: StationAsset | undefined;
+        s.assets.forEach((a) => {
+          if (a.id === assetId || a.storageKey === assetId) {
+            a.isPrimary = true;
+            target = a;
+          } else {
+            a.isPrimary = false;
+          }
+        });
+        if (!target) throw new Error(`Không tìm thấy ảnh ${assetId}`);
+        return target;
+      },
     },
 
     transactions: {
@@ -1665,6 +1715,19 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           expiresInSeconds: 60,
           connectorId,
           createdAt: new Date().toISOString(),
+        };
+      },
+    },
+
+    media: {
+      async getImageKitAuth() {
+        await delay();
+        return {
+          token: `mock-token-${Date.now()}`,
+          expire: Math.floor(Date.now() / 1000) + 1800,
+          signature: 'mock-sig-' + Math.random().toString(36).substring(2),
+          publicKey: 'mock_public_key',
+          urlEndpoint: 'https://ik.imagekit.io/chargeops',
         };
       },
     },

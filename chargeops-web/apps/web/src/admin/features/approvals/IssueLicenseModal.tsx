@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, IconInfo, IconShield, Modal } from '@chargeops/ui';
+import { Button, Checkbox, IconInfo, IconShield, Modal } from '@chargeops/ui';
 import type { StationApprovalSummary, Station } from '@chargeops/api';
 
 export interface IssueLicenseModalProps {
@@ -160,22 +160,18 @@ export function IssueLicenseModal({
 
         {/* Verification Checkbox */}
         <div className="mt-3.5 rounded-[9px] border border-line-2 bg-surface-2 p-3">
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <input
-              type="checkbox"
-              checked={verified}
-              onChange={(e) => {
-                setVerified(e.target.checked);
-                if (e.target.checked) setError(null);
-              }}
-              className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand"
-            />
-            <span className="text-[12px] leading-snug font-medium text-ink">
-              {t('issueLicenseModal.verificationCheckbox', {
-                defaultValue: 'Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gói License của chủ trạm ngoài nền tảng.',
-              })}
-            </span>
-          </label>
+          <Checkbox
+            checked={verified}
+            onChange={(checked) => {
+              setVerified(checked);
+              if (checked) setError(null);
+            }}
+            accent="brand"
+          >
+            {t('issueLicenseModal.verificationCheckbox', {
+              defaultValue: 'Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gói License của chủ trạm ngoài nền tảng.',
+            })}
+          </Checkbox>
           {error && !verified && (
             <div className="mt-1.5 text-[11.5px] font-medium text-bad">{error}</div>
           )}

@@ -18,6 +18,7 @@ import {
   IconUsers,
   SegmentedControl,
   Skeleton,
+  StationGallery,
   StationStatusBadge,
   StatusPill,
   useToast,
@@ -47,7 +48,7 @@ export interface StationDetailDrawerProps {
   isActiveInContext?: boolean;
 }
 
-type StationTab = 'overview' | 'hardware' | 'hours_amenities' | 'license' | 'staff' | 'timeline';
+type StationTab = 'overview' | 'gallery' | 'hardware' | 'hours_amenities' | 'license' | 'staff' | 'timeline';
 
 const DAY_LABELS: Record<string, string> = {
   MONDAY: 'Thứ Hai',
@@ -130,6 +131,12 @@ export function StationDetailDrawer({
     queryKey: ['stations', 'statusHistory', stationId],
     queryFn: () => (stationId ? api.stations.statusHistory(stationId) : Promise.resolve([])),
     enabled: Boolean(stationId) && open && activeTab === 'timeline',
+  });
+
+  const assetsQ = useQuery({
+    queryKey: ['stations', 'assets', stationId],
+    queryFn: () => (stationId ? api.stations.getAssets(stationId) : Promise.resolve([])),
+    enabled: Boolean(stationId) && open,
   });
 
   // Update amenities mutation
@@ -249,6 +256,7 @@ export function StationDetailDrawer({
         <SegmentedControl<StationTab>
           segments={[
             { key: 'overview', label: 'Tổng quan' },
+            { key: 'gallery', label: 'Thư viện ảnh' },
             { key: 'hardware', label: 'Thiết bị & Trụ sạc' },
             { key: 'hours_amenities', label: 'Giờ & Tiện ích' },
             { key: 'license', label: 'Giấy phép' },
@@ -433,6 +441,42 @@ export function StationDetailDrawer({
               </div>
             </div>
           </div>
+        )}
+
+        {/* ==================== TAB: GALLERY ==================== */}
+        {activeTab === 'gallery' && (
+          <Card className="p-4">
+            <StationGallery
+              stationId={station.id}
+              stationName={station.name}
+              assets={assetsQ.data ?? station.assets ?? []}
+              getAuthParams={() => api.media.getImageKitAuth()}
+              onUploadSuccess={async (res, isPrimary) => {
+                await api.stations.registerAsset(station.id, {
+                  assetUrl: res.url,
+                  storageKey: res.fileId,
+                  assetType: 'IMAGE',
+                  altText: station.name,
+                  primary: isPrimary,
+                });
+                qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
+                qc.invalidateQueries({ queryKey: ['stations'] });
+                toast('Tải ảnh trạm sạc lên thành công!', 'success');
+              }}
+              onDeleteAsset={async (assetId) => {
+                await api.stations.deleteAsset(station.id, assetId);
+                qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
+                qc.invalidateQueries({ queryKey: ['stations'] });
+                toast('Đã xóa ảnh khỏi trạm sạc.', 'success');
+              }}
+              onSetPrimaryAsset={async (assetId) => {
+                await api.stations.setPrimaryAsset(station.id, assetId);
+                qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
+                qc.invalidateQueries({ queryKey: ['stations'] });
+                toast('Đã cập nhật ảnh chính cho trạm sạc!', 'success');
+              }}
+            />
+          </Card>
         )}
 
         {/* ==================== TAB 2: HARDWARE & CHARGERS ==================== */}

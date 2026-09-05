@@ -370,6 +370,10 @@ export function createRestServices(http: HttpClient): Services {
       suspend: (id, reason) => http.post(`/admin/stations/${id}/suspend`, { reason }),
       reactivate: (id, reason) => http.post(`/admin/stations/${id}/reactivate`, { reason }),
       statusHistory: (id) => http.get(`/stations/${id}/status-history`),
+      getAssets: (stationId) => http.get(`/owner/stations/${stationId}/assets`),
+      registerAsset: (stationId, input) => http.post(`/owner/stations/${stationId}/assets/register`, input),
+      deleteAsset: (stationId, assetId) => http.delete(`/owner/stations/${stationId}/assets/${assetId}`),
+      setPrimaryAsset: (stationId, assetId) => http.patch(`/owner/stations/${stationId}/assets/${assetId}/primary`),
     },
 
     transactions: {
@@ -490,6 +494,10 @@ export function createRestServices(http: HttpClient): Services {
     challenge: {
       create: (connectorId: string) =>
         http.post<CheckInChallengeResponse>(`/internal/connectors/${connectorId}/check-in-challenge`),
+    },
+
+    media: {
+      getImageKitAuth: () => http.get('/media/imagekit-auth'),
     },
   };
 }

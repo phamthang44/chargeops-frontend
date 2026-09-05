@@ -271,12 +271,29 @@ export interface StationDriverEligibility {
 }
 
 export interface StationAsset {
+  id?: string;
   assetType: 'IMAGE' | 'DOCUMENT' | string;
   assetUrl: string;
   isPrimary?: boolean;
   storageKey?: string;
   displayOrder?: number;
   altText?: string;
+}
+
+export interface RegisterStationAssetInput {
+  assetUrl: string;
+  storageKey?: string;
+  assetType?: 'IMAGE' | 'DOCUMENT' | string;
+  altText?: string;
+  primary?: boolean;
+}
+
+export interface ImageKitAuthResponse {
+  token: string;
+  expire: number;
+  signature: string;
+  publicKey?: string;
+  urlEndpoint?: string;
 }
 
 export type StationOperatingState =

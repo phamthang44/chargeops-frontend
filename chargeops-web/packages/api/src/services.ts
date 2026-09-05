@@ -47,10 +47,13 @@ import type {
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
+  StationAsset,
   StationOperationalStatusResponse,
   StationRegistration,
   StationStaffMember,
   StationStatusHistory,
+  RegisterStationAssetInput,
+  ImageKitAuthResponse,
   Ticket,
   TicketListParams,
   TicketMessage,
@@ -196,6 +199,14 @@ export interface StationService {
   reactivate(id: string, reason?: string): Promise<void>;
   /** Audit log: list status transitions and approval history for a station. */
   statusHistory(stationId: string): Promise<StationStatusHistory[]>;
+  /** Owner: get assets / gallery of station. */
+  getAssets(stationId: string): Promise<StationAsset[]>;
+  /** Owner: register an asset after direct client-side upload. */
+  registerAsset(stationId: string, input: RegisterStationAssetInput): Promise<StationAsset>;
+  /** Owner: delete an asset. */
+  deleteAsset(stationId: string, assetId: string): Promise<void>;
+  /** Owner: set primary cover asset. */
+  setPrimaryAsset(stationId: string, assetId: string): Promise<StationAsset>;
 }
 
 export interface TransactionService {
@@ -300,6 +311,11 @@ export interface ChallengeService {
   create(connectorId: string): Promise<CheckInChallengeResponse>;
 }
 
+export interface MediaService {
+  /** Request ImageKit client-side upload authentication signature */
+  getImageKitAuth(): Promise<ImageKitAuthResponse>;
+}
+
 export interface Services {
   profile: ProfileService;
   location: LocationService;
@@ -317,4 +333,5 @@ export interface Services {
   policies: PolicyService;
   tickets: TicketService;
   challenge: ChallengeService;
+  media: MediaService;
 }

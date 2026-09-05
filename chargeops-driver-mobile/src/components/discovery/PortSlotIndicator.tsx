@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { LiveDot } from '@/components/LiveDot';
@@ -8,6 +9,7 @@ interface PortSlotIndicatorProps {
   available: number;
   total: number;
   showBars?: boolean;
+  showLabel?: boolean;
 }
 
 /**
@@ -18,7 +20,9 @@ export function PortSlotIndicator({
   available,
   total,
   showBars = true,
+  showLabel = true,
 }: PortSlotIndicatorProps) {
+  const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
   const isFull = available <= 0;
@@ -35,27 +39,33 @@ export function PortSlotIndicator({
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <LiveDot color={statusColor} size={7} />
-        <Text
-          style={[
-            styles.label,
-            {
-              color: isFull
-                ? themeColors.error
-                : isNearlyFull
-                  ? themeColors.warning
-                  : isDark
-                    ? themeColors.primaryLight
-                    : themeColors.primaryDark,
-            },
-          ]}
-        >
-          {isFull
-            ? 'Hết chỗ trống'
-            : `Còn ${available}/${total} cổng khả dụng`}
-        </Text>
-      </View>
+      {showLabel && (
+        <View style={styles.headerRow}>
+          <LiveDot color={statusColor} size={7} />
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isFull
+                  ? themeColors.error
+                  : isNearlyFull
+                    ? themeColors.warning
+                    : isDark
+                      ? themeColors.primaryLight
+                      : themeColors.primaryDark,
+              },
+            ]}
+          >
+            {isFull
+              ? t('stationList.card.portsFull', 'Hết chỗ trống')
+              : t('stationList.card.portsAvailable', {
+                  available,
+                  total,
+                  defaultValue: `Còn ${available}/${total} cổng khả dụng`,
+                })}
+          </Text>
+        </View>
+      )}
 
       {showBars && total > 0 && (
         <View style={styles.barRow}>

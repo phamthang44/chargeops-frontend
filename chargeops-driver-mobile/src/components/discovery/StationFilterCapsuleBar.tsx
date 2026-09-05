@@ -53,15 +53,15 @@ export function StationFilterCapsuleBar({
             backgroundColor: hasActiveFilters
               ? isDark
                 ? '#113322'
-                : '#ECFDF5'
+                : '#E6F9F0'
               : isDark
                 ? '#161B1A'
-                : themeColors.surfaceAlt,
+                : '#E6F9F0',
             borderColor: hasActiveFilters
               ? themeColors.primary
               : isDark
                 ? '#2A312F'
-                : themeColors.border,
+                : '#A7F3D0',
           },
         ]}
         onPress={onOpenDrawer}
@@ -69,7 +69,15 @@ export function StationFilterCapsuleBar({
         <Ionicons
           name="options-outline"
           size={15}
-          color={hasActiveFilters ? themeColors.primary : themeColors.textStrong}
+          color={
+            hasActiveFilters
+              ? isDark
+                ? '#34D399'
+                : '#065F46'
+              : isDark
+                ? themeColors.textStrong
+                : '#065F46'
+          }
         />
         <Text
           style={[
@@ -78,8 +86,10 @@ export function StationFilterCapsuleBar({
               color: hasActiveFilters
                 ? isDark
                   ? '#6EE6A0'
-                  : themeColors.primaryDark
-                : themeColors.textStrong,
+                  : '#065F46'
+                : isDark
+                  ? themeColors.textStrong
+                  : '#065F46',
             },
           ]}
         >
@@ -103,8 +113,8 @@ export function StationFilterCapsuleBar({
           style={[
             styles.clearChip,
             {
-              backgroundColor: isDark ? '#1F2625' : themeColors.textStrong,
-              borderColor: isDark ? '#2A312F' : themeColors.textStrong,
+              backgroundColor: isDark ? '#1F2625' : '#0F172A',
+              borderColor: isDark ? '#2A312F' : '#0F172A',
             },
           ]}
           onPress={onClearAll}
@@ -126,16 +136,16 @@ export function StationFilterCapsuleBar({
               filters.currentType === 'DC' || (filters.minPowerKw ?? 0) >= 50
                 ? isDark
                   ? '#113322'
-                  : themeColors.primarySoft
+                  : '#E6F9F0'
                 : isDark
                   ? '#161B1A'
-                  : themeColors.surfaceAlt,
+                  : '#FFFFFF',
             borderColor:
               filters.currentType === 'DC' || (filters.minPowerKw ?? 0) >= 50
                 ? themeColors.primary
                 : isDark
                   ? '#2A312F'
-                  : themeColors.border,
+                  : '#E2E8F0',
           },
         ]}
         onPress={() =>
@@ -153,8 +163,10 @@ export function StationFilterCapsuleBar({
             filters.currentType === 'DC'
               ? isDark
                 ? '#34D399'
-                : themeColors.primaryDark
-              : themeColors.textMuted
+                : '#059669'
+              : isDark
+                ? themeColors.textMuted
+                : '#334155'
           }
         />
         <Text
@@ -165,13 +177,15 @@ export function StationFilterCapsuleBar({
                 filters.currentType === 'DC'
                   ? isDark
                     ? '#6EE6A0'
-                    : themeColors.primaryDark
-                  : themeColors.textBody,
+                    : '#065F46'
+                  : isDark
+                    ? themeColors.textBody
+                    : '#334155',
             },
             filters.currentType === 'DC' && styles.chipTextActive,
           ]}
         >
-          Sạc nhanh DC
+          {t('stationList.filters.dc', 'Sạc nhanh DC')}
         </Text>
       </Pressable>
 
@@ -183,15 +197,15 @@ export function StationFilterCapsuleBar({
             backgroundColor: filters.availableOnly
               ? isDark
                 ? '#113322'
-                : themeColors.primarySoft
+                : '#E6F9F0'
               : isDark
                 ? '#161B1A'
-                : themeColors.surfaceAlt,
+                : '#FFFFFF',
             borderColor: filters.availableOnly
               ? themeColors.primary
               : isDark
                 ? '#2A312F'
-                : themeColors.border,
+                : '#E2E8F0',
           },
         ]}
         onPress={() =>
@@ -202,14 +216,16 @@ export function StationFilterCapsuleBar({
         }
       >
         <Ionicons
-          name="checkmark-circle"
-          size={13}
+          name="time-outline"
+          size={14}
           color={
             filters.availableOnly
               ? isDark
                 ? '#34D399'
-                : themeColors.primaryDark
-              : themeColors.textMuted
+                : '#059669'
+              : isDark
+                ? themeColors.textMuted
+                : '#334155'
           }
         />
         <Text
@@ -219,8 +235,10 @@ export function StationFilterCapsuleBar({
               color: filters.availableOnly
                 ? isDark
                   ? '#6EE6A0'
-                  : themeColors.primaryDark
-                : themeColors.textBody,
+                  : '#065F46'
+                : isDark
+                  ? themeColors.textBody
+                  : '#334155',
             },
             filters.availableOnly && styles.chipTextActive,
           ]}
@@ -237,15 +255,15 @@ export function StationFilterCapsuleBar({
             backgroundColor: filters.openOnly
               ? isDark
                 ? '#113322'
-                : themeColors.primarySoft
+                : '#E6F9F0'
               : isDark
                 ? '#161B1A'
-                : themeColors.surfaceAlt,
+                : '#FFFFFF',
             borderColor: filters.openOnly
               ? themeColors.primary
               : isDark
                 ? '#2A312F'
-                : themeColors.border,
+                : '#E2E8F0',
           },
         ]}
         onPress={() =>
@@ -256,14 +274,16 @@ export function StationFilterCapsuleBar({
         }
       >
         <Ionicons
-          name="time"
-          size={13}
+          name="time-outline"
+          size={14}
           color={
             filters.openOnly
               ? isDark
                 ? '#34D399'
-                : themeColors.primaryDark
-              : themeColors.textMuted
+                : '#059669'
+              : isDark
+                ? themeColors.textMuted
+                : '#334155'
           }
         />
         <Text
@@ -273,8 +293,10 @@ export function StationFilterCapsuleBar({
               color: filters.openOnly
                 ? isDark
                   ? '#6EE6A0'
-                  : themeColors.primaryDark
-                : themeColors.textBody,
+                  : '#065F46'
+                : isDark
+                  ? themeColors.textBody
+                  : '#334155',
             },
             filters.openOnly && styles.chipTextActive,
           ]}
@@ -358,15 +380,15 @@ export function StationFilterCapsuleBar({
                 backgroundColor: active
                   ? isDark
                     ? '#113322'
-                    : themeColors.primarySoft
+                    : '#E6F9F0'
                   : isDark
                     ? '#161B1A'
-                    : themeColors.surfaceAlt,
+                    : '#FFFFFF',
                 borderColor: active
                   ? themeColors.primary
                   : isDark
                     ? '#2A312F'
-                    : themeColors.border,
+                    : '#E2E8F0',
               },
             ]}
             onPress={() =>
@@ -385,8 +407,10 @@ export function StationFilterCapsuleBar({
                   color: active
                     ? isDark
                       ? '#6EE6A0'
-                      : themeColors.primaryDark
-                    : themeColors.textBody,
+                      : '#065F46'
+                    : isDark
+                      ? themeColors.textBody
+                      : '#334155',
                 },
                 active && styles.chipTextActive,
               ]}

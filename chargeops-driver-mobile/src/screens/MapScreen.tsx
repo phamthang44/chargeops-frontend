@@ -248,11 +248,11 @@ export function MapScreen() {
         {selectedStation && (
           <MapStationPeekSheet
             station={selectedStation}
-            onOpenDetail={(id) => navigation.navigate('StationDetail', { stationId: id })}
+            onOpenDetail={(id) => navigation.navigate('StationDetail', { stationId: id, distanceKm: selectedStation.distanceKm })}
             onDirections={(st) => {
               mapRef.current?.navigateToStation(st);
             }}
-            onQuickBook={(id) => navigation.navigate('StationDetail', { stationId: id })}
+            onQuickBook={(id) => navigation.navigate('StationDetail', { stationId: id, distanceKm: selectedStation.distanceKm })}
             onClose={() => setSelected(null)}
             bottomOffset={tabInset + 12}
           />

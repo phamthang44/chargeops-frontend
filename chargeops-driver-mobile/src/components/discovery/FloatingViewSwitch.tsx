@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
@@ -18,23 +19,24 @@ export function FloatingViewSwitch({
   onToggle,
   bottomOffset = 88,
 }: FloatingViewSwitchProps) {
+  const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
   const isList = currentView === 'list';
-  const label = isList ? 'Bản đồ' : 'Danh sách';
+  const label = isList ? t('stationList.viewMap', 'Bản đồ') : t('stationList.viewList', 'Danh sách');
   const iconName = isList ? 'map' : 'list';
 
   return (
-    <View style={[styles.wrapper, { bottom: bottomOffset }]} pointerEvents="box-none">
+    <View style={[styles.wrapper, { bottom: bottomOffset }]}>
       <Pressable
         onPress={onToggle}
         style={({ pressed }) => [
           styles.pill,
           {
-            backgroundColor: isDark ? '#161B1A' : '#FFFFFF',
-            borderColor: isDark ? '#2A312F' : '#E5E7EB',
+            backgroundColor: isDark ? '#1C2724' : '#FFFFFF',
+            borderColor: isDark ? '#2D4039' : '#E5E7EB',
             shadowColor: isDark ? '#000000' : themeColors.textStrong,
-            shadowOpacity: isDark ? 0.35 : 0.12,
+            shadowOpacity: isDark ? 0.45 : 0.12,
             transform: [{ scale: pressed ? 0.96 : 1 }],
           },
         ]}
@@ -53,6 +55,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     zIndex: 50,
+    pointerEvents: 'box-none',
   },
   pill: {
     flexDirection: 'row',

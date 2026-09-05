@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useRef, useEffect } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
@@ -179,7 +179,7 @@ function CenterTab({
       toValue: isFocused ? 1.08 : 1,
       friction: 5,
       tension: 100,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [isFocused, scaleAnim]);
 

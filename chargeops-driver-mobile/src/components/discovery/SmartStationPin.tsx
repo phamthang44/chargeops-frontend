@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius } from '@/theme';
@@ -43,7 +43,7 @@ export function SmartStationPin({
       toValue: selected ? 1.15 : 1,
       friction: 6,
       tension: 100,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [selected, scale]);
 

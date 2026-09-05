@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Platform,
   Pressable,
@@ -19,6 +20,7 @@ interface StationSearchBarProps {
   placeholder?: string;
   onClear?: () => void;
   onSubmit?: () => void;
+  onPressFilter?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
@@ -32,8 +34,10 @@ export function StationSearchBar({
   placeholder,
   onClear,
   onSubmit,
+  onPressFilter,
   containerStyle,
 }: StationSearchBarProps) {
+  const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
   const [isFocused, setIsFocused] = useState(false);
 
@@ -45,25 +49,27 @@ export function StationSearchBar({
   // Determine dynamic colors based on theme & focus
   const barBg = isFocused
     ? isDark
-      ? '#131D1A'
+      ? '#141E1A'
       : '#FFFFFF'
     : isDark
-      ? '#161B1A'
-      : '#F9FAFB';
+      ? '#16201D'
+      : '#FFFFFF';
 
   const barBorder = isFocused
     ? isDark
       ? '#34D399'
       : themeColors.primary
     : isDark
-      ? '#2A312F'
-      : '#E5E7EB';
+      ? '#283732'
+      : '#E2E8F0';
 
   const iconColor = isFocused
     ? isDark
       ? '#34D399'
       : themeColors.primary
-    : themeColors.textMuted;
+    : isDark
+      ? '#94A3B8'
+      : '#64748B';
 
   return (
     <View style={[styles.wrapper, containerStyle]}>
@@ -73,17 +79,17 @@ export function StationSearchBar({
           {
             backgroundColor: barBg,
             borderColor: barBorder,
-            shadowColor: isFocused ? themeColors.primary : '#000000',
-            shadowOpacity: isFocused ? (isDark ? 0.35 : 0.16) : 0,
-            shadowRadius: isFocused ? 8 : 0,
-            shadowOffset: { width: 0, height: isFocused ? 3 : 0 },
-            elevation: isFocused ? 4 : 0,
+            shadowColor: isFocused ? themeColors.primary : '#0F172A',
+            shadowOpacity: isFocused ? (isDark ? 0.35 : 0.16) : 0.04,
+            shadowRadius: isFocused ? 8 : 6,
+            shadowOffset: { width: 0, height: isFocused ? 3 : 2 },
+            elevation: isFocused ? 4 : 2,
           },
         ]}
       >
         {/* Leading Search Icon */}
         <View style={styles.iconWrap}>
-          <Ionicons name="search" size={18} color={iconColor} />
+          <Ionicons name="search-outline" size={19} color={iconColor} />
         </View>
 
         {/* Input Field */}
@@ -98,7 +104,7 @@ export function StationSearchBar({
             },
           ]}
           placeholder={placeholder}
-          placeholderTextColor={themeColors.textMuted}
+          placeholderTextColor={isDark ? '#94A3B8' : '#64748B'}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
@@ -118,13 +124,32 @@ export function StationSearchBar({
             style={({ pressed }) => [
               styles.clearBtn,
               {
-                backgroundColor: isDark ? '#1F2625' : '#E5E7EB',
+                backgroundColor: isDark ? '#24322D' : '#E5E7EB',
                 transform: [{ scale: pressed ? 0.9 : 1 }],
               },
             ]}
-            accessibilityLabel="Xóa tìm kiếm"
+            accessibilityLabel={t('stationList.clearSearch', 'Xóa tìm kiếm')}
           >
-            <Ionicons name="close" size={13} color={themeColors.textBody} />
+            <Ionicons name="close" size={13} color={isDark ? '#E2E8F0' : themeColors.textBody} />
+          </Pressable>
+        )}
+
+        {/* Trailing Filter Button (matching design) */}
+        {onPressFilter && (
+          <Pressable
+            hitSlop={8}
+            onPress={onPressFilter}
+            style={({ pressed }) => [
+              styles.filterBtn,
+              { transform: [{ scale: pressed ? 0.92 : 1 }] },
+            ]}
+            accessibilityLabel={t('stationList.filterBtn', 'Bộ lọc')}
+          >
+            <Ionicons
+              name="options-outline"
+              size={19}
+              color={isDark ? '#6EE6A0' : '#334155'}
+            />
           </Pressable>
         )}
       </View>
@@ -142,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 48,
     borderRadius: radius.full,
-    borderWidth: 1.5,
+    borderWidth: 1,
     paddingHorizontal: spacing.md + 2,
     gap: spacing.sm,
   },
@@ -167,6 +192,12 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBtn: {
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },

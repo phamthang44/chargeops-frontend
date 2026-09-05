@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Animated,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -47,11 +48,11 @@ const CONNECTOR_OPTIONS: {
   { type: 'GBT', label: 'GB/T', sub: 'DC/AC Chuẩn TQ', icon: 'hardware-chip' },
 ];
 
-const POWER_TIERS: { label: string; minPowerKw?: number; currentType?: 'AC' | 'DC' }[] = [
-  { label: 'Tất cả' },
-  { label: 'AC (<22kW)', currentType: 'AC' },
-  { label: 'DC Nhanh (≥50kW)', minPowerKw: 50, currentType: 'DC' },
-  { label: 'DC Siêu nhanh (≥120kW)', minPowerKw: 120, currentType: 'DC' },
+const POWER_TIERS: { key: string; label: string; minPowerKw?: number; currentType?: 'AC' | 'DC' }[] = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'ac', label: 'AC (<22kW)', currentType: 'AC' },
+  { key: 'dcFast', label: 'DC Nhanh (≥50kW)', minPowerKw: 50, currentType: 'DC' },
+  { key: 'dcSuperFast', label: 'DC Siêu nhanh (≥120kW)', minPowerKw: 120, currentType: 'DC' },
 ];
 
 const DISTANCE_OPTIONS: { label: string; value?: number }[] = [
@@ -97,7 +98,7 @@ export function StationFilterDrawer({
       setDraftMaxDistance(filters.maxDistanceKm);
 
       rise.setValue(32);
-      Animated.timing(rise, { toValue: 0, duration: 220, useNativeDriver: true }).start();
+      Animated.timing(rise, { toValue: 0, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start();
     }
   }, [visible, filters, rise]);
 
@@ -181,7 +182,7 @@ export function StationFilterDrawer({
               {activeCount > 0 && (
                 <View style={[styles.activeBadge, { backgroundColor: themeColors.primarySoft }]}>
                   <Text style={[styles.activeBadgeText, { color: themeColors.primaryDark }]}>
-                    {activeCount} đang chọn
+                    {t('stationList.activeCount', { count: activeCount, defaultValue: `${activeCount} đang chọn` })}
                   </Text>
                 </View>
               )}
@@ -209,7 +210,7 @@ export function StationFilterDrawer({
             {/* Section 1: Chuẩn Cổng Sạc */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-                Chuẩn cổng sạc khả dụng
+                {t('stationList.drawer.connectorTypes', 'Chuẩn cổng sạc khả dụng')}
               </Text>
               <View style={styles.socketsGrid}>
                 {CONNECTOR_OPTIONS.map((item) => {
@@ -274,7 +275,7 @@ export function StationFilterDrawer({
                         {item.label}
                       </Text>
                       <Text style={[styles.socketSub, { color: themeColors.textMuted }]}>
-                        {item.sub}
+                        {t(`stationList.drawer.connectorSubs.${item.type}`, item.sub)}
                       </Text>
                     </Pressable>
                   );
@@ -285,7 +286,7 @@ export function StationFilterDrawer({
             {/* Section 2: Công Suất Sạc */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-                Công suất sạc tối thiểu
+                {t('stationList.drawer.minPower', 'Công suất sạc tối thiểu')}
               </Text>
               <View style={styles.powerPills}>
                 {POWER_TIERS.map((tier, idx) => {
@@ -330,7 +331,7 @@ export function StationFilterDrawer({
                           active && styles.powerPillTextActive,
                         ]}
                       >
-                        {tier.label}
+                        {t(`stationList.drawer.${tier.key}`, tier.label)}
                       </Text>
                     </Pressable>
                   );
@@ -341,7 +342,7 @@ export function StationFilterDrawer({
             {/* Section 3: Trạng Thái Hoạt Động */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-                Trạng thái trạm
+                {t('stationList.drawer.stationStatus', 'Trạng thái trạm')}
               </Text>
               <View style={styles.togglesRow}>
                 <Pressable
@@ -382,7 +383,7 @@ export function StationFilterDrawer({
                       draftAvailableOnly && styles.toggleTextActive,
                     ]}
                   >
-                    Chỉ trạm còn cổng trống
+                    {t('stationList.drawer.availableOnly', 'Chỉ trạm còn cổng trống')}
                   </Text>
                 </Pressable>
 
@@ -424,7 +425,7 @@ export function StationFilterDrawer({
                       draftOpenOnly && styles.toggleTextActive,
                     ]}
                   >
-                    Đang mở cửa
+                    {t('stationList.drawer.openOnly', 'Đang mở cửa')}
                   </Text>
                 </Pressable>
               </View>
@@ -433,7 +434,7 @@ export function StationFilterDrawer({
             {/* Section 4: Bán Kính Tìm Kiếm */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-                Khoảng cách tối đa
+                {t('stationList.drawer.maxDistance', 'Khoảng cách tối đa')}
               </Text>
               <View style={styles.distanceRow}>
                 {DISTANCE_OPTIONS.map((item, idx) => {
@@ -473,7 +474,7 @@ export function StationFilterDrawer({
                           active && styles.distanceTextActive,
                         ]}
                       >
-                        {item.label}
+                        {item.value ? `${item.value} km` : t('stationList.drawer.all', 'Tất cả')}
                       </Text>
                     </Pressable>
                   );
@@ -502,7 +503,7 @@ export function StationFilterDrawer({
             >
               <Ionicons name="refresh" size={16} color={themeColors.textBody} />
               <Text style={[styles.resetText, { color: themeColors.textBody }]}>
-                Đặt lại
+                {t('stationList.drawer.reset', 'Đặt lại')}
               </Text>
             </Pressable>
 
@@ -517,7 +518,7 @@ export function StationFilterDrawer({
             >
               <Ionicons name="checkmark" size={18} color="#FFFFFF" />
               <Text style={styles.applyText}>
-                Áp dụng {totalResults !== undefined ? `(${totalResults} trạm)` : 'bộ lọc'}
+                {t('stationList.drawer.apply', 'Áp dụng')} {totalResults !== undefined ? `(${totalResults})` : ''}
               </Text>
             </Pressable>
           </View>

@@ -50,24 +50,36 @@ export function MapStationPeekSheet({
   if (!station) return null;
 
   const operatingState = station.operatingState || (station.isOpen ? 'OPEN' : 'CLOSED_BY_SCHEDULE');
+  const isPaused = operatingState === 'PAUSED_BY_OWNER';
+  const isMaintenance = operatingState === 'MAINTENANCE';
   const isNoSchedule = operatingState === 'SCHEDULE_NOT_CONFIGURED';
   const isClosedBySchedule = operatingState === 'CLOSED_BY_SCHEDULE';
+  const isUnavailable = operatingState === 'UNAVAILABLE_BY_PLATFORM';
   const full = station.availableConnectors === 0;
 
-  // Future booking allowed when CLOSED_BY_SCHEDULE as long as connectors exist.
-  const canBook = !isNoSchedule && !full;
+  // Booking allowed if open and not full, or if closed by schedule (for advance booking)
+  const canBook = operatingState === 'OPEN' ? !full : isClosedBySchedule && !full;
 
   let actionLabel = t('stationList.card.bookNow', 'Đặt chỗ ngay');
   let actionIcon: keyof typeof Ionicons.glyphMap = 'flash';
 
-  if (isNoSchedule) {
-    actionLabel = 'Chưa có lịch';
+  if (isPaused) {
+    actionLabel = t('stationList.card.paused', 'Tạm ngưng');
+    actionIcon = 'pause-circle-outline';
+  } else if (isMaintenance) {
+    actionLabel = t('stationList.card.maintenance', 'Bảo trì');
+    actionIcon = 'construct-outline';
+  } else if (isNoSchedule) {
+    actionLabel = t('stationList.card.noSchedule', 'Chưa có lịch');
     actionIcon = 'calendar-outline';
+  } else if (isUnavailable) {
+    actionLabel = t('stationList.card.unavailable', 'Tạm ẩn');
+    actionIcon = 'alert-circle-outline';
   } else if (full) {
     actionLabel = t('stationList.full', 'Hết chỗ');
     actionIcon = 'close-circle-outline';
   } else if (isClosedBySchedule) {
-    actionLabel = 'Đặt lịch';
+    actionLabel = t('stationList.card.scheduleBooking', 'Đặt lịch');
     actionIcon = 'calendar';
   }
 
@@ -79,7 +91,6 @@ export function MapStationPeekSheet({
           bottom: bottomOffset,
         },
       ]}
-      pointerEvents="box-none"
     >
       <Pressable
         style={({ pressed }) => [
@@ -154,6 +165,38 @@ export function MapStationPeekSheet({
                   </Text>
                 </View>
               )}
+              {isPaused && (
+                <View
+                  style={[
+                    styles.closedPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(239, 68, 68, 0.18)' : '#FEE2E2',
+                      borderColor: isDark ? '#B91C1C' : '#FCA5A5',
+                    },
+                  ]}
+                >
+                  <Ionicons name="pause-circle-outline" size={10} color={isDark ? '#F87171' : '#DC2626'} />
+                  <Text style={[styles.closedText, { color: isDark ? '#F87171' : '#DC2626' }]}>
+                    {t('stationList.card.pausedDesc', 'Tạm ngừng đón khách')}
+                  </Text>
+                </View>
+              )}
+              {isMaintenance && (
+                <View
+                  style={[
+                    styles.closedPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7',
+                      borderColor: isDark ? '#D97706' : '#FCD34D',
+                    },
+                  ]}
+                >
+                  <Ionicons name="construct-outline" size={10} color={isDark ? '#FBBF24' : '#D97706'} />
+                  <Text style={[styles.closedText, { color: isDark ? '#FBBF24' : '#D97706' }]}>
+                    {t('stationList.card.maintenanceDesc', 'Đang bảo trì')}
+                  </Text>
+                </View>
+              )}
               {isClosedBySchedule && (
                 <View
                   style={[
@@ -166,7 +209,7 @@ export function MapStationPeekSheet({
                 >
                   <Ionicons name="time-outline" size={10} color={themeColors.warning} />
                   <Text style={[styles.closedText, { color: themeColors.warning }]}>
-                    Đóng cửa theo lịch
+                    {t('stationList.card.closedByScheduleDesc', 'Đóng cửa theo lịch')}
                   </Text>
                 </View>
               )}
@@ -182,7 +225,23 @@ export function MapStationPeekSheet({
                 >
                   <Ionicons name="settings-outline" size={10} color={themeColors.textMuted} />
                   <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
-                    Chưa cấu hình giờ hoạt động
+                    {t('stationList.card.noScheduleDesc', 'Chưa cấu hình giờ hoạt động')}
+                  </Text>
+                </View>
+              )}
+              {isUnavailable && (
+                <View
+                  style={[
+                    styles.closedPill,
+                    {
+                      backgroundColor: isDark ? 'rgba(100, 116, 139, 0.15)' : '#F1F5F9',
+                      borderColor: isDark ? '#475569' : '#CBD5E1',
+                    },
+                  ]}
+                >
+                  <Ionicons name="alert-circle-outline" size={10} color={themeColors.textMuted} />
+                  <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
+                    {t('stationList.card.unavailableDesc', 'Không khả dụng')}
                   </Text>
                 </View>
               )}
@@ -195,6 +254,21 @@ export function MapStationPeekSheet({
             >
               {station.address}
             </Text>
+
+            {/* Operational Reason */}
+            {(isPaused || isMaintenance) && !!station.operationalStatusReason && (
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontWeight: '500',
+                  color: isPaused ? (isDark ? '#F87171' : '#DC2626') : (isDark ? '#FBBF24' : '#D97706'),
+                  marginTop: 2,
+                }}
+                numberOfLines={1}
+              >
+                {isPaused ? '⏸️ ' : '🛠️ '}{station.operationalStatusReason}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -221,7 +295,11 @@ export function MapStationPeekSheet({
             )}
             {station.distanceKm !== undefined && (
               <Text style={[styles.distanceLabel, { color: themeColors.textMuted }]}>
-                {station.distanceKm} km · {etaMinutes(station.distanceKm)}p
+                {t('stationList.card.distanceEta', {
+                  distance: station.distanceKm,
+                  minutes: etaMinutes(station.distanceKm),
+                  defaultValue: `${station.distanceKm} km · ${etaMinutes(station.distanceKm)}p`,
+                })}
               </Text>
             )}
           </View>
@@ -243,7 +321,7 @@ export function MapStationPeekSheet({
           >
             <Ionicons name="navigate-outline" size={16} color={themeColors.textBody} />
             <Text style={[styles.btnSecondaryText, { color: themeColors.textBody }]}>
-              {t('stationList.card.directions', 'Chỉ đường')}
+              {t('stationList.directions', 'Chỉ đường')}
             </Text>
           </Pressable>
 
@@ -290,6 +368,7 @@ const styles = StyleSheet.create({
     left: spacing.lg,
     right: spacing.lg,
     zIndex: 40,
+    pointerEvents: 'box-none',
   },
   card: {
     borderRadius: radius.xl,

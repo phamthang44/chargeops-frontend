@@ -121,6 +121,9 @@ function buildLeafletHtml(
     .ev-pill.busy { background: #F59E0B; }
     .ev-pill.full { background: #EF4444; }
     .ev-pill.closed { background: #64748B; }
+    .ev-pill.paused { background: #E11D48; }
+    .ev-pill.maintenance { background: #D97706; }
+    .ev-pill.no_schedule { background: #94A3B8; }
 
     .ev-arrow {
       width: 0;
@@ -134,6 +137,9 @@ function buildLeafletHtml(
     .ev-arrow.busy { border-top-color: #F59E0B; }
     .ev-arrow.full { border-top-color: #EF4444; }
     .ev-arrow.closed { border-top-color: #64748B; }
+    .ev-arrow.paused { border-top-color: #E11D48; }
+    .ev-arrow.maintenance { border-top-color: #D97706; }
+    .ev-arrow.no_schedule { border-top-color: #94A3B8; }
 
     .ev-marker-wrap.selected {
       transform: translate(-50%, -100%) scale(1.18);
@@ -213,7 +219,10 @@ function buildLeafletHtml(
     var routeLine = null;
 
     function getPinStatus(s) {
-      if (!s.isOpen) return 'closed';
+      if (s.operatingState === 'PAUSED_BY_OWNER') return 'paused';
+      if (s.operatingState === 'MAINTENANCE') return 'maintenance';
+      if (s.operatingState === 'SCHEDULE_NOT_CONFIGURED' || s.operatingState === 'UNAVAILABLE_BY_PLATFORM') return 'no_schedule';
+      if (!s.isOpen || s.operatingState === 'CLOSED_BY_SCHEDULE') return 'closed';
       if (s.availableConnectors <= 0) return 'full';
       if (s.availableConnectors <= 1) return 'busy';
       return 'available';
@@ -223,10 +232,19 @@ function buildLeafletHtml(
       var status = getPinStatus(s);
       var selClass = isSelected ? ' selected' : '';
       var boltSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
+      var iconSvg = boltSvg;
       var label = s.availableConnectors + '/' + s.totalConnectors;
 
+      if (status === 'paused') {
+        label = 'Tạm dừng';
+        iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="10" y1="15" x2="10" y2="9"></line><line x1="14" y1="15" x2="14" y2="9"></line></svg>';
+      } else if (status === 'maintenance') {
+        label = 'Bảo trì';
+        iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>';
+      }
+
       return '<div class="ev-marker-wrap' + selClass + '" id="pin-' + s.id + '">' +
-        '<div class="ev-pill ' + status + '">' + boltSvg + '<span>' + label + '</span></div>' +
+        '<div class="ev-pill ' + status + '">' + iconSvg + '<span>' + label + '</span></div>' +
         '<div class="ev-arrow ' + status + '"></div>' +
       '</div>';
     }

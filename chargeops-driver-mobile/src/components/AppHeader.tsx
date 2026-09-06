@@ -225,8 +225,12 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   darkOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(10, 20, 16, 0.65)',
+    pointerEvents: 'none',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFill,
     pointerEvents: 'none',
   },
   headerTopRow: {

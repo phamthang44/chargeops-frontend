@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton, BottomSheet, GlassButton, StatusBadge } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -34,6 +34,7 @@ export function BookingConfirmationScreen() {
   const { params } = useRoute<Route>();
   const { t, i18n } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const insets = useSafeAreaInsets();
 
   const [station, setStation] = useState<Station | null>(null);
   const [connector, setConnector] = useState<Connector | null>(null);
@@ -115,14 +116,14 @@ export function BookingConfirmationScreen() {
 
   if (loading || !station || !connector || !quote) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
         <ActivityIndicator color={themeColors.primary} style={styles.loader} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
         <GlassButton
@@ -296,7 +297,16 @@ export function BookingConfirmationScreen() {
       </ScrollView>
 
       {/* Sticky footer */}
-      <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: themeColors.surface,
+            borderTopColor: themeColors.border,
+            paddingBottom: Math.max(insets.bottom, spacing.md),
+          },
+        ]}
+      >
         <View style={styles.footerRow}>
           <View>
             <Text style={[styles.footerLabel, { color: themeColors.textMuted }]}>{t('bookingConfirmation.totalPayment')}</Text>

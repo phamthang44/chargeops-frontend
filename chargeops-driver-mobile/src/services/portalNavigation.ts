@@ -1,11 +1,14 @@
 import { Linking, Platform } from 'react-native';
 
+import { resolveDevUrl } from '@/utils/networkHost';
+
 const DEFAULT_OWNER_PORTAL_URL = 'http://localhost:5173';
 
 /** Build an explicit owner route so the operator portal never falls back to its highest-role home. */
 export function getOwnerPortalUrl(): string {
-  const configuredUrl =
-    process.env.EXPO_PUBLIC_OWNER_PORTAL_URL?.trim() || DEFAULT_OWNER_PORTAL_URL;
+  const configuredUrl = resolveDevUrl(
+    process.env.EXPO_PUBLIC_OWNER_PORTAL_URL?.trim() || DEFAULT_OWNER_PORTAL_URL
+  );
   const url = new URL(`${configuredUrl.replace(/\/+$/, '')}/owner`);
 
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {

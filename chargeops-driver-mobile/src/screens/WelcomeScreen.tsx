@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceAlt,
   },
   imagePlaceholder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#2D3748',
     alignItems: 'center',
     justifyContent: 'center',

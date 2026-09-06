@@ -154,33 +154,34 @@ export function ProfileScreen() {
         <Card style={[styles.userCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.userRow}>
             {/* Initials or Real Photo avatar */}
-            <Pressable
-              style={styles.avatarWrapper}
-              onPress={() => {
-                if (userAvatar) {
-                  setAvatarViewerVisible(true);
-                } else {
-                  setAvatarModalVisible(true);
-                }
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={userAvatar ? 'Xem ảnh đại diện' : t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
-            >
-              <View style={[styles.avatar, { backgroundColor: themeColors.primarySoft }]}>
-                {userAvatar ? (
-                  <Image
-                    source={{
-                      uri: getAvatarUrl(userAvatar, 160),
-                    }}
-                    style={styles.avatarImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>
-                    {initialsOf(userName)}
-                  </Text>
-                )}
-              </View>
+            <View style={styles.avatarWrapper}>
+              <Pressable
+                onPress={() => {
+                  if (userAvatar) {
+                    setAvatarViewerVisible(true);
+                  } else {
+                    setAvatarModalVisible(true);
+                  }
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={userAvatar ? 'Xem ảnh đại diện' : t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
+              >
+                <View style={[styles.avatar, { backgroundColor: themeColors.primarySoft }]}>
+                  {userAvatar ? (
+                    <Image
+                      source={{
+                        uri: getAvatarUrl(userAvatar, 160),
+                      }}
+                      style={styles.avatarImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Text style={[styles.avatarText, { color: themeColors.primaryDark }]}>
+                      {initialsOf(userName)}
+                    </Text>
+                  )}
+                </View>
+              </Pressable>
               <Pressable
                 style={[
                   styles.cameraBadge,
@@ -197,7 +198,7 @@ export function ProfileScreen() {
                 <Ionicons name="camera" size={11} color="#FFFFFF" />
               </Pressable>
               <View style={[styles.onlineBadge, { borderColor: themeColors.surface }]} />
-            </Pressable>
+            </View>
 
             {/* Name, Email & Member Tier */}
             <View style={styles.userInfo}>

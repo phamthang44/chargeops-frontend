@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { legalDocument, type LegalDocType } from '@/content/legal';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -171,11 +171,18 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+      },
+    }),
   },
   tabText: {
     fontSize: fontSizes.caption,

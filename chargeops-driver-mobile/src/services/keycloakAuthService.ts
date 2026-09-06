@@ -13,13 +13,14 @@ import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
 import type { AuthSession as AppAuthSession, GrantedRole, User } from '@/types';
+import { resolveDevUrl } from '@/utils/networkHost';
 
 const DRIVER_ROLE = 'DRIVER';
 const CHARGEOPS_ROLES = new Set<GrantedRole>(['DRIVER', 'OWNER', 'ADMIN']);
 const WEB_AUTH_TRANSACTION_KEY = 'chargeops.keycloak.webAuthTransaction';
 
 export const keycloakConfig = {
-  issuerUrl: process.env.EXPO_PUBLIC_KEYCLOAK_ISSUER_URL ?? 'http://localhost:8080/realms/chargeops',
+  issuerUrl: resolveDevUrl(process.env.EXPO_PUBLIC_KEYCLOAK_ISSUER_URL ?? 'http://localhost:8080/realms/chargeops'),
   clientId: process.env.EXPO_PUBLIC_KEYCLOAK_DRIVER_CLIENT_ID ?? 'chargeops-driver-mobile',
   redirectScheme: process.env.EXPO_PUBLIC_KEYCLOAK_REDIRECT_SCHEME ?? 'chargeops',
   redirectPath: 'auth/callback',

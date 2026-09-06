@@ -440,7 +440,7 @@ export function TimeRangePickerScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
       {/* Upgraded Navigation Header with Flow Indicator */}
       <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
         <GlassButton

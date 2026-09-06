@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   ringWrap: { alignSelf: 'center', width: RING_SIZE, height: RING_SIZE, alignItems: 'center', justifyContent: 'center' },
-  ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  ringCenter: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
   ringStatusRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   ringStatus: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, letterSpacing: 1 },
   ringPercent: { fontSize: 56, fontWeight: fontWeights.bold },

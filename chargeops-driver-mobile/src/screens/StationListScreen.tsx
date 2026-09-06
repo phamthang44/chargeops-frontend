@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   darkOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(10, 20, 16, 0.65)',
   },
   headerTopRow: {

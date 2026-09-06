@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 
+import { resolveDevUrl } from '@/utils/networkHost';
+
 import { chargePointsMock, connectorsMock, reviewsMock, stationsMock } from '@/mock/stations.mock';
 import type { ChargePoint, Connector, ConnectorType, Review, Station } from '@/types';
 import { effectiveConnectorStatus } from '@/utils/connectors';
@@ -49,9 +51,10 @@ export {
 
 const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
 
-export const apiBaseUrl =
+export const apiBaseUrl = resolveDevUrl(
   configuredBaseUrl ??
-  (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081');
+  (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081')
+);
 
 let activeAccessTokenGetter: (() => string | null) | null = null;
 

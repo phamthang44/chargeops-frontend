@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   permissionBtn: { alignSelf: 'stretch', marginTop: spacing.sm },
 
   sheetOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },

@@ -148,7 +148,7 @@ export const colors: Colors = balancedLightColors;
 
 export function getThemeColors(
   mode: 'light' | 'dark' | 'system',
-  systemScheme?: 'light' | 'dark' | null,
+  systemScheme?: 'light' | 'dark' | 'unspecified' | null,
   preset: PalettePreset = 'balanced',
 ): Colors {
   const isDark = mode === 'dark' || (mode === 'system' && systemScheme === 'dark');

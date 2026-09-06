@@ -52,89 +52,122 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
         {
           backgroundColor: themeColors.surface,
           borderTopColor: themeColors.border,
-          paddingBottom: Math.max(insets.bottom, 14),
+          paddingBottom: Math.max(insets.bottom, spacing.md),
         },
       ]}
     >
-      {!hasSel ? (
-        <View style={styles.hintContainer}>
-          <View style={[styles.hintIcon, { backgroundColor: themeColors.surfaceAlt }]}>
-            <Ionicons name="time-outline" size={20} color={themeColors.textMuted} />
-          </View>
-          <Text style={[styles.hintText, { color: themeColors.textMuted }]}>
-            {t('timeRangePicker.selectHint')}
+      <View style={styles.contentRow}>
+        {/* Left info */}
+        <View style={styles.infoCol}>
+          {!hasSel ? (
+            <>
+              <View style={styles.labelRow}>
+                <Text style={[styles.timeRangeLabel, { color: themeColors.textMuted }]}>
+                  {t('timeRangePicker.sectionSlots', 'Khung giờ sạc')}
+                </Text>
+              </View>
+              <Text style={[styles.timeValuePrompt, { color: themeColors.textStrong }]} numberOfLines={1}>
+                {t('timeRangePicker.chooseSlotPrompt', 'Chọn giờ bắt đầu sạc')}
+              </Text>
+              <Text style={[styles.durationSub, { color: themeColors.textMuted }]} numberOfLines={1}>
+                {t('timeRangePicker.selectHint', 'Chạm vào ô giờ khả dụng phía trên')}
+              </Text>
+            </>
+          ) : !meetsMinDuration ? (
+            <>
+              <View style={styles.labelRow}>
+                <Text style={[styles.timeRangeLabel, { color: themeColors.warning }]}>
+                  {t('timeRangePicker.insufficientDuration', 'Chưa đủ thời gian')}
+                </Text>
+                {onReset && (
+                  <Pressable onPress={onReset} hitSlop={8}>
+                    <Text style={[styles.resetText, { color: themeColors.primary }]}>
+                      {t('timeRangePicker.resetSelection')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+              <View style={styles.timeValueRow}>
+                <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>
+                  {startMin !== null ? formatMinutes(startMin) : '--:--'} – {endMin !== null ? formatMinutes(endMin) : '--:--'}
+                </Text>
+              </View>
+              <Text style={[styles.durationSubWarning, { color: themeColors.warning }]} numberOfLines={1}>
+                {t('timeRangePicker.minDurationHint', {
+                  minutes: minDurationMin,
+                  count: Math.round(minDurationMin / durationStepMin),
+                })}
+              </Text>
+            </>
+          ) : (
+            <>
+              <View style={styles.labelRow}>
+                <Text style={[styles.timeRangeLabel, { color: themeColors.textMuted }]}>
+                  {t('timeRangePicker.selectedWindow')}
+                </Text>
+                {onReset && (
+                  <Pressable onPress={onReset} hitSlop={8}>
+                    <Text style={[styles.resetText, { color: themeColors.primary }]}>
+                      {t('timeRangePicker.resetSelection')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+
+              <View style={styles.timeValueRow}>
+                <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>
+                  {startMin !== null ? formatMinutes(startMin) : '--:--'} – {endMin !== null ? formatMinutes(endMin) : '--:--'}
+                </Text>
+
+                {isCrossDay && (
+                  <View style={[styles.crossDayBadge, { backgroundColor: `${themeColors.primary}20` }]}>
+                    <Text style={[styles.crossDayText, { color: themeColors.primaryDark }]}>
+                      {t('timeRangePicker.nextDayTag')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.subInfoRow}>
+                <Text style={[styles.durationSub, { color: themeColors.textMuted }]}>
+                  {durationLabel(durationMin)}
+                </Text>
+                <Text style={[styles.dotSep, { color: themeColors.textMuted }]}>·</Text>
+                <Text style={[styles.totalAmount, { color: themeColors.primaryDark }]}>
+                  {formatVnd(totalPrice)}
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Right CTA Button - Always visible and aligned at bottom */}
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canContinue}
+          onPress={onContinue}
+          style={({ pressed }) => [
+            styles.ctaButton,
+            {
+              backgroundColor: canContinue ? themeColors.primary : themeColors.surfaceAlt,
+              borderColor: canContinue ? 'transparent' : themeColors.border,
+              borderWidth: canContinue ? 0 : 1,
+            },
+            pressed && canContinue && { opacity: 0.88, transform: [{ scale: 0.985 }] },
+            !canContinue && { opacity: 0.65 },
+            canContinue && styles.ctaButtonShadow,
+          ]}
+        >
+          <Text style={[styles.ctaButtonText, { color: canContinue ? '#FFFFFF' : themeColors.textMuted }]}>
+            {t('timeRangePicker.cta')}
           </Text>
-        </View>
-      ) : !meetsMinDuration ? (
-        <View style={[styles.minDurationHint, { backgroundColor: `${themeColors.warning}15`, borderColor: `${themeColors.warning}40` }]}>
-          <Ionicons name="alert-circle-outline" size={18} color={themeColors.warning} />
-          <Text style={[styles.minDurationText, { color: themeColors.warning }]}>
-            {t('timeRangePicker.minDurationHint', {
-              minutes: minDurationMin,
-              count: Math.round(minDurationMin / durationStepMin),
-            })}
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.contentRow}>
-          {/* Left info */}
-          <View style={styles.infoCol}>
-            <View style={styles.labelRow}>
-              <Text style={[styles.timeRangeLabel, { color: themeColors.textMuted }]}>
-                {t('timeRangePicker.selectedWindow')}
-              </Text>
-              {onReset && (
-                <Pressable onPress={onReset} hitSlop={8}>
-                  <Text style={[styles.resetText, { color: themeColors.primary }]}>
-                    {t('timeRangePicker.resetSelection')}
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-
-            <View style={styles.timeValueRow}>
-              <Text style={[styles.timeValue, { color: themeColors.textStrong }]}>
-                {startMin !== null ? formatMinutes(startMin) : '--:--'} – {endMin !== null ? formatMinutes(endMin) : '--:--'}
-              </Text>
-
-              {isCrossDay && (
-                <View style={[styles.crossDayBadge, { backgroundColor: `${themeColors.primary}20` }]}>
-                  <Text style={[styles.crossDayText, { color: themeColors.primaryDark }]}>
-                    {t('timeRangePicker.nextDayTag')}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.subInfoRow}>
-              <Text style={[styles.durationSub, { color: themeColors.textMuted }]}>
-                {durationLabel(durationMin)}
-              </Text>
-              <Text style={[styles.dotSep, { color: themeColors.textMuted }]}>·</Text>
-              <Text style={[styles.totalAmount, { color: themeColors.primaryDark }]}>
-                {formatVnd(totalPrice)}
-              </Text>
-            </View>
-          </View>
-
-          {/* Right CTA Button */}
-          <Pressable
-            disabled={!canContinue}
-            onPress={onContinue}
-            style={({ pressed }) => [
-              styles.ctaButton,
-              {
-                backgroundColor: canContinue ? themeColors.primary : themeColors.border,
-                opacity: pressed ? 0.85 : canContinue ? 1 : 0.6,
-              },
-              canContinue && styles.ctaButtonShadow,
-            ]}
-          >
-            <Text style={styles.ctaButtonText}>{t('timeRangePicker.cta')}</Text>
-            <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-          </Pressable>
-        </View>
-      )}
+          <Ionicons
+            name="arrow-forward"
+            size={18}
+            color={canContinue ? '#FFFFFF' : themeColors.textMuted}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 });
@@ -224,6 +257,15 @@ const styles = StyleSheet.create({
   crossDayText: {
     fontSize: 11,
     fontWeight: fontWeights.bold,
+  },
+  timeValuePrompt: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  durationSubWarning: {
+    fontSize: 12,
+    fontWeight: fontWeights.semibold,
   },
   subInfoRow: {
     flexDirection: 'row',

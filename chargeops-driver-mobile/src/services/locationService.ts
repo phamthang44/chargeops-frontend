@@ -1,4 +1,4 @@
-import { apiBaseUrl, resolveAccessToken } from './stationService';
+import { apiBaseUrl, isMockMode, resolveAccessToken } from './stationService';
 
 export interface AdministrativeProvince {
   code: string;
@@ -26,9 +26,14 @@ let inflightPromise: Promise<AdministrativeProvince[]> | null = null;
 export async function getAdministrativeProvinces(options?: {
   accessToken?: string | null;
 }): Promise<AdministrativeProvince[]> {
+  if (isMockMode()) {
+    return FALLBACK_PROVINCES;
+  }
+
   if (cachedProvinces && cachedProvinces.length > 0) {
     return cachedProvinces;
   }
+
 
   if (inflightPromise) {
     return inflightPromise;

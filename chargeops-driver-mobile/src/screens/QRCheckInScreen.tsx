@@ -81,6 +81,15 @@ export function QRCheckInScreen() {
     navigation.replace('ChargingSession', { bookingId: result.booking.id });
   }
 
+  async function forceDemoCheckIn() {
+    if (!result || result.ok || !result.booking) return;
+    setCommitting(true);
+    await confirmCheckIn(result.booking.id);
+    setCommitting(false);
+    navigation.replace('ChargingSession', { bookingId: result.booking.id });
+  }
+
+
   function errorBody(r: Extract<CheckInResolution, { ok: false }>): string {
     switch (r.code) {
       case 'TOO_EARLY':
@@ -228,9 +237,22 @@ export function QRCheckInScreen() {
                 {t('qrCheckIn.scannedCode', { code: result.connector.id })}
               </Text>
             )}
-            <AppButton label={t('qrCheckIn.rescan')} onPress={retry} />
+            {result.code === 'TOO_EARLY' && result.booking && (
+              <AppButton
+                label="⚡ Check-in ngay (Mô phỏng Demo)"
+                loading={committing}
+                onPress={forceDemoCheckIn}
+                style={{ alignSelf: 'stretch' }}
+              />
+            )}
+            <AppButton
+              label={t('qrCheckIn.rescan')}
+              variant={result.code === 'TOO_EARLY' ? 'secondary' : 'primary'}
+              onPress={retry}
+            />
           </View>
         </View>
+
       )}
     </SafeAreaView>
   );

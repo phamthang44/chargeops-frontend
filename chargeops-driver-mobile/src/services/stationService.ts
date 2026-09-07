@@ -2,9 +2,11 @@ import { Platform } from 'react-native';
 
 import { resolveDevUrl } from '@/utils/networkHost';
 
+import { occupancyMock } from '@/mock/occupancy.mock';
 import { chargePointsMock, connectorsMock, reviewsMock, stationsMock } from '@/mock/stations.mock';
 import type { ChargePoint, Connector, ConnectorType, Review, Station } from '@/types';
 import { effectiveConnectorStatus } from '@/utils/connectors';
+
 import {
   adaptChargePointsFromDetail,
   adaptConnectorsFromDetail,
@@ -56,7 +58,11 @@ export const apiBaseUrl = resolveDevUrl(
   (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081')
 );
 
+/** Checks whether mock data mode is enabled via environment variable. */
+export const isMockMode = (): boolean => process.env.EXPO_PUBLIC_USE_MOCKS === 'true';
+
 let activeAccessTokenGetter: (() => string | null) | null = null;
+
 
 /**
  * Configure global token provider so all station service calls automatically
@@ -212,41 +218,44 @@ export async function getNearbyStations(
   const requestedPage = Math.max(1, pagination.page ?? 1);
   const requestedSize = Math.min(100, Math.max(1, pagination.size ?? STATION_PAGE_SIZE));
 
-  // Try real API first if endpoint is available
-  try {
-    const params = buildStationDiscoveryQueryParams(filter, {
-      page: requestedPage,
-      size: requestedSize,
-    });
+  // Try real API first if not in mock mode and endpoint is available
+  if (!isMockMode()) {
+    try {
+      const params = buildStationDiscoveryQueryParams(filter, {
+        page: requestedPage,
+        size: requestedSize,
+      });
 
-    const token = resolveAccessToken(options?.accessToken);
-    const headers: Record<string, string> = { Accept: 'application/json' };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${apiBaseUrl}/api/v1/stations?${params.toString()}`, {
-      headers,
-    });
-
-    if (response.ok) {
-      const payload = await response.json();
-      const rawItems: BackendStationDiscoveryItem[] | undefined =
-        payload?.data?.content ?? payload?.data?.items ?? payload?.data ?? payload?.content;
-
-      if (Array.isArray(rawItems)) {
-        const items = adaptStationList(rawItems);
-        const meta = payload?.meta ?? payload?.data?.meta ?? {};
-        const page = Math.max(1, Number(meta.page ?? requestedPage) || requestedPage);
-        const size = Math.max(1, Number(meta.size ?? requestedSize) || requestedSize);
-        const total = Math.max(0, Number(meta.totalElements ?? payload?.total ?? items.length) || 0);
-        const totalPages = Math.max(0, Number(meta.totalPages ?? Math.ceil(total / size)) || 0);
-        return { items, page, size, total, totalPages, hasNextPage: page < totalPages };
+      const token = resolveAccessToken(options?.accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
+
+      const response = await fetch(`${apiBaseUrl}/api/v1/stations?${params.toString()}`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const rawItems: BackendStationDiscoveryItem[] | undefined =
+          payload?.data?.content ?? payload?.data?.items ?? payload?.data ?? payload?.content;
+
+        if (Array.isArray(rawItems)) {
+          const items = adaptStationList(rawItems);
+          const meta = payload?.meta ?? payload?.data?.meta ?? {};
+          const page = Math.max(1, Number(meta.page ?? requestedPage) || requestedPage);
+          const size = Math.max(1, Number(meta.size ?? requestedSize) || requestedSize);
+          const total = Math.max(0, Number(meta.totalElements ?? payload?.total ?? items.length) || 0);
+          const totalPages = Math.max(0, Number(meta.totalPages ?? Math.ceil(total / size)) || 0);
+          return { items, page, size, total, totalPages, hasNextPage: page < totalPages };
+        }
+      }
+    } catch {
+      // Graceful fallback to mock data on network error
     }
-  } catch {
-    // Graceful fallback to mock data on network error
   }
+
 
   // Fallback to local mock data
   const sorted = sortStations(
@@ -282,29 +291,31 @@ export async function getStationDetail(
   id: string,
   options?: { accessToken?: string | null },
 ): Promise<StationDetailBundle | null> {
-  try {
-    const token = resolveAccessToken(options?.accessToken);
-    const headers: Record<string, string> = { Accept: 'application/json' };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${apiBaseUrl}/api/v1/stations/${id}`, {
-      headers,
-    });
-
-    if (response.ok) {
-      const payload = await response.json();
-      const rawDetail: BackendStationDiscoveryDetail = payload?.data ?? payload;
-      if (rawDetail && rawDetail.id) {
-        const station = adaptStationDiscoveryDetail(rawDetail);
-        const chargePoints = adaptChargePointsFromDetail(rawDetail);
-        const connectors = adaptConnectorsFromDetail(rawDetail, station.minRatePerKwh);
-        return { station, chargePoints, connectors };
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(options?.accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
+
+      const response = await fetch(`${apiBaseUrl}/api/v1/stations/${id}`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const rawDetail: BackendStationDiscoveryDetail = payload?.data ?? payload;
+        if (rawDetail && rawDetail.id) {
+          const station = adaptStationDiscoveryDetail(rawDetail);
+          const chargePoints = adaptChargePointsFromDetail(rawDetail);
+          const connectors = adaptConnectorsFromDetail(rawDetail, station.minRatePerKwh);
+          return { station, chargePoints, connectors };
+        }
+      }
+    } catch {
+      // Fallback to mock
     }
-  } catch {
-    // Fallback to mock
   }
 
   const station = stationsMock.find((s) => s.id === id) ?? null;
@@ -341,33 +352,71 @@ export async function getStationAvailability(
   date: string, // YYYY-MM-DD
   options?: { accessToken?: string | null },
 ): Promise<BackendStationAvailabilityResponse | null> {
-  try {
-    const token = resolveAccessToken(options?.accessToken);
-    const headers: Record<string, string> = { Accept: 'application/json' };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const url = `${apiBaseUrl}/api/v1/stations/${stationId}/availability?connectorId=${encodeURIComponent(connectorId)}&date=${encodeURIComponent(date)}`;
-    const response = await fetch(url, { headers });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    if (response.ok) {
-      const payload = await response.json();
-      const rawAvailability: BackendStationAvailabilityResponse | undefined =
-        payload?.data ?? payload;
-      if (rawAvailability && rawAvailability.stationId) {
-        return rawAvailability;
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(options?.accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
+
+      const url = `${apiBaseUrl}/api/v1/stations/${stationId}/availability?connectorId=${encodeURIComponent(connectorId)}&date=${encodeURIComponent(date)}`;
+      const response = await fetch(url, { headers });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const rawAvailability: BackendStationAvailabilityResponse | undefined =
+          payload?.data ?? payload;
+        if (rawAvailability && rawAvailability.stationId) {
+          return rawAvailability;
+        }
+      }
+    } catch {
+      // Fallback to mock on network error
     }
-  } catch {
-    // Fallback to mock on network error
   }
 
-  // Fallback mock availability
+  const station = stationsMock.find((s) => s.id === stationId);
+  const is24h = station?.open24Hours || (station?.opensAtMin === 0 && station?.closesAtMin === 1440);
+  const opensHour = station ? Math.floor(station.opensAtMin / 60) : 6;
+  const opensMin = station ? station.opensAtMin % 60 : 0;
+  const closesHour = station ? Math.floor(station.closesAtMin / 60) : 22;
+  const closesMin = station ? station.closesAtMin % 60 : 0;
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  const operatingWindows = is24h
+    ? [
+        {
+          startAt: `${date}T00:00:00+07:00`,
+          endAt: `${date}T23:59:59+07:00`,
+        },
+      ]
+    : [
+        {
+          startAt: `${date}T${pad(opensHour)}:${pad(opensMin)}:00+07:00`,
+          endAt: `${date}T${pad(closesHour)}:${pad(closesMin)}:00+07:00`,
+        },
+      ];
+
+  const occupancyRanges = occupancyMock
+    .filter((o) => o.connectorId === connectorId && o.startAt.startsWith(date))
+    .map((o) => ({ startAt: o.startAt, endAt: o.endAt }));
+
+  const busyRanges =
+    occupancyRanges.length > 0
+      ? occupancyRanges
+      : [
+          {
+            startAt: `${date}T09:00:00+07:00`,
+            endAt: `${date}T10:30:00+07:00`,
+          },
+          {
+            startAt: `${date}T14:00:00+07:00`,
+            endAt: `${date}T15:00:00+07:00`,
+          },
+        ];
+
+  // Realistic mock availability
   return simulateNetwork({
     stationId,
     connectorId,
@@ -377,22 +426,8 @@ export async function getStationAvailability(
     minDurationMinutes: 30,
     durationStepMinutes: 30,
     maxDurationMinutes: 180,
-    operatingWindows: [
-      {
-        startAt: `${date}T06:00:00+07:00`,
-        endAt: `${date}T22:00:00+07:00`,
-      },
-    ],
-    busyRanges: [
-      {
-        startAt: `${date}T09:00:00+07:00`,
-        endAt: `${date}T10:30:00+07:00`,
-      },
-      {
-        startAt: `${date}T14:00:00+07:00`,
-        endAt: `${date}T15:00:00+07:00`,
-      },
-    ],
+    operatingWindows,
+    busyRanges,
     priceRanges: [
       {
         startAt: `${date}T00:00:00+07:00`,

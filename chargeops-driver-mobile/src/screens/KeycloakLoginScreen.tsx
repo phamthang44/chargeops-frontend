@@ -5,11 +5,14 @@ import { ResponseType, useAuthRequest, useAutoDiscovery } from 'expo-auth-sessio
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components';
 import { useAuth } from '@/context/AuthContext';
+import { makeMockSession, usersMock } from '@/mock/users.mock';
+
 import {
   consumeWebAuthTransaction,
   createSessionFromKeycloakToken,
@@ -190,6 +193,15 @@ export function KeycloakLoginScreen() {
           disabled={submitting}
           style={styles.cta}
         />
+        <Pressable
+          onPress={() => signIn(makeMockSession(usersMock[0]))}
+          style={styles.mockLoginBtn}
+          hitSlop={8}
+        >
+          <Text style={styles.mockLoginText}>
+            ⚡ Vào ngay với Tài xế mẫu (Mock Driver)
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -207,6 +219,17 @@ const styles = StyleSheet.create({
   formError: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.error },
   securityBadge: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, backgroundColor: colors.primarySoft, borderRadius: radius.md, padding: spacing.md },
   securityText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.caption },
-  footer: { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm },
+  footer: { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm, gap: spacing.md },
   cta: { height: 52, borderRadius: radius.lg },
+  mockLoginBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+  },
+  mockLoginText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+    color: colors.primary,
+  },
 });
+

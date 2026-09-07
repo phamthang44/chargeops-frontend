@@ -8,7 +8,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, BrandMark, FeatureArt, LegalDocumentSheet, SettingsModal, type FeatureName } from '@/components';
 import type { LegalDocType } from '@/content/legal';
+import { useAuth } from '@/context/AuthContext';
+import { makeMockSession, usersMock } from '@/mock/users.mock';
 import type { RootStackParamList } from '@/navigation/types';
+import { isMockMode } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
@@ -22,8 +25,16 @@ const FEATURES: { art: FeatureName; key: 'fast' | 'find' | 'pay' }[] = [
 export function WelcomeScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
+  const { signIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
+  const mockActive = isMockMode();
+
+  function handleQuickMockLogin() {
+    const mockDriver = usersMock[0];
+    signIn(makeMockSession(mockDriver));
+  }
+
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -32,8 +43,16 @@ export function WelcomeScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* Settings (language, appearance, …) — available before login */}
+        {/* Settings (language, appearance, …) & Mock status */}
         <View style={styles.topBar}>
+          {mockActive ? (
+            <View style={styles.mockBadge}>
+              <Ionicons name="flash" size={14} color="#10B981" />
+              <Text style={styles.mockBadgeText}>MOCK MODE</Text>
+            </View>
+          ) : (
+            <View />
+          )}
           <Pressable
             style={styles.settingsBtn}
             hitSlop={8}
@@ -78,8 +97,16 @@ export function WelcomeScreen() {
 
       {/* Fixed footer */}
       <View style={styles.footer}>
+        {mockActive && (
+          <AppButton
+            label="⚡ Trải nghiệm nhanh (Tài xế mẫu)"
+            onPress={handleQuickMockLogin}
+            style={styles.mockCtaButton}
+          />
+        )}
         <AppButton
           label={t('welcome.cta')}
+          variant={mockActive ? 'secondary' : 'primary'}
           onPress={() => navigation.navigate('Login')}
           style={styles.ctaButton}
         />
@@ -120,9 +147,29 @@ const styles = StyleSheet.create({
   // Top bar (settings entry)
   topBar: {
     alignSelf: 'stretch',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: spacing.lg,
   },
+  mockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  mockBadgeText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    color: '#10B981',
+    letterSpacing: 0.5,
+  },
+
   settingsBtn: {
     width: 40,
     height: 40,
@@ -225,6 +272,11 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: radius.lg,
   },
+  mockCtaButton: {
+    height: 52,
+    borderRadius: radius.lg,
+  },
+
   footerNote: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,

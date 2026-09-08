@@ -163,8 +163,12 @@ export function StationDetailScreen() {
   const isClosedBySchedule = opState === 'CLOSED_BY_SCHEDULE';
   const isUnavailable = opState === 'UNAVAILABLE_BY_PLATFORM';
 
+  const hasValidPolicy = Boolean(
+    station?.cancellationPolicy && typeof station.cancellationPolicy.gracePeriodMinutes === 'number',
+  );
+
   const isOperatingAllowed = opState === 'OPEN' || isClosedBySchedule;
-  const canBook = isOperatingAllowed && (station?.totalConnectors ?? 0) > 0 && !!selectedConnectorId;
+  const canBook = isOperatingAllowed && (station?.totalConnectors ?? 0) > 0 && !!selectedConnectorId && hasValidPolicy;
 
   const bookButtonLabel = isPaused
     ? t('stationDetail.action.paused')
@@ -194,7 +198,9 @@ export function StationDetailScreen() {
               ? t('stationDetail.fullHint')
               : !selectedConnectorId
                 ? t('stationDetail.selectConnectorHint')
-                : null;
+                : !hasValidPolicy
+                  ? t('stationDetail.policy.unavailable')
+                  : null;
 
   const areaLabel = station
     ? [station.wardName, station.provinceName].filter(Boolean).join(', ')

@@ -55,6 +55,11 @@
         "title": "Policy Assistant",
         "subtitle": "Look up cancellation, check-in, and payment regulations."
       },
+      "legal": {
+        "label": "Policies & Legal",
+        "title": "Policies & Regulations",
+        "subtitle": "Legal documents, License agreement, and operational regulations."
+      },
       "notifications": {
         "label": "Notifications",
         "title": "Notification Center",

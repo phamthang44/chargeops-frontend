@@ -18,6 +18,7 @@ interface TimePickerStickyBarProps {
   isCrossDay: boolean;
   totalPrice: number;
   canContinue: boolean;
+  hasValidPolicy?: boolean;
   onContinue: () => void;
   onReset?: () => void;
   themeColors: any;
@@ -37,6 +38,7 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
   isCrossDay,
   totalPrice,
   canContinue,
+  hasValidPolicy = true,
   onContinue,
   onReset,
   themeColors,
@@ -97,6 +99,24 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
                   minutes: minDurationMin,
                   count: Math.round(minDurationMin / durationStepMin),
                 })}
+              </Text>
+            </>
+          ) : !hasValidPolicy ? (
+            <>
+              <View style={styles.labelRow}>
+                <Text style={[styles.timeRangeLabel, { color: themeColors.warning }]}>
+                  {t('timeRangePicker.sectionPolicy', 'Chính sách hủy')}
+                </Text>
+                {onReset && (
+                  <Pressable onPress={onReset} hitSlop={8}>
+                    <Text style={[styles.resetText, { color: themeColors.primary }]}>
+                      {t('timeRangePicker.resetSelection')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+              <Text style={[styles.durationSubWarning, { color: themeColors.warning }]} numberOfLines={2}>
+                {t('timeRangePicker.policyPendingNotice')}
               </Text>
             </>
           ) : (

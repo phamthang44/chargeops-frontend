@@ -316,6 +316,61 @@ export interface MediaService {
   getImageKitAuth(): Promise<ImageKitAuthResponse>;
 }
 
+export type LegalDocType = 'TERMS_OF_SERVICE' | 'PRIVACY_POLICY' | 'LICENSE_AGREEMENT' | 'OPERATIONAL_REGULATION';
+export type TargetAudience = 'ALL' | 'DRIVER' | 'OWNER';
+
+export interface LegalDocumentSummary {
+  id: string;
+  slug: string;
+  docType: LegalDocType;
+  targetAudience: TargetAudience;
+  title: string;
+  eyebrow?: string;
+  summary?: string;
+  version: string;
+  locale: string;
+  active: boolean;
+  effectiveFrom: string;
+  updatedAt: string;
+}
+
+export interface LegalDocumentDetail extends LegalDocumentSummary {
+  content: string;
+  createdAt: string;
+}
+
+export interface LegalDocumentSearchParams {
+  search?: string;
+  docType?: LegalDocType;
+  audience?: TargetAudience;
+  active?: boolean;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface LegalDocumentsService {
+  list(params?: LegalDocumentSearchParams): Promise<Page<LegalDocumentSummary>>;
+  get(slug: string): Promise<LegalDocumentDetail>;
+  adminList(params?: LegalDocumentSearchParams): Promise<Page<LegalDocumentSummary>>;
+  adminGet(id: string): Promise<LegalDocumentDetail>;
+  adminCreate(doc: {
+    slug: string;
+    docType: LegalDocType;
+    targetAudience?: TargetAudience;
+    title: string;
+    eyebrow?: string;
+    summary?: string;
+    content: string;
+    version: string;
+    locale?: string;
+    active?: boolean;
+    effectiveFrom?: string;
+  }): Promise<LegalDocumentDetail>;
+  adminUpdate(id: string, doc: Partial<LegalDocumentDetail>): Promise<LegalDocumentDetail>;
+  adminRemove(id: string): Promise<void>;
+}
+
 export interface Services {
   profile: ProfileService;
   location: LocationService;
@@ -331,6 +386,7 @@ export interface Services {
   staff: StaffService;
   pricing: PricingService;
   policies: PolicyService;
+  legalDocuments: LegalDocumentsService;
   tickets: TicketService;
   challenge: ChallengeService;
   media: MediaService;

@@ -4,7 +4,7 @@
  * real, and mutates the in-memory DB so flows (cancel, approve, rename…) feel
  * live within a session.
  */
-import type { Services } from '../services';
+import type { Services, LegalDocumentDetail } from '../services';
 import type {
   AdministrativeProvince,
   AdministrativeWard,
@@ -74,6 +74,11 @@ const MOCK_WARDS: Record<string, AdministrativeWard[]> = {
     { code: '11386', provinceCode: '31', name: 'Minh Khai', fullName: 'Phường Minh Khai' },
   ],
 };
+
+import { mockLegalDocs as initialMockLegalDocs } from './legal-documents.data';
+
+const mockLegalDocs: LegalDocumentDetail[] = [...initialMockLegalDocs];
+
 
 /**
  * BR-CHG-01 — a Connector is only live if its Charge Point is ACTIVE. Derived
@@ -1615,6 +1620,81 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           db.policyDocs.find((d) => q.split(/\s+/).filter((w) => w.length > 3).some((w) => d.content.toLowerCase().includes(w))) ??
           db.policyDocs[0];
         return { text: hit.content, sources: [hit.id] };
+      },
+    },
+
+    legalDocuments: {
+      async list(params = {}) {
+        await delay();
+        const { search = '', docType, audience } = params;
+        const q = search.trim().toLowerCase();
+        let rows = [...mockLegalDocs.filter((d) => d.active)];
+        if (docType) rows = rows.filter((d) => d.docType === docType);
+        if (audience && audience !== 'ALL') {
+          rows = rows.filter((d) => d.targetAudience === audience || d.targetAudience === 'ALL');
+        }
+        if (q) {
+          rows = rows.filter((d) => d.title.toLowerCase().includes(q) || (d.summary && d.summary.toLowerCase().includes(q)));
+        }
+        return { items: rows, total: rows.length, page: 0, pageSize: rows.length };
+      },
+      async get(slug: string) {
+        await delay();
+        const doc = mockLegalDocs.find((d) => d.slug === slug && d.active);
+        if (!doc) throw new Error(`Không tìm thấy tài liệu ${slug}`);
+        return doc;
+      },
+      async adminList(params = {}) {
+        await delay();
+        const { search = '', docType, audience, active } = params;
+        const q = search.trim().toLowerCase();
+        let rows = [...mockLegalDocs];
+        if (docType) rows = rows.filter((d) => d.docType === docType);
+        if (audience) rows = rows.filter((d) => d.targetAudience === audience);
+        if (active !== undefined) rows = rows.filter((d) => d.active === active);
+        if (q) {
+          rows = rows.filter((d) => d.title.toLowerCase().includes(q) || (d.summary && d.summary.toLowerCase().includes(q)));
+        }
+        return { items: rows, total: rows.length, page: 0, pageSize: rows.length };
+      },
+      async adminGet(id: string) {
+        await delay();
+        const doc = mockLegalDocs.find((d) => d.id === id);
+        if (!doc) throw new Error(`Không tìm thấy tài liệu ${id}`);
+        return doc;
+      },
+      async adminCreate(doc: any) {
+        await delay();
+        const newDoc: LegalDocumentDetail = {
+          id: 'doc-' + (mockLegalDocs.length + 1),
+          slug: doc.slug,
+          docType: doc.docType,
+          targetAudience: doc.targetAudience || 'ALL',
+          title: doc.title,
+          eyebrow: doc.eyebrow,
+          summary: doc.summary,
+          content: doc.content,
+          version: doc.version || '1.0.0',
+          locale: doc.locale || 'vi',
+          active: doc.active ?? true,
+          effectiveFrom: doc.effectiveFrom || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        mockLegalDocs.unshift(newDoc);
+        return newDoc;
+      },
+      async adminUpdate(id: string, doc: any) {
+        await delay();
+        const target = mockLegalDocs.find((d) => d.id === id);
+        if (!target) throw new Error(`Không tìm thấy tài liệu ${id}`);
+        Object.assign(target, doc, { updatedAt: new Date().toISOString() });
+        return target;
+      },
+      async adminRemove(id: string) {
+        await delay();
+        const i = mockLegalDocs.findIndex((d) => d.id === id);
+        if (i >= 0) mockLegalDocs.splice(i, 1);
       },
     },
 

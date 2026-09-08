@@ -110,16 +110,16 @@ export interface BackendStationDiscoveryDetail {
 }
 
 export interface BackendCancellationPolicyResponse {
+  policyVersion?: string;
   gracePeriodMinutes?: number;
-  refundRules?: BackendRefundRuleResponse[];
-}
-
-export interface BackendRefundRuleResponse {
-  tier?: string;
-  refundPercent?: number;
-  minMinutesBeforeStartInclusive?: number | null;
-  maxMinutesBeforeStartExclusive?: number | null;
-  appliesToNoShow?: boolean;
+  graceStartsAt?: string;
+  requiresBeforeBookingStart?: boolean;
+  requiresNotCheckedIn?: boolean;
+  withinGraceRefundPercent?: number;
+  afterGraceRefundPercent?: number;
+  noShowRefundPercent?: number;
+  verifiedStationFailureRefundPercent?: number;
+  stationFailureRequiresVerification?: boolean;
 }
 
 /**
@@ -243,19 +243,21 @@ function formatOperatingHours(
   };
 }
 
-function adaptCancellationPolicy(
+export function adaptCancellationPolicy(
   policy?: BackendCancellationPolicyResponse | null,
 ): CancellationPolicy | undefined {
-  if (!policy) return undefined;
+  if (!policy || typeof policy.gracePeriodMinutes !== 'number') return undefined;
   return {
-    gracePeriodMinutes: Number(policy.gracePeriodMinutes ?? 0),
-    refundRules: (policy.refundRules ?? []).map((rule) => ({
-      tier: rule.tier ?? '',
-      refundPercent: Number(rule.refundPercent ?? 0),
-      minMinutesBeforeStartInclusive: rule.minMinutesBeforeStartInclusive ?? null,
-      maxMinutesBeforeStartExclusive: rule.maxMinutesBeforeStartExclusive ?? null,
-      appliesToNoShow: Boolean(rule.appliesToNoShow),
-    })),
+    policyVersion: policy.policyVersion,
+    gracePeriodMinutes: Number(policy.gracePeriodMinutes),
+    graceStartsAt: policy.graceStartsAt ?? 'PAYMENT_CONFIRMED_AT',
+    requiresBeforeBookingStart: policy.requiresBeforeBookingStart ?? true,
+    requiresNotCheckedIn: policy.requiresNotCheckedIn ?? true,
+    withinGraceRefundPercent: Number(policy.withinGraceRefundPercent ?? 100),
+    afterGraceRefundPercent: Number(policy.afterGraceRefundPercent ?? 0),
+    noShowRefundPercent: Number(policy.noShowRefundPercent ?? 0),
+    verifiedStationFailureRefundPercent: Number(policy.verifiedStationFailureRefundPercent ?? 100),
+    stationFailureRequiresVerification: policy.stationFailureRequiresVerification ?? true,
   };
 }
 

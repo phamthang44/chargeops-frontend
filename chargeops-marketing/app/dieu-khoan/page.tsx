@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 import { getLegalPage } from "@/lib/legal";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
-  title: "Điều khoản dịch vụ",
-  description: "Điều khoản dịch vụ bản nháp cho ChargeOps theo SRS v4.7.",
+  title: "Điều khoản dịch vụ | ChargeOps",
+  description: "Điều khoản dịch vụ chính thức của nền tảng đặt chỗ và quản trị trạm sạc xe điện ChargeOps theo quy chuẩn Booking v4.9.",
 };
 
-export default function TermsPage() {
-  return <LegalPage content={getLegalPage("terms")} />;
+export default async function TermsPage() {
+  const content = await getLegalPage("terms");
+  return <LegalPage content={content} />;
 }

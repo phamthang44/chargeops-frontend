@@ -99,3 +99,18 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+---
+
+## ChargeOps Knowledge Base (Obsidian Vault) — Quy Tắc Bắt Buộc
+
+Toàn bộ tài liệu kiến trúc, đặc tả nghiệp vụ, API contract và chính sách hệ thống được quản lý tập trung tại **Obsidian Vault** (`chargeops/docs/ChargeOps`), được theo dõi bởi repository độc lập: `https://github.com/phamthang44/chargeops-vault.git`.
+
+1. **Vault-First**: Trước khi triển khai code mới hoặc sửa đổi các component, hook, logic màn hình liên quan đến Booking, Discovery, Cancellation Policy hay Platform Rules, agent **PHẢI** đọc tài liệu trong `docs/ChargeOps/` trước (bắt đầu từ `00 - ChargeOps Knowledge Hub.md` hoặc `Booking/04-frontend-handoff.md`).
+2. **Bắt buộc Commit & Push Thẳng Lên GitHub**: Mỗi lần chỉnh sửa, thêm mới hoặc cập nhật tài liệu trong `docs/ChargeOps/`, agent **BẮT BUỘC** phải commit và push thẳng lên repository `chargeops-vault` trên GitHub (`origin main`):
+   ```bash
+   cd ../chargeops-backend/chargeops/docs/ChargeOps
+   git add .
+   git commit -m "docs(<scope>): <mô tả thay đổi rõ ràng>"
+   git push origin main
+   ```

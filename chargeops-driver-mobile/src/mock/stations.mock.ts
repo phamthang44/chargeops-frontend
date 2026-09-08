@@ -1,4 +1,17 @@
-import type { Amenity, ChargePoint, Connector, ConnectorType, Review, Station } from '@/types';
+import type { Amenity, CancellationPolicy, ChargePoint, Connector, ConnectorType, Review, Station } from '@/types';
+
+const defaultMockCancellationPolicy: CancellationPolicy = {
+  policyVersion: 'booking-v4.9',
+  gracePeriodMinutes: 10,
+  graceStartsAt: 'PAYMENT_CONFIRMED_AT',
+  requiresBeforeBookingStart: true,
+  requiresNotCheckedIn: true,
+  withinGraceRefundPercent: 100,
+  afterGraceRefundPercent: 0,
+  noShowRefundPercent: 0,
+  verifiedStationFailureRefundPercent: 100,
+  stationFailureRequiresVerification: true,
+};
 
 /**
  * Mock stations with realistic Vietnamese data (HCMC District 1 & 3).
@@ -30,6 +43,7 @@ const baseStations: Station[] = [
     hasFastCharging: true,
     minRatePerKwh: 3500,
     amenities: ['wifi', 'food', 'parking', 'security', 'restroom'],
+    cancellationPolicy: defaultMockCancellationPolicy,
   },
   {
     id: 'st-002',
@@ -51,6 +65,7 @@ const baseStations: Station[] = [
     hasFastCharging: false, // AC-only station (so the DC filter excludes it)
     minRatePerKwh: 3000,
     amenities: ['wifi', 'parking', 'security'],
+    cancellationPolicy: defaultMockCancellationPolicy,
   },
   {
     id: 'st-003',
@@ -72,6 +87,7 @@ const baseStations: Station[] = [
     hasFastCharging: true,
     minRatePerKwh: 3200,
     amenities: ['wifi', 'food', 'parking'],
+    cancellationPolicy: defaultMockCancellationPolicy,
   },
   {
     id: 'st-004',

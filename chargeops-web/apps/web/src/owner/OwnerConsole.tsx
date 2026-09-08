@@ -26,6 +26,7 @@ import {
   IconShield,
   IconTag,
   IconUsers,
+  IconBook,
   NotificationBell,
   type NotificationItem,
   type ShellNavItem,
@@ -37,6 +38,7 @@ import { Chargers } from './pages/Chargers';
 import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
+import { LegalPolicies } from './pages/LegalPolicies';
 import { Revenue } from './pages/Revenue';
 import { Staff } from './pages/Staff';
 import { NotificationsShowcase } from './pages/NotificationsShowcase';
@@ -56,6 +58,7 @@ const PAGES: Record<string, ComponentType> = {
   revenue: Revenue,
   license: License,
   assistant: Assistant,
+  legal: LegalPolicies,
   staff: Staff,
   notifications: NotificationsShowcase,
   tickets: () => <TicketsRoute admin={false} />,
@@ -73,6 +76,7 @@ const NAV = [
   { key: 'revenue', icon: <IconCard size={17} /> },
   { key: 'license', icon: <IconShield size={17} /> },
   { key: 'assistant', icon: <IconChat size={17} /> },
+  { key: 'legal', icon: <IconBook size={17} /> },
 ];
 
 /**

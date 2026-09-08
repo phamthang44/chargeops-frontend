@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { legalDocument, type LegalDocType } from '@/content/legal';
+import { legalDocument, type LegalDocType, type LegalDocument } from '@/content/legal';
 import { usePreferences } from '@/context/PreferencesContext';
+import { fetchLegalDocument } from '@/services/legalService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import { BottomSheet } from './BottomSheet';
 
@@ -27,15 +28,42 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
   const { i18n } = useTranslation();
   const { themeColors } = usePreferences();
   const [activeType, setActiveType] = useState<LegalDocType>(initialType);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [doc, setDoc] = useState<LegalDocument>(() => legalDocument(activeType, i18n.language));
 
-  const doc = legalDocument(activeType, i18n.language);
+  useEffect(() => {
+    setDoc(legalDocument(activeType, i18n.language));
+
+    let isMounted = true;
+    fetchLegalDocument(activeType, i18n.language).then((liveDoc) => {
+      if (isMounted && liveDoc) {
+        setDoc(liveDoc);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeType, i18n.language]);
+
+  const q = searchQuery.trim().toLowerCase();
+  const filteredSections = doc.sections.filter((section) => {
+    if (!q) return true;
+    return (
+      section.title.toLowerCase().includes(q) ||
+      section.body.some((line) => line.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       {/* Top Segmented Tab Switcher */}
       <View style={[styles.tabs, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
         <Pressable
-          onPress={() => setActiveType('terms')}
+          onPress={() => {
+            setActiveType('terms');
+            setSearchQuery('');
+          }}
           style={[
             styles.tabBtn,
             activeType === 'terms' && [styles.activeTab, { backgroundColor: themeColors.surface, borderColor: themeColors.border }],
@@ -58,7 +86,10 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
         </Pressable>
 
         <Pressable
-          onPress={() => setActiveType('privacy')}
+          onPress={() => {
+            setActiveType('privacy');
+            setSearchQuery('');
+          }}
           style={[
             styles.tabBtn,
             activeType === 'privacy' && [styles.activeTab, { backgroundColor: themeColors.surface, borderColor: themeColors.border }],
@@ -79,6 +110,23 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
             Chính sách bảo mật
           </Text>
         </Pressable>
+      </View>
+
+      {/* In-document keyword search */}
+      <View style={[styles.searchBar, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+        <Ionicons name="search-outline" size={16} color={themeColors.textMuted} />
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Tìm từ khóa trong điều khoản..."
+          placeholderTextColor={themeColors.textMuted}
+          style={[styles.searchInput, { color: themeColors.textStrong }]}
+        />
+        {Boolean(searchQuery) && (
+          <Pressable onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={16} color={themeColors.textMuted} />
+          </Pressable>
+        )}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -116,29 +164,37 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
           <Text style={[styles.introText, { color: themeColors.textBody }]}>{doc.intro}</Text>
         </View>
 
-        {/* Structured Section Cards */}
-        {doc.sections.map((section, idx) => {
-          const iconName = SECTION_ICONS[idx % 6] ?? 'document-text-outline';
-          return (
-            <View key={section.title} style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.sectionIconBadge, { backgroundColor: themeColors.primarySoft }]}>
-                  <Ionicons name={iconName} size={16} color={themeColors.primaryDark} />
-                </View>
-                <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>{section.title}</Text>
-              </View>
-
-              <View style={styles.sectionBody}>
-                {section.body.map((line, lIdx) => (
-                  <View key={lIdx} style={styles.bulletRow}>
-                    <View style={[styles.bulletDot, { backgroundColor: themeColors.primary }]} />
-                    <Text style={[styles.bodyText, { color: themeColors.textBody }]}>{line}</Text>
+        {/* Filtered Section Cards */}
+        {filteredSections.length === 0 ? (
+          <View style={[styles.introCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border, alignItems: 'center' }]}>
+            <Text style={[styles.introText, { color: themeColors.textMuted }]}>
+              Không tìm thấy điều khoản nào chứa "{searchQuery}"
+            </Text>
+          </View>
+        ) : (
+          filteredSections.map((section, idx) => {
+            const iconName = SECTION_ICONS[idx % 6] ?? 'document-text-outline';
+            return (
+              <View key={section.title} style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+                <View style={styles.sectionHeader}>
+                  <View style={[styles.sectionIconBadge, { backgroundColor: themeColors.primarySoft }]}>
+                    <Ionicons name={iconName} size={16} color={themeColors.primaryDark} />
                   </View>
-                ))}
+                  <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>{section.title}</Text>
+                </View>
+
+                <View style={styles.sectionBody}>
+                  {section.body.map((line, lIdx) => (
+                    <View key={lIdx} style={styles.bulletRow}>
+                      <View style={[styles.bulletDot, { backgroundColor: themeColors.primary }]} />
+                      <Text style={[styles.bodyText, { color: themeColors.textBody }]}>{line}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </ScrollView>
 
       {/* Sticky Confirm Action Footer */}
@@ -158,7 +214,22 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
     borderRadius: radius.md,
     borderWidth: 1,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    height: 40,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: fontSizes.caption + 1,
+    paddingVertical: 0,
   },
   tabBtn: {
     flex: 1,

@@ -1,4 +1,5 @@
 import {
+  adaptCancellationPolicy,
   adaptChargePointsFromDetail,
   adaptConnectorsFromDetail,
   adaptStationDiscoveryDetail,
@@ -190,5 +191,56 @@ const mockAvailabilityResponse: BackendStationAvailabilityResponse = {
 assert(mockAvailabilityResponse.priceRanges.length === 3, 'priceRanges has 3 items');
 assert(mockAvailabilityResponse.priceRanges[1].rateVndPerKwh === 4200, 'PEAK rate is 4200');
 assert(mockAvailabilityResponse.priceRanges[1].periodCode === 'PEAK', 'periodCode is PEAK');
+
+console.log('\n--- Testing adaptCancellationPolicy (Booking v4.9 schema) ---');
+
+// Case 1: Valid backend v4.9 policy
+const validBackendPolicy = {
+  policyVersion: 'booking-v4.9',
+  gracePeriodMinutes: 10,
+  graceStartsAt: 'PAYMENT_CONFIRMED_AT',
+  requiresBeforeBookingStart: true,
+  requiresNotCheckedIn: true,
+  withinGraceRefundPercent: 100,
+  afterGraceRefundPercent: 0,
+  noShowRefundPercent: 0,
+  verifiedStationFailureRefundPercent: 100,
+  stationFailureRequiresVerification: true,
+};
+
+const adaptedPolicy = adaptCancellationPolicy(validBackendPolicy);
+assert(adaptedPolicy !== undefined, 'Policy adapted successfully');
+assert(adaptedPolicy?.gracePeriodMinutes === 10, 'gracePeriodMinutes is 10');
+assert(adaptedPolicy?.withinGraceRefundPercent === 100, 'withinGraceRefundPercent is 100%');
+assert(adaptedPolicy?.afterGraceRefundPercent === 0, 'afterGraceRefundPercent is 0%');
+assert(adaptedPolicy?.noShowRefundPercent === 0, 'noShowRefundPercent is 0%');
+assert(adaptedPolicy?.verifiedStationFailureRefundPercent === 100, 'verifiedStationFailureRefundPercent is 100%');
+assert(adaptedPolicy?.policyVersion === 'booking-v4.9', 'policyVersion is booking-v4.9');
+assert(adaptedPolicy?.stationFailureRequiresVerification === true, 'stationFailureRequiresVerification is true');
+// Ensure legacy fields do not exist
+assert((adaptedPolicy as any).refundRules === undefined, 'Legacy refundRules must be undefined');
+
+// Case 2: Null / undefined / empty input
+assert(adaptCancellationPolicy(null) === undefined, 'null policy returns undefined (no fallback)');
+assert(adaptCancellationPolicy(undefined) === undefined, 'undefined policy returns undefined (no fallback)');
+assert(adaptCancellationPolicy({} as any) === undefined, 'empty object returns undefined');
+
+// Case 3: Missing gracePeriodMinutes or non-numeric
+assert(adaptCancellationPolicy({ policyVersion: 'booking-v4.9' } as any) === undefined, 'missing gracePeriodMinutes returns undefined');
+assert(adaptCancellationPolicy({ gracePeriodMinutes: 'not-a-number' as any } as any) === undefined, 'non-numeric gracePeriodMinutes returns undefined');
+
+// Case 4: adaptStationDiscoveryDetail carries policy
+const detailWithPolicy = adaptStationDiscoveryDetail({
+  ...mockBackendDetail,
+  cancellationPolicy: validBackendPolicy,
+});
+assert(detailWithPolicy.cancellationPolicy !== undefined, 'adaptStationDiscoveryDetail passes adapted cancellationPolicy');
+assert(detailWithPolicy.cancellationPolicy?.gracePeriodMinutes === 10, 'detail cancellationPolicy has gracePeriodMinutes 10');
+
+const detailWithoutPolicy = adaptStationDiscoveryDetail({
+  ...mockBackendDetail,
+  cancellationPolicy: null,
+});
+assert(detailWithoutPolicy.cancellationPolicy === undefined, 'adaptStationDiscoveryDetail sets cancellationPolicy undefined when null');
 
 console.log('\n🎉 ALL UPDATED ADAPTER TESTS PASSED SUCCESSFULLY!');

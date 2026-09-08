@@ -87,16 +87,16 @@ export interface Station {
 }
 
 export interface CancellationPolicy {
+  policyVersion?: string;
   gracePeriodMinutes: number;
-  refundRules: RefundRule[];
-}
-
-export interface RefundRule {
-  tier: string;
-  refundPercent: number;
-  minMinutesBeforeStartInclusive: number | null;
-  maxMinutesBeforeStartExclusive: number | null;
-  appliesToNoShow: boolean;
+  graceStartsAt?: 'PAYMENT_CONFIRMED_AT' | string;
+  requiresBeforeBookingStart?: boolean;
+  requiresNotCheckedIn?: boolean;
+  withinGraceRefundPercent: number;
+  afterGraceRefundPercent: number;
+  noShowRefundPercent: number;
+  verifiedStationFailureRefundPercent: number;
+  stationFailureRequiresVerification?: boolean;
 }
 
 /**

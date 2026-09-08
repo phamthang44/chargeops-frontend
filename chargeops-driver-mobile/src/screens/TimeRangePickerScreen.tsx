@@ -413,12 +413,15 @@ export function TimeRangePickerScreen() {
 
   const meetsMinDuration = durationMin >= minDurationMin;
   const meetsMaxDuration = durationMin <= maxDurationMin;
-  const canContinue = hasSel && meetsMinDuration && meetsMaxDuration;
+  const hasValidPolicy = Boolean(
+    station?.cancellationPolicy && typeof station.cancellationPolicy.gracePeriodMinutes === 'number',
+  );
+  const canContinue = hasSel && meetsMinDuration && meetsMaxDuration && hasValidPolicy;
 
   const isCrossDay = hasSel && endMin > 1440;
 
   function handleContinue() {
-    if (!connector || !startAt || !canContinue) return;
+    if (!connector || !startAt || !canContinue || !hasValidPolicy) return;
     navigation.navigate('BookingConfirmation', {
       stationId: params.stationId,
       connectorId: connector.id,
@@ -643,6 +646,7 @@ export function TimeRangePickerScreen() {
         isCrossDay={isCrossDay}
         totalPrice={quote?.totalPrice ?? 0}
         canContinue={canContinue}
+        hasValidPolicy={hasValidPolicy}
         onContinue={handleContinue}
         onReset={hasSel ? handleResetSelection : undefined}
         themeColors={themeColors}

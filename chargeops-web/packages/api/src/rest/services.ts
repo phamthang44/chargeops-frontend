@@ -480,6 +480,16 @@ export function createRestServices(http: HttpClient): Services {
       ask: (question) => http.post('/assistant/ask', { question }),
     },
 
+    legalDocuments: {
+      list: (params = {}) => http.get('/legal-documents', params),
+      get: (slug) => http.get(`/legal-documents/${slug}`),
+      adminList: (params = {}) => http.get('/admin/legal-documents', params),
+      adminGet: (id) => http.get(`/admin/legal-documents/${id}`),
+      adminCreate: (doc) => http.post('/admin/legal-documents', doc),
+      adminUpdate: (id, doc) => http.put(`/admin/legal-documents/${id}`, doc),
+      adminRemove: (id) => http.delete(`/admin/legal-documents/${id}`),
+    },
+
     tickets: {
       list: (params = {}) => http.get('/tickets', params),
       get: (id) => http.get(`/tickets/${id}`),

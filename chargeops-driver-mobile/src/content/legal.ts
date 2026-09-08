@@ -14,9 +14,9 @@ export interface LegalDocument {
 
 const TERMS_VI: LegalDocument = {
   title: 'Điều khoản dịch vụ',
-  updatedAt: '01/08/2026',
+  updatedAt: '08/09/2026',
   intro:
-    'Điều khoản dịch vụ cho nền tảng ChargeOps theo SRS v4.7. Điều khoản này quy định cách tài xế sử dụng ứng dụng để tìm trạm, đặt khung giờ sạc, thanh toán và quét mã QR check-in.',
+    'Điều khoản dịch vụ cho nền tảng ChargeOps theo SRS v4.9. Điều khoản này quy định cách tài xế sử dụng ứng dụng để tìm trạm, đặt khung giờ sạc, thanh toán mô phỏng, hủy và hoàn tiền theo chính sách v4.9, và quét mã QR check-in.',
   sections: [
     {
       title: '1. Tài khoản và phân quyền',
@@ -28,35 +28,38 @@ const TERMS_VI: LegalDocument = {
     {
       title: '2. Bảo mật mật khẩu & Tiến trình xác thực PKCE',
       body: [
-        'Mật khẩu tài khoản được bảo vệ bởi dịch vụ xác thực chuyên biệt và mã hóa một chiều bằng thuật toán Argon2id (Salted Password Hashing), chống lại các cuộc tấn công dò quét mật khẩu.',
+        'Mật khẩu tài khoản được bảo vệ bởi dịch vụ xác thực chuyên biệt và mã hóa một chiều bằng thuật toán Argon2id (Salted Password Hashing), chống lại các cuộc tấn công vét cạn.',
         'Tiến trình xác thực đăng nhập tuân thủ tiêu chuẩn OpenID Connect Authorization Code Flow kết hợp PKCE S256, đảm bảo an toàn tuyệt đối cho ứng dụng di động.',
       ],
     },
     {
-      title: '3. Đặt khung giờ sạc',
+      title: '3. Đặt khung giờ sạc và giữ chỗ',
       body: [
-        'Tài xế chọn trạm, cổng sạc, ngày, giờ bắt đầu và thời lượng sạc. Hệ thống kiểm tra khung giờ theo giờ hoạt động của trạm và tình trạng đặt chỗ hiện có.',
-        'Một cổng sạc chỉ có một booking hợp lệ tại cùng một khoảng thời gian. Khi có cạnh tranh đặt chỗ, hệ thống sẽ sử dụng cơ chế khóa dữ liệu (Locking) để chỉ chấp nhận một yêu cầu duy nhất.',
+        'Tài xế chọn trạm, cổng sạc, ngày, giờ bắt đầu và thời lượng sạc. Ngày bắt đầu được chọn là hôm nay hoặc ngày mai, đặt trước ít nhất 60 phút theo bước 30 phút.',
+        'Một cổng sạc chỉ có một booking hợp lệ tại cùng một khoảng thời gian. Khi có cạnh tranh đặt chỗ, hệ thống sẽ sử dụng cơ chế khóa bi quan (Pessimistic Locking) để đảm bảo không chồng lấn.',
       ],
     },
     {
-      title: '4. Thanh toán và hoàn tiền',
+      title: '4. Thanh toán và chính sách hủy, hoàn tiền v4.9',
       body: [
-        'Booking mới ở trạng thái Chờ thanh toán và giữ khung giờ tạm thời trong 10 phút. Dự án hiện sử dụng chế độ Sandbox cho cổng thanh toán.',
-        'Tài xế có 5 phút grace window sau khi đặt để hủy và được hoàn tiền 100%. Sau 5 phút, các mốc hoàn tiền theo thời gian trước giờ sạc sẽ được tự động áp dụng.',
+        'Booking mới ở trạng thái Chờ thanh toán (PENDING) và được giữ chỗ tạm thời trong 10 phút kể từ lúc tạo. Quá thời hạn này, booking sẽ hết hạn (EXPIRED).',
+        'Ân hạn hủy 10 phút: Sau khi thanh toán thành công, tài xế hủy booking trong vòng 10 phút kể từ thời điểm thanh toán (và trước giờ bắt đầu sạc, chưa check-in) sẽ được hoàn tiền 100% giá gói.',
+        'Sau hạn 10 phút ân hạn hoặc nếu không đến nhận chỗ (No-show), mức hoàn tiền là 0% do đổi ý.',
+        'Trường hợp sự cố trạm sạc được hệ thống hoặc ban quản trị xác nhận, tài xế sẽ được hỗ trợ hoàn tiền 100% giá gói sạc.',
       ],
     },
     {
       title: '5. Check-in QR và trạng thái trụ sạc',
       body: [
-        'Tài xế check-in bằng cách quét mã QR trên đúng cổng sạc đã đặt. Mã QR đại diện cho Connector ID trong hệ thống.',
-        'Trong phạm vi đồ án, trạng thái trụ sạc và phiên sạc là mô hình trạng thái logic (Simulated State).',
+        'Tài xế check-in bằng cách quét mã QR hợp lệ trên đúng cổng sạc đã đặt trước từ thời điểm bắt đầu phiên sạc đến trước giờ kết thúc 15 phút.',
+        'Nếu quá hạn chót check-in mà tài xế chưa quét QR, hệ thống sẽ ghi nhận vắng mặt (No-show, hoàn 0%) để giải phóng trụ sạc cho các phương tiện khác.',
+        'Trong phạm vi dự án, trạng thái trụ sạc và phiên sạc được mô phỏng theo mô hình trạng thái logic.',
       ],
     },
     {
-      title: '6. Hỗ trợ sự cố',
+      title: '6. Hỗ trợ sự cố và giải quyết khiếu nại',
       body: [
-        'Người dùng có thể tạo ticket hỗ trợ cho các sự cố booking, thanh toán, tài khoản hoặc trạm sạc. Ticket được tự động định tuyến đến chủ trạm hoặc quản trị viên.',
+        'Người dùng có thể tạo phiếu hỗ trợ (Ticket) đối với các sự cố booking, thanh toán, tài khoản hoặc lỗi sạc tại trạm để được tiếp nhận và xử lý nhanh chóng.',
       ],
     },
   ],
@@ -108,9 +111,9 @@ const PRIVACY_VI: LegalDocument = {
 
 const TERMS_EN: LegalDocument = {
   title: 'Terms of Service',
-  updatedAt: '2026-08-01',
+  updatedAt: '2026-09-08',
   intro:
-    'Terms of Service for ChargeOps based on SRS v4.7. These terms govern how drivers use the app to discover stations, reserve slots, complete sandbox payments, and check in via QR code.',
+    'Terms of Service for ChargeOps based on SRS v4.9. These terms govern how drivers use the app to discover stations, reserve charging slots, complete test payments, cancel and refund per v4.9 policy, and check in via QR code.',
   sections: [
     {
       title: '1. Account and roles',
@@ -129,21 +132,24 @@ const TERMS_EN: LegalDocument = {
     {
       title: '3. Charging reservations',
       body: [
-        'Drivers select a station, connector, date, start time, and duration. The system validates operating hours and availability.',
-        'A connector can hold only one valid booking at any given time. Concurrent reservation requests are serialized using backend pessimistic locking.',
+        'Drivers select a station, connector, date, start time, and duration. Starting date is today or tomorrow, booked at least 60 minutes in advance in 30-minute steps.',
+        'A connector can hold only one valid booking at any given time. Concurrent reservation requests are serialized using backend pessimistic locking to avoid overlaps.',
       ],
     },
     {
-      title: '4. Payment and refunds',
+      title: '4. Payment and v4.9 cancellation & refund policy',
       body: [
-        'New bookings hold the time range for 10 minutes in Pending Payment. Payments run in Sandbox test mode for this project.',
-        'Drivers enjoy a 5-minute grace window for 100% refund upon cancellation. Subsequent cancellation fees apply according to SRS refund tiers.',
+        'New bookings hold the time range for 10 minutes in Pending Payment. Payments run in test mode for this demo.',
+        '10-Minute Grace Window: Drivers can cancel within 10 minutes from payment confirmation (before booking start time and before check-in) for a 100% package refund.',
+        'After the 10-minute grace window expires or in case of a no-show, refund is 0% due to change of mind.',
+        'In verified station failure incidents, drivers receive a 100% refund in accordance with support procedures.',
       ],
     },
     {
       title: '5. QR check-in & simulated hardware',
       body: [
-        'Drivers check in by scanning the QR code at the reserved connector. The QR code encodes the unique Connector ID.',
+        'Drivers check in by scanning the valid QR code at the reserved connector between booking start time and 15 minutes before booking end time.',
+        'Failing to check in by the deadline marks the booking as CANCELLED (NO_SHOW, 0% refund) to release the charger for other vehicles.',
         'In this project scope, charger states and charging sessions represent logical simulated states.',
       ],
     },

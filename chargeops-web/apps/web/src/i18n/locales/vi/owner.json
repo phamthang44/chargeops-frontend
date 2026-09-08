@@ -55,6 +55,11 @@
         "title": "Trợ lý chính sách",
         "subtitle": "Tra cứu quy định hủy, check-in, thanh toán."
       },
+      "legal": {
+        "label": "Chính sách & Pháp lý",
+        "title": "Chính sách & Quy định",
+        "subtitle": "Văn bản pháp lý, thỏa thuận License và quy chế vận hành."
+      },
       "notifications": {
         "label": "Thông báo",
         "title": "Trung tâm Thông báo",

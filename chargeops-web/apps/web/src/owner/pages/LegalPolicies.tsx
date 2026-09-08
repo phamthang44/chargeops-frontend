@@ -8,6 +8,7 @@ import {
   type LegalDocumentSummary,
 } from '@chargeops/api';
 import {
+  Button,
   Card,
   EmptyState,
   IconArrowRight,
@@ -38,20 +39,31 @@ const DOC_TYPE_LABELS: Record<LegalDocType, string> = {
 export function LegalPolicies() {
   const api = useApi();
   const toast = useToast();
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [committedSearch, setCommittedSearch] = useState('');
   const [selectedSlug, setSelectedSlug] = useState<string>('station-owner-license-agreement');
   const [inDocSearch, setInDocSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'all' | 'license' | 'operation' | 'general'>('all');
 
-  // Fetch list of documents for Owner
-  const { data: listData, isLoading: listLoading } = useQuery({
-    queryKey: ['owner-legal-documents', search],
+  // Fetch list of documents for Owner - only queries when committedSearch changes on Submit/Enter
+  const { data: listData, isLoading: listLoading, isFetching: listFetching } = useQuery({
+    queryKey: ['owner-legal-documents', committedSearch],
     queryFn: () =>
       api.legalDocuments.list({
         audience: 'OWNER',
-        search: search.trim() || undefined,
+        search: committedSearch.trim() || undefined,
       }),
   });
+
+  const handleTriggerSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setCommittedSearch(searchInput.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setCommittedSearch('');
+  };
 
   const allDocs = listData?.items ?? [];
 
@@ -101,13 +113,49 @@ export function LegalPolicies() {
       <div className="grid items-start gap-5 lg:grid-cols-[330px_1fr]">
         {/* Left Sidebar: Topic Filter + Document Selector */}
         <div className="flex flex-col gap-3">
-          {/* Quick Search */}
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Tìm theo tiêu đề, từ khóa..."
-            className="w-full"
-          />
+          {/* Quick Search with explicit search button & Enter trigger */}
+          <form onSubmit={handleTriggerSearch} className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <SearchInput
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  placeholder="Tìm theo tiêu đề, từ khóa..."
+                  accent="owner"
+                  className="w-full"
+                />
+              </div>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="shrink-0 gap-1 px-3 py-2 font-medium"
+                disabled={listFetching}
+                title="Tìm kiếm tài liệu"
+              >
+                <IconSearch size={14} />
+                <span>Tìm</span>
+              </Button>
+            </div>
+            {(searchInput || committedSearch) && (
+              <div className="flex items-center justify-between px-1 text-[11.5px]">
+                <span className="truncate text-muted">
+                  {committedSearch ? (
+                    <>Đang lọc: <strong className="font-semibold text-ink">{committedSearch}</strong></>
+                  ) : (
+                    <span>Nhấn Tìm để tra cứu</span>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="shrink-0 font-semibold text-owner hover:underline"
+                >
+                  Xóa lọc
+                </button>
+              </div>
+            )}
+          </form>
 
           {/* Group Filter Chips */}
           <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-line bg-surface p-1">

@@ -9,6 +9,7 @@ import { QrDownload } from "@/components/QrDownload";
 import { Reveal } from "@/components/Reveal";
 import { BackToTop } from "@/components/BackToTop";
 import { OwnerPricing } from "@/components/OwnerPricing";
+import { BrowserFrame } from "@/components/BrowserFrame";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -97,7 +98,7 @@ function Hero() {
         <Reveal delay={120} className="relative flex justify-center lg:justify-end">
           <div className="relative">
             <PhoneFrame
-              src="/screens/app-home.png"
+              src="/screens/app-home-new.png"
               alt="Màn hình tìm trạm sạc ChargeOps"
               priority
               float
@@ -178,7 +179,7 @@ function Problem() {
     <section className="py-20 sm:py-24">
       <div className="container-x grid items-center gap-12 lg:grid-cols-2">
         <Reveal className="order-2 flex justify-center lg:order-1">
-          <PhoneFrame src="/screens/app-map.png" alt="Bản đồ trạm sạc quanh bạn" />
+          <PhoneFrame src="/screens/app-map-new.png" alt="Bản đồ trạm sạc quanh bạn" />
         </Reveal>
         <Reveal delay={80} className="order-1 lg:order-2">
           <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
@@ -216,20 +217,20 @@ function HowItWorks() {
     {
       n: "1",
       title: "Tìm trạm gần bạn",
-      desc: "Lọc theo sạc nhanh DC, giá, hoặc trạm đang mở. Xem đánh giá và tiện ích.",
-      img: "/screens/app-home.png",
+      desc: "Lọc theo sạc nhanh DC, giá, hoặc trạm đang mở. Xem đánh giá và số cổng trống theo thời gian thực.",
+      img: "/screens/app-home-new.png",
     },
     {
       n: "2",
-      title: "Đặt chỗ & giữ khung giờ",
-      desc: "Chọn trạm và giữ khung giờ trước với giá cố định. Theo dõi các lượt đặt sắp tới.",
-      img: "/screens/app-bookings.png",
+      title: "Khám phá bản đồ trực quan",
+      desc: "Xem trạm sạc quanh vị trí của bạn trên bản đồ, khoảng cách và thời gian lái xe chính xác.",
+      img: "/screens/app-map-new.png",
     },
     {
       n: "3",
-      title: "Check-in & xem lịch sử",
-      desc: "Quét QR tại trạm để bắt đầu sạc, rồi xem lại toàn bộ lịch sử chuyến sạc.",
-      img: "/screens/app-history.png",
+      title: "Giữ khung giờ & Check-in QR",
+      desc: "Đặt trước khung giờ sạc với giá cố định. Quét mã QR tại đúng trụ sạc để bắt đầu phiên sạc.",
+      img: "/screens/app-bookings-new.png",
     },
   ];
   return (
@@ -328,47 +329,56 @@ function OwnerBand() {
   return (
     <section id="doi-tac" className="relative overflow-hidden py-20 sm:py-24">
       <div className="pointer-events-none absolute inset-0 bg-surface-alt" />
-      <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
+      <div className="container-x relative grid items-center gap-12 lg:grid-cols-[1fr_1.3fr]">
         <Reveal>
-          <h2 className="text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
+          <span className="pill bg-primary-soft text-primary-dark">Dành cho chủ trạm</span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-balance text-ink-strong sm:text-4xl">
             Sở hữu trụ sạc? Tăng doanh thu cùng ChargeOps
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-body">
-            Đăng ký trụ sạc, đặt giá theo khung giờ, quản lý đặt chỗ và theo dõi
-            doanh thu, tất cả qua bảng điều khiển dành cho chủ trạm.
+            Gia nhập mạng lưới ChargeOps để tiếp cận hàng nghìn tài xế xe điện.
+            Tự chủ định giá theo khung giờ (Time-of-Use), quản lý đặt chỗ và theo dõi
+            doanh thu, tất cả qua bảng điều khiển Web Console chuyên nghiệp.
           </p>
           <ul className="mt-6 space-y-3">
             {[
-              "Tự đặt giá đ/kWh và khung giờ cao điểm",
+              "Tự đặt giá đ/kWh và khung giờ cao điểm linh hoạt",
               "Quản lý trụ, khung giờ và đặt chỗ tập trung",
-              "Báo cáo doanh thu minh bạch",
+              "Báo cáo doanh thu minh bạch và phân tích công suất",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-ink-body">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-dark">
                   <CheckIcon className="h-3.5 w-3.5" />
                 </span>
-                {t}
+                <span>{t}</span>
               </li>
             ))}
           </ul>
-          <a
-            href="mailto:phamthang3564@gmail.com?subject=Đăng ký trạm sạc ChargeOps"
-            className="btn-primary mt-8"
-          >
-            Đăng ký trạm của bạn
-          </a>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <a
+              href="mailto:phamthang3564@gmail.com?subject=Đăng ký trạm sạc ChargeOps"
+              className="btn-primary"
+            >
+              Đăng ký trạm của bạn
+            </a>
+          </div>
         </Reveal>
 
-        <Reveal delay={100} className="flex justify-center lg:justify-end">
-          <div className="rounded-card border border-line bg-white p-3 shadow-glass">
+        <Reveal delay={100} className="w-full">
+          <BrowserFrame
+            url="https://console.chargeops.vn/owner/pricing"
+            title="ChargeOps Console — Cấu hình biểu giá & Quản trị trạm"
+          >
             <Image
-              src="/screens/owner-pricing.jpg"
-              alt="Bảng quản lý giá & khung giờ cho chủ trạm"
-              width={520}
-              height={1100}
-              className="h-auto w-[260px] rounded-[0.9rem] sm:w-[300px]"
+              src="/screens/owner-pricing-new.png"
+              alt="Bảng điều khiển quản lý trạm sạc và biểu giá ChargeOps Console"
+              width={1519}
+              height={912}
+              className="h-auto w-full object-cover"
+              sizes="(min-width: 1024px) 55vw, 100vw"
+              priority
             />
-          </div>
+          </BrowserFrame>
         </Reveal>
       </div>
     </section>

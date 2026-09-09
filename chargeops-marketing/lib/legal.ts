@@ -6,6 +6,7 @@ export interface LegalSection {
 }
 
 export interface LegalPageContent {
+  kind: LegalPageKind;
   title: string;
   eyebrow: string;
   description: string;
@@ -14,6 +15,7 @@ export interface LegalPageContent {
 }
 
 const termsFallback: LegalPageContent = {
+  kind: "terms",
   title: "Điều khoản dịch vụ",
   eyebrow: "ChargeOps Terms of Service",
   updatedAt: "08/09/2026",
@@ -72,6 +74,7 @@ const termsFallback: LegalPageContent = {
 };
 
 const privacyFallback: LegalPageContent = {
+  kind: "privacy",
   title: "Chính sách bảo mật dữ liệu",
   eyebrow: "ChargeOps Privacy & Data Security",
   updatedAt: "08/09/2026",
@@ -206,6 +209,7 @@ export async function getLegalPage(kind: LegalPageKind): Promise<LegalPageConten
       if (data && typeof data.content === "string" && data.content.trim().length > 0) {
         const sections = parseMarkdownToSections(data.content);
         return {
+          kind,
           title: data.title || fallback.title,
           eyebrow: data.eyebrow || fallback.eyebrow,
           description: data.summary || fallback.description,

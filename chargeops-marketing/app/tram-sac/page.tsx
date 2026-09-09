@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { StationDirectory } from "@/components/StationDirectory";
 import { StoreBadges } from "@/components/StoreBadges";
 import { STATIONS } from "@/components/stations";
+import { fetchPublicStations } from "@/lib/stations-api";
 
 export const metadata: Metadata = {
   title: "Trạm sạc xe điện ChargeOps · Tìm trạm gần bạn",
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function StationsPage() {
+export default async function StationsPage() {
+  const data = await fetchPublicStations();
+
   return (
     <>
       <SiteHeader />
@@ -41,7 +44,7 @@ export default function StationsPage() {
           </div>
         </section>
 
-        <StationDirectory />
+        <StationDirectory initialStations={data.stations} initialIsLive={data.isLive} />
 
         <section className="border-t border-line bg-surface-alt py-16">
           <div className="container-x flex flex-col items-center gap-5 text-center">

@@ -170,7 +170,33 @@ export function PolicyKB() {
   const [formDocType, setFormDocType] = useState<LegalDocType>('TERMS_OF_SERVICE');
   const [formAudience, setFormAudience] = useState<TargetAudience>('ALL');
   const [formActive, setFormActive] = useState(true);
+  const [formKeywords, setFormKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState('');
   const [editorTab, setEditorTab] = useState<'write' | 'preview' | 'split'>('write');
+
+  const handleAddKeyword = (kwToAdd?: string) => {
+    const text = (kwToAdd ?? keywordInput).trim().replace(/\s+/g, ' ');
+    if (!text) return;
+    if (!formKeywords.some((k) => k.toLowerCase() === text.toLowerCase())) {
+      if (formKeywords.length >= 30) {
+        toast('Tối đa 30 từ khóa cho mỗi văn kiện', 'info');
+        return;
+      }
+      setFormKeywords([...formKeywords, text]);
+    }
+    setKeywordInput('');
+  };
+
+  const handleRemoveKeyword = (indexToRemove: number) => {
+    setFormKeywords(formKeywords.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddKeyword();
+    }
+  };
 
   const handleTriggerSearch = () => {
     setCommittedSearch(searchInput.trim());
@@ -220,6 +246,7 @@ export function PolicyKB() {
           content: formContent.trim(),
           version: formVersion.trim(),
           targetAudience: formAudience,
+          keywords: formKeywords,
           active: formActive,
         });
       } else {
@@ -232,6 +259,7 @@ export function PolicyKB() {
           summary: formSummary.trim(),
           content: formContent.trim(),
           version: formVersion.trim(),
+          keywords: formKeywords,
           active: formActive,
         });
       }
@@ -265,6 +293,8 @@ export function PolicyKB() {
     setFormDocType('TERMS_OF_SERVICE');
     setFormAudience('ALL');
     setFormActive(true);
+    setFormKeywords([]);
+    setKeywordInput('');
     setEditorTab('write');
   };
 
@@ -286,6 +316,8 @@ export function PolicyKB() {
       setFormDocType(detail.docType);
       setFormAudience(detail.targetAudience);
       setFormActive(detail.active);
+      setFormKeywords(detail.keywords || []);
+      setKeywordInput('');
       setEditorTab('write');
       setEditModalOpen(true);
     } catch (e: any) {
@@ -614,6 +646,26 @@ export function PolicyKB() {
                       <p className="text-[13px] leading-relaxed text-muted line-clamp-2">
                         {doc.summary}
                       </p>
+
+                      {/* Keywords Badges */}
+                      {doc.keywords && doc.keywords.length > 0 && (
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          <IconTag size={12} className="text-muted shrink-0" />
+                          {doc.keywords.slice(0, 5).map((kw, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-md bg-canvas px-2 py-0.5 font-mono text-[11px] text-body border border-line-2 shadow-2xs"
+                            >
+                              {kw}
+                            </span>
+                          ))}
+                          {doc.keywords.length > 5 && (
+                            <span className="text-[11px] font-medium text-ghost">
+                              +{doc.keywords.length - 5} từ khóa
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Action buttons */}
@@ -683,6 +735,21 @@ export function PolicyKB() {
                 <div className="text-[12px] text-ghost">
                   Slug: <code className="font-mono text-brand">/{activeDoc.slug}</code> · Hiệu lực từ {formatDateVn(activeDoc.effectiveFrom)}
                 </div>
+
+                {/* Keywords Tags in Reader Header */}
+                {activeDoc.keywords && activeDoc.keywords.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                    <IconTag size={13} className="text-brand shrink-0" />
+                    {activeDoc.keywords.map((kw, idx) => (
+                      <span
+                        key={idx}
+                        className="rounded-md bg-brand-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-brand"
+                      >
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -836,6 +903,62 @@ export function PolicyKB() {
                 placeholder="Tóm tắt 1-2 câu về nội dung và phạm vi của tài liệu..."
                 className="w-full rounded-xl border border-line bg-canvas px-3 py-2 text-[13px] outline-none"
               />
+            </div>
+
+            {/* Keywords Tag Input */}
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <label className="text-[12px] font-semibold text-body flex items-center gap-1.5">
+                  <IconTag size={14} className="text-brand" />
+                  Từ khóa ngữ nghĩa (Keywords phục vụ tra cứu & tìm kiếm)
+                </label>
+                <span className="text-[11px] text-muted">
+                  {formKeywords.length}/30 từ khóa · Nhấn Enter hoặc dấu phẩy để thêm
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-canvas p-2.5 focus-within:border-brand transition shadow-2xs">
+                {formKeywords.map((kw, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-brand-soft px-2.5 py-1 text-[12px] font-medium text-brand"
+                  >
+                    <span>{kw}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveKeyword(idx)}
+                      className="rounded-full p-0.5 hover:bg-brand/20 text-brand"
+                      title="Xóa từ khóa"
+                    >
+                      <IconX size={12} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyDown={handleKeywordKeyDown}
+                  placeholder={
+                    formKeywords.length === 0
+                      ? 'Nhập từ khóa (vd: refund, hoàn tiền, hủy đặt chỗ, ân hạn) rồi nhấn Enter...'
+                      : 'Thêm từ khóa...'
+                  }
+                  className="min-w-[180px] flex-1 bg-transparent px-2 py-0.5 text-[13px] outline-none placeholder:text-muted"
+                />
+                {keywordInput.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => handleAddKeyword()}
+                    className="rounded-lg bg-brand px-3 py-1 text-[11.5px] font-semibold text-white hover:bg-brand/90 transition shadow-xs"
+                  >
+                    Thêm
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-muted">
+                Admin gắn từ khóa để tra cứu song ngữ và đồng nghĩa linh hoạt (unaccent + ILIKE), ví dụ tài liệu tiếng Việt gắn thêm "refund" để tìm thấy ngay.
+              </p>
             </div>
 
             {/* Markdown Content Editor with Live Preview tabs */}

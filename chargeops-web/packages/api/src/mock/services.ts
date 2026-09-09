@@ -1634,7 +1634,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           rows = rows.filter((d) => d.targetAudience === audience || d.targetAudience === 'ALL');
         }
         if (q) {
-          rows = rows.filter((d) => d.title.toLowerCase().includes(q) || (d.summary && d.summary.toLowerCase().includes(q)));
+          rows = rows.filter(
+            (d) =>
+              d.title.toLowerCase().includes(q) ||
+              (d.summary && d.summary.toLowerCase().includes(q)) ||
+              d.slug.toLowerCase().includes(q) ||
+              (d.keywords && d.keywords.some((k) => k.toLowerCase().includes(q))),
+          );
+          rows.sort((a, b) => {
+            const aTitle = a.title.toLowerCase();
+            const bTitle = b.title.toLowerCase();
+            const aKwExact = a.keywords?.some((k) => k.toLowerCase() === q);
+            const bKwExact = b.keywords?.some((k) => k.toLowerCase() === q);
+            const aScore = aTitle === q ? 1 : aKwExact ? 2 : aTitle.includes(q) ? 3 : 4;
+            const bScore = bTitle === q ? 1 : bKwExact ? 2 : bTitle.includes(q) ? 3 : 4;
+            return aScore - bScore;
+          });
         }
         return { items: rows, total: rows.length, page: 0, pageSize: rows.length };
       },
@@ -1653,7 +1668,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (audience) rows = rows.filter((d) => d.targetAudience === audience);
         if (active !== undefined) rows = rows.filter((d) => d.active === active);
         if (q) {
-          rows = rows.filter((d) => d.title.toLowerCase().includes(q) || (d.summary && d.summary.toLowerCase().includes(q)));
+          rows = rows.filter(
+            (d) =>
+              d.title.toLowerCase().includes(q) ||
+              (d.summary && d.summary.toLowerCase().includes(q)) ||
+              d.slug.toLowerCase().includes(q) ||
+              (d.keywords && d.keywords.some((k) => k.toLowerCase().includes(q))),
+          );
+          rows.sort((a, b) => {
+            const aTitle = a.title.toLowerCase();
+            const bTitle = b.title.toLowerCase();
+            const aKwExact = a.keywords?.some((k) => k.toLowerCase() === q);
+            const bKwExact = b.keywords?.some((k) => k.toLowerCase() === q);
+            const aScore = aTitle === q ? 1 : aKwExact ? 2 : aTitle.includes(q) ? 3 : 4;
+            const bScore = bTitle === q ? 1 : bKwExact ? 2 : bTitle.includes(q) ? 3 : 4;
+            return aScore - bScore;
+          });
         }
         return { items: rows, total: rows.length, page: 0, pageSize: rows.length };
       },
@@ -1676,6 +1706,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           content: doc.content,
           version: doc.version || '1.0.0',
           locale: doc.locale || 'vi',
+          keywords: doc.keywords || [],
           active: doc.active ?? true,
           effectiveFrom: doc.effectiveFrom || new Date().toISOString(),
           createdAt: new Date().toISOString(),

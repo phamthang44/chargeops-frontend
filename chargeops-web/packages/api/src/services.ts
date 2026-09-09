@@ -329,6 +329,7 @@ export interface LegalDocumentSummary {
   summary?: string;
   version: string;
   locale: string;
+  keywords?: string[];
   active: boolean;
   effectiveFrom: string;
   updatedAt: string;
@@ -364,6 +365,7 @@ export interface LegalDocumentsService {
     content: string;
     version: string;
     locale?: string;
+    keywords?: string[];
     active?: boolean;
     effectiveFrom?: string;
   }): Promise<LegalDocumentDetail>;

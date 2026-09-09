@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StoreBadges } from "@/components/StoreBadges";
 import { STATIONS, getStationBySlug } from "@/components/stations";
+import { fetchPublicStationBySlug } from "@/lib/stations-api";
 import {
   MapPinIcon,
   BoltIcon,
@@ -26,7 +27,7 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const station = getStationBySlug(slug);
+  const station = (await fetchPublicStationBySlug(slug)) || getStationBySlug(slug);
   if (!station) return { title: "Không tìm thấy trạm sạc" };
 
   const title = `${station.name} · Trạm sạc xe điện ${station.district}`;
@@ -48,7 +49,7 @@ export default async function StationDetailPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const station = getStationBySlug(slug);
+  const station = (await fetchPublicStationBySlug(slug)) || getStationBySlug(slug);
   if (!station) notFound();
 
   const full = station.available === 0;

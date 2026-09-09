@@ -27,9 +27,12 @@ export function StationDirectory({
   useEffect(() => {
     let mounted = true;
     async function loadStations() {
+      if (initialIsLive && initialStations.length > 0) {
+        return;
+      }
       setIsLoading(true);
       try {
-        const res = await fetchPublicStations();
+        const res = await fetchPublicStations({ size: 50 });
         if (mounted) {
           if (res.stations && res.stations.length > 0) {
             setStationList(res.stations);

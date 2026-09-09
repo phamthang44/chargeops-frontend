@@ -24,6 +24,10 @@ export type CoverageStation = {
   rating: number;
   reviewCount: number;
   description: string;
+  primaryImageUrl?: string | null;
+  maxPowerKw?: number | null;
+  operatingState?: string;
+  operationalStatus?: string;
 };
 
 export const CITIES = ["Tất cả", "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"] as const;

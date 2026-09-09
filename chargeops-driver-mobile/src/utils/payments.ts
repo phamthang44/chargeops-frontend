@@ -11,6 +11,7 @@ export const PAYMENT_META: Record<
   PaymentMethod,
   { icon: keyof typeof Ionicons.glyphMap; color: string }
 > = {
+  SIMULATOR: { icon: 'flash', color: colors.warning },
   MOMO: { icon: 'wallet', color: colors.error },
   VISA: { icon: 'card', color: colors.info },
   ZALOPAY: { icon: 'wallet-outline', color: colors.info },
@@ -19,4 +20,4 @@ export const PAYMENT_META: Record<
 };
 
 /** Methods offered for selection on the confirmation screen (in display order). */
-export const SELECTABLE_PAYMENT_METHODS: PaymentMethod[] = ['MOMO', 'VISA', 'ZALOPAY', 'ATM'];
+export const SELECTABLE_PAYMENT_METHODS: PaymentMethod[] = ['SIMULATOR', 'MOMO', 'VISA', 'ZALOPAY', 'ATM'];

@@ -9,6 +9,7 @@ import {
   resolvePaymentOutcome,
   type PaymentResultStatus,
 } from './simulation';
+import { apiBaseUrl, isMockMode, resolveAccessToken, getConnectorById } from './stationService';
 
 /**
  * Booking data layer.
@@ -99,8 +100,8 @@ export function computeRefund(booking: Booking, now: number = Date.now()): Refun
   };
 }
 
-// In-memory store (newest first). Seeded from the mock once at module load.
-const store: Booking[] = [...bookingsMock];
+// In-memory store (newest first). Seeded from the mock only in mock mode.
+const store: Booking[] = isMockMode() ? [...bookingsMock] : [];
 
 function simulateNetwork<T>(data: T, delayMs = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
@@ -297,6 +298,125 @@ export async function getBusyRanges(connectorId: string, dayISO: string): Promis
   return simulateNetwork([...mine, ...others].sort((a, b) => a.fromMin - b.fromMin));
 }
 
+export interface BackendPriceLineResponse {
+  sequence: number;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  label: string;
+  periodCode: string;
+  rateVndPerKwh: number;
+  estimatedEnergyKwh: number;
+  amount: number;
+}
+
+export interface BackendPricePreviewResponse {
+  pricingVersion: string;
+  connectorId: string;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  currency: string;
+  totalAmount: number;
+  priceLines: BackendPriceLineResponse[];
+  pricingBasis?: {
+    kind?: string;
+    rateUnit?: string;
+    formulaVersion?: string;
+    energyFactor?: number;
+    powerKw?: number;
+  };
+  policy?: any;
+  overlapWarnings?: string[];
+}
+
+/**
+ * Preview price directly from the backend (BKG-017).
+ * Calls POST /api/v1/bookings/price-preview.
+ * Falls back to local quote if network or mock mode is active.
+ */
+export async function getPricePreview(
+  connectorId: string,
+  startAt: string,
+  durationMin: number,
+  options?: {
+    accessToken?: string | null;
+    connector?: Connector | null;
+    priceRanges?: { startAt: string; endAt: string; rateVndPerKwh: number; periodCode?: string }[];
+  },
+): Promise<BackendPricePreviewResponse | null> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(options?.accessToken);
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${apiBaseUrl}/api/v1/bookings/price-preview`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          connectorId,
+          startAt,
+          durationMin,
+        }),
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const data: BackendPricePreviewResponse | undefined = payload?.data ?? payload;
+        if (data && data.pricingVersion) {
+          return data;
+        }
+      }
+    } catch (err) {
+      console.warn('Backend price-preview call failed, falling back to local calculation:', err);
+    }
+  }
+
+  // Fallback to local computation
+  const connector =
+    options?.connector ??
+    (await getConnectorById(connectorId)) ??
+    connectorsMock.find((c) => c.id === connectorId);
+  if (!connector) return null;
+  const localQuote = quoteBooking(connector, startAt, durationMin, options?.priceRanges);
+  const endAt = new Date(new Date(startAt).getTime() + durationMin * 60_000).toISOString();
+
+  return {
+    pricingVersion: `mock-pv-${String(Date.now()).slice(-8)}`,
+    connectorId,
+    startAt,
+    endAt,
+    durationMin,
+    currency: 'VND',
+    totalAmount: localQuote.totalPrice,
+    priceLines: localQuote.priceLines.map((l, index) => ({
+      sequence: index + 1,
+      startAt: l.fromAt,
+      endAt: l.toAt,
+      durationMin: Math.round((new Date(l.toAt).getTime() - new Date(l.fromAt).getTime()) / 60_000),
+      label: l.rateKind,
+      periodCode: l.rateKind,
+      rateVndPerKwh: l.rateVndPerKwh,
+      estimatedEnergyKwh: l.energyKwh,
+      amount: l.amount,
+    })),
+    pricingBasis: {
+      kind: 'ESTIMATED_ENERGY_FIXED_PACKAGE',
+      rateUnit: 'VND_PER_KWH',
+      formulaVersion: 'booking-estimate-v1',
+      energyFactor: 0.62,
+      powerKw: connector.powerKw,
+    },
+    overlapWarnings: [],
+  };
+}
+
 /**
  * Price a candidate window before the booking exists, so the picker and the
  * confirmation screen can show the same figures the booking will snapshot.
@@ -353,7 +473,9 @@ export async function createBooking(req: CreateBookingRequest): Promise<Booking>
   const connector = connectorsMock.find((c) => c.id === req.connectorId);
   const chargePoint = chargePointsMock.find((cp) => cp.id === connector?.chargePointId);
   const station = stationsMock.find((s) => s.id === req.stationId);
-  const quote = connector ? quoteBooking(connector, req.startAt, req.durationMin) : null;
+  const quote = connector
+    ? quoteBooking(connector, req.startAt, req.durationMin, req.backendPriceRanges)
+    : null;
   const now = Date.now();
   const endAt = new Date(new Date(req.startAt).getTime() + req.durationMin * 60_000).toISOString();
 

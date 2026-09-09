@@ -675,6 +675,8 @@
   },
   "payment": {
     "title": "Payment method",
+    "SIMULATOR": "Payment Simulator (Demo Sandbox)",
+    "SIMULATOR_desc": "Instant payment simulation for demo purposes",
     "MOMO": "MoMo Wallet",
     "MOMO_desc": "Pay via MoMo e-wallet app",
     "VISA": "International Card (Visa/Master)",
@@ -701,7 +703,11 @@
     "paymentTitle": "Payment method",
     "totalPayment": "Total payment",
     "payBtn": "Pay {{amount}}",
-    "errorTitle": "Unable to create booking"
+    "errorTitle": "Unable to create booking",
+    "fastTrackTitle": "⚡ Fast-Track Booking (1-Click)",
+    "fastTrackDesc": "Automatically selected the best available connector and earliest charging slot.",
+    "changeConnector": "Change port",
+    "changeTime": "Change time"
   },
   "bookingConfirm": {
     "title": "Booking confirmation",

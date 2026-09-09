@@ -7,20 +7,29 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton, BottomSheet, GlassButton, StatusBadge } from '@/components';
+import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import { bookingErrorMessage } from '@/i18n/bookingErrors';
 import type { RootStackParamList } from '@/navigation/types';
-import { createBooking, findOverlappingBookings } from '@/services/bookingService';
+import {
+  createBooking,
+  findOverlappingBookings,
+  getPricePreview,
+  type BackendPricePreviewResponse,
+} from '@/services/bookingService';
 import {
   getChargePointsByStation,
   getConnectorsByStation,
+  getConnectorById,
+  getStationAvailability,
   getStationById,
+  getStationDetail,
 } from '@/services/stationService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
 import { formatDate, formatEquipmentName, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
 import { PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
-import { quoteBooking } from '@/utils/pricing';
+import { quoteBooking, type Quote } from '@/utils/pricing';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
 type Route = RouteProp<RootStackParamList, 'BookingConfirmation'>;
@@ -34,15 +43,18 @@ export function BookingConfirmationScreen() {
   const { params } = useRoute<Route>();
   const { t, i18n } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const { getAccessToken } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [station, setStation] = useState<Station | null>(null);
   const [connector, setConnector] = useState<Connector | null>(null);
   const [chargePoint, setChargePoint] = useState<ChargePoint | null>(null);
   const [loading, setLoading] = useState(true);
-  const [method, setMethod] = useState<PaymentMethod>('MOMO');
+  const [method, setMethod] = useState<PaymentMethod>('SIMULATOR');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [priceRanges, setPriceRanges] = useState(params.priceRanges ?? null);
+  const [backendPreview, setBackendPreview] = useState<BackendPricePreviewResponse | null>(null);
 
   // Duplicate booking warning state (BR-BOK-08)
   const [overlappingBooking, setOverlappingBooking] = useState<Booking | null>(null);
@@ -55,35 +67,122 @@ export function BookingConfirmationScreen() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([
-      getStationById(params.stationId),
-      getConnectorsByStation(params.stationId),
-      getChargePointsByStation(params.stationId),
-      findOverlappingBookings(params.startAt, endAt),
-    ]).then(([s, connectors, points, overlaps]) => {
-      if (!active) return;
-      const picked = connectors.find((c) => c.id === params.connectorId) ?? null;
-      setStation(s);
-      setConnector(picked);
-      setChargePoint(points.find((p) => p.id === picked?.chargePointId) ?? null);
-      setLoading(false);
+    const token = getAccessToken();
 
-      if (overlaps.length > 0) {
-        setOverlappingBooking(overlaps[0]);
-        setShowOverlapModal(true);
+    async function loadData() {
+      try {
+        setLoading(true);
+
+        // 1. Fetch Station Detail Bundle (station, chargePoints, connectors)
+        const detail = await getStationDetail(params.stationId, { accessToken: token });
+        if (!active) return;
+
+        let pickedStation = detail?.station ?? null;
+        let pickedConnectors = detail?.connectors ?? [];
+        let pickedChargePoints = detail?.chargePoints ?? [];
+
+        // Fallbacks if getStationDetail didn't return complete list
+        if (!pickedStation) {
+          pickedStation = await getStationById(params.stationId, { accessToken: token });
+        }
+        if (pickedConnectors.length === 0) {
+          pickedConnectors = await getConnectorsByStation(params.stationId, { accessToken: token });
+        }
+        if (pickedChargePoints.length === 0) {
+          pickedChargePoints = await getChargePointsByStation(params.stationId, { accessToken: token });
+        }
+
+        let pickedConn = pickedConnectors.find((c) => c.id === params.connectorId) ?? null;
+        if (!pickedConn) {
+          pickedConn = await getConnectorById(params.connectorId);
+        }
+
+        setStation(pickedStation);
+        setConnector(pickedConn);
+        setChargePoint(pickedChargePoints.find((p) => p.id === pickedConn?.chargePointId) ?? null);
+
+        // 2. Fetch Availability if priceRanges not already passed
+        let currentPriceRanges = priceRanges ?? params.priceRanges;
+        if (!currentPriceRanges && pickedStation && pickedConn) {
+          const dateStr = params.startAt.slice(0, 10);
+          const avail = await getStationAvailability(params.stationId, pickedConn.id, dateStr, { accessToken: token });
+          if (avail?.priceRanges) {
+            currentPriceRanges = avail.priceRanges;
+            setPriceRanges(avail.priceRanges);
+          }
+        }
+
+        // 3. Fetch Price Preview & Overlaps concurrently
+        const [overlaps, preview] = await Promise.all([
+          findOverlappingBookings(params.startAt, endAt, params.connectorId).catch(() => []),
+          getPricePreview(params.connectorId, params.startAt, params.durationMin, {
+            accessToken: token,
+            connector: pickedConn,
+            priceRanges: currentPriceRanges,
+          }).catch(() => null),
+        ]);
+
+        if (!active) return;
+
+        if (preview) {
+          setBackendPreview(preview);
+        }
+
+        if (overlaps && overlaps.length > 0) {
+          setOverlappingBooking(overlaps[0]);
+          setShowOverlapModal(true);
+        }
+      } catch (err) {
+        console.warn('Failed to load booking confirmation details:', err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
-    });
+    }
+
+    loadData();
+
     return () => {
       active = false;
     };
-  }, [params.stationId, params.connectorId, params.startAt, endAt]);
+  }, [params.stationId, params.connectorId, params.startAt, endAt, params.priceRanges, getAccessToken]);
 
-  const quote = useMemo(
-    () => (connector ? quoteBooking(connector, params.startAt, params.durationMin) : null),
-    [connector, params.startAt, params.durationMin],
-  );
+  const quote = useMemo<Quote | null>(() => {
+    if (backendPreview) {
+      return {
+        priceLines: backendPreview.priceLines.map((l) => ({
+          fromAt: l.startAt,
+          toAt: l.endAt,
+          rateKind:
+            l.periodCode === 'PEAK'
+              ? 'PEAK'
+              : l.periodCode === 'OFF_PEAK' || l.periodCode === 'OFFPEAK'
+                ? 'OFFPEAK'
+                : 'STANDARD',
+          rateVndPerKwh: l.rateVndPerKwh,
+          energyKwh: l.estimatedEnergyKwh,
+          amount: l.amount,
+        })),
+        energyKwh: +backendPreview.priceLines
+          .reduce((acc, l) => acc + (l.estimatedEnergyKwh ?? 0), 0)
+          .toFixed(1),
+        chargingFee: backendPreview.totalAmount,
+        serviceFee: 0,
+        totalPrice: backendPreview.totalAmount,
+      };
+    }
+    return connector
+      ? quoteBooking(connector, params.startAt, params.durationMin, priceRanges ?? params.priceRanges)
+      : null;
+  }, [backendPreview, connector, params.startAt, params.durationMin, priceRanges, params.priceRanges]);
 
-  const previewCode = useMemo(() => `CO-${String(Date.now()).slice(-4)}`, []);
+  const previewCode = useMemo(() => {
+    if (backendPreview?.pricingVersion) {
+      return `PV-${backendPreview.pricingVersion.slice(0, 6)}`;
+    }
+    return `CO-${String(Date.now()).slice(-4)}`;
+  }, [backendPreview?.pricingVersion]);
 
   function durationLabel(min: number): string {
     const { hours, minutes } = splitDuration(min);
@@ -103,6 +202,10 @@ export function BookingConfirmationScreen() {
         startAt: params.startAt,
         durationMin: params.durationMin,
         paymentMethod: method,
+        acceptedTotalAmount: quote?.totalPrice,
+        acceptedPricingVersion: backendPreview?.pricingVersion,
+        acceptedPolicyVersion: backendPreview?.policy?.version ?? 'booking-v4.9',
+        backendPriceRanges: priceRanges ?? params.priceRanges,
       });
       navigation.replace('PaymentProcessing', { bookingId: booking.id });
     } catch (e) {
@@ -114,10 +217,45 @@ export function BookingConfirmationScreen() {
     }
   }
 
-  if (loading || !station || !connector || !quote) {
+  if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
         <ActivityIndicator color={themeColors.primary} style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!station || !connector || !quote) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
+        <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
+          <GlassButton
+            size={40}
+            glassEffectStyle="regular"
+            fallbackColor={themeColors.surfaceAlt}
+            accessibilityLabel={t('common.back')}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
+          </GlassButton>
+          <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.title')}</Text>
+          <View style={styles.headerBtn} />
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.md }}>
+          <Ionicons name="alert-circle-outline" size={48} color={themeColors.warning} />
+          <Text style={{ fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: themeColors.textStrong, textAlign: 'center' }}>
+            {t('bookingConfirmation.notFound', 'Không thể tải thông tin cổng sạc hoặc trạm')}
+          </Text>
+          <Text style={{ fontSize: fontSizes.body, color: themeColors.textMuted, textAlign: 'center' }}>
+            {t('bookingConfirmation.notFoundDesc', 'Vui lòng kiểm tra lại kết nối hoặc quay lại chọn cổng sạc khác.')}
+          </Text>
+          <AppButton
+            label={t('common.back', 'Quay lại')}
+            variant="secondary"
+            onPress={() => navigation.goBack()}
+            style={{ marginTop: spacing.md }}
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -140,9 +278,58 @@ export function BookingConfirmationScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Fast-Track 1-Click Banner */}
+        {params.isFastTrack && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.16)' : '#ECFDF5',
+              borderColor: isDark ? 'rgba(16, 185, 129, 0.35)' : '#A7F3D0',
+              borderWidth: 1,
+              borderRadius: radius.lg,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.md - 2,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.25)' : '#D1FAE5',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons name="flash" size={18} color="#10B981" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: isDark ? '#34D399' : '#047857' }}>
+                {t('bookingConfirmation.fastTrackTitle', '⚡ Đặt chỗ nhanh (1-Click)')}
+              </Text>
+              <Text style={{ fontSize: 12, color: isDark ? '#A7F3D0' : '#065F46', marginTop: 2 }}>
+                {t('bookingConfirmation.fastTrackDesc', 'Đã tự động chọn cổng khả dụng tốt nhất & khung giờ sạc sớm nhất.')}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Station summary */}
         <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
-          <Text style={[styles.stationName, { color: themeColors.textStrong }]}>{station.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <Text style={[styles.stationName, { color: themeColors.textStrong, flex: 1 }]}>{station.name}</Text>
+            <Pressable
+              onPress={() => navigation.navigate('StationDetail', { stationId: params.stationId })}
+              hitSlop={6}
+              style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6' }}
+            >
+              <Text style={{ color: themeColors.primary, fontSize: 12, fontWeight: '600' }}>
+                {t('bookingConfirmation.changeConnector', 'Đổi cổng')}
+              </Text>
+            </Pressable>
+          </View>
           <View style={styles.metaRow}>
             <Ionicons name="location-outline" size={14} color={themeColors.textMuted} />
             <Text style={[styles.metaText, { color: themeColors.textMuted }]} numberOfLines={1}>
@@ -183,6 +370,15 @@ export function BookingConfirmationScreen() {
           <View style={styles.cardTitleRow}>
             <Ionicons name="calendar-outline" size={18} color={themeColors.primary} />
             <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.timeTitle')}</Text>
+            <Pressable
+              onPress={() => navigation.navigate('TimeRangePicker', { stationId: params.stationId, connectorId: params.connectorId })}
+              hitSlop={6}
+              style={{ marginLeft: 'auto', paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6' }}
+            >
+              <Text style={{ color: themeColors.primary, fontSize: 12, fontWeight: '600' }}>
+                {t('bookingConfirmation.changeTime', 'Đổi giờ')}
+              </Text>
+            </Pressable>
           </View>
 
           <View style={styles.timeBlock}>
@@ -209,7 +405,10 @@ export function BookingConfirmationScreen() {
           <View style={styles.cardTitleRow}>
             <Ionicons name="receipt-outline" size={18} color={themeColors.primary} />
             <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.invoiceTitle')}</Text>
-            <StatusBadge variant="neutral" label={previewCode} />
+            <StatusBadge
+              variant={backendPreview ? 'success' : 'neutral'}
+              label={backendPreview ? `${previewCode} · BE Verified` : previewCode}
+            />
           </View>
 
           {quote.priceLines.map((line, i) => (

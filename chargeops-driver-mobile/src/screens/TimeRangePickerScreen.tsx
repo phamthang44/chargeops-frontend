@@ -427,6 +427,7 @@ export function TimeRangePickerScreen() {
       connectorId: connector.id,
       startAt,
       durationMin,
+      priceRanges: availability?.priceRanges,
     });
   }
 

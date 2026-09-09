@@ -39,6 +39,8 @@ export type RootStackParamList = {
     connectorId: string;
     startAt: string;
     durationMin: number;
+    priceRanges?: { startAt: string; endAt: string; rateVndPerKwh: number; periodCode?: string }[];
+    isFastTrack?: boolean;
   };
   // "Waiting for payment" — booking is PENDING until the gateway confirms.
   PaymentProcessing: { bookingId: string };

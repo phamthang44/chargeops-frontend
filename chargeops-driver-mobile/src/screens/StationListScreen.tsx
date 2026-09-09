@@ -49,6 +49,7 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import type { RootStackParamList } from '@/navigation/types';
 import { getUnreadCount, type AppNotification } from '@/services/notificationService';
 import { getNearbyStations, STATION_PAGE_SIZE, type StationFilter } from '@/services/stationService';
+import { executeQuickBook } from '@/utils/quickBook';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { ConnectorType, Station } from '@/types';
 
@@ -133,6 +134,7 @@ export function StationListScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [promoDismissed, setPromoDismissed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [quickBookingId, setQuickBookingId] = useState<string | null>(null);
 
   // Parallel background fetching of provinces and unread notifications (non-blocking, zero-lag)
   useEffect(() => {
@@ -375,7 +377,12 @@ export function StationListScreen() {
             station={item}
             onOpen={() => navigation.navigate('StationDetail', { stationId: item.id, distanceKm: item.distanceKm })}
             onDirections={() => navigation.navigate('Tabs', { screen: 'Map' })}
-            onQuickBook={() => navigation.navigate('StationDetail', { stationId: item.id, distanceKm: item.distanceKm })}
+            isQuickBooking={quickBookingId === item.id}
+            onQuickBook={() => {
+              executeQuickBook(item.id, navigation, (loading) => {
+                setQuickBookingId(loading ? item.id : null);
+              });
+            }}
           />
         )}
         refreshControl={

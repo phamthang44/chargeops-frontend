@@ -675,6 +675,8 @@
   },
   "payment": {
     "title": "Phương thức thanh toán",
+    "SIMULATOR": "Thanh toán giả lập (Demo Sandbox)",
+    "SIMULATOR_desc": "Mô phỏng thanh toán tức thì phục vụ demo đồ án",
     "MOMO": "Ví MoMo",
     "MOMO_desc": "Thanh toán qua ứng dụng ví MoMo",
     "VISA": "Thẻ Quốc tế (Visa/Master)",
@@ -701,7 +703,11 @@
     "paymentTitle": "Phương thức thanh toán",
     "totalPayment": "Tổng tiền thanh toán",
     "payBtn": "Thanh toán {{amount}}",
-    "errorTitle": "Không thể tạo lượt đặt"
+    "errorTitle": "Không thể tạo lượt đặt",
+    "fastTrackTitle": "⚡ Đặt chỗ nhanh (1-Click)",
+    "fastTrackDesc": "Đã tự động chọn cổng khả dụng tốt nhất & khung giờ sạc sớm nhất.",
+    "changeConnector": "Đổi cổng",
+    "changeTime": "Đổi giờ"
   },
   "bookingConfirm": {
     "title": "Xác nhận đặt chỗ",

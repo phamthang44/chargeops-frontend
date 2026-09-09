@@ -38,7 +38,7 @@ export function BaseConfigStep({
               <div className="mt-0.5 text-[12px] text-faint">
                 {t('pricing.steps.step1.groupHelp', {
                   defaultValue:
-                    'Chủ trạm chọn mức sạc tối thiểu (30 / 60 / 90 phút) để tránh các booking quá ngắn gây lắt nhắt.',
+                    'Chủ trạm chọn mức sạc tối thiểu (30 hoặc 60 phút) để tránh các booking quá ngắn gây lắt nhắt.',
                 })}
               </div>
             </div>
@@ -49,22 +49,42 @@ export function BaseConfigStep({
           </div>
           <div className="flex gap-[6px] rounded-[11px] bg-chip p-1">
             {MIN_DURATION_PRESETS.map((m) => {
+              const isLocked = m === 90;
               const on = m === minBookingDurationMin;
               return (
                 <button
                   key={m}
                   type="button"
-                  onClick={() => onMinDuration(m)}
-                  className={`flex-1 rounded-lg py-[10px] text-center text-[13.5px] font-semibold transition cursor-pointer ${
-                    on
-                      ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(16,17,26,.1)] ring-1 ring-line-2'
-                      : 'text-faint hover:text-body'
+                  disabled={isLocked}
+                  onClick={() => !isLocked && onMinDuration(m)}
+                  title={
+                    isLocked
+                      ? 'Mốc 90 phút chưa được xác thực trong vận hành thực tế nên tạm thời bị khóa'
+                      : undefined
+                  }
+                  className={`flex-1 rounded-lg py-[10px] text-center text-[13.5px] font-semibold transition ${
+                    isLocked
+                      ? 'opacity-40 cursor-not-allowed bg-transparent text-faint'
+                      : on
+                        ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(16,17,26,.1)] ring-1 ring-line-2 cursor-pointer'
+                        : 'text-faint hover:text-body cursor-pointer'
                   }`}
                 >
-                  {t('pricing.steps.step1.durationVal', { minutes: m, defaultValue: `${m} phút` })}
+                  <span>{t('pricing.steps.step1.durationVal', { minutes: m, defaultValue: `${m} phút` })}</span>
+                  {isLocked && (
+                    <span className="block text-[10px] font-medium text-amber-500 mt-0.5 tracking-tight">
+                      (Tạm khóa)
+                    </span>
+                  )}
                 </button>
               );
             })}
+          </div>
+
+          {/* Warning for unverified 90m duration */}
+          <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+            <span>⚠️</span>
+            <span>Mốc 90 phút chưa được kiểm chứng vận hành thực tế nên tạm thời bị khóa.</span>
           </div>
 
           {/* Dynamic Example Hint */}

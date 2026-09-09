@@ -62,7 +62,7 @@ export const apiBaseUrl = resolveDevUrl(
 export const isMockMode = (): boolean => process.env.EXPO_PUBLIC_USE_MOCKS === 'true';
 
 let activeAccessTokenGetter: (() => string | null) | null = null;
-
+const connectorCache = new Map<string, Connector>();
 
 /**
  * Configure global token provider so all station service calls automatically
@@ -310,6 +310,7 @@ export async function getStationDetail(
           const station = adaptStationDiscoveryDetail(rawDetail);
           const chargePoints = adaptChargePointsFromDetail(rawDetail);
           const connectors = adaptConnectorsFromDetail(rawDetail, station.minRatePerKwh);
+          connectors.forEach((c) => connectorCache.set(c.id, c));
           return { station, chargePoints, connectors };
         }
       }
@@ -457,13 +458,29 @@ export async function getStationAvailability(
   });
 }
 
-export async function getChargePointsByStation(stationId: string): Promise<ChargePoint[]> {
-  // NOW: return mock. LATER: GET /stations/:stationId/charge-points
+export async function getChargePointsByStation(
+  stationId: string,
+  options?: { accessToken?: string | null },
+): Promise<ChargePoint[]> {
+  if (!isMockMode()) {
+    const bundle = await getStationDetail(stationId, options);
+    if (bundle?.chargePoints && bundle.chargePoints.length > 0) {
+      return bundle.chargePoints;
+    }
+  }
   return simulateNetwork(driverVisibleChargePoints(stationId));
 }
 
-export async function getConnectorsByStation(stationId: string): Promise<Connector[]> {
-  // NOW: return mock. LATER: GET /stations/:stationId/connectors
+export async function getConnectorsByStation(
+  stationId: string,
+  options?: { accessToken?: string | null },
+): Promise<Connector[]> {
+  if (!isMockMode()) {
+    const bundle = await getStationDetail(stationId, options);
+    if (bundle?.connectors && bundle.connectors.length > 0) {
+      return bundle.connectors;
+    }
+  }
   const connectors = connectorsMock.filter((c) =>
     driverVisibleChargePoints(stationId).some((cp) => cp.id === c.chargePointId),
   );
@@ -471,7 +488,8 @@ export async function getConnectorsByStation(stationId: string): Promise<Connect
 }
 
 export async function getConnectorById(connectorId: string): Promise<Connector | null> {
-  // NOW: return mock. LATER: GET /connectors/:id
+  const cached = connectorCache.get(connectorId);
+  if (cached) return cached;
   return simulateNetwork(connectorsMock.find((c) => c.id === connectorId) ?? null);
 }
 

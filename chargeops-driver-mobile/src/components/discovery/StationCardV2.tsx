@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { StationThumb } from '@/components/StationThumb';
@@ -16,6 +16,7 @@ interface StationCardV2Props {
   onOpen: () => void;
   onDirections: () => void;
   onQuickBook?: () => void;
+  isQuickBooking?: boolean;
 }
 
 function etaMinutes(distanceKm?: number): number {
@@ -31,6 +32,7 @@ export function StationCardV2({
   onOpen,
   onDirections,
   onQuickBook,
+  isQuickBooking,
 }: StationCardV2Props) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
@@ -319,20 +321,27 @@ export function StationCardV2({
           ]}
           onPress={canBook ? (onQuickBook || onOpen) : onOpen}
           hitSlop={4}
+          disabled={isQuickBooking}
         >
-          <Ionicons
-            name={actionIcon}
-            size={15}
-            color={!canBook ? (isDark ? '#64748B' : themeColors.textMuted) : '#FFFFFF'}
-          />
-          <Text
-            style={[
-              styles.primaryActionText,
-              { color: !canBook ? (isDark ? '#64748B' : themeColors.textMuted) : '#FFFFFF' },
-            ]}
-          >
-            {actionLabel}
-          </Text>
+          {isQuickBooking ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              <Ionicons
+                name={actionIcon}
+                size={15}
+                color={!canBook ? (isDark ? '#64748B' : themeColors.textMuted) : '#FFFFFF'}
+              />
+              <Text
+                style={[
+                  styles.primaryActionText,
+                  { color: !canBook ? (isDark ? '#64748B' : themeColors.textMuted) : '#FFFFFF' },
+                ]}
+              >
+                {actionLabel}
+              </Text>
+            </>
+          )}
         </Pressable>
       </View>
     </Pressable>

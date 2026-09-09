@@ -162,7 +162,7 @@ export interface BookingPriceLine {
 }
 
 /** Payment methods offered on the booking-confirmation screen. */
-export type PaymentMethod = 'MOMO' | 'VISA' | 'ZALOPAY' | 'ATM' | 'WALLET';
+export type PaymentMethod = 'MOMO' | 'VISA' | 'ZALOPAY' | 'ATM' | 'WALLET' | 'SIMULATOR';
 
 /**
  * A booking, denormalized for display. It reserves a continuous time range on
@@ -219,6 +219,10 @@ export interface CreateBookingRequest {
   startAt: string; // ISO datetime
   durationMin: number;
   paymentMethod: PaymentMethod;
+  acceptedTotalAmount?: number;
+  acceptedPricingVersion?: string;
+  acceptedPolicyVersion?: string;
+  backendPriceRanges?: { startAt: string; endAt: string; rateVndPerKwh: number; periodCode?: string }[];
 }
 
 /** A driver review for a station (display only; submission not yet specified). */

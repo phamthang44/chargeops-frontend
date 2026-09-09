@@ -35,6 +35,7 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import type { RootStackParamList } from '@/navigation/types';
 import { getUnreadCount, type AppNotification } from '@/services/notificationService';
 import { getNearbyStations, type StationFilter } from '@/services/stationService';
+import { executeQuickBook } from '@/utils/quickBook';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Station } from '@/types';
 
@@ -226,7 +227,7 @@ export function MapScreen() {
             onDirections={(st) => {
               mapRef.current?.navigateToStation(st);
             }}
-            onQuickBook={(id) => navigation.navigate('StationDetail', { stationId: id, distanceKm: selectedStation.distanceKm })}
+            onQuickBook={(id) => executeQuickBook(id, navigation)}
             onClose={() => setSelected(null)}
             bottomOffset={tabInset + 12}
           />

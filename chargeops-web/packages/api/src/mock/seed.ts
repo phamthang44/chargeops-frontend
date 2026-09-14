@@ -929,6 +929,8 @@ export function buildMockDb(): MockDb {
       { id: 'TOU-2', name: 'Giờ thấp điểm', days: 'daily', from: '21:00', to: '05:00', rateVnd: 2800 },
     ],
     availability: { autoLock: true, maxAdvanceDays: 2, bufferMinutes: 10 },
+    scheduleStatus: 'ACTIVE',
+    version: 1,
   };
 
   return {

@@ -119,19 +119,33 @@ export function OperatingHoursStep({
         <div className="flex flex-col gap-2 rounded-[10px] border border-line-2 bg-surface-2/70 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-bold text-emerald-600 border border-emerald-500/25">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {t('pricing.steps.step2.activeSchedule', { defaultValue: 'Đang áp dụng' })}
-              </span>
-              {effectiveFrom ? (
-                <span className="inline-flex items-center gap-1 text-[12px] text-muted font-mono">
-                  {t('pricing.steps.step2.effectiveFrom', { defaultValue: 'Có hiệu lực từ:' })}{' '}
-                  <strong className="text-ink font-semibold">{formatDateTimeVn(effectiveFrom)}</strong>
-                </span>
+              {scheduleStatus === 'UNCONFIGURED' ? (
+                <>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11.5px] font-bold text-amber-600 border border-amber-500/25">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    {t('pricing.steps.step2.unconfigured', { defaultValue: 'Chưa cấu hình' })}
+                  </span>
+                  <span className="text-[12px] text-amber-700/90 dark:text-amber-300/90 italic">
+                    {t('pricing.steps.step2.unconfiguredHint', { defaultValue: 'Trạm chưa lưu cấu hình giá & lịch. Vui lòng thiết lập và lưu để bắt đầu nhận lịch sạc.' })}
+                  </span>
+                </>
               ) : (
-                <span className="text-[12px] text-muted italic">
-                  {t('pricing.steps.step2.defaultSchedule', { defaultValue: 'Đang áp dụng lịch mặc định hệ thống' })}
-                </span>
+                <>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-bold text-emerald-600 border border-emerald-500/25">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {t('pricing.steps.step2.activeSchedule', { defaultValue: 'Đang áp dụng' })}
+                  </span>
+                  {effectiveFrom ? (
+                    <span className="inline-flex items-center gap-1 text-[12px] text-muted font-mono">
+                      {t('pricing.steps.step2.effectiveFrom', { defaultValue: 'Có hiệu lực từ:' })}{' '}
+                      <strong className="text-ink font-semibold">{formatDateTimeVn(effectiveFrom)}</strong>
+                    </span>
+                  ) : (
+                    <span className="text-[12px] text-muted italic">
+                      {t('pricing.steps.step2.defaultSchedule', { defaultValue: 'Đang áp dụng lịch mặc định hệ thống' })}
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>

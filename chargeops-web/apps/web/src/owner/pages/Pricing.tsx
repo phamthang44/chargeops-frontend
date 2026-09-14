@@ -56,7 +56,24 @@ export function Pricing() {
       toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình và áp dụng thành công!' }), 'success');
     },
     onError: (e) => {
-      toast((e as Error).message, 'error');
+      const msg = (e as Error)?.message || '';
+      if (
+        msg.includes('409') ||
+        msg.toLowerCase().includes('conflict') ||
+        msg.includes('STATION_053') ||
+        msg.includes('xung đột')
+      ) {
+        qc.invalidateQueries({ queryKey: ['pricing', selectedStationId] });
+        toast(
+          t('pricing.conflictError', {
+            defaultValue:
+              'Cấu hình đã bị thay đổi bởi một phiên làm việc khác. Dữ liệu mới nhất đã được tải lại, vui lòng kiểm tra và thử lại.',
+          }),
+          'error',
+        );
+      } else {
+        toast(msg || t('pricing.saveError', { defaultValue: 'Không thể lưu cấu hình trạm' }), 'error');
+      }
     },
   });
 

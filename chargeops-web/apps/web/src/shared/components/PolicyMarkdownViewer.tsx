@@ -23,6 +23,39 @@ interface PolicyMarkdownViewerProps {
   onCopySuccess?: () => void;
 }
 
+const TYPOGRAPHY_SCALES = {
+  [-1]: {
+    body: 'text-[13px]',
+    sub: 'text-[12px]',
+    h1: 'text-[21px]',
+    h2: 'text-[16px]',
+    h3: 'text-[13.5px]',
+    table: 'text-[12px]',
+    code: 'text-[11.5px]',
+    leading: 'leading-[1.65]',
+  },
+  0: {
+    body: 'text-[15px]',
+    sub: 'text-[13.5px]',
+    h1: 'text-[24px]',
+    h2: 'text-[18.5px]',
+    h3: 'text-[15.5px]',
+    table: 'text-[13.5px]',
+    code: 'text-[13px]',
+    leading: 'leading-[1.7]',
+  },
+  1: {
+    body: 'text-[17.5px]',
+    sub: 'text-[15px]',
+    h1: 'text-[28px]',
+    h2: 'text-[22px]',
+    h3: 'text-[18px]',
+    table: 'text-[15px]',
+    code: 'text-[14.5px]',
+    leading: 'leading-[1.75]',
+  },
+} as const;
+
 export function PolicyMarkdownViewer({
   content,
   searchQuery = '',
@@ -31,8 +64,30 @@ export function PolicyMarkdownViewer({
   onCopySuccess,
 }: PolicyMarkdownViewerProps) {
   const [copied, setCopied] = useState(false);
-  const [fontSizeOffset, setFontSizeOffset] = useState<number>(0); // -1, 0, +1
+  const [fontSizeOffset, setFontSizeOffset] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('chargeops_policy_font_size');
+      if (saved !== null) {
+        const val = Number(saved);
+        if (val === -1 || val === 0 || val === 1) return val;
+      }
+    } catch {
+      // ignore
+    }
+    return 0;
+  });
   const [activeHeadingId, setActiveHeadingId] = useState<string>('');
+
+  const handleSetFontSize = (offset: number) => {
+    setFontSizeOffset(offset);
+    try {
+      localStorage.setItem('chargeops_policy_font_size', String(offset));
+    } catch {
+      // ignore
+    }
+  };
+
+  const typo = TYPOGRAPHY_SCALES[fontSizeOffset as -1 | 0 | 1] ?? TYPOGRAPHY_SCALES[0];
 
   // 1. Calculate reading stats
   const stats = useMemo(() => {
@@ -112,7 +167,7 @@ export function PolicyMarkdownViewer({
         tokens.push(
           <code
             key={idx}
-            className="rounded bg-chip px-1.5 py-0.5 font-mono text-[12px] font-medium text-brand-strong"
+            className={`rounded bg-chip px-1.5 py-0.5 font-mono font-medium text-brand-strong ${typo.code}`}
           >
             {highlightText(p.slice(1, -1), query)}
           </code>,
@@ -176,7 +231,7 @@ export function PolicyMarkdownViewer({
       const body = tableRows.slice(1);
       const node = (
         <div key={key} className="my-4 overflow-x-auto rounded-lg border border-line bg-surface">
-          <table className="w-full text-left text-[12.5px]">
+          <table className={`w-full text-left ${typo.table}`}>
             <thead>
               <tr className="border-b border-line bg-surface-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
                 {headers.map((h, i) => (
@@ -211,7 +266,7 @@ export function PolicyMarkdownViewer({
       const node = (
         <div
           key={key}
-          className="my-4 flex items-start gap-3 rounded-xl border border-brand-line bg-brand-faint p-3.5 text-[13px] leading-relaxed text-body"
+          className={`my-4 flex items-start gap-3 rounded-xl border border-brand-line bg-brand-faint p-3.5 text-body ${typo.sub} ${typo.leading}`}
         >
           <IconInfoCircle size={18} className="mt-0.5 shrink-0 text-brand" />
           <div className="flex-1">{renderInline(text, searchQuery)}</div>
@@ -271,7 +326,7 @@ export function PolicyMarkdownViewer({
         if (level === 1) {
           elements.push(
             <div key={`h1-${i}`} id={id} className="mb-4 mt-2 border-b border-line pb-3 scroll-mt-6">
-              <h1 className="text-[23px] font-extrabold tracking-tight text-ink">
+              <h1 className={`${typo.h1} font-extrabold tracking-tight text-ink`}>
                 {renderInline(text, searchQuery)}
               </h1>
             </div>,
@@ -280,7 +335,7 @@ export function PolicyMarkdownViewer({
           elements.push(
             <div key={`h2-${i}`} id={id} className="mb-3 mt-6 flex items-center gap-2.5 scroll-mt-6">
               <span className="h-4 w-1 rounded-full bg-brand" />
-              <h2 className="text-[17px] font-bold text-ink">{renderInline(text, searchQuery)}</h2>
+              <h2 className={`${typo.h2} font-bold text-ink`}>{renderInline(text, searchQuery)}</h2>
             </div>,
           );
         } else {
@@ -290,7 +345,7 @@ export function PolicyMarkdownViewer({
               id={id}
               className="mb-2 mt-5 flex items-center justify-between rounded-lg bg-surface-2/80 px-3 py-1.5 scroll-mt-6 border border-line-3"
             >
-              <h3 className="text-[14px] font-bold text-body">{renderInline(text, searchQuery)}</h3>
+              <h3 className={`${typo.h3} font-bold text-body`}>{renderInline(text, searchQuery)}</h3>
               <a
                 href={`#${id}`}
                 onClick={(e) => {
@@ -312,8 +367,8 @@ export function PolicyMarkdownViewer({
       if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         const itemText = trimmed.replace(/^[-*]\s+/, '');
         elements.push(
-          <div key={`li-${i}`} className="my-1.5 flex items-start gap-2.5 pl-2 text-[13.5px] leading-relaxed text-body">
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/70" />
+          <div key={`li-${i}`} className={`my-2 flex items-start gap-2.5 pl-2 text-body ${typo.body} ${typo.leading}`}>
+            <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/70" />
             <div className="flex-1">{renderInline(itemText, searchQuery)}</div>
           </div>,
         );
@@ -326,7 +381,7 @@ export function PolicyMarkdownViewer({
         const num = numMatch[1];
         const itemText = numMatch[2];
         elements.push(
-          <div key={`num-${i}`} className="my-2 flex items-start gap-2.5 pl-1 text-[13.5px] leading-relaxed text-body">
+          <div key={`num-${i}`} className={`my-2.5 flex items-start gap-2.5 pl-1 text-body ${typo.body} ${typo.leading}`}>
             <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-canvas text-[11px] font-bold text-muted border border-line-2">
               {num}
             </span>
@@ -340,7 +395,7 @@ export function PolicyMarkdownViewer({
       if (line.startsWith('   - ') || line.startsWith('     - ')) {
         const itemText = trimmed.replace(/^[-*]\s+/, '');
         elements.push(
-          <div key={`subli-${i}`} className="my-1 flex items-start gap-2 pl-8 text-[13px] leading-relaxed text-muted">
+          <div key={`subli-${i}`} className={`my-1.5 flex items-start gap-2 pl-8 text-muted ${typo.sub} ${typo.leading}`}>
             <span className="mt-2 h-1.2 w-1.2 shrink-0 rounded-full bg-ghost" />
             <div className="flex-1">{renderInline(itemText, searchQuery)}</div>
           </div>,
@@ -350,7 +405,7 @@ export function PolicyMarkdownViewer({
 
       // Standard paragraph
       elements.push(
-        <p key={`p-${i}`} className="my-2 text-[13.5px] leading-relaxed text-body">
+        <p key={`p-${i}`} className={`my-2.5 text-body ${typo.body} ${typo.leading}`}>
           {renderInline(trimmed, searchQuery)}
         </p>,
       );
@@ -361,13 +416,6 @@ export function PolicyMarkdownViewer({
 
     return elements;
   };
-
-  const fontSizeClass =
-    fontSizeOffset === 1
-      ? 'text-[14.5px]'
-      : fontSizeOffset === -1
-        ? 'text-[12.5px]'
-        : 'text-[13.5px]';
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
@@ -400,25 +448,38 @@ export function PolicyMarkdownViewer({
           {/* Font size toggles */}
           <div className="mr-1 flex items-center rounded-lg border border-line bg-canvas p-0.5">
             <button
-              onClick={() => setFontSizeOffset((v) => Math.max(-1, v - 1))}
-              disabled={fontSizeOffset === -1}
-              className="rounded px-2 py-0.5 text-[11px] font-semibold text-muted hover:bg-surface disabled:opacity-40"
-              title="Cỡ chữ nhỏ hơn"
+              type="button"
+              onClick={() => handleSetFontSize(-1)}
+              className={`rounded px-2.5 py-0.5 text-[11px] font-semibold transition ${
+                fontSizeOffset === -1
+                  ? 'bg-surface text-ink font-bold shadow-xs'
+                  : 'text-muted hover:bg-surface/60 hover:text-ink'
+              }`}
+              title="Cỡ chữ nhỏ (13px)"
             >
               A-
             </button>
             <button
-              onClick={() => setFontSizeOffset(0)}
-              className={`rounded px-2 py-0.5 text-[11px] font-semibold ${fontSizeOffset === 0 ? 'bg-surface text-ink shadow-xs' : 'text-muted hover:bg-surface'}`}
-              title="Cỡ chữ chuẩn"
+              type="button"
+              onClick={() => handleSetFontSize(0)}
+              className={`rounded px-2.5 py-0.5 text-[11px] font-semibold transition ${
+                fontSizeOffset === 0
+                  ? 'bg-surface text-ink font-bold shadow-xs'
+                  : 'text-muted hover:bg-surface/60 hover:text-ink'
+              }`}
+              title="Cỡ chữ chuẩn (15px)"
             >
               A
             </button>
             <button
-              onClick={() => setFontSizeOffset((v) => Math.min(1, v + 1))}
-              disabled={fontSizeOffset === 1}
-              className="rounded px-2 py-0.5 text-[11px] font-semibold text-muted hover:bg-surface disabled:opacity-40"
-              title="Cỡ chữ lớn hơn"
+              type="button"
+              onClick={() => handleSetFontSize(1)}
+              className={`rounded px-2.5 py-0.5 text-[11px] font-semibold transition ${
+                fontSizeOffset === 1
+                  ? 'bg-surface text-ink font-bold shadow-xs'
+                  : 'text-muted hover:bg-surface/60 hover:text-ink'
+              }`}
+              title="Cỡ chữ lớn (17.5px)"
             >
               A+
             </button>
@@ -455,7 +516,7 @@ export function PolicyMarkdownViewer({
       {/* Main Container: Split with Table of Contents if enabled */}
       <div className={`grid items-start gap-5 ${showToc && headings.length > 1 ? 'lg:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
         {/* Document Content View */}
-        <div className={`rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs ${fontSizeClass}`}>
+        <div className={`rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs transition-[font-size] duration-150 ${typo.body} ${typo.leading}`}>
           {renderDocumentBlocks()}
         </div>
 

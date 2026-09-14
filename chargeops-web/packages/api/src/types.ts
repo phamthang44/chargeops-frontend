@@ -691,7 +691,6 @@ export interface CurrentStaffContextResponse {
 
 export interface StaffLookupResponse {
   exists: boolean;
-  userId?: string;
   email?: string;
   displayName?: string;
   maskedPhone?: string;
@@ -815,7 +814,8 @@ export interface PricingConfig {
   /** Active schedule version metadata */
   scheduleEffectiveFrom?: string | null;
   scheduleEffectiveTo?: string | null;
-  scheduleStatus?: 'ACTIVE' | 'DEFAULT' | string;
+  scheduleStatus?: 'ACTIVE' | 'DEFAULT' | 'UNCONFIGURED' | string;
+  version?: number;
 }
 
 export interface StationScheduleHistoryItem {

@@ -21,6 +21,7 @@ import {
   mapFrontendSortToBackend,
   type BackendChargePointResponse,
   type BackendConnectorResponse,
+  type BackendPriceBasis,
   type BackendPriceRangeResponse,
   type BackendStationAvailabilityResponse,
   type BackendStationDiscoveryDetail,
@@ -43,6 +44,7 @@ export {
   mapFrontendSortToBackend,
   type BackendChargePointResponse,
   type BackendConnectorResponse,
+  type BackendPriceBasis,
   type BackendPriceRangeResponse,
   type BackendStationAvailabilityResponse,
   type BackendStationDiscoveryDetail,
@@ -417,6 +419,14 @@ export async function getStationAvailability(
           },
         ];
 
+  const now = new Date();
+  const earliestStart = new Date(Math.ceil((now.getTime() + 60 * 60 * 1000) / (30 * 60 * 1000)) * (30 * 60 * 1000));
+  const coverageStartAt = `${date}T00:00:00+07:00`;
+  const nextDay = new Date(`${date}T00:00:00+07:00`);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const nextDayStr = `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}`;
+  const coverageEndAt = `${nextDayStr}T03:00:00+07:00`;
+
   // Realistic mock availability
   return simulateNetwork({
     stationId,
@@ -424,9 +434,19 @@ export async function getStationAvailability(
     date,
     timezone: 'Asia/Ho_Chi_Minh',
     generatedAt: new Date().toISOString(),
+    earliestStartAt: earliestStart.toISOString(),
+    coverageStartAt,
+    coverageEndAt,
     minDurationMinutes: 30,
     durationStepMinutes: 30,
     maxDurationMinutes: 180,
+    policyVersion: 'booking-v4.9',
+    pricingEstimateParameters: {
+      chargingPricingType: 'FIXED_PRICE_TIER',
+      powerKw: 120,
+      energyFactor: 0.9,
+      formulaVersion: 'booking-estimate-v1',
+    },
     operatingWindows,
     busyRanges,
     priceRanges: [

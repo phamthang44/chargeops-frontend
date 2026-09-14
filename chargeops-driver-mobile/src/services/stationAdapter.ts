@@ -137,15 +137,27 @@ export interface BackendPriceRangeResponse {
   periodCode?: 'NORMAL' | 'PEAK' | 'OFF_PEAK' | string;
 }
 
+export interface BackendPriceBasis {
+  chargingPricingType?: string;
+  powerKw?: number;
+  energyFactor?: number;
+  formulaVersion?: string;
+}
+
 export interface BackendStationAvailabilityResponse {
   stationId: string;
   connectorId: string;
   date: string; // YYYY-MM-DD
   timezone: string;
   generatedAt: string;
+  earliestStartAt?: string; // ISO datetime - earliest valid start accounting for lead time and grid
+  coverageStartAt?: string; // ISO datetime - start of availability coverage window
+  coverageEndAt?: string; // ISO datetime - end of coverage window (extends past midnight for overnight sessions)
   minDurationMinutes: number;
   durationStepMinutes: number;
   maxDurationMinutes: number;
+  policyVersion?: string;
+  pricingEstimateParameters?: BackendPriceBasis;
   operatingWindows: BackendTimeRangeResponse[];
   busyRanges: BackendTimeRangeResponse[];
   priceRanges: BackendPriceRangeResponse[]; // Nested response for available booking times with pricing (FR04)

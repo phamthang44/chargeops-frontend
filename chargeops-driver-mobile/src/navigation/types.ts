@@ -32,7 +32,7 @@ export type RootStackParamList = {
   Tabs: NavigatorScreenParams<BottomTabParamList> | undefined;
   StationDetail: { stationId: string; distanceKm?: number };
   // Pick a date, a start time and a duration on one Connector (FR05/FR11).
-  TimeRangePicker: { stationId: string; connectorId?: string };
+  TimeRangePicker: { stationId: string; connectorId?: string; isFromFastTrack?: boolean };
   // Review the chosen window + pick a payment method, then create the booking.
   BookingConfirmation: {
     stationId: string;

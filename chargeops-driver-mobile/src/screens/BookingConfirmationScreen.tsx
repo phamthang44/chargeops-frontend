@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton, BottomSheet, GlassButton, StatusBadge } from '@/components';
@@ -217,6 +217,27 @@ export function BookingConfirmationScreen() {
     }
   }
 
+  const handleBack = useCallback(() => {
+    if (params.isFastTrack) {
+      navigation.replace('TimeRangePicker', {
+        stationId: params.stationId,
+        connectorId: params.connectorId,
+        isFromFastTrack: true,
+      });
+      return true;
+    }
+    navigation.goBack();
+    return true;
+  }, [navigation, params]);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [handleBack]);
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'left', 'right']}>
@@ -234,7 +255,7 @@ export function BookingConfirmationScreen() {
             glassEffectStyle="regular"
             fallbackColor={themeColors.surfaceAlt}
             accessibilityLabel={t('common.back')}
-            onPress={() => navigation.goBack()}
+            onPress={handleBack}
           >
             <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
           </GlassButton>
@@ -252,7 +273,7 @@ export function BookingConfirmationScreen() {
           <AppButton
             label={t('common.back', 'Quay lại')}
             variant="secondary"
-            onPress={() => navigation.goBack()}
+            onPress={handleBack}
             style={{ marginTop: spacing.md }}
           />
         </View>
@@ -269,7 +290,7 @@ export function BookingConfirmationScreen() {
           glassEffectStyle="regular"
           fallbackColor={themeColors.surfaceAlt}
           accessibilityLabel={t('common.back')}
-          onPress={() => navigation.goBack()}
+          onPress={handleBack}
         >
           <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
         </GlassButton>

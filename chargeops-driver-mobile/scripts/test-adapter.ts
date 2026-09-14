@@ -176,9 +176,19 @@ const mockAvailabilityResponse: BackendStationAvailabilityResponse = {
   date: '2026-09-01',
   timezone: 'Asia/Ho_Chi_Minh',
   generatedAt: '2026-09-01T08:00:00Z',
+  earliestStartAt: '2026-09-01T09:30:00Z',
+  coverageStartAt: '2026-09-01T00:00:00+07:00',
+  coverageEndAt: '2026-09-02T03:00:00+07:00',
   minDurationMinutes: 30,
   durationStepMinutes: 15,
   maxDurationMinutes: 180,
+  policyVersion: 'booking-v4.9',
+  pricingEstimateParameters: {
+    chargingPricingType: 'FIXED_PRICE_TIER',
+    powerKw: 120,
+    energyFactor: 0.9,
+    formulaVersion: 'booking-estimate-v1',
+  },
   operatingWindows: [{ startAt: '2026-09-01T06:00:00Z', endAt: '2026-09-01T22:00:00Z' }],
   busyRanges: [{ startAt: '2026-09-01T09:00:00Z', endAt: '2026-09-01T10:00:00Z' }],
   priceRanges: [
@@ -191,6 +201,10 @@ const mockAvailabilityResponse: BackendStationAvailabilityResponse = {
 assert(mockAvailabilityResponse.priceRanges.length === 3, 'priceRanges has 3 items');
 assert(mockAvailabilityResponse.priceRanges[1].rateVndPerKwh === 4200, 'PEAK rate is 4200');
 assert(mockAvailabilityResponse.priceRanges[1].periodCode === 'PEAK', 'periodCode is PEAK');
+assert(mockAvailabilityResponse.earliestStartAt === '2026-09-01T09:30:00Z', 'earliestStartAt is present');
+assert(mockAvailabilityResponse.coverageEndAt === '2026-09-02T03:00:00+07:00', 'coverageEndAt extends past midnight');
+assert(mockAvailabilityResponse.policyVersion === 'booking-v4.9', 'policyVersion is booking-v4.9');
+assert(mockAvailabilityResponse.pricingEstimateParameters?.powerKw === 120, 'pricingEstimateParameters powerKw is 120');
 
 console.log('\n--- Testing adaptCancellationPolicy (Booking v4.9 schema) ---');
 

@@ -306,6 +306,7 @@ export type {
   BackendChargePointResponse,
   BackendConnectorResponse,
   BackendOperatingHour,
+  BackendPriceBasis,
   BackendPriceRangeResponse,
   BackendStationAsset,
   BackendStationAvailabilityResponse,

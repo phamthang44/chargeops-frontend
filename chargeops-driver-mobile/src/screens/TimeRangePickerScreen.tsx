@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, GlassButton } from '@/components';
@@ -25,6 +25,7 @@ import {
   getStationAvailability,
   getStationDetail,
   isRangeBusy,
+  isRangeInOperatingWindows,
   type BackendStationAvailabilityResponse,
 } from '@/services/stationService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -147,69 +148,19 @@ export function TimeRangePickerScreen() {
     const dateParam = formatDateParam(selectedDate);
     const token = getAccessToken();
 
-    const isToday = selectedDate.toDateString() === new Date().toDateString();
-    const isCrossMidnightStation = Boolean(
-      station?.open24Hours || (station?.opensAtMin === 0 && station?.closesAtMin === 1440),
-    );
-
-    if (isToday && isCrossMidnightStation) {
-      const tomorrowDate = new Date(selectedDate);
-      tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-      const tomorrowDateParam = formatDateParam(tomorrowDate);
-
-      Promise.all([
-        getStationAvailability(params.stationId, connector.id, dateParam, { accessToken: token }),
-        getStationAvailability(params.stationId, connector.id, tomorrowDateParam, { accessToken: token }),
-      ])
-        .then(([todayData, tomorrowData]) => {
-          if (!active) return;
-          if (!todayData) {
-            setAvailability(null);
-            setAvailabilityError(true);
-            setLoading(false);
-            return;
-          }
-
-          const mergedAvailability: BackendStationAvailabilityResponse = {
-            ...todayData,
-            busyRanges: [
-              ...(todayData.busyRanges ?? []),
-              ...(tomorrowData?.busyRanges ?? []),
-            ],
-            priceRanges: [
-              ...(todayData.priceRanges ?? []),
-              ...(tomorrowData?.priceRanges ?? []),
-            ],
-            operatingWindows: [
-              ...(todayData.operatingWindows ?? []),
-              ...(tomorrowData?.operatingWindows ?? []),
-            ],
-          };
-          setAvailability(mergedAvailability);
-          setAvailabilityError(false);
-          setLoading(false);
-        })
-        .catch(() => {
-          if (!active) return;
-          setAvailability(null);
-          setAvailabilityError(true);
-          setLoading(false);
-        });
-    } else {
-      getStationAvailability(params.stationId, connector.id, dateParam, { accessToken: token })
-        .then((data) => {
-          if (!active) return;
-          setAvailability(data);
-          setAvailabilityError(!data);
-          setLoading(false);
-        })
-        .catch(() => {
-          if (!active) return;
-          setAvailability(null);
-          setAvailabilityError(true);
-          setLoading(false);
-        });
-    }
+    getStationAvailability(params.stationId, connector.id, dateParam, { accessToken: token })
+      .then((data) => {
+        if (!active) return;
+        setAvailability(data);
+        setAvailabilityError(!data);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setAvailability(null);
+        setAvailabilityError(true);
+        setLoading(false);
+      });
 
     return () => {
       active = false;
@@ -218,9 +169,6 @@ export function TimeRangePickerScreen() {
     params.stationId,
     connector,
     selectedDate,
-    station?.open24Hours,
-    station?.opensAtMin,
-    station?.closesAtMin,
     getAccessToken,
   ]);
 
@@ -254,55 +202,57 @@ export function TimeRangePickerScreen() {
   const isCrossMidnightStation = Boolean(
     station?.open24Hours || (opensAtMin === 0 && closesAtMin === 1440),
   );
-  const minStartMin = isToday ? earliestStartMin(selectedDate, opensAtMin) : 0;
+
+  const selectedDateMidnightMs = useMemo(() => {
+    const d = new Date(selectedDate);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }, [selectedDate]);
+
+  // Use earliestStartAt from backend if available (handles lead 60m + 30m grid and cross-midnight)
+  const minStartMin = useMemo(() => {
+    if (availability?.earliestStartAt) {
+      const earliestMs = new Date(availability.earliestStartAt).getTime();
+      const diffMin = Math.ceil((earliestMs - selectedDateMidnightMs) / 60000);
+      return Math.max(opensAtMin, diffMin);
+    }
+    return isToday ? earliestStartMin(selectedDate, opensAtMin) : opensAtMin;
+  }, [availability?.earliestStartAt, selectedDateMidnightMs, opensAtMin, isToday, selectedDate]);
 
   // 3. Generate Timeline Slots
   const slots = useMemo<SlotCell[]>(() => {
     if (!connector || availabilityError) return [];
+    if (availability?.operatingWindows && availability.operatingWindows.length === 0) return [];
+
     const list: SlotCell[] = [];
 
-    if (availability?.operatingWindows && availability.operatingWindows.length > 0) {
-      const firstSlot = Math.max(opensAtMin, Math.ceil(minStartMin / durationStepMin) * durationStepMin);
-      const normalLastSlot = closesAtMin - durationStepMin;
-      const extendedEndSlot =
-        isToday && isCrossMidnightStation
-          ? Math.max(normalLastSlot, 1440 + maxDurationMin - durationStepMin)
-          : normalLastSlot;
-
-      for (let m = firstSlot; m <= extendedEndSlot; m += durationStepMin) {
-        const startAtIso = isoAtMinutes(selectedDate, m);
-        const endAtIso = isoAtMinutes(selectedDate, m + durationStepMin);
-
-        const isPast = isToday && m < minStartMin;
-        const isBooked = isPast || isRangeBusy(availability.busyRanges, startAtIso, endAtIso);
-
-        list.push({
-          startMin: m,
-          startAt: startAtIso,
-          booked: isBooked,
-        });
-      }
-      return list;
-    }
-
-    if (availability && availability.operatingWindows && availability.operatingWindows.length === 0) {
-      return [];
-    }
+    // Backend availability coverage extends cross-midnight for overnight sessions (dayEnd + maxDurationMinutes)
+    const hasCrossMidnightOperatingWindow = Boolean(
+      availability?.operatingWindows?.some((win) => {
+        const winEndMs = new Date(win.endAt).getTime();
+        return winEndMs > selectedDateMidnightMs + 1440 * 60000;
+      }),
+    );
+    const allowCrossMidnight = isCrossMidnightStation || hasCrossMidnightOperatingWindow;
 
     const firstSlot = Math.max(opensAtMin, Math.ceil(minStartMin / durationStepMin) * durationStepMin);
     const normalLastSlot = closesAtMin - durationStepMin;
     const extendedEndSlot =
-      isToday && isCrossMidnightStation
+      allowCrossMidnight
         ? Math.max(normalLastSlot, 1440 + maxDurationMin - durationStepMin)
         : normalLastSlot;
 
     for (let m = firstSlot; m <= extendedEndSlot; m += durationStepMin) {
       const startAtIso = isoAtMinutes(selectedDate, m);
-      const slotEndMin = m + durationStepMin;
-      const endAtIso = isoAtMinutes(selectedDate, slotEndMin);
+      const endAtIso = isoAtMinutes(selectedDate, m + durationStepMin);
 
-      const isPast = isToday && m < minStartMin;
-      const isBooked = isPast || (availability ? isRangeBusy(availability.busyRanges, startAtIso, endAtIso) : false);
+      const isPast = m < minStartMin;
+      const isClosed =
+        availability?.operatingWindows && availability.operatingWindows.length > 0
+          ? !isRangeInOperatingWindows(availability.operatingWindows, startAtIso, endAtIso)
+          : false;
+      const isBooked =
+        isPast || isClosed || (availability ? isRangeBusy(availability.busyRanges, startAtIso, endAtIso) : false);
 
       list.push({
         startMin: m,
@@ -320,8 +270,8 @@ export function TimeRangePickerScreen() {
     closesAtMin,
     minStartMin,
     selectedDate,
+    selectedDateMidnightMs,
     durationStepMin,
-    isToday,
     isCrossMidnightStation,
     maxDurationMin,
   ]);
@@ -379,10 +329,10 @@ export function TimeRangePickerScreen() {
       if (!canFitFrom(idx)) return;
 
       counts.ALL += 1;
-      if (s.startMin >= 360 && s.startMin < 720) counts.MORNING += 1;
+      if (s.startMin >= 300 && s.startMin < 720) counts.MORNING += 1;
       else if (s.startMin >= 720 && s.startMin < 1080) counts.AFTERNOON += 1;
-      else if (s.startMin >= 1080) counts.EVENING += 1;
-      else if (s.startMin < 360) counts.NIGHT += 1;
+      else if (s.startMin >= 1080 && s.startMin < 1320) counts.EVENING += 1;
+      else if (s.startMin < 300 || s.startMin >= 1320) counts.NIGHT += 1;
     });
 
     return counts;
@@ -393,10 +343,10 @@ export function TimeRangePickerScreen() {
     const baseSlots = slots.filter((s) => s.startMin < 1440);
     if (timeFilter === 'ALL') return baseSlots;
     return baseSlots.filter((s) => {
-      if (timeFilter === 'MORNING') return s.startMin >= 360 && s.startMin < 720;
+      if (timeFilter === 'MORNING') return s.startMin >= 300 && s.startMin < 720;
       if (timeFilter === 'AFTERNOON') return s.startMin >= 720 && s.startMin < 1080;
-      if (timeFilter === 'EVENING') return s.startMin >= 1080;
-      if (timeFilter === 'NIGHT') return s.startMin < 360;
+      if (timeFilter === 'EVENING') return s.startMin >= 1080 && s.startMin < 1320;
+      if (timeFilter === 'NIGHT') return s.startMin < 300 || s.startMin >= 1320;
       return true;
     });
   }, [slots, timeFilter]);
@@ -436,6 +386,25 @@ export function TimeRangePickerScreen() {
     setFocus(null);
   }
 
+  const handleBack = useCallback(() => {
+    if (params.isFromFastTrack) {
+      navigation.replace('StationDetail', {
+        stationId: params.stationId,
+      });
+      return true;
+    }
+    navigation.goBack();
+    return true;
+  }, [navigation, params]);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [handleBack]);
+
   function durationLabel(min: number): string {
     const { hours, minutes } = splitDuration(min);
     if (hours === 0) return t('timeRangePicker.durationMin', { minutes });
@@ -452,7 +421,7 @@ export function TimeRangePickerScreen() {
           glassEffectStyle="regular"
           fallbackColor={themeColors.surfaceAlt}
           accessibilityLabel={t('common.back')}
-          onPress={() => navigation.goBack()}
+          onPress={handleBack}
         >
           <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
         </GlassButton>

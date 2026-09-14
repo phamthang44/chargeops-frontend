@@ -18,6 +18,8 @@ function formatDateParam(d: Date): string {
  * 2. Fetches availability & TOU price ranges.
  * 3. Calculates the earliest available non-conflicting 60-minute charging slot today.
  * 4. Navigates straight to BookingConfirmationScreen with pre-filled parameters.
+ *    The back action from BookingConfirmation is handled intelligently:
+ *    BookingConfirmation -> TimeRangePicker -> StationDetail -> Home/Map.
  */
 export async function executeQuickBook(
   stationId: string,
@@ -45,18 +47,23 @@ export async function executeQuickBook(
     );
     const chosenConnector = sorted[0];
 
-    // 3. Determine earliest start time (today, rounded up to next 15-minute slot with buffer)
+    // 3. Determine earliest start time (use earliestStartAt from availability or lead60 fallback)
     const now = new Date();
     const todayStr = formatDateParam(now);
 
     const availability = await getStationAvailability(stationId, chosenConnector.id, todayStr);
 
-    let startAtDate = new Date(now.getTime() + 10 * 60_000); // 10-minute buffer
-    const remainderMin = startAtDate.getMinutes() % 15;
-    if (remainderMin !== 0) {
-      startAtDate.setMinutes(startAtDate.getMinutes() + (15 - remainderMin), 0, 0);
+    let startAtDate: Date;
+    if (availability?.earliestStartAt) {
+      startAtDate = new Date(availability.earliestStartAt);
     } else {
-      startAtDate.setSeconds(0, 0);
+      startAtDate = new Date(now.getTime() + 60 * 60_000); // 60-minute lead time
+      const remainderMin = startAtDate.getMinutes() % 15;
+      if (remainderMin !== 0) {
+        startAtDate.setMinutes(startAtDate.getMinutes() + (15 - remainderMin), 0, 0);
+      } else {
+        startAtDate.setSeconds(0, 0);
+      }
     }
 
     const durationMin = 60; // Standard 1-hour session
@@ -75,7 +82,9 @@ export async function executeQuickBook(
       }
     }
 
-    // 5. Navigate straight to BookingConfirmation
+    // 5. Jump straight to BookingConfirmationScreen with isFastTrack flag.
+    // BookingConfirmationScreen & TimeRangePickerScreen intercept the back navigation
+    // to unwind smoothly: BookingConfirmation -> TimeRangePicker -> StationDetail -> Home.
     navigation.navigate('BookingConfirmation', {
       stationId,
       connectorId: chosenConnector.id,

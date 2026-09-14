@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -41,41 +41,44 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface NotificationSheetProps {
   visible: boolean;
   onClose: () => void;
-  /**
-   * Callback fired when the user taps a notification to navigate.
-   *
-   * BACKEND INTEGRATION: The `type` + `referenceId` pair lets the caller
-   * resolve the target screen.  No navigation logic lives inside this sheet
-   * — the parent screen owns routing.
-   */
   onNavigate?: (notification: AppNotification) => void;
-  /**
-   * Fired with the unread count whenever it changes, so the caller's bell badge
-   * stays in sync with reads/deletes made inside the sheet.
-   */
   onUnreadChange?: (count: number) => void;
 }
 
+type TabType = 'all' | 'unread';
+
 /* ------------------------------------------------------------------ */
-/*  Look-up tables                                                     */
+/*  Look-up tables & Action Labels                                     */
 /* ------------------------------------------------------------------ */
 
-const TYPE_ICON: Record<AppNotification['type'], keyof typeof Ionicons.glyphMap> = {
-  charging: 'flash',
-  booking: 'calendar',
-  wallet: 'wallet',
-  promo: 'gift',
+const TYPE_CONFIG: Record<
+  AppNotification['type'],
+  { icon: keyof typeof Ionicons.glyphMap; color: string; actionLabel: string }
+> = {
+  charging: {
+    icon: 'flash',
+    color: '#10B981',
+    actionLabel: 'Xem phiên sạc',
+  },
+  booking: {
+    icon: 'calendar',
+    color: '#3B82F6',
+    actionLabel: 'Chi tiết đặt chỗ',
+  },
+  wallet: {
+    icon: 'wallet',
+    color: '#F59E0B',
+    actionLabel: 'Ví & Nạp tiền',
+  },
+  promo: {
+    icon: 'gift',
+    color: '#8B5CF6',
+    actionLabel: 'Xem ưu đãi',
+  },
 };
 
-const TYPE_COLOR: Record<AppNotification['type'], string> = {
-  charging: '#10B981',
-  booking: '#3B82F6',
-  wallet: '#F59E0B',
-  promo: '#8B5CF6',
-};
-
 /* ------------------------------------------------------------------ */
-/*  Swipeable notification item                                        */
+/*  Action-Driven Notification Item (Novu / Knock Pattern)             */
 /* ------------------------------------------------------------------ */
 
 interface NotificationItemProps {
@@ -85,19 +88,8 @@ interface NotificationItemProps {
   onDelete: () => void;
 }
 
-/**
- * A single notification row.
- *
- * Delete is an always-visible button on the row, not a swipe gesture. A hidden
- * gesture is the wrong trade here: the driver deletes a notification rarely and
- * in a hurry, so the action has to be visible and hittable on the first try,
- * with no hint text to teach it. An unread row is tinted and carries a dot; the
- * whole card is the tap target for opening what the notification refers to.
- */
 function NotificationItem({ notification, themeColors, onPress, onDelete }: NotificationItemProps) {
-  const { t } = useTranslation();
-  const icon = TYPE_ICON[notification.type];
-  const color = TYPE_COLOR[notification.type];
+  const cfg = TYPE_CONFIG[notification.type];
   const hasLink = !!notification.referenceId;
 
   return (
@@ -105,8 +97,8 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
       style={[
         styles.item,
         {
-          backgroundColor: notification.read ? themeColors.surface : themeColors.surfaceAlt,
-          borderColor: notification.read ? themeColors.border : themeColors.primarySoft,
+          backgroundColor: notification.read ? themeColors.surface : `${themeColors.primary}0D`,
+          borderColor: notification.read ? themeColors.border : `${themeColors.primary}33`,
         },
       ]}
     >
@@ -115,70 +107,98 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
         onPress={onPress}
         accessibilityRole="button"
       >
-        <View style={[styles.iconWrap, { backgroundColor: `${color}1A` }]}>
-          <Ionicons name={icon} size={20} color={color} />
+        {/* Category Icon Badge with soft tinted background */}
+        <View style={[styles.iconWrap, { backgroundColor: `${cfg.color}1F` }]}>
+          <Ionicons name={cfg.icon} size={20} color={cfg.color} />
         </View>
 
+        {/* Content Body */}
         <View style={styles.body}>
+          {/* Header Row: Dot + Title + Timestamp */}
           <View style={styles.itemHeader}>
             {!notification.read && (
               <View style={[styles.unreadDot, { backgroundColor: themeColors.primary }]} />
             )}
-            <Text style={[styles.title, { color: themeColors.textStrong }]} numberOfLines={1}>
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: notification.read ? themeColors.textStrong : themeColors.primaryDark,
+                  fontWeight: notification.read ? fontWeights.semibold : fontWeights.bold,
+                },
+              ]}
+              numberOfLines={1}
+            >
               {notification.title}
             </Text>
-          </View>
-          <Text style={[styles.desc, { color: themeColors.textBody }]}>{notification.body}</Text>
-          <View style={styles.itemFooter}>
+
             <Text style={[styles.time, { color: themeColors.textMuted }]}>
               {formatRelativeTime(notification.createdAt)}
             </Text>
-            {hasLink && (
-              <View style={styles.navHint}>
-                <Text style={[styles.navHintText, { color: themeColors.primary }]}>
-                  {t('notifications.viewDetail')}
-                </Text>
-                <Ionicons name="chevron-forward" size={14} color={themeColors.primary} />
-              </View>
-            )}
           </View>
+
+          {/* Description */}
+          <Text style={[styles.desc, { color: themeColors.textBody }]} numberOfLines={2}>
+            {notification.body}
+          </Text>
+
+          {/* Bottom Row: Action Pill CTA (Novu pattern) */}
+          {hasLink && (
+            <View style={styles.actionRow}>
+              <View
+                style={[
+                  styles.actionPill,
+                  {
+                    backgroundColor: notification.read
+                      ? `${themeColors.primary}12`
+                      : themeColors.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.actionPillText,
+                    {
+                      color: notification.read
+                        ? themeColors.primary
+                        : themeColors.surface,
+                    },
+                  ]}
+                >
+                  {cfg.actionLabel}
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={12}
+                  color={notification.read ? themeColors.primary : themeColors.surface}
+                />
+              </View>
+            </View>
+          )}
         </View>
       </Pressable>
 
-      {/* Delete — its own tap target, outside the card's press area */}
+      {/* Subtle dismiss button positioned at top-right, sibling to itemMain to avoid nesting */}
       <Pressable
-        style={({ pressed }) => [
-          styles.rowDelete,
-          {
-            // Deepens from a 8% wash to 30% on press — unmistakable feedback
-            // for the one destructive control on the row.
-            backgroundColor: pressed ? `${themeColors.error}4D` : `${themeColors.error}14`,
-            transform: [{ scale: pressed ? 0.92 : 1 }],
-          },
-        ]}
         onPress={onDelete}
-        hitSlop={6}
+        hitSlop={8}
+        style={({ pressed }) => [
+          styles.dismissBtn,
+          pressed && { backgroundColor: `${themeColors.textMuted}20` },
+        ]}
         accessibilityRole="button"
-        accessibilityLabel={t('notifications.delete')}
+        accessibilityLabel="Xóa thông báo"
       >
-        <Ionicons name="trash-outline" size={17} color={themeColors.error} />
+        <Ionicons name="close" size={14} color={themeColors.textMuted} />
       </Pressable>
     </View>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main sheet                                                         */
+/*  Main Notification Sheet                                            */
 /* ------------------------------------------------------------------ */
 
-/**
- * Reusable notification sheet with:
- * - a per-row delete button (no hidden gesture)
- * - tap-to-navigate via the `onNavigate` callback
- * - "Clear all" + "Mark all read" bulk actions
- *
- * Dynamic theme aware (Light / Dark).
- */
 export function NotificationSheet({
   visible,
   onClose,
@@ -189,6 +209,7 @@ export function NotificationSheet({
   const { themeColors } = usePreferences();
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabType>('all');
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -203,14 +224,21 @@ export function NotificationSheet({
 
   const unreadCount = items.filter((i) => !i.read).length;
 
-  // Keep the caller's bell badge in sync with whatever happened in here.
   useEffect(() => {
     if (!loading) onUnreadChange?.(unreadCount);
   }, [unreadCount, loading, onUnreadChange]);
 
-  /* ---- Handlers ---- */
+  const filteredItems = useMemo(() => {
+    if (activeTab === 'unread') {
+      return items.filter((n) => !n.read);
+    }
+    return items;
+  }, [items, activeTab]);
+
+  /* ---- Optimistic Handlers ---- */
 
   const handleMarkAllRead = async () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const updated = await markAllNotificationsAsRead();
     setItems(updated);
   };
@@ -228,82 +256,126 @@ export function NotificationSheet({
   };
 
   const handlePress = async (notification: AppNotification) => {
-    // 1. Mark as read
+    // 1. Optimistically mark as read
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const updated = await markNotificationAsRead(notification.id);
     setItems(updated);
 
-    // 2. Navigate if the notification has a deep-link target
+    // 2. Navigate if linked
     if (notification.referenceId && onNavigate) {
-      onClose(); // dismiss the sheet first
+      onClose();
       onNavigate(notification);
     }
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={t('stationList.notificationsTitle')} animation="fade">
-      {/* Unread summary + bulk actions. Both actions are full-height pills:
-          they are destructive-ish and infrequent, so they need real tap targets. */}
-      {items.length > 0 && (
-        <View style={styles.topRow}>
-          {unreadCount > 0 && (
-            <View style={[styles.badge, { backgroundColor: themeColors.primarySoft }]}>
-              <Text style={[styles.badgeText, { color: themeColors.primaryDark }]}>
-                {t('notifications.unreadCount', { total: unreadCount })}
-              </Text>
-            </View>
-          )}
-          <View style={styles.flex1} />
-          {unreadCount > 0 && (
-            <Pressable
-              onPress={handleMarkAllRead}
-              // Press feedback: the pill fills with its own tint and dims
-              // slightly, so the tap registers visually before the list moves.
-              style={({ pressed }) => [
-                styles.bulkBtn,
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title={t('stationList.notificationsTitle', 'Thông báo')}
+      animation="fade"
+    >
+      {/* Top Controls: Segmented Tabs (All vs Unread) + Bulk Action */}
+      <View style={styles.topControlBar}>
+        {/* Novu / Knock Segmented Tabs Control */}
+        <View style={[styles.segmentedWrap, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Pressable
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setActiveTab('all');
+            }}
+            style={[
+              styles.segmentBtn,
+              activeTab === 'all' && [
+                styles.segmentBtnActive,
+                { backgroundColor: themeColors.surface },
+              ],
+            ]}
+          >
+            <Text
+              style={[
+                styles.segmentText,
                 {
-                  borderColor: themeColors.primary,
-                  backgroundColor: pressed ? themeColors.primarySoft : 'transparent',
-                  opacity: pressed ? 0.75 : 1,
+                  color: activeTab === 'all' ? themeColors.textStrong : themeColors.textMuted,
+                  fontWeight: activeTab === 'all' ? fontWeights.bold : fontWeights.medium,
                 },
               ]}
             >
-              <Ionicons name="checkmark-done" size={16} color={themeColors.primary} />
-              <Text style={[styles.bulkText, { color: themeColors.primary }]}>
-                {t('notifications.markAllRead')}
-              </Text>
-            </Pressable>
-          )}
+              Tất cả ({items.length})
+            </Text>
+          </Pressable>
+
           <Pressable
-            onPress={handleClearAll}
-            style={({ pressed }) => [
-              styles.bulkBtn,
-              {
-                borderColor: themeColors.error,
-                backgroundColor: pressed ? `${themeColors.error}1F` : 'transparent',
-                opacity: pressed ? 0.75 : 1,
-              },
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setActiveTab('unread');
+            }}
+            style={[
+              styles.segmentBtn,
+              activeTab === 'unread' && [
+                styles.segmentBtnActive,
+                { backgroundColor: themeColors.surface },
+              ],
             ]}
           >
-            <Ionicons name="trash-outline" size={16} color={themeColors.error} />
-            <Text style={[styles.bulkText, { color: themeColors.error }]}>
-              {t('notifications.clearAll')}
+            <Text
+              style={[
+                styles.segmentText,
+                {
+                  color: activeTab === 'unread' ? themeColors.primary : themeColors.textMuted,
+                  fontWeight: activeTab === 'unread' ? fontWeights.bold : fontWeights.medium,
+                },
+              ]}
+            >
+              Chưa đọc ({unreadCount})
             </Text>
           </Pressable>
         </View>
-      )}
 
+        {/* Quick Read-All icon button */}
+        {unreadCount > 0 && (
+          <Pressable
+            onPress={handleMarkAllRead}
+            style={({ pressed }) => [
+              styles.readAllBtn,
+              {
+                backgroundColor: pressed ? `${themeColors.primary}20` : `${themeColors.primary}0F`,
+                borderColor: `${themeColors.primary}33`,
+              },
+            ]}
+          >
+            <Ionicons name="checkmark-done" size={14} color={themeColors.primary} />
+            <Text style={[styles.readAllText, { color: themeColors.primary }]}>
+              {t('notifications.markAllRead', 'Đã đọc hết')}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Main Notification Feed List */}
       {loading ? (
         <ActivityIndicator color={themeColors.primary} style={{ marginVertical: spacing.xl }} />
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <View style={styles.empty}>
           <EmptyState variant="notifications" />
-          <Text style={[styles.emptyText, { color: themeColors.textMuted }]}>
-            {t('stationList.notificationsEmpty')}
+          <Text style={[styles.emptyText, { color: themeColors.textStrong }]}>
+            {activeTab === 'unread'
+              ? 'Tuyệt vời! Bạn đã đọc hết mọi thông báo.'
+              : t('stationList.notificationsEmpty', 'Không có thông báo nào')}
+          </Text>
+          <Text style={[styles.emptySubText, { color: themeColors.textMuted }]}>
+            {activeTab === 'unread'
+              ? 'Tất cả cảnh báo và hoạt động sạc đã được xem.'
+              : 'Các thông báo mới về phiên sạc và giao dịch sẽ xuất hiện tại đây.'}
           </Text>
         </View>
       ) : (
-        <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
-          {items.map((n) => (
+        <ScrollView
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.list}
+        >
+          {filteredItems.map((n) => (
             <NotificationItem
               key={n.id}
               notification={n}
@@ -312,6 +384,16 @@ export function NotificationSheet({
               onDelete={() => handleDelete(n.id)}
             />
           ))}
+
+          {/* Optional Clear All footer */}
+          {items.length > 0 && activeTab === 'all' && (
+            <Pressable onPress={handleClearAll} style={styles.clearAllFooter}>
+              <Ionicons name="trash-outline" size={13} color={themeColors.textMuted} />
+              <Text style={[styles.clearAllFooterText, { color: themeColors.textMuted }]}>
+                {t('notifications.clearAll', 'Xóa tất cả thông báo')}
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
     </BottomSheet>
@@ -323,126 +405,160 @@ export function NotificationSheet({
 /* ------------------------------------------------------------------ */
 
 const styles = StyleSheet.create({
-  topRow: {
+  topControlBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    // The two bulk pills sit side by side — they need air between them and
-    // below, or they read as one wide control.
+    justifyContent: 'space-between',
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  badge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.full,
-  },
-  badgeText: {
-    fontSize: fontSizes.caption,
-    fontWeight: fontWeights.semibold,
-  },
-  flex1: { flex: 1 },
-  // Bulk actions: 36pt pills rather than bare text, so they are hittable.
-  bulkBtn: {
+  segmentedWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    minHeight: 40,
-    borderWidth: 1,
     borderRadius: radius.full,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    padding: 3,
   },
-  bulkText: {
+  segmentBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+  },
+  segmentBtnActive: {
+    elevation: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+  },
+  segmentText: {
     fontSize: fontSizes.caption,
-    fontWeight: fontWeights.semibold,
+  },
+  readAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  readAllText: {
+    fontSize: fontSizes.caption - 1,
+    fontWeight: fontWeights.bold,
   },
 
   scroll: {
-    maxHeight: 420,
+    maxHeight: 460,
   },
   list: {
     gap: spacing.sm,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
   },
 
-  /* Card */
+  /* Card Item */
   item: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  itemMain: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
   },
-  itemMain: { flex: 1, flexDirection: 'row', gap: spacing.md },
-  pressedRow: { opacity: 0.6 },
-  // Delete: 40pt circle, tinted with the error color so it reads as destructive
-  // without shouting at the driver on every row.
-  rowDelete: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+  pressedRow: {
+    opacity: 0.7,
   },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 2,
   },
   body: {
     flex: 1,
-    gap: 3,
+    gap: 4,
   },
   itemHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 6,
+  },
+  unreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: radius.full,
   },
   title: {
-    fontSize: fontSizes.body,
-    fontWeight: fontWeights.bold,
+    fontSize: fontSizes.body - 0.5,
     flex: 1,
   },
-  // Leads the title so "unread" is the first thing scanned down the list.
-  unreadDot: {
-    width: 8,
-    height: 8,
+  time: {
+    fontSize: fontSizes.caption - 1,
+    fontWeight: fontWeights.medium,
+  },
+  dismissBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 24,
+    height: 24,
     borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
   },
   desc: {
     fontSize: fontSizes.caption,
     lineHeight: lineHeights.caption,
   },
-  itemFooter: {
+  actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 2,
+    justifyContent: 'flex-end',
+    marginTop: 4,
   },
-  time: {
-    fontSize: fontSizes.caption,
-  },
-  navHint: {
+  actionPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: radius.full,
   },
-  navHintText: {
-    fontSize: fontSizes.caption,
-    fontWeight: fontWeights.semibold,
+  actionPillText: {
+    fontSize: fontSizes.caption - 1,
+    fontWeight: fontWeights.bold,
   },
 
+  /* Empty state */
   empty: {
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.xs,
     paddingVertical: spacing.xl,
   },
   emptyText: {
     fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
     textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+  emptySubText: {
+    fontSize: fontSizes.caption,
+    textAlign: 'center',
+    maxWidth: 240,
+  },
+
+  /* Footer */
+  clearAllFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: spacing.md,
+  },
+  clearAllFooterText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.medium,
   },
 });

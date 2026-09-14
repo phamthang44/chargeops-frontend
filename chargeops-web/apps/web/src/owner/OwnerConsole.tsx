@@ -35,6 +35,13 @@ import { Dashboard } from './pages/Dashboard';
 import { Stations } from './pages/Stations';
 import { Bookings } from './pages/Bookings';
 import { Chargers } from './pages/Chargers';
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useDeleteNotification,
+} from '../shared/notifications/useNotifications';
 import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
@@ -199,72 +206,102 @@ function OwnerConsoleContent({
     queryFn: () => (reduced ? api.dashboard.staff() : api.dashboard.owner()),
   });
 
+  const { data: serverNotifications = [] } = useNotifications();
+  const { data: serverUnreadCount } = useUnreadCount();
+  const markAsRead = useMarkAsRead();
+  const markAllAsRead = useMarkAllAsRead();
+  const deleteNotif = useDeleteNotification();
+
   const notificationItems = useMemo<NotificationItem[]>(() => {
-    if (!dashboardQuery.data) return [];
-    const items: NotificationItem[] = [];
-    if (reduced) {
-      const d = dashboardQuery.data as StaffDashboardData;
-      if (d.kpis.offlineChargerNote) {
-        items.push({
-          id: 'offline',
-          title: d.kpis.offlineChargerNote,
-          tone: 'bad',
-          onSelect: () => navigate(`${base}/chargers`),
-        });
-      }
-      if (d.kpis.openTickets > 0) {
-        items.push({
-          id: 'tickets',
-          title: t('notifications.openTickets', { count: d.kpis.openTickets }),
-          tone: 'warn',
-          onSelect: () => navigate(`${base}/tickets`),
-        });
-      }
-    } else {
-      const d = dashboardQuery.data as OwnerDashboardData;
-      const licStatus = String(d.license.status).toUpperCase();
-      const days = d.license.daysLeft ?? 0;
-      const isExpiring = d.license.expiringSoon || (licStatus === 'ACTIVE' && days <= 30);
-      const isExpired = licStatus === 'EXPIRED';
-      const isSuspended = licStatus === 'SUSPENDED';
+    // 1. Convert notifications from useNotifications hook
+    const items: NotificationItem[] = serverNotifications.map((n) => ({
+      id: n.id,
+      title: n.title,
+      subtitle: n.subtitle,
+      body: n.body,
+      time: n.time,
+      tone: n.tone ?? n.severity,
+      read: n.read,
+      category: n.category,
+      stationName: n.stationName,
+      chargerId: n.chargerId,
+      metrics: n.metrics,
+      badge: n.badge,
+      actionLabel: n.actionLabel || n.primaryAction?.label,
+      onSelect: () => {
+        if (n.primaryAction?.actionUrl) {
+          navigate(`${base}${n.primaryAction.actionUrl}`);
+        } else if (n.category === 'alert' || n.category === 'session') {
+          navigate(`${base}/chargers`);
+        } else if (n.category === 'ticket') {
+          navigate(`${base}/tickets`);
+        } else {
+          navigate(`${base}/notifications`);
+        }
+      },
+      onAction: () => {
+        if (n.primaryAction?.actionUrl) {
+          navigate(`${base}${n.primaryAction.actionUrl}`);
+        }
+      },
+    }));
 
-      if (isExpired) {
-        items.push({
-          id: 'license',
-          title: t('notifications.license.expired', { defaultValue: 'Giấy phép vận hành đã hết hạn' }),
-          tone: 'bad',
-          onSelect: () => navigate(`${base}/license`),
-        });
-      } else if (isExpiring) {
-        items.push({
-          id: 'license',
-          title: t('notifications.license.expiring', {
-            days,
-            defaultValue: `Giấy phép sắp hết hạn · còn ${days} ngày`,
-          }),
-          tone: 'warn',
-          onSelect: () => navigate(`${base}/license`),
-        });
-      } else if (isSuspended) {
-        items.push({
-          id: 'license',
-          title: t('notifications.license.suspended', { defaultValue: 'Giấy phép vận hành đang tạm ngưng' }),
-          tone: 'warn',
-          onSelect: () => navigate(`${base}/license`),
-        });
-      }
+    // 2. Add dynamic dashboard warnings if any and not already present
+    if (dashboardQuery.data) {
+      if (reduced) {
+        const d = dashboardQuery.data as StaffDashboardData;
+        if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
+          items.unshift({
+            id: 'offline',
+            title: d.kpis.offlineChargerNote,
+            tone: 'bad',
+            category: 'alert',
+            actionLabel: 'Kiểm tra',
+            onSelect: () => navigate(`${base}/chargers`),
+          });
+        }
+      } else {
+        const d = dashboardQuery.data as OwnerDashboardData;
+        const licStatus = String(d.license.status).toUpperCase();
+        const days = d.license.daysLeft ?? 0;
+        const isExpiring = d.license.expiringSoon || (licStatus === 'ACTIVE' && days <= 30);
+        const isExpired = licStatus === 'EXPIRED';
 
-      if (d.kpis.offlineChargerNote) {
-        items.push({
-          id: 'offline',
-          title: d.kpis.offlineChargerNote,
-          tone: 'bad',
-          onSelect: () => navigate(`${base}/chargers`),
-        });
+        if (isExpired && !items.some((i) => i.id === 'license')) {
+          items.unshift({
+            id: 'license',
+            title: t('notifications.license.expired', { defaultValue: 'Giấy phép vận hành đã hết hạn' }),
+            tone: 'bad',
+            category: 'system',
+            actionLabel: 'Gia hạn',
+            onSelect: () => navigate(`${base}/license`),
+          });
+        } else if (isExpiring && !items.some((i) => i.id === 'license')) {
+          items.unshift({
+            id: 'license',
+            title: t('notifications.license.expiring', { days, defaultValue: `Giấy phép sắp hết hạn · còn ${days} ngày` }),
+            tone: 'warn',
+            category: 'system',
+            actionLabel: 'Gia hạn',
+            onSelect: () => navigate(`${base}/license`),
+          });
+        }
+
+        if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
+          items.unshift({
+            id: 'offline',
+            title: d.kpis.offlineChargerNote,
+            tone: 'bad',
+            category: 'alert',
+            actionLabel: 'Kiểm tra',
+            onSelect: () => navigate(`${base}/chargers`),
+          });
+        }
       }
     }
+
     return items;
-  }, [dashboardQuery.data, reduced, base, navigate, t]);
+  }, [serverNotifications, dashboardQuery.data, reduced, base, navigate, t]);
 
   return (
     <AppShell
@@ -298,8 +335,12 @@ function OwnerConsoleContent({
       notifications={
         <NotificationBell
           items={notificationItems}
+          unreadCount={serverUnreadCount}
           emptyLabel={t('notifications.empty')}
           onOpenCenter={() => navigate(`${base}/notifications`)}
+          onMarkRead={(id) => markAsRead.mutate(id)}
+          onMarkAllRead={() => markAllAsRead.mutate()}
+          onDismiss={(id) => deleteNotif.mutate(id)}
         />
       }
       onSettings={() => navigate(`${base}/settings`)}

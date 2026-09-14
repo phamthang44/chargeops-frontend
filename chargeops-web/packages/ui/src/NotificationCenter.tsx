@@ -454,7 +454,7 @@ export function NotificationCenter({
                           onClick={() => {
                             if (onMarkRead && !item.read) onMarkRead(item.id);
                             if (item.onAction) item.onAction();
-                            else item.onSelect();
+                            else if (item.onSelect) item.onSelect();
                           }}
                           className="mt-1 inline-flex items-center gap-2 rounded-xl bg-ink text-surface hover:bg-ink/90 px-3.5 py-1.5 text-[12px] font-extrabold transition-all shadow-xs group/btn active:scale-95"
                         >

@@ -5,6 +5,7 @@ import { createRestServices } from './rest/services';
 import type { Services } from './services';
 
 export * from './types';
+export * from './notificationTypes';
 export * from './format';
 export * from './status';
 export * from './services';

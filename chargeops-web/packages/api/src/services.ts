@@ -373,6 +373,14 @@ export interface LegalDocumentsService {
   adminRemove(id: string): Promise<void>;
 }
 
+export interface NotificationService {
+  list(params?: import('./notificationTypes').NotificationListParams): Promise<import('./notificationTypes').AppNotification[]>;
+  unreadCount(): Promise<number>;
+  markAsRead(id: string): Promise<void>;
+  markAllAsRead(): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
 export interface Services {
   profile: ProfileService;
   location: LocationService;
@@ -392,4 +400,5 @@ export interface Services {
   tickets: TicketService;
   challenge: ChallengeService;
   media: MediaService;
+  notifications: NotificationService;
 }

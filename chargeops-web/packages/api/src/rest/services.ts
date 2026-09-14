@@ -83,6 +83,7 @@ function normalizePricing(raw: any): PricingConfig {
     scheduleEffectiveFrom: raw?.scheduleEffectiveFrom ?? null,
     scheduleEffectiveTo: raw?.scheduleEffectiveTo ?? null,
     scheduleStatus: raw?.scheduleStatus ?? (raw?.scheduleEffectiveFrom ? 'ACTIVE' : 'DEFAULT'),
+    version: raw?.version != null ? Number(raw.version) : 0,
   };
 }
 
@@ -113,6 +114,7 @@ function pricingRequest(config: PricingConfig) {
       endTime: rule.to,
       rateVnd: rule.rateVnd,
     })),
+    version: config.version != null ? Number(config.version) : 0,
   };
 }
 
@@ -509,5 +511,21 @@ export function createRestServices(http: HttpClient): Services {
     media: {
       getImageKitAuth: () => http.get('/media/imagekit-auth'),
     },
+
+    notifications: {
+      list: (params) =>
+        http.get<import('../notificationTypes').AppNotification[]>('/notifications', {
+          unread: params?.unreadOnly ? 'true' : undefined,
+          category: params?.category && params.category !== 'all' ? params.category : undefined,
+        }),
+      unreadCount: async () => {
+        const res = await http.get<{ count: number }>('/notifications/unread-count');
+        return res?.count ?? 0;
+      },
+      markAsRead: (id) => http.patch(`/notifications/${id}/read`),
+      markAllAsRead: () => http.patch('/notifications/read-all'),
+      delete: (id) => http.delete(`/notifications/${id}`),
+    },
   };
 }
+

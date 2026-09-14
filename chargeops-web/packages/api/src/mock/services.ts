@@ -1429,7 +1429,6 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (user.status === 'suspended') {
           return {
             exists: true,
-            userId: user.id,
             email: user.email,
             displayName: user.name,
             maskedPhone: '098****321',
@@ -1441,7 +1440,6 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (user.role === 'ADMIN' || user.role === 'OWNER') {
           return {
             exists: true,
-            userId: user.id,
             email: user.email,
             displayName: user.name,
             maskedPhone: '098****888',
@@ -1457,7 +1455,6 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (currentActive) {
           return {
             exists: true,
-            userId: user.id,
             email: user.email,
             displayName: user.name,
             maskedPhone: currentActive.maskedPhone || '098****123',
@@ -1469,7 +1466,6 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         // Eligible user
         return {
           exists: true,
-          userId: user.id,
           email: user.email,
           displayName: user.name,
           maskedPhone: '098****567',
@@ -1485,7 +1481,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         if (!station) throw new Error(`Không tìm thấy trạm ${stationId}`);
 
         const lookupResult = await this.lookup(stationId, clean);
-        if (!lookupResult.assignable || !lookupResult.userId) {
+        if (!lookupResult.assignable) {
           if (lookupResult.status === 'NOT_FOUND') {
             throw new Error('Tài khoản chưa tồn tại. Vui lòng yêu cầu nhân viên đăng ký tài khoản trước.');
           }
@@ -1504,11 +1500,13 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           throw new Error('Không thể phân công tài khoản này.');
         }
 
+        const candidateUser = db.users.find((u) => u.email.toLowerCase() === clean);
+
         const member: StationStaffMember = {
           assignmentId: 'ASG-' + seq++,
           stationId,
           stationName: station.name,
-          userId: lookupResult.userId,
+          userId: candidateUser?.id || 'U-STAFF',
           displayName: lookupResult.displayName || clean,
           name: lookupResult.displayName || clean,
           email: lookupResult.email || clean,
@@ -1546,15 +1544,21 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           base.scheduleEffectiveFrom = '2026-08-15T08:00:00Z';
           base.scheduleStatus = 'ACTIVE';
         }
+        if (base.version == null) {
+          base.version = 1;
+        }
         return base;
       },
       async save(stationId, config) {
         await delay();
         const now = new Date().toISOString();
+        const prev = db.pricingByStation[stationId] ?? db.pricing;
+        const currentVersion = prev?.version != null ? Number(prev.version) : 1;
         const updated = {
           ...structuredClone(config),
           scheduleEffectiveFrom: now,
           scheduleStatus: 'ACTIVE',
+          version: currentVersion + 1,
         };
         db.pricingByStation[stationId] = updated;
         return structuredClone(updated);
@@ -1842,7 +1846,119 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         };
       },
     },
+
+    notifications: {
+      async list(params) {
+        await delay(50);
+        let items = [
+          {
+            id: 'notif-1',
+            title: 'Cảnh báo quá nhiệt Trụ #CHG-02 (Cổng CCS2)',
+            subtitle: 'Nhiệt độ đầu sạc vượt ngưỡng an toàn (68°C). Hệ thống đã tự động giảm công suất xuống 30 kW.',
+            body: 'Nhiệt độ đầu sạc vượt ngưỡng an toàn (68°C). Hệ thống đã tự động giảm công suất xuống 30 kW.',
+            createdAt: new Date(Date.now() - 2 * 60_000).toISOString(),
+            time: '2 phút trước',
+            severity: 'bad' as const,
+            tone: 'bad' as const,
+            category: 'alert' as const,
+            read: false,
+            stationName: 'Trạm Hà Đông (Hà Nội)',
+            chargerId: 'CHG-02',
+            metrics: { temperature: '68°C', powerKw: 30, voltage: '400V' },
+            actionLabel: 'Xử lý sự cố ngay',
+            primaryAction: { label: 'Kiểm tra trụ', actionUrl: '/chargers', actionType: 'link' as const, variant: 'destructive' as const },
+          },
+          {
+            id: 'notif-2',
+            title: 'Phiên sạc #CHG-9982 hoàn tất',
+            subtitle: 'Tài xế Nguyễn Văn A (VinFast VF8 - 30H-889.12) vừa sạc xong 45.2 kWh.',
+            body: 'Tài xế Nguyễn Văn A (VinFast VF8 - 30H-889.12) vừa sạc xong 45.2 kWh tại Trụ #01. Doanh thu: +248.600đ.',
+            createdAt: new Date(Date.now() - 8 * 60_000).toISOString(),
+            time: '8 phút trước',
+            severity: 'good' as const,
+            tone: 'good' as const,
+            category: 'session' as const,
+            read: false,
+            stationName: 'Trạm Hà Đông (Hà Nội)',
+            chargerId: 'CHG-01',
+            metrics: { progressPct: 100, powerKw: 120, amount: '+248.600đ' },
+            actionLabel: 'Xem hóa đơn',
+            primaryAction: { label: 'Xem doanh thu', actionUrl: '/revenue', actionType: 'link' as const },
+          },
+          {
+            id: 'notif-3',
+            title: 'Phiên sạc đang diễn ra (Trụ #03)',
+            subtitle: 'Đang nạp năng lượng cho xe Porsche Taycan (30G-771.88). Công suất đỉnh 180 kW.',
+            body: 'Đang nạp năng lượng cho xe Porsche Taycan (30G-771.88). Đã đạt 68% pin.',
+            createdAt: new Date(Date.now() - 15 * 60_000).toISOString(),
+            time: '15 phút trước',
+            severity: 'good' as const,
+            tone: 'good' as const,
+            category: 'session' as const,
+            read: true,
+            stationName: 'Trạm Cầu Giấy (Hà Nội)',
+            chargerId: 'CHG-03',
+            metrics: { progressPct: 68, powerKw: 180 },
+            actionLabel: 'Theo dõi live',
+            primaryAction: { label: 'Giám sát trạm', actionUrl: '/chargers', actionType: 'link' as const },
+          },
+          {
+            id: 'notif-4',
+            title: 'Vé hỗ trợ mới #TK-4029 từ tài xế',
+            subtitle: 'Tài xế báo lỗi không tự động nhả cáp sạc tại Trụ #04 sau khi đã thanh toán.',
+            body: 'Tài xế báo lỗi không tự động nhả cáp sạc tại Trụ #04 sau khi đã thanh toán.',
+            createdAt: new Date(Date.now() - 32 * 60_000).toISOString(),
+            time: '32 phút trước',
+            severity: 'warn' as const,
+            tone: 'warn' as const,
+            category: 'ticket' as const,
+            read: false,
+            stationName: 'Trạm Hà Đông (Hà Nội)',
+            chargerId: 'CHG-04',
+            badge: 'Ưu tiên cao',
+            actionLabel: 'Phản hồi vé',
+            primaryAction: { label: 'Mở vé hỗ trợ', actionUrl: '/tickets', actionType: 'link' as const },
+          },
+          {
+            id: 'notif-5',
+            title: 'Giấy phép vận hành trạm sắp hết hạn',
+            subtitle: 'Gói StationPro License của bạn còn 5 ngày sử dụng. Hãy gia hạn để tránh ngắt kết nối OCPP.',
+            body: 'Gói StationPro License của bạn còn 5 ngày sử dụng. Hãy gia hạn để tránh ngắt kết nối OCPP.',
+            createdAt: new Date(Date.now() - 60 * 60_000).toISOString(),
+            time: '1 giờ trước',
+            severity: 'warn' as const,
+            tone: 'warn' as const,
+            category: 'system' as const,
+            read: true,
+            badge: 'Hệ thống',
+            actionLabel: 'Gia hạn gói',
+            primaryAction: { label: 'Gia hạn ngay', actionUrl: '/license', actionType: 'link' as const },
+          },
+        ];
+        if (params?.unreadOnly) {
+          items = items.filter((n) => !n.read);
+        }
+        if (params?.category && params.category !== 'all') {
+          items = items.filter((n) => n.category === params.category);
+        }
+        return items;
+      },
+      async unreadCount() {
+        await delay(30);
+        return 3;
+      },
+      async markAsRead(_id: string) {
+        await delay(40);
+      },
+      async markAllAsRead() {
+        await delay(50);
+      },
+      async delete(_id: string) {
+        await delay(40);
+      },
+    },
   };
 }
 
 export type { Booking };
+

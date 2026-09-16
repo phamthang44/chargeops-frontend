@@ -677,16 +677,21 @@
     "title": "Phương thức thanh toán",
     "SIMULATOR": "Thanh toán giả lập (Demo Sandbox)",
     "SIMULATOR_desc": "Mô phỏng thanh toán tức thì phục vụ demo đồ án",
+    "VNPAY": "Cổng thanh toán VNPAY",
+    "VNPAY_desc": "Thẻ ATM nội địa, QR Pay, Thẻ quốc tế",
     "MOMO": "Ví MoMo",
     "MOMO_desc": "Thanh toán qua ứng dụng ví MoMo",
-    "VISA": "Thẻ Quốc tế (Visa/Master)",
-    "VISA_desc": "Thẻ ghi nợ / tín dụng Quốc tế",
     "ZALOPAY": "Ví ZaloPay",
     "ZALOPAY_desc": "Thanh toán qua ứng dụng ví ZaloPay",
+    "BANK_TRANSFER": "Chuyển khoản ngân hàng",
+    "BANK_TRANSFER_desc": "Chuyển khoản trực tiếp theo mã thanh toán VietQR",
+    "VISA": "Thẻ Quốc tế (Visa/Master)",
+    "VISA_desc": "Thẻ ghi nợ / tín dụng Quốc tế",
     "ATM": "Thẻ ATM Nội địa",
     "ATM_desc": "Thanh toán qua cổng Napas / Internet Banking",
     "WALLET": "Ví ChargeOps",
     "WALLET_desc": "Trừ trực tiếp từ số dư Ví ChargeOps",
+    "comingSoon": "Sắp ra mắt (Giai đoạn sau)",
     "paidVia": "Thanh toán qua {{method}}"
   },
   "bookingConfirmation": {
@@ -707,7 +712,13 @@
     "fastTrackTitle": "⚡ Đặt chỗ nhanh (1-Click)",
     "fastTrackDesc": "Đã tự động chọn cổng khả dụng tốt nhất & khung giờ sạc sớm nhất.",
     "changeConnector": "Đổi cổng",
-    "changeTime": "Đổi giờ"
+    "changeTime": "Đổi giờ",
+    "priceChangedTitle": "Giá hoặc chính sách đã cập nhật",
+    "priceChangedMessage": "Giá hoặc chính sách cho khung giờ sạc này đã được cập nhật lại từ hệ thống. Bạn có muốn tiếp tục đặt chỗ với mức giá mới không?",
+    "oldPrice": "Giá trước đó",
+    "newPrice": "Giá mới",
+    "acceptNewPrice": "Đồng ý giá mới & Tiếp tục",
+    "reviewBooking": "Hủy / Xem lại"
   },
   "bookingConfirm": {
     "title": "Xác nhận đặt chỗ",
@@ -766,7 +777,13 @@
     "errors": {
       "NETWORK_ERROR": "Không có kết nối mạng. Vui lòng kiểm tra và thử lại.",
       "GENERIC": "Không thể tạo lượt đặt chỗ. Vui lòng thử lại.",
-      "RANGE_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác."
+      "RANGE_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.",
+      "PRICE_CHANGED": "Giá hoặc chính sách đã thay đổi trong lúc bạn thao tác. Vui lòng xác nhận giá mới.",
+      "CONNECTOR_BUSY": "Cổng sạc hiện đang có phiên sạc hoặc đang bận. Vui lòng thử cổng khác.",
+      "CONNECTOR_LOCKED": "Cổng sạc đang tạm khóa để bảo trì hoặc chuẩn bị phiên sạc khác.",
+      "SLOT_UNAVAILABLE": "Khung giờ bạn chọn hiện không còn khả dụng.",
+      "DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED": "Bạn đang có phiên đặt chỗ khác chưa hoàn thành. Không thể đặt thêm.",
+      "UNAUTHORIZED": "Phiên đăng nhập đã hết hạn hoặc bạn không có quyền đặt chỗ."
     }
   },
   "bookingSuccess": {

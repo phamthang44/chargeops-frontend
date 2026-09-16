@@ -161,8 +161,9 @@ export interface BookingPriceLine {
   amount: number; // VND for this band
 }
 
-/** Payment methods offered on the booking-confirmation screen. */
-export type PaymentMethod = 'MOMO' | 'VISA' | 'ZALOPAY' | 'ATM' | 'WALLET' | 'SIMULATOR';
+/** Payment methods supported by backend and historical mock. */
+export type BackendPaymentMethod = 'SIMULATOR' | 'VNPAY' | 'MOMO' | 'ZALOPAY' | 'BANK_TRANSFER';
+export type PaymentMethod = BackendPaymentMethod | 'VISA' | 'ATM' | 'WALLET';
 
 /**
  * A booking, denormalized for display. It reserves a continuous time range on
@@ -208,10 +209,34 @@ export interface Booking {
 }
 
 /**
- * Payload sent to the backend to create a booking. The driver picks a start
- * time and a duration; the backend re-derives the price and checks the range
- * against existing bookings on that Connector (FR05, BR-BOK-01). The client
- * never sends a total it computed itself.
+ * Response returned by POST /api/v1/bookings (BKG-020).
+ */
+export interface BackendCreateBookingResponse {
+  bookingId: string;
+  bookingCode: string;
+  status: BookingStatus;
+  version: number;
+  connectorId: string;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  totalAmount: number;
+  currency: string;
+  paymentHoldExpiresAt: string;
+  payment: {
+    paymentId: string;
+    status: string;
+    method: PaymentMethod;
+  };
+  checkout?: {
+    status: string;
+  };
+}
+
+/**
+ * Payload sent to the backend to create a booking (BKG-020).
+ * The driver picks a start time and duration; the client sends consent
+ * (acceptedTotalAmount, acceptedPricingVersion, acceptedPolicyVersion).
  */
 export interface CreateBookingRequest {
   stationId: string;
@@ -219,9 +244,9 @@ export interface CreateBookingRequest {
   startAt: string; // ISO datetime
   durationMin: number;
   paymentMethod: PaymentMethod;
-  acceptedTotalAmount?: number;
-  acceptedPricingVersion?: string;
-  acceptedPolicyVersion?: string;
+  acceptedTotalAmount: number;
+  acceptedPricingVersion: string;
+  acceptedPolicyVersion: string;
   backendPriceRanges?: { startAt: string; endAt: string; rateVndPerKwh: number; periodCode?: string }[];
 }
 

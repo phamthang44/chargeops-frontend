@@ -677,16 +677,21 @@
     "title": "Payment method",
     "SIMULATOR": "Payment Simulator (Demo Sandbox)",
     "SIMULATOR_desc": "Instant payment simulation for demo purposes",
+    "VNPAY": "VNPAY Gateway",
+    "VNPAY_desc": "ATM card, QR Pay, International cards",
     "MOMO": "MoMo Wallet",
     "MOMO_desc": "Pay via MoMo e-wallet app",
-    "VISA": "International Card (Visa/Master)",
-    "VISA_desc": "Debit or Credit card",
     "ZALOPAY": "ZaloPay Wallet",
     "ZALOPAY_desc": "Pay via ZaloPay e-wallet app",
+    "BANK_TRANSFER": "Bank Transfer",
+    "BANK_TRANSFER_desc": "Direct bank transfer via VietQR",
+    "VISA": "International Card (Visa/Master)",
+    "VISA_desc": "Debit or Credit card",
     "ATM": "Domestic ATM Card",
     "ATM_desc": "Pay via Napas / Internet Banking",
     "WALLET": "ChargeOps Wallet",
     "WALLET_desc": "Deduct directly from ChargeOps Wallet balance",
+    "comingSoon": "Coming soon (Next phase)",
     "paidVia": "Paid via {{method}}"
   },
   "bookingConfirmation": {
@@ -707,7 +712,13 @@
     "fastTrackTitle": "⚡ Fast-Track Booking (1-Click)",
     "fastTrackDesc": "Automatically selected the best available connector and earliest charging slot.",
     "changeConnector": "Change port",
-    "changeTime": "Change time"
+    "changeTime": "Change time",
+    "priceChangedTitle": "Price or policy updated",
+    "priceChangedMessage": "Pricing or policy for this charging slot has been updated by the system. Would you like to proceed with the updated price?",
+    "oldPrice": "Previous price",
+    "newPrice": "Updated price",
+    "acceptNewPrice": "Accept & Continue",
+    "reviewBooking": "Cancel / Review"
   },
   "bookingConfirm": {
     "title": "Booking confirmation",
@@ -766,7 +777,13 @@
     "errors": {
       "NETWORK_ERROR": "No network connection. Please check and try again.",
       "GENERIC": "Couldn't create the booking. Please try again.",
-      "RANGE_TAKEN": "Sorry, this time range was just booked by someone else. Please pick another time."
+      "RANGE_TAKEN": "Sorry, this time range was just booked by someone else. Please pick another time.",
+      "PRICE_CHANGED": "Pricing or policy changed while confirming. Please review and accept the new price.",
+      "CONNECTOR_BUSY": "This connector is currently in use or occupied. Please try another port.",
+      "CONNECTOR_LOCKED": "This connector is temporarily locked for maintenance or preparation.",
+      "SLOT_UNAVAILABLE": "The selected time range is no longer available.",
+      "DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED": "You already have an active pending or confirmed booking.",
+      "UNAUTHORIZED": "Session expired or you do not have permission to book."
     }
   },
   "bookingSuccess": {

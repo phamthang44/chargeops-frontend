@@ -1,7 +1,17 @@
 import { bookingsMock } from '@/mock/bookings.mock';
 import { occupancyMock } from '@/mock/occupancy.mock';
 import { chargePointsMock, connectorsMock, stationsMock } from '@/mock/stations.mock';
-import type { Booking, BookingStatus, Connector, CreateBookingRequest } from '@/types';
+import type {
+  BackendCreateBookingResponse,
+  Booking,
+  BookingPriceLine,
+  BookingStatus,
+  ChargePoint,
+  Connector,
+  CreateBookingRequest,
+  PaymentMethod,
+  Station,
+} from '@/types';
 import { busyRangesForDay, isSameDay, rangesOverlap, type BusyRange } from '@/utils/availability';
 import { quoteBooking, SERVICE_FEE, type Quote } from '@/utils/pricing';
 import {
@@ -9,7 +19,13 @@ import {
   resolvePaymentOutcome,
   type PaymentResultStatus,
 } from './simulation';
-import { apiBaseUrl, isMockMode, resolveAccessToken, getConnectorById } from './stationService';
+import {
+  apiBaseUrl,
+  isMockMode,
+  resolveAccessToken,
+  getConnectorById,
+  getStationById,
+} from './stationService';
 
 /**
  * Booking data layer.
@@ -30,7 +46,47 @@ export { SERVICE_FEE };
  * map them to localized copy via `bookingErrorMessage` (see @/i18n/bookingErrors),
  * mirroring the authService convention.
  */
-export type BookingErrorCode = 'RANGE_TAKEN' | 'NETWORK_ERROR';
+export type BookingErrorCode =
+  | 'RANGE_TAKEN'
+  | 'NETWORK_ERROR'
+  | 'PRICE_CHANGED'
+  | 'CONNECTOR_BUSY'
+  | 'CONNECTOR_LOCKED'
+  | 'SLOT_UNAVAILABLE'
+  | 'DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED'
+  | 'UNAUTHORIZED'
+  | 'GENERIC';
+
+/**
+ * Specific error thrown when backend returns 409 PRICE_CHANGED (BKG-020).
+ * Holds latestPricePreview so the screen can prompt driver for consent.
+ */
+export class PriceChangedError extends Error {
+  latestPricePreview: BackendPricePreviewResponse;
+  constructor(latestPricePreview: BackendPricePreviewResponse) {
+    super('PRICE_CHANGED');
+    this.name = 'PriceChangedError';
+    this.latestPricePreview = latestPricePreview;
+  }
+}
+
+/**
+ * Generate RFC4122 v4 UUID for Idempotency-Key.
+ */
+export function generateIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    try {
+      return globalThis.crypto.randomUUID();
+    } catch {
+      // ignore
+    }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 /** Result of attempting to settle payment for a pending booking. */
 export interface PaymentResult {
@@ -452,7 +508,146 @@ export async function findOverlappingBookings(
   return simulateNetwork(overlapping, 0);
 }
 
-export async function createBooking(req: CreateBookingRequest): Promise<Booking> {
+export interface CreateBookingOptions {
+  idempotencyKey?: string;
+  accessToken?: string | null;
+  station?: Station | null;
+  connector?: Connector | null;
+  chargePoint?: ChargePoint | null;
+  priceLines?: BookingPriceLine[];
+}
+
+export async function createBooking(
+  req: CreateBookingRequest,
+  options?: CreateBookingOptions,
+): Promise<Booking> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(options?.accessToken);
+    const key = options?.idempotencyKey || generateIdempotencyKey();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Idempotency-Key': key,
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const body = {
+      connectorId: req.connectorId,
+      startAt: req.startAt,
+      durationMin: req.durationMin,
+      acceptedTotalAmount: req.acceptedTotalAmount,
+      acceptedPricingVersion: req.acceptedPricingVersion,
+      acceptedPolicyVersion: req.acceptedPolicyVersion,
+      paymentMethod: req.paymentMethod,
+    };
+
+    let response: Response;
+    try {
+      response = await fetch(`${apiBaseUrl}/api/v1/bookings`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+    } catch (err) {
+      console.warn('Network error calling POST /api/v1/bookings:', err);
+      throw new Error('NETWORK_ERROR');
+    }
+
+    if (response.status === 409) {
+      const errJson = await response.json().catch(() => null);
+      const code = errJson?.errorCode || errJson?.error?.code || 'PRICE_CHANGED';
+      const latestPricePreview: BackendPricePreviewResponse | undefined =
+        errJson?.data?.latestPricePreview ||
+        errJson?.details?.latestPricePreview ||
+        errJson?.error?.details?.latestPricePreview;
+
+      if (code === 'PRICE_CHANGED' && latestPricePreview) {
+        throw new PriceChangedError(latestPricePreview);
+      }
+      if (
+        code === 'CONNECTOR_BUSY' ||
+        code === 'CONNECTOR_LOCKED' ||
+        code === 'SLOT_UNAVAILABLE' ||
+        code === 'DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED'
+      ) {
+        throw new Error(code);
+      }
+      throw new Error('RANGE_TAKEN');
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => null);
+      const code = errJson?.errorCode || errJson?.error?.code;
+      if (code && typeof code === 'string') {
+        throw new Error(code);
+      }
+      throw new Error('GENERIC');
+    }
+
+    const payload = await response.json();
+    const data: BackendCreateBookingResponse = payload?.data ?? payload;
+
+    const connector =
+      options?.connector ??
+      (await getConnectorById(req.connectorId)) ??
+      connectorsMock.find((c) => c.id === req.connectorId);
+    const chargePoint =
+      options?.chargePoint ??
+      chargePointsMock.find((cp) => cp.id === connector?.chargePointId);
+    const station =
+      options?.station ??
+      (await getStationById(req.stationId)) ??
+      stationsMock.find((s) => s.id === req.stationId);
+
+    const endAt =
+      data.endAt ??
+      new Date(new Date(req.startAt).getTime() + req.durationMin * 60_000).toISOString();
+
+    const createdBooking: Booking = {
+      id: data.bookingId,
+      code: data.bookingCode ?? `CHG-${data.bookingId.slice(0, 4).toUpperCase()}`,
+      stationId: req.stationId,
+      stationName: station?.name ?? '',
+      stationAddress: station?.address ?? '',
+      stationImageUrl: station?.imageUrl,
+      connectorId: req.connectorId,
+      connectorName: connector?.name ?? '',
+      chargePointName: chargePoint?.name ?? '',
+      zoneLabel: chargePoint?.zoneLabel ?? null,
+      connectorType: connector?.connectorType ?? 'CCS2',
+      powerKw: connector?.powerKw ?? 0,
+      startAt: data.startAt ?? req.startAt,
+      endAt,
+      durationMin: data.durationMin ?? req.durationMin,
+      priceLines: options?.priceLines ?? [],
+      energyKwh: options?.priceLines?.reduce((sum, l) => sum + (l.energyKwh || 0), 0) ?? 0,
+      chargingFee: data.totalAmount,
+      serviceFee: 0,
+      totalPrice: data.totalAmount,
+      paymentMethod: (data.payment?.method as PaymentMethod) ?? req.paymentMethod,
+      status: data.status ?? 'PENDING',
+      createdAt: new Date().toISOString(),
+      expiresAt:
+        data.paymentHoldExpiresAt ??
+        new Date(Date.now() + PAYMENT_HOLD_MIN * 60_000).toISOString(),
+    };
+
+    const existingIdx = store.findIndex((b) => b.id === createdBooking.id);
+    if (existingIdx >= 0) {
+      store[existingIdx] = createdBooking;
+    } else {
+      store.unshift(createdBooking);
+    }
+
+    return createdBooking;
+  }
+
   // Simulated edge cases first (mock only): the range was taken by someone else
   // between picking and paying, or the request failed to reach the server.
   // LATER: these become real 409 / network errors from POST /bookings.

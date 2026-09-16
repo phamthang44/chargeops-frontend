@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +14,9 @@ import type { RootStackParamList } from '@/navigation/types';
 import {
   createBooking,
   findOverlappingBookings,
+  generateIdempotencyKey,
   getPricePreview,
+  PriceChangedError,
   type BackendPricePreviewResponse,
 } from '@/services/bookingService';
 import {
@@ -28,7 +30,7 @@ import {
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
 import { formatDate, formatEquipmentName, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
-import { PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
+import { ONLY_SIMULATOR_PAYMENT, PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
 import { quoteBooking, type Quote } from '@/utils/pricing';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
@@ -55,6 +57,11 @@ export function BookingConfirmationScreen() {
   const [error, setError] = useState<string | null>(null);
   const [priceRanges, setPriceRanges] = useState(params.priceRanges ?? null);
   const [backendPreview, setBackendPreview] = useState<BackendPricePreviewResponse | null>(null);
+
+  // Idempotency Key for BKG-020 (persisted across retries, renewed on param/price change)
+  const idempotencyKeyRef = useRef<string>(generateIdempotencyKey());
+  const [pendingPricePreview, setPendingPricePreview] = useState<BackendPricePreviewResponse | null>(null);
+  const [showPriceChangedModal, setShowPriceChangedModal] = useState(false);
 
   // Duplicate booking warning state (BR-BOK-08)
   const [overlappingBooking, setOverlappingBooking] = useState<Booking | null>(null);
@@ -191,30 +198,72 @@ export function BookingConfirmationScreen() {
     return t('timeRangePicker.durationHourMin', { hours, minutes });
   }
 
-  async function submitBooking() {
+  async function submitBooking(overridePreview?: BackendPricePreviewResponse) {
     if (!connector) return;
+    const activePreview = overridePreview ?? backendPreview;
+    const activeTotal = overridePreview ? overridePreview.totalAmount : (quote?.totalPrice ?? 0);
+    const activePricingVersion = activePreview?.pricingVersion ?? '';
+    const activePolicyVersion =
+      activePreview?.policy?.policyVersion ??
+      activePreview?.policy?.version ??
+      'booking-v4.9';
+
     setSubmitting(true);
     setError(null);
     try {
-      const booking = await createBooking({
-        stationId: params.stationId,
-        connectorId: connector.id,
-        startAt: params.startAt,
-        durationMin: params.durationMin,
-        paymentMethod: method,
-        acceptedTotalAmount: quote?.totalPrice,
-        acceptedPricingVersion: backendPreview?.pricingVersion,
-        acceptedPolicyVersion: backendPreview?.policy?.version ?? 'booking-v4.9',
-        backendPriceRanges: priceRanges ?? params.priceRanges,
-      });
+      const token = getAccessToken();
+      const booking = await createBooking(
+        {
+          stationId: params.stationId,
+          connectorId: connector.id,
+          startAt: params.startAt,
+          durationMin: params.durationMin,
+          paymentMethod: method,
+          acceptedTotalAmount: activeTotal,
+          acceptedPricingVersion: activePricingVersion,
+          acceptedPolicyVersion: activePolicyVersion,
+          backendPriceRanges: priceRanges ?? params.priceRanges,
+        },
+        {
+          idempotencyKey: idempotencyKeyRef.current,
+          accessToken: token,
+          station,
+          connector,
+          chargePoint,
+          priceLines: quote?.priceLines ?? [],
+        },
+      );
       navigation.replace('PaymentProcessing', { bookingId: booking.id });
     } catch (e) {
+      if (e instanceof PriceChangedError) {
+        setPendingPricePreview(e.latestPricePreview);
+        setShowPriceChangedModal(true);
+        return;
+      }
       const msg = bookingErrorMessage(t, e);
       setError(msg);
       Alert.alert(t('bookingConfirmation.errorTitle'), msg);
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleAcceptNewPrice() {
+    if (!pendingPricePreview) return;
+    const newPreview = pendingPricePreview;
+    setShowPriceChangedModal(false);
+    setPendingPricePreview(null);
+    setBackendPreview(newPreview);
+    // Renew idempotency key for new price agreement
+    idempotencyKeyRef.current = generateIdempotencyKey();
+    setTimeout(() => {
+      submitBooking(newPreview);
+    }, 150);
+  }
+
+  function handleDeclineNewPrice() {
+    setShowPriceChangedModal(false);
+    setPendingPricePreview(null);
   }
 
   const handleBack = useCallback(() => {
@@ -476,23 +525,46 @@ export function BookingConfirmationScreen() {
           {SELECTABLE_PAYMENT_METHODS.map((pm) => {
             const meta = PAYMENT_META[pm];
             const isSel = method === pm;
+            const isDisabled = ONLY_SIMULATOR_PAYMENT && pm !== 'SIMULATOR';
             return (
               <Pressable
                 key={pm}
+                disabled={isDisabled}
                 style={[
                   styles.paymentRow,
                   {
                     backgroundColor: isSel ? themeColors.primarySoft : themeColors.surfaceAlt,
                     borderColor: isSel ? themeColors.primary : themeColors.border,
+                    opacity: isDisabled ? 0.45 : 1,
                   },
                 ]}
-                onPress={() => setMethod(pm)}
+                onPress={() => {
+                  if (!isDisabled) {
+                    setMethod(pm);
+                  }
+                }}
               >
                 <View style={[styles.paymentIcon, { backgroundColor: `${meta.color}1A` }]}>
                   <Ionicons name={meta.icon} size={20} color={meta.color} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.paymentName, { color: themeColors.textStrong }]}>{t(`payment.${pm}`)}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                    <Text style={[styles.paymentName, { color: themeColors.textStrong }]}>{t(`payment.${pm}`)}</Text>
+                    {isDisabled && (
+                      <View
+                        style={{
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E5E7EB',
+                        }}
+                      >
+                        <Text style={{ fontSize: 10, color: themeColors.textMuted, fontWeight: '600' }}>
+                          {t('payment.comingSoon')}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                   <Text style={[styles.paymentDesc, { color: themeColors.textMuted }]}>{t(`payment.${pm}_desc`)}</Text>
                 </View>
                 <View
@@ -571,6 +643,53 @@ export function BookingConfirmationScreen() {
                   setShowOverlapModal(false);
                   navigation.goBack();
                 }}
+              />
+            </View>
+          </View>
+        </BottomSheet>
+      )}
+
+      {/* 409 PRICE_CHANGED Re-Consent BottomSheet (BKG-020) */}
+      {pendingPricePreview && (
+        <BottomSheet
+          visible={showPriceChangedModal}
+          onClose={handleDeclineNewPrice}
+          title={t('bookingConfirmation.priceChangedTitle')}
+        >
+          <View style={styles.modalContent}>
+            <View style={[styles.modalIconRing, { backgroundColor: `${themeColors.info}1A` }]}>
+              <Ionicons name="pricetag-outline" size={32} color={themeColors.info} />
+            </View>
+            <Text style={[styles.modalBodyText, { color: themeColors.textBody }]}>
+              {t('bookingConfirmation.priceChangedMessage')}
+            </Text>
+            <View style={[styles.priceChangeComparison, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+              <View style={styles.priceChangeRow}>
+                <Text style={[styles.priceChangeLabel, { color: themeColors.textMuted }]}>
+                  {t('bookingConfirmation.oldPrice')}:
+                </Text>
+                <Text style={[styles.priceChangeOldValue, { color: themeColors.textMuted }]}>
+                  {formatVnd(quote?.totalPrice ?? 0)}
+                </Text>
+              </View>
+              <View style={styles.priceChangeRow}>
+                <Text style={[styles.priceChangeLabel, { color: themeColors.textStrong, fontWeight: fontWeights.semibold }]}>
+                  {t('bookingConfirmation.newPrice')}:
+                </Text>
+                <Text style={[styles.priceChangeNewValue, { color: themeColors.primary, fontWeight: fontWeights.bold }]}>
+                  {formatVnd(pendingPricePreview.totalAmount)}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.modalActions}>
+              <AppButton
+                label={t('bookingConfirmation.acceptNewPrice')}
+                onPress={handleAcceptNewPrice}
+              />
+              <AppButton
+                label={t('bookingConfirmation.reviewBooking')}
+                variant="secondary"
+                onPress={handleDeclineNewPrice}
               />
             </View>
           </View>
@@ -700,4 +819,27 @@ const styles = StyleSheet.create({
   modalIconRing: { width: 64, height: 64, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
   modalBodyText: { fontSize: fontSizes.body, textAlign: 'center', lineHeight: lineHeights.body },
   modalActions: { alignSelf: 'stretch', gap: spacing.sm, marginTop: spacing.sm },
+
+  priceChangeComparison: {
+    alignSelf: 'stretch',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  priceChangeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceChangeLabel: {
+    fontSize: fontSizes.body,
+  },
+  priceChangeOldValue: {
+    fontSize: fontSizes.body,
+    textDecorationLine: 'line-through',
+  },
+  priceChangeNewValue: {
+    fontSize: fontSizes.body,
+  },
 });

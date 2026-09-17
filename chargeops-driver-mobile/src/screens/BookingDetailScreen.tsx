@@ -19,8 +19,9 @@ import {
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
-  CHECK_IN_WINDOW_MIN,
   getBookingById,
+  getBookingNowMs,
+  getBookingTimeRemainingMs,
   BookingApiError,
 } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -65,9 +66,6 @@ const STATUS_ICON: Record<StatusTone, IconName> = {
   warning: 'time-outline',
   neutral: 'remove-circle-outline',
 };
-
-/** Check-in closes this long after the start time; after that it is a no-show. */
-const CHECK_IN_WINDOW_MS = CHECK_IN_WINDOW_MIN * 60_000;
 
 function statusLabelKey(booking: Booking): string {
   if (booking.status === 'CANCELLED' && booking.cancelReason === 'NO_SHOW') {
@@ -143,7 +141,7 @@ export function BookingDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(getBookingNowMs());
 
   const handleCopy = (text: string, field: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -190,8 +188,8 @@ export function BookingDetailScreen() {
 
   useEffect(() => {
     if (!booking) return;
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    setNow(getBookingNowMs());
+    const id = setInterval(() => setNow(getBookingNowMs()), 1000);
     return () => clearInterval(id);
   }, [booking]);
 
@@ -427,9 +425,10 @@ export function BookingDetailScreen() {
 
   const startMs = new Date(booking.startAt).getTime();
   const endMs = new Date(booking.endAt).getTime();
+  const checkInOpensMs = new Date(booking.checkInOpensAt ?? booking.startAt).getTime();
   const checkInDeadlineMs = booking.checkInDeadline
     ? new Date(booking.checkInDeadline).getTime()
-    : startMs + CHECK_IN_WINDOW_MS;
+    : Number.NaN;
   const isConfirmed = booking.status === 'CONFIRMED';
   const isPending = booking.status === 'PENDING';
   const isCancelled = booking.status === 'CANCELLED';
@@ -438,21 +437,21 @@ export function BookingDetailScreen() {
   const isCharging = booking.status === 'CHARGING';
   const isExpired = booking.status === 'EXPIRED';
 
-  const windowStarted = now >= startMs;
-  const windowPassed = now > checkInDeadlineMs;
-  const msToCheckInClose = Math.max(0, checkInDeadlineMs - now);
+  const hasCheckInDeadline = Number.isFinite(checkInDeadlineMs);
+  const windowStarted = now >= checkInOpensMs;
+  const windowPassed = hasCheckInDeadline && now > checkInDeadlineMs;
+  const msToCheckInClose = getBookingTimeRemainingMs(booking.checkInDeadline, now);
 
-  const canCheckIn = booking.actions ? booking.actions.canCheckIn : (isConfirmed && windowStarted && !windowPassed);
+  const canCheckIn = booking.actions
+    ? booking.actions.canCheckIn
+    : (isConfirmed && windowStarted && hasCheckInDeadline && !windowPassed);
   const checkInReason = booking.actions?.checkInReason ?? (windowPassed ? 'WINDOW_CLOSED' : !windowStarted ? 'TOO_EARLY' : 'AVAILABLE');
   const canCancel = booking.actions ? booking.actions.canCancel : (isPending || isConfirmed);
   const refundableAmount = booking.actions ? booking.actions.refundableAmount : (booking.refundAmount ?? 0);
   const cancellationReason = booking.actions?.cancellationReason;
   const canReportIssue = booking.actions?.canReportIssue ?? true;
 
-  const freeCancellationDeadlineMs = booking.freeCancellationDeadline
-    ? new Date(booking.freeCancellationDeadline).getTime()
-    : new Date(booking.createdAt).getTime() + 10 * 60_000;
-  const graceRemainingMs = Math.max(0, freeCancellationDeadlineMs - now);
+  const graceRemainingMs = getBookingTimeRemainingMs(booking.freeCancellationDeadline, now);
   const isWithinGrace = cancellationReason === 'WITHIN_GRACE' || (isConfirmed && graceRemainingMs > 0);
 
   const durationMin = Math.round((endMs - startMs) / 60_000);
@@ -480,8 +479,10 @@ export function BookingDetailScreen() {
       return t('bookingDetail.countdownNote');
     }
     if (isPending) {
-      const holdExpiresMs = new Date(booking.paymentHoldExpiresAt ?? booking.expiresAt ?? '').getTime();
-      const holdLeft = Math.max(0, holdExpiresMs - now);
+      const holdLeft = getBookingTimeRemainingMs(
+        booking.paymentHoldExpiresAt ?? booking.expiresAt,
+        now,
+      );
       return t('bookingDetail.holdNote', { time: formatCountdown(holdLeft) });
     }
     if (isCheckedIn && booking.checkedInAt) {

@@ -120,15 +120,47 @@ export interface PaymentResult {
   booking: Booking | null;
 }
 
-/** Reconsideration window after booking creation — a full refund regardless of tier (FR05 / Platform policy v4.9: 10 mins). */
-export const GRACE_PERIOD_MIN = 10;
 /** How long an unpaid booking holds its time range (BR-BOK-02). */
 export const PAYMENT_HOLD_MIN = 10;
 /** Check-in opens at the start time and closes this many minutes later (BR-BOK-04). */
 export const CHECK_IN_WINDOW_MIN = 15;
 
-/** Refund tier per FR08 / BR-PAY-03. */
-export type RefundTier = 'GRACE' | 'FULL' | 'PARTIAL' | 'NONE';
+let bookingServerClockOffsetMs = 0;
+
+/**
+ * Current time aligned with the booking API clock. It falls back to the device
+ * clock until a response containing ApiResult.meta.serverTime is received.
+ */
+export function getBookingNowMs(): number {
+  return Date.now() + bookingServerClockOffsetMs;
+}
+
+/** Return a safe countdown value for an absolute ISO-8601 deadline. */
+export function getBookingTimeRemainingMs(
+  deadline: string | null | undefined,
+  now: number = getBookingNowMs(),
+): number {
+  if (!deadline) return 0;
+  const deadlineMs = Date.parse(deadline);
+  return Number.isFinite(deadlineMs) ? Math.max(0, deadlineMs - now) : 0;
+}
+
+function syncBookingServerClock(
+  serverTime: unknown,
+  requestStartedAt: number,
+  responseReceivedAt: number,
+): void {
+  const serverTimeMs = Number(serverTime);
+  if (!Number.isFinite(serverTimeMs)) return;
+
+  // Midpoint compensation avoids counting the whole network round-trip as
+  // clock skew. Subsequent local ticks remain network-free.
+  const clientMidpoint = requestStartedAt + (responseReceivedAt - requestStartedAt) / 2;
+  bookingServerClockOffsetMs = serverTimeMs - clientMidpoint;
+}
+
+/** Refund tier per FR08 / BR-PAY-03 / Unpaid Hold. */
+export type RefundTier = 'UNPAID' | 'GRACE' | 'FULL' | 'PARTIAL' | 'NONE';
 
 export interface RefundBreakdown {
   tier: RefundTier;
@@ -138,28 +170,41 @@ export interface RefundBreakdown {
   minutesBefore: number; // whole minutes before start (negative once started)
   /** Milliseconds left in the grace window, or 0 once it has closed. */
   graceRemainingMs: number;
+  /** Milliseconds left in the unpaid payment hold window, or 0 if expired/not unpaid. */
+  holdRemainingMs?: number;
+  /** Whether the booking is unpaid / still in payment hold */
+  isUnpaid?: boolean;
 }
 
 /**
- * Compute the refund for cancelling a booking (FR08):
- *   - within 5 min of creating the booking -> 100% (GRACE), whatever the tier says
- *   - 60+ min before start                 -> 100% (FULL)
- *   - 15–60 min before start               -> 50%  (PARTIAL)
- *   - < 15 min, or no-show                 -> 0%   (NONE)
- * The grace period is an override, not another tier: it is checked first and
- * wins even when the slot starts in two minutes. Pure function — same input
- * always yields the same breakdown.
+ * Compute the refund preview from server capabilities and the booking-specific
+ * free-cancellation deadline. Never rebuild policy from createdAt: the server
+ * may start the grace window at payment confirmation or apply another policy
+ * version to this booking.
  */
-export function computeRefund(booking: Booking, now: number = Date.now()): RefundBreakdown {
-  const freeDeadlineMs = booking.freeCancellationDeadline
-    ? new Date(booking.freeCancellationDeadline).getTime()
-    : booking.createdAt
-    ? new Date(booking.createdAt).getTime() + GRACE_PERIOD_MIN * 60_000
-    : 0;
-
-  const graceRemainingMs = Math.max(0, freeDeadlineMs - now);
-
+export function computeRefund(booking: Booking, now: number = getBookingNowMs()): RefundBreakdown {
   const serverReason = booking.actions?.cancellationReason;
+  const isUnpaid = booking.status === 'PENDING' || serverReason === 'UNPAID';
+  const minutesBefore = Math.floor((new Date(booking.startAt).getTime() - now) / 60_000);
+
+  if (isUnpaid) {
+    const holdRemainingMs = getBookingTimeRemainingMs(
+      booking.paymentHoldExpiresAt ?? booking.expiresAt,
+      now,
+    );
+    return {
+      tier: 'UNPAID',
+      percent: 0,
+      refundAmount: 0,
+      feeAmount: 0,
+      minutesBefore,
+      graceRemainingMs: 0,
+      holdRemainingMs,
+      isUnpaid: true,
+    };
+  }
+
+  const graceRemainingMs = getBookingTimeRemainingMs(booking.freeCancellationDeadline, now);
   const serverRefundAmount = booking.actions?.refundableAmount;
 
   // Under Platform Policy v4.9 / BR-PAY-02, BR-PAY-03:
@@ -168,7 +213,7 @@ export function computeRefund(booking: Booking, now: number = Date.now()): Refun
   const isGrace =
     serverReason !== undefined
       ? serverReason === 'WITHIN_GRACE'
-      : (freeDeadlineMs > 0 && graceRemainingMs > 0);
+      : graceRemainingMs > 0;
 
   let percent: number;
   let tier: RefundTier;
@@ -187,7 +232,6 @@ export function computeRefund(booking: Booking, now: number = Date.now()): Refun
       : Math.round((booking.totalPrice * percent) / 100);
 
   const feeAmount = Math.max(0, booking.totalPrice - refundAmount);
-  const minutesBefore = Math.floor((new Date(booking.startAt).getTime() - now) / 60_000);
 
   return {
     tier,
@@ -195,7 +239,8 @@ export function computeRefund(booking: Booking, now: number = Date.now()): Refun
     refundAmount,
     feeAmount,
     minutesBefore,
-    graceRemainingMs: isGrace ? Math.min(graceRemainingMs, GRACE_PERIOD_MIN * 60_000) : 0,
+    graceRemainingMs: isGrace ? graceRemainingMs : 0,
+    isUnpaid: false,
   };
 }
 
@@ -244,19 +289,17 @@ const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'EXPIRED'];
  * Normalize booking with server-driven actions & deadlines for local store / mock fallback.
  */
 export function normalizeBookingWithCapabilities(b: Booking): Booking {
-  const now = Date.now();
+  const now = getBookingNowMs();
   const startMs = new Date(b.startAt).getTime();
   const checkInOpensAt = b.checkInOpensAt ?? b.startAt;
-  const checkInDeadline = b.checkInDeadline ?? new Date(startMs + 15 * 60_000).toISOString();
-  const checkInDeadlineMs = new Date(checkInDeadline).getTime();
+  const checkInDeadline = b.checkInDeadline;
+  const checkInDeadlineMs = checkInDeadline ? new Date(checkInDeadline).getTime() : Number.NaN;
   const paymentHoldExpiresAt =
     b.paymentHoldExpiresAt ??
     b.expiresAt ??
-    new Date(new Date(b.createdAt).getTime() + 10 * 60_000).toISOString();
-  const freeCancellationDeadline =
-    b.freeCancellationDeadline ??
-    new Date(new Date(b.createdAt).getTime() + 10 * 60_000).toISOString();
-  const isGrace = now <= new Date(freeCancellationDeadline).getTime();
+    undefined;
+  const freeCancellationDeadline = b.freeCancellationDeadline;
+  const isGrace = getBookingTimeRemainingMs(freeCancellationDeadline, now) > 0;
 
   let canCancel = false;
   let refundableAmount = 0;
@@ -283,7 +326,7 @@ export function normalizeBookingWithCapabilities(b: Booking): Booking {
     if (now < startMs) {
       canCheckIn = false;
       checkInReason = 'TOO_EARLY';
-    } else if (now > checkInDeadlineMs) {
+    } else if (!Number.isFinite(checkInDeadlineMs) || now > checkInDeadlineMs) {
       canCheckIn = false;
       checkInReason = 'WINDOW_CLOSED';
     } else {
@@ -343,14 +386,7 @@ export function mapListItemToBooking(item: DriverBookingListItem): Booking {
     status: item.status,
     cancelReason: item.cancellationReason,
     checkedInAt: item.checkedInAt,
-    createdAt:
-      item.createdAt ??
-      (item.paymentHoldExpiresAt
-        ? new Date(new Date(item.paymentHoldExpiresAt).getTime() - 10 * 60_000).toISOString()
-        : item.paymentConfirmedAt ??
-          (item.freeCancellationDeadline
-            ? new Date(new Date(item.freeCancellationDeadline).getTime() - 10 * 60_000).toISOString()
-            : new Date().toISOString())),
+    createdAt: item.createdAt,
     expiresAt: item.paymentHoldExpiresAt ?? null,
     paymentHoldExpiresAt: item.paymentHoldExpiresAt,
     freeCancellationDeadline: item.freeCancellationDeadline,
@@ -389,6 +425,7 @@ export function mapDetailItemToBooking(item: BookingDetailItem): Booking {
 
   return {
     ...base,
+    createdAt: item.createdAt,
     priceLines: normalizedPriceLines,
     energyKwh: totalKwh > 0 ? +totalKwh.toFixed(1) : base.energyKwh,
     paymentMethod: item.payment?.method ?? (item.checkout?.method as any) ?? 'VNPAY',
@@ -416,9 +453,11 @@ export async function getActiveBookings(accessToken?: string | null): Promise<Bo
       const headers: Record<string, string> = { Accept: 'application/json' };
       if (token) headers.Authorization = `Bearer ${token}`;
 
+      const requestStartedAt = Date.now();
       const res = await fetch(`${apiBaseUrl}/api/v1/bookings/active`, { headers });
       if (res.ok) {
         const json = await res.json();
+        syncBookingServerClock(json?.meta?.serverTime, requestStartedAt, Date.now());
         const content: DriverBookingListItem[] =
           json?.data?.content ?? json?.data ?? json?.content ?? json;
         if (Array.isArray(content)) {
@@ -624,9 +663,11 @@ export async function getBookingById(id: string, accessToken?: string | null): P
       const headers: Record<string, string> = { Accept: 'application/json' };
       if (token) headers.Authorization = `Bearer ${token}`;
 
+      const requestStartedAt = Date.now();
       const res = await fetch(`${apiBaseUrl}/api/v1/bookings/${id}`, { headers });
       if (res.ok) {
         const json = await res.json();
+        syncBookingServerClock(json?.meta?.serverTime, requestStartedAt, Date.now());
         const data: BookingDetailItem = json?.data ?? json;
         if (data && (data.bookingId || (data as any).id)) {
           return mapDetailItemToBooking(data);
@@ -1009,9 +1050,7 @@ export async function createBooking(
       paymentMethod: (data.payment?.method as PaymentMethod) ?? req.paymentMethod,
       status: data.status ?? 'PENDING',
       createdAt: new Date().toISOString(),
-      expiresAt:
-        data.paymentHoldExpiresAt ??
-        new Date(Date.now() + PAYMENT_HOLD_MIN * 60_000).toISOString(),
+      expiresAt: data.paymentHoldExpiresAt ?? null,
     };
 
     const existingIdx = store.findIndex((b) => b.id === createdBooking.id);

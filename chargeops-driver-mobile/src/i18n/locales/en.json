@@ -970,7 +970,20 @@
     "dismiss": "Keep booking",
     "warning": "Cancelling too often may affect your reputation score on ChargeOps.",
     "policyGrace": "You're within 10 minutes of booking — cancelling now refunds everything, however close the start time is.",
-    "graceLeft": "{{time}} left on the full-refund window"
+    "graceLeft": "{{time}} left on the full-refund window",
+    "unpaidSubtitle": "This reservation has not been paid yet. Are you sure you want to release the charging port hold?",
+    "policyUnpaidTitle": "Free hold release",
+    "policyUnpaid": "You have not paid for this reservation yet. Cancelling will release the charger hold immediately with zero fee.",
+    "unpaidSummaryTitle": "Hold reservation summary",
+    "holdAmount": "Reserved amount",
+    "paymentStatus": "Payment status",
+    "unpaidStatus": "Unpaid (0đ)",
+    "unpaidFee": "Hold cancellation fee",
+    "freeFee": "0đ (Free)",
+    "netPayOrRefund": "Incurred charges",
+    "holdTimeLeft": "Hold expires in:",
+    "confirmUnpaid": "Release hold",
+    "continuePay": "Continue payment"
   },
   "qrCheckIn": {
     "title": "QR Check-in",

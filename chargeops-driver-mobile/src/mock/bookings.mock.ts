@@ -7,7 +7,7 @@ import { quoteBooking } from '@/utils/pricing';
  * history / detail screens.
  *
  * Live bookings use timestamps relative to "now" so the countdowns on
- * BookingDetail (check-in, 5-minute grace window, 10-minute payment hold) always
+ * BookingDetail (check-in, 10-minute grace window, 10-minute payment hold) always
  * show a meaningful value during a demo, regardless of the device clock. Past
  * bookings use fixed dates.
  *
@@ -20,6 +20,8 @@ const minutesFromNow = (m: number) => new Date(NOW + m * 60_000).toISOString();
 
 /** How long an unpaid booking holds its range before the reservation lapses (BR-BOK-02). */
 const PAYMENT_HOLD_MIN = 10;
+const FREE_CANCELLATION_MIN = 10;
+const CHECK_IN_WINDOW_MIN = 15;
 
 interface BookingSeed {
   id: string;
@@ -41,6 +43,10 @@ function build(seed: BookingSeed): Booking {
   const station = stationsMock.find((s) => s.id === connector.stationId)!;
   const quote = quoteBooking(connector, seed.startAt, seed.durationMin);
   const endAt = new Date(new Date(seed.startAt).getTime() + seed.durationMin * 60_000).toISOString();
+  const paymentHoldExpiresAt =
+    seed.status === 'PENDING'
+      ? new Date(new Date(seed.createdAt).getTime() + PAYMENT_HOLD_MIN * 60_000).toISOString()
+      : undefined;
 
   return {
     id: seed.id,
@@ -68,10 +74,14 @@ function build(seed: BookingSeed): Booking {
     cancelReason: seed.cancelReason,
     checkedInAt: seed.checkedInAt,
     createdAt: seed.createdAt,
-    expiresAt:
+    expiresAt: paymentHoldExpiresAt ?? null,
+    paymentHoldExpiresAt,
+    freeCancellationDeadline:
       seed.status === 'PENDING'
-        ? new Date(new Date(seed.createdAt).getTime() + PAYMENT_HOLD_MIN * 60_000).toISOString()
-        : null,
+        ? undefined
+        : new Date(new Date(seed.createdAt).getTime() + FREE_CANCELLATION_MIN * 60_000).toISOString(),
+    checkInOpensAt: seed.startAt,
+    checkInDeadline: new Date(new Date(seed.startAt).getTime() + CHECK_IN_WINDOW_MIN * 60_000).toISOString(),
     refundPercent: seed.refundPercent,
     refundAmount:
       seed.refundPercent === undefined

@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { usePreferences } from '@/context/PreferencesContext';
-import { cancelBooking, computeRefund } from '@/services/bookingService';
+import { cancelBooking, computeRefund, getBookingNowMs } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatCountdown, formatMmSs, formatVnd } from '@/utils/format';
@@ -21,6 +21,7 @@ interface CancelBookingSheetProps {
 // Map the refund tier to the policy-banner body copy. GRACE is the FR05
 // reconsideration window — a full refund that overrides the time-based tiers.
 const TIER_KEY = {
+  UNPAID: 'policyUnpaid',
   GRACE: 'policyGrace',
   FULL: 'policyFull',
   PARTIAL: 'policyPartial',
@@ -36,14 +37,14 @@ const TIER_KEY = {
 export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: CancelBookingSheetProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(getBookingNowMs());
   const [cancelling, setCancelling] = useState(false);
 
   // Tick once a second while open so the breakdown + countdown stay live.
   useEffect(() => {
     if (!visible) return;
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    setNow(getBookingNowMs());
+    const id = setInterval(() => setNow(getBookingNowMs()), 1000);
     return () => clearInterval(id);
   }, [visible]);
 
@@ -60,23 +61,61 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
     }
   }
 
+  const isUnpaid = refund.tier === 'UNPAID';
+
   return (
     <BottomSheet visible={visible} onClose={onClose} title={t('cancelBooking.title')}>
-      <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>{t('cancelBooking.subtitle')}</Text>
+      <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
+        {isUnpaid ? t('cancelBooking.unpaidSubtitle') : t('cancelBooking.subtitle')}
+      </Text>
 
       {/* Current policy banner */}
-      <View style={[styles.policyCard, { backgroundColor: `${themeColors.error}14` }, refund.tier === 'GRACE' && { backgroundColor: themeColors.primarySoft }]}>
+      <View
+        style={[
+          styles.policyCard,
+          isUnpaid
+            ? { backgroundColor: `${themeColors.info}14` }
+            : refund.tier === 'GRACE'
+            ? { backgroundColor: themeColors.primarySoft }
+            : { backgroundColor: `${themeColors.error}14` },
+        ]}
+      >
         <View style={styles.policyHeader}>
           <Ionicons
-            name={refund.tier === 'GRACE' ? 'arrow-undo-outline' : 'alert-circle-outline'}
+            name={
+              isUnpaid
+                ? 'shield-checkmark-outline'
+                : refund.tier === 'GRACE'
+                ? 'arrow-undo-outline'
+                : 'alert-circle-outline'
+            }
             size={18}
-            color={refund.tier === 'GRACE' ? themeColors.primaryDark : themeColors.error}
+            color={
+              isUnpaid
+                ? themeColors.info
+                : refund.tier === 'GRACE'
+                ? themeColors.primaryDark
+                : themeColors.error
+            }
           />
-          <Text style={[styles.policyTitle, { color: themeColors.error }, refund.tier === 'GRACE' && { color: themeColors.primaryDark }]}>
-            {t('cancelBooking.policyTitle', { percent: refund.percent })}
+          <Text
+            style={[
+              styles.policyTitle,
+              isUnpaid
+                ? { color: themeColors.info }
+                : refund.tier === 'GRACE'
+                ? { color: themeColors.primaryDark }
+                : { color: themeColors.error },
+            ]}
+          >
+            {isUnpaid
+              ? t('cancelBooking.policyUnpaidTitle')
+              : t('cancelBooking.policyTitle', { percent: refund.percent })}
           </Text>
         </View>
-        <Text style={[styles.policyBody, { color: themeColors.textBody }]}>{t(`cancelBooking.${TIER_KEY[refund.tier]}`)}</Text>
+        <Text style={[styles.policyBody, { color: themeColors.textBody }]}>
+          {t(`cancelBooking.${TIER_KEY[refund.tier]}`)}
+        </Text>
         {refund.tier === 'GRACE' && refund.graceRemainingMs > 0 && (
           <Text style={[styles.policyTimer, { color: themeColors.primaryDark }]}>
             {t('cancelBooking.graceLeft', { time: formatCountdown(refund.graceRemainingMs) })}
@@ -84,29 +123,59 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
         )}
       </View>
 
-      {/* Refund summary */}
+      {/* Refund / Hold summary */}
       <View style={styles.summaryHeader}>
-        <Ionicons name="wallet-outline" size={16} color={themeColors.primaryDark} />
-        <Text style={[styles.summaryTitle, { color: themeColors.textMuted }]}>{t('cancelBooking.summaryTitle')}</Text>
+        <Ionicons
+          name={isUnpaid ? 'receipt-outline' : 'wallet-outline'}
+          size={16}
+          color={themeColors.primaryDark}
+        />
+        <Text style={[styles.summaryTitle, { color: themeColors.textMuted }]}>
+          {isUnpaid ? t('cancelBooking.unpaidSummaryTitle') : t('cancelBooking.summaryTitle')}
+        </Text>
       </View>
       <View style={[styles.summaryCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
-        <View style={styles.row}>
-          <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.totalPaid')}</Text>
-          <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>{formatVnd(booking.totalPrice)}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.refundRate')}</Text>
-          <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>{refund.percent}%</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.fee')}</Text>
-          <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>- {formatVnd(refund.feeAmount)}</Text>
-        </View>
-        <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
-        <View style={styles.row}>
-          <Text style={[styles.netLabel, { color: themeColors.textStrong }]}>{t('cancelBooking.netRefund')}</Text>
-          <Text style={[styles.netValue, { color: themeColors.error }]}>{formatVnd(refund.refundAmount)}</Text>
-        </View>
+        {isUnpaid ? (
+          <>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.holdAmount')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>{formatVnd(booking.totalPrice)}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.paymentStatus')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.textMuted }]}>{t('cancelBooking.unpaidStatus')}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.unpaidFee')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.primaryDark }]}>{t('cancelBooking.freeFee')}</Text>
+            </View>
+            <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+            <View style={styles.row}>
+              <Text style={[styles.netLabel, { color: themeColors.textStrong }]}>{t('cancelBooking.netPayOrRefund')}</Text>
+              <Text style={[styles.netValue, { color: themeColors.textStrong }]}>0đ</Text>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.totalPaid')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>{formatVnd(booking.totalPrice)}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.refundRate')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>{refund.percent}%</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: themeColors.textBody }]}>{t('cancelBooking.fee')}</Text>
+              <Text style={[styles.rowValue, { color: themeColors.textStrong }]}>- {formatVnd(refund.feeAmount)}</Text>
+            </View>
+            <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+            <View style={styles.row}>
+              <Text style={[styles.netLabel, { color: themeColors.textStrong }]}>{t('cancelBooking.netRefund')}</Text>
+              <Text style={[styles.netValue, { color: themeColors.error }]}>{formatVnd(refund.refundAmount)}</Text>
+            </View>
+          </>
+        )}
       </View>
 
       {refund.refundAmount > 0 && (
@@ -116,7 +185,19 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
         </View>
       )}
 
-      {msToStart > 0 && (
+      {isUnpaid && (refund.holdRemainingMs ?? 0) > 0 && (
+        <View style={styles.timeRow}>
+          <Ionicons name="time-outline" size={15} color={themeColors.warning} />
+          <Text style={[styles.timeText, { color: themeColors.textBody }]}>
+            {t('cancelBooking.holdTimeLeft')}{' '}
+            <Text style={[styles.timeStrong, { color: themeColors.textStrong }]}>
+              {formatCountdown(refund.holdRemainingMs ?? 0)}
+            </Text>
+          </Text>
+        </View>
+      )}
+
+      {!isUnpaid && msToStart > 0 && (
         <View style={styles.timeRow}>
           <Ionicons name="time-outline" size={15} color={themeColors.textMuted} />
           <Text style={[styles.timeText, { color: themeColors.textBody }]}>
@@ -139,7 +220,9 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
         {cancelling ? (
           <ActivityIndicator color="#FFFFFF" />
         ) : (
-          <Text style={[styles.confirmText, { color: '#FFFFFF' }]}>{t('cancelBooking.confirm')}</Text>
+          <Text style={[styles.confirmText, { color: '#FFFFFF' }]}>
+            {isUnpaid ? t('cancelBooking.confirmUnpaid') : t('cancelBooking.confirm')}
+          </Text>
         )}
       </Pressable>
       <Pressable
@@ -151,7 +234,9 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
         disabled={cancelling}
         onPress={onClose}
       >
-        <Text style={[styles.dismissText, { color: themeColors.textStrong }]}>{t('cancelBooking.dismiss')}</Text>
+        <Text style={[styles.dismissText, { color: themeColors.textStrong }]}>
+          {isUnpaid ? t('cancelBooking.continuePay') : t('cancelBooking.dismiss')}
+        </Text>
       </Pressable>
 
       <View style={styles.warnRow}>

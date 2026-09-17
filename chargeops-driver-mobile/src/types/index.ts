@@ -204,7 +204,8 @@ export interface Booking {
   cancelReason?: CancelReason;
   checkedInAt?: string;
   paymentConfirmedAt?: string;
-  createdAt: string; // ISO datetime — the 5-minute grace window runs from here (FR05)
+  /** Audit/timeline timestamp only. Never derive a policy deadline from it. */
+  createdAt?: string;
   /** When an unpaid PENDING booking's hold lapses (BR-BOK-02); null once paid. */
   expiresAt: string | null;
   paymentHoldExpiresAt?: string;
@@ -310,12 +311,12 @@ export interface DriverBookingListItem {
   checkedInAt?: string;
   chargingStartedAt?: string;
   createdAt?: string;
-  paymentConfirmedAt?: string;
   actions: BookingActions;
 }
 
 /** Full Driver-facing booking detail (BKG-021). */
 export interface BookingDetailItem extends DriverBookingListItem {
+  createdAt?: string;
   priceLines: BookingPriceLine[];
   pricingBasis?: any;
   policyVersion?: string;
@@ -458,5 +459,3 @@ export type {
   BackendStationDiscoverySort,
   BackendTimeRangeResponse,
 } from '@/services/stationAdapter';
-
-

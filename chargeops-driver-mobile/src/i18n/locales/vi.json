@@ -975,7 +975,20 @@
     "dismiss": "Giữ lại đặt chỗ",
     "warning": "Hành động hủy quá nhiều lần có thể ảnh hưởng đến điểm uy tín của bạn trên ChargeOps.",
     "policyGrace": "Bạn đang trong 10 phút đầu sau khi đặt — hủy ngay bây giờ được hoàn lại toàn bộ, bất kể còn bao lâu đến giờ sạc.",
-    "graceLeft": "Còn {{time}} trong thời gian hoàn tiền toàn phần"
+    "graceLeft": "Còn {{time}} trong thời gian hoàn tiền toàn phần",
+    "unpaidSubtitle": "Đơn đặt chỗ này chưa phát sinh thanh toán. Bạn có chắc chắn muốn hủy giữ cổng sạc?",
+    "policyUnpaidTitle": "Hủy giữ chỗ miễn phí",
+    "policyUnpaid": "Bạn chưa thực hiện thanh toán cho đơn này. Hủy giữ chỗ sẽ giải phóng cổng sạc ngay lập tức mà không phát sinh bất kỳ khoản phí nào.",
+    "unpaidSummaryTitle": "Thông tin giữ chỗ",
+    "holdAmount": "Giá trị giữ chỗ",
+    "paymentStatus": "Trạng thái thanh toán",
+    "unpaidStatus": "Chưa thanh toán (0đ)",
+    "unpaidFee": "Phí hủy giữ chỗ",
+    "freeFee": "0đ (Miễn phí)",
+    "netPayOrRefund": "Khoản tiền phát sinh",
+    "holdTimeLeft": "Thời hạn giữ chỗ còn lại:",
+    "confirmUnpaid": "Xác nhận hủy giữ chỗ",
+    "continuePay": "Tiếp tục thanh toán"
   },
   "qrCheckIn": {
     "title": "Quét QR Check-in",

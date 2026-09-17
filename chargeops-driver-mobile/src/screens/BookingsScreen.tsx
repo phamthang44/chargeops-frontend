@@ -8,7 +8,11 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { getActiveBookings } from '@/services/bookingService';
+import {
+  getActiveBookings,
+  getBookingNowMs,
+  getBookingTimeRemainingMs,
+} from '@/services/bookingService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
 import { formatCountdown, formatTime, formatVnd } from '@/utils/format';
@@ -45,7 +49,7 @@ export function BookingsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>('upcoming');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(getBookingNowMs());
 
   const TONE_BG: Record<ActionTone, string> = {
     primary: themeColors.primary,
@@ -54,7 +58,7 @@ export function BookingsScreen() {
   };
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(getBookingNowMs()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -64,6 +68,7 @@ export function BookingsScreen() {
     try {
       const data = await getActiveBookings();
       setBookings(data);
+      setNow(getBookingNowMs());
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -76,6 +81,7 @@ export function BookingsScreen() {
       getActiveBookings().then((data) => {
         if (active) {
           setBookings(data);
+          setNow(getBookingNowMs());
           setLoading(false);
         }
       });
@@ -181,8 +187,10 @@ export function BookingsScreen() {
 
   /** Card banner for pending payment hold countdown */
   const renderPendingBanner = (b: Booking) => {
-    const expiresMs = new Date(b.paymentHoldExpiresAt ?? b.expiresAt ?? '').getTime();
-    const msLeft = Math.max(0, expiresMs - now);
+    const msLeft = getBookingTimeRemainingMs(
+      b.paymentHoldExpiresAt ?? b.expiresAt,
+      now,
+    );
 
     return (
       <View style={[styles.chargeBanner, { backgroundColor: `${themeColors.warning}18`, borderColor: `${themeColors.warning}40` }]}>

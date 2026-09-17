@@ -3,7 +3,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -33,7 +33,7 @@ const HERO_MUTED = 'rgba(255, 255, 255, 0.75)';
 const HERO_CHIP_BG = 'rgba(255, 255, 255, 0.15)';
 
 /**
- * "Đặt chỗ" tab — active & upcoming bookings. Dynamic theme & futuristic live charging design.
+ * "Đặt chỗ" tab — active & upcoming bookings with server-driven capabilities (BKG-021).
  */
 export function BookingsScreen() {
   const navigation = useNavigation<Nav>();
@@ -43,6 +43,7 @@ export function BookingsScreen() {
   const tabInset = useTabBarInset();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>('upcoming');
   const [now, setNow] = useState(Date.now());
 
@@ -55,6 +56,18 @@ export function BookingsScreen() {
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
+  }, []);
+
+  const loadData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const data = await getActiveBookings();
+      setBookings(data);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useFocusEffect(
@@ -102,12 +115,57 @@ export function BookingsScreen() {
     : upcoming.filter((b) => b.id !== hero?.id);
 
   const onAction = (b: Booking) => {
-    if (b.status === 'CONFIRMED') navigation.navigate('QRCheckIn', { bookingId: b.id });
-    else if (b.status === 'CHECKED_IN') navigation.navigate('ChargingSession', { bookingId: b.id });
-    else navigation.navigate('BookingDetail', { bookingId: b.id });
+    if (b.status === 'CONFIRMED') {
+      if (b.actions?.canCheckIn) {
+        navigation.navigate('QRCheckIn', { bookingId: b.id });
+      } else {
+        navigation.navigate('BookingDetail', { bookingId: b.id });
+      }
+    } else if (b.status === 'CHECKED_IN') {
+      navigation.navigate('ChargingSession', { bookingId: b.id });
+    } else {
+      navigation.navigate('BookingDetail', { bookingId: b.id });
+    }
   };
 
   const renderAction = (b: Booking) => {
+    if (b.status === 'PENDING') {
+      return (
+        <Pressable
+          style={[styles.actionBtn, { backgroundColor: themeColors.warning }]}
+          onPress={() => navigation.navigate('BookingDetail', { bookingId: b.id })}
+        >
+          <Text style={[styles.actionText, { color: '#FFFFFF' }]}>{t('bookings.payNow', 'Thanh toán')}</Text>
+          <Ionicons name="card-outline" size={15} color="#FFFFFF" />
+        </Pressable>
+      );
+    }
+    if (b.status === 'CONFIRMED') {
+      const canCheckIn = b.actions?.canCheckIn ?? (now >= new Date(b.startAt).getTime());
+      return (
+        <Pressable
+          style={[
+            styles.actionBtn,
+            {
+              backgroundColor: canCheckIn ? themeColors.primary : themeColors.surfaceAlt,
+              borderWidth: canCheckIn ? 0 : 1,
+              borderColor: themeColors.border,
+            },
+          ]}
+          onPress={() => onAction(b)}
+        >
+          <Text style={[styles.actionText, { color: canCheckIn ? '#FFFFFF' : themeColors.textMuted }]}>
+            {canCheckIn ? t('bookings.actionCheckIn') : t('bookings.checkInAt', { time: formatTime(b.startAt) })}
+          </Text>
+          <Ionicons
+            name={canCheckIn ? 'qr-code-outline' : 'time-outline'}
+            size={15}
+            color={canCheckIn ? '#FFFFFF' : themeColors.textMuted}
+          />
+        </Pressable>
+      );
+    }
+
     const cfg = ACTION[b.status];
     if (!cfg) return undefined;
     return (
@@ -118,6 +176,28 @@ export function BookingsScreen() {
         <Text style={[styles.actionText, { color: '#FFFFFF' }]}>{t(cfg.labelKey)}</Text>
         <Ionicons name={cfg.icon} size={15} color="#FFFFFF" />
       </Pressable>
+    );
+  };
+
+  /** Card banner for pending payment hold countdown */
+  const renderPendingBanner = (b: Booking) => {
+    const expiresMs = new Date(b.paymentHoldExpiresAt ?? b.expiresAt ?? '').getTime();
+    const msLeft = Math.max(0, expiresMs - now);
+
+    return (
+      <View style={[styles.chargeBanner, { backgroundColor: `${themeColors.warning}18`, borderColor: `${themeColors.warning}40` }]}>
+        <View style={styles.chargeRow}>
+          <View style={styles.liveTag}>
+            <LiveDot color={themeColors.warning} />
+            <Text style={[styles.liveText, { color: themeColors.warning }]}>
+              {t('bookings.pendingHoldLeft', { time: formatCountdown(msLeft) })}
+            </Text>
+          </View>
+          <Text style={[styles.elapsed, { color: themeColors.warning, fontWeight: fontWeights.bold }]}>
+            {msLeft === 0 ? t('history.reasonExpired', 'Hết hạn') : formatCountdown(msLeft)}
+          </Text>
+        </View>
+      </View>
     );
   };
 
@@ -239,7 +319,7 @@ export function BookingsScreen() {
 
   const renderHero = (b: Booking) => {
     const msLeft = new Date(b.startAt).getTime() - now;
-    const due = msLeft <= 0;
+    const canCheckIn = b.actions?.canCheckIn ?? (msLeft <= 0);
     const heroBg = isDark ? '#113E30' : '#111827';
     const heroBorder = isDark ? '#10B981' : 'transparent';
 
@@ -271,18 +351,33 @@ export function BookingsScreen() {
         </View>
 
         <Text style={[styles.heroCountdown, { color: '#FFFFFF' }]}>
-          {due ? t('bookings.readyNow') : formatCountdown(msLeft)}
+          {canCheckIn ? t('bookings.readyNow') : formatCountdown(Math.max(0, msLeft))}
         </Text>
         <Text style={[styles.heroCaption, { color: HERO_MUTED }]}>
-          {due ? t('bookings.readyToCheckIn') : t('bookings.untilCheckIn')}
+          {canCheckIn ? t('bookings.readyToCheckIn') : t('bookings.untilCheckIn')}
         </Text>
 
         <Pressable
-          style={[styles.heroBtn, { backgroundColor: themeColors.primary }]}
-          onPress={() => navigation.navigate('QRCheckIn', { bookingId: b.id })}
+          style={[
+            styles.heroBtn,
+            {
+              backgroundColor: canCheckIn ? themeColors.primary : 'rgba(255, 255, 255, 0.18)',
+              borderWidth: canCheckIn ? 0 : 1,
+              borderColor: 'rgba(255, 255, 255, 0.25)',
+            },
+          ]}
+          onPress={() => {
+            if (canCheckIn) {
+              navigation.navigate('QRCheckIn', { bookingId: b.id });
+            } else {
+              navigation.navigate('BookingDetail', { bookingId: b.id });
+            }
+          }}
         >
-          <Ionicons name="qr-code-outline" size={16} color="#FFFFFF" />
-          <Text style={[styles.heroBtnText, { color: '#FFFFFF' }]}>{t('bookings.checkInNow')}</Text>
+          <Ionicons name={canCheckIn ? 'qr-code-outline' : 'time-outline'} size={16} color="#FFFFFF" />
+          <Text style={[styles.heroBtnText, { color: '#FFFFFF' }]}>
+            {canCheckIn ? t('bookings.checkInNow') : t('bookings.checkInAt', { time: formatTime(b.startAt) })}
+          </Text>
         </Pressable>
       </Pressable>
     );
@@ -370,6 +465,14 @@ export function BookingsScreen() {
         <ScrollView
           contentContainerStyle={[styles.content, { paddingBottom: tabInset }]}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadData(true)}
+              tintColor={themeColors.primary}
+              colors={[themeColors.primary]}
+            />
+          }
         >
           {tab === 'charging' && chargingHero && renderChargingHero(chargingHero)}
           {tab === 'upcoming' && hero && renderHero(hero)}
@@ -379,8 +482,20 @@ export function BookingsScreen() {
               booking={b}
               onPress={() => navigation.navigate('BookingDetail', { bookingId: b.id })}
               action={renderAction(b)}
-              banner={b.status === 'CHECKED_IN' ? renderChargingBanner(b) : undefined}
-              accentColor={b.status === 'CHECKED_IN' ? themeColors.info : undefined}
+              banner={
+                b.status === 'CHECKED_IN'
+                  ? renderChargingBanner(b)
+                  : b.status === 'PENDING'
+                  ? renderPendingBanner(b)
+                  : undefined
+              }
+              accentColor={
+                b.status === 'CHECKED_IN'
+                  ? themeColors.info
+                  : b.status === 'PENDING'
+                  ? themeColors.warning
+                  : undefined
+              }
             />
           ))}
         </ScrollView>

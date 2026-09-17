@@ -22,30 +22,38 @@ export function formatRate(value: number): string {
 }
 
 /** Format an ISO datetime as a short Vietnamese date, e.g. "15/06/2026". */
-export function formatDate(iso: string): string {
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '--/--/----';
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '--/--/----';
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
 /** Format an ISO datetime as a 24h time label, e.g. "08:00". */
-export function formatTime(iso: string): string {
+export function formatTime(iso: string | null | undefined): string {
+  if (!iso) return '--:--';
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '--:--';
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 /** Format a start/end ISO pair as a 24h time range, e.g. "14:00 - 15:00" or "23:00 - 02:00 (+1)". */
-export function formatTimeRange(startIso: string, endIso: string): string {
+export function formatTimeRange(startIso: string | null | undefined, endIso: string | null | undefined): string {
+  if (!startIso || !endIso) return '--:-- - --:--';
   const s = new Date(startIso);
   const e = new Date(endIso);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return '--:-- - --:--';
   const isDiffDay = s.getFullYear() !== e.getFullYear() || s.getMonth() !== e.getMonth() || s.getDate() !== e.getDate();
   return `${formatTime(startIso)} - ${formatTime(endIso)}${isDiffDay ? ' (+1)' : ''}`;
 }
 
 /** Format an ISO datetime as a short day/month, e.g. "20/06". */
-export function formatDayMonth(iso: string): string {
+export function formatDayMonth(iso: string | null | undefined): string {
+  if (!iso) return '--/--';
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '--/--';
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 

@@ -3,15 +3,23 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppButton, CancelBookingSheet, GlassButton, StatusBadge, type BadgeVariant } from '@/components';
+import {
+  AppButton,
+  BookingTimelineStepper,
+  CancelBookingSheet,
+  CheckoutQRCard,
+  GlassButton,
+  RefundStatusCard,
+  StatusBadge,
+  type BadgeVariant,
+} from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   CHECK_IN_WINDOW_MIN,
-  computeRefund,
   getBookingById,
 } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -126,12 +134,34 @@ export function BookingDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
-  const { themeColors } = usePreferences();
+  const { themeColors, isDark } = usePreferences();
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
+
+  const handleCopy = (text: string, field: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const b = await getBookingById(params.bookingId);
+      setBooking(b);
+    } catch {
+      // silently keep previous booking state if refresh fails
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -182,7 +212,9 @@ export function BookingDetailScreen() {
 
   const startMs = new Date(booking.startAt).getTime();
   const endMs = new Date(booking.endAt).getTime();
-  const checkInDeadlineMs = startMs + CHECK_IN_WINDOW_MS;
+  const checkInDeadlineMs = booking.checkInDeadline
+    ? new Date(booking.checkInDeadline).getTime()
+    : startMs + CHECK_IN_WINDOW_MS;
   const isConfirmed = booking.status === 'CONFIRMED';
   const isPending = booking.status === 'PENDING';
   const isCancelled = booking.status === 'CANCELLED';
@@ -195,8 +227,18 @@ export function BookingDetailScreen() {
   const windowPassed = now > checkInDeadlineMs;
   const msToCheckInClose = Math.max(0, checkInDeadlineMs - now);
 
-  const canCheckIn = isConfirmed && windowStarted && !windowPassed;
-  const refund = computeRefund(booking, now);
+  const canCheckIn = booking.actions ? booking.actions.canCheckIn : (isConfirmed && windowStarted && !windowPassed);
+  const checkInReason = booking.actions?.checkInReason ?? (windowPassed ? 'WINDOW_CLOSED' : !windowStarted ? 'TOO_EARLY' : 'AVAILABLE');
+  const canCancel = booking.actions ? booking.actions.canCancel : (isPending || isConfirmed);
+  const refundableAmount = booking.actions ? booking.actions.refundableAmount : (booking.refundAmount ?? 0);
+  const cancellationReason = booking.actions?.cancellationReason;
+  const canReportIssue = booking.actions?.canReportIssue ?? true;
+
+  const freeCancellationDeadlineMs = booking.freeCancellationDeadline
+    ? new Date(booking.freeCancellationDeadline).getTime()
+    : new Date(booking.createdAt).getTime() + 10 * 60_000;
+  const graceRemainingMs = Math.max(0, freeCancellationDeadlineMs - now);
+  const isWithinGrace = cancellationReason === 'WITHIN_GRACE' || (isConfirmed && graceRemainingMs > 0);
 
   const durationMin = Math.round((endMs - startMs) / 60_000);
   const { hours, minutes } = splitDuration(durationMin);
@@ -210,23 +252,45 @@ export function BookingDetailScreen() {
   const tone = STATUS_TONE[booking.status];
   const accent = getToneColor(tone, themeColors);
   const statusNote = (() => {
-    if (isConfirmed) return t('bookingDetail.countdownNote');
-    if (isPending && booking.expiresAt) {
-      return t('bookingDetail.holdNote', {
-        time: formatCountdown(Math.max(0, new Date(booking.expiresAt).getTime() - now)),
-      });
+    if (isConfirmed) {
+      if (canCheckIn) {
+        return t('bookings.readyToCheckIn', 'Đã đến giờ — check-in ngay trước khi hết hạn.');
+      }
+      if (checkInReason === 'TOO_EARLY') {
+        return t('bookingDetail.checkInOpensIn', { time: formatTime(booking.checkInOpensAt ?? booking.startAt) });
+      }
+      if (checkInReason === 'WINDOW_CLOSED') {
+        return t('bookingDetail.checkInClosed', 'Cửa sổ check-in đã đóng.');
+      }
+      return t('bookingDetail.countdownNote');
+    }
+    if (isPending) {
+      const holdExpiresMs = new Date(booking.paymentHoldExpiresAt ?? booking.expiresAt ?? '').getTime();
+      const holdLeft = Math.max(0, holdExpiresMs - now);
+      return t('bookingDetail.holdNote', { time: formatCountdown(holdLeft) });
     }
     if (isCheckedIn && booking.checkedInAt) {
       return t('bookingDetail.checkedInNote', { time: formatTime(booking.checkedInAt) });
     }
-    if (isCharging) return t('chargingSession.autoNote');
+    if (isCharging) return t('chargingSession.autoNote', 'Sạc sẽ tự động ngắt khi đầy pin.');
     if (isCompleted) return t('bookingDetail.completedNote');
-    if (isCancelled && (booking.refundAmount ?? 0) > 0) {
-      return t('bookingDetail.refundedNote', { amount: formatVnd(booking.refundAmount ?? 0) });
+    if (isCancelled) {
+      if (booking.cancelReason === 'NO_SHOW') return t('bookingDetail.reasonNoShow');
+      if (booking.cancelReason === 'PAYMENT_TIMEOUT') return t('bookingDetail.reasonTimeout');
+      if ((booking.refundAmount ?? refundableAmount) > 0) {
+        return t('bookingDetail.refundedNote', { amount: formatVnd(booking.refundAmount ?? refundableAmount) });
+      }
+      return t('bookingDetail.reasonUserCancelled');
     }
-    if (isCancelled || isExpired) return t('bookingDetail.noRefundNote');
+    if (isExpired) return t('bookingDetail.reasonTimeout');
     return t(`bookingStatus.${booking.status}`);
   })();
+
+  const paymentDetail = booking.paymentDetail;
+  const hasAccountingDiscrepancy =
+    Boolean(paymentDetail) &&
+    ((paymentDetail?.unallocatedAmount ?? 0) > 0 ||
+      (paymentDetail?.collectedAmount ?? 0) > (paymentDetail?.expectedAmount ?? 0));
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
@@ -247,7 +311,18 @@ export function BookingDetailScreen() {
         <View style={styles.headerBtn} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={themeColors.primary}
+            colors={[themeColors.primary]}
+          />
+        }
+      >
         <View
           style={[
             styles.heroCard,
@@ -260,8 +335,38 @@ export function BookingDetailScreen() {
         >
           <View style={styles.heroTopRow}>
             <View style={styles.codeBlock}>
-              <Text style={[styles.codeLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.code')}</Text>
-              <Text style={[styles.code, { color: themeColors.textStrong }]}>{booking.code}</Text>
+              <View style={styles.codeLabelRow}>
+                <Text style={[styles.codeLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.code')}</Text>
+                {copiedField === 'bookingCode' && (
+                  <Text style={[styles.copiedBadge, { color: themeColors.success }]}>
+                    {t('common.copied', 'Đã chép')}
+                  </Text>
+                )}
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.codePill,
+                  {
+                    backgroundColor: themeColors.surfaceAlt,
+                    borderColor: copiedField === 'bookingCode' ? `${themeColors.success}60` : themeColors.border,
+                  },
+                ]}
+                onPress={() => handleCopy(booking.code, 'bookingCode')}
+              >
+                <Text
+                  style={[styles.code, { color: themeColors.textStrong }]}
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                >
+                  {booking.code}
+                </Text>
+                <Ionicons
+                  name={copiedField === 'bookingCode' ? 'checkmark-circle' : 'copy-outline'}
+                  size={13}
+                  color={copiedField === 'bookingCode' ? themeColors.success : themeColors.textMuted}
+                />
+              </TouchableOpacity>
             </View>
             <StatusBadge
               variant={STATUS_VARIANT[tone]}
@@ -287,18 +392,89 @@ export function BookingDetailScreen() {
             <View style={[styles.countdownPanel, { backgroundColor: `${accent}12`, borderColor: `${accent}2E` }]}>
               <View style={styles.countdownLabelRow}>
                 <Ionicons name="timer-outline" size={17} color={accent} />
-                <Text style={[styles.countdownLabel, { color: accent }]}>{t('bookingDetail.countdownTitle')}</Text>
+                <Text style={[styles.countdownLabel, { color: accent }]}>
+                  {windowStarted
+                    ? t('bookingDetail.checkInWindowActive')
+                    : t('bookingDetail.countdownTitle')}
+                </Text>
               </View>
               <Text style={[styles.countdown, { color: accent }]}>{formatCountdown(msToCheckInClose)}</Text>
+              <Text style={[styles.countdownSub, { color: themeColors.textBody }]}>{statusNote}</Text>
             </View>
           )}
 
-          {isConfirmed && refund.tier === 'GRACE' && (
-            <View style={[styles.inlineNotice, { backgroundColor: themeColors.primarySoft }]}>
-              <Ionicons name="arrow-undo-outline" size={17} color={themeColors.primaryDark} />
-              <Text style={[styles.inlineNoticeText, { color: themeColors.primaryDark }]}>
-                {t('bookingDetail.graceHint', { time: formatMmSs(refund.graceRemainingMs) })}
-              </Text>
+          {isConfirmed && (
+            <View
+              style={[
+                styles.graceCard,
+                {
+                  backgroundColor: isWithinGrace ? `${themeColors.primary}10` : themeColors.surfaceAlt,
+                  borderColor: isWithinGrace ? `${themeColors.primary}33` : themeColors.border,
+                },
+              ]}
+            >
+              <View style={styles.graceCardHeader}>
+                <View
+                  style={[
+                    styles.graceCardIconWrap,
+                    { backgroundColor: isWithinGrace ? `${themeColors.primary}20` : `${themeColors.textMuted}1A` },
+                  ]}
+                >
+                  <Ionicons
+                    name={isWithinGrace ? 'shield-checkmark-outline' : 'shield-outline'}
+                    size={16}
+                    color={isWithinGrace ? themeColors.primary : themeColors.textMuted}
+                  />
+                </View>
+                <View style={styles.graceCardCopy}>
+                  <Text style={[styles.graceCardTitle, { color: themeColors.textStrong }]}>
+                    {t('bookingDetail.graceCardTitle')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.graceCardDesc,
+                      { color: isWithinGrace ? themeColors.primaryDark : themeColors.textMuted },
+                    ]}
+                  >
+                    {isWithinGrace
+                      ? t('bookingDetail.graceCardRemaining', { time: formatMmSs(graceRemainingMs) })
+                      : t('bookingDetail.graceCardExpired')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {isCharging && (
+            <View
+              style={[
+                styles.chargingCard,
+                { backgroundColor: `${themeColors.success}12`, borderColor: `${themeColors.success}33` },
+              ]}
+            >
+              <View style={styles.chargingHeader}>
+                <View style={[styles.chargingIconWrap, { backgroundColor: `${themeColors.success}25` }]}>
+                  <Ionicons name="flash" size={18} color={themeColors.success} />
+                </View>
+                <View style={styles.chargingCopy}>
+                  <Text style={[styles.chargingTitle, { color: themeColors.textStrong }]}>
+                    {t('bookingDetail.chargingLiveTitle')}
+                  </Text>
+                  <Text style={[styles.chargingNote, { color: themeColors.textBody }]}>
+                    {t('bookingDetail.chargingLiveNote')}
+                  </Text>
+                </View>
+              </View>
+              {Boolean(booking.chargingStartedAt) && (
+                <View style={[styles.chargingMetaRow, { borderTopColor: `${themeColors.success}20` }]}>
+                  <Text style={[styles.chargingMetaLabel, { color: themeColors.textMuted }]}>
+                    {t('bookingDetail.chargingStartedAtLabel', { time: formatTime(booking.chargingStartedAt!) })}
+                  </Text>
+                  <Text style={[styles.chargingMetaLabel, { color: themeColors.textMuted }]}>
+                    {t('bookingDetail.chargingExpectedEndLabel', { time: formatTime(booking.endAt) })}
+                  </Text>
+                </View>
+              )}
             </View>
           )}
 
@@ -319,6 +495,21 @@ export function BookingDetailScreen() {
             </View>
           </View>
         </View>
+
+        <SectionHeading
+          icon="git-commit-outline"
+          title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
+          color={themeColors.primary}
+          textColor={themeColors.textStrong}
+        />
+        <BookingTimelineStepper booking={booking} />
+
+        {isPending && (
+          <CheckoutQRCard
+            booking={booking}
+            onPayNow={() => navigation.navigate('PaymentProcessing', { bookingId: booking.id })}
+          />
+        )}
 
         <SectionHeading
           icon="business-outline"
@@ -364,18 +555,48 @@ export function BookingDetailScreen() {
             />
           </View>
 
-          <View style={[styles.connectorRibbon, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+          <View
+            style={[
+              styles.connectorRibbon,
+              {
+                backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : themeColors.surfaceAlt,
+                borderColor: `${themeColors.primary}25`,
+              },
+            ]}
+          >
             <View style={[styles.ribbonIcon, { backgroundColor: `${themeColors.primary}18` }]}>
-              <Ionicons name="hardware-chip-outline" size={17} color={themeColors.primaryDark} />
+              <Ionicons name="hardware-chip-outline" size={18} color={themeColors.primaryDark} />
             </View>
             <View style={styles.ribbonCopy}>
               <Text style={[styles.ribbonLabel, { color: themeColors.textMuted }]}>
-                {t('bookingDetail.chargerId')}
+                {t('bookingDetail.connectorCodeLabel', 'Mã cổng sạc trên trụ')}
               </Text>
               <Text style={[styles.ribbonValue, { color: themeColors.textStrong }]}>
-                {booking.connectorId}
+                {booking.connectorCode || booking.connectorName}
               </Text>
+              {Boolean(booking.connectorId && booking.connectorId !== (booking.connectorCode || booking.connectorName)) && (
+                <Text style={[styles.ribbonSubId, { color: themeColors.textMuted }]} numberOfLines={1}>
+                  ID: {booking.connectorId}
+                </Text>
+              )}
             </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[
+                styles.copyIconBtn,
+                {
+                  backgroundColor: themeColors.surface,
+                  borderColor: copiedField === 'connector' ? themeColors.success : themeColors.border,
+                },
+              ]}
+              onPress={() => handleCopy(booking.connectorCode || booking.connectorName, 'connector')}
+            >
+              <Ionicons
+                name={copiedField === 'connector' ? 'checkmark-circle' : 'copy-outline'}
+                size={15}
+                color={copiedField === 'connector' ? themeColors.success : themeColors.textMuted}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -387,19 +608,42 @@ export function BookingDetailScreen() {
         />
 
         <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
-          {booking.priceLines.map((line, i) => (
-            <View key={`${line.fromAt}-${line.toAt}-${i}`} style={styles.invoiceRow}>
-              <View style={styles.invoiceCopy}>
-                <Text style={[styles.invoiceLabel, { color: themeColors.textBody }]}>
-                  {t(`timeRangePicker.band.${line.rateKind}`)} ({formatTime(line.fromAt)} - {formatTime(line.toAt)})
-                </Text>
-                <Text style={[styles.invoiceSub, { color: themeColors.textMuted }]}>
-                  {line.energyKwh} kWh x {formatVnd(line.rateVndPerKwh)}
-                </Text>
+          {booking.priceLines.map((line, i) => {
+            const fromTime = line.fromAt ?? (line as any).startAt ?? booking.startAt;
+            const toTime = line.toAt ?? (line as any).endAt ?? booking.endAt;
+            const kind = line.rateKind ?? (line as any).periodCode ?? 'STANDARD';
+            const kwh = line.energyKwh ?? (line as any).estimatedEnergyKwh ?? (booking.energyKwh || 0);
+            const rate = line.rateVndPerKwh ?? 0;
+            const amount = line.amount ?? 0;
+            const kindStr = String(kind);
+            const bandKey = `timeRangePicker.band.${kindStr}`;
+            const fallbackBand =
+              kindStr === 'PEAK'
+                ? 'Giờ cao điểm'
+                : kindStr === 'OFF_PEAK' || kindStr === 'OFFPEAK'
+                ? 'Giờ thấp điểm'
+                : 'Giờ bình thường';
+            const bandLabel = t(bandKey, fallbackBand);
+
+            return (
+              <View key={`${fromTime}-${toTime}-${i}`} style={styles.invoiceRow}>
+                <View style={styles.invoiceCopy}>
+                  <View style={styles.invoiceBandRow}>
+                    <View style={[styles.bandPill, { backgroundColor: `${themeColors.primary}12` }]}>
+                      <Text style={[styles.bandPillText, { color: themeColors.primaryDark }]}>{bandLabel}</Text>
+                    </View>
+                    <Text style={[styles.invoiceTime, { color: themeColors.textBody }]}>
+                      ({formatTime(fromTime)} - {formatTime(toTime)})
+                    </Text>
+                  </View>
+                  <Text style={[styles.invoiceSub, { color: themeColors.textMuted }]}>
+                    {Number(kwh).toFixed(1)} kWh × {formatVnd(rate)}/kWh
+                  </Text>
+                </View>
+                <Text style={[styles.invoiceValue, { color: themeColors.textStrong }]}>{formatVnd(amount)}</Text>
               </View>
-              <Text style={[styles.invoiceValue, { color: themeColors.textStrong }]}>{formatVnd(line.amount)}</Text>
-            </View>
-          ))}
+            );
+          })}
 
           {Boolean(booking.serviceFee && booking.serviceFee > 0) && (
             <View style={styles.invoiceRow}>
@@ -419,6 +663,48 @@ export function BookingDetailScreen() {
             </View>
           </View>
 
+          {hasAccountingDiscrepancy && paymentDetail && (
+            <View
+              style={[
+                styles.accountingCard,
+                { backgroundColor: `${themeColors.info}10`, borderColor: `${themeColors.info}30` },
+              ]}
+            >
+              <View style={styles.accountingHeader}>
+                <Ionicons name="wallet-outline" size={16} color={themeColors.info} />
+                <Text style={[styles.accountingTitle, { color: themeColors.textStrong }]}>
+                  {t('bookingDetail.accountingTitle')}
+                </Text>
+              </View>
+              <View style={styles.accountingGrid}>
+                <View style={styles.accountingItem}>
+                  <Text style={[styles.accountingLabel, { color: themeColors.textMuted }]}>
+                    {t('bookingDetail.accountingCollected')}
+                  </Text>
+                  <Text style={[styles.accountingValue, { color: themeColors.textStrong }]}>
+                    {formatVnd(paymentDetail.collectedAmount ?? 0)}
+                  </Text>
+                </View>
+                <View style={styles.accountingItem}>
+                  <Text style={[styles.accountingLabel, { color: themeColors.textMuted }]}>
+                    {t('bookingDetail.accountingApplied')}
+                  </Text>
+                  <Text style={[styles.accountingValue, { color: themeColors.textStrong }]}>
+                    {formatVnd(paymentDetail.appliedAmount ?? paymentDetail.appliedToPackageAmount ?? 0)}
+                  </Text>
+                </View>
+                <View style={styles.accountingItem}>
+                  <Text style={[styles.accountingLabel, { color: themeColors.textMuted }]}>
+                    {t('bookingDetail.accountingUnallocated')}
+                  </Text>
+                  <Text style={[styles.accountingValue, { color: themeColors.primary }]}>
+                    {formatVnd(paymentDetail.unallocatedAmount ?? 0)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
           <View style={styles.paidViaRow}>
             <Ionicons name="wallet-outline" size={14} color={themeColors.textMuted} />
             <Text style={[styles.paidVia, { color: themeColors.textMuted }]}>
@@ -427,42 +713,93 @@ export function BookingDetailScreen() {
           </View>
         </View>
 
-        <View
-          style={[
-            styles.refundCard,
-            {
-              backgroundColor: isCancelled ? `${themeColors.error}10` : themeColors.surfaceAlt,
-              borderColor: isCancelled ? `${themeColors.error}26` : themeColors.border,
-            },
-          ]}
-        >
-          <View style={styles.refundHeader}>
-            <View style={[styles.refundIcon, { backgroundColor: `${themeColors.error}14` }]}>
-              <Ionicons name="shield-checkmark-outline" size={17} color={themeColors.error} />
+        {(isCancelled || (booking.refunds && booking.refunds.length > 0)) && (
+          <RefundStatusCard booking={booking} />
+        )}
+
+        {!isCancelled && (
+          <View
+            style={[
+              styles.refundCard,
+              {
+                backgroundColor: themeColors.surfaceAlt,
+                borderColor: themeColors.border,
+              },
+            ]}
+          >
+            <View style={styles.refundHeader}>
+              <View style={[styles.refundIcon, { backgroundColor: `${themeColors.error}14` }]}>
+                <Ionicons name="shield-checkmark-outline" size={17} color={themeColors.error} />
+              </View>
+              <Text style={[styles.refundTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.refundTitle')}</Text>
             </View>
-            <Text style={[styles.refundTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.refundTitle')}</Text>
+            <Text style={[styles.refundText, { color: themeColors.textBody }]}>{t('bookingDetail.refundBody')}</Text>
+            {isConfirmed && (
+              <View style={[styles.refundNowRow, { borderTopColor: themeColors.border }]}>
+                <Text style={[styles.refundNowLabel, { color: themeColors.textBody }]}>{t('bookingDetail.refundNow')}</Text>
+                <Text style={[styles.refundNowValue, { color: themeColors.textStrong }]}>{formatVnd(refundableAmount)}</Text>
+              </View>
+            )}
           </View>
-          <Text style={[styles.refundText, { color: themeColors.textBody }]}>{t('bookingDetail.refundBody')}</Text>
-          {isConfirmed && (
-            <View style={[styles.refundNowRow, { borderTopColor: themeColors.border }]}>
-              <Text style={[styles.refundNowLabel, { color: themeColors.textBody }]}>{t('bookingDetail.refundNow')}</Text>
-              <Text style={[styles.refundNowValue, { color: themeColors.textStrong }]}>{formatVnd(refund.refundAmount)}</Text>
-            </View>
-          )}
-        </View>
+        )}
       </ScrollView>
 
       {isConfirmed && (
         <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
           <AppButton
-            label={t('bookingDetail.cta')}
+            label={
+              canCheckIn
+                ? t('bookingDetail.cta')
+                : checkInReason === 'TOO_EARLY'
+                ? t('bookingDetail.checkInOpensIn', { time: formatTime(booking.checkInOpensAt ?? booking.startAt) })
+                : checkInReason === 'WINDOW_CLOSED'
+                ? t('bookingDetail.checkInClosed')
+                : t('bookingDetail.cta')
+            }
             disabled={!canCheckIn}
             onPress={() => navigation.navigate('QRCheckIn', { bookingId: booking.id })}
           />
           <AppButton
             label={t('bookingDetail.cancel')}
             variant="secondary"
+            disabled={!canCancel}
             onPress={() => setShowCancel(true)}
+          />
+        </View>
+      )}
+
+      {isPending && (
+        <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+          <AppButton
+            label={t('bookingDetail.payNow', 'Thanh toán ngay')}
+            onPress={() => navigation.navigate('PaymentProcessing', { bookingId: booking.id })}
+          />
+          <AppButton
+            label={t('bookingDetail.cancel', 'Hủy đặt chỗ')}
+            variant="secondary"
+            disabled={!canCancel}
+            onPress={() => setShowCancel(true)}
+          />
+        </View>
+      )}
+
+      {isCharging && (
+        <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+          <AppButton
+            label={t('chargingSession.title', 'Xem phiên sạc trực tiếp')}
+            onPress={() => navigation.navigate('ChargingSession', { bookingId: booking.id })}
+          />
+        </View>
+      )}
+
+      {(isCompleted || isCancelled || isExpired) && canReportIssue && (
+        <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+          <AppButton
+            label={t('bookingDetail.reportIssue', 'Báo cáo sự cố trạm sạc')}
+            variant="secondary"
+            onPress={() => {
+              navigation.goBack();
+            }}
           />
         </View>
       )}
@@ -513,13 +850,27 @@ const styles = StyleSheet.create({
   },
   heroTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },
   codeBlock: { flex: 1, minWidth: 0 },
+  codeLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   codeLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
-  code: { fontSize: fontSizes.title, lineHeight: lineHeights.title, fontWeight: fontWeights.bold, marginTop: 2 },
+  copiedBadge: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
+  codePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+  },
+  code: { fontSize: 15, lineHeight: 18, fontWeight: fontWeights.bold, letterSpacing: 0.6 },
   statusBadge: { flexShrink: 1, paddingHorizontal: spacing.sm },
   statusSummary: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   statusIcon: {
@@ -535,13 +886,69 @@ const styles = StyleSheet.create({
   countdownPanel: {
     borderWidth: 1,
     borderRadius: radius.lg,
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
     gap: spacing.xs,
   },
   countdownLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   countdownLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-  countdown: { fontSize: 38, lineHeight: 44, fontWeight: fontWeights.bold, letterSpacing: 1 },
+  countdown: { fontSize: 34, lineHeight: 40, fontWeight: fontWeights.bold, letterSpacing: 1.2 },
+  countdownSub: {
+    marginTop: spacing.xs,
+    fontSize: fontSizes.caption,
+    lineHeight: lineHeights.body,
+    textAlign: 'center',
+  },
+  graceCard: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+  },
+  graceCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  graceCardIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  graceCardCopy: { flex: 1, minWidth: 0 },
+  graceCardTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  graceCardDesc: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium, marginTop: 2 },
+  chargingCard: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  chargingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  chargingIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chargingCopy: { flex: 1, minWidth: 0 },
+  chargingTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  chargingNote: { fontSize: fontSizes.caption, marginTop: 2 },
+  chargingMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    paddingTop: spacing.xs,
+    gap: spacing.sm,
+  },
+  chargingMetaLabel: { fontSize: fontSizes.caption },
   inlineNotice: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -581,6 +988,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
   },
   stationImage: { width: '100%', height: 156, borderRadius: radius.md },
   stationImageFallback: {
@@ -622,14 +1033,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   ribbonCopy: { flex: 1, minWidth: 0 },
-  ribbonLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
-  ribbonValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, marginTop: 1 },
+  ribbonLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, textTransform: 'uppercase', letterSpacing: 0.5 },
+  ribbonValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, marginTop: 1 },
+  ribbonSubId: { fontSize: 11, marginTop: 2, letterSpacing: 0.3 },
+  copyIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-  invoiceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
-  invoiceCopy: { flex: 1, minWidth: 0 },
-  invoiceLabel: { fontSize: fontSizes.body, lineHeight: lineHeights.body },
+  invoiceRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },
+  invoiceCopy: { flex: 1, minWidth: 0, gap: 3 },
+  invoiceBandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
+  bandPill: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: radius.full },
+  bandPillText: { fontSize: 11, fontWeight: fontWeights.bold, letterSpacing: 0.3 },
+  invoiceTime: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
   invoiceSub: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, marginTop: 1 },
-  invoiceValue: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
+  invoiceValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
   totalPanel: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -637,7 +1060,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   totalLabel: {
     fontSize: fontSizes.caption,
@@ -650,6 +1074,33 @@ const styles = StyleSheet.create({
   energyValue: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
   paidViaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   paidVia: { fontSize: fontSizes.caption },
+
+  accountingCard: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  accountingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  accountingTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  accountingGrid: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  accountingItem: { flex: 1, minWidth: 0 },
+  accountingLabel: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.medium,
+  },
+  accountingValue: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+    marginTop: 2,
+  },
 
   refundCard: {
     borderRadius: radius.lg,

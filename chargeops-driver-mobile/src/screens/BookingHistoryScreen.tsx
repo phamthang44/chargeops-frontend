@@ -8,6 +8,7 @@ import {
   Keyboard,
   Platform,
   Pressable,
+  RefreshControl,
   SectionList,
   StyleSheet,
   Text,
@@ -15,7 +16,7 @@ import {
   View,
 } from 'react-native';
 
-import { AppHeader, EmptyState, HeaderActionBtn, useTabBarInset } from '@/components';
+import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, useTabBarInset } from '@/components';
 import { HistoryBookingCard } from '@/components/HistoryBookingCard';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
@@ -82,7 +83,35 @@ export function BookingHistoryScreen() {
   const [counts, setCounts] = useState<Record<HistoryStatusFilter, number>>(EMPTY_COUNTS);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
+
+  const updateCountsSafely = (newCounts: Record<HistoryStatusFilter, number>, activeFilter: HistoryStatusFilter, newTotal: number) => {
+    setCounts((prev) => ({
+      all: newCounts.all >= 0 ? newCounts.all : (activeFilter === 'all' ? newTotal : prev.all),
+      completed: newCounts.completed >= 0 ? newCounts.completed : (activeFilter === 'completed' ? newTotal : prev.completed),
+      cancelled: newCounts.cancelled >= 0 ? newCounts.cancelled : (activeFilter === 'cancelled' ? newTotal : prev.cancelled),
+    }));
+  };
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const [statsData, pageData] = await Promise.all([
+        getBookingStats(),
+        getBookingHistory({ query, status: filter }, { limit: BOOKING_PAGE_SIZE }),
+      ]);
+      setStats(statsData);
+      setItems(pageData.items);
+      setCursor(pageData.nextCursor);
+      setTotal(pageData.total);
+      updateCountsSafely(pageData.counts, filter, pageData.total);
+    } catch {
+      // ignore
+    } finally {
+      setRefreshing(false);
+    }
+  }, [query, filter]);
 
   useEffect(() => {
     const id = setTimeout(() => setQuery(input.trim()), SEARCH_DEBOUNCE_MS);
@@ -112,7 +141,7 @@ export function BookingHistoryScreen() {
         setItems(page.items);
         setCursor(page.nextCursor);
         setTotal(page.total);
-        setCounts(page.counts);
+        updateCountsSafely(page.counts, filter, page.total);
         setLoading(false);
       })
       .catch(() => {
@@ -137,7 +166,7 @@ export function BookingHistoryScreen() {
       setItems((prev) => [...prev, ...page.items]);
       setCursor(page.nextCursor);
       setTotal(page.total);
-      setCounts(page.counts);
+      updateCountsSafely(page.counts, filter, page.total);
     } catch {
       // Keep the loaded history visible if a later page fails.
     } finally {
@@ -183,62 +212,7 @@ export function BookingHistoryScreen() {
 
   const listHeader = (
     <View style={styles.header}>
-      <View
-        style={[
-          styles.summaryCard,
-          {
-            backgroundColor: themeColors.surface,
-            borderColor: themeColors.border,
-            shadowColor: themeColors.textStrong,
-          },
-        ]}
-      >
-        <View style={styles.summaryTop}>
-          <View style={styles.summaryCopy}>
-            <Text style={[styles.summaryEyebrow, { color: themeColors.textMuted }]}>
-              {t('history.statSpent')}
-            </Text>
-            <Text
-              style={[styles.summaryValue, { color: themeColors.textStrong }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {stats ? formatVnd(stats.spent) : '—'}
-            </Text>
-          </View>
-          <View style={[styles.summaryIcon, { backgroundColor: themeColors.primarySoft }]}>
-            <Ionicons name="wallet-outline" size={22} color={themeColors.primaryDark} />
-          </View>
-        </View>
-
-        <View style={[styles.summaryDivider, { backgroundColor: themeColors.border }]} />
-
-        <View style={styles.summaryMetrics}>
-          <View style={styles.summaryMetric}>
-            <Ionicons name="flash-outline" size={17} color={themeColors.primary} />
-            <View>
-              <Text style={[styles.metricValue, { color: themeColors.textStrong }]}>
-                {stats?.sessions ?? '—'}
-              </Text>
-              <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>
-                {t('history.statSessions')}
-              </Text>
-            </View>
-          </View>
-          <View style={[styles.metricDivider, { backgroundColor: themeColors.border }]} />
-          <View style={styles.summaryMetric}>
-            <Ionicons name="time-outline" size={17} color={themeColors.info} />
-            <View>
-              <Text style={[styles.metricValue, { color: themeColors.textStrong }]}>
-                {stats ? `${stats.hours}h` : '—'}
-              </Text>
-              <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>
-                {t('history.statHours')}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      <LifetimeStatsCard stats={stats} loading={!stats && loading} />
 
       <View
         style={[
@@ -429,6 +403,16 @@ export function BookingHistoryScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         initialNumToRender={BOOKING_PAGE_SIZE}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={themeColors.primary}
+            colors={[themeColors.primary]}
+          />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
         ListHeaderComponent={listHeader}
         ListFooterComponent={listFooter}
         renderSectionHeader={({ section }) => (

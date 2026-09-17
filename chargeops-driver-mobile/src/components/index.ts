@@ -43,5 +43,9 @@ export {
   MapStationPeekSheet,
   type DiscoveryFilterState,
 } from './discovery';
+export { LifetimeStatsCard } from './LifetimeStatsCard';
 export { RealStationMap, type RealStationMapProps, type RealStationMapRef } from './map';
 export * from './station-detail';
+export { BookingTimelineStepper } from './booking-detail/BookingTimelineStepper';
+export { CheckoutQRCard } from './booking-detail/CheckoutQRCard';
+export { RefundStatusCard } from './booking-detail/RefundStatusCard';

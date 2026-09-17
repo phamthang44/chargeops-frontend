@@ -373,9 +373,11 @@ export async function getStationAvailability(
         if (rawAvailability && rawAvailability.stationId) {
           return rawAvailability;
         }
+      } else {
+        console.warn(`[StationService] Availability API returned status ${response.status} for station ${stationId}`);
       }
-    } catch {
-      // Fallback to mock on network error
+    } catch (err) {
+      console.warn('[StationService] Error fetching station availability, falling back to mock:', err);
     }
   }
 

@@ -9,12 +9,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AppButton, BottomSheet, GlassButton, StatusBadge } from '@/components';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
-import { bookingErrorMessage } from '@/i18n/bookingErrors';
+import { bookingErrorMessage, extractBookingErrorCode } from '@/i18n/bookingErrors';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   createBooking,
   findOverlappingBookings,
   generateIdempotencyKey,
+  getLatestPendingBooking,
   getPricePreview,
   PriceChangedError,
   type BackendPricePreviewResponse,
@@ -26,6 +27,7 @@ import {
   getStationAvailability,
   getStationById,
   getStationDetail,
+  isMockMode,
 } from '@/services/stationService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
@@ -37,8 +39,9 @@ type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
 type Route = RouteProp<RootStackParamList, 'BookingConfirmation'>;
 
 /**
- * "Xác nhận đặt chỗ" — review chosen time range, see invoice, pick payment method, create booking.
- * Includes BR-BOK-08 duplicate/overlapping booking warning modal & dynamic Dark/Light mode theme support.
+ * "Xác nhận đặt chỗ" — final pre-payment review screen.
+ * FR05: pick start time + duration on a specific Connector.
+ * FR11: 10-minute hold countdown, payment method selector, idempotency key.
  */
 export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
@@ -55,6 +58,7 @@ export function BookingConfirmationScreen() {
   const [method, setMethod] = useState<PaymentMethod>('SIMULATOR');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [priceRanges, setPriceRanges] = useState(params.priceRanges ?? null);
   const [backendPreview, setBackendPreview] = useState<BackendPricePreviewResponse | null>(null);
 
@@ -126,13 +130,19 @@ export function BookingConfirmationScreen() {
             accessToken: token,
             connector: pickedConn,
             priceRanges: currentPriceRanges,
-          }).catch(() => null),
+          }).catch((err) => {
+            console.warn('Failed to load price preview:', err);
+            const msg = bookingErrorMessage(t, err);
+            setError(msg);
+            return null;
+          }),
         ]);
 
         if (!active) return;
 
         if (preview) {
           setBackendPreview(preview);
+          setError(null);
         }
 
         if (overlaps && overlaps.length > 0) {
@@ -141,6 +151,8 @@ export function BookingConfirmationScreen() {
         }
       } catch (err) {
         console.warn('Failed to load booking confirmation details:', err);
+        const msg = bookingErrorMessage(t, err);
+        setError(msg);
       } finally {
         if (active) {
           setLoading(false);
@@ -200,16 +212,45 @@ export function BookingConfirmationScreen() {
 
   async function submitBooking(overridePreview?: BackendPricePreviewResponse) {
     if (!connector) return;
-    const activePreview = overridePreview ?? backendPreview;
-    const activeTotal = overridePreview ? overridePreview.totalAmount : (quote?.totalPrice ?? 0);
-    const activePricingVersion = activePreview?.pricingVersion ?? '';
+    // Guard: ignore React Native press event objects passed when called directly from onPress
+    const isRealPreview = Boolean(
+      overridePreview &&
+      typeof overridePreview === 'object' &&
+      'pricingVersion' in overridePreview &&
+      typeof (overridePreview as any).pricingVersion === 'string',
+    );
+    const resolvedOverride = isRealPreview ? overridePreview : undefined;
+    const activePreview = resolvedOverride ?? backendPreview;
+    const activeTotal = resolvedOverride?.totalAmount ?? activePreview?.totalAmount ?? quote?.totalPrice ?? 0;
+    const activePricingVersion = (activePreview?.pricingVersion ?? '').trim();
     const activePolicyVersion =
       activePreview?.policy?.policyVersion ??
       activePreview?.policy?.version ??
       'booking-v4.9';
 
+    if (!isMockMode()) {
+      if (!activePreview || !activePricingVersion || !/^[0-9a-fA-F]{64}$/.test(activePricingVersion)) {
+        console.warn('Invalid pricing version:', activePricingVersion, activePreview);
+        const msg = t('bookingConfirmation.pricePreviewRequired', {
+          defaultValue: 'Chưa có thông tin báo giá hợp lệ từ hệ thống hoặc khung giờ không khả dụng. Vui lòng chọn lại khung giờ.',
+        });
+        setError(msg);
+        Alert.alert(t('bookingConfirmation.errorTitle'), msg);
+        return;
+      }
+      if (typeof activeTotal !== 'number' || isNaN(activeTotal) || activeTotal < 0) {
+        const msg = t('bookingConfirmation.invalidTotalAmount', {
+          defaultValue: 'Tổng tiền thanh toán không hợp lệ. Vui lòng chọn lại khung giờ.',
+        });
+        setError(msg);
+        Alert.alert(t('bookingConfirmation.errorTitle'), msg);
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError(null);
+    setErrorCode(null);
     try {
       const token = getAccessToken();
       const booking = await createBooking(
@@ -240,9 +281,39 @@ export function BookingConfirmationScreen() {
         setShowPriceChangedModal(true);
         return;
       }
+      const code = extractBookingErrorCode(e);
+      setErrorCode(code);
       const msg = bookingErrorMessage(t, e);
       setError(msg);
-      Alert.alert(t('bookingConfirmation.errorTitle'), msg);
+
+      const isPendingLimit =
+        code === 'BKG_PENDING_LIMIT_EXCEEDED' ||
+        code === 'PENDING_LIMIT_EXCEEDED' ||
+        code === 'DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED';
+
+      if (isPendingLimit) {
+        getLatestPendingBooking().then((pending) => {
+          Alert.alert(
+            t('bookingConfirmation.errorTitle'),
+            msg,
+            [
+              { text: t('common.cancel', 'Đóng'), style: 'cancel' },
+              {
+                text: t('bookingConfirmation.viewPendingDetail', 'Xem đơn đang chờ'),
+                onPress: () => {
+                  if (pending?.id) {
+                    navigation.navigate('BookingDetail', { bookingId: pending.id });
+                  } else {
+                    navigation.navigate('Tabs', { screen: 'Bookings' });
+                  }
+                },
+              },
+            ],
+          );
+        });
+      } else {
+        Alert.alert(t('bookingConfirmation.errorTitle'), msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -348,6 +419,103 @@ export function BookingConfirmationScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Error Banner */}
+        {error && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              gap: 12,
+              backgroundColor: isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEF2F2',
+              borderColor: isDark ? 'rgba(248, 113, 113, 0.4)' : '#FECACA',
+              borderWidth: 1,
+              borderRadius: radius.lg,
+              padding: spacing.md,
+              marginBottom: spacing.sm,
+            }}
+          >
+            <Ionicons
+              name="alert-circle"
+              size={22}
+              color={isDark ? '#F87171' : '#DC2626'}
+              style={{ marginTop: 1 }}
+            />
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: '600',
+                  lineHeight: 19,
+                  color: isDark ? '#FECACA' : '#991B1B',
+                }}
+              >
+                {error}
+              </Text>
+              {errorCode === 'BKG_PENDING_LIMIT_EXCEEDED' ||
+              errorCode === 'PENDING_LIMIT_EXCEEDED' ||
+              errorCode === 'DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED' ? (
+                <Pressable
+                  onPress={() => {
+                    getLatestPendingBooking().then((pending) => {
+                      if (pending?.id) {
+                        navigation.navigate('BookingDetail', { bookingId: pending.id });
+                      } else {
+                        navigation.navigate('Tabs', { screen: 'Bookings' });
+                      }
+                    });
+                  }}
+                  style={{
+                    alignSelf: 'flex-start',
+                    paddingVertical: 5,
+                    paddingHorizontal: 12,
+                    borderRadius: radius.sm,
+                    backgroundColor: isDark ? 'rgba(248, 113, 113, 0.22)' : 'rgba(220, 38, 38, 0.08)',
+                  }}
+                  hitSlop={8}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '700',
+                      color: isDark ? '#FCA5A5' : '#DC2626',
+                    }}
+                  >
+                    {t('bookingConfirmation.viewPendingBookingDetail', 'Xem chi tiết đơn đang chờ')} →
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={() =>
+                    navigation.navigate('TimeRangePicker', {
+                      stationId: params.stationId,
+                      connectorId: connector?.id ?? params.connectorId,
+                      isFromFastTrack: params.isFastTrack,
+                    })
+                  }
+                  style={{
+                    alignSelf: 'flex-start',
+                    paddingVertical: 4,
+                    paddingHorizontal: 10,
+                    borderRadius: radius.sm,
+                    backgroundColor: isDark ? 'rgba(248, 113, 113, 0.2)' : 'rgba(220, 38, 38, 0.08)',
+                  }}
+                  hitSlop={8}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '700',
+                      color: isDark ? '#FCA5A5' : '#DC2626',
+                    }}
+                  >
+                    {t('bookingConfirmation.changeTime', 'Đổi giờ sạc')} →
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        )}
+
         {/* Fast-Track 1-Click Banner */}
         {params.isFastTrack && (
           <View
@@ -441,7 +609,13 @@ export function BookingConfirmationScreen() {
             <Ionicons name="calendar-outline" size={18} color={themeColors.primary} />
             <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.timeTitle')}</Text>
             <Pressable
-              onPress={() => navigation.navigate('TimeRangePicker', { stationId: params.stationId, connectorId: params.connectorId })}
+              onPress={() =>
+                navigation.navigate('TimeRangePicker', {
+                  stationId: params.stationId,
+                  connectorId: connector?.id ?? params.connectorId,
+                  isFromFastTrack: params.isFastTrack,
+                })
+              }
               hitSlop={6}
               style={{ marginLeft: 'auto', paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6' }}
             >
@@ -607,7 +781,8 @@ export function BookingConfirmationScreen() {
           <AppButton
             label={t('bookingConfirmation.payBtn', { amount: formatVnd(quote.totalPrice) })}
             loading={submitting}
-            onPress={submitBooking}
+            disabled={submitting || loading || (!isMockMode() && (!backendPreview || !/^[0-9a-fA-F]{64}$/.test(backendPreview.pricingVersion?.trim() || '')))}
+            onPress={() => submitBooking()}
             style={styles.payBtn}
           />
         </View>

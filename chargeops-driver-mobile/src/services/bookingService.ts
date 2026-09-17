@@ -4,12 +4,18 @@ import { chargePointsMock, connectorsMock, stationsMock } from '@/mock/stations.
 import type {
   BackendCreateBookingResponse,
   Booking,
+  BookingActions,
+  BookingDetailItem,
   BookingPriceLine,
   BookingStatus,
+  CancellationCapabilityReason,
+  CheckInCapabilityReason,
   ChargePoint,
   Connector,
   CreateBookingRequest,
+  DriverBookingListItem,
   PaymentMethod,
+  RateKind,
   Station,
 } from '@/types';
 import { busyRangesForDay, isSameDay, rangesOverlap, type BusyRange } from '@/utils/availability';
@@ -58,6 +64,26 @@ export type BookingErrorCode =
   | 'GENERIC';
 
 /**
+ * Error thrown when backend booking API returns an error response.
+ * Carries code, userMessage, and structured error details (e.g. validation errors).
+ */
+export class BookingApiError extends Error {
+  code: string;
+  details?: any;
+  userMessage?: string;
+  messageKey?: string;
+
+  constructor(code: string, message?: string, details?: any, messageKey?: string) {
+    super(message || code);
+    this.name = 'BookingApiError';
+    this.code = code;
+    this.details = details;
+    this.userMessage = message;
+    this.messageKey = messageKey;
+  }
+}
+
+/**
  * Specific error thrown when backend returns 409 PRICE_CHANGED (BKG-020).
  * Holds latestPricePreview so the screen can prompt driver for consent.
  */
@@ -94,8 +120,8 @@ export interface PaymentResult {
   booking: Booking | null;
 }
 
-/** Reconsideration window after booking creation — a full refund regardless of tier (FR05). */
-export const GRACE_PERIOD_MIN = 5;
+/** Reconsideration window after booking creation — a full refund regardless of tier (FR05 / Platform policy v4.9: 10 mins). */
+export const GRACE_PERIOD_MIN = 10;
 /** How long an unpaid booking holds its time range (BR-BOK-02). */
 export const PAYMENT_HOLD_MIN = 10;
 /** Check-in opens at the start time and closes this many minutes later (BR-BOK-04). */
@@ -197,12 +223,206 @@ const ENDED_STATUSES: BookingStatus[] = ['COMPLETED', 'CANCELLED', 'EXPIRED'];
  * most, so this deliberately returns the whole set with no paging.
  * LATER: GET /bookings?state=active
  */
-export async function getActiveBookings(): Promise<Booking[]> {
+/**
+ * Normalize booking with server-driven actions & deadlines for local store / mock fallback.
+ */
+export function normalizeBookingWithCapabilities(b: Booking): Booking {
+  const now = Date.now();
+  const startMs = new Date(b.startAt).getTime();
+  const checkInOpensAt = b.checkInOpensAt ?? b.startAt;
+  const checkInDeadline = b.checkInDeadline ?? new Date(startMs + 15 * 60_000).toISOString();
+  const checkInDeadlineMs = new Date(checkInDeadline).getTime();
+  const paymentHoldExpiresAt =
+    b.paymentHoldExpiresAt ??
+    b.expiresAt ??
+    new Date(new Date(b.createdAt).getTime() + 10 * 60_000).toISOString();
+  const freeCancellationDeadline =
+    b.freeCancellationDeadline ??
+    new Date(new Date(b.createdAt).getTime() + 10 * 60_000).toISOString();
+  const isGrace = now <= new Date(freeCancellationDeadline).getTime();
+
+  let canCancel = false;
+  let refundableAmount = 0;
+  let cancellationReason: CancellationCapabilityReason = 'NOT_CANCELLABLE';
+
+  if (b.status === 'PENDING') {
+    canCancel = true;
+    refundableAmount = 0;
+    cancellationReason = 'UNPAID';
+  } else if (b.status === 'CONFIRMED') {
+    canCancel = true;
+    if (isGrace) {
+      refundableAmount = b.totalPrice;
+      cancellationReason = 'WITHIN_GRACE';
+    } else {
+      refundableAmount = 0;
+      cancellationReason = 'GRACE_ENDED';
+    }
+  }
+
+  let canCheckIn = false;
+  let checkInReason: CheckInCapabilityReason = 'AVAILABLE';
+  if (b.status === 'CONFIRMED') {
+    if (now < startMs) {
+      canCheckIn = false;
+      checkInReason = 'TOO_EARLY';
+    } else if (now > checkInDeadlineMs) {
+      canCheckIn = false;
+      checkInReason = 'WINDOW_CLOSED';
+    } else {
+      canCheckIn = true;
+      checkInReason = 'AVAILABLE';
+    }
+  } else {
+    checkInReason = 'WRONG_STATE';
+  }
+
+  const actions: BookingActions = b.actions ?? {
+    canCancel,
+    refundableAmount,
+    cancellationReason,
+    canCheckIn,
+    checkInReason,
+    canStartCharging: b.status === 'CHECKED_IN',
+    canComplete: b.status === 'CHARGING',
+    canReportIssue: true,
+  };
+
+  return {
+    ...b,
+    paymentHoldExpiresAt,
+    freeCancellationDeadline,
+    checkInOpensAt,
+    checkInDeadline,
+    actions,
+  };
+}
+
+export function mapListItemToBooking(item: DriverBookingListItem): Booking {
+  return {
+    id: item.bookingId,
+    code: item.bookingCode,
+    stationId: item.station.stationId,
+    stationName: item.station.stationName,
+    stationAddress: item.station.stationAddress,
+    stationImageUrl: item.station.stationImageUrl ?? undefined,
+    connectorId: item.station.connectorId,
+    connectorCode: item.station.connectorCode,
+    connectorName: item.station.connectorCode ?? 'Connector',
+    chargePointCode: item.station.chargePointCode,
+    chargePointName: item.station.chargePointCode ?? 'Trụ sạc',
+    zoneLabel: null,
+    connectorType: 'CCS2',
+    powerKw: 60,
+    startAt: item.startAt,
+    endAt: item.endAt,
+    durationMin: item.durationMin,
+    priceLines: [],
+    energyKwh: item.totalAmount > 0 ? +(item.totalAmount / 3850).toFixed(1) : 0,
+    chargingFee: item.totalAmount,
+    serviceFee: 0,
+    totalPrice: item.totalAmount,
+    paymentMethod: 'VNPAY',
+    status: item.status,
+    cancelReason: item.cancellationReason,
+    checkedInAt: item.checkedInAt,
+    createdAt: item.startAt,
+    expiresAt: item.paymentHoldExpiresAt ?? null,
+    paymentHoldExpiresAt: item.paymentHoldExpiresAt,
+    freeCancellationDeadline: item.freeCancellationDeadline,
+    checkInOpensAt: item.checkInOpensAt,
+    checkInDeadline: item.checkInDeadline,
+    chargingStartedAt: item.chargingStartedAt,
+    actions: item.actions,
+    refundAmount: item.actions?.refundableAmount,
+  };
+}
+
+export function mapDetailItemToBooking(item: BookingDetailItem): Booking {
+  const base = mapListItemToBooking(item);
+  const rawPriceLines: any[] = item.priceLines ?? [];
+  const normalizedPriceLines: BookingPriceLine[] = rawPriceLines.length > 0
+    ? rawPriceLines.map((line) => ({
+        fromAt: line.fromAt ?? line.startAt ?? item.startAt,
+        toAt: line.toAt ?? line.endAt ?? item.endAt,
+        rateKind: (line.rateKind ?? line.periodCode ?? 'STANDARD') as RateKind,
+        rateVndPerKwh: Number(line.rateVndPerKwh ?? 0),
+        energyKwh: Number(line.energyKwh ?? line.estimatedEnergyKwh ?? (line.amount && line.rateVndPerKwh ? +(line.amount / line.rateVndPerKwh).toFixed(1) : 0)),
+        amount: Number(line.amount ?? 0),
+      }))
+    : [
+        {
+          fromAt: item.startAt,
+          toAt: item.endAt,
+          rateKind: 'STANDARD' as RateKind,
+          rateVndPerKwh: 3850,
+          energyKwh: item.totalAmount > 0 ? +(item.totalAmount / 3850).toFixed(1) : 0,
+          amount: item.totalAmount,
+        },
+      ];
+
+  const totalKwh = normalizedPriceLines.reduce((acc, l) => acc + l.energyKwh, 0);
+
+  return {
+    ...base,
+    priceLines: normalizedPriceLines,
+    energyKwh: totalKwh > 0 ? +totalKwh.toFixed(1) : base.energyKwh,
+    paymentMethod: item.payment?.method ?? (item.checkout?.method as any) ?? 'VNPAY',
+    paymentConfirmedAt: item.paymentConfirmedAt,
+    completedAt: item.completedAt,
+    refundAmount: item.refunds?.[0]?.amount ?? item.actions?.refundableAmount ?? 0,
+    checkout: item.checkout,
+    paymentDetail: item.payment,
+    refunds: item.refunds ?? [],
+    policyVersion: item.policyVersion,
+    stateReconciliationPending: item.stateReconciliationPending,
+    persistedStatus: item.persistedStatus,
+  };
+}
+
+/**
+ * Active bookings for the driver (FR09 / BKG-021).
+ * Calls GET /api/v1/bookings/active when connected to backend,
+ * falls back to local reactive store with server-like capabilities.
+ */
+export async function getActiveBookings(accessToken?: string | null): Promise<Booking[]> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/active`, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        const content: DriverBookingListItem[] =
+          json?.data?.content ?? json?.data ?? json?.content ?? json;
+        if (Array.isArray(content)) {
+          return content.map(mapListItemToBooking);
+        }
+      }
+    } catch (err) {
+      console.warn('Network error fetching active bookings, falling back to local store:', err);
+    }
+  }
+
   reconcileLapsed();
   const items = store
     .filter((b) => ACTIVE_STATUSES.includes(b.status))
-    .sort((a, b) => (a.startAt < b.startAt ? -1 : 1));
+    .sort((a, b) => (a.startAt < b.startAt ? -1 : 1))
+    .map(normalizeBookingWithCapabilities);
   return simulateNetwork(items);
+}
+
+/**
+ * Retrieve the driver's current active pending booking, if one exists.
+ * Used when handling BKG_PENDING_LIMIT_EXCEEDED to navigate driver directly
+ * to the pending booking's detail or payment screen.
+ */
+export async function getLatestPendingBooking(): Promise<Booking | null> {
+  reconcileLapsed();
+  const pending = store.find((b) => b.status === 'PENDING');
+  return simulateNetwork(pending ? normalizeBookingWithCapabilities(pending) : null, 100);
 }
 
 /** Which ended bookings the history screen is asking for. */
@@ -265,27 +485,54 @@ function matchesBookingQuery(b: Booking, query: string): boolean {
 }
 
 /**
- * Search, filter and page the driver's ended bookings (FR09).
- *
- * Everything that narrows the list happens here so the cursor stays consistent
- * across pages — the screen must never re-filter what it was handed, or page 2
- * would be a slice of the wrong set.
- * LATER: GET /bookings?state=ended&query=&status=&cursor=&limit= — the backend
- * runs the same predicate as a DB keyset query and returns this exact shape.
+ * Search, filter and page the driver's ended bookings (FR09 / BKG-021).
+ * Calls GET /api/v1/bookings/history when connected to backend.
  */
 export async function getBookingHistory(
   filter: BookingHistoryFilter = {},
-  page: { cursor?: string | null; limit?: number } = {},
+  page: { cursor?: string | null; limit?: number; pageIndex?: number } = {},
+  accessToken?: string | null,
 ): Promise<BookingHistoryPage> {
-  reconcileLapsed();
-  const { cursor = null, limit = BOOKING_PAGE_SIZE } = page;
+  const { cursor = null, limit = BOOKING_PAGE_SIZE, pageIndex = 1 } = page;
   const { query = '', status = 'all' } = filter;
 
-  // Query first: the chip counts are "how this search splits by status", so they
-  // must be computed over the query-matched set, before the status narrows it.
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      let url = `${apiBaseUrl}/api/v1/bookings/history?page=${pageIndex}&size=${limit}`;
+      if (status === 'completed') url += '&status=COMPLETED';
+      if (status === 'cancelled') url += '&status=CANCELLED';
+
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        const pageData = json?.data ?? json;
+        const metaData = json?.meta;
+        const rawItems: DriverBookingListItem[] = pageData?.content ?? pageData?.items ?? (Array.isArray(pageData) ? pageData : []);
+        const items = rawItems.map(mapListItemToBooking);
+        const total = pageData?.totalElements ?? pageData?.total ?? items.length;
+        const nextCursor = items.length === limit ? String(pageIndex + 1) : null;
+        const serverCounts = metaData?.counts;
+        const counts: Record<HistoryStatusFilter, number> = {
+          all: Number(serverCounts?.all ?? (status === 'all' ? total : -1)),
+          completed: Number(serverCounts?.completed ?? (status === 'completed' ? total : -1)),
+          cancelled: Number(serverCounts?.cancelled ?? (status === 'cancelled' ? total : -1)),
+        };
+        return { items, nextCursor, total, counts };
+      }
+    } catch (err) {
+      console.warn('Network error fetching booking history, falling back to local store:', err);
+    }
+  }
+
+  reconcileLapsed();
   const matched = store
     .filter((b) => ENDED_STATUSES.includes(b.status) && matchesBookingQuery(b, query))
-    .sort((a, b) => (a.startAt < b.startAt ? 1 : -1)); // newest first
+    .sort((a, b) => (a.startAt < b.startAt ? 1 : -1))
+    .map(normalizeBookingWithCapabilities);
 
   const counts = {
     all: matched.length,
@@ -303,12 +550,36 @@ export async function getBookingHistory(
 }
 
 /**
- * Lifetime charging totals. Separate from the history page on purpose: these
- * cover every completed session ever, so they can never be summed from the rows
- * currently loaded on screen.
- * LATER: GET /bookings/stats — one aggregate query, not a full-table read.
+ * Lifetime charging totals (Modular aggregate).
+ * Can be fetched from GET /api/v1/bookings/stats in future, or aggregated from completed sessions.
  */
-export async function getBookingStats(): Promise<BookingStats> {
+export async function getBookingStats(accessToken?: string | null): Promise<BookingStats> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/stats`, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data ?? json;
+        if (data) {
+          const sessions = data.sessions ?? data.totalChargingSessions ?? data.totalCompletedBookings;
+          if (typeof sessions === 'number') {
+            return {
+              sessions,
+              hours: Number(data.hours ?? data.totalHours ?? 0),
+              spent: Number(data.spent ?? data.totalSpending ?? 0),
+            };
+          }
+        }
+      }
+    } catch {
+      // Future endpoint not yet ready; fall through to store calculation
+    }
+  }
+
   reconcileLapsed();
   const done = store.filter((b) => b.status === 'COMPLETED');
   return simulateNetwork({
@@ -318,11 +589,33 @@ export async function getBookingStats(): Promise<BookingStats> {
   });
 }
 
-export async function getBookingById(id: string): Promise<Booking | null> {
-  // NOW: look up in the store. LATER: GET /bookings/:id
+/**
+ * Fetch booking detail (BKG-021).
+ * Calls GET /api/v1/bookings/:id when connected to backend.
+ */
+export async function getBookingById(id: string, accessToken?: string | null): Promise<Booking | null> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/${id}`, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        const data: BookingDetailItem = json?.data ?? json;
+        if (data && (data.bookingId || (data as any).id)) {
+          return mapDetailItemToBooking(data);
+        }
+      }
+    } catch (err) {
+      console.warn('Network error fetching booking detail, falling back to local store:', err);
+    }
+  }
+
   reconcileLapsed();
   const booking = store.find((b) => b.id === id) ?? null;
-  return simulateNetwork(booking);
+  return simulateNetwork(booking ? normalizeBookingWithCapabilities(booking) : null);
 }
 
 /**
@@ -428,9 +721,22 @@ export async function getPricePreview(
         if (data && data.pricingVersion) {
           return data;
         }
+      } else {
+        const errJson = await response.json().catch(() => null);
+        const errObj = errJson?.error || errJson;
+        console.warn('Backend price-preview error:', response.status, errObj);
+        throw new BookingApiError(
+          errObj?.code || 'PRICE_PREVIEW_FAILED',
+          errObj?.message || 'Không thể lấy báo giá từ máy chủ',
+          errObj?.details,
+        );
       }
     } catch (err) {
-      console.warn('Backend price-preview call failed, falling back to local calculation:', err);
+      if (err instanceof BookingApiError) {
+        throw err;
+      }
+      console.warn('Backend price-preview call failed:', err);
+      throw new BookingApiError('NETWORK_ERROR', 'Không thể kết nối đến máy chủ tính giá');
     }
   }
 
@@ -533,6 +839,21 @@ export async function createBooking(
       headers.Authorization = `Bearer ${token}`;
     }
 
+    if (typeof req.acceptedTotalAmount !== 'number' || isNaN(req.acceptedTotalAmount) || req.acceptedTotalAmount < 0) {
+      throw new BookingApiError(
+        'SYS_003',
+        'Tổng tiền thanh toán không hợp lệ hoặc chưa được tính toán từ máy chủ',
+        { acceptedTotalAmount: 'NotNull' },
+      );
+    }
+    if (!req.acceptedPricingVersion || !/^[0-9a-f]{64}$/.test(req.acceptedPricingVersion)) {
+      throw new BookingApiError(
+        'SYS_003',
+        'Phiên bản giá không hợp lệ từ máy chủ. Vui lòng tải lại báo giá.',
+        { acceptedPricingVersion: 'Pattern' },
+      );
+    }
+
     const body = {
       connectorId: req.connectorId,
       startAt: req.startAt,
@@ -552,42 +873,39 @@ export async function createBooking(
       });
     } catch (err) {
       console.warn('Network error calling POST /api/v1/bookings:', err);
-      throw new Error('NETWORK_ERROR');
+      throw new BookingApiError('NETWORK_ERROR', 'Lỗi kết nối mạng khi tạo lượt đặt');
     }
 
     if (response.status === 409) {
       const errJson = await response.json().catch(() => null);
-      const code = errJson?.errorCode || errJson?.error?.code || 'PRICE_CHANGED';
+      const errObj = errJson?.error || errJson;
+      const code = errObj?.code || errObj?.errorCode || 'PRICE_CHANGED';
+      const message = errObj?.message;
+      const details = errObj?.details;
+      const messageKey = errObj?.messageKey;
       const latestPricePreview: BackendPricePreviewResponse | undefined =
         errJson?.data?.latestPricePreview ||
         errJson?.details?.latestPricePreview ||
         errJson?.error?.details?.latestPricePreview;
 
-      if (code === 'PRICE_CHANGED' && latestPricePreview) {
+      if ((code === 'PRICE_CHANGED' || code === 'BKG_PRICE_CHANGED') && latestPricePreview) {
         throw new PriceChangedError(latestPricePreview);
       }
-      if (
-        code === 'CONNECTOR_BUSY' ||
-        code === 'CONNECTOR_LOCKED' ||
-        code === 'SLOT_UNAVAILABLE' ||
-        code === 'DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED'
-      ) {
-        throw new Error(code);
-      }
-      throw new Error('RANGE_TAKEN');
+      throw new BookingApiError(code, message, details, messageKey);
     }
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error('UNAUTHORIZED');
+      throw new BookingApiError('UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn hoặc không có quyền thực hiện');
     }
 
     if (!response.ok) {
       const errJson = await response.json().catch(() => null);
-      const code = errJson?.errorCode || errJson?.error?.code;
-      if (code && typeof code === 'string') {
-        throw new Error(code);
-      }
-      throw new Error('GENERIC');
+      const errObj = errJson?.error || errJson;
+      const code = errObj?.code || errObj?.errorCode || 'GENERIC';
+      const message = errObj?.message;
+      const details = errObj?.details;
+      const messageKey = errObj?.messageKey;
+      throw new BookingApiError(code, message, details, messageKey);
     }
 
     const payload = await response.json();

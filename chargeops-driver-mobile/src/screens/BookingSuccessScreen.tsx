@@ -3,7 +3,15 @@ import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-n
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
@@ -17,18 +25,47 @@ import { formatDayMonth, formatTimeRange, formatVnd } from '@/utils/format';
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingSuccess'>;
 type Route = RouteProp<RootStackParamList, 'BookingSuccess'>;
 
-const STEP_ICONS: (keyof typeof Ionicons.glyphMap)[] = ['time-outline', 'qr-code-outline', 'flash'];
+interface GuideStepItem {
+  step: number;
+  icon: keyof typeof Ionicons.glyphMap;
+  titleKey: string;
+  descKey: string;
+}
+
+const GUIDE_STEPS: GuideStepItem[] = [
+  {
+    step: 1,
+    icon: 'time-outline',
+    titleKey: 'bookingSuccess.step1Title',
+    descKey: 'bookingSuccess.step1',
+  },
+  {
+    step: 2,
+    icon: 'qr-code-outline',
+    titleKey: 'bookingSuccess.step2Title',
+    descKey: 'bookingSuccess.step2',
+  },
+  {
+    step: 3,
+    icon: 'flash-outline',
+    titleKey: 'bookingSuccess.step3Title',
+    descKey: 'bookingSuccess.step3',
+  },
+];
 
 /**
- * "Đặt chỗ thành công" — post-payment confirmation screen with dynamic Dark and Light mode theme support.
+ * "Đặt chỗ thành công" — high-end post-payment confirmation screen.
+ * Features a celebratory hero glow, digital receipt ticket voucher,
+ * structured transaction breakdown, and a clean check-in stepper timeline.
  */
 export function BookingSuccessScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors } = usePreferences();
 
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -39,6 +76,17 @@ export function BookingSuccessScreen() {
       active = false;
     };
   }, [params.bookingId]);
+
+  function handleCopyCode() {
+    if (!booking?.code) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(booking.code).catch(() => {});
+    }
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  }
 
   function goHome() {
     navigation.dispatch(
@@ -66,25 +114,107 @@ export function BookingSuccessScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Success mark */}
-        <View style={[styles.checkOuter, { backgroundColor: themeColors.primarySoft }]}>
-          <View style={[styles.checkInner, { backgroundColor: themeColors.primary }]}>
-            <Ionicons name="checkmark-sharp" size={48} color="#FFFFFF" />
+        {/* Celebration Hero Section */}
+        <View style={styles.heroSection}>
+          <View
+            style={[
+              styles.checkOuterRing,
+              {
+                backgroundColor: themeColors.primarySoft,
+                borderColor: `${themeColors.primary}33`,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.checkInnerCircle,
+                {
+                  backgroundColor: themeColors.primary,
+                  shadowColor: themeColors.primary,
+                  ...(Platform.OS === 'web'
+                    ? { boxShadow: '0 8px 24px rgba(16, 201, 138, 0.35)' }
+                    : {}),
+                },
+              ]}
+            >
+              <Ionicons name="checkmark-sharp" size={44} color="#FFFFFF" />
+            </View>
+          </View>
+          <Text style={[styles.title, { color: themeColors.textStrong }]}>{t('bookingSuccess.title')}</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>{t('bookingSuccess.subtitle')}</Text>
+        </View>
+
+        {/* Booking Code Voucher / Ticket Badge */}
+        <View style={[styles.voucherCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.voucherHeader}>
+            <View style={styles.voucherLabelRow}>
+              <Ionicons name="receipt-outline" size={14} color={themeColors.textMuted} />
+              <Text style={[styles.voucherLabel, { color: themeColors.textMuted }]}>
+                {t('bookingSuccess.codeLabel')}
+              </Text>
+            </View>
+            {copied && (
+              <View style={[styles.copiedPill, { backgroundColor: themeColors.primarySoft }]}>
+                <Ionicons name="checkmark-circle" size={13} color={themeColors.primary} />
+                <Text style={[styles.copiedText, { color: themeColors.primary }]}>
+                  {t('bookingSuccess.codeCopied')}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={[styles.voucherCodeBox, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+            <Text
+              style={[styles.voucherCodeText, { color: themeColors.primary }]}
+              numberOfLines={1}
+              ellipsizeMode="middle"
+              selectable
+            >
+              {booking.code}
+            </Text>
+            <Pressable
+              onPress={handleCopyCode}
+              style={({ pressed }) => [
+                styles.copyButton,
+                {
+                  backgroundColor: copied ? themeColors.primarySoft : themeColors.surface,
+                  borderColor: copied ? themeColors.primary : themeColors.border,
+                },
+                pressed && styles.copyButtonPressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={t('bookingSuccess.copyCode')}
+            >
+              <Ionicons
+                name={copied ? 'checkmark' : 'copy-outline'}
+                size={14}
+                color={copied ? themeColors.primary : themeColors.textBody}
+              />
+              <Text
+                style={[
+                  styles.copyButtonText,
+                  { color: copied ? themeColors.primary : themeColors.textBody },
+                ]}
+              >
+                {t(copied ? 'bookingSuccess.codeCopied' : 'bookingSuccess.copyCode')}
+              </Text>
+            </Pressable>
           </View>
         </View>
 
-        <Text style={[styles.title, { color: themeColors.textStrong }]}>{t('bookingSuccess.title')}</Text>
-        <Text style={[styles.code, { color: themeColors.primary }]}>{t('bookingSuccess.code', { code: booking.code })}</Text>
-
-        {/* Transaction summary */}
+        {/* Transaction Summary Card */}
         <View style={[styles.txCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.txHeader}>
-            <Text style={[styles.txTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.txTitle')}</Text>
-            <StatusBadge variant="success" label={t('bookingSuccess.paid')} />
+            <View style={styles.txHeaderLeft}>
+              <Ionicons name="document-text-outline" size={17} color={themeColors.primary} />
+              <Text style={[styles.txTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.txTitle')}</Text>
+            </View>
+            <StatusBadge variant="success" label={t('bookingSuccess.paid')} dot />
           </View>
+
           <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
           <TxRow
-            icon="location-outline"
+            icon="business-outline"
             label={t('bookingSuccess.station')}
             value={booking.stationName}
           />
@@ -94,37 +224,91 @@ export function BookingSuccessScreen() {
             value={`${booking.chargePointName} · ${booking.connectorName} (${booking.connectorType})`}
           />
           <TxRow
-            icon="calendar-outline"
+            icon="time-outline"
             label={t('bookingSuccess.window')}
             value={`${formatDayMonth(booking.startAt)} · ${formatTimeRange(booking.startAt, booking.endAt)}`}
           />
-          <TxRow
-            icon="card-outline"
-            label={t('bookingSuccess.total')}
-            value={formatVnd(booking.totalPrice)}
-            valueBold
-          />
+
+          <View style={[styles.dashedDivider, { borderColor: themeColors.border }]} />
+
+          <View style={styles.totalRow}>
+            <View style={styles.totalLabelWrap}>
+              <View style={[styles.totalIconWrap, { backgroundColor: themeColors.primarySoft }]}>
+                <Ionicons name="wallet-outline" size={16} color={themeColors.primary} />
+              </View>
+              <Text style={[styles.totalLabel, { color: themeColors.textStrong }]}>{t('bookingSuccess.total')}</Text>
+            </View>
+            <Text style={[styles.totalValue, { color: themeColors.primary }]}>
+              {formatVnd(booking.totalPrice)}
+            </Text>
+          </View>
         </View>
 
-        {/* Guide steps */}
-        <View style={[styles.guideCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
-          <Text style={[styles.guideTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.guideTitle')}</Text>
-          <View style={styles.guideSteps}>
-            {([1, 2, 3] as const).map((step, idx) => (
-              <View key={step} style={styles.stepRow}>
-                <View style={[styles.stepIcon, { backgroundColor: themeColors.surface }]}>
-                  <Ionicons name={STEP_ICONS[idx]} size={18} color={themeColors.primary} />
+        {/* Check-in Guide Stepper Card */}
+        <View style={[styles.guideCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+          <View style={styles.guideHeader}>
+            <View style={[styles.guideIconWrap, { backgroundColor: themeColors.primarySoft }]}>
+              <Ionicons name="shield-checkmark-outline" size={18} color={themeColors.primary} />
+            </View>
+            <View style={styles.guideTitleBlock}>
+              <Text style={[styles.guideTitle, { color: themeColors.textStrong }]}>{t('bookingSuccess.guideTitle')}</Text>
+            </View>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
+
+          <View style={styles.guideStepsContainer}>
+            {GUIDE_STEPS.map((item, idx) => {
+              const isLast = idx === GUIDE_STEPS.length - 1;
+              return (
+                <View key={item.step} style={styles.stepperRow}>
+                  <View style={styles.stepperTrack}>
+                    <View
+                      style={[
+                        styles.stepCircle,
+                        {
+                          backgroundColor: themeColors.surfaceAlt,
+                          borderColor: themeColors.primary,
+                        },
+                      ]}
+                    >
+                      <Ionicons name={item.icon} size={16} color={themeColors.primary} />
+                    </View>
+                    {!isLast && (
+                      <View style={[styles.stepConnectorLine, { backgroundColor: themeColors.border }]} />
+                    )}
+                  </View>
+                  <View style={[styles.stepContent, !isLast && styles.stepContentSpaced]}>
+                    <View style={styles.stepBadgeRow}>
+                      <View style={[styles.stepNumPill, { backgroundColor: themeColors.primarySoft }]}>
+                        <Text style={[styles.stepNumBadge, { color: themeColors.primary }]}>
+                          {t('bookingSuccess.stepNum', { num: item.step })}
+                        </Text>
+                      </View>
+                      <Text style={[styles.stepItemTitle, { color: themeColors.textStrong }]}>
+                        {t(item.titleKey)}
+                      </Text>
+                    </View>
+                    <Text style={[styles.stepDesc, { color: themeColors.textBody }]}>
+                      {t(item.descKey)}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.stepBody}>
-                  <Text style={[styles.stepNum, { color: themeColors.primary }]}>
-                    {t('bookingSuccess.stepNum', { num: step })}
-                  </Text>
-                  <Text style={[styles.stepText, { color: themeColors.textBody }]}>
-                    {t(`bookingSuccess.step${step}`)}
-                  </Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
+          </View>
+
+          {/* Policy Notice Footer */}
+          <View
+            style={[
+              styles.noticeBanner,
+              { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border },
+            ]}
+          >
+            <Ionicons name="information-circle-outline" size={17} color={themeColors.primary} />
+            <Text style={[styles.noticeText, { color: themeColors.textMuted }]}>
+              {t('bookingSuccess.refundNote')}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -132,9 +316,7 @@ export function BookingSuccessScreen() {
       {/* Footer CTAs */}
       <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
         <AppButton label={t('bookingSuccess.viewDetail')} onPress={viewDetail} />
-        <Pressable style={styles.homeBtn} onPress={goHome}>
-          <Text style={[styles.homeText, { color: themeColors.textMuted }]}>{t('bookingSuccess.goHome')}</Text>
-        </Pressable>
+        <AppButton label={t('bookingSuccess.goHome')} variant="secondary" onPress={goHome} />
       </View>
     </SafeAreaView>
   );
@@ -144,26 +326,19 @@ function TxRow({
   icon,
   label,
   value,
-  valueBold,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
-  valueBold?: boolean;
 }) {
   const { themeColors } = usePreferences();
   return (
     <View style={styles.txRow}>
-      <Ionicons name={icon} size={16} color={themeColors.textMuted} />
+      <View style={[styles.txIconWrap, { backgroundColor: themeColors.surfaceAlt }]}>
+        <Ionicons name={icon} size={15} color={themeColors.textMuted} />
+      </View>
       <Text style={[styles.txLabel, { color: themeColors.textMuted }]}>{label}</Text>
-      <Text
-        style={[
-          styles.txValue,
-          { color: themeColors.textStrong },
-          valueBold && styles.txValueBold,
-        ]}
-        numberOfLines={1}
-      >
+      <Text style={[styles.txValue, { color: themeColors.textStrong }]} numberOfLines={2}>
         {value}
       </Text>
     </View>
@@ -175,30 +350,125 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,
+    paddingBottom: spacing.xl,
     gap: spacing.lg,
     alignItems: 'center',
   },
 
-  checkOuter: {
-    width: 104,
-    height: 104,
-    borderRadius: radius.full,
+  // Hero Section
+  heroSection: {
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginVertical: spacing.xs,
+  },
+  checkOuterRing: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: spacing.sm,
   },
-  checkInner: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.full,
+  checkInnerCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      default: {
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+        elevation: 6,
+      },
+    }),
+  },
+  title: {
+    fontSize: fontSizes.title,
+    fontWeight: fontWeights.bold,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
+  subtitle: {
+    fontSize: fontSizes.body,
+    textAlign: 'center',
+    lineHeight: lineHeights.body,
+    paddingHorizontal: spacing.md,
   },
 
-  title: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, textAlign: 'center' },
-  code: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, letterSpacing: 1 },
+  // Voucher / Ticket Card
+  voucherCard: {
+    alignSelf: 'stretch',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  voucherHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  voucherLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  voucherLabel: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 1,
+  },
+  copiedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  copiedText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+  },
+  voucherCodeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm,
+    gap: spacing.xs,
+  },
+  voucherCodeText: {
+    flex: 1,
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 0.8,
+  },
+  copyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: 5,
+    paddingHorizontal: spacing.sm,
+  },
+  copyButtonPressed: {
+    opacity: 0.75,
+  },
+  copyButtonText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+  },
 
+  // Transaction Card
   txCard: {
     alignSelf: 'stretch',
     borderRadius: radius.lg,
@@ -206,15 +476,78 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  txHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  txTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
-  divider: { height: 1 },
+  txHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  txHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  txTitle: {
+    fontSize: fontSizes.heading,
+    fontWeight: fontWeights.bold,
+  },
+  divider: {
+    height: 1,
+  },
+  txRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  txIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  txLabel: {
+    fontSize: fontSizes.body,
+    width: 95,
+  },
+  txValue: {
+    flex: 1,
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.medium,
+    textAlign: 'right',
+  },
+  dashedDivider: {
+    borderTopWidth: 1,
+    borderStyle: 'dashed',
+    marginVertical: spacing.xs,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 2,
+  },
+  totalLabelWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  totalIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  totalLabel: {
+    fontSize: fontSizes.heading,
+    fontWeight: fontWeights.bold,
+  },
+  totalValue: {
+    fontSize: fontSizes.title,
+    fontWeight: fontWeights.bold,
+  },
 
-  txRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  txLabel: { fontSize: fontSizes.caption, width: 90 },
-  txValue: { flex: 1, fontSize: fontSizes.body, textAlign: 'right' },
-  txValueBold: { fontWeight: fontWeights.bold, fontSize: fontSizes.heading },
-
+  // Check-in Guide Card
   guideCard: {
     alignSelf: 'stretch',
     borderRadius: radius.lg,
@@ -222,14 +555,98 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  guideTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
-  guideSteps: { gap: spacing.md },
-  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
-  stepIcon: { width: 36, height: 36, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  stepBody: { flex: 1, gap: 2 },
-  stepNum: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0.5 },
-  stepText: { fontSize: fontSizes.body, lineHeight: lineHeights.body },
+  guideHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  guideIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guideTitleBlock: {
+    flex: 1,
+  },
+  guideTitle: {
+    fontSize: fontSizes.heading,
+    fontWeight: fontWeights.bold,
+  },
+  guideStepsContainer: {
+    paddingVertical: spacing.xs,
+  },
+  stepperRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  stepperTrack: {
+    alignItems: 'center',
+    width: 36,
+  },
+  stepCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepConnectorLine: {
+    width: 2,
+    minHeight: 28,
+    flex: 1,
+    marginVertical: 4,
+  },
+  stepContent: {
+    flex: 1,
+    paddingLeft: spacing.sm,
+    gap: 4,
+  },
+  stepContentSpaced: {
+    paddingBottom: spacing.lg,
+  },
+  stepBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
+  },
+  stepNumPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: radius.sm,
+  },
+  stepNumBadge: {
+    fontSize: fontSizes.caption - 1,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 0.5,
+  },
+  stepItemTitle: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+  },
+  stepDesc: {
+    fontSize: fontSizes.body - 1,
+    lineHeight: lineHeights.body,
+  },
+  noticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: fontSizes.caption,
+    lineHeight: lineHeights.caption,
+  },
 
+  // Footer Actions
   footer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
@@ -237,6 +654,4 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     gap: spacing.sm,
   },
-  homeBtn: { alignItems: 'center', paddingVertical: spacing.sm },
-  homeText: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
 });

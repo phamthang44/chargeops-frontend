@@ -181,7 +181,9 @@ export interface Booking {
   stationImageUrl?: string;
   // Connector snapshot (chargePointName/zoneLabel help the driver find the port)
   connectorId: string;
+  connectorCode?: string;
   connectorName: string;
+  chargePointCode?: string;
   chargePointName: string;
   zoneLabel: string | null;
   connectorType: ConnectorType;
@@ -201,11 +203,125 @@ export interface Booking {
   status: BookingStatus;
   cancelReason?: CancelReason;
   checkedInAt?: string;
+  paymentConfirmedAt?: string;
   createdAt: string; // ISO datetime — the 5-minute grace window runs from here (FR05)
   /** When an unpaid PENDING booking's hold lapses (BR-BOK-02); null once paid. */
   expiresAt: string | null;
+  paymentHoldExpiresAt?: string;
+  freeCancellationDeadline?: string;
+  checkInOpensAt?: string;
+  checkInDeadline?: string;
+  chargingStartedAt?: string;
+  completedAt?: string;
+  actions?: BookingActions;
   refundAmount?: number; // VND credited back when CANCELLED (FR08 tiers)
   refundPercent?: number; // 100 | 50 | 0 — which tier applied
+  checkout?: BookingCheckoutDetail;
+  paymentDetail?: BookingPaymentDetail;
+  refunds?: BookingRefundSummary[];
+  policyVersion?: string;
+  stateReconciliationPending?: boolean;
+  persistedStatus?: BookingStatus;
+}
+
+export type CancellationCapabilityReason = 'UNPAID' | 'WITHIN_GRACE' | 'GRACE_ENDED' | 'NOT_CANCELLABLE';
+
+export type CheckInCapabilityReason =
+  | 'AVAILABLE'
+  | 'TOO_EARLY'
+  | 'WINDOW_CLOSED'
+  | 'WRONG_STATE'
+  | 'STATION_UNAVAILABLE';
+
+/** Server-evaluated capabilities; client must not recalculate these rules. */
+export interface BookingActions {
+  canCancel: boolean;
+  refundableAmount: number;
+  cancellationReason?: CancellationCapabilityReason;
+  canCheckIn: boolean;
+  checkInReason?: CheckInCapabilityReason;
+  canStartCharging: boolean;
+  canComplete: boolean;
+  canReportIssue: boolean;
+}
+
+export interface StationSnapshot {
+  stationId: string;
+  stationName: string;
+  stationAddress: string;
+  chargePointCode?: string;
+  connectorId: string;
+  connectorCode?: string;
+  stationImageUrl?: string | null;
+}
+
+export interface BookingCheckoutDetail {
+  status: 'NOT_CREATED' | 'READY' | 'UNAVAILABLE' | 'EXPIRED' | string;
+  method?: PaymentMethod;
+  expiresAt?: string;
+  instruction?: string;
+  checkoutReference?: string;
+  checkoutUrl?: string;
+}
+
+export interface BookingPaymentDetail {
+  paymentId: string;
+  status: string;
+  method: PaymentMethod;
+  expectedAmount?: number;
+  collectedAmount?: number;
+  appliedAmount?: number;
+  appliedToPackageAmount?: number;
+  packageRefundedAmount?: number;
+  excessAmount?: number;
+  unallocatedAmount?: number;
+  currency?: string;
+}
+
+export interface BookingRefundSummary {
+  refundId: string;
+  amount: number;
+  reason?: 'VOLUNTARY_GRACE' | 'STATION_FAILURE' | 'EXCESS_PAYMENT' | 'LATE_PAYMENT' | 'UNAPPLIED_PAYMENT' | string;
+  status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | string;
+  needsReconciliation?: boolean;
+  createdAt?: string;
+}
+
+/** Lightweight Driver-facing projection shared by active and history lists (BKG-021). */
+export interface DriverBookingListItem {
+  bookingId: string;
+  bookingCode: string;
+  status: BookingStatus;
+  persistedStatus?: BookingStatus;
+  stateReconciliationPending?: boolean;
+  cancellationReason?: CancelReason;
+  version: number;
+  station: StationSnapshot;
+  timezone: string;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  totalAmount: number;
+  currency: string;
+  paymentHoldExpiresAt?: string;
+  freeCancellationDeadline?: string;
+  checkInOpensAt?: string;
+  checkInDeadline?: string;
+  checkedInAt?: string;
+  chargingStartedAt?: string;
+  actions: BookingActions;
+}
+
+/** Full Driver-facing booking detail (BKG-021). */
+export interface BookingDetailItem extends DriverBookingListItem {
+  priceLines: BookingPriceLine[];
+  pricingBasis?: any;
+  policyVersion?: string;
+  paymentConfirmedAt?: string;
+  completedAt?: string;
+  payment?: BookingPaymentDetail;
+  checkout?: BookingCheckoutDetail;
+  refunds?: BookingRefundSummary[];
 }
 
 /**

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,84 +93,67 @@ export function TimeRangePickerScreen() {
   const [timeFilter, setTimeFilter] = useState<TimeFilterPeriod>('ALL');
   const [helpModalVisible, setHelpModalVisible] = useState(false);
 
-  // 1. Fetch Station & Connector Details
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    const token = getAccessToken();
-
-    getStationDetail(params.stationId, { accessToken: token })
-      .then((detail) => {
-        if (!active) return;
-        if (!detail) {
-          setStation(null);
-          setChargePoint(null);
-          setConnector(null);
-          setLoading(false);
-          return;
-        }
-
-        const conn =
-          (params.connectorId ? detail.connectors.find((c) => c.id === params.connectorId) : undefined) ??
-          detail.connectors.find((c) => c.runtimeStatus === 'AVAILABLE') ??
-          detail.connectors[0] ??
-          null;
-
-        setStation(detail.station);
-        setConnector(conn);
-        setChargePoint(conn ? detail.chargePoints.find((cp) => cp.id === conn.chargePointId) ?? null : null);
-        if (!conn) setLoading(false);
-      })
-      .catch(() => {
-        if (!active) return;
-        setStation(null);
-        setChargePoint(null);
-        setConnector(null);
-        setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [params.stationId, params.connectorId, getAccessToken]);
-
-  // 2. Fetch Availability (with 24/7 cross-midnight merge for Today)
-  useEffect(() => {
-    if (!connector) {
-      setAvailability(null);
-      setAvailabilityError(false);
-      setLoading(false);
-      return;
-    }
+  // Atomic data loader: fetches station detail, selects connector, and loads live availability
+  const loadData = useCallback(async () => {
     let active = true;
     setLoading(true);
     setAvailabilityError(false);
-    const dateParam = formatDateParam(selectedDate);
     const token = getAccessToken();
 
-    getStationAvailability(params.stationId, connector.id, dateParam, { accessToken: token })
-      .then((data) => {
-        if (!active) return;
-        setAvailability(data);
-        setAvailabilityError(!data);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!active) return;
+    try {
+      const detail = await getStationDetail(params.stationId, { accessToken: token });
+      if (!active) return;
+      if (!detail) {
+        setStation(null);
+        setChargePoint(null);
+        setConnector(null);
         setAvailability(null);
-        setAvailabilityError(true);
         setLoading(false);
-      });
+        return;
+      }
 
-    return () => {
-      active = false;
-    };
-  }, [
-    params.stationId,
-    connector,
-    selectedDate,
-    getAccessToken,
-  ]);
+      const targetConnectorId = params.connectorId;
+      const conn =
+        (targetConnectorId
+          ? detail.connectors.find((c) => c.id.toLowerCase() === targetConnectorId.toLowerCase())
+          : undefined) ??
+        detail.connectors.find((c) => c.runtimeStatus === 'AVAILABLE') ??
+        detail.connectors[0] ??
+        null;
+
+      setStation(detail.station);
+      setConnector(conn);
+      setChargePoint(conn ? detail.chargePoints.find((cp) => cp.id === conn.chargePointId) ?? null : null);
+
+      if (!conn) {
+        setAvailability(null);
+        setLoading(false);
+        return;
+      }
+
+      const dateParam = formatDateParam(selectedDate);
+      const availData = await getStationAvailability(params.stationId, conn.id, dateParam, { accessToken: token });
+      if (!active) return;
+      setAvailability(availData);
+      setAvailabilityError(!availData);
+    } catch (err) {
+      console.warn('[TimeRangePicker] Failed to load station detail or availability:', err);
+      if (!active) return;
+      setAvailability(null);
+      setAvailabilityError(true);
+    } finally {
+      if (active) {
+        setLoading(false);
+      }
+    }
+  }, [params.stationId, params.connectorId, selectedDate, getAccessToken]);
+
+  // Load and refresh data on focus or parameter/date changes
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData]),
+  );
 
   // Reset selection on date switch
   useEffect(() => {
@@ -221,8 +204,8 @@ export function TimeRangePickerScreen() {
 
   // 3. Generate Timeline Slots
   const slots = useMemo<SlotCell[]>(() => {
-    if (!connector || availabilityError) return [];
-    if (availability?.operatingWindows && availability.operatingWindows.length === 0) return [];
+    if (!connector || availabilityError || !availability) return [];
+    if (availability.operatingWindows && availability.operatingWindows.length === 0) return [];
 
     const list: SlotCell[] = [];
 

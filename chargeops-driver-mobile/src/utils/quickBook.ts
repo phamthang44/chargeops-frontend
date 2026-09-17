@@ -3,6 +3,7 @@ import {
   getStationAvailability,
   getStationDetail,
   isRangeBusy,
+  resolveAccessToken,
 } from '@/services/stationService';
 
 function formatDateParam(d: Date): string {
@@ -16,7 +17,7 @@ function formatDateParam(d: Date): string {
  * Execute Fast-Track (1-Click) Booking:
  * 1. Resolves connectors for the station and selects the best connector (highest power DC, AVAILABLE).
  * 2. Fetches availability & TOU price ranges.
- * 3. Calculates the earliest available non-conflicting 60-minute charging slot today.
+ * 3. Calculates the earliest available non-conflicting 60-minute charging slot today (aligned to 30-min grid).
  * 4. Navigates straight to BookingConfirmationScreen with pre-filled parameters.
  *    The back action from BookingConfirmation is handled intelligently:
  *    BookingConfirmation -> TimeRangePicker -> StationDetail -> Home/Map.
@@ -29,11 +30,13 @@ export async function executeQuickBook(
   try {
     onLoadingChange?.(true);
 
+    const token = resolveAccessToken();
+
     // 1. Fetch connectors for this station (via getStationDetail to guarantee real backend data)
-    const detail = await getStationDetail(stationId);
+    const detail = await getStationDetail(stationId, { accessToken: token });
     const connectors = detail?.connectors && detail.connectors.length > 0
       ? detail.connectors
-      : await getConnectorsByStation(stationId);
+      : await getConnectorsByStation(stationId, { accessToken: token });
 
     if (!connectors || connectors.length === 0) {
       navigation.navigate('StationDetail', { stationId });
@@ -47,28 +50,32 @@ export async function executeQuickBook(
     );
     const chosenConnector = sorted[0];
 
-    // 3. Determine earliest start time (use earliestStartAt from availability or lead60 fallback)
+    // 3. Determine earliest start time (align to 30-min grid & >= 60-min lead time per BookingTimePolicy)
     const now = new Date();
     const todayStr = formatDateParam(now);
 
-    const availability = await getStationAvailability(stationId, chosenConnector.id, todayStr);
+    const availability = await getStationAvailability(stationId, chosenConnector.id, todayStr, { accessToken: token });
 
     let startAtDate: Date;
     if (availability?.earliestStartAt) {
       startAtDate = new Date(availability.earliestStartAt);
-    } else {
-      startAtDate = new Date(now.getTime() + 60 * 60_000); // 60-minute lead time
-      const remainderMin = startAtDate.getMinutes() % 15;
+      startAtDate.setSeconds(0, 0);
+      const remainderMin = startAtDate.getMinutes() % 30;
       if (remainderMin !== 0) {
-        startAtDate.setMinutes(startAtDate.getMinutes() + (15 - remainderMin), 0, 0);
-      } else {
-        startAtDate.setSeconds(0, 0);
+        startAtDate.setMinutes(startAtDate.getMinutes() + (30 - remainderMin));
+      }
+    } else {
+      startAtDate = new Date(now.getTime() + 60 * 60_000); // 60-minute minimum advance
+      startAtDate.setSeconds(0, 0);
+      const remainderMin = startAtDate.getMinutes() % 30;
+      if (remainderMin !== 0) {
+        startAtDate.setMinutes(startAtDate.getMinutes() + (30 - remainderMin));
       }
     }
 
     const durationMin = 60; // Standard 1-hour session
 
-    // 4. Check for busy range conflicts and advance to next available slot
+    // 4. Check for busy range conflicts and advance by 30-min grid to next available slot
     if (availability?.busyRanges && availability.busyRanges.length > 0) {
       for (let attempt = 0; attempt < 8; attempt++) {
         const slotEnd = new Date(startAtDate.getTime() + durationMin * 60_000);
@@ -78,7 +85,7 @@ export async function executeQuickBook(
           slotEnd.toISOString(),
         );
         if (!busy) break;
-        startAtDate = new Date(startAtDate.getTime() + 15 * 60_000);
+        startAtDate = new Date(startAtDate.getTime() + 30 * 60_000);
       }
     }
 

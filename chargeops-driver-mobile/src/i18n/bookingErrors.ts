@@ -29,6 +29,7 @@ export const BOOKING_ERROR_CODES = [
   'BKG_QR_INVALID',
   'BKG_CONNECTOR_MISMATCH',
   'BKG_STATION_UNAVAILABLE',
+  'BKG_NOT_ACCESS',
 ] as const;
 
 /**

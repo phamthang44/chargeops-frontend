@@ -607,13 +607,47 @@ export async function getBookingById(id: string, accessToken?: string | null): P
         if (data && (data.bookingId || (data as any).id)) {
           return mapDetailItemToBooking(data);
         }
+      } else {
+        const errJson = await res.json().catch(() => null);
+        const code =
+          errJson?.error?.code ??
+          errJson?.code ??
+          (res.status === 403
+            ? 'BKG_NOT_ACCESS'
+            : res.status === 404
+            ? 'RESOURCE_NOT_FOUND'
+            : 'NETWORK_ERROR');
+        const message =
+          errJson?.error?.message ??
+          errJson?.message ??
+          (res.status === 403
+            ? 'Bạn không có quyền truy cập lượt đặt chỗ này'
+            : 'Không tìm thấy lượt đặt chỗ');
+        const messageKey =
+          errJson?.error?.messageKey ??
+          (res.status === 403 ? 'error.booking.notAccess' : undefined);
+        throw new BookingApiError(code, message, errJson?.error?.details, messageKey);
       }
     } catch (err) {
+      if (err instanceof BookingApiError) {
+        throw err;
+      }
       console.warn('Network error fetching booking detail, falling back to local store:', err);
     }
   }
 
   reconcileLapsed();
+  if (isMockMode()) {
+    if (id === 'forbidden' || id.toLowerCase().includes('not_access') || id.toLowerCase().includes('other_driver')) {
+      throw new BookingApiError(
+        'BKG_NOT_ACCESS',
+        'Bạn không có quyền truy cập lượt đặt chỗ này',
+        null,
+        'error.booking.notAccess',
+      );
+    }
+  }
+
   const booking = store.find((b) => b.id === id) ?? null;
   return simulateNetwork(booking ? normalizeBookingWithCapabilities(booking) : null);
 }

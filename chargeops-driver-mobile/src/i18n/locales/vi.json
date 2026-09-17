@@ -720,7 +720,9 @@
       "MINIMUM_ADVANCE_NOT_MET": "Phải đặt trước tối thiểu 60 phút so với thời điểm hiện tại.",
       "OUTSIDE_OPERATING_HOURS": "Khung giờ nằm ngoài thời gian hoạt động của trạm.",
       "SYS_003": "Dữ liệu đặt chỗ không hợp lệ ({{fields}}). Vui lòng chọn lại.",
-      "PRICE_PREVIEW_FAILED": "Không thể lấy báo giá cho khung giờ này. Vui lòng thử lại."
+      "PRICE_PREVIEW_FAILED": "Không thể lấy báo giá cho khung giờ này. Vui lòng thử lại.",
+      "BKG_NOT_ACCESS": "Bạn không có quyền truy cập lượt đặt chỗ của tài xế khác.",
+      "error.booking.notAccess": "Bạn không có quyền truy cập lượt đặt chỗ này."
     }
   },
   "bookingConfirmation": {
@@ -885,6 +887,17 @@
     "payNow": "Thanh toán ngay",
     "cancel": "Hủy đặt chỗ",
     "notFound": "Không tìm thấy lượt đặt chỗ.",
+    "notAccessTitle": "Không có quyền truy cập",
+    "notAccessSubtitle": "Lượt đặt chỗ này thuộc về tài xế khác hoặc tài khoản của bạn không được phép xem thông tin chi tiết. Vui lòng kiểm tra lại hoặc quay lại danh sách của bạn.",
+    "notAccessBadge": "TRUY CẬP BỊ TỪ CHỐI",
+    "queryBookingId": "ID truy vấn: {{id}}",
+    "backToMyBookings": "Danh sách đặt chỗ của tôi",
+    "backToHome": "Về trang chủ",
+    "notFoundTitle": "Không tìm thấy đơn đặt chỗ",
+    "notFoundDesc": "Đơn đặt chỗ này không tồn tại trên hệ thống hoặc đã bị xóa.",
+    "networkErrorTitle": "Lỗi kết nối mạng",
+    "networkErrorDesc": "Không thể tải dữ liệu đặt chỗ. Vui lòng kiểm tra lại kết nối mạng.",
+    "retry": "Thử lại",
     "completedNote": "Lượt đặt chỗ đã kết thúc.",
     "checkedInNote": "Bạn đã check-in lúc {{time}}.",
     "refundedNote": "Đã hủy. Hoàn {{amount}} về Ví ChargeOps.",

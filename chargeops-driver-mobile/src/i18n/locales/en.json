@@ -720,7 +720,9 @@
       "MINIMUM_ADVANCE_NOT_MET": "Must book at least 60 minutes in advance.",
       "OUTSIDE_OPERATING_HOURS": "Time slot is outside station operating hours.",
       "SYS_003": "Invalid booking parameters ({{fields}}). Please try again.",
-      "PRICE_PREVIEW_FAILED": "Unable to fetch price preview for this time slot. Please try again."
+      "PRICE_PREVIEW_FAILED": "Unable to fetch price preview for this time slot. Please try again.",
+      "BKG_NOT_ACCESS": "You do not have access to another driver's booking.",
+      "error.booking.notAccess": "You do not have access to this booking."
     }
   },
   "bookingConfirmation": {
@@ -880,6 +882,17 @@
     "payNow": "Pay Now",
     "cancel": "Cancel booking",
     "notFound": "Booking not found.",
+    "notAccessTitle": "Access Denied",
+    "notAccessSubtitle": "This booking belongs to another driver or your account does not have permission to view it. Please check your account or return to your bookings.",
+    "notAccessBadge": "ACCESS DENIED",
+    "queryBookingId": "Queried ID: {{id}}",
+    "backToMyBookings": "My Bookings",
+    "backToHome": "Go to Home",
+    "notFoundTitle": "Booking Not Found",
+    "notFoundDesc": "This booking does not exist on the platform or has been removed.",
+    "networkErrorTitle": "Network Connection Error",
+    "networkErrorDesc": "Unable to connect to the server. Please check your internet connection.",
+    "retry": "Retry",
     "completedNote": "This booking has ended.",
     "checkedInNote": "You checked in at {{time}}.",
     "refundedNote": "Cancelled. {{amount}} refunded to your ChargeOps Wallet.",

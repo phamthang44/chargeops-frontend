@@ -151,34 +151,51 @@ export interface RefundBreakdown {
  * always yields the same breakdown.
  */
 export function computeRefund(booking: Booking, now: number = Date.now()): RefundBreakdown {
-  const minutesBefore = Math.floor((new Date(booking.startAt).getTime() - now) / 60_000);
-  const graceEndsAt = new Date(booking.createdAt).getTime() + GRACE_PERIOD_MIN * 60_000;
-  const graceRemainingMs = Math.max(0, graceEndsAt - now);
+  const freeDeadlineMs = booking.freeCancellationDeadline
+    ? new Date(booking.freeCancellationDeadline).getTime()
+    : booking.createdAt
+    ? new Date(booking.createdAt).getTime() + GRACE_PERIOD_MIN * 60_000
+    : 0;
+
+  const graceRemainingMs = Math.max(0, freeDeadlineMs - now);
+
+  const serverReason = booking.actions?.cancellationReason;
+  const serverRefundAmount = booking.actions?.refundableAmount;
+
+  // Under Platform Policy v4.9 / BR-PAY-02, BR-PAY-03:
+  // 100% refund is ONLY applicable during the 10-minute grace period from payment confirmation.
+  // After grace period, cancellation has 0% refund (NONE).
+  const isGrace =
+    serverReason !== undefined
+      ? serverReason === 'WITHIN_GRACE'
+      : (freeDeadlineMs > 0 && graceRemainingMs > 0);
 
   let percent: number;
   let tier: RefundTier;
-  if (graceRemainingMs > 0) {
+
+  if (isGrace) {
     percent = 100;
     tier = 'GRACE';
-  } else if (minutesBefore >= 60) {
-    percent = 100;
-    tier = 'FULL';
-  } else if (minutesBefore >= 15) {
-    percent = 50;
-    tier = 'PARTIAL';
   } else {
     percent = 0;
     tier = 'NONE';
   }
 
-  const refundAmount = Math.round((booking.totalPrice * percent) / 100);
+  const refundAmount =
+    serverRefundAmount !== undefined && serverRefundAmount !== null
+      ? serverRefundAmount
+      : Math.round((booking.totalPrice * percent) / 100);
+
+  const feeAmount = Math.max(0, booking.totalPrice - refundAmount);
+  const minutesBefore = Math.floor((new Date(booking.startAt).getTime() - now) / 60_000);
+
   return {
     tier,
     percent,
     refundAmount,
-    feeAmount: booking.totalPrice - refundAmount,
+    feeAmount,
     minutesBefore,
-    graceRemainingMs,
+    graceRemainingMs: isGrace ? Math.min(graceRemainingMs, GRACE_PERIOD_MIN * 60_000) : 0,
   };
 }
 
@@ -326,7 +343,14 @@ export function mapListItemToBooking(item: DriverBookingListItem): Booking {
     status: item.status,
     cancelReason: item.cancellationReason,
     checkedInAt: item.checkedInAt,
-    createdAt: item.startAt,
+    createdAt:
+      item.createdAt ??
+      (item.paymentHoldExpiresAt
+        ? new Date(new Date(item.paymentHoldExpiresAt).getTime() - 10 * 60_000).toISOString()
+        : item.paymentConfirmedAt ??
+          (item.freeCancellationDeadline
+            ? new Date(new Date(item.freeCancellationDeadline).getTime() - 10 * 60_000).toISOString()
+            : new Date().toISOString())),
     expiresAt: item.paymentHoldExpiresAt ?? null,
     paymentHoldExpiresAt: item.paymentHoldExpiresAt,
     freeCancellationDeadline: item.freeCancellationDeadline,

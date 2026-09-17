@@ -77,9 +77,9 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
           </Text>
         </View>
         <Text style={[styles.policyBody, { color: themeColors.textBody }]}>{t(`cancelBooking.${TIER_KEY[refund.tier]}`)}</Text>
-        {refund.tier === 'GRACE' && (
+        {refund.tier === 'GRACE' && refund.graceRemainingMs > 0 && (
           <Text style={[styles.policyTimer, { color: themeColors.primaryDark }]}>
-            {t('cancelBooking.graceLeft', { time: formatMmSs(refund.graceRemainingMs) })}
+            {t('cancelBooking.graceLeft', { time: formatCountdown(refund.graceRemainingMs) })}
           </Text>
         )}
       </View>

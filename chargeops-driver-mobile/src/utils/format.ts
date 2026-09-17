@@ -77,13 +77,15 @@ export function formatMmSs(ms: number): string {
 }
 
 /**
- * Format a second duration as a countdown string, e.g. 3661 -> "01:01:01".
+ * Format a duration in milliseconds as a countdown string:
+ * - "hh:mm:ss" if 1 hour or more (e.g. 3661000 -> "01:01:01")
+ * - "mm:ss" if under 1 hour (e.g. 56000 -> "00:56")
  */
-export function formatCountdown(secOrMs: number): string {
-  const s = secOrMs > 100000 ? Math.floor(secOrMs / 1000) : secOrMs;
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
+export function formatCountdown(ms: number): string {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const sec = totalSec % 60;
   if (h > 0) {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   }

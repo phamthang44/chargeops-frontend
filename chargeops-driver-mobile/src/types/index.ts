@@ -309,6 +309,8 @@ export interface DriverBookingListItem {
   checkInDeadline?: string;
   checkedInAt?: string;
   chargingStartedAt?: string;
+  createdAt?: string;
+  paymentConfirmedAt?: string;
   actions: BookingActions;
 }
 

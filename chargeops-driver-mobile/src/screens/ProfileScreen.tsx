@@ -25,8 +25,8 @@ import {
   Card,
   GlassButton,
   HeaderActionBtn,
+  PaymentMethodsModal,
   SettingsModal,
-  TopUpModal,
   useTabBarInset,
 } from '@/components';
 import { EditProfileModal } from '@/components/EditProfileModal';
@@ -44,18 +44,22 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const { session, profile, signOut } = useAuth();
-  const { themeColors, isDark } = usePreferences();
+  const {
+    themeColors,
+    isDark,
+    preferredPaymentMethod,
+    savedPaymentMethods,
+  } = usePreferences();
   // Clears the absolutely-positioned floating tab bar.
   const tabInset = useTabBarInset();
   const navigation = useNavigation<NavigationProp>();
 
-  const [walletBalance, setWalletBalance] = useState(2450000);
+  const [paymentMethodsVisible, setPaymentMethodsVisible] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
   const [avatarViewerVisible, setAvatarViewerVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [settingsSection, setSettingsSection] = useState<'all' | 'language' | 'appearance'>('all');
-  const [topUpVisible, setTopUpVisible] = useState(false);
   const [supportVisible, setSupportVisible] = useState(false);
   const [ownerModalVisible, setOwnerModalVisible] = useState(false);
   const [openingOwnerPortal, setOpeningOwnerPortal] = useState(false);
@@ -68,9 +72,6 @@ export function ProfileScreen() {
   const userPhone = profile?.phone ?? session?.user.phone ?? '';
   const hasOwnerAccess = session?.grantedRoles.includes('OWNER') ?? false;
 
-  function handleTopUpSuccess(amount: number) {
-    setWalletBalance((prev) => prev + amount);
-  }
 
   function handleOpenHistory() {
     navigation.navigate('Tabs', { screen: 'BookingHistory' });
@@ -402,55 +403,43 @@ export function ProfileScreen() {
           </Pressable>
         </View>
 
-        {/* 3. Section: Payment & Wallet ("Thanh toán & Ví") */}
+        {/* 3. Section: Payment & Payment Methods ("Thanh toán") */}
         <Card style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="wallet-outline" size={20} color={themeColors.primary} />
+            <Ionicons name="card-outline" size={20} color={themeColors.primary} />
             <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
-              {t('profile.wallet.sectionTitle')}
+              {t('profile.wallet.sectionTitle', 'Thanh toán')}
             </Text>
           </View>
 
-          {/* Wallet Balance Display & Top-up CTA */}
-          <View style={styles.balanceContainer}>
-            <View style={styles.balanceLeft}>
-              <Text style={[styles.balanceLabel, { color: themeColors.textMuted }]}>
-                {t('profile.wallet.currentBalance')}
-              </Text>
-              <Text style={[styles.balanceAmount, { color: themeColors.primaryDark }]}>
-                {walletBalance.toLocaleString('vi-VN')}đ
-              </Text>
-            </View>
-
-            <Pressable
-              style={[
-                styles.topUpBtn,
-                { borderColor: themeColors.primary, backgroundColor: themeColors.surface },
-              ]}
-              onPress={() => setTopUpVisible(true)}
-            >
-              <Text style={[styles.topUpBtnText, { color: themeColors.primary }]}>
-                {t('profile.wallet.topUp')}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
-
-          {/* List Item: Payment Methods */}
+          {/* List Item: Payment Methods Management */}
           <Pressable
             style={styles.menuRow}
-            onPress={() => Alert.alert(t('profile.wallet.paymentMethods'), 'Visa, Mastercard, MoMo, ZaloPay')}
+            onPress={() => setPaymentMethodsVisible(true)}
           >
             <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E293B' : '#EFF6FF' }]}>
-              <Ionicons name="card-outline" size={20} color={themeColors.info} />
+              <Ionicons name="wallet-outline" size={20} color={themeColors.primary} />
             </View>
             <View style={styles.menuTextContent}>
-              <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
-                {t('profile.wallet.paymentMethods')}
-              </Text>
-              <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
-                {t('profile.wallet.paymentMethodsSub')}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+                  {t('profile.wallet.paymentMethods', 'Phương thức thanh toán')}
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: themeColors.primarySoft,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text style={{ fontSize: 10, color: themeColors.primaryDark, fontWeight: '700' }}>
+                    {savedPaymentMethods.length}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.menuSub, { color: themeColors.textMuted }]} numberOfLines={1}>
+                {t('profile.wallet.defaultPrefix', 'Ưu tiên')}: {savedPaymentMethods.find((m) => m.type === preferredPaymentMethod || m.isDefault)?.title ?? 'Thanh toán mô phỏng (Demo Sandbox)'}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
@@ -627,11 +616,10 @@ export function ProfileScreen() {
         onClose={() => setSupportVisible(false)}
       />
 
-      {/* Wallet Balance Top-up Sheet */}
-      <TopUpModal
-        visible={topUpVisible}
-        onClose={() => setTopUpVisible(false)}
-        onSuccess={handleTopUpSuccess}
+      {/* Payment Methods Management Modal */}
+      <PaymentMethodsModal
+        visible={paymentMethodsVisible}
+        onClose={() => setPaymentMethodsVisible(false)}
       />
 
       {/* Station Owner Info Modal with Notification-style Blur Backdrop */}

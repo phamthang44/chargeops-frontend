@@ -30,6 +30,7 @@ export type { BadgeVariant } from './StatusBadge';
 export { TextField } from './TextField';
 export type { TextFieldProps } from './TextField';
 export { TopUpModal } from './TopUpModal';
+export { PaymentMethodsModal } from './PaymentMethodsModal';
 export { NotificationSheet } from './NotificationSheet';
 export {
   PowerBadge,

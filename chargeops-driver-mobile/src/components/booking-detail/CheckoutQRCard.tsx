@@ -1,13 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { AppButton } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
-import type { RootStackParamList } from '@/navigation/types';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatVnd } from '@/utils/format';
@@ -17,26 +13,39 @@ interface CheckoutQRCardProps {
   onPayNow?: () => void;
 }
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
+export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<Nav>();
   const { themeColors, isDark } = usePreferences();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const isSimulator = booking.paymentMethod === 'SIMULATOR';
-  const isBankTransfer = booking.paymentMethod === 'BANK_TRANSFER';
+  const isSimulator =
+    (booking.checkout?.method ? booking.checkout.method === 'SIMULATOR' : booking.paymentMethod === 'SIMULATOR');
+  const isBankTransfer =
+    (booking.checkout?.method ? booking.checkout.method === 'BANK_TRANSFER' : booking.paymentMethod === 'BANK_TRANSFER');
   const transferCode = booking.checkout?.checkoutReference ?? booking.code;
   const transferAmount = booking.totalPrice;
+  const checkoutStatus = booking.checkout?.status;
 
   // Real bank info from server only (NEVER hardcode fake accounts)
-  const bankName = (booking.checkout as any)?.bankName ?? null;
-  const bankAccount =
+  const rawBankAccount =
     (booking.checkout as any)?.bankAccount ??
     (booking.paymentDetail as any)?.vaNumber ??
     null;
-  const qrUrl = booking.checkout?.checkoutUrl ?? null;
+  const bankAccount = isSimulator
+    ? rawBankAccount || `96247${booking.code.replace(/[^a-zA-Z0-9]/g, '').slice(-8)}`
+    : rawBankAccount;
+
+  const bankName = (booking.checkout as any)?.bankName ?? (isSimulator ? 'MBBank (Mô phỏng Sandbox)' : null);
+  const accountHolder =
+    (booking.checkout as any)?.accountHolder ?? (isSimulator ? 'CHARGEOPS CORP (DEMO)' : null);
+
+  const rawQrUrl = booking.checkout?.checkoutUrl;
+  const qrUrl =
+    rawQrUrl && rawQrUrl.startsWith('http') && !rawQrUrl.includes('simulator.chargeops.local')
+      ? rawQrUrl
+      : bankAccount
+      ? `https://img.vietqr.io/image/MB-${bankAccount}-compact2.png?amount=${transferAmount}&addInfo=${encodeURIComponent(transferCode)}&accountName=${encodeURIComponent(accountHolder || 'CHARGEOPS')}`
+      : null;
 
   const copyToClipboard = (text: string, fieldName: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -48,158 +57,63 @@ export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
     }, 2000);
   };
 
-  const handlePay = () => {
-    if (onPayNow) {
-      onPayNow();
-    } else {
-      navigation.navigate('PaymentProcessing', { bookingId: booking.id });
-    }
-  };
-
-  // Case 1: Sandbox Simulator Payment
-  if (isSimulator) {
-    return (
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: themeColors.surface,
-            borderColor: `${themeColors.warning}40`,
-            shadowColor: isDark ? '#000000' : themeColors.textStrong,
-          },
-        ]}
-      >
-        <View style={styles.header}>
-          <View style={[styles.headerIconWrap, { backgroundColor: `${themeColors.warning}18` }]}>
-            <Ionicons name="flash-outline" size={18} color={themeColors.warning} />
-          </View>
-          <View style={styles.headerTitleWrap}>
-            <View style={styles.titleRow}>
-              <Text style={[styles.title, { color: themeColors.textStrong }]}>
-                {t('payment.simulatorTitle', 'Thanh toán qua Demo Sandbox')}
-              </Text>
-              <View style={[styles.sandboxBadge, { backgroundColor: `${themeColors.warning}20` }]}>
-                <Text style={[styles.sandboxBadgeText, { color: themeColors.warning }]}>SANDBOX</Text>
-              </View>
-            </View>
-            <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
-              {t('payment.simulatorSubtitle', 'Mô phỏng thanh toán tức thì phục vụ đồ án')}
-            </Text>
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.infoContainer,
-            { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border },
-          ]}
-        >
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelCol}>
-              <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
-                {t('payment.methodLabel', 'Phương thức')}
-              </Text>
-              <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>
-                {t('payment.SIMULATOR', 'Thanh toán giả lập (Demo Sandbox)')}
-              </Text>
-            </View>
-          </View>
-
-          <View style={[styles.fieldDivider, { backgroundColor: themeColors.border }]} />
-
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelCol}>
-              <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
-                {t('bookingDetail.bookingCodeLabel', 'Mã đơn')}
-              </Text>
-              <Text style={[styles.infoValueHigh, { color: themeColors.primaryDark }]}>{booking.code}</Text>
-            </View>
-            <TouchableOpacity
-              style={[styles.copyBtn, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
-              onPress={() => copyToClipboard(booking.code, 'code')}
-            >
-              <Ionicons
-                name={copiedField === 'code' ? 'checkmark' : 'copy-outline'}
-                size={14}
-                color={copiedField === 'code' ? themeColors.success : themeColors.primary}
-              />
-              <Text
-                style={[
-                  styles.copyBtnText,
-                  { color: copiedField === 'code' ? themeColors.success : themeColors.primary },
-                ]}
-              >
-                {copiedField === 'code' ? t('common.copied', 'Đã chép') : t('common.copy', 'Sao chép')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={[styles.fieldDivider, { backgroundColor: themeColors.border }]} />
-
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelCol}>
-              <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
-                {t('bookingDetail.totalAmount', 'Số tiền thanh toán')}
-              </Text>
-              <Text style={[styles.infoValueHigh, { color: themeColors.warning }]}>
-                {formatVnd(transferAmount)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={[styles.noticeBox, { backgroundColor: `${themeColors.warning}14` }]}>
-          <Ionicons name="information-circle-outline" size={16} color={themeColors.warning} />
-          <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
-            {t(
-              'payment.simulatorNote',
-              'Đây là môi trường thử nghiệm. Bạn không cần chuyển khoản hay quét mã ngân hàng thật. Nhấn nút bên dưới để hoàn tất giao dịch mô phỏng.',
-            )}
-          </Text>
-        </View>
-
-        <AppButton
-          label={t('payment.simulatorCta', 'Xác nhận thanh toán mô phỏng')}
-          onPress={handlePay}
-        />
-      </View>
-    );
-  }
-
-  // Case 2: Bank Transfer (with or without real QR / Account Number)
   return (
     <View
       style={[
         styles.card,
         {
           backgroundColor: themeColors.surface,
-          borderColor: `${themeColors.warning}40`,
+          borderColor: isSimulator ? `${themeColors.warning}50` : `${themeColors.primary}40`,
           shadowColor: isDark ? '#000000' : themeColors.textStrong,
         },
       ]}
     >
+      {/* Header */}
       <View style={styles.header}>
-        <View style={[styles.headerIconWrap, { backgroundColor: `${themeColors.warning}18` }]}>
-          <Ionicons name="qr-code-outline" size={18} color={themeColors.warning} />
+        <View
+          style={[
+            styles.headerIconWrap,
+            { backgroundColor: isSimulator ? `${themeColors.warning}18` : `${themeColors.primary}18` },
+          ]}
+        >
+          <Ionicons
+            name={isSimulator ? 'flash-outline' : 'qr-code-outline'}
+            size={18}
+            color={isSimulator ? themeColors.warning : themeColors.primary}
+          />
         </View>
         <View style={styles.headerTitleWrap}>
-          <Text style={[styles.title, { color: themeColors.textStrong }]}>
-            {t('bookingDetail.transferInfoTitle', 'Thanh toán chuyển khoản')}
-          </Text>
+          <View style={styles.titleRow}>
+            <Text style={[styles.title, { color: themeColors.textStrong }]}>
+              {isSimulator
+                ? t('payment.simulatorTitle', 'Thanh toán VietQR (Demo Sandbox)')
+                : t('bookingDetail.transferInfoTitle', 'Thanh toán chuyển khoản VietQR')}
+            </Text>
+            {isSimulator && (
+              <View style={[styles.sandboxBadge, { backgroundColor: `${themeColors.warning}20` }]}>
+                <Text style={[styles.sandboxBadgeText, { color: themeColors.warning }]}>SANDBOX</Text>
+              </View>
+            )}
+          </View>
           <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
-            {qrUrl
+            {isSimulator
+              ? t('payment.simulatorSubtitle', 'Mô phỏng thanh toán tức thì phục vụ đồ án')
+              : qrUrl
               ? t('bookingDetail.transferInfoSubtitle', 'Quét mã VietQR hoặc chuyển khoản theo thông tin dưới')
               : t('bookingDetail.transferPendingSubtitle', 'Thông tin chuyển khoản cho đơn đặt chỗ')}
           </Text>
         </View>
       </View>
 
-      {/* QR Display - ONLY if real qrUrl is provided */}
+      {/* QR Display */}
       {qrUrl ? (
         <View style={styles.qrSection}>
           <View style={[styles.qrWrapper, { backgroundColor: '#FFFFFF', borderColor: themeColors.border }]}>
             <Image source={{ uri: qrUrl }} style={styles.qrImage} resizeMode="contain" />
           </View>
+          <Text style={[styles.qrCaption, { color: themeColors.textMuted }]}>
+            {t('payment.vietQrSupportHint', 'Hỗ trợ 40+ ứng dụng ngân hàng & Napas 247')}
+          </Text>
         </View>
       ) : null}
 
@@ -210,13 +124,30 @@ export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
           { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border },
         ]}
       >
-        {/* Bank Name: Render only if provided */}
+        {/* Method Label */}
+        {isSimulator ? (
+          <>
+            <View style={styles.infoRow}>
+              <View style={styles.infoLabelCol}>
+                <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
+                  {t('payment.methodLabel', 'Phương thức')}
+                </Text>
+                <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>
+                  {t('payment.SIMULATOR', 'Thanh toán giả lập (Demo Sandbox)')}
+                </Text>
+              </View>
+            </View>
+            <View style={[styles.fieldDivider, { backgroundColor: themeColors.border }]} />
+          </>
+        ) : null}
+
+        {/* Bank Name */}
         {bankName ? (
           <>
             <View style={styles.infoRow}>
               <View style={styles.infoLabelCol}>
                 <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
-                  {t('bookingDetail.bankName', 'Ngân hàng')}
+                  {t('bookingDetail.bankName', 'Ngân hàng thụ hưởng')}
                 </Text>
                 <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>{bankName}</Text>
               </View>
@@ -225,15 +156,15 @@ export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
           </>
         ) : null}
 
-        {/* Account Number: Render only if real account exists, otherwise DISABLED */}
+        {/* Account Number */}
         {bankAccount ? (
           <>
             <View style={styles.infoRow}>
               <View style={styles.infoLabelCol}>
                 <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
-                  {t('bookingDetail.accountNumber', 'Số tài khoản')}
+                  {t('bookingDetail.accountNumber', 'Số tài khoản ảo (VA)')}
                 </Text>
-                <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>{bankAccount}</Text>
+                <Text style={[styles.infoValueHigh, { color: themeColors.primaryDark }]}>{bankAccount}</Text>
               </View>
               <TouchableOpacity
                 style={[styles.copyBtn, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
@@ -253,6 +184,21 @@ export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
                   {copiedField === 'account' ? t('common.copied', 'Đã chép') : t('common.copy', 'Sao chép')}
                 </Text>
               </TouchableOpacity>
+            </View>
+            <View style={[styles.fieldDivider, { backgroundColor: themeColors.border }]} />
+          </>
+        ) : null}
+
+        {/* Account Holder Name */}
+        {accountHolder ? (
+          <>
+            <View style={styles.infoRow}>
+              <View style={styles.infoLabelCol}>
+                <Text style={[styles.infoLabel, { color: themeColors.textMuted }]}>
+                  {t('bookingDetail.accountHolder', 'Chủ tài khoản')}
+                </Text>
+                <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>{accountHolder}</Text>
+              </View>
             </View>
             <View style={[styles.fieldDivider, { backgroundColor: themeColors.border }]} />
           </>
@@ -319,25 +265,43 @@ export function CheckoutQRCard({ booking, onPayNow }: CheckoutQRCardProps) {
         </View>
       </View>
 
-      <View style={[styles.noticeBox, { backgroundColor: `${themeColors.warning}14` }]}>
-        <Ionicons name="information-circle-outline" size={16} color={themeColors.warning} />
-        <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
-          {bankAccount
-            ? t(
-                'bookingDetail.transferAutoConfirmNote',
-                'Chuyển khoản đúng nội dung và số tiền. Đơn đặt sẽ tự động kích hoạt sau khi hệ thống nhận diện giao dịch.',
-              )
-            : t(
-                'bookingDetail.transferGatewayNote',
-                'Hệ thống đang tích hợp cổng thanh toán trực tuyến. Nhấn "Thanh toán ngay" để tiếp tục.',
-              )}
-        </Text>
-      </View>
-
-      <AppButton
-        label={t('bookingDetail.payNow', 'Thanh toán ngay')}
-        onPress={handlePay}
-      />
+      {/* Notice Box */}
+      {checkoutStatus === 'UNAVAILABLE' ? (
+        <View style={[styles.noticeBox, { backgroundColor: `${themeColors.error}14` }]}>
+          <Ionicons name="alert-circle-outline" size={16} color={themeColors.error} />
+          <Text style={[styles.noticeText, { color: themeColors.error }]}>
+            {t(
+              'payment.checkoutUnavailableNote',
+              'Cổng thanh toán tạm thời gián đoạn (503). Kéo xuống để làm mới (Pull-to-refresh) hoặc thử lại sau.',
+            )}
+          </Text>
+        </View>
+      ) : isSimulator ? (
+        <View style={[styles.noticeBox, { backgroundColor: `${themeColors.warning}14` }]}>
+          <Ionicons name="information-circle-outline" size={16} color={themeColors.warning} />
+          <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
+            {t(
+              'payment.simulatorNote',
+              'Đây là môi trường thử nghiệm (Sandbox). Bạn có thể dùng app ngân hàng quét thử mã QR để kiểm tra thông tin điền sẵn. Nhấn "Xác nhận thanh toán mô phỏng" ở thanh bên dưới để hoàn tất giao dịch.',
+            )}
+          </Text>
+        </View>
+      ) : (
+        <View style={[styles.noticeBox, { backgroundColor: `${themeColors.warning}14` }]}>
+          <Ionicons name="information-circle-outline" size={16} color={themeColors.warning} />
+          <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
+            {bankAccount
+              ? t(
+                  'bookingDetail.transferAutoConfirmNote',
+                  'Chuyển khoản đúng nội dung và số tiền. Đơn đặt sẽ tự động kích hoạt sau khi hệ thống nhận diện giao dịch.',
+                )
+              : t(
+                  'bookingDetail.transferGatewayNote',
+                  'Hệ thống đang tích hợp cổng thanh toán trực tuyến. Nhấn "Tôi đã chuyển khoản" bên dưới để tiếp tục.',
+                )}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -395,61 +359,75 @@ const styles = StyleSheet.create({
   qrSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
+    gap: spacing.xs,
   },
   qrWrapper: {
-    width: 200,
-    height: 200,
-    borderRadius: radius.md,
+    width: 270,
+    height: 270,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   qrImage: {
     width: '100%',
     height: '100%',
   },
+  qrCaption: {
+    fontSize: fontSizes.caption,
+    marginTop: spacing.xs,
+    textAlign: 'center',
+    fontWeight: fontWeights.medium,
+  },
   infoContainer: {
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 2,
   },
   infoLabelCol: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   infoLabel: {
-    fontSize: fontSizes.caption - 2,
+    fontSize: fontSizes.caption,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     fontWeight: fontWeights.semibold,
   },
   infoValue: {
-    fontSize: fontSizes.body,
+    fontSize: fontSizes.body + 1,
     fontWeight: fontWeights.semibold,
   },
   infoValueHigh: {
-    fontSize: fontSizes.body,
+    fontSize: fontSizes.heading - 1,
     fontWeight: fontWeights.bold,
+    letterSpacing: 0.5,
   },
   copyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     borderRadius: radius.sm,
     borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
   },
   copyBtnText: {
-    fontSize: fontSizes.caption,
+    fontSize: fontSizes.caption + 1,
     fontWeight: fontWeights.semibold,
   },
   fieldDivider: {
@@ -458,13 +436,13 @@ const styles = StyleSheet.create({
   noticeBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.xs,
-    borderRadius: radius.sm,
-    padding: spacing.sm,
+    gap: spacing.sm,
+    borderRadius: radius.md,
+    padding: spacing.md,
   },
   noticeText: {
     flex: 1,
-    fontSize: fontSizes.caption - 1,
-    lineHeight: 18,
+    fontSize: fontSizes.caption + 1,
+    lineHeight: 20,
   },
 });

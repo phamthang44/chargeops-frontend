@@ -13,6 +13,7 @@ import { bookingErrorMessage, extractBookingErrorCode } from '@/i18n/bookingErro
 import type { RootStackParamList } from '@/navigation/types';
 import {
   createBooking,
+  createCheckout,
   findOverlappingBookings,
   generateIdempotencyKey,
   getLatestPendingBooking,
@@ -32,7 +33,12 @@ import {
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking, ChargePoint, Connector, PaymentMethod, Station } from '@/types';
 import { formatDate, formatEquipmentName, formatTime, formatTimeRange, formatVnd, splitDuration } from '@/utils/format';
-import { ONLY_SIMULATOR_PAYMENT, PAYMENT_META, SELECTABLE_PAYMENT_METHODS } from '@/utils/payments';
+import {
+  ONLY_SIMULATOR_PAYMENT,
+  PAYMENT_FEATURE_FLAGS,
+  PAYMENT_META,
+  SELECTABLE_PAYMENT_METHODS,
+} from '@/utils/payments';
 import { quoteBooking, type Quote } from '@/utils/pricing';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingConfirmation'>;
@@ -47,7 +53,7 @@ export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Route>();
   const { t, i18n } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors, isDark, preferredPaymentMethod, setPreferredPaymentMethod } = usePreferences();
   const { getAccessToken } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -55,7 +61,22 @@ export function BookingConfirmationScreen() {
   const [connector, setConnector] = useState<Connector | null>(null);
   const [chargePoint, setChargePoint] = useState<ChargePoint | null>(null);
   const [loading, setLoading] = useState(true);
-  const [method, setMethod] = useState<PaymentMethod>('SIMULATOR');
+  const [method, setMethod] = useState<PaymentMethod>(() => {
+    if (preferredPaymentMethod === 'BANK_TRANSFER' && !PAYMENT_FEATURE_FLAGS.ENABLE_SEPAY_PAYMENT) {
+      return 'SIMULATOR';
+    }
+    return preferredPaymentMethod || 'SIMULATOR';
+  });
+
+  useEffect(() => {
+    if (preferredPaymentMethod) {
+      if (preferredPaymentMethod === 'BANK_TRANSFER' && !PAYMENT_FEATURE_FLAGS.ENABLE_SEPAY_PAYMENT) {
+        setMethod('SIMULATOR');
+      } else {
+        setMethod(preferredPaymentMethod);
+      }
+    }
+  }, [preferredPaymentMethod]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -274,7 +295,18 @@ export function BookingConfirmationScreen() {
           priceLines: quote?.priceLines ?? [],
         },
       );
-      navigation.replace('PaymentProcessing', { bookingId: booking.id });
+
+      try {
+        const checkout = await createCheckout(booking.id, {
+          accessToken: token,
+          requestKey: generateIdempotencyKey(),
+        });
+        booking.checkout = checkout;
+      } catch (checkoutErr) {
+        console.warn('createCheckout failed after createBooking:', checkoutErr);
+      }
+
+      navigation.replace('BookingDetail', { bookingId: booking.id });
     } catch (e) {
       if (e instanceof PriceChangedError) {
         setPendingPricePreview(e.latestPricePreview);
@@ -696,10 +728,17 @@ export function BookingConfirmationScreen() {
             <Text style={[styles.cardTitle, { color: themeColors.textStrong }]}>{t('bookingConfirmation.paymentTitle')}</Text>
           </View>
 
-          {SELECTABLE_PAYMENT_METHODS.map((pm) => {
+          {SELECTABLE_PAYMENT_METHODS.filter(
+            (pm) => pm !== 'SIMULATOR' || PAYMENT_FEATURE_FLAGS.ENABLE_SIMULATOR_PAYMENT,
+          ).map((pm) => {
             const meta = PAYMENT_META[pm];
             const isSel = method === pm;
-            const isDisabled = ONLY_SIMULATOR_PAYMENT && pm !== 'SIMULATOR';
+            const isSepayDisabled = pm === 'BANK_TRANSFER' && !PAYMENT_FEATURE_FLAGS.ENABLE_SEPAY_PAYMENT;
+            const isOtherDisabled = pm !== 'SIMULATOR' && pm !== 'BANK_TRANSFER';
+            const isDisabled = isSepayDisabled || isOtherDisabled;
+            const badgeLabel = isSepayDisabled
+              ? t('payment.updateLater', 'Sẽ cập nhật sau')
+              : t('payment.comingSoon', 'Sắp ra mắt');
             return (
               <Pressable
                 key={pm}
@@ -715,6 +754,7 @@ export function BookingConfirmationScreen() {
                 onPress={() => {
                   if (!isDisabled) {
                     setMethod(pm);
+                    setPreferredPaymentMethod(pm);
                   }
                 }}
               >
@@ -734,7 +774,7 @@ export function BookingConfirmationScreen() {
                         }}
                       >
                         <Text style={{ fontSize: 10, color: themeColors.textMuted, fontWeight: '600' }}>
-                          {t('payment.comingSoon')}
+                          {badgeLabel}
                         </Text>
                       </View>
                     )}

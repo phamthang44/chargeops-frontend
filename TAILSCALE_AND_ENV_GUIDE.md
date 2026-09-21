@@ -13,10 +13,10 @@
                ▼  (HTTPS Public Domain qua Tailscale Funnel)
     https://thang.tail704409.ts.net
                │
-       ┌───────┴────────────────────────┬────────────────────────┐
-       ▼ (:443 /)                       ▼ (:443 /api)            ▼ (:8443 /)
-Keycloak Identity Service      Spring Boot Backend API     Owner & Operator Web Portal
-(Local Docker Port 8080)       (Local App Port 8081)       (Local Vite Port 5173)
+       ┌───────┼────────────────────────┬────────────────────────┬────────────────────────┐
+       ▼ (:443 /)                       ▼ (:443 /api)            ▼ (:443 /realms, ...)    ▼ (:8443 /)
+Mobile Driver Web App          Spring Boot Backend API     Keycloak Identity Auth      Owner & Operator Web Portal
+(Local Expo Web Port 8082)     (Local App Port 8081)       (Local Docker Port 8080)    (Local Vite Port 5173)
 ```
 
 ---
@@ -106,16 +106,23 @@ VITE_DRIVER_APP_URL=http://localhost:8082
 
 ## 4. Script 1-Click Kích Hoạt Tailscale Funnel (Mỗi Khi Mở Máy)
 
-Mỗi lần khởi động lại máy tính hoặc khi cần test app trên iPhone, bạn chỉ cần mở PowerShell (quyền Admin hoặc User thường đều được) và chạy 3 lệnh sau:
+Mỗi lần khởi động lại máy tính hoặc khi cần test app trên iPhone, bạn chỉ cần mở PowerShell (hoặc chạy file `start-funnel.bat`) với các lệnh sau:
 
 ```powershell
-# 1. Expose Keycloak (Cổng 8080 -> https://thang.tail704409.ts.net:443/)
-tailscale funnel --bg http://127.0.0.1:8080
+# 1. Expose Mobile Driver Web (Cổng 8082 -> https://thang.tail704409.ts.net:443/)
+tailscale funnel --bg http://localhost:8082
 
 # 2. Expose Spring Boot API (Cổng 8081 -> https://thang.tail704409.ts.net:443/api)
 tailscale funnel --bg --set-path /api http://127.0.0.1:8081/api
 
-# 3. Expose Web Portal (Cổng 5173 -> https://thang.tail704409.ts.net:8443/)
+# 3. Expose Keycloak Auth Realms (Cổng 8080 -> https://thang.tail704409.ts.net:443/realms)
+tailscale funnel --bg --set-path /realms http://127.0.0.1:8080/realms
+
+# 4. Expose Keycloak Resources & JS (Cổng 8080 -> https://thang.tail704409.ts.net:443/resources, /js)
+tailscale funnel --bg --set-path /resources http://127.0.0.1:8080/resources
+tailscale funnel --bg --set-path /js http://127.0.0.1:8080/js
+
+# 5. Expose Web Portal (Cổng 5173 -> https://thang.tail704409.ts.net:8443/)
 tailscale funnel --bg --https=8443 http://localhost:5173
 ```
 
@@ -130,8 +137,11 @@ Kết quả hiển thị chuẩn xác sẽ như sau:
 #     - https://thang.tail704409.ts.net:8443
 
 https://thang.tail704409.ts.net (Funnel on)
-|-- /    proxy http://127.0.0.1:8080
-|-- /api proxy http://127.0.0.1:8081/api
+|-- /          proxy http://localhost:8082
+|-- /js        proxy http://127.0.0.1:8080/js
+|-- /api       proxy http://127.0.0.1:8081/api
+|-- /realms    proxy http://127.0.0.1:8080/realms
+|-- /resources proxy http://127.0.0.1:8080/resources
 
 https://thang.tail704409.ts.net:8443 (Funnel on)
 |-- / proxy http://localhost:5173

@@ -11,6 +11,7 @@ import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { cancelBooking, confirmPayment, getBookingById } from '@/services/bookingService';
 import type { PaymentResultStatus } from '@/services/simulation';
+import { paymentErrorMessage } from '@/i18n';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatVnd } from '@/utils/format';
@@ -33,6 +34,7 @@ export function PaymentProcessingScreen() {
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phase, setPhase] = useState<Phase>('processing');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const FAILURE_META: Record<
     FailPhase,
@@ -56,19 +58,27 @@ export function PaymentProcessingScreen() {
   const attempt = useCallback(() => {
     let active = true;
     setPhase('processing');
-    confirmPayment(params.bookingId).then((res) => {
-      if (!active) return;
-      if (res.status === 'SUCCESS') {
-        navigation.replace('BookingSuccess', { bookingId: params.bookingId });
-      } else {
-        if (res.booking) setBooking(res.booking);
-        setPhase(res.status);
-      }
-    });
+    setErrorMessage(null);
+    confirmPayment(params.bookingId)
+      .then((res) => {
+        if (!active) return;
+        if (res.status === 'SUCCESS') {
+          navigation.replace('BookingSuccess', { bookingId: params.bookingId });
+        } else {
+          if (res.booking) setBooking(res.booking);
+          setErrorMessage(paymentErrorMessage(t, res));
+          setPhase(res.status);
+        }
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        setErrorMessage(paymentErrorMessage(t, err));
+        setPhase('FAILED');
+      });
     return () => {
       active = false;
     };
-  }, [params.bookingId, navigation]);
+  }, [params.bookingId, navigation, t]);
 
   useEffect(() => attempt(), [attempt]);
 
@@ -94,7 +104,9 @@ export function PaymentProcessingScreen() {
             <Ionicons name={f.icon} size={44} color={f.color} />
           </View>
           <Text style={[styles.title, { color: themeColors.textStrong }]}>{t(`paymentProcessing.${phase}.title`)}</Text>
-          <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>{t(`paymentProcessing.${phase}.body`)}</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
+            {errorMessage || t(`paymentProcessing.${phase}.body`)}
+          </Text>
 
           {booking && (
             <View style={[styles.infoCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>

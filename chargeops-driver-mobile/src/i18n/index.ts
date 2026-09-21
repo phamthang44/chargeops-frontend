@@ -68,5 +68,7 @@ if (Platform.OS !== 'web') {
   }).catch(() => {});
 }
 
+export { paymentErrorMessage } from './paymentErrors';
+
 export default i18n;
 

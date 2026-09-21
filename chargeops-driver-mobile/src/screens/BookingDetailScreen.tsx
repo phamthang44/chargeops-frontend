@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Image, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +19,7 @@ import {
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
+  createCheckout,
   getBookingById,
   getBookingNowMs,
   getBookingTimeRemainingMs,
@@ -141,11 +142,13 @@ export function BookingDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const isFocused = useIsFocused();
+  const triggeredMilestonesRef = useRef<Set<string>>(new Set());
   const [now, setNow] = useState(getBookingNowMs());
 
   const handleCopy = (text: string, field: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text).catch(() => {});
     }
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
@@ -154,7 +157,19 @@ export function BookingDetailScreen() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const b = await getBookingById(params.bookingId);
+      let b = await getBookingById(params.bookingId);
+      if (
+        b &&
+        b.status === 'PENDING' &&
+        (!b.checkout || b.checkout.status === 'NOT_CREATED' || b.checkout.status === 'UNAVAILABLE')
+      ) {
+        try {
+          const checkout = await createCheckout(b.id);
+          b = { ...b, checkout, paymentMethod: checkout.method || b.paymentMethod };
+        } catch (checkoutErr) {
+          console.warn('Refresh createCheckout failed:', checkoutErr);
+        }
+      }
       setBooking(b);
       setError(null);
     } catch (err: any) {
@@ -164,12 +179,38 @@ export function BookingDetailScreen() {
     }
   };
 
+  const silentRefresh = useCallback(async () => {
+    try {
+      let b = await getBookingById(params.bookingId);
+      if (b) {
+        setBooking((prev) => {
+          if (!prev) return b;
+          if (!b.checkout && prev.checkout) {
+            return { ...b, checkout: prev.checkout };
+          }
+          return b;
+        });
+      }
+    } catch {
+      // silent background refresh, ignore errors
+    }
+  }, [params.bookingId]);
+
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
     getBookingById(params.bookingId)
-      .then((b) => {
+      .then(async (b) => {
+        if (!active) return;
+        if (b && b.status === 'PENDING' && (!b.checkout || b.checkout.status === 'NOT_CREATED')) {
+          try {
+            const checkout = await createCheckout(b.id);
+            b = { ...b, checkout, paymentMethod: checkout.method || b.paymentMethod };
+          } catch (checkoutErr) {
+            console.warn('Auto createCheckout in BookingDetail failed:', checkoutErr);
+          }
+        }
         if (active) {
           setBooking(b);
           setLoading(false);
@@ -188,10 +229,81 @@ export function BookingDetailScreen() {
 
   useEffect(() => {
     if (!booking) return;
-    setNow(getBookingNowMs());
-    const id = setInterval(() => setNow(getBookingNowMs()), 1000);
+    const id = setInterval(() => {
+      const currentNow = getBookingNowMs();
+      setNow(currentNow);
+
+      // Auto-trigger refetch when 100% refund grace period expires
+      if (booking.status === 'CONFIRMED' && booking.freeCancellationDeadline) {
+        const remaining = getBookingTimeRemainingMs(booking.freeCancellationDeadline, currentNow);
+        const key = `grace_${booking.id}`;
+        if (remaining <= 0 && !triggeredMilestonesRef.current.has(key)) {
+          triggeredMilestonesRef.current.add(key);
+          silentRefresh();
+        }
+      }
+
+      // Auto-trigger refetch when check-in opens
+      if (booking.status === 'CONFIRMED' && booking.startAt) {
+        const checkInOpensMs = new Date(booking.checkInOpensAt ?? booking.startAt).getTime();
+        const key = `checkin_opened_${booking.id}`;
+        if (currentNow >= checkInOpensMs && !triggeredMilestonesRef.current.has(key)) {
+          triggeredMilestonesRef.current.add(key);
+          silentRefresh();
+        }
+      }
+
+      // Auto-trigger refetch when check-in window closes
+      if (booking.status === 'CONFIRMED' && booking.checkInDeadline) {
+        const checkInDeadlineMs = new Date(booking.checkInDeadline).getTime();
+        const key = `checkin_closed_${booking.id}`;
+        if (currentNow >= checkInDeadlineMs && !triggeredMilestonesRef.current.has(key)) {
+          triggeredMilestonesRef.current.add(key);
+          silentRefresh();
+        }
+      }
+
+      // Auto-trigger refetch when unpaid hold expires
+      if (booking.status === 'PENDING') {
+        const holdExpiresAt = booking.paymentHoldExpiresAt ?? booking.expiresAt;
+        if (holdExpiresAt) {
+          const holdLeft = getBookingTimeRemainingMs(holdExpiresAt, currentNow);
+          const key = `hold_expired_${booking.id}`;
+          if (holdLeft <= 0 && !triggeredMilestonesRef.current.has(key)) {
+            triggeredMilestonesRef.current.add(key);
+            silentRefresh();
+          }
+        }
+      }
+    }, 1000);
+
     return () => clearInterval(id);
-  }, [booking]);
+  }, [booking, silentRefresh]);
+
+  // Smart Polling: auto-refresh based on lifecycle state (BR-BOK, SePay webhook, telemetry)
+  useEffect(() => {
+    if (!isFocused || !booking) return;
+
+    if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED' || booking.status === 'EXPIRED') {
+      return;
+    }
+
+    // PENDING: waiting for payment confirmation via SePay / Bank Transfer / Simulator -> poll every 4s
+    // CHARGING: charging telemetry in progress -> poll every 5s
+    // CONFIRMED: check-in / status window -> poll every 25s
+    const intervalMs =
+      booking.status === 'PENDING'
+        ? 4000
+        : booking.status === 'CHARGING'
+        ? 5000
+        : 25000;
+
+    const pollId = setInterval(() => {
+      silentRefresh();
+    }, intervalMs);
+
+    return () => clearInterval(pollId);
+  }, [isFocused, booking?.status, silentRefresh]);
 
   if (loading) {
     return (
@@ -446,13 +558,17 @@ export function BookingDetailScreen() {
     ? booking.actions.canCheckIn
     : (isConfirmed && windowStarted && hasCheckInDeadline && !windowPassed);
   const checkInReason = booking.actions?.checkInReason ?? (windowPassed ? 'WINDOW_CLOSED' : !windowStarted ? 'TOO_EARLY' : 'AVAILABLE');
-  const canCancel = booking.actions ? booking.actions.canCancel : (isPending || isConfirmed);
-  const refundableAmount = booking.actions ? booking.actions.refundableAmount : (booking.refundAmount ?? 0);
-  const cancellationReason = booking.actions?.cancellationReason;
-  const canReportIssue = booking.actions?.canReportIssue ?? true;
-
   const graceRemainingMs = getBookingTimeRemainingMs(booking.freeCancellationDeadline, now);
-  const isWithinGrace = cancellationReason === 'WITHIN_GRACE' || (isConfirmed && graceRemainingMs > 0);
+  const cancellationReason = booking.actions?.cancellationReason;
+  // Reactive: once graceRemainingMs hits 0, isWithinGrace is FALSE immediately!
+  const isWithinGrace = isConfirmed && graceRemainingMs > 0 && cancellationReason !== 'GRACE_ENDED';
+
+  const canCancel = booking.actions ? booking.actions.canCancel : (isPending || isConfirmed);
+  // Reactive: if isConfirmed, refundableAmount is 100% ONLY when isWithinGrace is true, otherwise 0!
+  const refundableAmount = isConfirmed
+    ? (isWithinGrace ? (booking.actions?.refundableAmount ?? booking.totalPrice) : 0)
+    : (booking.refundAmount ?? 0);
+  const canReportIssue = booking.actions?.canReportIssue ?? true;
 
   const durationMin = Math.round((endMs - startMs) / 60_000);
   const { hours, minutes } = splitDuration(durationMin);
@@ -987,7 +1103,11 @@ export function BookingDetailScreen() {
       {isPending && (
         <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
           <AppButton
-            label={t('bookingDetail.payNow', 'Thanh toán ngay')}
+            label={
+              (booking.checkout?.method ? booking.checkout.method === 'SIMULATOR' : booking.paymentMethod === 'SIMULATOR')
+                ? t('payment.simulatorCta', 'Xác nhận thanh toán mô phỏng')
+                : t('payment.iHaveTransferred', 'Tôi đã chuyển khoản')
+            }
             onPress={() => navigation.navigate('PaymentProcessing', { bookingId: booking.id })}
           />
           <AppButton

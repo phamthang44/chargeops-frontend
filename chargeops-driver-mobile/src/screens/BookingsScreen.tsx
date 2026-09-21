@@ -62,6 +62,22 @@ export function BookingsScreen() {
     return () => clearInterval(id);
   }, []);
 
+  // Live polling: auto-refresh when user has active PENDING or CHARGING bookings
+  useEffect(() => {
+    const hasLive = bookings.some((b) => b.status === 'PENDING' || b.status === 'CHARGING');
+    if (!hasLive) return;
+
+    const interval = setInterval(() => {
+      getActiveBookings()
+        .then((data) => {
+          setBookings(data);
+        })
+        .catch(() => {});
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [bookings]);
+
   const loadData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);

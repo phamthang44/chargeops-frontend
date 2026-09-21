@@ -5,6 +5,7 @@ import type {
   BackendCreateBookingResponse,
   Booking,
   BookingActions,
+  BookingCheckoutDetail,
   BookingDetailItem,
   BookingPriceLine,
   BookingStatus,
@@ -118,6 +119,9 @@ export function generateIdempotencyKey(): string {
 export interface PaymentResult {
   status: PaymentResultStatus;
   booking: Booking | null;
+  errorMessage?: string;
+  errorCode?: string;
+  messageKey?: string;
 }
 
 /** How long an unpaid booking holds its time range (BR-BOK-02). */
@@ -209,11 +213,10 @@ export function computeRefund(booking: Booking, now: number = getBookingNowMs())
 
   // Under Platform Policy v4.9 / BR-PAY-02, BR-PAY-03:
   // 100% refund is ONLY applicable during the 10-minute grace period from payment confirmation.
-  // After grace period, cancellation has 0% refund (NONE).
+  // After grace period (graceRemainingMs <= 0), cancellation has 0% refund (NONE).
   const isGrace =
-    serverReason !== undefined
-      ? serverReason === 'WITHIN_GRACE'
-      : graceRemainingMs > 0;
+    graceRemainingMs > 0 &&
+    (serverReason !== undefined ? serverReason === 'WITHIN_GRACE' : true);
 
   let percent: number;
   let tier: RefundTier;
@@ -226,10 +229,11 @@ export function computeRefund(booking: Booking, now: number = getBookingNowMs())
     tier = 'NONE';
   }
 
-  const refundAmount =
-    serverRefundAmount !== undefined && serverRefundAmount !== null
-      ? serverRefundAmount
-      : Math.round((booking.totalPrice * percent) / 100);
+  const refundAmount = isGrace
+    ? (serverRefundAmount !== undefined && serverRefundAmount !== null
+        ? serverRefundAmount
+        : Math.round((booking.totalPrice * percent) / 100))
+    : 0;
 
   const feeAmount = Math.max(0, booking.totalPrice - refundAmount);
 
@@ -1121,6 +1125,96 @@ export async function createBooking(
   return simulateNetwork(booking);
 }
 
+export interface CreateCheckoutOptions {
+  requestKey?: string;
+  accessToken?: string | null;
+}
+
+/**
+ * Create or retrieve a checkout order session for a pending booking (FE-06 / BKG-025).
+ * Calls POST /api/v1/bookings/:bookingId/checkout with X-Request-Key.
+ *
+ * Status values:
+ * - READY: Order created, checkoutReference / QR / instruction ready for payment.
+ * - UNAVAILABLE: Payment gateway adapter temporary failure (HTTP 503 PAY_CHECKOUT_UNAVAILABLE).
+ * - EXPIRED: Booking hold or gateway session expired.
+ */
+export async function createCheckout(
+  bookingId: string,
+  options?: CreateCheckoutOptions,
+): Promise<BookingCheckoutDetail> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(options?.accessToken);
+    const key = options?.requestKey || generateIdempotencyKey();
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Idempotency-Key': key,
+      'X-Request-Key': key,
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${apiBaseUrl}/api/v1/bookings/${bookingId}/checkout`, {
+        method: 'POST',
+        headers,
+      });
+    } catch (err) {
+      console.warn('Network error calling POST /api/v1/bookings/:id/checkout:', err);
+      throw new BookingApiError('NETWORK_ERROR', 'Lỗi kết nối mạng khi tạo phiên thanh toán');
+    }
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => null);
+      const errObj = errJson?.error || errJson;
+      const code =
+        errObj?.code ||
+        errObj?.errorCode ||
+        (response.status === 503
+          ? 'PAY_CHECKOUT_UNAVAILABLE'
+          : response.status === 409
+          ? 'CONFLICT'
+          : 'GENERIC');
+      const message = errObj?.message || 'Không thể tạo thông tin thanh toán';
+      const details = errObj?.details;
+      const messageKey = errObj?.messageKey;
+      throw new BookingApiError(code, message, details, messageKey);
+    }
+
+    const payload = await response.json();
+    const checkout: BookingCheckoutDetail = payload?.data ?? payload;
+
+    // Synchronize local in-memory store so subsequent screens have latest checkout
+    const existing = store.find((b) => b.id === bookingId);
+    if (existing) {
+      existing.checkout = checkout;
+      if (checkout.method) {
+        existing.paymentMethod = checkout.method;
+      }
+    }
+
+    return checkout;
+  }
+
+  // Fallback for mock mode
+  const booking = store.find((b) => b.id === bookingId);
+  const mockCheckout: BookingCheckoutDetail = {
+    status: 'READY',
+    method: booking?.paymentMethod ?? 'SIMULATOR',
+    expiresAt: booking?.expiresAt ?? new Date(Date.now() + 10 * 60_000).toISOString(),
+    instruction: 'Vui lòng hoàn tất thanh toán trước khi hết hạn giữ chỗ.',
+    checkoutReference: booking ? `CO${booking.code.replace(/[^a-zA-Z0-9]/g, '')}` : `CO${Date.now()}`,
+    checkoutUrl: undefined,
+  };
+  if (booking) {
+    booking.checkout = mockCheckout;
+  }
+  return simulateNetwork(mockCheckout, 200);
+}
+
 /**
  * Settle the payment for a pending booking. Resolves to a PaymentResult whose
  * `status` covers every gateway outcome:
@@ -1133,6 +1227,126 @@ export async function createBooking(
  * handle the gateway webhook / return URL — same PaymentResult shape.
  */
 export async function confirmPayment(id: string): Promise<PaymentResult> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken();
+    const idempotencyKey = generateIdempotencyKey();
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey,
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    let booking: Booking | null = null;
+    try {
+      booking = await getBookingById(id);
+    } catch (error) {
+      return {
+        status: 'FAILED',
+        booking: null,
+        errorCode: 'BOOKING_LOAD_FAILED',
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Không thể tải thông tin booking trước khi mô phỏng thanh toán.',
+      };
+    }
+
+    if (!booking) {
+      return {
+        status: 'FAILED',
+        booking: null,
+        errorCode: 'BOOKING_NOT_FOUND',
+        errorMessage: 'Không tìm thấy booking cần mô phỏng thanh toán.',
+      };
+    }
+
+    const amount = Math.round(booking.totalPrice);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return {
+        status: 'FAILED',
+        booking,
+        errorCode: 'INVALID_PAYMENT_AMOUNT',
+        errorMessage: 'Số tiền thanh toán của booking không hợp lệ.',
+      };
+    }
+
+    try {
+      const simPayload = {
+        transactionRef: `SIM-${idempotencyKey}`,
+        outcome: 'SUCCESS',
+        amount,
+        currency: 'VND',
+        providerPaidAt: new Date().toISOString(),
+      };
+
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/bookings/${encodeURIComponent(id)}/simulate-payment`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(simPayload),
+        },
+      );
+
+      if (response.ok) {
+        const payload = await response.json().catch(() => null);
+        const simulationResult = payload?.data ?? payload;
+        const updatedBooking = await getBookingById(id);
+
+        if (!updatedBooking || updatedBooking.status !== 'CONFIRMED') {
+          const classification = simulationResult?.receipt?.classification;
+          return {
+            status: 'FAILED',
+            booking: updatedBooking ?? booking,
+            errorCode: classification ?? 'PAYMENT_NOT_APPLIED',
+            errorMessage: classification
+              ? `Thanh toán mô phỏng chưa được áp dụng: ${classification}.`
+              : 'Thanh toán mô phỏng chưa xác nhận được booking.',
+          };
+        }
+
+        return {
+          status: 'SUCCESS',
+          booking: updatedBooking,
+        };
+      }
+
+      // Backend returned HTTP error (404, 403, 500, etc.)
+      const errJson = await response.json().catch(() => null);
+      const errObj = errJson?.error || errJson;
+      const code = errObj?.code || `HTTP_${response.status}`;
+      const messageKey = errObj?.messageKey;
+      const message =
+        errObj?.message ||
+        (response.status === 404
+          ? 'Không tìm thấy API mô phỏng thanh toán trên máy chủ. Vui lòng kiểm tra hoặc khởi động lại backend.'
+          : response.status === 403
+          ? 'Tài khoản không có quyền thực hiện mô phỏng thanh toán.'
+          : 'Thanh toán mô phỏng không thành công trên máy chủ.');
+
+      console.warn('POST /api/v1/bookings/:id/simulate-payment failed:', response.status, errObj);
+
+      return {
+        status: 'FAILED',
+        booking,
+        errorCode: code,
+        messageKey,
+        errorMessage: message,
+      };
+    } catch (err: any) {
+      console.warn('Network error calling simulate-payment API:', err);
+      return {
+        status: 'FAILED',
+        booking,
+        errorCode: 'NETWORK_ERROR',
+        errorMessage: 'Không thể kết nối đến máy chủ backend. Vui lòng kiểm tra lại server.',
+      };
+    }
+  }
+
   const status = resolvePaymentOutcome();
   reconcileLapsed();
   const booking = store.find((b) => b.id === id) ?? null;
@@ -1151,7 +1365,7 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
     // FAILED / TIMEOUT leave it PENDING so the user can retry before expiry.
   }
 
-  return simulateNetwork({ status, booking }, 2200);
+  return simulateNetwork({ status, booking }, 1500);
 }
 
 export async function cancelBooking(id: string): Promise<Booking | null> {

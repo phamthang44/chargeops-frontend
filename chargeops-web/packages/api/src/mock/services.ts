@@ -90,13 +90,26 @@ function effectiveRuntimeStatus(c: Connector, chargePoints: ChargePoint[]): Conn
   return cp?.provisioningStatus === 'ACTIVE' && cp?.operationalStatus === 'AVAILABLE' ? c.runtimeStatus : 'OFFLINE';
 }
 
-/** BR-PAY-03 + FR08 grace-period override, evaluated at cancel moment. */
+/**
+ * BR-PAY-02, BR-PAY-03 (Booking v4.9):
+ * 100% refund is ONLY applicable during the 10-minute grace period from payment confirmation
+ * (strictly before freeCancellationDeadline and not checked in).
+ * If outside grace, expired, unpaid, or no-show: refund is 0%.
+ */
 function computeRefundPct(b: Booking, now = Date.now()): number {
-  const minutesSinceCreated = (now - new Date(b.createdAt).getTime()) / 60_000;
-  if (minutesSinceCreated <= 5) return 100; // grace period — overrides the tier table
-  const minutesBeforeStart = (new Date(b.startAt).getTime() - now) / 60_000;
-  if (minutesBeforeStart >= 60) return 100;
-  if (minutesBeforeStart >= 15) return 50;
+  if (b.status === 'pending') {
+    return 0; // Unpaid cancellation: release hold, no refund
+  }
+  if (b.freeCancellationDeadline) {
+    const deadlineMs = new Date(b.freeCancellationDeadline).getTime();
+    return now < deadlineMs ? 100 : 0;
+  }
+  if (b.paymentConfirmedAt) {
+    const confirmedMs = new Date(b.paymentConfirmedAt).getTime();
+    const startMs = new Date(b.startAt).getTime();
+    const deadlineMs = Math.min(confirmedMs + 10 * 60_000, startMs);
+    return now < deadlineMs ? 100 : 0;
+  }
   return 0;
 }
 

@@ -163,12 +163,12 @@ function syncBookingServerClock(
   bookingServerClockOffsetMs = serverTimeMs - clientMidpoint;
 }
 
-/** Refund tier per FR08 / BR-PAY-03 / Unpaid Hold. */
-export type RefundTier = 'UNPAID' | 'GRACE' | 'FULL' | 'PARTIAL' | 'NONE';
+/** Refund tier per FR08 / BR-PAY-03 (Booking v4.9). */
+export type RefundTier = 'UNPAID' | 'GRACE' | 'NONE';
 
 export interface RefundBreakdown {
   tier: RefundTier;
-  percent: number; // 100 | 50 | 0
+  percent: number; // 100 | 0
   refundAmount: number; // VND credited back
   feeAmount: number; // VND withheld (totalPrice - refundAmount)
   minutesBefore: number; // whole minutes before start (negative once started)

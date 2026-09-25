@@ -18,13 +18,10 @@ interface CancelBookingSheetProps {
   onConfirmed: (booking: Booking) => void;
 }
 
-// Map the refund tier to the policy-banner body copy. GRACE is the FR05
-// reconsideration window — a full refund that overrides the time-based tiers.
+// Map the refund tier to the policy-banner body copy per Booking v4.9.
 const TIER_KEY = {
   UNPAID: 'policyUnpaid',
   GRACE: 'policyGrace',
-  FULL: 'policyFull',
-  PARTIAL: 'policyPartial',
   NONE: 'policyNone',
 } as const;
 

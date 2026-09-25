@@ -157,11 +157,11 @@ export function buildMockDb(): MockDb {
     const rateVndPerKwh = dominant.rateVndPerKwh;
     const energyKwh = +priceLines.reduce((s, l) => s + l.energyKwh, 0).toFixed(1);
     const amountVnd = priceLines.reduce((s, l) => s + l.amountVnd, 0);
-    // BR-PAY-03 refund tiers by time-before-start at cancel moment
+    // BR-PAY-03 refund tiers (Booking v4.9): 100% within grace, 0% outside grace / no-show
     let refundPct: number | null = null;
     let refundVnd = 0;
     if (status === 'cancelled') {
-      refundPct = pick([100, 100, 50, 0, 0]);
+      refundPct = pick([100, 100, 0, 0]);
       refundVnd = Math.round((amountVnd * refundPct) / 100 / 1000) * 1000;
     }
     const eh = Math.floor(endTot / 60);
@@ -173,6 +173,16 @@ export function buildMockDb(): MockDb {
       createdTot += 24 * 60;
       createdDay -= 1;
     }
+    const createdAtStr = `2026-06-${pad(createdDay)}T${pad(Math.floor(createdTot / 60))}:${pad(createdTot % 60)}:00`;
+    const startAtStr = isoAt(day, startTot);
+    const endAtStr = isoAt(day, endTot);
+    const confirmedAtStr = status !== 'pending'
+      ? `2026-06-${pad(createdDay)}T${pad(Math.floor((createdTot + 1) / 60))}:${pad((createdTot + 1) % 60)}:00`
+      : null;
+    const deadlineStr = confirmedAtStr
+      ? toLocalIso(new Date(Math.min(new Date(confirmedAtStr).getTime() + 10 * 60_000, new Date(startAtStr).getTime())))
+      : null;
+
     bookings.push({
       id: 'BK-' + (38100 + i),
       stationId: stationIds[stationName],
@@ -183,11 +193,13 @@ export function buildMockDb(): MockDb {
       powerKw,
       driverName: pick(drivers),
       driverPhone: '+84 9' + pad(Math.floor(R() * 90)) + ' •••• ' + pad(Math.floor(R() * 90)) + Math.floor(R() * 9),
-      createdAt: `2026-06-${pad(createdDay)}T${pad(Math.floor(createdTot / 60))}:${pad(createdTot % 60)}:00`,
+      createdAt: createdAtStr,
+      paymentConfirmedAt: confirmedAtStr,
+      freeCancellationDeadline: deadlineStr,
       // BR-BOK-02: the 10-minute hold only exists while payment is outstanding.
       expiresAt: status === 'pending' ? `2026-06-${pad(createdDay)}T${pad(Math.floor((createdTot + 10) / 60))}:${pad((createdTot + 10) % 60)}:00` : null,
-      startAt: isoAt(day, startTot),
-      endAt: isoAt(day, endTot),
+      startAt: startAtStr,
+      endAt: endAtStr,
       durationMin,
       rateKind,
       rateVndPerKwh,
@@ -202,11 +214,11 @@ export function buildMockDb(): MockDb {
   }
   bookings.sort((a, b) => (a.startAt < b.startAt ? 1 : -1));
 
-  /* ---- live grace-period demo bookings (FR08) — createdAt anchored to real wall-clock "now" ---- */
+  /* ---- live grace-period demo bookings (FR08 / v4.9) — anchored to real wall-clock "now" ---- */
   const now = Date.now();
   const freshBookings: [string, number][] = [
-    ['BK-39002', 2 * 60_000], // created 2 min ago — still inside the 5-min grace window on load
-    ['BK-39001', 20 * 60_000], // created 20 min ago — grace window already closed, normal tiers apply
+    ['BK-39002', 2 * 60_000], // confirmed 2 min ago — inside the 10-min grace window
+    ['BK-39001', 20 * 60_000], // confirmed 20 min ago — grace window closed, 0% refund applies
   ];
   for (const [id, ageMs] of freshBookings) {
     const created = new Date(now - ageMs);
@@ -215,6 +227,8 @@ export function buildMockDb(): MockDb {
     const [connector, powerKw, baseRate] = conns[0];
     const energyKwh = +(powerKw * 1 * 0.62).toFixed(1);
     const amountVnd = Math.round((energyKwh * baseRate) / 1000) * 1000;
+    const confirmedAt = toLocalIso(created);
+    const freeDeadline = toLocalIso(new Date(Math.min(created.getTime() + 10 * 60_000, start.getTime())));
     bookings.unshift({
       id,
       stationId: 'ST-1001',
@@ -226,6 +240,8 @@ export function buildMockDb(): MockDb {
       driverName: 'Nguyễn Văn An',
       driverPhone: '+84 987 654 321',
       createdAt: toLocalIso(created),
+      paymentConfirmedAt: confirmedAt,
+      freeCancellationDeadline: freeDeadline,
       expiresAt: null, // already confirmed — the payment hold no longer applies
       startAt: toLocalIso(start),
       endAt: toLocalIso(end),

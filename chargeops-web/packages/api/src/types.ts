@@ -58,8 +58,15 @@ export interface Booking {
   powerKw: number;
   driverName: string;
   driverPhone: string;
-  /** ISO datetime the booking was created — anchors the FR08 grace-period window. */
+  /** ISO datetime the booking was created. */
   createdAt: string;
+  /** ISO datetime of the first server payment confirmation. */
+  paymentConfirmedAt?: string | null;
+  /**
+   * ISO datetime of the snapshotted free cancellation deadline: min(paymentConfirmedAt + 10m, startAt).
+   * Null while pending or if not eligible.
+   */
+  freeCancellationDeadline?: string | null;
   /**
    * ISO datetime the unpaid reservation lapses (createdAt + 10 min, BR-BOK-02).
    * Null once the booking leaves Pending Payment — the hold no longer applies.
@@ -77,10 +84,9 @@ export interface Booking {
   /** Per-band snapshots; one entry unless the window crosses a TOU boundary. */
   priceLines: BookingPriceLine[];
   /**
-   * BR-PAY-03 refund tiers, evaluated at cancel moment: 100 if cancelled within 5 min of
-   * `createdAt` (grace period, FR08 override — takes priority regardless of time-before-start),
-   * else 100 / 50 / 0 by time remaining before slot start (>=60min / 15-60min / <15min).
-   * Null unless cancelled.
+   * BR-PAY-03 refund tiers (Booking v4.9): 100% within the 10-minute grace period from
+   * payment confirmation (strictly before freeCancellationDeadline and not checked in),
+   * else 0% (outside grace or no-show). Null unless cancelled.
    */
   refundPct: number | null;
   refundVnd: number;

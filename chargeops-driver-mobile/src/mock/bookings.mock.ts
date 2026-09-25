@@ -176,7 +176,7 @@ const curatedBookings: Booking[] = [
     createdAt: '2026-06-14T19:30:00+07:00',
     checkedInAt: '2026-06-15T13:55:00+07:00',
   }),
-  // Cancelled ~40 min before start → the 50% tier.
+  // Cancelled after grace period expired → 0% refund (BR-PAY-03).
   build({
     id: 'bk-005',
     code: 'CHG-8533',
@@ -187,7 +187,7 @@ const curatedBookings: Booking[] = [
     status: 'CANCELLED',
     createdAt: '2026-06-11T08:00:00+07:00',
     cancelReason: 'DRIVER',
-    refundPercent: 50,
+    refundPercent: 0,
   }),
   // Never checked in → auto-cancelled at 0% (BR-BOK-05).
   build({

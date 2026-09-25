@@ -87,7 +87,7 @@ function ToastItem({ toast, onDismiss }: { toast: NotificationItem; onDismiss: (
           <button
             type="button"
             onClick={() => {
-              toast.onSelect();
+              toast.onSelect?.();
               onDismiss(toast.id);
             }}
             className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:underline"

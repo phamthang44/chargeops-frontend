@@ -18,6 +18,11 @@ import type {
   LicenseStatusEventDto,
   OwnerDashboard,
   PaymentMethod,
+  ExecuteRefundRequest,
+  RefundAttemptItem,
+  RefundDetail,
+  RefundQueueSummary,
+  RefundStatus,
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
@@ -1013,6 +1018,121 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           methodBreakdown,
           dailyTrend,
         };
+      },
+    },
+
+    refunds: {
+      async list(params = {}) {
+        await delay();
+        let rows = [...db.refunds];
+        if (params.status && params.status !== 'all') {
+          rows = rows.filter((r) => r.status === params.status);
+        }
+        if (params.search) {
+          const q = params.search.trim().toLowerCase();
+          rows = rows.filter(
+            (r) =>
+              r.id.toLowerCase().includes(q) ||
+              (r.refundId && r.refundId.toLowerCase().includes(q)) ||
+              r.bookingId.toLowerCase().includes(q) ||
+              (r.bookingCode && r.bookingCode.toLowerCase().includes(q)) ||
+              (r.driverName && r.driverName.toLowerCase().includes(q)) ||
+              (r.stationName && r.stationName.toLowerCase().includes(q)) ||
+              (r.transferReference && r.transferReference.toLowerCase().includes(q))
+          );
+        }
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 10;
+        return {
+          items: rows.slice(page * pageSize, (page + 1) * pageSize),
+          total: rows.length,
+          page,
+          pageSize,
+        };
+      },
+
+      async get(refundId: string) {
+        await delay();
+        const r = db.refunds.find((x) => x.id === refundId || x.refundId === refundId);
+        if (!r) throw new Error(`Không tìm thấy khoản hoàn tiền ${refundId}`);
+        return { ...r };
+      },
+
+      async summary() {
+        await delay();
+        const pending = db.refunds.filter((r) => r.status === 'PENDING');
+        const succeeded = db.refunds.filter((r) => r.status === 'SUCCEEDED');
+        return {
+          totalPendingCount: pending.length,
+          totalPendingAmountVnd: pending.reduce((sum, r) => sum + r.amount, 0),
+          totalSucceededCount: succeeded.length,
+          totalSucceededAmountVnd: succeeded.reduce((sum, r) => sum + r.amount, 0),
+        };
+      },
+
+      async execute(refundId: string, req: ExecuteRefundRequest, idempotencyKey?: string) {
+        await delay(350);
+        const r = db.refunds.find((x) => x.id === refundId || x.refundId === refundId);
+        if (!r) throw new Error(`Không tìm thấy khoản hoàn tiền ${refundId}`);
+
+        if (r.status === 'SUCCEEDED') {
+          throw new Error('Khoản hoàn tiền này đã được hoàn tất thành công (terminal state). Không thể thực thi lại.');
+        }
+
+        if (r.version !== req.expectedVersion) {
+          throw new Error(`Xung đột phiên bản: Dữ liệu đã thay đổi trên máy chủ (Expected: ${req.expectedVersion}, Current: ${r.version}). Vui lòng tải lại trang.`);
+        }
+
+        const requestKey = idempotencyKey || `req-${Date.now()}`;
+        const attempts = r.attempts ? [...r.attempts] : [];
+        const existingAttempt = attempts.find((a) => a.requestKey === requestKey);
+        if (existingAttempt) {
+          return { ...r };
+        }
+
+        const attemptId = `ATT-${String(attempts.length + 1).padStart(3, '0')}`;
+        const completedAt = req.performedAt || new Date().toISOString();
+        const transferRef = req.transferReference || (req.executionMode === 'SIMULATOR' ? `SIM-REF-${Math.floor(100000 + Math.random() * 900000)}` : 'EXT-MANUAL-REF');
+
+        const newAttempt: RefundAttemptItem = {
+          id: attemptId,
+          attemptId,
+          sequenceNo: attempts.length + 1,
+          executionMode: req.executionMode,
+          requestKey,
+          status: req.outcome,
+          transferReference: transferRef,
+          failureCode: req.outcome === 'FAILED' ? 'SIMULATED_FAILURE' : undefined,
+          note: req.note,
+          startedAt: new Date(Date.now() - 500).toISOString(),
+          performedAt: completedAt,
+          completedAt,
+          performedBy: 'admin@chargeops.vn',
+        };
+
+        attempts.unshift(newAttempt);
+        r.attempts = attempts;
+        r.version += 1;
+
+        if (req.outcome === 'SUCCEEDED') {
+          r.status = 'SUCCEEDED';
+          r.successfulAttemptId = attemptId;
+          r.transferReference = transferRef;
+          r.completedAt = completedAt;
+
+          // Sync into general transactions log as refund
+          db.transactions.unshift({
+            id: `TX-RF-${r.id}`,
+            bookingId: r.bookingId,
+            stationName: r.stationName || 'Trạm sạc ChargeOps',
+            type: 'refund',
+            method: 'ATM',
+            amountVnd: -r.amount,
+            date: completedAt,
+          });
+        }
+
+        return { ...r };
       },
     },
 

@@ -39,107 +39,68 @@ import {
 } from '@chargeops/ui';
 import { PolicyMarkdownViewer } from '../../shared/components/PolicyMarkdownViewer';
 
-const DOC_TYPE_LABELS: Record<LegalDocType, string> = {
-  TERMS_OF_SERVICE: 'Điều khoản dịch vụ',
-  PRIVACY_POLICY: 'Chính sách bảo mật',
-  LICENSE_AGREEMENT: 'Thỏa thuận License',
-  OPERATIONAL_REGULATION: 'Quy chế vận hành',
-};
-
-const AUDIENCE_LABELS: Record<TargetAudience, string> = {
-  ALL: 'Toàn hệ thống (ALL)',
-  DRIVER: 'Tài xế (DRIVER)',
-  OWNER: 'Chủ trạm (OWNER)',
-};
-
-const DOC_TYPE_OPTIONS: SelectOption[] = [
-  { value: 'all', label: 'Tất cả loại văn bản' },
-  { value: 'TERMS_OF_SERVICE', label: 'Điều khoản dịch vụ' },
-  { value: 'PRIVACY_POLICY', label: 'Chính sách bảo mật' },
-  { value: 'LICENSE_AGREEMENT', label: 'Thỏa thuận License' },
-  { value: 'OPERATIONAL_REGULATION', label: 'Quy chế vận hành' },
-];
-
-const AUDIENCE_OPTIONS: SelectOption[] = [
-  { value: 'all', label: 'Tất cả đối tượng' },
-  { value: 'ALL', label: 'Toàn hệ thống (ALL)' },
-  { value: 'OWNER', label: 'Chủ trạm (OWNER)' },
-  { value: 'DRIVER', label: 'Tài xế (DRIVER)' },
-];
-
-const STATUS_OPTIONS: SelectOption[] = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'active', label: 'Đang hiệu lực' },
-  { value: 'inactive', label: 'Bản nháp / Ẩn' },
-];
-
-const FORM_DOC_TYPE_OPTIONS: SelectOption[] = [
-  { value: 'TERMS_OF_SERVICE', label: 'Điều khoản dịch vụ' },
-  { value: 'PRIVACY_POLICY', label: 'Chính sách bảo mật' },
-  { value: 'LICENSE_AGREEMENT', label: 'Thỏa thuận License' },
-  { value: 'OPERATIONAL_REGULATION', label: 'Quy chế vận hành' },
-];
-
-const FORM_AUDIENCE_OPTIONS: SelectOption[] = [
-  { value: 'ALL', label: 'Toàn hệ thống (ALL)' },
-  { value: 'OWNER', label: 'Chủ trạm (OWNER)' },
-  { value: 'DRIVER', label: 'Tài xế (DRIVER)' },
-];
-
 type CategoryTab = 'all' | 'foundation' | 'booking' | 'hardware' | 'license';
-
-const CATEGORY_TABS: { id: CategoryTab; label: string; countPredicate: (slug: string) => boolean }[] = [
-  {
-    id: 'all',
-    label: 'Tất cả văn bản',
-    countPredicate: () => true,
-  },
-  {
-    id: 'foundation',
-    label: 'Pháp lý nền tảng',
-    countPredicate: (slug) =>
-      ['terms-of-service', 'privacy-policy', 'operational-regulations'].includes(slug),
-  },
-  {
-    id: 'booking',
-    label: 'Đặt chỗ & Biểu giá',
-    countPredicate: (slug) =>
-      [
-        'booking-time-and-availability',
-        'time-package-pricing-policy',
-        'cancellation-and-refund-policy',
-        'payment-reconciliation-policy',
-      ].includes(slug),
-  },
-  {
-    id: 'hardware',
-    label: 'Vận hành & Phần cứng',
-    countPredicate: (slug) =>
-      [
-        'qr-check-in-and-no-show-policy',
-        'station-incident-and-support-policy',
-        'station-discovery-and-eligibility-policy',
-        'station-equipment-operation-policy',
-      ].includes(slug),
-  },
-  {
-    id: 'license',
-    label: 'Chủ trạm & License',
-    countPredicate: (slug) =>
-      [
-        'station-owner-license-agreement',
-        'license-lifecycle-and-renewal-policy',
-        'station-staff-access-policy',
-        'owner-payout-and-adjustment-policy',
-      ].includes(slug),
-  },
-];
 
 export function PolicyKB() {
   const { t } = useTranslation('admin');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
+
+  const docTypeLabels: Record<LegalDocType, string> = useMemo(() => ({
+    TERMS_OF_SERVICE: t('policyKB.docTypes.TERMS_OF_SERVICE', 'Điều khoản dịch vụ'),
+    PRIVACY_POLICY: t('policyKB.docTypes.PRIVACY_POLICY', 'Chính sách bảo mật'),
+    LICENSE_AGREEMENT: t('policyKB.docTypes.LICENSE_AGREEMENT', 'Thỏa thuận License'),
+    OPERATIONAL_REGULATION: t('policyKB.docTypes.OPERATIONAL_REGULATION', 'Quy chế vận hành'),
+  }), [t]);
+
+  const audienceLabels: Record<TargetAudience, string> = useMemo(() => ({
+    ALL: t('policyKB.audiences.ALL', 'Toàn hệ thống (ALL)'),
+    DRIVER: t('policyKB.audiences.DRIVER', 'Tài xế (DRIVER)'),
+    OWNER: t('policyKB.audiences.OWNER', 'Chủ trạm (OWNER)'),
+  }), [t]);
+
+  const docTypeOptions: SelectOption[] = useMemo(() => [
+    { value: 'all', label: t('policyKB.docTypes.all', 'Tất cả loại văn bản') },
+    { value: 'TERMS_OF_SERVICE', label: t('policyKB.docTypes.TERMS_OF_SERVICE', 'Điều khoản dịch vụ') },
+    { value: 'PRIVACY_POLICY', label: t('policyKB.docTypes.PRIVACY_POLICY', 'Chính sách bảo mật') },
+    { value: 'LICENSE_AGREEMENT', label: t('policyKB.docTypes.LICENSE_AGREEMENT', 'Thỏa thuận License') },
+    { value: 'OPERATIONAL_REGULATION', label: t('policyKB.docTypes.OPERATIONAL_REGULATION', 'Quy chế vận hành') },
+  ], [t]);
+
+  const audienceOptions: SelectOption[] = useMemo(() => [
+    { value: 'all', label: t('policyKB.audiences.all', 'Tất cả đối tượng') },
+    { value: 'ALL', label: t('policyKB.audiences.ALL', 'Toàn hệ thống (ALL)') },
+    { value: 'OWNER', label: t('policyKB.audiences.OWNER', 'Chủ trạm (OWNER)') },
+    { value: 'DRIVER', label: t('policyKB.audiences.DRIVER', 'Tài xế (DRIVER)') },
+  ], [t]);
+
+  const statusOptions: SelectOption[] = useMemo(() => [
+    { value: 'all', label: t('policyKB.statusOptions.all', 'Tất cả trạng thái') },
+    { value: 'active', label: t('policyKB.statusOptions.active', 'Đang hiệu lực') },
+    { value: 'inactive', label: t('policyKB.statusOptions.inactive', 'Bản nháp / Ẩn') },
+  ], [t]);
+
+  const formDocTypeOptions: SelectOption[] = useMemo(() => [
+    { value: 'TERMS_OF_SERVICE', label: t('policyKB.docTypes.TERMS_OF_SERVICE', 'Điều khoản dịch vụ') },
+    { value: 'PRIVACY_POLICY', label: t('policyKB.docTypes.PRIVACY_POLICY', 'Chính sách bảo mật') },
+    { value: 'LICENSE_AGREEMENT', label: t('policyKB.docTypes.LICENSE_AGREEMENT', 'Thỏa thuận License') },
+    { value: 'OPERATIONAL_REGULATION', label: t('policyKB.docTypes.OPERATIONAL_REGULATION', 'Quy chế vận hành') },
+  ], [t]);
+
+  const formAudienceOptions: SelectOption[] = useMemo(() => [
+    { value: 'ALL', label: t('policyKB.audiences.ALL', 'Toàn hệ thống (ALL)') },
+    { value: 'OWNER', label: t('policyKB.audiences.OWNER', 'Chủ trạm (OWNER)') },
+    { value: 'DRIVER', label: t('policyKB.audiences.DRIVER', 'Tài xế (DRIVER)') },
+  ], [t]);
+
+  const categoryTabs = useMemo(() => [
+    { id: 'all' as CategoryTab, label: t('policyKB.categories.all', 'Tất cả văn bản'), countPredicate: () => true },
+    { id: 'foundation' as CategoryTab, label: t('policyKB.categories.foundation', 'Pháp lý nền tảng'), countPredicate: (slug: string) => ['terms-of-service', 'privacy-policy', 'operational-regulations'].includes(slug) },
+    { id: 'booking' as CategoryTab, label: t('policyKB.categories.booking', 'Đặt chỗ & Biểu giá'), countPredicate: (slug: string) => ['booking-time-and-availability', 'time-package-pricing-policy', 'cancellation-and-refund-policy', 'payment-reconciliation-policy'].includes(slug) },
+    { id: 'hardware' as CategoryTab, label: t('policyKB.categories.hardware', 'Vận hành & Phần cứng'), countPredicate: (slug: string) => ['qr-check-in-and-no-show-policy', 'station-incident-and-support-policy', 'station-discovery-and-eligibility-policy', 'station-equipment-operation-policy'].includes(slug) },
+    { id: 'license' as CategoryTab, label: t('policyKB.categories.license', 'Chủ trạm & License'), countPredicate: (slug: string) => ['station-owner-license-agreement', 'license-lifecycle-and-renewal-policy', 'station-staff-access-policy', 'owner-payout-and-adjustment-policy'].includes(slug) },
+  ], [t]);
 
   const [activeTab, setActiveTab] = useState<CategoryTab>('all');
   
@@ -224,7 +185,7 @@ export function PolicyKB() {
   const filteredDocs = useMemo(() => {
     return allDocs.filter((doc) => {
       // Category tab
-      const currentTabDef = CATEGORY_TABS.find((t) => t.id === activeTab);
+      const currentTabDef = categoryTabs.find((ct) => ct.id === activeTab);
       if (currentTabDef && !currentTabDef.countPredicate(doc.slug)) {
         return false;
       }
@@ -233,7 +194,7 @@ export function PolicyKB() {
       if (selectedStatus === 'inactive' && doc.active) return false;
       return true;
     });
-  }, [allDocs, activeTab, selectedStatus]);
+  }, [allDocs, activeTab, selectedStatus, categoryTabs]);
 
   // Mutations
   const saveMutation = useMutation({
@@ -359,8 +320,8 @@ export function PolicyKB() {
   return (
     <>
       <PageHeader
-        title="Kho Văn Bản Nghiệp Vụ & Pháp Lý (SSOT)"
-        subtitle="Nguồn dữ liệu chân lý duy nhất (Single Source of Truth) quản lý 15 văn kiện quy chuẩn, biểu phí, vận hành trạm và thỏa thuận License theo SRS v4.9."
+        title={t('policyKB.pageTitle', 'Kho Văn Bản Nghiệp Vụ & Pháp Lý (SSOT)')}
+        subtitle={t('policyKB.pageSubtitle', 'Nguồn dữ liệu chân lý duy nhất (Single Source of Truth) quản lý 15 văn kiện quy chuẩn, biểu phí, vận hành trạm và thỏa thuận License theo SRS v4.9.')}
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -368,10 +329,10 @@ export function PolicyKB() {
               icon={<IconRefreshCw size={15} className={isFetching ? 'animate-spin' : ''} />}
               onClick={() => refetch()}
             >
-              Làm mới
+              {t('policyKB.refreshBtn', 'Làm mới')}
             </Button>
             <Button icon={<IconPlusCircle size={16} strokeWidth={2} />} onClick={openCreate}>
-              Thêm văn kiện mới
+              {t('policyKB.addDocBtn', 'Thêm văn kiện mới')}
             </Button>
           </div>
         }
@@ -384,8 +345,8 @@ export function PolicyKB() {
             <IconBook size={20} />
           </div>
           <div>
-            <div className="text-[11.5px] font-medium text-muted">Tổng số văn kiện</div>
-            <div className="text-[20px] font-extrabold text-ink">{allDocs.length} tài liệu</div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.totalDocs', 'Tổng số văn kiện')}</div>
+            <div className="text-[20px] font-extrabold text-ink">{allDocs.length}</div>
           </div>
         </div>
 
@@ -394,9 +355,9 @@ export function PolicyKB() {
             <IconShieldCheck size={20} />
           </div>
           <div>
-            <div className="text-[11.5px] font-medium text-muted">Đang hiệu lực</div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.activeDocs', 'Đang hiệu lực')}</div>
             <div className="text-[20px] font-extrabold text-ink">
-              {allDocs.filter((d) => d.active).length} văn bản
+              {allDocs.filter((d) => d.active).length}
             </div>
           </div>
         </div>
@@ -406,9 +367,9 @@ export function PolicyKB() {
             <IconUsers size={20} />
           </div>
           <div>
-            <div className="text-[11.5px] font-medium text-muted">Toàn hệ thống (ALL)</div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.systemAudience', 'Toàn hệ thống (ALL)')}</div>
             <div className="text-[20px] font-extrabold text-ink">
-              {allDocs.filter((d) => d.targetAudience === 'ALL').length} văn bản
+              {allDocs.filter((d) => d.targetAudience === 'ALL').length}
             </div>
           </div>
         </div>
@@ -418,9 +379,9 @@ export function PolicyKB() {
             <IconHome size={20} />
           </div>
           <div>
-            <div className="text-[11.5px] font-medium text-muted">Dành cho Chủ trạm</div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.audiences.OWNER', 'Dành cho Chủ trạm')}</div>
             <div className="text-[20px] font-extrabold text-ink">
-              {allDocs.filter((d) => d.targetAudience === 'OWNER').length} văn bản
+              {allDocs.filter((d) => d.targetAudience === 'OWNER').length}
             </div>
           </div>
         </div>
@@ -436,7 +397,7 @@ export function PolicyKB() {
         <div className="flex flex-col gap-5">
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto border-b border-line pb-2 scrollbar-none">
-            {CATEGORY_TABS.map((tab) => {
+            {categoryTabs.map((tab) => {
               const count = allDocs.filter((d) => tab.countPredicate(d.slug)).length;
               const isActive = activeTab === tab.id;
               return (
@@ -481,7 +442,7 @@ export function PolicyKB() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Tìm kiếm theo tiêu đề, slug, tóm tắt..."
+                  placeholder={t('policyKB.searchPlaceholder', 'Tìm trong nội dung chính sách…')}
                   className="w-full rounded-[10px] border border-line bg-surface py-[9px] pl-9 pr-8 text-[13px] font-medium text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15 placeholder:text-faint"
                 />
                 {searchInput && (
@@ -489,47 +450,47 @@ export function PolicyKB() {
                     type="button"
                     onClick={handleClearSearch}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center text-faint hover:text-ink transition"
-                    title="Xóa tìm kiếm"
+                    title={t('common.clear', 'Xóa tìm kiếm')}
                   >
                     <IconX size={12} strokeWidth={2.4} />
                   </button>
                 )}
               </div>
               <Button type="submit" size="md" variant="secondary" icon={<IconSearch size={14} />}>
-                Tìm kiếm
+                {t('common.search', 'Tìm kiếm')}
               </Button>
             </form>
 
             <div className="flex flex-wrap items-center gap-3">
               {/* Type selector with system Select */}
               <div className="flex items-center gap-2 text-[12px]">
-                <span className="font-medium text-muted shrink-0">Loại:</span>
+                <span className="font-medium text-muted shrink-0">{t('policyKB.table.cols.type', 'Loại')}:</span>
                 <Select
                   value={selectedType}
                   onChange={setSelectedType}
-                  options={DOC_TYPE_OPTIONS}
+                  options={docTypeOptions}
                   className="w-[185px]"
                 />
               </div>
 
               {/* Audience selector with system Select */}
               <div className="flex items-center gap-2 text-[12px]">
-                <span className="font-medium text-muted shrink-0">Đối tượng:</span>
+                <span className="font-medium text-muted shrink-0">{t('policyKB.table.cols.audience', 'Đối tượng')}:</span>
                 <Select
                   value={selectedAudience}
                   onChange={setSelectedAudience}
-                  options={AUDIENCE_OPTIONS}
+                  options={audienceOptions}
                   className="w-[185px]"
                 />
               </div>
 
               {/* Status selector with system Select */}
               <div className="flex items-center gap-2 text-[12px]">
-                <span className="font-medium text-muted shrink-0">Trạng thái:</span>
+                <span className="font-medium text-muted shrink-0">{t('policyKB.table.cols.status', 'Trạng thái')}:</span>
                 <Select
                   value={selectedStatus}
                   onChange={setSelectedStatus}
-                  options={STATUS_OPTIONS}
+                  options={statusOptions}
                   className="w-[155px]"
                 />
               </div>
@@ -595,7 +556,7 @@ export function PolicyKB() {
                           className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-0.5 font-mono text-[11px] font-bold ${badgeBg}`}
                         >
                           <IconTag size={11} />
-                          {DOC_TYPE_LABELS[doc.docType]}
+                          {docTypeLabels[doc.docType]}
                         </span>
 
                         <span className="inline-flex items-center gap-1 rounded-lg bg-chip px-2.5 py-0.5 text-[11px] font-medium text-body">
@@ -604,7 +565,7 @@ export function PolicyKB() {
                           ) : (
                             <IconUsers size={11} className="text-muted" />
                           )}
-                          {AUDIENCE_LABELS[doc.targetAudience]}
+                          {audienceLabels[doc.targetAudience]}
                         </span>
 
                         <span className="rounded-lg border border-line bg-canvas px-2 py-0.5 font-mono text-[10.5px] font-semibold text-muted">
@@ -614,16 +575,16 @@ export function PolicyKB() {
                         {doc.active ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-good-soft px-2.5 py-0.5 text-[10.5px] font-bold text-good-deep">
                             <span className="h-1.5 w-1.5 rounded-full bg-good animate-pulse" />
-                            Hiệu lực
+                            {t('policyKB.statusOptions.active', 'Hiệu lực')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded-full bg-line-3 px-2 py-0.5 text-[10.5px] font-medium text-faint">
-                            Bản nháp / Ẩn
+                            {t('policyKB.statusOptions.inactive', 'Bản nháp / Ẩn')}
                           </span>
                         )}
 
                         <span className="text-[11px] text-ghost">
-                          Hiệu lực từ: {formatDateVn(doc.effectiveFrom)}
+                          {t('policyKB.previewModal.effectiveDate', 'Hiệu lực từ:')} {formatDateVn(doc.effectiveFrom)}
                         </span>
                       </div>
 
@@ -661,7 +622,7 @@ export function PolicyKB() {
                           ))}
                           {doc.keywords.length > 5 && (
                             <span className="text-[11px] font-medium text-ghost">
-                              +{doc.keywords.length - 5} từ khóa
+                              +{doc.keywords.length - 5}
                             </span>
                           )}
                         </div>
@@ -676,7 +637,7 @@ export function PolicyKB() {
                         icon={<IconBook size={14} className="text-brand" />}
                         onClick={() => openPreview(doc)}
                       >
-                        Đọc toàn văn
+                        {t('policyKB.actions.viewMarkdown', 'Xem trước')}
                       </Button>
                       <Button
                         variant="secondary"
@@ -684,7 +645,7 @@ export function PolicyKB() {
                         icon={<IconEdit size={14} />}
                         onClick={() => openEdit(doc)}
                       >
-                        Sửa
+                        {t('policyKB.actions.edit', 'Sửa')}
                       </Button>
                       <Button
                         variant="ghost"
@@ -697,7 +658,7 @@ export function PolicyKB() {
                           }
                         }}
                       >
-                        Xóa
+                        {t('policyKB.actions.delete', 'Xóa')}
                       </Button>
                     </div>
                   </div>
@@ -724,10 +685,10 @@ export function PolicyKB() {
               <div>
                 <div className="mb-1 flex items-center gap-2">
                   <span className="rounded-md bg-brand-soft px-2 py-0.5 font-mono text-[11px] font-bold text-brand">
-                    {DOC_TYPE_LABELS[activeDoc.docType]}
+                    {docTypeLabels[activeDoc.docType]}
                   </span>
                   <span className="rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-body">
-                    {AUDIENCE_LABELS[activeDoc.targetAudience]}
+                    {audienceLabels[activeDoc.targetAudience]}
                   </span>
                   <span className="font-mono text-[11px] text-muted">v{activeDoc.version}</span>
                 </div>
@@ -862,21 +823,21 @@ export function PolicyKB() {
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-body">Loại văn bản</label>
+                <label className="mb-1 block text-[12px] font-semibold text-body">{t('policyKB.modal.typeLabel', 'Loại văn bản *')}</label>
                 <Select
                   value={formDocType}
                   disabled={Boolean(activeDoc)}
                   onChange={(val) => setFormDocType(val as LegalDocType)}
-                  options={FORM_DOC_TYPE_OPTIONS}
+                  options={formDocTypeOptions}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-body">Đối tượng áp dụng</label>
+                <label className="mb-1 block text-[12px] font-semibold text-body">{t('policyKB.modal.audienceLabel', 'Đối tượng áp dụng *')}</label>
                 <Select
                   value={formAudience}
                   onChange={(val) => setFormAudience(val as TargetAudience)}
-                  options={FORM_AUDIENCE_OPTIONS}
+                  options={formAudienceOptions}
                 />
               </div>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Card, IconShield, Modal, Skeleton, StatusPill } from '@chargeops/ui';
 import { formatDateVn, formatVnd, LICENSE_STATUS, useApi, type License } from '@chargeops/api';
@@ -15,6 +16,7 @@ export function LicenseHistoryDrawer({
   stationName,
   onClose,
 }: LicenseHistoryDrawerProps) {
+  const { t } = useTranslation('admin');
   const api = useApi();
 
   const { data: history, isLoading } = useQuery({
@@ -35,9 +37,12 @@ export function LicenseHistoryDrawer({
             <IconShield size={20} />
           </div>
           <div>
-            <div className="text-[16px] font-bold text-ink">Lịch sử License theo trạm</div>
+            <div className="text-[16px] font-bold text-ink">
+              {t('licenses.historyDrawer.title', 'Lịch sử License theo trạm')}
+            </div>
             <div className="text-[12px] text-muted">
-              {stationName || stationId} · Mã trạm: <span className="font-mono font-semibold">{stationId}</span>
+              {stationName || stationId} · {t('licenses.historyDrawer.stationCode', 'Mã trạm: ')}
+              <span className="font-mono font-semibold">{stationId}</span>
             </div>
           </div>
         </div>
@@ -53,7 +58,9 @@ export function LicenseHistoryDrawer({
             <Skeleton className="h-20 w-full rounded-[9px]" />
           </div>
         ) : items.length === 0 ? (
-          <div className="py-8 text-center text-[13px] text-faint">Chưa có lịch sử license cho trạm này.</div>
+          <div className="py-8 text-center text-[13px] text-faint">
+            {t('licenses.historyDrawer.empty', 'Chưa có lịch sử license cho trạm này.')}
+          </div>
         ) : (
           items.map((l) => {
             const meta = LICENSE_STATUS[l.status] || { label: l.status, tone: 'neutral' };
@@ -68,7 +75,9 @@ export function LicenseHistoryDrawer({
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[12px] font-bold text-brand">{l.licenseCode || l.id}</span>
                     <span className="rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-body">
-                      {isYear ? 'Gói Năm (1 năm)' : 'Gói Tháng (1 tháng)'}
+                      {isYear
+                        ? t('licenses.historyDrawer.planYearly', 'Gói Năm (1 năm)')
+                        : t('licenses.historyDrawer.planMonthly', 'Gói Tháng (1 tháng)')}
                     </span>
                   </div>
                   <StatusPill tone={meta.tone} label={meta.label} />
@@ -76,19 +85,19 @@ export function LicenseHistoryDrawer({
 
                 <div className="mt-2.5 grid grid-cols-2 gap-2 text-[12px] font-medium text-body border-t border-hairline pt-2">
                   <div>
-                    <span className="text-faint">Bắt đầu: </span>
+                    <span className="text-faint">{t('licenses.historyDrawer.start', 'Bắt đầu: ')}</span>
                     <span>{start ? formatDateVn(start) : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-faint">Hết hạn: </span>
+                    <span className="text-faint">{t('licenses.historyDrawer.expiry', 'Hết hạn: ')}</span>
                     <span className="font-semibold text-ink">{expiry ? formatDateVn(expiry) : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-faint">Phí ghi nhận: </span>
+                    <span className="text-faint">{t('licenses.historyDrawer.recordedFee', 'Phí ghi nhận: ')}</span>
                     <span className="font-semibold text-brand">{fee > 0 ? formatVnd(fee) : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-faint">Chủ trạm: </span>
+                    <span className="text-faint">{t('licenses.historyDrawer.owner', 'Chủ trạm: ')}</span>
                     <span className="text-muted">{l.ownerName || '—'}</span>
                   </div>
                 </div>

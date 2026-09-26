@@ -51,8 +51,14 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
   async function handleConfirm() {
     setCancelling(true);
     try {
-      const updated = await cancelBooking(booking.id);
+      const updated = await cancelBooking(booking.id, {
+        expectedVersion: booking.version,
+        expectedRefundAmount: refund.refundAmount,
+        acceptedPolicyVersion: booking.policyVersion,
+      });
       if (updated) onConfirmed(updated);
+    } catch (err: any) {
+      console.warn('Failed to cancel booking:', err);
     } finally {
       setCancelling(false);
     }

@@ -22,7 +22,69 @@ import type {
   StationOperationalStatusResponse,
   StationStaffMember,
   UserProfile,
+  RefundDetail,
+  RefundAttemptItem,
+  RefundStatus,
 } from '../types';
+
+function generateUuidV4(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function normalizeRefundAttempt(a: any): RefundAttemptItem {
+  const attemptId = a?.attemptId || a?.id || '';
+  return {
+    ...a,
+    id: attemptId,
+    attemptId,
+    sequenceNo: Number(a?.sequenceNo ?? 1),
+    executionMode: a?.executionMode ?? 'SIMULATOR',
+    status: a?.status ?? 'STARTED',
+    transferReference: a?.transferReference,
+    failureCode: a?.failureCode,
+    note: a?.note,
+    startedAt: a?.startedAt || new Date().toISOString(),
+    performedAt: a?.performedAt,
+    completedAt: a?.completedAt,
+    performedBy: a?.performedBy,
+  };
+}
+
+function normalizeRefundDetail(r: any): RefundDetail {
+  const refundId = r?.refundId || r?.id || '';
+  const rawAttempts = Array.isArray(r?.attempts) ? r.attempts : [];
+  return {
+    ...r,
+    id: refundId,
+    refundId,
+    bookingId: r?.bookingId || '',
+    bookingCode: r?.bookingCode,
+    driverId: r?.driverId,
+    driverName: r?.driverName,
+    stationName: r?.stationName,
+    ticketId: r?.ticketId,
+    amount: Number(r?.amount ?? 0),
+    currency: r?.currency ?? 'VND',
+    reason: r?.reason ?? 'VOLUNTARY_GRACE',
+    basisType: r?.basisType ?? 'BOOKING_CANCELLATION',
+    basisId: r?.basisId || '',
+    status: (r?.status as RefundStatus) ?? 'PENDING',
+    version: Number(r?.version ?? 0),
+    decisionAt: r?.decisionAt || new Date().toISOString(),
+    decidedBy: r?.decidedBy || '',
+    successfulAttemptId: r?.successfulAttemptId,
+    transferReference: r?.transferReference,
+    completedAt: r?.completedAt,
+    attempts: rawAttempts.map(normalizeRefundAttempt),
+  };
+}
 
 const STATION_DAY_TO_UI: Record<string, string> = {
   MONDAY: 'T2',
@@ -381,6 +443,56 @@ export function createRestServices(http: HttpClient): Services {
     transactions: {
       list: (params = {}) => http.get('/transactions', params),
       summary: () => http.get('/transactions/summary'),
+    },
+
+    refunds: {
+      list: async (params = {}) => {
+        const query: Record<string, any> = {};
+        if (params.status && params.status !== 'all') query.status = params.status;
+        if (params.search) query.search = params.search;
+        query.page = (params.page ?? 0) + 1;
+        query.size = params.pageSize ?? 10;
+        const res: any = await http.get('/admin/refunds', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+        return {
+          items: rawItems.map(normalizeRefundDetail),
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 10,
+        };
+      },
+      get: async (refundId) => {
+        const res: any = await http.get(`/admin/refunds/${refundId}`);
+        const data = res?.data ?? res;
+        return normalizeRefundDetail(data);
+      },
+      summary: async () => {
+        const res: any = await http.get('/admin/refunds', { page: 1, size: 1 });
+        const counts = res?.counts ?? res?.meta?.counts ?? res?.extra ?? {};
+        const pendingCount = Number(counts?.PENDING ?? 0);
+        const succeededCount = Number(counts?.SUCCEEDED ?? 0);
+        return {
+          totalPendingCount: pendingCount,
+          totalPendingAmountVnd: 0,
+          totalSucceededCount: succeededCount,
+          totalSucceededAmountVnd: 0,
+        };
+      },
+      execute: async (refundId, request, idempotencyKey) => {
+        const key = idempotencyKey || generateUuidV4();
+        const res: any = await http.post(
+          `/admin/refunds/${refundId}/execute`,
+          request,
+          { headers: { 'Idempotency-Key': key } },
+        );
+        const data = res?.data ?? res;
+        return normalizeRefundDetail(data);
+      },
     },
 
     licenses: {

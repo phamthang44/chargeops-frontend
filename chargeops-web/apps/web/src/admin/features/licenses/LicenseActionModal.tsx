@@ -42,11 +42,17 @@ export function LicenseActionModal({
 
   const config = {
     suspend: {
-      title: 'Tạm ngưng License',
-      subtitle: `Tạm ngưng quyền vận hành của License ${displayCode} thuộc trạm ${stationLabel}.`,
-      notice:
-        'Lưu ý: Thời hạn gói License vẫn tiếp tục trôi trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường.',
-      confirmBtn: 'Xác nhận tạm ngưng',
+      title: t('licenses.actionModal.suspend.title', 'Tạm ngưng License'),
+      subtitle: t('licenses.actionModal.suspend.subtitle', {
+        code: displayCode,
+        station: stationLabel,
+        defaultValue: `Tạm ngưng quyền vận hành của License ${displayCode} thuộc trạm ${stationLabel}.`,
+      }),
+      notice: t(
+        'licenses.actionModal.suspend.notice',
+        'Lưu ý: Thời hạn gói License vẫn tiếp tục trôi trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường.'
+      ),
+      confirmBtn: t('licenses.actionModal.suspend.confirmBtn', 'Xác nhận tạm ngưng'),
       confirmVariant: 'danger' as const,
       tone: 'warn' as const,
       presets: [
@@ -58,10 +64,17 @@ export function LicenseActionModal({
       ],
     },
     activate: {
-      title: 'Kích hoạt lại License',
-      subtitle: `Khôi phục trạng thái hoạt động cho License ${displayCode} thuộc trạm ${stationLabel}.`,
-      notice: `Thời hạn của gói tiếp tục có hiệu lực đến ${expiry ? formatDateVn(expiry) : 'hết hạn theo quy định'}. Trạm sẽ tự động hiển thị lại cho tài xế tìm kiếm và đặt chỗ nếu trạm đang ở trạng thái Hoạt động.`,
-      confirmBtn: 'Xác nhận kích hoạt lại',
+      title: t('licenses.actionModal.activate.title', 'Kích hoạt lại License'),
+      subtitle: t('licenses.actionModal.activate.subtitle', {
+        code: displayCode,
+        station: stationLabel,
+        defaultValue: `Khôi phục trạng thái hoạt động cho License ${displayCode} thuộc trạm ${stationLabel}.`,
+      }),
+      notice: t('licenses.actionModal.activate.notice', {
+        date: expiry ? formatDateVn(expiry) : 'hết hạn theo quy định',
+        defaultValue: `Thời hạn của gói tiếp tục có hiệu lực đến ${expiry ? formatDateVn(expiry) : 'hết hạn theo quy định'}. Trạm sẽ tự động hiển thị lại cho tài xế tìm kiếm và đặt chỗ nếu trạm đang ở trạng thái Hoạt động.`,
+      }),
+      confirmBtn: t('licenses.actionModal.activate.confirmBtn', 'Xác nhận kích hoạt lại'),
       confirmVariant: 'primary' as const,
       tone: 'good' as const,
       presets: [
@@ -72,11 +85,17 @@ export function LicenseActionModal({
       ],
     },
     cancel: {
-      title: 'Hủy bỏ License (Không thể hoàn tác)',
-      subtitle: `Chấm dứt hoàn toàn hiệu lực của License ${displayCode} thuộc trạm ${stationLabel}.`,
-      notice:
-        'CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). License này sẽ không thể khôi phục lại. Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã thanh toán trước đó vẫn được bảo toàn.',
-      confirmBtn: 'Xác nhận hủy License',
+      title: t('licenses.actionModal.cancel.title', 'Hủy bỏ License (Không thể hoàn tác)'),
+      subtitle: t('licenses.actionModal.cancel.subtitle', {
+        code: displayCode,
+        station: stationLabel,
+        defaultValue: `Chấm dứt hoàn toàn hiệu lực của License ${displayCode} thuộc trạm ${stationLabel}.`,
+      }),
+      notice: t(
+        'licenses.actionModal.cancel.notice',
+        'CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). License này sẽ không thể khôi phục lại. Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã thanh toán trước đó vẫn được bảo toàn.'
+      ),
+      confirmBtn: t('licenses.actionModal.cancel.confirmBtn', 'Xác nhận hủy License'),
       confirmVariant: 'danger' as const,
       tone: 'bad' as const,
       presets: [
@@ -203,7 +222,7 @@ export function LicenseActionModal({
 
       <div className="mt-5 flex gap-2.5">
         <Button variant="secondary" className="flex-1" onClick={handleClose} disabled={pending}>
-          Hủy bỏ
+          {t('licenses.actionModal.cancelBtn', 'Hủy bỏ')}
         </Button>
         <Button
           variant={config.confirmVariant}
@@ -211,7 +230,7 @@ export function LicenseActionModal({
           onClick={handleSubmit}
           disabled={pending}
         >
-          {pending ? 'Đang xử lý…' : config.confirmBtn}
+          {pending ? t('licenses.actionModal.processing', 'Đang xử lý…') : config.confirmBtn}
         </Button>
       </div>
     </Modal>

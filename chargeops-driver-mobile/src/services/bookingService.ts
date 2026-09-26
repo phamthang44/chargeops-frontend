@@ -399,6 +399,7 @@ export function mapListItemToBooking(item: DriverBookingListItem): Booking {
     chargingStartedAt: item.chargingStartedAt,
     actions: item.actions,
     refundAmount: item.actions?.refundableAmount,
+    version: item.version,
   };
 }
 
@@ -1368,20 +1369,85 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
   return simulateNetwork({ status, booking }, 1500);
 }
 
-export async function cancelBooking(id: string): Promise<Booking | null> {
-  // NOW: compute the refund (FR08 tiers incl. the grace-period override) for
-  // paid bookings, store it, flip the status. A still-unpaid (PENDING) booking
-  // refunds nothing — no money moved.
-  // LATER: POST /bookings/:id/cancel -> backend computes + disburses the refund.
+export async function cancelBooking(
+  id: string,
+  options?: {
+    expectedVersion?: number;
+    expectedRefundAmount?: number;
+    acceptedPolicyVersion?: string;
+  },
+): Promise<Booking | null> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken();
+    const idempotencyKey = generateIdempotencyKey();
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey,
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const currentBooking = await getBookingById(id);
+    if (!currentBooking) {
+      throw new BookingApiError('NOT_FOUND', 'Không tìm thấy thông tin đơn đặt chỗ.');
+    }
+
+    const refundBreakdown = computeRefund(currentBooking);
+    const expectedVersion = options?.expectedVersion ?? currentBooking.version ?? 0;
+    const expectedRefundAmount = Math.round(options?.expectedRefundAmount ?? refundBreakdown.refundAmount);
+    const acceptedPolicyVersion =
+      options?.acceptedPolicyVersion ?? currentBooking.policyVersion ?? 'booking-v4.9';
+
+    const body = {
+      expectedVersion,
+      expectedRefundAmount,
+      acceptedPolicyVersion,
+    };
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/bookings/${encodeURIComponent(id)}/cancel`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      const rawDetail: BookingDetailItem = json?.data ?? json;
+      return mapDetailItemToBooking(rawDetail);
+    }
+
+    const errJson = await res.json().catch(() => null);
+    const errObj = errJson?.error || errJson;
+    const code = errObj?.code || `HTTP_${res.status}`;
+    const message = errObj?.message || 'Không thể thực hiện hủy đặt chỗ.';
+    throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey);
+  }
+
+  // Fallback in-memory store
   const booking = store.find((b) => b.id === id);
   if (booking) {
     const breakdown = computeRefund(booking);
     const paid = booking.status === 'CONFIRMED';
+    const refundAmount = paid ? breakdown.refundAmount : 0;
     booking.refundPercent = paid ? breakdown.percent : 0;
-    booking.refundAmount = paid ? breakdown.refundAmount : 0;
+    booking.refundAmount = refundAmount;
     booking.status = 'CANCELLED';
     booking.cancelReason = 'DRIVER';
     booking.expiresAt = null;
+    if (refundAmount > 0) {
+      booking.refunds = [
+        {
+          refundId: `RF-${id}`,
+          amount: refundAmount,
+          reason: 'VOLUNTARY_GRACE',
+          status: 'PENDING',
+          needsReconciliation: false,
+          createdAt: new Date().toISOString(),
+        },
+      ];
+    }
   }
   return simulateNetwork(booking ?? null);
 }

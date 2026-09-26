@@ -97,12 +97,12 @@ export function Stations() {
   });
 
   const provinceOptions = useMemo(() => {
-    const opts = [{ value: 'all', label: 'Tất cả Tỉnh / Thành' }];
+    const opts = [{ value: 'all', label: t('stations.filters.allProvinces', 'Tất cả Tỉnh / Thành') }];
     if (provinces) {
       provinces.forEach((p) => opts.push({ value: p.code, label: p.name || p.fullName }));
     }
     return opts;
-  }, [provinces]);
+  }, [provinces, t]);
 
   const handleFilterChange = (newFilter: FilterKey) => {
     setFilter(newFilter);
@@ -139,8 +139,8 @@ export function Stations() {
       qc.invalidateQueries({ queryKey: ['admin', 'stations'] });
       toast(
         actionState?.type === 'suspend'
-          ? 'Đã tạm ngưng vận hành trạm sạc thành công.'
-          : 'Đã kích hoạt lại trạm sạc thành công.',
+          ? t('stations.toasts.suspendSuccess', 'Đã tạm ngưng vận hành trạm sạc thành công.')
+          : t('stations.toasts.reactivateSuccess', 'Đã kích hoạt lại trạm sạc thành công.'),
         'success',
       );
       setActionState(null);
@@ -161,13 +161,13 @@ export function Stations() {
 
   const tabs = useMemo<FilterTab<FilterKey>[]>(() => {
     return [
-      { key: 'all', label: 'Tất cả', count: filter === 'all' ? total : undefined },
-      { key: 'ACTIVE', label: 'Đang hoạt động', count: filter === 'ACTIVE' ? total : undefined },
-      { key: 'PENDING_APPROVAL', label: 'Chờ duyệt', count: filter === 'PENDING_APPROVAL' ? total : undefined },
-      { key: 'SUSPENDED', label: 'Tạm ngưng', count: filter === 'SUSPENDED' ? total : undefined },
-      { key: 'REJECTED', label: 'Từ chối', count: filter === 'REJECTED' ? total : undefined },
+      { key: 'all', label: t('stations.tabs.all', 'Tất cả'), count: filter === 'all' ? total : undefined },
+      { key: 'ACTIVE', label: t('stations.tabs.ACTIVE', 'Đang hoạt động'), count: filter === 'ACTIVE' ? total : undefined },
+      { key: 'PENDING_APPROVAL', label: t('stations.tabs.PENDING_APPROVAL', 'Chờ duyệt'), count: filter === 'PENDING_APPROVAL' ? total : undefined },
+      { key: 'SUSPENDED', label: t('stations.tabs.SUSPENDED', 'Tạm ngưng'), count: filter === 'SUSPENDED' ? total : undefined },
+      { key: 'REJECTED', label: t('stations.tabs.REJECTED', 'Từ chối'), count: filter === 'REJECTED' ? total : undefined },
     ];
-  }, [filter, total]);
+  }, [filter, total, t]);
 
   // If currently in drilldown provisioning workspace for a station
   if (provisioningStation) {
@@ -186,8 +186,8 @@ export function Stations() {
         {/* Page Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <PageHeader
-            title="Quản lý Trạm & Trụ Sạc"
-            subtitle="Trung tâm giám sát danh mục trạm sạc, cấp hạ tầng trụ & súng sạc (FR14), theo dõi giấy phép và can thiệp vận hành."
+            title={t('stations.pageTitle', 'Quản lý Trạm & Trụ Sạc')}
+            subtitle={t('stations.pageSubtitle', 'Trung tâm giám sát danh mục trạm sạc, cấp hạ tầng trụ & súng sạc (FR14), theo dõi giấy phép và can thiệp vận hành.')}
           />
           <Button
             variant="secondary"
@@ -197,7 +197,7 @@ export function Stations() {
             className="flex items-center gap-1.5"
           >
             <IconRefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
-            <span>Làm mới</span>
+            <span>{t('stations.refreshBtn', 'Làm mới')}</span>
           </Button>
         </div>
 
@@ -210,22 +210,22 @@ export function Stations() {
             {/* Top KPI Metric Cards */}
             <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
               <MetricCard
-                label="Tổng số trạm sạc"
+                label={t('stations.kpi.total', 'Tổng số trạm sạc')}
                 value={String(total)}
                 accent="#5b54e8"
               />
               <MetricCard
-                label="Đang vận hành"
+                label={t('stations.kpi.active', 'Đang vận hành')}
                 value={String(activeCount)}
                 accent="#0d8a5a"
               />
               <MetricCard
-                label="Tạm ngưng / Sự cố"
+                label={t('stations.kpi.suspended', 'Tạm ngưng / Sự cố')}
                 value={String(suspendedCount)}
                 accent="#9a6b16"
               />
               <MetricCard
-                label="Hồ sơ chờ duyệt"
+                label={t('stations.kpi.pending', 'Hồ sơ chờ duyệt')}
                 value={String(pendingCount)}
                 accent="#6366f1"
               />
@@ -256,7 +256,7 @@ export function Stations() {
                   <SearchInput
                     value={searchInput}
                     onChange={setSearchInput}
-                    placeholder="Tìm kiếm mã trạm, tên, chủ trạm..."
+                    placeholder={t('stations.filters.searchPlaceholder', 'Tìm kiếm mã trạm, tên, chủ trạm...')}
                   />
                 </div>
               </div>
@@ -271,14 +271,14 @@ export function Stations() {
                     className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                     style={{ gridTemplateColumns: GRID_COLS }}
                   >
-                    <span>MÃ TRẠM</span>
-                    <span>TÊN TRẠM & ĐỊA CHỈ</span>
-                    <span>CHỦ SỞ HỮU (CPO)</span>
-                    <span>QUY HOẠCH TRỤ</span>
-                    <span>GIẤY PHÉP</span>
-                    <span>TRẠNG THÁI</span>
-                    <span>NGÀY TẠO</span>
-                    <span className="text-right">THAO TÁC</span>
+                    <span>{t('stations.table.cols.code', 'MÃ TRẠM')}</span>
+                    <span>{t('stations.table.cols.nameAndAddress', 'TÊN TRẠM & ĐỊA CHỈ')}</span>
+                    <span>{t('stations.table.cols.host', 'CHỦ SỞ HỮU (CPO)')}</span>
+                    <span>{t('stations.table.cols.chargers', 'QUY HOẠCH TRỤ')}</span>
+                    <span>{t('licenses.title', 'GIẤY PHÉP')}</span>
+                    <span>{t('stations.table.cols.status', 'TRẠNG THÁI')}</span>
+                    <span>{t('stations.table.cols.createdAt', 'NGÀY TẠO')}</span>
+                    <span className="text-right">{t('stations.table.cols.actions', 'THAO TÁC')}</span>
                   </div>
 
                   {isLoading ? (
@@ -289,11 +289,11 @@ export function Stations() {
                     </div>
                   ) : rows.length === 0 ? (
                     <EmptyState
-                      title="Không có trạm sạc nào"
+                      title={t('stations.table.emptyTitle', 'Không có trạm sạc nào')}
                       description={
                         debouncedSearch || selectedProvince !== 'all' || filter !== 'all'
-                          ? 'Không tìm thấy kết quả phù hợp với điều kiện lọc hiện tại.'
-                          : 'Hệ thống chưa ghi nhận trạm sạc nào.'
+                          ? t('stations.table.empty', 'Không tìm thấy kết quả phù hợp với điều kiện lọc hiện tại.')
+                          : t('stations.table.emptyInitial', 'Hệ thống chưa ghi nhận trạm sạc nào.')
                       }
                       className="py-12"
                     />
@@ -404,19 +404,19 @@ function StationRow({
     const items: MoreMenuItem[] = [
       {
         key: 'detail',
-        label: 'Xem chi tiết 360°',
+        label: t('stations.actions.viewDetail', 'Xem chi tiết 360°'),
         icon: <IconInfo size={14} />,
         onClick: onSelect,
       },
       {
         key: 'provision',
-        label: 'Cấp & Cấu hình trụ (FR14)',
+        label: t('stations.actions.provisioning', 'Cấp & Cấu hình trụ (FR14)'),
         icon: <IconBolt size={14} />,
         onClick: onProvision,
       },
       {
         key: 'licenses',
-        label: 'Xem giấy phép License',
+        label: t('stations.actions.manageLicense', 'Xem giấy phép License'),
         icon: <IconShield size={14} />,
         onClick: () => navigate('/admin/licenses'),
       },
@@ -425,7 +425,7 @@ function StationRow({
     if (isActive) {
       items.push({
         key: 'suspend',
-        label: 'Tạm ngưng vận hành trạm',
+        label: t('stations.actions.suspend', 'Tạm ngưng vận hành trạm'),
         icon: <IconAlertTriangle size={14} />,
         onClick: onSuspend,
         tone: 'danger',
@@ -435,14 +435,14 @@ function StationRow({
     if (isSuspended) {
       items.push({
         key: 'reactivate',
-        label: 'Kích hoạt lại trạm sạc',
+        label: t('stations.actions.reactivate', 'Kích hoạt lại trạm sạc'),
         icon: <IconCheck size={14} />,
         onClick: onReactivate,
       });
     }
 
     return items;
-  }, [isActive, isSuspended, onSelect, onProvision, onSuspend, onReactivate, navigate]);
+  }, [isActive, isSuspended, onSelect, onProvision, onSuspend, onReactivate, navigate, t]);
 
   return (
     <div
@@ -459,7 +459,7 @@ function StationRow({
           type="button"
           onClick={handleCopy}
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-faint hover:bg-chip hover:text-ink transition"
-          title="Sao chép mã"
+          title={t('stations.drawer.copyCode', 'Sao chép mã')}
         >
           {copied ? <IconCheck size={12} className="text-good" /> : <span className="text-[11px] font-mono">⧉</span>}
         </button>
@@ -482,7 +482,7 @@ function StationRow({
       {/* Chủ sở hữu */}
       <div className="flex flex-col gap-0.5 min-w-0 pr-2">
         <span className="font-semibold text-ink text-[12px] truncate">
-          {s.ownerDisplayName || 'Chủ trạm'}
+          {s.ownerDisplayName || t('stations.table.cols.host', 'Chủ trạm')}
         </span>
         <span className="font-mono text-[10.5px] text-faint truncate">
           {s.ownerEmail || '—'}
@@ -492,10 +492,10 @@ function StationRow({
       {/* Quy hoạch trụ */}
       <div className="flex flex-col">
         <span className="font-bold text-ink text-[12px]">
-          {s.plannedChargePointCount ?? 0} Trụ
+          {s.plannedChargePointCount ?? 0} {t('provisioning.cpListTitle', 'Trụ sạc')}
         </span>
         <span className="text-[10.5px] text-faint">
-          Quy hoạch duyệt
+          {t('stations.table.cols.chargers', 'Quy hoạch')}
         </span>
       </div>
 
@@ -505,23 +505,23 @@ function StationRow({
           <>
             <div className="flex items-center">
               <span className="rounded bg-brand-soft px-1.5 py-0.2 text-[10px] font-bold text-brand">
-                {isYear ? 'Gói Năm' : 'Gói Tháng'}
+                {isYear ? t('licenses.historyDrawer.planYearly', 'Gói Năm') : t('licenses.historyDrawer.planMonthly', 'Gói Tháng')}
               </span>
             </div>
             <span className="text-[10px] text-muted truncate">
-              Đến {lic.expiresAt ? formatDateVn(lic.expiresAt) : '—'}
+              {lic.expiresAt ? formatDateVn(lic.expiresAt) : '—'}
             </span>
           </>
         ) : (
           <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-faint border border-line-2 w-fit">
-            Chưa cấp
+            {t('provisioning.filters.needsSetup', 'Chưa cấp')}
           </span>
         )}
       </div>
 
       {/* Trạng thái */}
       <div>
-        <StatusPill tone={meta.tone} label={meta.label} />
+        <StatusPill tone={meta.tone} label={t(`stations.status.${st}`, { defaultValue: meta.label })} />
       </div>
 
       {/* Ngày tạo */}
@@ -541,7 +541,7 @@ function StationRow({
           className="h-[28px] px-2 text-[11.5px] flex items-center gap-1 hover:border-brand"
         >
           <IconBolt size={12} className="text-brand" />
-          <span>Cấp trụ</span>
+          <span>{t('stations.actions.provisioningBtn', 'Cấp trụ')}</span>
         </Button>
 
         <MoreMenu items={menuItems} align="right" />

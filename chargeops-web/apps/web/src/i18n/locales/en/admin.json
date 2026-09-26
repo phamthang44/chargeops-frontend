@@ -99,6 +99,68 @@
         "badge": "Faulted",
         "action": "Inspect"
       }
+    },
+    "hub": {
+      "badge": "PLATFORM-WIDE MONITORING SYSTEM",
+      "title": "Admin Notification & Alert Center",
+      "subtitle": "Real-time monitoring of technical anomalies, station registration approvals, license compliance, and urgent support tickets.",
+      "simulateLabel": "Simulate Event:",
+      "simStation": "+ Station Reg",
+      "simOverheat": "+ Overheat",
+      "simTicket": "+ Ticket",
+      "simLicense": "+ Expired License"
+    },
+    "sim": {
+      "justNow": "Just now",
+      "stationTitle": "📋 New station registration ST-1020",
+      "stationSubtitle": "Station owner submitted application for charging station in Da Nang City.",
+      "reviewNow": "Review Now",
+      "overheatTitle": "🔥 ALARM: Dispenser #CHG-08 Overheating (74°C)",
+      "overheatSubtitle": "Tan Binh Station reports abnormal high temperature. Immediate inspection advised!",
+      "checkTech": "Technical Inspection",
+      "ticketTitle": "🎟️ Urgent driver assistance ticket #TK-9944",
+      "ticketSubtitle": "VinFast VF9 driver requires emergency connector release at Cau Giay Station.",
+      "urgent": "Urgent",
+      "openTicket": "Open Ticket",
+      "licenseTitle": "🛡️ Station operating license expired",
+      "licenseSubtitle": "License package for Nam Tu Liem Station has expired. Station automatically paused bookings.",
+      "viewLicenses": "View Licenses"
+    },
+    "mock": {
+      "item1": {
+        "title": "New station registration ST-1018 (Cau Giay Station)",
+        "subtitle": "Owner Pham Duc Thang submitted 4-dispenser dossier with Business License & Fire Safety.",
+        "time": "5 mins ago",
+        "badge": "Pending Review",
+        "action": "Review & Approve Now"
+      },
+      "item2": {
+        "title": "Dispenser Overheating Alert DC 120kW #CHG-02",
+        "subtitle": "CCS2 connector temp at Ha Dong Station exceeded 68°C. System automatically derated power.",
+        "time": "12 mins ago",
+        "action": "Inspect Dispenser"
+      },
+      "item3": {
+        "title": "Operating licenses expiring soon (3 stations)",
+        "subtitle": "Charging stations in Nam Tu Liem, District 7, and Hai Chau expire within 7 days.",
+        "time": "45 mins ago",
+        "badge": "License",
+        "action": "Manage Licenses"
+      },
+      "item4": {
+        "title": "Emergency driver support ticket #TK-802",
+        "subtitle": "Driver unable to unplug CCS2 connector at Thu Duc Station after charging ended.",
+        "time": "1 hour ago",
+        "badge": "High Priority",
+        "action": "Dispatch Support"
+      },
+      "item5": {
+        "title": "Policy Knowledge Base (RAG) update complete",
+        "subtitle": "Cancellation policies and idle fee rules successfully re-indexed and embedded.",
+        "time": "2 hours ago",
+        "badge": "RAG Knowledge",
+        "action": "View Policy Library"
+      }
     }
   },
   "rejectModal": {
@@ -299,79 +361,223 @@
     }
   },
   "licenses": {
-    "plans": {
-      "yearly": "Year",
-      "monthly": "Month",
-      "yearlyPlan": "Yearly Plan",
-      "monthlyPlan": "Monthly Plan"
-    },
     "toastRenewal": "Recorded license renewal for {{name}}",
-    "metrics": {
-      "total": "TOTAL LICENSES",
-      "active": "ACTIVE",
-      "expiring": "EXPIRING SOON",
-      "expired": "EXPIRED"
+    "updateSuccess": "License status updated successfully.",
+    "kpi": {
+      "total": "Total Licenses",
+      "active": "Active",
+      "renewalQueue": "Due for Renewal",
+      "totalFee": "Recorded License Fees"
     },
-    "error": "Failed to load licenses: {{message}}",
     "queue": {
       "title": "Renewal Queue",
-      "empty": "No licenses require renewal.",
-      "daysOverdue": "{{days}} days overdue",
+      "countBadge": "{{count}} stations",
+      "desc": "Active licenses with ≤ 30 days remaining or expired that need a new period.",
+      "empty": "All active stations have over 30 days remaining.",
+      "defaultOwner": "Station Owner",
+      "planMonth": "Monthly",
+      "planYear": "Yearly",
       "daysLeft": "{{days}} days left",
-      "recordRenewal": "Record Renewal"
+      "expired": "Expired",
+      "recordRenewalBtn": "Record Renewal",
+      "renewBtn": "Renew"
     },
-    "distribution": {
-      "title": "Plan Distribution",
-      "help": "Purchases/renewals are processed offline (per SRS). Admin records status here."
+    "tabs": {
+      "all": "All",
+      "ACTIVE": "Active",
+      "PENDING": "Pending",
+      "SUSPENDED": "Suspended",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled"
     },
+    "policyCard": {
+      "title": "Subscription License Policy",
+      "offPlatform": "Off-platform:",
+      "offPlatformDesc": "Station owners purchase or renew subscriptions directly with the operator.",
+      "inChargeOps": "In ChargeOps:",
+      "inChargeOpsDesc": "Admins verify payment details and record the plan to activate operating rights.",
+      "validity": "Validity:",
+      "validityDesc": "Stations with expired licenses automatically stop receiving new bookings ({{policy}}).",
+      "totalFeeRecorded": "Total recorded fees:"
+    },
+    "searchPlaceholder": "Search license code (LIC-...), station, owner…",
     "table": {
+      "refresh": "Refresh",
       "cols": {
-        "id": "ID",
+        "code": "LICENSE CODE",
         "station": "STATION",
         "owner": "OWNER",
         "plan": "PLAN",
-        "expires": "EXPIRES",
-        "remaining": "REMAINING",
+        "expiry": "EXPIRES",
         "status": "STATUS",
-        "action": "ACTION"
+        "period": "VALIDITY PERIOD",
+        "fee": "FEE",
+        "actions": "ACTIONS"
       },
-      "overdueVal": "{{days}} days overdue",
-      "daysLeftVal": "{{days}} days",
-      "renewBtn": "Renew"
+      "emptyTitle": "No Licenses Found",
+      "empty": "No license plans found in this section.",
+      "emptySearch": "No results matching keyword \"{{query}}\"."
     },
-    "actionModal": {
-      "reasonLabel": "Action Reason",
-      "reasonRequired": "Please enter a reason for this operation (at least 5 characters).",
-      "reasonPlaceholder": "Enter a detailed reason or pick from the preset suggestions below…",
-      "presetSuggestions": "Preset Operating Authority Reasons:",
-      "presets": {
-        "suspend": {
-          "safety": "Violation of charging station operational safety standards",
-          "compliance": "Pending supplementary verification of legal documents and safety certification",
-          "authority": "Suspension requested by regulatory authority / local government",
-          "ownerRequest": "Station owner proactively requested operational suspension",
-          "dispute": "Site lease dispute or breach of platform service agreement"
+    "menu": {
+      "detail": "View Details & History",
+      "suspend": "Suspend License",
+      "reactivate": "Reactivate License",
+      "activate": "Activate License",
+      "cancel": "Cancel License"
+    },
+    "row": {
+      "copyCode": "Copy code",
+      "copiedCode": "Copied license code",
+      "planYearly": "Yearly Plan",
+      "planMonthly": "Monthly Plan",
+      "daysLeft": "{{days}} days left",
+      "overdue": "{{days}} days overdue",
+      "expired": "Expired",
+      "renewBtn": "Renew",
+      "detailBtn": "Details"
+    },
+    "drawer": {
+      "title": "License Details",
+      "copyCodeTitle": "Copy License Code",
+      "copySuccess": "License Code",
+      "copyUuidSuccess": "Technical UUID",
+      "emptyTitle": "Information Not Found",
+      "emptyDesc": "This license does not exist or has been deleted.",
+      "planMonthly": "Monthly Plan (1 month)",
+      "planYearly": "Yearly Plan (12 months)",
+      "planStationYearly": "Yearly Plan",
+      "planStationMonthly": "Monthly Plan",
+      "overviewTitle": "Plan & Validity Details",
+      "stationLabel": "Station:",
+      "ownerLabel": "Owner",
+      "statusLabel": "Status",
+      "feeLabel": "Listed Fee (Snapshot)",
+      "startDateLabel": "Effective Start Date",
+      "expiryDateLabel": "Expiry Date",
+      "operatingValidity": "Operating Term:",
+      "statusExpired": "Expired ({{days}} days ago)",
+      "statusSuspended": "Suspended ({{days}} days remaining when restored)",
+      "statusPending": "Not yet effective",
+      "statusExpiringSoon": "Expiring Soon ({{days}} days left)",
+      "statusDaysLeft": "{{days}} days left",
+      "recordedAt": "Recorded on: {{date}}",
+      "recordedBy": "Recorded by: {{name}}",
+      "systemRecorded": "System",
+      "techId": "Technical ID (UUID):",
+      "copyUuidTitle": "Copy UUID",
+      "lifecycleTitle": "Lifecycle Actions",
+      "renewAction": "Renew for New Term",
+      "activateAction": "Activate License",
+      "suspendAction": "Suspend License",
+      "reactivateAction": "Reactivate License",
+      "cancelAction": "Cancel License",
+      "cancelledNote": "This license has been permanently cancelled and cannot be operated on.",
+      "tabStatusEvents": "Status Audit Log",
+      "tabStationPeriods": "Station License Periods",
+      "timelineSortAsc": "Lifecycle Flow (Oldest → Newest):",
+      "timelineSortDesc": "Event Log (Newest First):",
+      "toggleToDesc": "Switch: Newest First",
+      "toggleToAsc": "Switch: Oldest → Newest",
+      "emptyStatusEvents": "No status transition events recorded for this license.",
+      "currentState": "Current",
+      "stateTransition": "Status Transition:",
+      "reason": "Reason: ",
+      "performedBy": "Performed by: ",
+      "systemActor": "Automated System (SYSTEM)",
+      "adminActor": "Administrator",
+      "emptyPeriods": "Station has no other license history periods.",
+      "selectedPeriod": "Selected",
+      "periodValidity": "Validity: ",
+      "periodFee": "Fee: ",
+      "events": {
+        "ISSUED": {
+          "title": "License Issued",
+          "description": "Initial license profile created"
         },
-        "activate": {
-          "safetyFixed": "Station resolved violations and passed safety certification",
-          "complianceCompleted": "Completed supplementary submission of legal records and permits",
-          "authorityApproved": "Regulatory authority approved resumption of operations",
-          "ownerReopen": "Station owner completed remediation and requested operational reactivation"
+        "ACTIVATED": {
+          "title": "Operation Activated",
+          "description": "License active validity starts"
         },
-        "cancel": {
-          "contractTerminated": "Station owner terminated ChargeOps platform partnership agreement",
-          "siteClosed": "Permanent closure due to land clearance / site relocation",
-          "severeViolation": "Irremediable severe policy violation"
+        "SUSPENDED": {
+          "title": "License Suspended",
+          "description": "Station operating rights suspended"
+        },
+        "REACTIVATED": {
+          "title": "License Reactivated",
+          "description": "Commercial rights restored"
+        },
+        "CANCELLED": {
+          "title": "License Cancelled",
+          "description": "License permanently revoked"
+        },
+        "EXPIRED": {
+          "title": "Term Expired",
+          "description": "Validity period ended"
         }
       }
     },
-    "updateSuccess": "License status updated successfully.",
-    "copiedCode": "Copied License code"
+    "historyDrawer": {
+      "title": "Station License History",
+      "stationCode": "Station Code: ",
+      "empty": "No license history for this station.",
+      "planYearly": "Yearly Plan (1 year)",
+      "planMonthly": "Monthly Plan (1 month)",
+      "start": "Start: ",
+      "expiry": "Expires: ",
+      "recordedFee": "Recorded Fee: ",
+      "owner": "Owner: "
+    },
+    "actionModal": {
+      "suspend": {
+        "title": "Suspend License",
+        "subtitle": "Suspend operating rights for License {{code}} of station {{station}}.",
+        "notice": "Notice: The license term continues to elapse while suspended. The station will be hidden from driver apps and cease taking new bookings. Ongoing charging sessions and previously paid bookings will continue normally.",
+        "confirmBtn": "Confirm Suspension"
+      },
+      "activate": {
+        "title": "Reactivate License",
+        "subtitle": "Restore active status for License {{code}} of station {{station}}.",
+        "notice": "The term remains valid until {{date}}. The station will automatically reappear for drivers if it is currently operational.",
+        "confirmBtn": "Confirm Reactivation"
+      },
+      "cancel": {
+        "title": "Cancel License (Permanent)",
+        "subtitle": "Permanently terminate License {{code}} of station {{station}}.",
+        "notice": "WARNING: This is a terminal action and cannot be undone. The station will immediately stop accepting new bookings. Prior paid transactions remain intact.",
+        "confirmBtn": "Confirm Cancellation"
+      },
+      "presetSuggestions": "Standard reason presets by operational authority:",
+      "presets": {
+        "suspend": {
+          "safety": "Violation of charging station operating safety standards",
+          "compliance": "Pending legal documentation and safety inspection verification",
+          "authority": "Suspension requested by local authority or regulatory agency",
+          "ownerRequest": "Station owner requested voluntary operating suspension",
+          "dispute": "Site leasing dispute or service agreement breach"
+        },
+        "activate": {
+          "safetyFixed": "Station resolved violations and passed safety inspection",
+          "complianceCompleted": "Submitted full legal documentation and required permits",
+          "authorityApproved": "Regulatory authorities approved resumption of operations",
+          "ownerReopen": "Owner completed resolution and requested restoration of business rights"
+        },
+        "cancel": {
+          "contractTerminated": "Station owner terminated ChargeOps partnership contract",
+          "siteClosed": "Station permanently closed due to land reclamation or relocation",
+          "severeViolation": "Severe, irremediable policy violation"
+        }
+      },
+      "reasonLabel": "Action Reason (Required)",
+      "reasonPlaceholder": "Enter detailed reason or select a preset from above…",
+      "reasonRequired": "Please enter a reason for this action (at least 5 characters).",
+      "cancelBtn": "Cancel",
+      "processing": "Processing…"
+    }
   },
   "policyKB": {
     "toastSaved": "Saved & regenerated embeddings",
     "toastDeleted": "Deleted document",
-    "addDocBtn": "Add Document",
+    "addDocBtn": "Create Document",
     "error": "Failed to load policy library: {{message}}",
     "syncNote": "Embeddings in sync · updated 29/06",
     "categorySidebar": "CATEGORIES",
@@ -381,7 +587,87 @@
     "editBtn": "Edit",
     "deleteBtn": "Delete",
     "docsLabel": "DOCUMENTS",
-    "catsLabel": "CATEGORIES"
+    "catsLabel": "CATEGORIES",
+    "pageTitle": "Operational Policies & Legal Library",
+    "pageSubtitle": "Knowledge base managing legal documents, booking policies, refunds, and platform terms.",
+    "refreshBtn": "Refresh",
+    "kpi": {
+      "totalDocs": "Total Policies",
+      "activeDocs": "Active Policies",
+      "systemAudience": "System-wide",
+      "ragReady": "RAG Synced"
+    },
+    "docTypes": {
+      "all": "All Document Types",
+      "TERMS_OF_SERVICE": "Terms of Service",
+      "PRIVACY_POLICY": "Privacy Policy",
+      "LICENSE_AGREEMENT": "License Agreement",
+      "OPERATIONAL_REGULATION": "Operational Regulation"
+    },
+    "audiences": {
+      "all": "All Audiences",
+      "ALL": "System-wide (ALL)",
+      "DRIVER": "Drivers (DRIVER)",
+      "OWNER": "Station Hosts (OWNER)"
+    },
+    "statusOptions": {
+      "all": "All Statuses",
+      "active": "Active",
+      "inactive": "Draft / Archived"
+    },
+    "categories": {
+      "all": "All Documents",
+      "foundation": "Platform Legal Foundation",
+      "booking": "Booking & Pricing Rules",
+      "hardware": "Hardware & Operations",
+      "license": "License Agreements"
+    },
+    "table": {
+      "cols": {
+        "title": "TITLE / SLUG",
+        "type": "DOC TYPE",
+        "audience": "AUDIENCE",
+        "version": "VERSION / EFFECTIVE",
+        "status": "STATUS",
+        "actions": "ACTIONS"
+      },
+      "empty": "No policies match your search or filter."
+    },
+    "actions": {
+      "viewMarkdown": "Preview Markdown",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copySlug": "Copy Slug"
+    },
+    "previewModal": {
+      "title": "Policy Document Preview",
+      "slug": "Document Slug:",
+      "version": "Version:",
+      "effectiveDate": "Effective Date:",
+      "close": "Close"
+    },
+    "modal": {
+      "createTitle": "Create Policy Document",
+      "editTitle": "Edit Policy Document",
+      "titleLabel": "Document Title *",
+      "slugLabel": "Document Slug (URL-friendly) *",
+      "typeLabel": "Document Type *",
+      "audienceLabel": "Target Audience *",
+      "versionLabel": "Version (e.g. 1.0.0, 2026.1) *",
+      "effectiveDateLabel": "Effective Date *",
+      "statusLabel": "Publication Status",
+      "activeStatus": "Active (Effective across platform)",
+      "inactiveStatus": "Draft / Archived (Unpublished)",
+      "summaryLabel": "Policy Executive Summary",
+      "contentLabel": "Document Content (Markdown supported) *",
+      "cancelBtn": "Cancel",
+      "saveBtn": "Save Document",
+      "saving": "Saving…",
+      "validationTitle": "Please enter document title.",
+      "validationSlug": "Please enter valid slug (lowercase, numbers, hyphens only).",
+      "validationVersion": "Please enter document version.",
+      "validationContent": "Please enter document content."
+    }
   },
   "provisioning": {
     "submitting": "Creating...",
@@ -470,11 +756,17 @@
     "draftConnectorDeleteSuccess": "Deleted draft connector."
   },
   "transactions": {
+    "tabs": {
+      "list": "Transactions & Receipts",
+      "refundQueue": "Refund Queue (FE-19)"
+    },
     "methods": {
       "ATM": "ATM Card",
       "MOMO": "Momo",
       "VNPAY": "VNPay",
-      "title": "By Payment Method"
+      "title": "By Payment Method",
+      "subtitle": "Revenue distribution across payment methods",
+      "share": "Share: {{pct}}%"
     },
     "types": {
       "all": "All",
@@ -507,13 +799,126 @@
     },
     "metrics": {
       "gross": "GROSS REVENUE",
-      "payCountVal": "{{count}} payments",
-      "refunded": "REFUNDED",
+      "grossSub": "Total revenue processed across all payment gateways",
+      "payCountVal": "{{count}} transactions",
+      "refunded": "TOTAL REFUNDED",
+      "refundedSub": "Refunds issued for grace period cancellations or station faults",
       "refundCountVal": "{{count}} refunds",
       "net": "NET REVENUE",
-      "netDelta": "gross − refund",
-      "avg": "AVG TICKET",
-      "avgDelta": "per transaction"
+      "netSub": "Net settled cash flow after deducting all refunds",
+      "netDelta": "Net settleable",
+      "avg": "AVERAGE TICKET",
+      "avgSub": "Average transaction volume per completed charging session",
+      "avgDelta": "Avg per transaction"
+    },
+    "searchPlaceholder": "Search by transaction ID, booking code, station...",
+    "refreshBtn": "Refresh",
+    "exportBtn": "Export Data",
+    "liveFeed": "Real-time Cash Flow",
+    "copied": "Code copied"
+  },
+  "refunds": {
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "succeeded": "Succeeded"
+    },
+    "kpi": {
+      "pending": "PENDING REFUNDS",
+      "pendingDelta": "{{count}} refunds",
+      "succeeded": "SUCCEEDED",
+      "succeededDelta": "{{count}} completed",
+      "total": "TOTAL OBLIGATIONS",
+      "totalDelta": "{{count}} total",
+      "mode": "EXECUTION MODE",
+      "modeValue": "Simulator / Manual",
+      "modeDelta": "BR-PAY-08/13 Compliant"
+    },
+    "searchPlaceholder": "Search refund ID, booking, driver…",
+    "table": {
+      "cols": {
+        "id": "REFUND ID",
+        "booking": "BOOKING",
+        "station": "STATION",
+        "reason": "REASON",
+        "amount": "AMOUNT",
+        "status": "STATUS",
+        "date": "DATE",
+        "actions": "ACTIONS"
+      },
+      "empty": "No refunds match your filter.",
+      "attemptsCount": "x{{count}}",
+      "attemptsTitle": "{{count}} attempts",
+      "processBtn": "Execute Refund",
+      "viewDetailBtn": "View Details"
+    },
+    "reasons": {
+      "VOLUNTARY_GRACE": "10-min Grace (100%)",
+      "STATION_FAILURE": "Station Failure",
+      "EXCESS_PAYMENT": "Excess Payment"
+    },
+    "drawer": {
+      "title": "Refund Details",
+      "copyIdTitle": "Copy refund ID",
+      "amountLabel": "Refund Amount",
+      "statusLabel": "Status",
+      "statusPending": "PENDING EXECUTION",
+      "statusSucceeded": "SUCCEEDED (TERMINAL)",
+      "bookingCode": "Booking Code:",
+      "driverName": "Recipient Driver:",
+      "stationName": "Charging Station:",
+      "reasonLabel": "Refund Basis:",
+      "createdAt": "Created: {{date}}",
+      "version": "Version: v{{version}}",
+      "terminalBanner": "Refund completed successfully (Terminal State)",
+      "terminalDesc": "Bank transfer reference: {{ref}}. Completed at: {{time}}. No further execution allowed on this record.",
+      "tabExecute": "Execute Refund",
+      "tabInfo": "Execution Info",
+      "tabHistory": "Attempt History ({{count}})",
+      "modeLabel": "Execution Mode",
+      "modeSimulator": "Sandbox Simulator",
+      "modeSimulatorDesc": "For dev / test / demo. Does not call real banks.",
+      "modeManual": "Manual Record",
+      "modeManualDesc": "Transferred off-platform. Reconciliation ref required.",
+      "outcomeConfig": "Simulation Outcome Config:",
+      "outcomeSucceeded": "Success (SUCCEEDED)",
+      "outcomeFailed": "Simulated Failure (FAILED)",
+      "simRefLabel": "Simulated Reference (auto-generated if empty):",
+      "simRefPlaceholder": "e.g., SIM-REF-902184",
+      "manualRefLabel": "Bank Transfer Reference / Transaction ID",
+      "manualRefPlaceholder": "e.g., FT260925987123 / VCB1982736",
+      "manualRefHelp": "Enter reference number from bank transfer statement made to driver.",
+      "performedAtLabel": "Transfer Execution Time",
+      "noteLabel": "Execution Note / Reconciliation Reason",
+      "notePlaceholder": "Enter note explaining or justifying this refund execution…",
+      "noteDefaultGrace": "100% refund for voluntary cancellation within 10-minute grace period",
+      "noteDefaultFailure": "Refund due to charging station failure",
+      "protectionTitle": "Data Protection Principles (BR-PAY-13):",
+      "protectionPoint1": "Each execution request is accompanied by an Idempotency-Key to prevent duplicate submissions.",
+      "protectionPoint2": "If an attempt fails (FAILED), the refund remains in PENDING status. Driver rights are protected.",
+      "closeBtn": "Close",
+      "confirmSimulatorSuccess": "Execute Simulated Success",
+      "confirmSimulatorFailed": "Simulate Failure",
+      "confirmManual": "Confirm Manual Bank Transfer",
+      "submitting": "Executing…",
+      "validationManualRef": "Please enter Bank Transfer Reference.",
+      "validationPerformedAt": "Please select transfer execution time.",
+      "validationNote": "Please enter execution note / reconciliation reason.",
+      "toastSuccess": "Refund completed: Reference {{ref}}. Recorded {{amount}} refund.",
+      "toastFailed": "Recorded failed attempt (FAILED). Refund remains in PENDING status (BR-PAY-13).",
+      "toastErrorDefault": "An error occurred while executing the refund.",
+      "errorVersionConflict": "Refund data has changed on the server. Refreshing data...",
+      "errorAlreadySucceeded": "This refund obligation has already been executed successfully.",
+      "errorRequestConflict": "Request conflict with previous attempt execution."
+    },
+    "timeline": {
+      "empty": "No previous attempts. Refund is in initial state (awaiting Admin action).",
+      "title": "Execution Attempts ({{count}})",
+      "notice": "Preserves PENDING when FAILED (BR-PAY-13)",
+      "attemptNum": "Attempt #{{seq}}",
+      "reference": "Reference:",
+      "copyTitle": "Copy",
+      "errorCode": "Error Code:"
     }
   },
   "users": {
@@ -560,12 +965,140 @@
     "title": "Record License Renewal",
     "subtitle": "Create a new License term after verifying off-platform renewal payment.",
     "currentInfoTitle": "CURRENT LICENSE INFORMATION",
+    "licenseCode": "License Code:",
+    "station": "Station:",
+    "owner": "Owner:",
+    "currentExpiry": "Current Expiry:",
     "planLabel": "New renewal plan",
     "cancelBtn": "Cancel",
     "processing": "Recording…",
-    "confirmBtn": "Confirm Renewal"
+    "confirmBtn": "Confirm Renewal",
+    "immediately": "Immediately upon confirmation",
+    "validationVerified": "Please confirm that offline renewal payment has been verified.",
+    "monthly": "Monthly Plan",
+    "monthlyRate": "500k/mo",
+    "monthlyDesc": "Valid for 1 calendar month",
+    "yearly": "Yearly Plan",
+    "yearlyBadge": "-16.7% (Save 1M)",
+    "yearlyDesc": "Valid for 1 calendar year · 5,000,000 VND",
+    "feeLabel": "Listed fee by plan:",
+    "effectiveStartLabel": "New effective start date: ",
+    "effectiveStartHint": "This action records a new license period; it does not directly overwrite the current license.",
+    "verificationCheckbox": "I have reviewed and confirmed the station owner's offline license payment information."
   },
   "stations": {
-    "copiedCode": "Copied station code"
+    "copiedCode": "Copied station code",
+    "pageTitle": "Charging Stations & EVSEs",
+    "pageSubtitle": "System-wide charging station directory, EVSE provisioning (FR14), license monitoring and operational interventions.",
+    "refreshBtn": "Refresh",
+    "kpi": {
+      "total": "Total Stations",
+      "active": "Operational",
+      "suspended": "Suspended / Issues",
+      "pending": "Pending Approval"
+    },
+    "tabs": {
+      "all": "All",
+      "ACTIVE": "Active",
+      "PENDING_APPROVAL": "Pending Approval",
+      "SUSPENDED": "Suspended",
+      "REJECTED": "Rejected"
+    },
+    "filters": {
+      "allProvinces": "All Provinces",
+      "searchPlaceholder": "Search by station code, name, host..."
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "PENDING_APPROVAL": "Pending Approval",
+      "SUSPENDED": "Suspended",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "table": {
+      "cols": {
+        "code": "STATION CODE",
+        "nameAndAddress": "STATION NAME & ADDRESS",
+        "host": "HOST / OPERATOR",
+        "province": "PROVINCE",
+        "chargers": "CHARGERS / PORTS",
+        "status": "STATUS",
+        "createdAt": "CREATED DATE",
+        "actions": "ACTIONS"
+      },
+      "chargersCount": "{{chargePoints}} EVSEs · {{connectors}} ports",
+      "empty": "No stations match your search or filter."
+    },
+    "actions": {
+      "viewDetail": "View Details",
+      "provisioning": "Provisioning (FR14)",
+      "suspend": "Suspend Operation",
+      "reactivate": "Reactivate Station",
+      "manageLicense": "Manage License"
+    },
+    "toasts": {
+      "suspendSuccess": "Station operation suspended successfully.",
+      "reactivateSuccess": "Station reactivated successfully."
+    },
+    "modal": {
+      "suspendTitle": "Suspend Station Operation",
+      "reactivateTitle": "Reactivate Station",
+      "suspendConfirm": "Confirm Suspension",
+      "reactivateConfirm": "Confirm Reactivation",
+      "stationCode": "Station Code: {{code}} · Host: {{owner}}",
+      "suspendNotice": "When suspended, the station is hidden from driver search and new bookings are halted.",
+      "reactivateNotice": "The station will resume public active status if it holds a valid license.",
+      "suspendReasonLabel": "Suspension Reason *",
+      "reactivateReasonLabel": "Activation Notes / Reason",
+      "suspendReasonHint": "Required 5 - 500 characters",
+      "optionalHint": "Optional",
+      "suspendPlaceholder": "e.g., Suspended due to substation failure, scheduled maintenance...",
+      "reactivatePlaceholder": "e.g., Electrical safety inspection completed...",
+      "cancelBtn": "Cancel",
+      "validationReason": "Please enter a suspension reason (at least 5 characters)."
+    },
+    "drawer": {
+      "title": "Station Details",
+      "tabs": {
+        "overview": "Overview",
+        "owner": "Host & Legal",
+        "hardware": "Hardware & EVSEs",
+        "history": "Audit History"
+      },
+      "days": {
+        "MONDAY": "Monday",
+        "TUESDAY": "Tuesday",
+        "WEDNESDAY": "Wednesday",
+        "THURSDAY": "Thursday",
+        "FRIDAY": "Friday",
+        "SATURDAY": "Saturday",
+        "SUNDAY": "Sunday"
+      },
+      "status": {
+        "ACTIVE": "Operational",
+        "PENDING_APPROVAL": "Under Review",
+        "SUSPENDED": "Suspended Operation",
+        "REJECTED": "Application Rejected",
+        "WITHDRAWN": "Application Withdrawn"
+      },
+      "contact": "Contact Information",
+      "phone": "Phone:",
+      "email": "Email:",
+      "address": "Address:",
+      "operatingHours": "Operating Hours",
+      "licenseStatus": "License Status",
+      "amenities": "Surrounding Amenities",
+      "noAmenities": "No amenities listed",
+      "hardwareSummary": "EVSE & Connector Summary",
+      "emptyHardware": "No chargers configured for this station.",
+      "emptyHistory": "No status events recorded yet.",
+      "btnSuspend": "Suspend Station",
+      "btnReactivate": "Reactivate",
+      "btnProvisioning": "EVSE Provisioning (FR14)",
+      "btnLicense": "View License",
+      "closeBtn": "Close",
+      "copyCode": "Copy station code",
+      "copied": "Station code copied"
+    }
   }
 }

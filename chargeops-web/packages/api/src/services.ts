@@ -23,10 +23,14 @@ import type {
   ConnectorRuntimeStatus,
   ConnectorStatusEvent,
   ConnectorType,
+  ExecuteRefundRequest,
   IssueLicenseRequest,
   License,
   LicenseStatus,
   LicenseStatusEventDto,
+  RefundDetail,
+  RefundQueueSummary,
+  RefundStatus,
   RenewLicenseRequest,
   OperationalChargePointStatus,
   OwnerDashboard,
@@ -219,6 +223,23 @@ export interface TransactionService {
   summary(): Promise<TransactionSummary>;
 }
 
+export interface RefundService {
+  list(params?: {
+    status?: RefundStatus | 'all';
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<Page<RefundDetail>>;
+  get(refundId: string): Promise<RefundDetail>;
+  summary(): Promise<RefundQueueSummary>;
+  execute(
+    refundId: string,
+    request: ExecuteRefundRequest,
+    idempotencyKey?: string
+  ): Promise<RefundDetail>;
+}
+
+
 export interface LicenseService {
   /** Admin: issue an active license to a station (POST /stations/{stationId}/licenses). */
   issue(stationId: string, input: IssueLicenseRequest): Promise<License>;
@@ -391,6 +412,7 @@ export interface Services {
   connectors: ConnectorService;
   stations: StationService;
   transactions: TransactionService;
+  refunds: RefundService;
   licenses: LicenseService;
   users: UserService;
   staff: StaffService;

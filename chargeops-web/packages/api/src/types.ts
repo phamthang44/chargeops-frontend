@@ -770,6 +770,69 @@ export interface TransactionSummary {
   dailyTrend: DailyRevenuePoint[];
 }
 
+/* ---------- refunds (BKG-034 / FE-19) ---------- */
+
+export type RefundStatus = 'PENDING' | 'SUCCEEDED';
+export type TransferExecutionMode = 'SIMULATOR' | 'MANUAL_RECORD';
+export type TransferAttemptStatus = 'STARTED' | 'SUCCEEDED' | 'FAILED';
+
+export interface RefundAttemptItem {
+  id: string;
+  attemptId?: string;
+  sequenceNo: number;
+  executionMode: TransferExecutionMode;
+  requestKey?: string;
+  status: TransferAttemptStatus;
+  providerRefundId?: string;
+  transferReference?: string;
+  failureCode?: string;
+  note?: string;
+  startedAt: string;
+  performedAt?: string;
+  completedAt?: string;
+  performedBy?: string;
+}
+
+export interface RefundDetail {
+  id: string;
+  refundId?: string;
+  bookingId: string;
+  bookingCode?: string;
+  driverId?: string;
+  driverName?: string;
+  stationName?: string;
+  ticketId?: string;
+  amount: number;
+  currency: string;
+  reason: 'VOLUNTARY_GRACE' | 'STATION_FAILURE' | 'EXCESS_PAYMENT' | 'LATE_PAYMENT' | 'UNAPPLIED_PAYMENT' | string;
+  basisType: string;
+  basisId: string;
+  status: RefundStatus;
+  version: number;
+  decisionAt: string;
+  decidedBy: string;
+  successfulAttemptId?: string;
+  transferReference?: string;
+  completedAt?: string;
+  attempts?: RefundAttemptItem[];
+}
+
+export interface ExecuteRefundRequest {
+  expectedVersion: number;
+  executionMode: TransferExecutionMode;
+  outcome: 'SUCCEEDED' | 'FAILED';
+  transferReference?: string;
+  performedAt?: string;
+  note: string;
+}
+
+export interface RefundQueueSummary {
+  totalPendingCount: number;
+  totalPendingAmountVnd: number;
+  totalSucceededCount: number;
+  totalSucceededAmountVnd: number;
+}
+
 /* ---------- pricing & hours (FR11) ---------- */
 
 /** One day's operating window. open/close are "HH:mm"; ignored when closed. */

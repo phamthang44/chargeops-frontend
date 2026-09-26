@@ -99,6 +99,68 @@
         "badge": "Sự cố trụ",
         "action": "Kiểm tra"
       }
+    },
+    "hub": {
+      "badge": "HỆ THỐNG GIÁM SÁT TOÀN NỀN TẢNG",
+      "title": "Trung tâm Thông báo & Cảnh báo Admin",
+      "subtitle": "Theo dõi sự cố kỹ thuật theo thời gian thực, hồ sơ đăng ký trạm chờ duyệt, trạng thái giấy phép và vé hỗ trợ khẩn cấp.",
+      "simulateLabel": "Mô phỏng sự kiện:",
+      "simStation": "+ Đăng ký trạm",
+      "simOverheat": "+ Quá nhiệt",
+      "simTicket": "+ Ticket",
+      "simLicense": "+ Hết hạn License"
+    },
+    "sim": {
+      "justNow": "Vừa xong",
+      "stationTitle": "📋 Hồ sơ đăng ký trạm mới ST-1020",
+      "stationSubtitle": "Chủ trạm vừa hoàn tất gửi hồ sơ đăng ký trạm sạc tại TP. Đà Nẵng.",
+      "reviewNow": "Xét duyệt ngay",
+      "overheatTitle": "🔥 BÁO ĐỘNG: Quá nhiệt Trụ #CHG-08 (74°C)",
+      "overheatSubtitle": "Trạm Tân Bình báo động nhiệt độ cao bất thường. Đề nghị ngắt điện kiểm tra!",
+      "checkTech": "Kiểm tra kỹ thuật",
+      "ticketTitle": "🎟️ Khiếu nại tài xế cần hỗ trợ #TK-9944",
+      "ticketSubtitle": "Tài xế VinFast VF9 cần mở khóa trụ sạc khẩn cấp tại Trạm Cầu Giấy.",
+      "urgent": "Khẩn cấp",
+      "openTicket": "Mở chi tiết vé",
+      "licenseTitle": "🛡️ Giấy phép trạm sạc đã hết hạn",
+      "licenseSubtitle": "Gói License của Trạm Nam Từ Liêm đã hết hạn sử dụng. Trạm đã tự ngắt nhận đặt chỗ.",
+      "viewLicenses": "Xem danh sách Giấy phép"
+    },
+    "mock": {
+      "item1": {
+        "title": "Hồ sơ đăng ký trạm mới ST-1018 (Trạm Cầu Giấy)",
+        "subtitle": "Chủ trạm Phạm Đức Thắng vừa gửi hồ sơ 4 trụ sạc kèm Giấy phép kinh doanh & PCCC.",
+        "time": "5 phút trước",
+        "badge": "Chờ duyệt",
+        "action": "Xem & Phê duyệt ngay"
+      },
+      "item2": {
+        "title": "Cảnh báo quá nhiệt trụ sạc DC 120kW #CHG-02",
+        "subtitle": "Nhiệt độ đầu súng CCS2 tại Trạm Hà Đông vượt ngưỡng 68°C. Hệ thống đã tự động giới hạn dòng sạc.",
+        "time": "12 phút trước",
+        "action": "Kiểm tra cấp trụ"
+      },
+      "item3": {
+        "title": "Giấy phép vận hành trạm sắp hết hạn (3 trạm)",
+        "subtitle": "Các trạm sạc tại Nam Từ Liêm, Quận 7 và Hải Châu sẽ hết hạn gói License trong 7 ngày tới.",
+        "time": "45 phút trước",
+        "badge": "Giấy phép",
+        "action": "Quản lý Giấy phép"
+      },
+      "item4": {
+        "title": "Vé hỗ trợ sự cố khẩn cấp #TK-802 từ tài xế",
+        "subtitle": "Tài xế báo lỗi không thể rút đầu sạc tại Trạm Thủ Đức sau khi phiên sạc kết thúc.",
+        "time": "1 giờ trước",
+        "badge": "Ưu tiên cao",
+        "action": "Điều phối hỗ trợ"
+      },
+      "item5": {
+        "title": "Cập nhật Kho chính sách (Policy RAG) hoàn tất",
+        "subtitle": "Tài liệu quy định hủy đặt chỗ và phạt chiếm dụng trụ sạc đã được tái tạo embedding thành công.",
+        "time": "2 giờ trước",
+        "badge": "Tri thức RAG",
+        "action": "Xem kho chính sách"
+      }
     }
   },
   "rejectModal": {
@@ -299,50 +361,191 @@
     }
   },
   "licenses": {
-    "plans": {
-      "yearly": "Năm",
-      "monthly": "Tháng",
-      "yearlyPlan": "Gói Năm",
-      "monthlyPlan": "Gói Tháng"
+    "toastRenewal": "Đã ghi nhận gia hạn License cho {{name}}",
+    "updateSuccess": "Thao tác cập nhật trạng thái License thành công.",
+    "kpi": {
+      "total": "Tổng số License",
+      "active": "Đang hoạt động",
+      "renewalQueue": "Cần gia hạn / Xử lý",
+      "totalFee": "Phí License đã ghi nhận"
     },
-    "toastRenewal": "Đã ghi nhận gia hạn {{name}}",
-    "metrics": {
-      "total": "TỔNG GIẤY PHÉP",
-      "active": "ĐANG HOẠT ĐỘNG",
-      "expiring": "SẮP HẾT HẠN",
-      "expired": "ĐÃ HẾT HẠN"
-    },
-    "error": "Không tải được giấy phép: {{message}}",
     "queue": {
       "title": "Hàng đợi gia hạn",
-      "empty": "Không có giấy phép nào cần gia hạn.",
-      "daysOverdue": "Quá {{days}} ngày",
+      "countBadge": "{{count}} trạm",
+      "desc": "Các License đang hoạt động còn ≤ 30 ngày hoặc đã hết hạn cần tạo kỳ hạn mới.",
+      "empty": "Tất cả các trạm đang hoạt động đều có hạn trên 30 ngày.",
+      "defaultOwner": "Chủ trạm",
+      "planMonth": "Gói Tháng",
+      "planYear": "Gói Năm",
       "daysLeft": "Còn {{days}} ngày",
-      "recordRenewal": "Ghi nhận gia hạn"
-    },
-    "distribution": {
-      "title": "Phân bổ gói",
-      "help": "Mua/gia hạn xử lý ngoài nền tảng (theo SRS). Quản trị viên ghi nhận trạng thái tại đây."
-    },
-    "table": {
-      "cols": {
-        "id": "MÃ",
-        "station": "TRẠM",
-        "owner": "CHỦ TRẠM",
-        "plan": "GÓI",
-        "expires": "HẾT HẠN",
-        "remaining": "CÒN LẠI",
-        "status": "TRẠNG THÁI",
-        "action": "HÀNH ĐỘNG"
-      },
-      "overdueVal": "Quá {{days}} ngày",
-      "daysLeftVal": "{{days}} ngày",
+      "expired": "Đã hết hạn",
+      "recordRenewalBtn": "Ghi nhận gia hạn",
       "renewBtn": "Gia hạn"
     },
+    "tabs": {
+      "all": "Tất cả",
+      "ACTIVE": "Hoạt động",
+      "PENDING": "Chờ hiệu lực",
+      "SUSPENDED": "Tạm ngưng",
+      "EXPIRED": "Hết hạn",
+      "CANCELLED": "Đã hủy"
+    },
+    "policyCard": {
+      "title": "Quy định Subscription License",
+      "offPlatform": "Ngoài nền tảng:",
+      "offPlatformDesc": "Chủ trạm thanh toán mua hoặc gia hạn gói trực tiếp với đơn vị vận hành.",
+      "inChargeOps": "Trong ChargeOps:",
+      "inChargeOpsDesc": "Admin xác minh thông tin và ghi nhận gói để kích hoạt quyền vận hành trạm.",
+      "validity": "Hiệu lực:",
+      "validityDesc": "Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới ({{policy}}).",
+      "totalFeeRecorded": "Tổng phí đã ghi nhận:"
+    },
+    "searchPlaceholder": "Tìm mã License (LIC-...), trạm, chủ trạm…",
+    "table": {
+      "refresh": "Làm mới",
+      "cols": {
+        "code": "MÃ LICENSE",
+        "station": "TRẠM SẠC",
+        "owner": "CHỦ SỞ HỮU",
+        "plan": "GÓI HẠN",
+        "expiry": "HẾT HẠN",
+        "status": "TRẠNG THÁI",
+        "period": "KỲ HIỆU LỰC",
+        "fee": "MỨC PHÍ",
+        "actions": "THAO TÁC"
+      },
+      "emptyTitle": "Không tìm thấy License",
+      "empty": "Chưa có gói giấy phép nào trong mục này.",
+      "emptySearch": "Không có kết quả nào khớp với từ khóa \"{{query}}\"."
+    },
+    "menu": {
+      "detail": "Xem chi tiết & Lịch sử",
+      "suspend": "Tạm ngưng License",
+      "reactivate": "Kích hoạt lại License",
+      "activate": "Kích hoạt License",
+      "cancel": "Hủy bỏ License"
+    },
+    "row": {
+      "copyCode": "Sao chép mã",
+      "copiedCode": "Đã sao chép mã License",
+      "planYearly": "Gói Năm",
+      "planMonthly": "Gói Tháng",
+      "daysLeft": "Còn {{days}} ngày",
+      "overdue": "Quá hạn {{days}} ngày",
+      "expired": "Đã hết hạn",
+      "renewBtn": "Gia hạn",
+      "detailBtn": "Chi tiết"
+    },
+    "drawer": {
+      "title": "Chi tiết License",
+      "copyCodeTitle": "Sao chép mã License",
+      "copySuccess": "Mã License",
+      "copyUuidSuccess": "UUID kỹ thuật",
+      "emptyTitle": "Không tìm thấy thông tin",
+      "emptyDesc": "Giấy phép này không tồn tại hoặc đã bị xóa.",
+      "planMonthly": "Gói Tháng (1 tháng)",
+      "planYearly": "Gói Năm (12 tháng)",
+      "planStationYearly": "Gói Năm",
+      "planStationMonthly": "Gói Tháng",
+      "overviewTitle": "Thông tin gói & Hiệu lực",
+      "stationLabel": "Trạm sạc:",
+      "ownerLabel": "Chủ sở hữu",
+      "statusLabel": "Trạng thái",
+      "feeLabel": "Mức phí niêm yết (Snapshot)",
+      "startDateLabel": "Ngày bắt đầu hiệu lực",
+      "expiryDateLabel": "Ngày hết hạn",
+      "operatingValidity": "Thời hạn vận hành:",
+      "statusExpired": "Đã hết hạn ({{days}} ngày trước)",
+      "statusSuspended": "Đang tạm ngưng (còn {{days}} ngày khi khôi phục)",
+      "statusPending": "Chưa đến thời điểm hiệu lực",
+      "statusExpiringSoon": "Sắp hết hạn (Còn {{days}} ngày)",
+      "statusDaysLeft": "Còn {{days}} ngày",
+      "recordedAt": "Ghi nhận ngày: {{date}}",
+      "recordedBy": "Người ghi nhận: {{name}}",
+      "systemRecorded": "Hệ thống",
+      "techId": "Technical ID (UUID):",
+      "copyUuidTitle": "Sao chép UUID",
+      "lifecycleTitle": "Thao tác vòng đời (Lifecycle Actions)",
+      "renewAction": "Gia hạn kỳ mới",
+      "activateAction": "Kích hoạt License",
+      "suspendAction": "Tạm ngưng License",
+      "reactivateAction": "Kích hoạt lại License",
+      "cancelAction": "Hủy bỏ License",
+      "cancelledNote": "Giấy phép này đã bị hủy vĩnh viễn và không thể thao tác thêm.",
+      "tabStatusEvents": "Nhật ký trạng thái",
+      "tabStationPeriods": "Các kỳ License của trạm",
+      "timelineSortAsc": "Tiến trình vòng đời (Cũ → Mới):",
+      "timelineSortDesc": "Nhật ký sự kiện (Mới nhất trước):",
+      "toggleToDesc": "Đổi: Mới nhất trước",
+      "toggleToAsc": "Đổi: Cũ → Mới (Tiến trình)",
+      "emptyStatusEvents": "Chưa có sự kiện trạng thái nào được ghi nhận cho License này.",
+      "currentState": "Hiện tại",
+      "stateTransition": "Chuyển trạng thái:",
+      "reason": "Lý do: ",
+      "performedBy": "Người thực hiện: ",
+      "systemActor": "Hệ thống tự động (SYSTEM)",
+      "adminActor": "Quản trị viên",
+      "emptyPeriods": "Trạm chưa có lịch sử các kỳ License khác.",
+      "selectedPeriod": "Đang chọn",
+      "periodValidity": "Hiệu lực: ",
+      "periodFee": "Phí: ",
+      "events": {
+        "ISSUED": {
+          "title": "Cấp phát License",
+          "description": "Khởi tạo hồ sơ License ban đầu"
+        },
+        "ACTIVATED": {
+          "title": "Kích hoạt vận hành",
+          "description": "License bắt đầu hiệu lực hoạt động"
+        },
+        "SUSPENDED": {
+          "title": "Tạm ngưng License",
+          "description": "Tạm dừng quyền vận hành của trạm"
+        },
+        "REACTIVATED": {
+          "title": "Kích hoạt lại License",
+          "description": "Khôi phục quyền kinh doanh"
+        },
+        "CANCELLED": {
+          "title": "Hủy bỏ License",
+          "description": "Hủy giấy phép vĩnh viễn"
+        },
+        "EXPIRED": {
+          "title": "Hết hạn hiệu lực",
+          "description": "Kỳ hạn kết thúc"
+        }
+      }
+    },
+    "historyDrawer": {
+      "title": "Lịch sử License theo trạm",
+      "stationCode": "Mã trạm: ",
+      "empty": "Chưa có lịch sử license cho trạm này.",
+      "planYearly": "Gói Năm (1 năm)",
+      "planMonthly": "Gói Tháng (1 tháng)",
+      "start": "Bắt đầu: ",
+      "expiry": "Hết hạn: ",
+      "recordedFee": "Phí ghi nhận: ",
+      "owner": "Chủ trạm: "
+    },
     "actionModal": {
-      "reasonLabel": "Lý do thao tác",
-      "reasonRequired": "Vui lòng nhập lý do thực hiện thao tác này (tối thiểu 5 ký tự).",
-      "reasonPlaceholder": "Nhập lý do chi tiết hoặc chọn nhanh từ các gợi ý bên dưới…",
+      "suspend": {
+        "title": "Tạm ngưng License",
+        "subtitle": "Tạm ngưng quyền vận hành của License {{code}} thuộc trạm {{station}}.",
+        "notice": "Lưu ý: Thời hạn gói License vẫn tiếp tục trôi trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường.",
+        "confirmBtn": "Xác nhận tạm ngưng"
+      },
+      "activate": {
+        "title": "Kích hoạt lại License",
+        "subtitle": "Khôi phục trạng thái hoạt động cho License {{code}} thuộc trạm {{station}}.",
+        "notice": "Thời hạn của gói tiếp tục có hiệu lực đến {{date}}. Trạm sẽ tự động hiển thị lại cho tài xế tìm kiếm và đặt chỗ nếu trạm đang ở trạng thái Hoạt động.",
+        "confirmBtn": "Xác nhận kích hoạt lại"
+      },
+      "cancel": {
+        "title": "Hủy bỏ License (Không thể hoàn tác)",
+        "subtitle": "Chấm dứt hoàn toàn hiệu lực của License {{code}} thuộc trạm {{station}}.",
+        "notice": "CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). License này sẽ không thể khôi phục lại. Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã thanh toán trước đó vẫn được bảo toàn.",
+        "confirmBtn": "Xác nhận hủy License"
+      },
       "presetSuggestions": "Gợi ý lý do chuẩn theo thẩm quyền vận hành:",
       "presets": {
         "suspend": {
@@ -363,15 +566,18 @@
           "siteClosed": "Trạm dừng hoạt động vĩnh viễn do giải tỏa/thu hồi mặt bằng",
           "severeViolation": "Vi phạm nghiêm trọng chính sách không thể khắc phục"
         }
-      }
-    },
-    "updateSuccess": "Thao tác cập nhật trạng thái License thành công.",
-    "copiedCode": "Đã sao chép mã License"
+      },
+      "reasonLabel": "Lý do thao tác (Bắt buộc)",
+      "reasonPlaceholder": "Nhập lý do chi tiết hoặc chọn nhanh từ các gợi ý bên trên…",
+      "reasonRequired": "Vui lòng nhập lý do thực hiện thao tác này (tối thiểu 5 ký tự).",
+      "cancelBtn": "Hủy bỏ",
+      "processing": "Đang xử lý…"
+    }
   },
   "policyKB": {
     "toastSaved": "Đã lưu & tái tạo embedding",
     "toastDeleted": "Đã xóa tài liệu",
-    "addDocBtn": "Thêm tài liệu",
+    "addDocBtn": "Tạo văn bản mới",
     "error": "Không tải được kho chính sách: {{message}}",
     "syncNote": "Embedding đồng bộ · cập nhật 29/06",
     "categorySidebar": "DANH MỤC",
@@ -381,7 +587,87 @@
     "editBtn": "Sửa",
     "deleteBtn": "Xóa",
     "docsLabel": "TÀI LIỆU",
-    "catsLabel": "DANH MỤC"
+    "catsLabel": "DANH MỤC",
+    "pageTitle": "Kho Văn bản & Chính sách Vận hành",
+    "pageSubtitle": "Cơ sở tri thức quản lý các văn bản pháp lý, chính sách đặt chỗ, hoàn tiền và quy chế nền tảng.",
+    "refreshBtn": "Làm mới",
+    "kpi": {
+      "totalDocs": "Tổng số văn bản",
+      "activeDocs": "Đang hiệu lực",
+      "systemAudience": "Toàn hệ thống",
+      "ragReady": "Sẵn sàng RAG"
+    },
+    "docTypes": {
+      "all": "Tất cả loại văn bản",
+      "TERMS_OF_SERVICE": "Điều khoản dịch vụ",
+      "PRIVACY_POLICY": "Chính sách bảo mật",
+      "LICENSE_AGREEMENT": "Thỏa thuận License",
+      "OPERATIONAL_REGULATION": "Quy chế vận hành"
+    },
+    "audiences": {
+      "all": "Tất cả đối tượng",
+      "ALL": "Toàn hệ thống (ALL)",
+      "DRIVER": "Tài xế (DRIVER)",
+      "OWNER": "Chủ trạm (OWNER)"
+    },
+    "statusOptions": {
+      "all": "Tất cả trạng thái",
+      "active": "Đang hiệu lực",
+      "inactive": "Bản nháp / Ẩn"
+    },
+    "categories": {
+      "all": "Tất cả văn bản",
+      "foundation": "Pháp lý nền tảng",
+      "booking": "Đặt chỗ & Biểu giá",
+      "hardware": "Vận hành & Phần cứng",
+      "license": "Thỏa thuận License"
+    },
+    "table": {
+      "cols": {
+        "title": "TIÊU ĐỀ / MÃ VĂN BẢN",
+        "type": "LOẠI VĂN BẢN",
+        "audience": "ĐỐI TƯỢNG",
+        "version": "PHIÊN BẢN / HIỆU LỰC",
+        "status": "TRẠNG THÁI",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Không tìm thấy văn bản chính sách nào khớp với bộ lọc."
+    },
+    "actions": {
+      "viewMarkdown": "Xem trước Markdown",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "copySlug": "Sao chép Slug"
+    },
+    "previewModal": {
+      "title": "Xem trước tài liệu chính sách",
+      "slug": "Mã văn bản (Slug):",
+      "version": "Phiên bản:",
+      "effectiveDate": "Ngày hiệu lực:",
+      "close": "Đóng"
+    },
+    "modal": {
+      "createTitle": "Thêm văn bản chính sách mới",
+      "editTitle": "Chỉnh sửa văn bản chính sách",
+      "titleLabel": "Tiêu đề văn bản *",
+      "slugLabel": "Slug nhận diện (URL-friendly) *",
+      "typeLabel": "Loại văn bản *",
+      "audienceLabel": "Đối tượng áp dụng *",
+      "versionLabel": "Phiên bản (vd: 1.0.0, 2026.1) *",
+      "effectiveDateLabel": "Ngày bắt đầu có hiệu lực *",
+      "statusLabel": "Trạng thái công khai",
+      "activeStatus": "Đang hiệu lực (Áp dụng trên toàn nền tảng)",
+      "inactiveStatus": "Bản nháp / Lưu trữ (Chưa công bố)",
+      "summaryLabel": "Tóm tắt nội dung chính sách",
+      "contentLabel": "Nội dung văn bản (Hỗ trợ Markdown) *",
+      "cancelBtn": "Hủy bỏ",
+      "saveBtn": "Lưu văn bản",
+      "saving": "Đang lưu…",
+      "validationTitle": "Vui lòng nhập tiêu đề văn bản.",
+      "validationSlug": "Vui lòng nhập slug nhận diện (chỉ chữ thường, số và dấu gạch ngang).",
+      "validationVersion": "Vui lòng nhập phiên bản.",
+      "validationContent": "Vui lòng nhập nội dung văn bản."
+    }
   },
   "provisioning": {
     "submitting": "Đang tạo…",
@@ -470,11 +756,17 @@
     "draftConnectorDeleteSuccess": "Đã xóa Súng sạc bản nháp."
   },
   "transactions": {
+    "tabs": {
+      "list": "Lịch sử giao dịch & Biên nhận",
+      "refundQueue": "Hàng chờ hoàn tiền (FE-19)"
+    },
     "methods": {
       "ATM": "Thẻ ATM",
       "MOMO": "Momo",
       "VNPAY": "VNPay",
-      "title": "Theo phương thức thanh toán"
+      "title": "Theo phương thức thanh toán",
+      "subtitle": "Tỷ trọng phân bổ dòng tiền trên từng kênh",
+      "share": "Tỷ lệ: {{pct}}%"
     },
     "types": {
       "all": "Tất cả",
@@ -507,13 +799,126 @@
     },
     "metrics": {
       "gross": "TỔNG THU",
+      "grossSub": "Tổng doanh thu phát sinh qua các cổng thanh toán",
       "payCountVal": "{{count}} giao dịch",
-      "refunded": "ĐÃ HOÀN",
+      "refunded": "ĐÃ HOÀN TRẢ",
+      "refundedSub": "Hoàn tiền do hủy đơn trong ân hạn hoặc sự cố trạm",
       "refundCountVal": "{{count}} lượt hoàn",
       "net": "DOANH THU RÒNG",
-      "netDelta": "thu − hoàn",
-      "avg": "GIÁ TRỊ TB",
-      "avgDelta": "mỗi giao dịch"
+      "netSub": "Dòng tiền thực thu sau khi khấu trừ toàn bộ hoàn trả",
+      "netDelta": "Thu ròng khả dụng",
+      "avg": "GIÁ TRỊ TB / ĐƠN",
+      "avgSub": "Giá trị giao dịch trung bình mỗi lượt sạc hoàn tất",
+      "avgDelta": "TB mỗi giao dịch"
+    },
+    "searchPlaceholder": "Tìm theo mã giao dịch, đơn đặt chỗ, trạm sạc...",
+    "refreshBtn": "Làm mới",
+    "exportBtn": "Xuất dữ liệu",
+    "liveFeed": "Dòng tiền thời gian thực",
+    "copied": "Đã sao chép mã"
+  },
+  "refunds": {
+    "tabs": {
+      "all": "Tất cả",
+      "pending": "Chờ xử lý (PENDING)",
+      "succeeded": "Đã hoàn tất (SUCCEEDED)"
+    },
+    "kpi": {
+      "pending": "CHỜ XỬ LÝ (PENDING)",
+      "pendingDelta": "{{count}} khoản hoàn",
+      "succeeded": "ĐÃ HOÀN TẤT",
+      "succeededDelta": "{{count}} hoàn tất",
+      "total": "TỔNG NGHĨA VỤ HOÀN",
+      "totalDelta": "{{count}} tổng số",
+      "mode": "CHẾ ĐỘ THỰC THI",
+      "modeValue": "Simulator / Manual",
+      "modeDelta": "Tuân thủ BR-PAY-08/13"
+    },
+    "searchPlaceholder": "Tìm mã refund, booking, tài xế…",
+    "table": {
+      "cols": {
+        "id": "MÃ REFUND",
+        "booking": "ĐƠN ĐẶT CHỖ",
+        "station": "TRẠM SẠC",
+        "reason": "LÝ DO HOÀN",
+        "amount": "SỐ TIỀN",
+        "status": "TRẠNG THÁI",
+        "date": "NGÀY PHÁT SINH",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Không có khoản hoàn tiền nào khớp với bộ lọc.",
+      "attemptsCount": "x{{count}}",
+      "attemptsTitle": "{{count}} lần thử",
+      "processBtn": "Xử lý hoàn",
+      "viewDetailBtn": "Xem chi tiết"
+    },
+    "reasons": {
+      "VOLUNTARY_GRACE": "Ân hạn 10p (100%)",
+      "STATION_FAILURE": "Sự cố trạm sạc",
+      "EXCESS_PAYMENT": "Thanh toán thừa"
+    },
+    "drawer": {
+      "title": "Chi tiết Hoàn tiền",
+      "copyIdTitle": "Sao chép mã hoàn tiền",
+      "amountLabel": "Số tiền cần hoàn trả",
+      "statusLabel": "Trạng thái",
+      "statusPending": "CHỜ THỰC THI (PENDING)",
+      "statusSucceeded": "ĐÃ HOÀN TẤT (SUCCEEDED)",
+      "bookingCode": "Mã đơn đặt chỗ:",
+      "driverName": "Tài xế nhận hoàn:",
+      "stationName": "Trạm sạc:",
+      "reasonLabel": "Căn cứ hoàn:",
+      "createdAt": "Khởi tạo: {{date}}",
+      "version": "Phiên bản: v{{version}}",
+      "terminalBanner": "Khoản hoàn tiền đã được hoàn tất thành công (Terminal State)",
+      "terminalDesc": "Mã tham chiếu ngân hàng: {{ref}}. Hoàn tất lúc: {{time}}. Hệ thống không cho phép thực thi thêm lệnh mới trên bản ghi này.",
+      "tabExecute": "Thực thi hoàn tiền",
+      "tabInfo": "Thông tin thực thi",
+      "tabHistory": "Lịch sử các lần thử ({{count}})",
+      "modeLabel": "Chế độ thực thi (Execution Mode)",
+      "modeSimulator": "Mô phỏng Sandbox",
+      "modeSimulatorDesc": "Dành cho dev / test / demo. Không gọi ngân hàng thật.",
+      "modeManual": "Ghi nhận thủ công",
+      "modeManualDesc": "Đã chuyển khoản ngoài nền tảng. Cần mã đối soát.",
+      "outcomeConfig": "Cấu hình kết quả mô phỏng (Test Outcome):",
+      "outcomeSucceeded": "Thành công (SUCCEEDED)",
+      "outcomeFailed": "Lỗi mô phỏng (FAILED)",
+      "simRefLabel": "Mã tham chiếu mô phỏng (Tự động sinh nếu để trống):",
+      "simRefPlaceholder": "ví dụ: SIM-REF-902184",
+      "manualRefLabel": "Mã giao dịch ngân hàng / UNC",
+      "manualRefPlaceholder": "ví dụ: FT260925987123 / VCB1982736",
+      "manualRefHelp": "Nhập mã tham chiếu từ sao kê ngân hàng đã thực hiện chuyển tiền cho tài xế.",
+      "performedAtLabel": "Thời điểm thực hiện chuyển khoản",
+      "noteLabel": "Ghi chú thực thi / Đối soát",
+      "notePlaceholder": "Nhập ghi chú giải trình hoặc lý do xử lý hoàn tiền…",
+      "noteDefaultGrace": "Hoàn tiền 100% tài xế hủy trong ân hạn 10 phút",
+      "noteDefaultFailure": "Hoàn tiền theo sự cố trạm sạc",
+      "protectionTitle": "Nguyên tắc bảo vệ dữ liệu (BR-PAY-13):",
+      "protectionPoint1": "Mỗi thao tác gửi lệnh đi kèm Idempotency-Key để chống bấm đúp hoặc gửi trùng lặp.",
+      "protectionPoint2": "Nếu lần thử gặp lỗi (FAILED), khoản hoàn tiền vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bị mất.",
+      "closeBtn": "Đóng",
+      "confirmSimulatorSuccess": "Thực thi Mô phỏng Thành công",
+      "confirmSimulatorFailed": "Mô phỏng Thất bại",
+      "confirmManual": "Xác nhận Ghi nhận Chuyển khoản",
+      "submitting": "Đang thực thi…",
+      "validationManualRef": "Vui lòng nhập Mã giao dịch ngân hàng / Ủy nhiệm chi.",
+      "validationPerformedAt": "Vui lòng chọn thời điểm thực hiện giao dịch.",
+      "validationNote": "Vui lòng nhập ghi chú thực thi / lý do đối soát.",
+      "toastSuccess": "Hoàn tất hoàn tiền: Mã tham chiếu {{ref}}. Đã ghi nhận hoàn trả {{amount}}.",
+      "toastFailed": "Đã ghi nhận lần thử thất bại (FAILED). Khoản hoàn tiền vẫn được bảo lưu ở trạng thái PENDING (BR-PAY-13).",
+      "toastErrorDefault": "Có lỗi xảy ra khi thực thi hoàn tiền.",
+      "errorVersionConflict": "Dữ liệu khoản hoàn tiền đã thay đổi trên máy chủ. Đang làm mới dữ liệu...",
+      "errorAlreadySucceeded": "Khoản hoàn tiền này đã được thực thi hoàn tất trước đó.",
+      "errorRequestConflict": "Yêu cầu xung đột với lần thực thi trước đó."
+    },
+    "timeline": {
+      "empty": "Chưa có lần thực thi nào trước đó. Khoản hoàn tiền đang ở trạng thái sơ khởi (chờ Admin xử lý).",
+      "title": "Lịch sử các lần thực thi ({{count}})",
+      "notice": "Bảo lưu PENDING khi FAILED (BR-PAY-13)",
+      "attemptNum": "Lần #{{seq}}",
+      "reference": "Mã tham chiếu:",
+      "copyTitle": "Sao chép",
+      "errorCode": "Mã lỗi:"
     }
   },
   "users": {
@@ -560,12 +965,140 @@
     "title": "Ghi nhận gia hạn License",
     "subtitle": "Tạo một kỳ hạn License mới sau khi xác minh thanh toán gia hạn ngoài nền tảng.",
     "currentInfoTitle": "THÔNG TIN LICENSE HIỆN TẠI",
+    "licenseCode": "Mã License:",
+    "station": "Trạm sạc:",
+    "owner": "Chủ sở hữu:",
+    "currentExpiry": "Hạn hiện tại:",
     "planLabel": "Gói gia hạn mới",
     "cancelBtn": "Hủy bỏ",
     "processing": "Đang ghi nhận…",
-    "confirmBtn": "Xác nhận ghi nhận gia hạn"
+    "confirmBtn": "Xác nhận ghi nhận gia hạn",
+    "immediately": "Ngay sau khi xác nhận",
+    "validationVerified": "Vui lòng xác nhận đã đối chiếu thông tin gia hạn ngoài nền tảng.",
+    "monthly": "Gói Tháng",
+    "monthlyRate": "500k/tháng",
+    "monthlyDesc": "Hiệu lực 1 tháng lịch",
+    "yearly": "Gói Năm",
+    "yearlyBadge": "-16.7% (Tiết kiệm 1tr)",
+    "yearlyDesc": "Hiệu lực 1 năm lịch · 5.000.000đ",
+    "feeLabel": "Mức phí niêm yết theo gói:",
+    "effectiveStartLabel": "Thời điểm bắt đầu hiệu lực mới: ",
+    "effectiveStartHint": "Thao tác tạo một License row mới trong lịch sử; không chỉnh sửa trực tiếp License hiện tại.",
+    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gia hạn gói License của chủ trạm ngoài nền tảng."
   },
   "stations": {
-    "copiedCode": "Đã sao chép mã trạm"
+    "copiedCode": "Đã sao chép mã trạm",
+    "pageTitle": "Quản lý Trạm & Trụ Sạc",
+    "pageSubtitle": "Trung tâm giám sát danh mục trạm sạc toàn hệ thống, cấp hạ tầng trụ & súng sạc (FR14), theo dõi giấy phép và can thiệp vận hành.",
+    "refreshBtn": "Làm mới",
+    "kpi": {
+      "total": "Tổng số trạm sạc",
+      "active": "Đang vận hành",
+      "suspended": "Tạm ngưng / Sự cố",
+      "pending": "Hồ sơ chờ duyệt"
+    },
+    "tabs": {
+      "all": "Tất cả",
+      "ACTIVE": "Đang hoạt động",
+      "PENDING_APPROVAL": "Chờ duyệt",
+      "SUSPENDED": "Tạm ngưng",
+      "REJECTED": "Từ chối"
+    },
+    "filters": {
+      "allProvinces": "Tất cả Tỉnh / Thành",
+      "searchPlaceholder": "Tìm kiếm mã trạm, tên, chủ trạm..."
+    },
+    "status": {
+      "ACTIVE": "Hoạt động",
+      "PENDING_APPROVAL": "Chờ duyệt",
+      "SUSPENDED": "Tạm ngưng",
+      "REJECTED": "Từ chối",
+      "WITHDRAWN": "Đã rút"
+    },
+    "table": {
+      "cols": {
+        "code": "MÃ TRẠM",
+        "nameAndAddress": "TÊN & ĐỊA CHỈ TRẠM",
+        "host": "CHỦ TRẠM (HOST)",
+        "province": "TỈNH/THÀNH",
+        "chargers": "TRỤ / CỔNG SẠC",
+        "status": "TRẠNG THÁI",
+        "createdAt": "NGÀY TẠO",
+        "actions": "THAO TÁC"
+      },
+      "chargersCount": "{{chargePoints}} trụ · {{connectors}} cổng",
+      "empty": "Không tìm thấy trạm sạc nào phù hợp với bộ lọc."
+    },
+    "actions": {
+      "viewDetail": "Xem chi tiết",
+      "provisioning": "Cấp hạ tầng (FR14)",
+      "suspend": "Tạm ngưng vận hành",
+      "reactivate": "Kích hoạt lại",
+      "manageLicense": "Quản lý giấy phép"
+    },
+    "toasts": {
+      "suspendSuccess": "Đã tạm ngưng vận hành trạm sạc thành công.",
+      "reactivateSuccess": "Đã kích hoạt lại trạm sạc thành công."
+    },
+    "modal": {
+      "suspendTitle": "Tạm ngưng vận hành trạm sạc",
+      "reactivateTitle": "Kích hoạt lại trạm sạc",
+      "suspendConfirm": "Xác nhận tạm ngưng",
+      "reactivateConfirm": "Xác nhận kích hoạt",
+      "stationCode": "Mã trạm: {{code}} · Chủ trạm: {{owner}}",
+      "suspendNotice": "Khi tạm ngưng, trạm sạc sẽ bị ẩn khỏi ứng dụng tìm kiếm của tài xế và tạm dừng mọi lượt đặt chỗ mới.",
+      "reactivateNotice": "Trạm sạc sẽ được mở lại trạng thái hoạt động công khai nếu trạm có giấy phép License còn hiệu lực.",
+      "suspendReasonLabel": "Lý do tạm ngưng vận hành *",
+      "reactivateReasonLabel": "Ghi chú / Lý do kích hoạt",
+      "suspendReasonHint": "Bắt buộc nhập từ 5 - 500 ký tự",
+      "optionalHint": "Không bắt buộc",
+      "suspendPlaceholder": "Ví dụ: Tạm ngưng do sự cố trạm biến áp, bảo trì hệ thống định kỳ...",
+      "reactivatePlaceholder": "Ví dụ: Đã hoàn tất sửa chữa và kiểm định an toàn điện...",
+      "cancelBtn": "Hủy bỏ",
+      "validationReason": "Vui lòng nhập lý do tạm ngưng trạm (tối thiểu 5 ký tự)."
+    },
+    "drawer": {
+      "title": "Chi tiết trạm sạc",
+      "tabs": {
+        "overview": "Tổng quan trạm",
+        "owner": "Chủ trạm & Pháp lý",
+        "hardware": "Hạ tầng trụ sạc",
+        "history": "Lịch sử trạng thái"
+      },
+      "days": {
+        "MONDAY": "Thứ Hai",
+        "TUESDAY": "Thứ Ba",
+        "WEDNESDAY": "Thứ Tư",
+        "THURSDAY": "Thứ Năm",
+        "FRIDAY": "Thứ Sáu",
+        "SATURDAY": "Thứ Bảy",
+        "SUNDAY": "Chủ Nhật"
+      },
+      "status": {
+        "ACTIVE": "Đang hoạt động",
+        "PENDING_APPROVAL": "Chờ xét duyệt",
+        "SUSPENDED": "Tạm ngưng vận hành",
+        "REJECTED": "Từ chối duyệt",
+        "WITHDRAWN": "Đã rút hồ sơ"
+      },
+      "contact": "Thông tin liên hệ",
+      "phone": "Điện thoại:",
+      "email": "Email:",
+      "address": "Địa chỉ:",
+      "operatingHours": "Khung giờ hoạt động",
+      "licenseStatus": "Tình trạng Giấy phép (License)",
+      "amenities": "Tiện ích xung quanh",
+      "noAmenities": "Không có thông tin tiện ích",
+      "hardwareSummary": "Thống kê trụ & cổng sạc",
+      "emptyHardware": "Trạm chưa được cấu hình trụ sạc nào.",
+      "emptyHistory": "Chưa có sự kiện trạng thái nào được ghi nhận.",
+      "btnSuspend": "Tạm ngưng trạm",
+      "btnReactivate": "Kích hoạt lại",
+      "btnProvisioning": "Thiết lập trụ sạc (FR14)",
+      "btnLicense": "Xem License",
+      "closeBtn": "Đóng",
+      "copyCode": "Sao chép mã trạm",
+      "copied": "Đã sao chép mã trạm"
+    }
   }
 }

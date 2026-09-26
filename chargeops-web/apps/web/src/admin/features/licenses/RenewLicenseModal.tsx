@@ -27,7 +27,10 @@ export function RenewLicenseModal({
 
   const currentExpiry = license.expiresAt || license.expiryDate;
   const isCurrentlyActive = license.status === 'ACTIVE' || license.status === 'active';
-  const effectiveStartPreview = isCurrentlyActive && currentExpiry ? formatDateVn(currentExpiry) : 'Ngay sau khi xác nhận';
+  const effectiveStartPreview =
+    isCurrentlyActive && currentExpiry
+      ? formatDateVn(currentExpiry)
+      : t('renewModal.immediately', 'Ngay sau khi xác nhận');
 
   const handlePlanChange = (newPlan: 'MONTHLY' | 'YEARLY') => {
     setPlan(newPlan);
@@ -42,7 +45,9 @@ export function RenewLicenseModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!verified) {
-      setError('Vui lòng xác nhận đã đối chiếu thông tin gia hạn ngoài nền tảng.');
+      setError(
+        t('renewModal.validationVerified', 'Vui lòng xác nhận đã đối chiếu thông tin gia hạn ngoài nền tảng.')
+      );
       return;
     }
     setError(null);
@@ -75,22 +80,22 @@ export function RenewLicenseModal({
           </div>
           <div className="flex flex-col gap-1.5 font-medium">
             <div className="flex justify-between">
-              <span className="text-muted">Mã License:</span>
+              <span className="text-muted">{t('renewModal.licenseCode', 'Mã License:')}</span>
               <span className="font-mono font-bold text-brand">{license.licenseCode || license.id}</span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
-              <span className="text-muted">Trạm sạc:</span>
+              <span className="text-muted">{t('renewModal.station', 'Trạm sạc:')}</span>
               <span className="font-semibold text-ink">
                 {license.stationName || license.stationId}{' '}
                 <span className="font-mono text-faint font-normal">({license.stationCode || license.stationId})</span>
               </span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
-              <span className="text-faint">Chủ sở hữu:</span>
+              <span className="text-faint">{t('renewModal.owner', 'Chủ sở hữu:')}</span>
               <span className="text-ink">{license.ownerName || '—'}</span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
-              <span className="text-faint">Hạn hiện tại:</span>
+              <span className="text-faint">{t('renewModal.currentExpiry', 'Hạn hiện tại:')}</span>
               <span className="font-semibold text-warn-deep">{currentExpiry ? formatDateVn(currentExpiry) : '—'}</span>
             </div>
           </div>
@@ -112,10 +117,14 @@ export function RenewLicenseModal({
               }`}
             >
               <div className="flex w-full items-center justify-between">
-                <span className="text-[13px] font-bold">Gói Tháng</span>
-                <span className="font-mono text-[11px] font-semibold text-faint">500k/tháng</span>
+                <span className="text-[13px] font-bold">{t('renewModal.monthly', 'Gói Tháng')}</span>
+                <span className="font-mono text-[11px] font-semibold text-faint">
+                  {t('renewModal.monthlyRate', '500k/tháng')}
+                </span>
               </div>
-              <span className="mt-0.5 text-[11px] text-muted">Hiệu lực 1 tháng lịch</span>
+              <span className="mt-0.5 text-[11px] text-muted">
+                {t('renewModal.monthlyDesc', 'Hiệu lực 1 tháng lịch')}
+              </span>
             </button>
             <button
               type="button"
@@ -127,19 +136,21 @@ export function RenewLicenseModal({
               }`}
             >
               <div className="flex w-full items-center justify-between">
-                <span className="text-[13px] font-bold">Gói Năm</span>
+                <span className="text-[13px] font-bold">{t('renewModal.yearly', 'Gói Năm')}</span>
                 <span className="rounded bg-good-soft px-1.5 py-0.2 text-[10px] font-bold text-good-deep">
-                  -16.7% (Tiết kiệm 1tr)
+                  {t('renewModal.yearlyBadge', '-16.7% (Tiết kiệm 1tr)')}
                 </span>
               </div>
-              <span className="mt-0.5 text-[11px] text-muted">Hiệu lực 1 năm lịch · 5.000.000đ</span>
+              <span className="mt-0.5 text-[11px] text-muted">
+                {t('renewModal.yearlyDesc', 'Hiệu lực 1 năm lịch · 5.000.000đ')}
+              </span>
             </button>
           </div>
         </div>
 
         {/* Standard Fee Summary Box */}
         <div className="mt-3.5 flex items-center justify-between rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12.5px]">
-          <span className="text-muted font-medium">Mức phí niêm yết theo gói:</span>
+          <span className="text-muted font-medium">{t('renewModal.feeLabel', 'Mức phí niêm yết theo gói:')}</span>
           <span className="font-mono font-bold text-ink text-[14px]">
             {plan === 'YEARLY' ? '5.000.000 đ' : '500.000 đ'}
           </span>
@@ -150,11 +161,14 @@ export function RenewLicenseModal({
           <IconInfo size={16} className="mt-0.5 shrink-0 text-brand" />
           <div>
             <div>
-              <span className="font-semibold">Thời điểm bắt đầu hiệu lực mới: </span>
+              <span className="font-semibold">{t('renewModal.effectiveStartLabel', 'Thời điểm bắt đầu hiệu lực mới: ')}</span>
               <span className="font-bold text-brand-strong">{effectiveStartPreview}</span>
             </div>
             <div className="mt-1 text-[11px] text-muted">
-              Thao tác tạo một License row mới trong lịch sử; không chỉnh sửa trực tiếp License hiện tại.
+              {t(
+                'renewModal.effectiveStartHint',
+                'Thao tác tạo một License row mới trong lịch sử; không chỉnh sửa trực tiếp License hiện tại.'
+              )}
             </div>
           </div>
         </div>
@@ -169,7 +183,7 @@ export function RenewLicenseModal({
             }}
             accent="brand"
           >
-            {t('renewLicenseModal.verificationCheckbox', {
+            {t('renewModal.verificationCheckbox', {
               defaultValue:
                 'Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gia hạn gói License của chủ trạm ngoài nền tảng.',
             })}

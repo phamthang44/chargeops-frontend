@@ -170,14 +170,14 @@ export function Licenses() {
 
   const tabs = useMemo<FilterTab<FilterKey>[]>(() => {
     return [
-      { key: 'all', label: 'Tất cả', count: filter === 'all' ? total : undefined },
-      { key: 'ACTIVE', label: 'Hoạt động', count: filter === 'ACTIVE' ? total : undefined },
-      { key: 'PENDING', label: 'Chờ hiệu lực', count: filter === 'PENDING' ? total : undefined },
-      { key: 'SUSPENDED', label: 'Tạm ngưng', count: filter === 'SUSPENDED' ? total : undefined },
-      { key: 'EXPIRED', label: 'Hết hạn', count: filter === 'EXPIRED' ? total : undefined },
-      { key: 'CANCELLED', label: 'Đã hủy', count: filter === 'CANCELLED' ? total : undefined },
+      { key: 'all', label: t('licenses.tabs.all', 'Tất cả'), count: filter === 'all' ? total : undefined },
+      { key: 'ACTIVE', label: t('licenses.tabs.ACTIVE', 'Hoạt động'), count: filter === 'ACTIVE' ? total : undefined },
+      { key: 'PENDING', label: t('licenses.tabs.PENDING', 'Chờ hiệu lực'), count: filter === 'PENDING' ? total : undefined },
+      { key: 'SUSPENDED', label: t('licenses.tabs.SUSPENDED', 'Tạm ngưng'), count: filter === 'SUSPENDED' ? total : undefined },
+      { key: 'EXPIRED', label: t('licenses.tabs.EXPIRED', 'Hết hạn'), count: filter === 'EXPIRED' ? total : undefined },
+      { key: 'CANCELLED', label: t('licenses.tabs.CANCELLED', 'Đã hủy'), count: filter === 'CANCELLED' ? total : undefined },
     ];
-  }, [filter, total]);
+  }, [filter, total, t]);
 
   return (
     <>
@@ -198,7 +198,7 @@ export function Licenses() {
             className="flex items-center gap-1.5"
           >
             <IconRefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
-            <span>Làm mới</span>
+            <span>{t('licenses.table.refresh', 'Làm mới')}</span>
           </Button>
         </div>
 
@@ -211,22 +211,22 @@ export function Licenses() {
             {/* Top Metric Cards */}
             <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
               <MetricCard
-                label="Tổng số License"
+                label={t('licenses.kpi.total', 'Tổng số License')}
                 value={String(total)}
                 accent="#5b54e8"
               />
               <MetricCard
-                label="Đang hoạt động"
+                label={t('licenses.kpi.active', 'Đang hoạt động')}
                 value={String(activeCount)}
                 accent="#0d8a5a"
               />
               <MetricCard
-                label="Cần gia hạn / Xử lý"
+                label={t('licenses.kpi.renewalQueue', 'Cần gia hạn / Xử lý')}
                 value={String(renewalQueue.length)}
                 accent="#9a6b16"
               />
               <MetricCard
-                label="Phí License đã ghi nhận"
+                label={t('licenses.kpi.totalFee', 'Phí License đã ghi nhận')}
                 value={formatVndCompact(totalFeeRecorded)}
                 accent="#10111a"
               />
@@ -240,19 +240,19 @@ export function Licenses() {
                   <div className="mb-1 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <IconClock size={16} className="text-warn" />
-                      <span className="text-[13px] font-semibold text-ink">Hàng đợi gia hạn</span>
+                      <span className="text-[13px] font-semibold text-ink">{t('licenses.queue.title', 'Hàng đợi gia hạn')}</span>
                     </div>
                     <span className="rounded-full bg-warn-soft px-2 py-0.5 text-[10.5px] font-bold text-warn-deep">
-                      {renewalQueue.length} trạm
+                      {t('licenses.queue.countBadge', { count: renewalQueue.length, defaultValue: `${renewalQueue.length} trạm` })}
                     </span>
                   </div>
                   <div className="mb-3 text-[11.5px] text-muted">
-                    Các License đang hoạt động còn ≤ 30 ngày hoặc đã hết hạn cần tạo kỳ hạn mới.
+                    {t('licenses.queue.desc', 'Các License đang hoạt động còn ≤ 30 ngày hoặc đã hết hạn cần tạo kỳ hạn mới.')}
                   </div>
 
                   {renewalQueue.length === 0 ? (
                     <div className="py-8 text-center text-[12.5px] font-medium text-faint">
-                      Tất cả các trạm đang hoạt động đều có hạn trên 30 ngày.
+                      {t('licenses.queue.empty', 'Tất cả các trạm đang hoạt động đều có hạn trên 30 ngày.')}
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
@@ -277,13 +277,13 @@ export function Licenses() {
                               </div>
                               <div className="mt-0.5 text-[11px] text-muted">
                                 <span className="font-mono text-brand font-bold">{l.licenseCode || l.id}</span> ·{' '}
-                                {l.ownerName || 'Chủ trạm'} · {isYear ? 'Gói Năm' : 'Gói Tháng'}
+                                {l.ownerName || t('licenses.queue.defaultOwner', 'Chủ trạm')} · {isYear ? t('licenses.queue.planYear', 'Gói Năm') : t('licenses.queue.planMonth', 'Gói Tháng')}
                               </div>
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
                               <StatusPill
                                 tone={isExpired ? 'bad' : 'warn'}
-                                label={isExpired ? 'Đã hết hạn' : `Còn ${days} ngày`}
+                                label={isExpired ? t('licenses.queue.expired', 'Đã hết hạn') : t('licenses.queue.daysLeft', { days, defaultValue: `Còn ${days} ngày` })}
                               />
                               <Button
                                 size="sm"
@@ -291,7 +291,7 @@ export function Licenses() {
                                 onClick={() => setRenewLicense(l)}
                                 className="h-[30px] px-2.5 text-[11.5px]"
                               >
-                                Gia hạn
+                                {t('licenses.queue.renewBtn', 'Gia hạn')}
                               </Button>
                             </div>
                           </div>
@@ -307,32 +307,32 @@ export function Licenses() {
                 <div>
                   <div className="flex items-center gap-2 text-[13px] font-semibold text-ink">
                     <IconInfo size={16} className="text-brand" />
-                    <span>Quy định Subscription License</span>
+                    <span>{t('licenses.policyCard.title', 'Quy định Subscription License')}</span>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 text-[12px] leading-relaxed text-body">
                     <div className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
                       <span>
-                        <b>Ngoài nền tảng:</b> Chủ trạm thanh toán mua hoặc gia hạn gói trực tiếp với đơn vị vận hành.
+                        <b>{t('licenses.policyCard.offPlatform', 'Ngoài nền tảng:')}</b> {t('licenses.policyCard.offPlatformDesc', 'Chủ trạm thanh toán mua hoặc gia hạn gói trực tiếp với đơn vị vận hành.')}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
                       <span>
-                        <b>Trong ChargeOps:</b> Admin xác minh thông tin và ghi nhận gói để kích hoạt quyền vận hành trạm.
+                        <b>{t('licenses.policyCard.inChargeOps', 'Trong ChargeOps:')}</b> {t('licenses.policyCard.inChargeOpsDesc', 'Admin xác minh thông tin và ghi nhận gói để kích hoạt quyền vận hành trạm.')}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
                       <span>
-                        <b>Hiệu lực:</b> Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới ({DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY}).
+                        <b>{t('licenses.policyCard.validity', 'Hiệu lực:')}</b> {t('licenses.policyCard.validityDesc', { policy: DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY, defaultValue: `Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới (${DOMAIN_POLICIES.LICENSE_SEARCH_VISIBILITY}).` })}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-3 rounded-[8px] border border-hairline bg-surface-2 p-2.5 text-[11px] text-faint">
-                  Tổng phí đã ghi nhận:{' '}
+                  {t('licenses.policyCard.totalFeeRecorded', 'Tổng phí đã ghi nhận:')}{' '}
                   <span className="font-semibold text-ink">{formatVnd(totalFeeRecorded)}</span>
                 </div>
               </Card>
@@ -344,7 +344,7 @@ export function Licenses() {
               <SearchInput
                 value={searchInput}
                 onChange={setSearchInput}
-                placeholder="Tìm mã License (LIC-...), trạm, chủ trạm…"
+                placeholder={t('licenses.searchPlaceholder', 'Tìm mã License (LIC-...), trạm, chủ trạm…')}
                 className="w-[300px]"
               />
             </div>
@@ -357,13 +357,13 @@ export function Licenses() {
                     className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
                     style={{ gridTemplateColumns: GRID_COLS }}
                   >
-                    <span>MÃ LICENSE</span>
-                    <span>TRẠM SẠC</span>
-                    <span>CHỦ SỞ HỮU</span>
-                    <span>GÓI</span>
-                    <span>HẾT HẠN</span>
-                    <span>TRẠNG THÁI</span>
-                    <span className="text-right">THAO TÁC</span>
+                    <span>{t('licenses.table.cols.code', 'MÃ LICENSE')}</span>
+                    <span>{t('licenses.table.cols.station', 'TRẠM SẠC')}</span>
+                    <span>{t('licenses.table.cols.owner', 'CHỦ SỞ HỮU')}</span>
+                    <span>{t('licenses.table.cols.plan', 'GÓI')}</span>
+                    <span>{t('licenses.table.cols.expiry', 'HẾT HẠN')}</span>
+                    <span>{t('licenses.table.cols.status', 'TRẠNG THÁI')}</span>
+                    <span className="text-right">{t('licenses.table.cols.actions', 'THAO TÁC')}</span>
                   </div>
 
                   {isLoading ? (
@@ -374,11 +374,11 @@ export function Licenses() {
                     </div>
                   ) : rows.length === 0 ? (
                     <EmptyState
-                      title="Không tìm thấy License"
+                      title={t('licenses.table.emptyTitle', 'Không tìm thấy License')}
                       description={
                         debouncedSearch
-                          ? `Không có kết quả nào khớp với từ khóa "${debouncedSearch}".`
-                          : 'Chưa có gói giấy phép nào trong mục này.'
+                          ? t('licenses.table.emptySearch', { query: debouncedSearch, defaultValue: `Không có kết quả nào khớp với từ khóa "${debouncedSearch}".` })
+                          : t('licenses.table.empty', 'Chưa có gói giấy phép nào trong mục này.')
                       }
                       className="py-12"
                     />
@@ -487,7 +487,7 @@ function LicenseRow({
     e.stopPropagation();
     navigator.clipboard.writeText(displayCode);
     setCopied(true);
-    toast(t('licenses.copiedCode', { code: displayCode, defaultValue: 'Đã sao chép mã License' }), 'success');
+    toast(t('licenses.row.copiedCode', { code: displayCode, defaultValue: 'Đã sao chép mã License' }), 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -495,7 +495,7 @@ function LicenseRow({
     const items: MoreMenuItem[] = [
       {
         key: 'detail',
-        label: 'Xem chi tiết & Lịch sử',
+        label: t('licenses.menu.detail', 'Xem chi tiết & Lịch sử'),
         icon: <IconShield size={15} />,
         onClick: onSelect,
       },
@@ -504,7 +504,7 @@ function LicenseRow({
     if (isActive) {
       items.push({
         key: 'suspend',
-        label: 'Tạm ngưng License',
+        label: t('licenses.menu.suspend', 'Tạm ngưng License'),
         icon: <IconAlertTriangle size={15} />,
         onClick: onSuspend,
       });
@@ -513,7 +513,7 @@ function LicenseRow({
     if (isSuspended) {
       items.push({
         key: 'activate',
-        label: 'Kích hoạt lại License',
+        label: t('licenses.menu.reactivate', 'Kích hoạt lại License'),
         icon: <IconCheckCircle size={15} />,
         onClick: onActivate,
       });
@@ -522,7 +522,7 @@ function LicenseRow({
     if (isPending) {
       items.push({
         key: 'activate',
-        label: 'Kích hoạt License',
+        label: t('licenses.menu.activate', 'Kích hoạt License'),
         icon: <IconCheckCircle size={15} />,
         onClick: onActivate,
       });
@@ -531,7 +531,7 @@ function LicenseRow({
     if (isActive || isPending || isSuspended) {
       items.push({
         key: 'cancel',
-        label: 'Hủy bỏ License',
+        label: t('licenses.menu.cancel', 'Hủy bỏ License'),
         icon: <IconX size={15} />,
         tone: 'danger',
         onClick: onCancel,
@@ -539,7 +539,7 @@ function LicenseRow({
     }
 
     return items;
-  }, [isActive, isPending, isSuspended, onSelect, onSuspend, onActivate, onCancel]);
+  }, [isActive, isPending, isSuspended, onSelect, onSuspend, onActivate, onCancel, t]);
 
   return (
     <div
@@ -554,7 +554,7 @@ function LicenseRow({
           type="button"
           onClick={handleCopy}
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-faint hover:bg-chip hover:text-ink transition"
-          title="Sao chép mã"
+          title={t('licenses.row.copyCode', 'Sao chép mã')}
         >
           {copied ? <IconCheck size={12} className="text-good" /> : <IconCopy size={12} />}
         </button>
@@ -572,7 +572,7 @@ function LicenseRow({
       {/* Plan */}
       <div>
         <span className="rounded-[6px] bg-surface-2 px-2 py-0.5 text-[11.5px] font-semibold text-body">
-          {isYear ? 'Gói Năm' : 'Gói Tháng'}
+          {isYear ? t('licenses.row.planYearly', 'Gói Năm') : t('licenses.row.planMonthly', 'Gói Tháng')}
         </span>
       </div>
 
@@ -581,12 +581,14 @@ function LicenseRow({
         <div className="text-body font-medium">{expiry ? formatDateVn(expiry) : '—'}</div>
         {isActive && days <= 30 && (
           <div className="mt-0.5 text-[10.5px] font-semibold text-warn-deep">
-            {days < 0 ? `Quá hạn ${-days} ngày` : `Còn ${days} ngày`}
+            {days < 0
+              ? t('licenses.row.overdue', { days: -days, defaultValue: `Quá hạn ${-days} ngày` })
+              : t('licenses.row.daysLeft', { days, defaultValue: `Còn ${days} ngày` })}
           </div>
         )}
         {isExpired && (
           <div className="mt-0.5 text-[10.5px] font-semibold text-bad-deep">
-            Đã hết hạn
+            {t('licenses.row.expired', 'Đã hết hạn')}
           </div>
         )}
       </div>
@@ -608,7 +610,7 @@ function LicenseRow({
             onClick={onRenew}
             className="h-[28px] px-2.5 text-[11.5px]"
           >
-            Gia hạn
+            {t('licenses.row.renewBtn', 'Gia hạn')}
           </Button>
         ) : (
           <Button
@@ -617,7 +619,7 @@ function LicenseRow({
             onClick={onSelect}
             className="h-[28px] px-2 text-[11.5px] text-faint hover:text-ink"
           >
-            Chi tiết
+            {t('licenses.row.detailBtn', 'Chi tiết')}
           </Button>
         )}
 

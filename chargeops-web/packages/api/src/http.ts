@@ -20,6 +20,7 @@ type Query = object;
 interface RequestOptions {
   params?: Query;
   body?: unknown;
+  headers?: Record<string, string>;
 }
 
 const TIMEOUT_MS = 15_000;
@@ -38,7 +39,7 @@ export class HttpClient {
       if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
     }
 
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = { Accept: 'application/json', ...(opts.headers ?? {}) };
     if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
     const token = await this.cfg.getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -95,13 +96,15 @@ export class HttpClient {
         Array.isArray(body.data) &&
         body.meta &&
         typeof body.meta === 'object' &&
-        ('totalElements' in body.meta || 'totalPages' in body.meta)
+        ('totalElements' in body.meta || 'totalPages' in body.meta || 'page' in body.meta)
       ) {
         return {
           items: body.data,
           total: Number(body.meta.totalElements ?? body.data.length),
           page: Number(body.meta.page ?? 1),
           pageSize: Number(body.meta.size ?? body.data.length),
+          meta: body.meta,
+          counts: (body.meta as any).counts ?? {},
         } as unknown as T;
       }
       return body.data as T;
@@ -112,8 +115,8 @@ export class HttpClient {
   get<T>(path: string, params?: Query): Promise<T> {
     return this.request<T>('GET', path, { params });
   }
-  post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>('POST', path, { body });
+  post<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
+    return this.request<T>('POST', path, { body, ...opts });
   }
   put<T>(path: string, body?: unknown): Promise<T> {
     return this.request<T>('PUT', path, { body });

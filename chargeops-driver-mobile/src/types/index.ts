@@ -221,6 +221,7 @@ export interface Booking {
   paymentDetail?: BookingPaymentDetail;
   refunds?: BookingRefundSummary[];
   policyVersion?: string;
+  version?: number;
   stateReconciliationPending?: boolean;
   persistedStatus?: BookingStatus;
 }
@@ -285,6 +286,7 @@ export interface BookingRefundSummary {
   reason?: 'VOLUNTARY_GRACE' | 'STATION_FAILURE' | 'EXCESS_PAYMENT' | 'LATE_PAYMENT' | 'UNAPPLIED_PAYMENT' | string;
   status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | string;
   needsReconciliation?: boolean;
+  transferReference?: string;
   createdAt?: string;
 }
 

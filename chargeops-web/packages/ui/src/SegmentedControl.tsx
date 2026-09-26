@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 export interface Segment<K extends string> {
   key: K;
-  label: string;
+  label: ReactNode;
   /** Optional leading icon shown inside the button. */
   icon?: ReactNode;
   /** Optional description shown below the label (only in 'card' variant). */

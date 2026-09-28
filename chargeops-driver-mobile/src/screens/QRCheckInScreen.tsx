@@ -8,12 +8,14 @@ import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
+import { ChargerKioskModal } from '@/components/kiosk/ChargerKioskModal';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   confirmCheckIn,
   getBookingById,
   resolveCheckIn,
+  type CheckInErrorCode,
   type CheckInResolution,
 } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -37,6 +39,8 @@ export function QRCheckInScreen() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<CheckInResolution | null>(null);
   const [committing, setCommitting] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
+  const [kioskVisible, setKioskVisible] = useState(false);
   const handled = useRef(false);
 
   useEffect(() => {
@@ -56,29 +60,77 @@ export function QRCheckInScreen() {
     }
   }, [permission, requestPermission]);
 
+  // Challenge expiry countdown timer (BKG-040 / BKG-042)
+  useEffect(() => {
+    if (!result?.ok || !result.challengeExpiresAt) {
+      setSecondsRemaining(null);
+      return;
+    }
+
+    const expiresTime = new Date(result.challengeExpiresAt).getTime();
+
+    const checkExpiry = () => {
+      const diff = Math.max(0, Math.ceil((expiresTime - Date.now()) / 1000));
+      setSecondsRemaining(diff);
+
+      if (diff <= 0) {
+        setResult({
+          ok: false,
+          code: 'CHALLENGE_EXPIRED',
+          connector: result.connector,
+          booking: result.booking,
+        });
+      }
+    };
+
+    checkExpiry();
+    const timer = setInterval(checkExpiry, 1000);
+    return () => clearInterval(timer);
+  }, [result?.ok, (result as any)?.challengeExpiresAt]);
+
   async function handleScan(payload: string) {
     if (handled.current) return;
     handled.current = true;
     setScanning(true);
-    setResult(await resolveCheckIn(payload));
+    const bookingId = params?.bookingId ?? expected?.id;
+    const res = await resolveCheckIn(payload, bookingId);
+    setResult(res);
     setScanning(false);
   }
 
   function simulateScan() {
-    void handleScan(expected?.connectorId ?? '');
+    const simToken = expected?.connectorId
+      ? `chk_demo_${expected.connectorId}_${Date.now()}`
+      : `chk_demo_simulation_token_${Date.now()}`;
+    void handleScan(simToken);
   }
 
   function retry() {
     handled.current = false;
     setResult(null);
+    setSecondsRemaining(null);
   }
 
   async function commitCheckIn() {
     if (!result?.ok) return;
     setCommitting(true);
-    await confirmCheckIn(result.booking.id);
-    setCommitting(false);
-    navigation.replace('ChargingSession', { bookingId: result.booking.id });
+    try {
+      await confirmCheckIn(result.booking.id, {
+        expectedVersion: result.expectedVersion,
+        challengeToken: result.challengeToken,
+      });
+      setCommitting(false);
+      navigation.replace('ChargingSession', { bookingId: result.booking.id });
+    } catch (err: any) {
+      setCommitting(false);
+      setResult({
+        ok: false,
+        code: 'STATE_CONFLICT',
+        connector: result.connector,
+        booking: result.booking,
+        message: err?.message || 'Check-in không thành công. Vui lòng thử lại.',
+      });
+    }
   }
 
   async function forceDemoCheckIn() {
@@ -89,9 +141,42 @@ export function QRCheckInScreen() {
     navigation.replace('ChargingSession', { bookingId: result.booking.id });
   }
 
+  function errorTitle(code: CheckInErrorCode): string {
+    switch (code) {
+      case 'CHALLENGE_EXPIRED':
+        return t('qrCheckIn.errorTitles.CHALLENGE_EXPIRED');
+      case 'NOT_ACCESS':
+        return t('qrCheckIn.errorTitles.NOT_ACCESS');
+      case 'STATE_CONFLICT':
+        return t('qrCheckIn.errorTitles.STATE_CONFLICT');
+      case 'STATION_UNAVAILABLE':
+        return t('qrCheckIn.errorTitles.STATION_UNAVAILABLE');
+      case 'TOO_EARLY':
+        return t('qrCheckIn.errorTitles.TOO_EARLY');
+      case 'WINDOW_EXPIRED':
+        return t('qrCheckIn.errorTitles.WINDOW_EXPIRED');
+      case 'WRONG_CONNECTOR':
+        return t('qrCheckIn.errorTitles.WRONG_CONNECTOR');
+      case 'UNKNOWN_QR':
+        return t('qrCheckIn.errorTitles.UNKNOWN_QR');
+      default:
+        return t('qrCheckIn.errorTitles.NO_BOOKING');
+    }
+  }
 
   function errorBody(r: Extract<CheckInResolution, { ok: false }>): string {
+    if (r.message && (r.code === 'STATE_CONFLICT' || r.code === 'STATION_UNAVAILABLE')) {
+      return r.message;
+    }
     switch (r.code) {
+      case 'CHALLENGE_EXPIRED':
+        return t('qrCheckIn.errors.CHALLENGE_EXPIRED');
+      case 'NOT_ACCESS':
+        return t('qrCheckIn.errors.NOT_ACCESS');
+      case 'STATE_CONFLICT':
+        return t('qrCheckIn.errors.STATE_CONFLICT');
+      case 'STATION_UNAVAILABLE':
+        return t('qrCheckIn.errors.STATION_UNAVAILABLE');
       case 'TOO_EARLY':
         return t('qrCheckIn.errors.TOO_EARLY', {
           time: r.booking ? formatTime(r.booking.startAt) : '',
@@ -152,8 +237,15 @@ export function QRCheckInScreen() {
               <Text style={styles.scanHint}>
                 {scanning ? t('qrCheckIn.scanning') : t('qrCheckIn.scanHint')}
               </Text>
-              <Pressable onPress={simulateScan} hitSlop={8}>
-                <Text style={[styles.simulateLink, { color: themeColors.primary }]}>{t('qrCheckIn.simulate')}</Text>
+              <Pressable
+                onPress={() => setKioskVisible(true)}
+                hitSlop={8}
+                style={styles.kioskLauncherBtn}
+              >
+                <Ionicons name="hardware-chip-outline" size={15} color={themeColors.primary} />
+                <Text style={[styles.simulateLink, { color: themeColors.primary }]}>
+                  {t('qrCheckIn.kioskModalBtn', 'Màn hình Trụ Sạc (Demo Kiosk)')}
+                </Text>
               </Pressable>
             </View>
           </>
@@ -169,12 +261,31 @@ export function QRCheckInScreen() {
               onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())}
               style={styles.permissionBtn}
             />
-            <Pressable onPress={simulateScan} hitSlop={8}>
-              <Text style={[styles.simulateLink, { color: themeColors.primary }]}>{t('qrCheckIn.simulate')}</Text>
+            <Pressable
+              onPress={() => setKioskVisible(true)}
+              hitSlop={8}
+              style={[styles.kioskLauncherBtn, { marginTop: spacing.xs }]}
+            >
+              <Ionicons name="hardware-chip-outline" size={15} color={themeColors.primary} />
+              <Text style={[styles.simulateLink, { color: themeColors.primary }]}>
+                {t('qrCheckIn.kioskModalBtn', 'Màn hình Trụ Sạc (Demo Kiosk)')}
+              </Text>
             </Pressable>
           </View>
         )}
       </View>
+
+      {/* Charger Kiosk Simulator Modal */}
+      <ChargerKioskModal
+        visible={kioskVisible}
+        onClose={() => setKioskVisible(false)}
+        booking={expected}
+        connectorId={expected?.connectorId}
+        onSimulateScan={(simToken) => {
+          setKioskVisible(false);
+          void handleScan(simToken);
+        }}
+      />
 
       {/* Confirmation bottom sheet */}
       {result?.ok && (
@@ -208,6 +319,36 @@ export function QRCheckInScreen() {
                   {formatTimeRange(result.booking.startAt, result.booking.endAt)}
                 </Text>
               </View>
+              {secondsRemaining !== null && (
+                <View style={styles.sheetRow}>
+                  <Text style={[styles.sheetLabel, { color: themeColors.textMuted }]}>
+                    {t('qrCheckIn.challengeCountdown')}
+                  </Text>
+                  <View
+                    style={[
+                      styles.countdownPill,
+                      {
+                        backgroundColor:
+                          secondsRemaining <= 10 ? `${themeColors.error}20` : `${themeColors.primary}20`,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="time-outline"
+                      size={14}
+                      color={secondsRemaining <= 10 ? themeColors.error : themeColors.primary}
+                    />
+                    <Text
+                      style={[
+                        styles.countdownText,
+                        { color: secondsRemaining <= 10 ? themeColors.error : themeColors.primary },
+                      ]}
+                    >
+                      {t('qrCheckIn.secondsLeft', { count: secondsRemaining })}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
 
             <AppButton
@@ -230,7 +371,7 @@ export function QRCheckInScreen() {
             <View style={[styles.errorRing, { backgroundColor: `${themeColors.error}1A` }]}>
               <Ionicons name="alert" size={30} color={themeColors.error} />
             </View>
-            <Text style={[styles.sheetTitle, { color: themeColors.textStrong }]}>{t(`qrCheckIn.errorTitles.${result.code}`)}</Text>
+            <Text style={[styles.sheetTitle, { color: themeColors.textStrong }]}>{errorTitle(result.code)}</Text>
             <Text style={[styles.errorBody, { color: themeColors.textBody }]}>{errorBody(result)}</Text>
             {result.connector && (
               <Text style={[styles.sheetCode, { color: themeColors.textMuted }]}>
@@ -299,6 +440,17 @@ const styles = StyleSheet.create({
   },
   scanHint: { fontSize: fontSizes.body, color: '#FFFFFF', textAlign: 'center' },
   simulateLink: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold },
+  kioskLauncherBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
 
   permissionBlock: {
     alignItems: 'center',
@@ -350,4 +502,16 @@ const styles = StyleSheet.create({
   autoStopRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   autoStop: { fontSize: fontSizes.caption },
   errorBody: { fontSize: fontSizes.body, textAlign: 'center', lineHeight: lineHeights.body },
+  countdownPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  countdownText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+  },
 });

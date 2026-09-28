@@ -1011,6 +1011,7 @@
     "refundStatusSucceeded": "Refund Succeeded",
     "refundDescReconciling": "The payment is undergoing manual reconciliation with the provider. No further action is required from you.",
     "refundDescProcessing": "Your refund has been scheduled and is transferring to your original payment method.",
+    "refundDescAutoProcessing": "Your refund request has been initiated and is being processed automatically back to your original payment method.",
     "refundDescSucceeded": "The refunded amount has been successfully credited to your original payment method.",
     "refundedTotal": "Refunded Amount",
     "graceCardTitle": "100% Cancellation Grace",
@@ -1064,6 +1065,7 @@
     "title": "QR Check-in",
     "scanHint": "Position the QR code on the charger within the frame to check in.",
     "simulate": "Scan code (Simulated)",
+    "kioskModalBtn": "Charger Screen (Demo Kiosk)",
     "scanning": "Scanning…",
     "permissionTitle": "Camera access needed",
     "permissionBody": "ChargeOps uses the camera to scan the QR code on the charger when you check in.",
@@ -1079,19 +1081,30 @@
     "confirmCta": "Confirm & start charging",
     "scannedCode": "Scanned: {{code}}",
     "rescan": "Scan again",
+    "challengeCountdown": "QR code validity",
+    "secondsLeft": "{{count}}s left",
+    "deadline": "Check-in deadline",
     "errorTitles": {
       "UNKNOWN_QR": "QR code not recognised",
       "NO_BOOKING": "No booking found",
       "WRONG_CONNECTOR": "Wrong connector",
       "TOO_EARLY": "Too early to check in",
-      "WINDOW_EXPIRED": "Check-in window closed"
+      "WINDOW_EXPIRED": "Check-in window closed",
+      "CHALLENGE_EXPIRED": "QR code expired",
+      "NOT_ACCESS": "Access denied",
+      "STATE_CONFLICT": "Invalid booking state",
+      "STATION_UNAVAILABLE": "Station unavailable"
     },
     "errors": {
-      "UNKNOWN_QR": "This QR code isn't a ChargeOps connector. Check that you're scanning the sticker on the port itself.",
+      "UNKNOWN_QR": "This QR code isn't recognized by ChargeOps or is malformed. Check that you're scanning the valid QR code on the charger.",
       "NO_BOOKING": "You have no active booking on this connector right now.",
       "WRONG_CONNECTOR": "Your booking is on {{chargePoint}} · {{connector}} ({{zone}}). Scan the QR on that connector instead.",
       "TOO_EARLY": "Check-in opens at {{time}}, in {{minutes}} min. You can't scan before the start time.",
-      "WINDOW_EXPIRED": "The 15-minute check-in window has closed; the booking was auto-cancelled with no refund."
+      "WINDOW_EXPIRED": "The check-in deadline for this booking has passed. The slot is transitioning to no-show.",
+      "CHALLENGE_EXPIRED": "The QR code has expired or is invalid. Please wait for the charger display to refresh and scan again.",
+      "NOT_ACCESS": "This booking does not belong to your account.",
+      "STATE_CONFLICT": "The current booking status does not allow check-in.",
+      "STATION_UNAVAILABLE": "The station or connector is undergoing maintenance or temporarily unavailable."
     }
   },
   "chargingSession": {

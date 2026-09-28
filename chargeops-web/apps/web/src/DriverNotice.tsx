@@ -26,22 +26,33 @@ export function DriverNotice() {
           trạm và quản trị viên — hãy tìm sạc, đặt chỗ và thanh toán trên ứng dụng ChargeOps
           trên điện thoại của bạn.
         </div>
-        <div className="flex items-center justify-center gap-3">
-          <a
-            href={getDriverAppUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-ctl bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand/90 transition-colors shadow-xs"
-          >
-            <span>Mở ứng dụng tài xế</span>
-            <span className="text-[12px]">↗</span>
-          </a>
-          <button
-            onClick={logout}
-            className="cursor-pointer rounded-ctl border border-line px-4 py-2 text-[13px] font-semibold text-body hover:bg-canvas transition-colors"
-          >
-            Đăng xuất
-          </button>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center gap-3">
+            <a
+              href={getDriverAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-ctl bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand/90 transition-colors shadow-xs"
+            >
+              <span>Mở ứng dụng tài xế</span>
+              <span className="text-[12px]">↗</span>
+            </a>
+            <button
+              onClick={logout}
+              className="cursor-pointer rounded-ctl border border-line px-4 py-2 text-[13px] font-semibold text-body hover:bg-canvas transition-colors"
+            >
+              Đăng xuất
+            </button>
+          </div>
+          <div className="mt-2 pt-3 border-t border-line w-full text-center">
+            <a
+              href="/simulator"
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-brand hover:underline"
+            >
+              <span>⚡ Mở Màn hình Trụ sạc Mô phỏng (Simulator Kiosk)</span>
+              <span>↗</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -58,12 +58,23 @@
         "title": "Phân tích",
         "subtitle": "Xu hướng đặt chỗ, doanh thu và vận hành toàn nền tảng."
       },
+      "observability": {
+        "label": "Giám sát hệ thống",
+        "title": "Giám sát hệ thống",
+        "subtitle": "Metrics và log vận hành từ Grafana, Prometheus và Loki."
+      },
       "kb": {
         "label": "Kho chính sách",
         "title": "Kho chính sách",
         "subtitle": "Nguồn tri thức cho trợ lý chính sách (RAG)."
       }
     }
+  },
+  "observability": {
+    "dashboardTitle": "ChargeOps Overview",
+    "accessHint": "Grafana xác thực riêng qua Keycloak và chỉ chấp nhận role OBSERVABILITY_ADMIN.",
+    "openInNewTab": "Mở toàn màn hình",
+    "iframeTitle": "Bảng điều khiển giám sát ChargeOps"
   },
   "search": {
     "groups": {
@@ -758,7 +769,7 @@
   "transactions": {
     "tabs": {
       "list": "Lịch sử giao dịch & Biên nhận",
-      "refundQueue": "Hàng chờ hoàn tiền (FE-19)"
+      "refundQueue": "Theo dõi hoàn tiền"
     },
     "methods": {
       "ATM": "Thẻ ATM",
@@ -818,23 +829,39 @@
     "copied": "Đã sao chép mã"
   },
   "refunds": {
-    "tabs": {
-      "all": "Tất cả",
-      "pending": "Chờ xử lý (PENDING)",
-      "succeeded": "Đã hoàn tất (SUCCEEDED)"
-    },
     "kpi": {
-      "pending": "CHỜ XỬ LÝ (PENDING)",
-      "pendingDelta": "{{count}} khoản hoàn",
+      "pending": "ĐANG CHỜ XỬ LÝ (PENDING)",
+      "pendingDelta": "{{count}} khoản mở nghĩa vụ",
+      "pendingCountLabel": "Không có khoản tồn đọng",
       "succeeded": "ĐÃ HOÀN TẤT",
       "succeededDelta": "{{count}} hoàn tất",
+      "succeededCountLabel": "Đã xử lý thành công",
       "total": "TỔNG NGHĨA VỤ HOÀN",
-      "totalDelta": "{{count}} tổng số",
-      "mode": "CHẾ ĐỘ THỰC THI",
-      "modeValue": "Simulator / Manual",
-      "modeDelta": "Tuân thủ BR-PAY-08/13"
+      "totalDelta": "{{count}} tổng số hồ sơ",
+      "actionRequired": "CẦN CAN THIỆP (LỖI LẦN THỬ)",
+      "actionRequiredDelta": "{{count}} lần thử thất bại",
+      "actionRequiredZero": "Không có lỗi tồn đọng"
+    },
+    "tabs": {
+      "all": "Tất cả hồ sơ",
+      "pending": "Đang chờ xử lý (PENDING)",
+      "succeeded": "Đã hoàn tất (SUCCEEDED)"
     },
     "searchPlaceholder": "Tìm mã refund, booking, tài xế…",
+    "reasons": {
+      "VOLUNTARY_GRACE": "Ân hạn 10 phút",
+      "STATION_FAILURE": "Sự cố trạm sạc",
+      "EXCESS_PAYMENT": "Thanh toán thừa"
+    },
+    "status": {
+      "actionRequired": "CẦN CAN THIỆP",
+      "failedAttemptSub": "Lỗi lần thử",
+      "adminRequiredSub": "Admin đối soát",
+      "autoProcessing": "TỰ ĐỘNG XỬ LÝ",
+      "autoProcessingSub": "Hệ thống đang chạy",
+      "pendingSub": "Chờ xử lý",
+      "succeededSub": "Đã hoàn tất"
+    },
     "table": {
       "cols": {
         "id": "MÃ REFUND",
@@ -847,60 +874,67 @@
         "actions": "THAO TÁC"
       },
       "empty": "Không có khoản hoàn tiền nào khớp với bộ lọc.",
-      "attemptsCount": "x{{count}}",
       "attemptsTitle": "{{count}} lần thử",
+      "retryBtn": "Thử lại / Can thiệp",
+      "executeBtn": "Thực thi chi trả",
       "processBtn": "Xử lý hoàn",
       "viewDetailBtn": "Xem chi tiết"
-    },
-    "reasons": {
-      "VOLUNTARY_GRACE": "Ân hạn 10p (100%)",
-      "STATION_FAILURE": "Sự cố trạm sạc",
-      "EXCESS_PAYMENT": "Thanh toán thừa"
     },
     "drawer": {
       "title": "Chi tiết Hoàn tiền",
       "copyIdTitle": "Sao chép mã hoàn tiền",
+      "closeBtn": "Đóng",
+      "submitting": "Đang thực thi…",
+      "confirmRetry": "Thử lại lệnh hoàn tiền",
+      "confirmManualOverride": "Can thiệp thực thi ngay",
+      "confirmSimulatorSuccess": "Kích hoạt lệnh hoàn tiền",
+      "confirmSimulatorFailed": "Mô phỏng Thất bại (Test Failure)",
+      "confirmManual": "Xác nhận Đã Chuyển Khoản & Đối Soát",
       "amountLabel": "Số tiền cần hoàn trả",
       "statusLabel": "Trạng thái",
-      "statusPending": "CHỜ THỰC THI (PENDING)",
       "statusSucceeded": "ĐÃ HOÀN TẤT (SUCCEEDED)",
+      "statusFailedAttempt": "CẦN CAN THIỆP (LẦN THỬ LỖI)",
+      "statusAutoProcessing": "TỰ ĐỘNG XỬ LÝ (AUTO_FIRST_ATTEMPT)",
+      "statusPending": "ĐANG CHỜ XỬ LÝ (PENDING)",
       "bookingCode": "Mã đơn đặt chỗ:",
       "driverName": "Tài xế nhận hoàn:",
       "stationName": "Trạm sạc:",
       "reasonLabel": "Căn cứ hoàn:",
+      "graceEntitlementTitle": "Đủ điều kiện hoàn 100% (Xác lập tự động theo BR-PAY-08)",
+      "graceEntitlementDesc": "Tài xế đã hủy trong 10 phút ân hạn đầu tiên. Quyền hoàn 100% là quyền lợi mặc định đã được chốt bởi chính sách. Thao tác tại đây nhằm kích hoạt kênh chi trả hoặc ghi nhận đối soát chuyển khoản ngân hàng.",
+      "autoProcessingBannerTitle": "Hệ thống đang tự động điều phối thực thi (Auto First Attempt)",
+      "autoProcessingBannerDesc": "Khoản hoàn tiền này thuộc chính sách tự động thực thi (AUTO_FIRST_ATTEMPT). Scheduler/worker hệ thống đang phát lệnh chi trả nền tảng. Admin không cần can thiệp trừ khi phát sinh lỗi.",
       "createdAt": "Khởi tạo: {{date}}",
       "version": "Phiên bản: v{{version}}",
       "terminalBanner": "Khoản hoàn tiền đã được hoàn tất thành công (Terminal State)",
       "terminalDesc": "Mã tham chiếu ngân hàng: {{ref}}. Hoàn tất lúc: {{time}}. Hệ thống không cho phép thực thi thêm lệnh mới trên bản ghi này.",
-      "tabExecute": "Thực thi hoàn tiền",
       "tabInfo": "Thông tin thực thi",
+      "tabExecute": "Thực thi chi trả",
       "tabHistory": "Lịch sử các lần thử ({{count}})",
-      "modeLabel": "Chế độ thực thi (Execution Mode)",
-      "modeSimulator": "Mô phỏng Sandbox",
-      "modeSimulatorDesc": "Dành cho dev / test / demo. Không gọi ngân hàng thật.",
-      "modeManual": "Ghi nhận thủ công",
-      "modeManualDesc": "Đã chuyển khoản ngoài nền tảng. Cần mã đối soát.",
-      "outcomeConfig": "Cấu hình kết quả mô phỏng (Test Outcome):",
-      "outcomeSucceeded": "Thành công (SUCCEEDED)",
-      "outcomeFailed": "Lỗi mô phỏng (FAILED)",
-      "simRefLabel": "Mã tham chiếu mô phỏng (Tự động sinh nếu để trống):",
+      "modeLabel": "Phương thức chi trả / Đối soát",
+      "modeSimulator": "Kênh mô phỏng Sandbox",
+      "modeSimulatorDesc": "Gửi lệnh qua kênh mô phỏng cổng thanh toán (Dev/Demo).",
+      "modeManual": "Ghi nhận chuyển khoản ngoài",
+      "modeManualDesc": "Đã chuyển tiền ngoài qua ngân hàng. Cần mã UNC đối soát.",
+      "simTitleRetry": "Kích hoạt thử lại lệnh hoàn tiền",
+      "simTitleDefault": "Kích hoạt lệnh hoàn tiền mô phỏng",
+      "simDesc": "Hệ thống sẽ gửi yêu cầu hoàn tiền qua adapter mô phỏng với Idempotency-Key chống trùng lặp. Kết quả hoàn thành công sẽ cập nhật thanh toán REFUNDED một lần duy nhất.",
+      "simRefLabel": "Mã tham chiếu mô phỏng (tùy chọn - tự sinh nếu để trống):",
       "simRefPlaceholder": "ví dụ: SIM-REF-902184",
+      "manualSectionTitle": "Ủy nhiệm chi / Chuyển khoản ngân hàng ngoài nền tảng",
+      "manualSectionDesc": "ChargeOps không tự chuyển tiền qua tài khoản này. Nhập mã giao dịch để đối soát khoản tiền đã chi trả thủ công cho tài xế.",
       "manualRefLabel": "Mã giao dịch ngân hàng / UNC",
       "manualRefPlaceholder": "ví dụ: FT260925987123 / VCB1982736",
       "manualRefHelp": "Nhập mã tham chiếu từ sao kê ngân hàng đã thực hiện chuyển tiền cho tài xế.",
       "performedAtLabel": "Thời điểm thực hiện chuyển khoản",
+      "performedAtHint": "Thời gian ghi trên sao kê hoặc biên lai chuyển khoản",
       "noteLabel": "Ghi chú thực thi / Đối soát",
       "notePlaceholder": "Nhập ghi chú giải trình hoặc lý do xử lý hoàn tiền…",
+      "protectionTitle": "Nguyên tắc vận hành & bảo vệ dữ liệu (BR-PAY-08 / BR-PAY-13):",
+      "protectionPoint1": "Mỗi thao tác gửi lệnh đi kèm Idempotency-Key tự sinh theo chuẩn BKG-034 để chống trùng lặp dòng tiền.",
+      "protectionPoint2": "Tách bạch Quyền lợi và Thực thi: Quyền hoàn tiền đã được chốt bởi chính sách. Nếu lần thử gặp lỗi (FAILED), khoản hoàn vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bao giờ bị mất.",
       "noteDefaultGrace": "Hoàn tiền 100% tài xế hủy trong ân hạn 10 phút",
       "noteDefaultFailure": "Hoàn tiền theo sự cố trạm sạc",
-      "protectionTitle": "Nguyên tắc bảo vệ dữ liệu (BR-PAY-13):",
-      "protectionPoint1": "Mỗi thao tác gửi lệnh đi kèm Idempotency-Key để chống bấm đúp hoặc gửi trùng lặp.",
-      "protectionPoint2": "Nếu lần thử gặp lỗi (FAILED), khoản hoàn tiền vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bị mất.",
-      "closeBtn": "Đóng",
-      "confirmSimulatorSuccess": "Thực thi Mô phỏng Thành công",
-      "confirmSimulatorFailed": "Mô phỏng Thất bại",
-      "confirmManual": "Xác nhận Ghi nhận Chuyển khoản",
-      "submitting": "Đang thực thi…",
       "validationManualRef": "Vui lòng nhập Mã giao dịch ngân hàng / Ủy nhiệm chi.",
       "validationPerformedAt": "Vui lòng chọn thời điểm thực hiện giao dịch.",
       "validationNote": "Vui lòng nhập ghi chú thực thi / lý do đối soát.",
@@ -912,10 +946,12 @@
       "errorRequestConflict": "Yêu cầu xung đột với lần thực thi trước đó."
     },
     "timeline": {
-      "empty": "Chưa có lần thực thi nào trước đó. Khoản hoàn tiền đang ở trạng thái sơ khởi (chờ Admin xử lý).",
       "title": "Lịch sử các lần thực thi ({{count}})",
       "notice": "Bảo lưu PENDING khi FAILED (BR-PAY-13)",
+      "empty": "Chưa có lần thực thi nào trước đó. Khoản hoàn tiền đang ở trạng thái sơ khởi.",
       "attemptNum": "Lần #{{seq}}",
+      "triggerSystem": "🤖 Tự động hệ thống",
+      "triggerAdmin": "👤 Admin can thiệp",
       "reference": "Mã tham chiếu:",
       "copyTitle": "Sao chép",
       "errorCode": "Mã lỗi:"

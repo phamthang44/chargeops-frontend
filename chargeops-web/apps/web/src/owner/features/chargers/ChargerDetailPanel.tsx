@@ -261,26 +261,6 @@ function ConnectorCard({
         <PerfStat label={t('connectors.panel.sessions')} value={String(c.sessionsToday)} />
         <PerfStat label={t('connectors.panel.kwh')} value={String(c.kwhToday)} />
       </div>
-
-      <div className="flex items-center justify-between gap-3 rounded-card border border-line-3 bg-surface-2 p-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] border border-line-3 bg-surface">
-            <IconBolt size={22} className="text-owner" />
-          </span>
-          <div className="min-w-0 flex flex-col">
-            <span className="text-[12px] font-bold text-ink">Dynamic QR Check-in</span>
-            <span className="text-[11px] text-muted">Mã challenge 60s trên màn hình trụ</span>
-          </div>
-        </div>
-        <a
-          href={`/simulator?connectorId=${c.id}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex shrink-0 items-center justify-center gap-1 rounded-[9px] bg-emerald-600 px-3 py-1.5 text-[11.5px] font-bold text-white hover:bg-emerald-500 shadow-sm transition"
-        >
-          ⚡ Mở Simulator
-        </a>
-      </div>
     </div>
   );
 }

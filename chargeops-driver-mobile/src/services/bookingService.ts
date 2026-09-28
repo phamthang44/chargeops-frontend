@@ -1460,14 +1460,26 @@ export async function cancelBooking(
  * needs different advice from one who scanned the wrong port.
  */
 export type CheckInErrorCode =
-  | 'UNKNOWN_QR' // the payload isn't one of our connectors
+  | 'UNKNOWN_QR' // the payload isn't one of our connectors or invalid token
   | 'NO_BOOKING' // no booking of the driver's on this connector, now
   | 'WRONG_CONNECTOR' // they do have a booking now, but on a different port
   | 'TOO_EARLY' // scanned before the slot start time
-  | 'WINDOW_EXPIRED'; // more than 15 minutes after the start
+  | 'WINDOW_EXPIRED' // more than 15 minutes after the start / check-in closed
+  | 'CHALLENGE_EXPIRED' // QR challenge expired or invalid in Redis
+  | 'NOT_ACCESS' // booking does not belong to driver
+  | 'STATE_CONFLICT' // booking is not in CONFIRMED state
+  | 'STATION_UNAVAILABLE'; // station/charger hardware unavailable or in maintenance
 
 export type CheckInResolution =
-  | { ok: true; booking: Booking; connector: Connector }
+  | {
+      ok: true;
+      booking: Booking;
+      connector: Connector;
+      challengeToken?: string;
+      challengeExpiresAt?: string;
+      checkInDeadline?: string;
+      expectedVersion?: number;
+    }
   | {
       ok: false;
       code: CheckInErrorCode;
@@ -1476,18 +1488,165 @@ export type CheckInResolution =
       booking?: Booking;
       /** Minutes until check-in opens, for TOO_EARLY. */
       minutesUntilOpen?: number;
+      message?: string;
     };
 
 /**
- * Validate a scanned QR without changing anything (FR07 step 1). The driver then
- * sees a confirmation screen and taps to commit — `confirmCheckIn` does the
+ * Validate a scanned QR without changing anything (FR07 step 1 / BKG-040).
+ * In live mode, calls POST /api/v1/bookings/check-in/resolve.
+ * The driver then sees a confirmation screen and taps to commit — `confirmCheckIn` does the
  * state transition. Splitting it this way means a stray scan never silently
  * checks someone in.
  */
-export async function resolveCheckIn(qrToken: string): Promise<CheckInResolution> {
+export async function resolveCheckIn(
+  qrToken: string,
+  bookingId?: string,
+  accessToken?: string | null,
+): Promise<CheckInResolution> {
+  const token = qrToken.trim();
+
+  if (!isMockMode()) {
+    try {
+      const jwtToken = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      };
+      if (jwtToken) {
+        headers.Authorization = `Bearer ${jwtToken}`;
+      }
+
+      // 1. Determine effective booking
+      let effectiveBookingId = bookingId;
+      let activeBooking: Booking | null = null;
+
+      if (effectiveBookingId) {
+        activeBooking = await getBookingById(effectiveBookingId, jwtToken);
+      } else {
+        const activeList = await getActiveBookings(jwtToken);
+        activeBooking = activeList.find((b) => b.status === 'CONFIRMED') ?? null;
+        effectiveBookingId = activeBooking?.id;
+      }
+
+      if (!effectiveBookingId) {
+        return {
+          ok: false,
+          code: 'NO_BOOKING',
+          connector: null,
+        };
+      }
+
+      // 2. Client-side length validation matching backend constraint (16 - 512)
+      if (token.length < 16 || token.length > 512) {
+        return {
+          ok: false,
+          code: 'UNKNOWN_QR',
+          connector: null,
+          booking: activeBooking ?? undefined,
+        };
+      }
+
+      // 3. Call backend preview endpoint
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/check-in/resolve`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          bookingId: effectiveBookingId,
+          challengeToken: token,
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data ?? json;
+
+        const booking = activeBooking ?? (await getBookingById(data.bookingId, jwtToken));
+        let connector = await getConnectorById(data.connectorId);
+        if (!connector && booking) {
+          connector = {
+            id: data.connectorId,
+            chargePointId: booking.chargePointName ?? '',
+            stationId: booking.stationId,
+            name: booking.connectorName ?? 'Cổng sạc',
+            connectorType: booking.connectorType,
+            powerKw: booking.powerKw,
+            currentType:
+              booking.connectorType === 'CCS2' ||
+              booking.connectorType === 'CHADEMO' ||
+              booking.connectorType === 'GBT'
+                ? 'DC'
+                : 'AC',
+            runtimeStatus: 'AVAILABLE',
+            qrToken: token,
+            ratePerKwh: 3850,
+          };
+        }
+
+        if (booking && connector) {
+          return {
+            ok: true,
+            booking,
+            connector,
+            challengeToken: token,
+            challengeExpiresAt: data.challengeExpiresAt,
+            checkInDeadline: data.checkInDeadline,
+            expectedVersion: data.expectedVersion ?? booking.version ?? 1,
+          };
+        }
+      }
+
+      // 4. Map error response from backend
+      const errJson = await res.json().catch(() => null);
+      const errObj = errJson?.error || errJson;
+      const rawCode: string = errObj?.code || '';
+      const messageKey: string = errObj?.messageKey || '';
+      const serverMessage: string | undefined = errObj?.message;
+
+      let code: CheckInErrorCode = 'UNKNOWN_QR';
+      let minutesUntilOpen: number | undefined;
+
+      if (rawCode === 'CHECK_IN_TOO_EARLY') {
+        code = 'TOO_EARLY';
+        if (activeBooking?.startAt) {
+          const start = new Date(activeBooking.startAt).getTime();
+          minutesUntilOpen = Math.max(1, Math.ceil((start - Date.now()) / 60_000));
+        }
+      } else if (rawCode === 'CHECK_IN_CLOSED') {
+        code = 'WINDOW_EXPIRED';
+      } else if (rawCode === 'CONNECTOR_MISMATCH') {
+        code = 'WRONG_CONNECTOR';
+      } else if (rawCode === 'BOOKING_NOT_ACCESS') {
+        code = 'NOT_ACCESS';
+      } else if (rawCode === 'STATE_CONFLICT') {
+        code = 'STATE_CONFLICT';
+      } else if (rawCode === 'STATION_UNAVAILABLE') {
+        code = 'STATION_UNAVAILABLE';
+      } else if (
+        rawCode === 'INVALID_CHECK_IN_CHALLENGE' ||
+        rawCode === 'error.station.invalidCheckInChallenge' ||
+        messageKey === 'error.station.invalidCheckInChallenge'
+      ) {
+        code = 'CHALLENGE_EXPIRED';
+      } else if (rawCode === 'RESOURCE_NOT_FOUND') {
+        code = 'NO_BOOKING';
+      }
+
+      return {
+        ok: false,
+        code,
+        connector: null,
+        booking: activeBooking ?? undefined,
+        minutesUntilOpen,
+        message: serverMessage,
+      };
+    } catch (err) {
+      console.warn('Network error resolving check-in, falling back to local store:', err);
+    }
+  }
+
+  // --- Local mock simulation ---
   reconcileLapsed();
   const now = Date.now();
-  const token = qrToken.trim();
   let connector =
     connectorsMock.find((c) => c.qrToken === token) ??
     connectorsMock.find((c) => c.id.toLowerCase() === token.toLowerCase()) ??
@@ -1495,7 +1654,9 @@ export async function resolveCheckIn(qrToken: string): Promise<CheckInResolution
 
   // If token is a dynamic challenge token (UUID or chk_... generated by Simulator), resolve it to matching booking/connector
   if (!connector && (token.includes('-') || token.startsWith('chk_') || token.length >= 16)) {
-    const activeBooking = store.find((b) => b.status === 'CONFIRMED');
+    const activeBooking = bookingId
+      ? store.find((b) => b.id === bookingId)
+      : store.find((b) => b.status === 'CONFIRMED');
     if (activeBooking) {
       connector = connectorsMock.find((c) => c.id === activeBooking.connectorId) ?? connectorsMock[0];
     } else {
@@ -1514,7 +1675,20 @@ export async function resolveCheckIn(qrToken: string): Promise<CheckInResolution
     (b) => b.connectorId === connector.id && b.status === 'CONFIRMED',
   );
   const match = onThisConnector.find(inWindow);
-  if (match) return simulateNetwork({ ok: true as const, booking: match, connector }, 400);
+  if (match) {
+    return simulateNetwork(
+      {
+        ok: true as const,
+        booking: match,
+        connector,
+        challengeToken: token,
+        challengeExpiresAt: new Date(now + 60_000).toISOString(),
+        checkInDeadline: new Date(new Date(match.endAt).getTime() - 15 * 60_000).toISOString(),
+        expectedVersion: match.version ?? 1,
+      },
+      400,
+    );
+  }
 
   // Same port, wrong time — say which way they got it wrong.
   const soonest = [...onThisConnector].sort(
@@ -1552,15 +1726,110 @@ export async function resolveCheckIn(qrToken: string): Promise<CheckInResolution
   return simulateNetwork({ ok: false as const, code: 'NO_BOOKING' as const, connector }, 400);
 }
 
-/** Commit the check-in the driver just confirmed: CONFIRMED -> CHECKED_IN (FR07). */
-export async function confirmCheckIn(bookingId: string): Promise<Booking | null> {
-  // NOW: flip the status. LATER: POST /bookings/:id/check-in
+/** Commit the check-in the driver just confirmed: CONFIRMED -> CHECKED_IN (FR07 / BKG-041). */
+export async function confirmCheckIn(
+  bookingId: string,
+  options?: {
+    expectedVersion?: number;
+    challengeToken?: string;
+  },
+  accessToken?: string | null,
+): Promise<Booking | null> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const idempotencyKey = generateIdempotencyKey();
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const body = {
+        bookingId,
+        challengeToken: options?.challengeToken ?? '',
+        expectedVersion: options?.expectedVersion,
+      };
+
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/${encodeURIComponent(bookingId)}/check-in`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const updated = await getBookingById(bookingId, token);
+        return updated;
+      }
+
+      const errJson = await res.json().catch(() => null);
+      const errObj = errJson?.error || errJson;
+      const code = errObj?.code || `HTTP_${res.status}`;
+      const message = errObj?.message || 'Không thể thực hiện check-in.';
+      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey);
+    } catch (err) {
+      if (err instanceof BookingApiError) throw err;
+      console.warn('Network error confirming check-in, falling back to local store:', err);
+    }
+  }
+
+  // Fallback in-memory store
   const booking = store.find((b) => b.id === bookingId);
   if (booking && booking.status === 'CONFIRMED') {
     booking.status = 'CHECKED_IN';
     booking.checkedInAt = new Date().toISOString();
+    booking.version = (booking.version ?? 1) + 1;
   }
   return simulateNetwork(booking ?? null);
+}
+
+/**
+ * Request a dynamic check-in challenge token from the Charger Simulator endpoint
+ * (FR07 / BKG-040 / BKG-042).
+ * Used for Physical Kiosk Display simulation inside the mobile app or web console.
+ */
+export async function generateSimulatorChallenge(
+  connectorId: string,
+  accessToken?: string | null,
+): Promise<{ challengeToken: string; expiresInSeconds: number }> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(
+        `${apiBaseUrl}/api/v1/internal/connectors/${encodeURIComponent(connectorId)}/check-in-challenge`,
+        {
+          method: 'POST',
+          headers,
+        },
+      );
+
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data ?? json;
+        if (data?.challengeToken) {
+          return {
+            challengeToken: data.challengeToken,
+            expiresInSeconds: data.expiresInSeconds ?? 60,
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Network error requesting simulator challenge token:', err);
+    }
+  }
+
+  // Mock / offline fallback: generate standard 16+ char challenge token with 60s TTL
+  const fallbackToken = `chk_sim_${generateIdempotencyKey()}`;
+  return {
+    challengeToken: fallbackToken,
+    expiresInSeconds: 60,
+  };
 }
 
 /** Driver started charging: CHECKED_IN -> CHARGING. */

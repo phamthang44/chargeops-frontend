@@ -4,10 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Button,
   Card,
+  DateTimeInput,
   Drawer,
+  IconBolt,
   IconCheck,
   IconClock,
   IconCopy,
+  IconShield,
+  IconTag,
   SegmentedControl,
   StatusPill,
   useToast,
@@ -64,6 +68,7 @@ export function RefundExecutionDrawer({
   const [activeTab, setActiveTab] = useState<'execute' | 'history'>('execute');
   const [executionMode, setExecutionMode] = useState<TransferExecutionMode>('SIMULATOR');
   const [outcome, setOutcome] = useState<'SUCCEEDED' | 'FAILED'>('SUCCEEDED');
+  const [showTestTools, setShowTestTools] = useState(false);
   const [transferReference, setTransferReference] = useState('');
   const [performedAt, setPerformedAt] = useState('');
   const [note, setNote] = useState('');
@@ -74,6 +79,7 @@ export function RefundExecutionDrawer({
   // Reset form when drawer opens or refund changes
   useEffect(() => {
     if (open && activeRefund) {
+      const isAuto = activeRefund.status === 'PENDING' && activeRefund.reason === 'VOLUNTARY_GRACE' && !activeRefund.requiresAdminAction && !activeRefund.attempts?.some((a) => a.status === 'FAILED');
       setActiveTab(activeRefund.status === 'SUCCEEDED' ? 'history' : 'execute');
       setExecutionMode('SIMULATOR');
       setOutcome('SUCCEEDED');
@@ -93,6 +99,12 @@ export function RefundExecutionDrawer({
   if (!activeRefund) return null;
 
   const isTerminalSuccess = activeRefund.status === 'SUCCEEDED';
+  const hasFailedAttempt = Boolean(
+    activeRefund.attempts && activeRefund.attempts.some((a) => a.status === 'FAILED')
+  );
+  const isGrace = activeRefund.reason === 'VOLUNTARY_GRACE';
+  const needsAdminAction = Boolean(activeRefund.requiresAdminAction || hasFailedAttempt);
+  const isAutoProcessing = !isTerminalSuccess && isGrace && !needsAdminAction && (activeRefund.executionPolicy === 'AUTO_FIRST_ATTEMPT' || !activeRefund.executionPolicy);
 
   const copyId = () => {
     navigator.clipboard?.writeText(activeRefund.refundId || activeRefund.id);
@@ -105,7 +117,7 @@ export function RefundExecutionDrawer({
       case 'VOLUNTARY_GRACE':
         return (
           <span className="inline-flex items-center gap-1 rounded bg-good-soft px-2 py-0.5 text-[11px] font-semibold text-good">
-            {t('refunds.reasons.VOLUNTARY_GRACE', 'Ân hạn 10p (100%)')}
+            {t('refunds.reasons.VOLUNTARY_GRACE', 'Ân hạn 10 phút')}
           </span>
         );
       case 'STATION_FAILURE':
@@ -250,7 +262,7 @@ export function RefundExecutionDrawer({
               {t('refunds.drawer.closeBtn', 'Đóng')}
             </Button>
             <Button
-              variant="primary"
+              variant={isAutoProcessing ? 'secondary' : 'primary'}
               type="submit"
               form="refund-execute-form"
               disabled={isSubmitting}
@@ -259,9 +271,13 @@ export function RefundExecutionDrawer({
                 ? t('refunds.drawer.submitting', 'Đang thực thi…')
                 : executionMode === 'SIMULATOR'
                 ? outcome === 'SUCCEEDED'
-                  ? t('refunds.drawer.confirmSimulatorSuccess', 'Thực thi Mô phỏng Thành công')
-                  : t('refunds.drawer.confirmSimulatorFailed', 'Mô phỏng Thất bại')
-                : t('refunds.drawer.confirmManual', 'Xác nhận Ghi nhận Chuyển khoản')}
+                  ? hasFailedAttempt
+                    ? t('refunds.drawer.confirmRetry', 'Thử lại lệnh hoàn tiền')
+                    : isAutoProcessing
+                    ? t('refunds.drawer.confirmManualOverride', 'Can thiệp thực thi ngay')
+                    : t('refunds.drawer.confirmSimulatorSuccess', 'Kích hoạt lệnh hoàn tiền')
+                  : t('refunds.drawer.confirmSimulatorFailed', 'Mô phỏng Thất bại (Test Failure)')
+                : t('refunds.drawer.confirmManual', 'Xác nhận Đã Chuyển Khoản & Đối Soát')}
             </Button>
           </div>
         ) : (
@@ -289,10 +305,22 @@ export function RefundExecutionDrawer({
               {t('refunds.drawer.statusLabel', 'Trạng thái')}
             </span>
             <StatusPill
-              tone={isTerminalSuccess ? 'good' : 'warn'}
+              tone={
+                isTerminalSuccess
+                  ? 'good'
+                  : needsAdminAction
+                  ? 'bad'
+                  : isAutoProcessing
+                  ? 'brand'
+                  : 'warn'
+              }
               label={
                 isTerminalSuccess
                   ? t('refunds.drawer.statusSucceeded', 'ĐÃ HOÀN TẤT (SUCCEEDED)')
+                  : needsAdminAction
+                  ? t('refunds.drawer.statusFailedAttempt', 'CẦN CAN THIỆP (LẦN THỬ LỖI)')
+                  : isAutoProcessing
+                  ? t('refunds.drawer.statusAutoProcessing', 'TỰ ĐỘNG XỬ LÝ (AUTO_FIRST_ATTEMPT)')
                   : t('refunds.drawer.statusPending', 'CHỜ THỰC THI (PENDING)')
               }
             />
@@ -323,6 +351,42 @@ export function RefundExecutionDrawer({
             <div>{getReasonBadge(activeRefund.reason)}</div>
           </div>
         </div>
+
+        {/* Grace Entitlement Callout */}
+        {isGrace && (
+          <div className="flex items-start gap-2.5 rounded-xl bg-good-soft/30 border border-good/25 p-3 text-[12px] text-body">
+            <IconShield size={16} className="text-good shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-semibold text-good block">
+                {t('refunds.drawer.graceEntitlementTitle', 'Đủ điều kiện hoàn 100% (Xác lập tự động theo BR-PAY-08)')}
+              </span>
+              <span className="text-[11.5px] text-muted leading-relaxed block">
+                {t(
+                  'refunds.drawer.graceEntitlementDesc',
+                  'Tài xế đã hủy trong 10 phút ân hạn đầu tiên. Quyền hoàn 100% là quyền lợi mặc định đã được chốt bởi chính sách. Thao tác tại đây nhằm kích hoạt kênh chi trả hoặc ghi nhận đối soát chuyển khoản ngân hàng.'
+                )}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Auto Processing Notice */}
+        {isAutoProcessing && (
+          <div className="flex items-start gap-2.5 rounded-xl bg-brand/10 border border-brand/25 p-3 text-[12px] text-body">
+            <IconBolt size={16} className="text-brand shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-semibold text-brand block">
+                {t('refunds.drawer.autoProcessingBannerTitle', 'Hệ thống đang tự động điều phối thực thi (Auto First Attempt)')}
+              </span>
+              <span className="text-[11.5px] text-muted leading-relaxed block">
+                {t(
+                  'refunds.drawer.autoProcessingBannerDesc',
+                  'Khoản hoàn tiền này thuộc chính sách tự động thực thi (AUTO_FIRST_ATTEMPT). Scheduler/worker hệ thống đang phát lệnh chi trả nền tảng. Admin không cần can thiệp trừ khi phát sinh lỗi.'
+                )}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between pt-2 border-t border-hairline/60 text-[11px] text-faint">
           <span>
@@ -395,7 +459,7 @@ export function RefundExecutionDrawer({
           {/* Mode Selector */}
           <div>
             <label className="block text-[12px] font-semibold text-body mb-1.5">
-              {t('refunds.drawer.modeLabel', 'Chế độ thực thi (Execution Mode)')}
+              {t('refunds.drawer.modeLabel', 'Phương thức chi trả / Đối soát')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -408,10 +472,10 @@ export function RefundExecutionDrawer({
                 }`}
               >
                 <div className="flex items-center gap-1.5 font-semibold text-[13px] text-brand">
-                  <span>{t('refunds.drawer.modeSimulator', 'Mô phỏng Sandbox')}</span>
+                  <span>{t('refunds.drawer.modeSimulator', 'Kênh mô phỏng Sandbox')}</span>
                 </div>
                 <span className="text-[11px] text-muted mt-1">
-                  {t('refunds.drawer.modeSimulatorDesc', 'Dành cho dev / test / demo. Không gọi ngân hàng thật.')}
+                  {t('refunds.drawer.modeSimulatorDesc', 'Gửi lệnh qua kênh mô phỏng cổng thanh toán (Dev/Demo).')}
                 </span>
               </button>
 
@@ -420,15 +484,27 @@ export function RefundExecutionDrawer({
                 onClick={() => setExecutionMode('MANUAL_RECORD')}
                 className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${
                   executionMode === 'MANUAL_RECORD'
-                    ? 'border-warn bg-warn-soft ring-1 ring-warn'
-                    : 'border-hairline bg-surface hover:bg-surface-2'
+                    ? 'border-amber-500/80 dark:border-amber-400 bg-amber-500/10 dark:bg-amber-400/15 ring-1 ring-amber-500/40 shadow-xs'
+                    : 'border-line-2 bg-surface hover:bg-surface-2'
                 }`}
               >
-                <div className="flex items-center gap-1.5 font-semibold text-[13px] text-warn">
-                  <span>{t('refunds.drawer.modeManual', 'Ghi nhận thủ công')}</span>
+                <div
+                  className={`flex items-center gap-1.5 font-semibold text-[13px] ${
+                    executionMode === 'MANUAL_RECORD'
+                      ? 'text-amber-700 dark:text-amber-300 font-bold'
+                      : 'text-body'
+                  }`}
+                >
+                  <span>{t('refunds.drawer.modeManual', 'Ghi nhận chuyển khoản ngoài')}</span>
                 </div>
-                <span className="text-[11px] text-muted mt-1">
-                  {t('refunds.drawer.modeManualDesc', 'Đã chuyển khoản ngoài nền tảng. Cần mã đối soát.')}
+                <span
+                  className={`text-[11px] mt-1 ${
+                    executionMode === 'MANUAL_RECORD'
+                      ? 'text-amber-800/80 dark:text-amber-200/80 font-medium'
+                      : 'text-muted'
+                  }`}
+                >
+                  {t('refunds.drawer.modeManualDesc', 'Đã chuyển tiền ngoài qua ngân hàng. Cần mã UNC đối soát.')}
                 </span>
               </button>
             </div>
@@ -436,61 +512,116 @@ export function RefundExecutionDrawer({
 
           {/* SIMULATOR Specific Fields */}
           {executionMode === 'SIMULATOR' && (
-            <div className="rounded-lg border border-brand/20 bg-brand-soft/10 p-3.5 space-y-3">
-              <div className="text-[12px] text-brand font-medium">
-                {t('refunds.drawer.outcomeConfig', 'Cấu hình kết quả mô phỏng (Test Outcome):')}
-              </div>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-[12.5px] cursor-pointer">
-                  <input
-                    type="radio"
-                    name="outcome"
-                    value="SUCCEEDED"
-                    checked={outcome === 'SUCCEEDED'}
-                    onChange={() => setOutcome('SUCCEEDED')}
-                    className="accent-good"
-                  />
-                  <span className="font-semibold text-good">
-                    {t('refunds.drawer.outcomeSucceeded', 'Thành công (SUCCEEDED)')}
+            <div className="rounded-xl border border-brand/20 bg-brand-soft/10 p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">
+                    <IconShield size={13} />
                   </span>
-                </label>
-                <label className="flex items-center gap-2 text-[12.5px] cursor-pointer">
-                  <input
-                    type="radio"
-                    name="outcome"
-                    value="FAILED"
-                    checked={outcome === 'FAILED'}
-                    onChange={() => setOutcome('FAILED')}
-                    className="accent-bad"
-                  />
-                  <span className="font-semibold text-bad">
-                    {t('refunds.drawer.outcomeFailed', 'Lỗi mô phỏng (FAILED)')}
+                  <span className="text-[12.5px] font-bold text-ink">
+                    {hasFailedAttempt
+                      ? t('refunds.drawer.simTitleRetry', 'Kích hoạt thử lại lệnh hoàn tiền')
+                      : t('refunds.drawer.simTitleDefault', 'Kích hoạt lệnh hoàn tiền mô phỏng')}
                   </span>
-                </label>
+                </div>
+                <span className="rounded-full bg-good-soft px-2 py-0.5 text-[10.5px] font-semibold text-good">
+                  {outcome === 'SUCCEEDED' ? 'Mặc định: Thành công' : 'Đang ép lỗi giả lập'}
+                </span>
               </div>
 
+              <p className="text-[11.5px] text-muted leading-relaxed">
+                {t(
+                  'refunds.drawer.simDesc',
+                  'Hệ thống sẽ gửi yêu cầu hoàn tiền qua adapter mô phỏng với Idempotency-Key chống trùng lặp. Kết quả hoàn thành công sẽ cập nhật thanh toán REFUNDED một lần duy nhất.'
+                )}
+              </p>
+
               <div>
-                <label className="block text-[11.5px] text-muted mb-1">
-                  {t('refunds.drawer.simRefLabel', 'Mã tham chiếu mô phỏng (Tự động sinh nếu để trống):')}
+                <label className="block text-[11.5px] text-muted mb-1 font-medium">
+                  {t('refunds.drawer.simRefLabel', 'Mã tham chiếu mô phỏng (tùy chọn - tự sinh nếu để trống):')}
                 </label>
                 <input
                   type="text"
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.simRefPlaceholder', 'ví dụ: SIM-REF-902184')}
-                  className="w-full rounded border border-line-3 bg-surface px-3 py-1.5 font-mono text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
+                  className="w-full rounded-lg border border-line-3 bg-surface px-3 py-1.5 font-mono text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
                 />
+              </div>
+
+              {/* Collapsible Test Failure Injection Panel */}
+              <div className="pt-2 border-t border-brand/20">
+                <button
+                  type="button"
+                  onClick={() => setShowTestTools(!showTestTools)}
+                  className="flex items-center gap-1.5 text-[11px] font-semibold text-brand hover:underline transition"
+                >
+                  <span>🧪 {showTestTools ? 'Thu gọn công cụ giả lập kiểm thử' : 'Mở công cụ giả lập lỗi (Failure Injection)'}</span>
+                  <span className="text-[10px]">{showTestTools ? '▲' : '▼'}</span>
+                </button>
+
+                {showTestTools && (
+                  <div className="mt-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2 text-[11.5px]">
+                    <div className="font-semibold text-amber-800 dark:text-amber-200">
+                      Tùy chọn kết quả mô phỏng (Chỉ dùng cho mục đích Demo / Kiểm thử ngoại lệ):
+                    </div>
+                    <p className="text-muted leading-relaxed">
+                      Bạn có thể chọn kịch bản để kiểm tra xử lý lỗi. Lưu ý: dù lần thử có FAILED thì quyền hoàn tiền PENDING của tài xế vẫn được bảo lưu (BR-PAY-13).
+                    </p>
+                    <div className="flex gap-4 pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer font-medium">
+                        <input
+                          type="radio"
+                          name="outcome"
+                          value="SUCCEEDED"
+                          checked={outcome === 'SUCCEEDED'}
+                          onChange={() => setOutcome('SUCCEEDED')}
+                          className="accent-good"
+                        />
+                        <span className="text-good font-semibold">Thành công (SUCCEEDED)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer font-medium">
+                        <input
+                          type="radio"
+                          name="outcome"
+                          value="FAILED"
+                          checked={outcome === 'FAILED'}
+                          onChange={() => setOutcome('FAILED')}
+                          className="accent-bad"
+                        />
+                        <span className="text-bad font-semibold">Giả lập lỗi mạng/cổng (FAILED)</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* MANUAL_RECORD Specific Fields */}
           {executionMode === 'MANUAL_RECORD' && (
-            <div className="rounded-lg border border-warn-border bg-warn-soft/60 p-3.5 space-y-3">
+            <div className="rounded-xl border border-amber-500/30 dark:border-amber-400/30 bg-gradient-to-b from-amber-500/[0.08] to-amber-500/[0.02] dark:from-amber-400/[0.12] dark:to-amber-400/[0.03] p-4 space-y-4 shadow-xs backdrop-blur-xs">
+              <div className="flex items-center gap-2.5 pb-2.5 border-b border-amber-500/20 dark:border-amber-400/20">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30">
+                  <IconTag size={13} />
+                </span>
+                <div className="flex-1">
+                  <div className="text-[12.5px] font-bold text-amber-900 dark:text-amber-100">
+                    {t('refunds.drawer.manualSectionTitle', 'Ủy nhiệm chi / Chuyển khoản ngân hàng ngoài nền tảng')}
+                  </div>
+                  <div className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                    {t(
+                      'refunds.drawer.manualSectionDesc',
+                      'ChargeOps không tự chuyển tiền qua tài khoản này. Nhập mã giao dịch để đối soát khoản tiền đã chi trả thủ công cho tài xế.'
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[12px] font-semibold text-body mb-1">
                   {t('refunds.drawer.manualRefLabel', 'Mã giao dịch ngân hàng / UNC')}{' '}
-                  <span className="text-bad">*</span>
+                  <span className="text-bad font-bold">*</span>
                 </label>
                 <input
                   type="text"
@@ -498,7 +629,7 @@ export function RefundExecutionDrawer({
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.manualRefPlaceholder', 'ví dụ: FT260925987123 / VCB1982736')}
-                  className="w-full rounded border border-line-3 bg-surface px-3 py-1.5 font-mono text-[12.5px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
+                  className="w-full rounded-xl border border-line-2 bg-surface px-3.5 py-2 font-mono text-[13px] font-medium text-ink placeholder:text-faint focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs transition-all"
                 />
                 <span className="text-[11px] text-muted mt-1 block">
                   {t(
@@ -508,19 +639,15 @@ export function RefundExecutionDrawer({
                 </span>
               </div>
 
-              <div>
-                <label className="block text-[12px] font-semibold text-body mb-1">
-                  {t('refunds.drawer.performedAtLabel', 'Thời điểm thực hiện chuyển khoản')}{' '}
-                  <span className="text-bad">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={performedAt}
-                  onChange={(e) => setPerformedAt(e.target.value)}
-                  className="w-full rounded border border-line-3 bg-surface px-3 py-1.5 text-[12.5px] text-body focus:border-brand focus:outline-none"
-                />
-              </div>
+              <DateTimeInput
+                id="manual-performed-at"
+                label={t('refunds.drawer.performedAtLabel', 'Thời điểm thực hiện chuyển khoản')}
+                required
+                accent="warn"
+                value={performedAt}
+                onChange={setPerformedAt}
+                hint={t('refunds.drawer.performedAtHint', 'Thời gian ghi trên sao kê hoặc biên lai chuyển khoản')}
+              />
             </div>
           )}
 
@@ -540,15 +667,15 @@ export function RefundExecutionDrawer({
             />
           </div>
 
-          <div className="rounded-lg bg-surface-2 p-3 text-[11.5px] text-muted space-y-1">
+          <div className="rounded-lg bg-surface-2 p-3 text-[11.5px] text-muted space-y-1.5">
             <div className="font-semibold text-body">
-              {t('refunds.drawer.protectionTitle', 'Nguyên tắc bảo vệ dữ liệu (BR-PAY-13):')}
+              {t('refunds.drawer.protectionTitle', 'Nguyên tắc vận hành & bảo vệ dữ liệu (BR-PAY-08 / BR-PAY-13):')}
             </div>
             <p>
-              • {t('refunds.drawer.protectionPoint1', 'Mỗi thao tác gửi lệnh đi kèm Idempotency-Key để chống bấm đúp hoặc gửi trùng lặp.')}
+              • {t('refunds.drawer.protectionPoint1', 'Mỗi thao tác gửi lệnh đi kèm Idempotency-Key tự sinh theo chuẩn BKG-034 để chống trùng lặp dòng tiền.')}
             </p>
             <p>
-              • {t('refunds.drawer.protectionPoint2', 'Nếu lần thử gặp lỗi (FAILED), khoản hoàn tiền vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bị mất.')}
+              • {t('refunds.drawer.protectionPoint2', 'Tách bạch Quyền lợi và Thực thi: Quyền hoàn tiền đã được chốt bởi chính sách. Nếu lần thử gặp lỗi (FAILED), khoản hoàn vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bao giờ bị mất.')}
             </p>
           </div>
         </form>

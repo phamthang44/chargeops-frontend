@@ -1099,6 +1099,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           attemptId,
           sequenceNo: attempts.length + 1,
           executionMode: req.executionMode,
+          executionTrigger: 'ADMIN',
           requestKey,
           status: req.outcome,
           transferReference: transferRef,
@@ -1116,6 +1117,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
 
         if (req.outcome === 'SUCCEEDED') {
           r.status = 'SUCCEEDED';
+          r.requiresAdminAction = false;
           r.successfulAttemptId = attemptId;
           r.transferReference = transferRef;
           r.completedAt = completedAt;
@@ -1130,6 +1132,8 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             amountVnd: -r.amount,
             date: completedAt,
           });
+        } else {
+          r.requiresAdminAction = true;
         }
 
         return { ...r };

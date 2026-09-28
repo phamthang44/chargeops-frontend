@@ -68,6 +68,12 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
       );
     }
     if (isPending) {
+      if (refund?.executionPolicy === 'AUTO_FIRST_ATTEMPT') {
+        return t(
+          'bookingDetail.refundDescAutoProcessing',
+          'Yêu cầu hoàn tiền đã được tạo và đang được hệ thống xử lý tự động về phương thức thanh toán ban đầu của bạn.',
+        );
+      }
       return t(
         'bookingDetail.refundDescProcessing',
         'Yêu cầu hoàn tiền đã được ghi nhận và đang chờ xử lý hoàn về phương thức thanh toán ban đầu của bạn.',
@@ -129,17 +135,6 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
           {formatVnd(refundAmount)}
         </Text>
       </View>
-
-      {refund?.transferReference ? (
-        <View style={[styles.metaRow, { borderTopColor: `${toneColor}18` }]}>
-          <Text style={[styles.metaLabel, { color: themeColors.textMuted }]}>
-            {t('bookingDetail.refundReference', 'Mã tham chiếu')}
-          </Text>
-          <Text style={[styles.metaValue, { color: themeColors.textStrong }]}>
-            {refund.transferReference}
-          </Text>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -207,22 +202,5 @@ const styles = StyleSheet.create({
   amountValue: {
     fontSize: fontSizes.heading,
     fontWeight: fontWeights.bold,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    paddingTop: spacing.xs,
-    marginTop: 2,
-  },
-  metaLabel: {
-    fontSize: fontSizes.caption - 1,
-    fontWeight: fontWeights.medium,
-  },
-  metaValue: {
-    fontSize: fontSizes.caption,
-    fontWeight: fontWeights.semibold,
-    fontFamily: 'monospace',
   },
 });

@@ -58,12 +58,23 @@
         "title": "Analytics",
         "subtitle": "Platform-wide trends in bookings, revenue, and operations."
       },
+      "observability": {
+        "label": "Observability",
+        "title": "System Observability",
+        "subtitle": "Operational metrics and logs from Grafana, Prometheus, and Loki."
+      },
       "kb": {
         "label": "Policy Library",
         "title": "Policy Library",
         "subtitle": "Knowledge source for the policy assistant (RAG)."
       }
     }
+  },
+  "observability": {
+    "dashboardTitle": "ChargeOps Overview",
+    "accessHint": "Grafana authenticates with Keycloak and only accepts the OBSERVABILITY_ADMIN role.",
+    "openInNewTab": "Open fullscreen",
+    "iframeTitle": "ChargeOps observability dashboard"
   },
   "search": {
     "groups": {
@@ -758,7 +769,7 @@
   "transactions": {
     "tabs": {
       "list": "Transactions & Receipts",
-      "refundQueue": "Refund Queue (FE-19)"
+      "refundQueue": "Refund Monitoring"
     },
     "methods": {
       "ATM": "ATM Card",
@@ -818,23 +829,39 @@
     "copied": "Code copied"
   },
   "refunds": {
-    "tabs": {
-      "all": "All",
-      "pending": "Pending",
-      "succeeded": "Succeeded"
-    },
     "kpi": {
-      "pending": "PENDING REFUNDS",
-      "pendingDelta": "{{count}} refunds",
-      "succeeded": "SUCCEEDED",
+      "pending": "PENDING PROCESSING",
+      "pendingDelta": "{{count}} pending obligations",
+      "pendingCountLabel": "No pending obligations",
+      "succeeded": "COMPLETED",
       "succeededDelta": "{{count}} completed",
+      "succeededCountLabel": "Successfully processed",
       "total": "TOTAL OBLIGATIONS",
-      "totalDelta": "{{count}} total",
-      "mode": "EXECUTION MODE",
-      "modeValue": "Simulator / Manual",
-      "modeDelta": "BR-PAY-08/13 Compliant"
+      "totalDelta": "{{count}} total records",
+      "actionRequired": "REQUIRES ACTION (FAILED ATTEMPTS)",
+      "actionRequiredDelta": "{{count}} failed attempts",
+      "actionRequiredZero": "No failed attempts"
     },
-    "searchPlaceholder": "Search refund ID, booking, driver…",
+    "tabs": {
+      "all": "All Records",
+      "pending": "Pending Processing (PENDING)",
+      "succeeded": "Completed (SUCCEEDED)"
+    },
+    "searchPlaceholder": "Search refund ID, booking, driver...",
+    "reasons": {
+      "VOLUNTARY_GRACE": "10-min Grace",
+      "STATION_FAILURE": "Station Outage",
+      "EXCESS_PAYMENT": "Excess Payment"
+    },
+    "status": {
+      "actionRequired": "REQUIRES ACTION",
+      "failedAttemptSub": "Failed attempt",
+      "adminRequiredSub": "Admin audit required",
+      "autoProcessing": "AUTO PROCESSING",
+      "autoProcessingSub": "System running",
+      "pendingSub": "Pending",
+      "succeededSub": "Completed"
+    },
     "table": {
       "cols": {
         "id": "REFUND ID",
@@ -843,79 +870,88 @@
         "reason": "REASON",
         "amount": "AMOUNT",
         "status": "STATUS",
-        "date": "DATE",
+        "date": "OCCURRED AT",
         "actions": "ACTIONS"
       },
-      "empty": "No refunds match your filter.",
-      "attemptsCount": "x{{count}}",
+      "empty": "No refunds match the current filter.",
       "attemptsTitle": "{{count}} attempts",
-      "processBtn": "Execute Refund",
-      "viewDetailBtn": "View Details"
-    },
-    "reasons": {
-      "VOLUNTARY_GRACE": "10-min Grace (100%)",
-      "STATION_FAILURE": "Station Failure",
-      "EXCESS_PAYMENT": "Excess Payment"
+      "retryBtn": "Retry / Intervene",
+      "executeBtn": "Execute Payout",
+      "processBtn": "Process Refund",
+      "viewDetailBtn": "View Detail"
     },
     "drawer": {
-      "title": "Refund Details",
+      "title": "Refund Detail",
       "copyIdTitle": "Copy refund ID",
+      "closeBtn": "Close",
+      "submitting": "Executing...",
+      "confirmRetry": "Retry Refund Attempt",
+      "confirmManualOverride": "Intervene & Execute Now",
+      "confirmSimulatorSuccess": "Execute Refund",
+      "confirmSimulatorFailed": "Simulate Failure (Test)",
+      "confirmManual": "Confirm Bank Transfer & Reconcile",
       "amountLabel": "Refund Amount",
       "statusLabel": "Status",
-      "statusPending": "PENDING EXECUTION",
-      "statusSucceeded": "SUCCEEDED (TERMINAL)",
+      "statusSucceeded": "COMPLETED (SUCCEEDED)",
+      "statusFailedAttempt": "REQUIRES ACTION (FAILED ATTEMPT)",
+      "statusAutoProcessing": "AUTO PROCESSING (AUTO_FIRST_ATTEMPT)",
+      "statusPending": "PENDING PROCESSING",
       "bookingCode": "Booking Code:",
-      "driverName": "Recipient Driver:",
-      "stationName": "Charging Station:",
-      "reasonLabel": "Refund Basis:",
+      "driverName": "Driver:",
+      "stationName": "Station:",
+      "reasonLabel": "Grounds for Refund:",
+      "graceEntitlementTitle": "100% Eligible (Determined by Policy BR-PAY-08)",
+      "graceEntitlementDesc": "Driver cancelled within the 10-minute grace period. 100% refund is determined by policy. Actions here trigger payout execution or manual reconciliation.",
+      "autoProcessingBannerTitle": "System automatically executing first attempt (Auto First Attempt)",
+      "autoProcessingBannerDesc": "This refund is governed by automated execution policy (AUTO_FIRST_ATTEMPT). The system worker is dispatching payout in the background. Admin intervention is not required unless an error occurs.",
       "createdAt": "Created: {{date}}",
       "version": "Version: v{{version}}",
       "terminalBanner": "Refund completed successfully (Terminal State)",
-      "terminalDesc": "Bank transfer reference: {{ref}}. Completed at: {{time}}. No further execution allowed on this record.",
-      "tabExecute": "Execute Refund",
+      "terminalDesc": "Bank reference: {{ref}}. Completed at: {{time}}. No further actions allowed.",
       "tabInfo": "Execution Info",
+      "tabExecute": "Execute Payout",
       "tabHistory": "Attempt History ({{count}})",
-      "modeLabel": "Execution Mode",
+      "modeLabel": "Payout / Reconciliation Method",
       "modeSimulator": "Sandbox Simulator",
-      "modeSimulatorDesc": "For dev / test / demo. Does not call real banks.",
-      "modeManual": "Manual Record",
-      "modeManualDesc": "Transferred off-platform. Reconciliation ref required.",
-      "outcomeConfig": "Simulation Outcome Config:",
-      "outcomeSucceeded": "Success (SUCCEEDED)",
-      "outcomeFailed": "Simulated Failure (FAILED)",
-      "simRefLabel": "Simulated Reference (auto-generated if empty):",
+      "modeSimulatorDesc": "Send execution via payment adapter simulation (Dev/Demo).",
+      "modeManual": "Manual Bank Transfer Record",
+      "modeManualDesc": "Transferred outside ChargeOps. Requires bank reference.",
+      "simTitleRetry": "Retry Refund Execution",
+      "simTitleDefault": "Trigger Sandbox Refund",
+      "simDesc": "System dispatches refund attempt via simulator adapter with unique Idempotency-Key. Success marks payment as REFUNDED once.",
+      "simRefLabel": "Simulator Reference (optional - auto-generated if blank):",
       "simRefPlaceholder": "e.g., SIM-REF-902184",
-      "manualRefLabel": "Bank Transfer Reference / Transaction ID",
+      "manualSectionTitle": "Manual Bank Transfer / Wire Reconciliation",
+      "manualSectionDesc": "ChargeOps does not wire funds from this screen. Enter external transfer reference to close pending obligation.",
+      "manualRefLabel": "Bank Transfer Reference / UNC",
       "manualRefPlaceholder": "e.g., FT260925987123 / VCB1982736",
-      "manualRefHelp": "Enter reference number from bank transfer statement made to driver.",
+      "manualRefHelp": "Enter transfer reference from your bank statement.",
       "performedAtLabel": "Transfer Execution Time",
-      "noteLabel": "Execution Note / Reconciliation Reason",
-      "notePlaceholder": "Enter note explaining or justifying this refund execution…",
-      "noteDefaultGrace": "100% refund for voluntary cancellation within 10-minute grace period",
-      "noteDefaultFailure": "Refund due to charging station failure",
-      "protectionTitle": "Data Protection Principles (BR-PAY-13):",
-      "protectionPoint1": "Each execution request is accompanied by an Idempotency-Key to prevent duplicate submissions.",
-      "protectionPoint2": "If an attempt fails (FAILED), the refund remains in PENDING status. Driver rights are protected.",
-      "closeBtn": "Close",
-      "confirmSimulatorSuccess": "Execute Simulated Success",
-      "confirmSimulatorFailed": "Simulate Failure",
-      "confirmManual": "Confirm Manual Bank Transfer",
-      "submitting": "Executing…",
-      "validationManualRef": "Please enter Bank Transfer Reference.",
-      "validationPerformedAt": "Please select transfer execution time.",
-      "validationNote": "Please enter execution note / reconciliation reason.",
-      "toastSuccess": "Refund completed: Reference {{ref}}. Recorded {{amount}} refund.",
-      "toastFailed": "Recorded failed attempt (FAILED). Refund remains in PENDING status (BR-PAY-13).",
-      "toastErrorDefault": "An error occurred while executing the refund.",
-      "errorVersionConflict": "Refund data has changed on the server. Refreshing data...",
-      "errorAlreadySucceeded": "This refund obligation has already been executed successfully.",
-      "errorRequestConflict": "Request conflict with previous attempt execution."
+      "performedAtHint": "Time shown on bank statement or transaction receipt",
+      "noteLabel": "Execution / Audit Note",
+      "notePlaceholder": "Enter reason or explanation for this refund...",
+      "protectionTitle": "Operating & Protection Principles (BR-PAY-08 / BR-PAY-13):",
+      "protectionPoint1": "Every attempt includes a unique client Idempotency-Key (BKG-034) preventing duplicate payout.",
+      "protectionPoint2": "Entitlement vs Execution: 100% refund entitlement is already established. If an attempt fails, refund stays PENDING and driver rights remain intact.",
+      "noteDefaultGrace": "100% refund for voluntary cancellation within 10-minute grace",
+      "noteDefaultFailure": "Refund due to station outage",
+      "validationManualRef": "Please enter bank reference / UNC number.",
+      "validationPerformedAt": "Please choose transaction time.",
+      "validationNote": "Please enter execution note.",
+      "toastSuccess": "Refund completed: Ref {{ref}}. Recorded {{amount}}.",
+      "toastFailed": "Recorded failed attempt (FAILED). Obligation remains PENDING (BR-PAY-13).",
+      "toastErrorDefault": "Error executing refund.",
+      "errorVersionConflict": "Refund data changed on server. Refreshing...",
+      "errorAlreadySucceeded": "This refund has already succeeded.",
+      "errorRequestConflict": "Request conflicts with previous execution."
     },
     "timeline": {
-      "empty": "No previous attempts. Refund is in initial state (awaiting Admin action).",
-      "title": "Execution Attempts ({{count}})",
-      "notice": "Preserves PENDING when FAILED (BR-PAY-13)",
+      "title": "Attempt History ({{count}})",
+      "notice": "PENDING preserved on FAILED (BR-PAY-13)",
+      "empty": "No prior attempts recorded. Refund is in initial state.",
       "attemptNum": "Attempt #{{seq}}",
+      "triggerSystem": "🤖 System Policy",
+      "triggerAdmin": "👤 Admin Action",
       "reference": "Reference:",
       "copyTitle": "Copy",
       "errorCode": "Error Code:"

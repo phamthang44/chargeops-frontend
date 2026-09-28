@@ -139,6 +139,9 @@ export const IconSearch = make(
   </>,
 );
 export const IconChevronDown = make(<polyline points="6 9 12 15 18 9" />);
+export const IconChevronUp = make(<polyline points="18 15 12 9 6 15" />);
+export const IconChevronLeft = make(<polyline points="15 18 9 12 15 6" />);
+export const IconChevronRight = make(<polyline points="9 18 15 12 9 6" />);
 export const IconCheck = make(<polyline points="20 6 9 17 4 12" />);
 export const IconArrowRight = make(
   <>

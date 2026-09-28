@@ -775,12 +775,15 @@ export interface TransactionSummary {
 export type RefundStatus = 'PENDING' | 'SUCCEEDED';
 export type TransferExecutionMode = 'SIMULATOR' | 'MANUAL_RECORD';
 export type TransferAttemptStatus = 'STARTED' | 'SUCCEEDED' | 'FAILED';
+export type RefundExecutionPolicy = 'AUTO_FIRST_ATTEMPT' | 'ADMIN_REQUIRED';
+export type RefundExecutionTrigger = 'SYSTEM_POLICY' | 'ADMIN';
 
 export interface RefundAttemptItem {
   id: string;
   attemptId?: string;
   sequenceNo: number;
   executionMode: TransferExecutionMode;
+  executionTrigger?: RefundExecutionTrigger;
   requestKey?: string;
   status: TransferAttemptStatus;
   providerRefundId?: string;
@@ -808,6 +811,8 @@ export interface RefundDetail {
   basisType: string;
   basisId: string;
   status: RefundStatus;
+  executionPolicy?: RefundExecutionPolicy;
+  requiresAdminAction?: boolean;
   version: number;
   decisionAt: string;
   decidedBy: string;

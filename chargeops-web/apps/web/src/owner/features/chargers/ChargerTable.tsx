@@ -297,16 +297,6 @@ function ConnectorRow({
             <IconHistory size={12} strokeWidth={2} />
             <span>Lịch sử</span>
           </button>
-
-          <a
-            href={`/simulator?connectorId=${c.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border-[1.5px] border-owner-border px-2.5 py-[5px] text-[11px] font-semibold text-owner-deep hover:bg-owner-soft"
-          >
-            <IconCard size={13} strokeWidth={1.9} />
-            ⚡ Simulator
-          </a>
         </div>
       </div>
     </div>

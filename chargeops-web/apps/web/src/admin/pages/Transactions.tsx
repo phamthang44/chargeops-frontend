@@ -155,7 +155,7 @@ export function Transactions() {
               key: 'refund-queue',
               label: (
                 <span className="flex items-center gap-2">
-                  <span>{t('transactions.tabs.refundQueue', 'Hàng chờ hoàn tiền (FE-19)')}</span>
+                  <span>{t('transactions.tabs.refundQueue', 'Theo dõi hoàn tiền')}</span>
                   {pendingRefundCount > 0 && (
                     <span className="inline-flex items-center justify-center rounded-full bg-warn-soft border border-warn/30 px-2 py-0.5 text-[10px] font-extrabold text-warn-deep shadow-2xs">
                       {pendingRefundCount}

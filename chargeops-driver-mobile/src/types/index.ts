@@ -285,8 +285,9 @@ export interface BookingRefundSummary {
   amount: number;
   reason?: 'VOLUNTARY_GRACE' | 'STATION_FAILURE' | 'EXCESS_PAYMENT' | 'LATE_PAYMENT' | 'UNAPPLIED_PAYMENT' | string;
   status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | string;
+  executionPolicy?: 'AUTO_FIRST_ATTEMPT' | 'ADMIN_REQUIRED';
+  requiresAdminAction?: boolean;
   needsReconciliation?: boolean;
-  transferReference?: string;
   createdAt?: string;
 }
 

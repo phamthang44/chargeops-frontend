@@ -590,15 +590,6 @@ function ChargePointItemCard({
 
                   <div className="flex items-center justify-between border-t border-hairline pt-2.5 mt-0.5">
                     <div className="flex items-center gap-1.5">
-                      <a
-                        href={`/simulator?connectorId=${c.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 rounded-[6px] border border-line-2 bg-surface-2 px-2 py-1 text-[11px] font-semibold text-muted hover:border-brand hover:text-brand transition cursor-pointer"
-                        title="Mở màn hình giả lập Dynamic QR cho súng sạc này"
-                      >
-                        ⚡ Simulator ↗
-                      </a>
                       <button
                         type="button"
                         onClick={() => onViewConnectorHistory(c)}

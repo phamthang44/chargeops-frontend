@@ -1016,6 +1016,7 @@
     "refundStatusSucceeded": "Đã hoàn tiền thành công",
     "refundDescReconciling": "Khoản tiền đang được bộ phận tài chính đối soát với đối tác thanh toán. Bạn không cần nộp thêm hay thực hiện thao tác nào.",
     "refundDescProcessing": "Yêu cầu hoàn tiền đã được ghi nhận và đang xử lý hoàn về phương thức thanh toán ban đầu.",
+    "refundDescAutoProcessing": "Yêu cầu hoàn tiền đã được tạo và đang được hệ thống xử lý tự động về phương thức thanh toán ban đầu của bạn.",
     "refundDescSucceeded": "Số tiền đã được hoàn trả thành công về phương thức thanh toán ban đầu của bạn.",
     "refundedTotal": "Số tiền hoàn trả",
     "graceCardTitle": "Ân hạn hủy 100%",
@@ -1069,6 +1070,7 @@
     "title": "Quét QR Check-in",
     "scanHint": "Đưa mã QR trên trụ sạc vào khung hình để check-in.",
     "simulate": "Quét mã (Giả lập)",
+    "kioskModalBtn": "Màn hình Trụ Sạc (Demo Kiosk)",
     "scanning": "Đang quét…",
     "permissionTitle": "Cần quyền truy cập camera",
     "permissionBody": "ChargeOps cần dùng camera để quét mã QR trên trụ sạc khi check-in.",
@@ -1084,19 +1086,30 @@
     "confirmCta": "Xác nhận & bắt đầu sạc",
     "scannedCode": "Mã vừa quét: {{code}}",
     "rescan": "Quét lại",
+    "challengeCountdown": "Hiệu lực mã QR",
+    "secondsLeft": "Còn {{count}}s",
+    "deadline": "Hạn chót check-in",
     "errorTitles": {
       "UNKNOWN_QR": "Không nhận diện được mã QR",
       "NO_BOOKING": "Không tìm thấy lượt đặt",
       "WRONG_CONNECTOR": "Sai cổng sạc",
       "TOO_EARLY": "Chưa đến giờ check-in",
-      "WINDOW_EXPIRED": "Đã quá hạn check-in"
+      "WINDOW_EXPIRED": "Đã quá hạn check-in",
+      "CHALLENGE_EXPIRED": "Mã QR đã hết hạn",
+      "NOT_ACCESS": "Không có quyền truy cập",
+      "STATE_CONFLICT": "Trạng thái không hợp lệ",
+      "STATION_UNAVAILABLE": "Trụ sạc tạm ngưng phục vụ"
     },
     "errors": {
-      "UNKNOWN_QR": "Mã QR này không thuộc hệ thống ChargeOps. Hãy kiểm tra xem bạn có đang quét đúng tem trên cổng sạc không.",
+      "UNKNOWN_QR": "Mã QR này không thuộc hệ thống ChargeOps hoặc không đúng định dạng. Hãy kiểm tra xem bạn có đang quét đúng mã QR trên trụ sạc không.",
       "NO_BOOKING": "Bạn không có lượt đặt nào đang hiệu lực trên cổng sạc này vào lúc này.",
       "WRONG_CONNECTOR": "Lượt đặt của bạn ở {{chargePoint}} · {{connector}} ({{zone}}). Hãy quét mã QR trên đúng cổng sạc đó.",
       "TOO_EARLY": "Check-in mở lúc {{time}} — còn {{minutes}} phút nữa. Bạn chưa thể quét trước giờ bắt đầu.",
-      "WINDOW_EXPIRED": "Cửa sổ check-in 15 phút đã đóng, lượt đặt được tự động hủy và không hoàn tiền."
+      "WINDOW_EXPIRED": "Đã quá hạn check-in cho đơn đặt này. Cổng sạc chuẩn bị chuyển sang trạng thái no-show.",
+      "CHALLENGE_EXPIRED": "Mã QR đã hết hạn hoặc không hợp lệ. Vui lòng chờ màn hình trụ sạc sinh mã mới rồi quét lại.",
+      "NOT_ACCESS": "Đơn đặt chỗ không thuộc tài khoản hiện tại.",
+      "STATE_CONFLICT": "Trạng thái đơn đặt chỗ không hợp lệ để check-in.",
+      "STATION_UNAVAILABLE": "Thiết bị tại trạm đang bảo trì hoặc tạm ngưng phục vụ. Vui lòng liên hệ hỗ trợ."
     }
   },
   "chargingSession": {

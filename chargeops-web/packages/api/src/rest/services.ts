@@ -46,6 +46,7 @@ function normalizeRefundAttempt(a: any): RefundAttemptItem {
     attemptId,
     sequenceNo: Number(a?.sequenceNo ?? 1),
     executionMode: a?.executionMode ?? 'SIMULATOR',
+    executionTrigger: a?.executionTrigger ?? (a?.performedBy ? 'ADMIN' : 'SYSTEM_POLICY'),
     status: a?.status ?? 'STARTED',
     transferReference: a?.transferReference,
     failureCode: a?.failureCode,
@@ -60,6 +61,7 @@ function normalizeRefundAttempt(a: any): RefundAttemptItem {
 function normalizeRefundDetail(r: any): RefundDetail {
   const refundId = r?.refundId || r?.id || '';
   const rawAttempts = Array.isArray(r?.attempts) ? r.attempts : [];
+  const normalizedAttempts = rawAttempts.map(normalizeRefundAttempt);
   return {
     ...r,
     id: refundId,
@@ -76,13 +78,17 @@ function normalizeRefundDetail(r: any): RefundDetail {
     basisType: r?.basisType ?? 'BOOKING_CANCELLATION',
     basisId: r?.basisId || '',
     status: (r?.status as RefundStatus) ?? 'PENDING',
+    executionPolicy: r?.executionPolicy ?? (r?.reason === 'VOLUNTARY_GRACE' ? 'AUTO_FIRST_ATTEMPT' : 'ADMIN_REQUIRED'),
+    requiresAdminAction: typeof r?.requiresAdminAction === 'boolean'
+      ? r.requiresAdminAction
+      : (r?.reason !== 'VOLUNTARY_GRACE' || normalizedAttempts.some((att: any) => att.status === 'FAILED')),
     version: Number(r?.version ?? 0),
     decisionAt: r?.decisionAt || new Date().toISOString(),
     decidedBy: r?.decidedBy || '',
     successfulAttemptId: r?.successfulAttemptId,
     transferReference: r?.transferReference,
     completedAt: r?.completedAt,
-    attempts: rawAttempts.map(normalizeRefundAttempt),
+    attempts: normalizedAttempts,
   };
 }
 

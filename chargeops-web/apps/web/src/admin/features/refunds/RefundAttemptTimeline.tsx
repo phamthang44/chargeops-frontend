@@ -34,6 +34,8 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
     );
   }
 
+  const hasFailedAttempt = attempts.some((a) => a.status === 'FAILED');
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -43,10 +45,24 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
             defaultValue: `Lịch sử các lần thực thi (${attempts.length})`,
           })}
         </span>
-        <span className="text-[11px] text-muted">
+        <span className="text-[11px] font-semibold text-brand">
           {t('refunds.timeline.notice', 'Bảo lưu PENDING khi FAILED (BR-PAY-13)')}
         </span>
       </div>
+
+      {hasFailedAttempt && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-[11.5px] text-body flex items-start gap-2.5">
+          <IconAlertTriangle size={15} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <span className="font-semibold text-amber-800 dark:text-amber-200 block">
+              Bảo lưu quyền hoàn tiền theo BR-PAY-13:
+            </span>
+            <span className="text-muted leading-relaxed block">
+              Lần thực thi thất bại chỉ phản ánh sự cố kỹ thuật hoặc cổng mô phỏng. Quyền lợi hoàn tiền 100% của tài xế vẫn còn nguyên vẹn ở trạng thái PENDING. Admin có thể thực hiện attempt mới hoặc chuyển sang ghi nhận đối soát chuyển khoản ngoài.
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-line-3">
         {attempts.map((attempt) => {
@@ -91,12 +107,21 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                     <span
                       className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${
                         isSimulator
-                          ? 'bg-brand/10 text-brand'
-                          : 'bg-warn-soft text-warn-deep'
+                          ? 'bg-brand/10 text-brand border border-brand/20'
+                          : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
                       }`}
                     >
                       {isSimulator ? 'SIMULATOR' : 'MANUAL_RECORD'}
                     </span>
+                    {attempt.executionTrigger === 'SYSTEM_POLICY' ? (
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                        {t('refunds.timeline.triggerSystem', '🤖 Tự động hệ thống')}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                        {t('refunds.timeline.triggerAdmin', '👤 Admin can thiệp')}
+                      </span>
+                    )}
                   </div>
 
                   <StatusPill
@@ -133,6 +158,12 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                     <div className="flex items-center gap-1.5 text-bad">
                       <span className="font-semibold">{t('refunds.timeline.errorCode', 'Mã lỗi:')}</span>
                       <span className="font-mono">{attempt.failureCode}</span>
+                    </div>
+                  )}
+
+                  {!isSuccess && (
+                    <div className="rounded bg-bad-soft/40 px-2.5 py-1 text-[11px] text-bad font-medium mt-1">
+                      ⚠️ Lần thử không thành công · Nghĩa vụ hoàn tiền vẫn được bảo lưu PENDING.
                     </div>
                   )}
 

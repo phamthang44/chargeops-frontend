@@ -19,6 +19,7 @@ import {
   IconPlusCircle,
   IconShield,
   IconUsers,
+  IconWrench,
   NotificationBell,
   type NotificationItem,
   type ShellNavItem,
@@ -34,6 +35,7 @@ import { Analytics } from './pages/Analytics';
 import { PolicyKB } from './pages/PolicyKB';
 import { Bookings } from './pages/Bookings';
 import { Transactions } from './pages/Transactions';
+import { Observability } from './pages/Observability';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
@@ -51,6 +53,7 @@ const PAGES: Record<string, ComponentType> = {
   licenses: Licenses,
   users: Users,
   analytics: Analytics,
+  observability: Observability,
   kb: PolicyKB,
   tickets: () => <TicketsRoute admin />,
 };
@@ -76,6 +79,7 @@ export function AdminConsole({ base }: { base: string }) {
     { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
     { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
     { key: 'analytics', label: t('console.nav.analytics.label'), icon: <IconBarChart size={17} />, title: t('console.nav.analytics.title') },
+    { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
     { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
   ];
 

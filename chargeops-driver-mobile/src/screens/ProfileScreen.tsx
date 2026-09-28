@@ -28,6 +28,7 @@ import {
   PaymentMethodsModal,
   SettingsModal,
   useTabBarInset,
+  useTabBarScroll,
 } from '@/components';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { SupportCenterModal } from '@/components/SupportCenterModal';
@@ -52,6 +53,7 @@ export function ProfileScreen() {
   } = usePreferences();
   // Clears the absolutely-positioned floating tab bar.
   const tabInset = useTabBarInset();
+  const tabBarScroll = useTabBarScroll();
   const navigation = useNavigation<NavigationProp>();
 
   const [paymentMethodsVisible, setPaymentMethodsVisible] = useState(false);
@@ -148,6 +150,7 @@ export function ProfileScreen() {
       />
 
       <ScrollView
+        {...tabBarScroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: tabInset }]}
       >

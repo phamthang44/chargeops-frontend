@@ -11,7 +11,14 @@ export { CancelBookingSheet } from './CancelBookingSheet';
 export { Card } from './Card';
 export { EmptyState, type EmptyVariant } from './illustrations/EmptyState';
 export { FeatureArt, type FeatureName } from './illustrations/FeatureArt';
-export { FloatingTabBar, useTabBarInset, FLOATING_TAB_BAR_HEIGHT } from './FloatingTabBar';
+export {
+  FloatingTabBar,
+  useTabBarInset,
+  FLOATING_TAB_BAR_HEIGHT,
+  useTabBarScroll,
+  useTabBarVisibility,
+  TabBarVisibilityProvider,
+} from './FloatingTabBar';
 export { StationPin, type PinStatus } from './StationPin';
 export { StationThumb } from './StationThumb';
 export { Checkbox } from './Checkbox';

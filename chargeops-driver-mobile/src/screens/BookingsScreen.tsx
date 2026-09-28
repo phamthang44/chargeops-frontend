@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset } from '@/components';
+import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset, useTabBarScroll } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -45,6 +45,7 @@ export function BookingsScreen() {
   const { themeColors, isDark } = usePreferences();
   // Clears the absolutely-positioned floating tab bar.
   const tabInset = useTabBarInset();
+  const tabBarScroll = useTabBarScroll();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -487,6 +488,7 @@ export function BookingsScreen() {
         </View>
       ) : (
         <ScrollView
+          {...tabBarScroll}
           contentContainerStyle={[styles.content, { paddingBottom: tabInset }]}
           showsVerticalScrollIndicator={false}
           refreshControl={

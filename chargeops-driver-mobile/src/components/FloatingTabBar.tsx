@@ -5,7 +5,14 @@ import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import {
+  TabBarVisibilityProvider,
+  useTabBarScroll,
+  useTabBarVisibility,
+} from '@/context/TabBarVisibilityContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+
+export { TabBarVisibilityProvider, useTabBarScroll, useTabBarVisibility };
 
 /**
  * Height of the floating pill itself: bar padding (sm top + sm bottom) plus one
@@ -60,14 +67,50 @@ const CENTER_TAB = 'Bookings';
  * in the brand emerald color. Active tabs show a soft emerald pill
  * indicator behind the icon.
  *
+ * Supports auto-hiding on scroll (Facebook style) using `useTabBarVisibility`.
  * Fully dynamic for Light / Dark mode via `usePreferences`.
  */
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { themeColors, isDark } = usePreferences();
   const barOffset = useBarOffset();
+  const { translateY, isHidden, showTabBar } = useTabBarVisibility();
+
+  // Reset tab bar visibility whenever tab changes
+  useEffect(() => {
+    showTabBar();
+  }, [state.index, showTabBar]);
+
+  const opacity = translateY.interpolate({
+    inputRange: [0, 60, 120],
+    outputRange: [1, 0.85, 0],
+    extrapolate: 'clamp',
+  });
+
+  const scale = translateY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [1, 0.93],
+    extrapolate: 'clamp',
+  });
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: barOffset, pointerEvents: 'box-none' }]}>
+    <Animated.View
+      pointerEvents={isHidden ? 'none' : 'box-none'}
+      style={[
+        styles.wrapper,
+        {
+          paddingBottom: barOffset,
+          transform: [{ translateY }, { scale }],
+          opacity,
+          ...Platform.select({
+            web: {
+              transition: 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease',
+              willChange: 'transform, opacity',
+            },
+            default: {},
+          }),
+        },
+      ]}
+    >
       <View
         style={[
           styles.bar,
@@ -76,9 +119,11 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
             borderColor: isDark ? 'rgba(42,49,47,0.6)' : 'rgba(229,231,235,0.6)',
             ...Platform.select({
               web: {
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
                 boxShadow: isDark
-                  ? '0 8px 24px rgba(0,0,0,0.45)'
-                  : '0 8px 24px rgba(107,114,128,0.18)',
+                  ? '0 8px 28px rgba(0,0,0,0.5), 0 0 1px rgba(255,255,255,0.08)'
+                  : '0 8px 28px rgba(107,114,128,0.2), 0 0 1px rgba(0,0,0,0.05)',
               },
               default: {
                 shadowColor: isDark ? '#000' : '#6B7280',
@@ -129,13 +174,17 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               accessibilityLabel={options.tabBarAccessibilityLabel}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={styles.tab}
+              style={({ pressed }) => [
+                styles.tab,
+                pressed && styles.tabPressed,
+              ]}
             >
               <View
                 style={[
                   styles.iconWrap,
                   isFocused && {
                     backgroundColor: themeColors.primarySoft,
+                    transform: [{ scale: 1.05 }],
                   },
                 ]}
               >
@@ -159,7 +208,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           );
         })}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -198,7 +247,10 @@ function CenterTab({
       accessibilityState={isFocused ? { selected: true } : {}}
       onPress={onPress}
       onLongPress={onLongPress}
-      style={styles.centerTab}
+      style={({ pressed }) => [
+        styles.centerTab,
+        pressed && styles.centerTabPressed,
+      ]}
     >
       <Animated.View
         style={[
@@ -289,6 +341,10 @@ const styles = StyleSheet.create({
   labelActive: {
     fontWeight: fontWeights.bold,
   },
+  tabPressed: {
+    transform: [{ scale: 0.9 }],
+    opacity: 0.8,
+  },
 
   // Center FAB tab
   centerTab: {
@@ -320,5 +376,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: fontWeights.medium,
     textAlign: 'center',
+  },
+  centerTabPressed: {
+    transform: [{ scale: 0.93 }],
+    opacity: 0.9,
   },
 });

@@ -32,7 +32,11 @@ export function KeycloakLoginScreen() {
   const { signIn } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const discovery = useAutoDiscovery(keycloakConfig.issuerUrl);
-  const redirectUri = useMemo(() => getKeycloakRedirectUri(), []);
+  const redirectUri = useMemo(() => {
+    const uri = getKeycloakRedirectUri();
+    console.log('🔑 [KeycloakAuth] Active redirectUri:', uri);
+    return uri;
+  }, []);
   const keycloakLocale = i18n.resolvedLanguage?.toLowerCase().startsWith('en') ? 'en' : 'vi';
   const callbackStarted = useRef(false);
   const [submitting, setSubmitting] = useState(false);

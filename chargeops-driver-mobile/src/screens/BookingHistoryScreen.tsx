@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 
-import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, useTabBarInset } from '@/components';
+import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, useTabBarInset, useTabBarScroll } from '@/components';
 import { HistoryBookingCard } from '@/components/HistoryBookingCard';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
@@ -69,6 +69,7 @@ export function BookingHistoryScreen() {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
   const tabInset = useTabBarInset();
+  const tabBarScroll = useTabBarScroll();
 
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
@@ -395,6 +396,7 @@ export function BookingHistoryScreen() {
       />
 
       <SectionList
+        {...tabBarScroll}
         sections={sections}
         keyExtractor={(booking) => booking.id}
         contentContainerStyle={[styles.content, { paddingBottom: tabInset }]}

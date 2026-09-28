@@ -40,6 +40,7 @@ import {
   StationFilterDrawer,
   StationSearchBar,
   useTabBarInset,
+  useTabBarScroll,
   type DiscoveryFilterState,
 } from '@/components';
 import { useAuth } from '@/context/AuthContext';
@@ -102,6 +103,7 @@ export function StationListScreen() {
   const { getAccessToken } = useAuth();
   const { coords: userCoords, refreshLocation } = useUserLocation();
   const tabInset = useTabBarInset();
+  const tabBarScroll = useTabBarScroll();
 
   const [provinces, setProvinces] = useState<AdministrativeProvince[]>([
     ALL_REGIONS_ITEM,
@@ -368,6 +370,7 @@ export function StationListScreen() {
       {/* Station List with StationCardV2 */}
       <FlatList
         style={styles.list}
+        {...tabBarScroll}
         contentContainerStyle={[styles.content, { paddingBottom: tabInset + 40 }]}
         showsVerticalScrollIndicator={false}
         data={loading || error ? [] : stations}

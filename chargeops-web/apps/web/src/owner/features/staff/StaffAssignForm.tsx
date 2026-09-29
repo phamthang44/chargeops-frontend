@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   IconAlertCircle,
-  IconAlertTriangle,
   IconCheck,
   IconUsers,
   IconX,
@@ -15,6 +14,7 @@ import {
 } from '@chargeops/ui';
 
 import { getApiErrorMessage } from '../../../i18n';
+import { StaffLookupFeedback } from './StaffLookupFeedback';
 
 interface StaffAssignFormProps {
   stations: Station[];
@@ -119,133 +119,15 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
         </Field>
 
         {/* Live Lookup State Feedback */}
-        {isValidEmail && !lookupQ.isFetching && lookupQ.isError && (
-          <div className="animate-fadeIn transition-all duration-200">
-            <div className="rounded-xl border border-danger/30 bg-danger-soft/30 p-3.5 text-[12px] flex items-start gap-2.5">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-danger/20 text-danger mt-0.5">
-                <IconAlertCircle size={13} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-danger">
-                    {t('staff.lookup.error', { defaultValue: 'Lỗi tra cứu tài khoản' })}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => lookupQ.refetch()}
-                    className="text-[11px] font-semibold text-danger hover:underline cursor-pointer"
-                  >
-                    {t('common.retry', { defaultValue: 'Thử lại' })}
-                  </button>
-                </div>
-                <p className="mt-1 text-[11.5px] text-muted leading-relaxed">
-                  {getApiErrorMessage(lookupQ.error)}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isValidEmail && !lookupQ.isFetching && lookupData && (
-          <div className="animate-fadeIn transition-all duration-200">
-            {lookupData.status === 'ELIGIBLE' && (
-              <div className="rounded-xl border border-good/30 bg-good-soft/30 p-3.5 flex flex-col gap-2.5">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-good text-[13px] font-bold text-white shadow-sm">
-                    {(lookupData.displayName || lookupData.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="truncate text-[13.5px] font-bold text-ink max-w-[200px] sm:max-w-none">
-                        {lookupData.displayName || lookupData.email}
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-good/15 px-2 py-0.5 text-[10.5px] font-bold text-good border border-good/25 whitespace-nowrap">
-                        <IconCheck size={10} strokeWidth={3} /> {t('staff.assign.userFound')}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-muted">
-                      <span className="break-all font-mono text-ink/80">{lookupData.email}</span>
-                      {lookupData.maskedPhone && <span>• {lookupData.maskedPhone}</span>}
-                      <span className="rounded bg-surface-3/80 px-1.5 py-0.5 text-[10px] font-semibold text-body">
-                        {t('staff.assign.driverRole')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {lookupData.status === 'NOT_FOUND' && (
-              <div className="rounded-xl border border-warn/40 bg-warn-soft/40 p-3.5 text-[12px]">
-                <div className="flex items-center gap-2 font-bold text-warn-deep">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warn/20 text-warn-deep">
-                    <IconAlertCircle size={13} />
-                  </div>
-                  <span>{t('staff.lookup.notFound')}</span>
-                </div>
-                <p className="mt-1.5 pl-7 text-[11.5px] text-muted leading-relaxed">
-                  {t('staff.lookup.notFoundHelp')}
-                </p>
-              </div>
-            )}
-
-            {lookupData.status === 'SELF_ASSIGNMENT' && (
-              <div className="rounded-xl border border-danger/30 bg-danger-soft/30 p-3.5 text-[12px]">
-                <div className="flex items-center gap-2 font-bold text-danger">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-danger/20 text-danger">
-                    <IconAlertTriangle size={13} />
-                  </div>
-                  <span>{t('staff.lookup.selfAssignment')}</span>
-                </div>
-                <p className="mt-1.5 pl-7 text-[11.5px] text-muted leading-relaxed">
-                  {t('staff.lookup.selfAssignmentHelp')}
-                </p>
-              </div>
-            )}
-
-            {lookupData.status === 'ALREADY_ASSIGNED' && (
-              <div className="rounded-xl border border-warn/40 bg-warn-soft/40 p-3.5 text-[12px]">
-                <div className="flex items-center gap-2 font-bold text-warn-deep">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warn/20 text-warn-deep">
-                    <IconAlertTriangle size={13} />
-                  </div>
-                  <span>{t('staff.lookup.alreadyAssigned')}</span>
-                </div>
-                <p className="mt-1.5 pl-7 text-[11.5px] text-muted leading-relaxed">
-                  {t('staff.lookup.alreadyAssignedHelp')}
-                </p>
-              </div>
-            )}
-
-            {lookupData.status === 'ROLE_NOT_ALLOWED' && (
-              <div className="rounded-xl border border-danger/30 bg-danger-soft/30 p-3.5 text-[12px]">
-                <div className="flex items-center gap-2 font-bold text-danger">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-danger/20 text-danger">
-                    <IconAlertTriangle size={13} />
-                  </div>
-                  <span>{t('staff.lookup.roleNotAllowed')}</span>
-                </div>
-                <p className="mt-1.5 pl-7 text-[11.5px] text-muted leading-relaxed">
-                  {t('staff.lookup.roleNotAllowedHelp')}
-                </p>
-              </div>
-            )}
-
-            {lookupData.status === 'ACCOUNT_INACTIVE' && (
-              <div className="rounded-xl border border-danger/30 bg-danger-soft/30 p-3.5 text-[12px]">
-                <div className="flex items-center gap-2 font-bold text-danger">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-danger/20 text-danger">
-                    <IconAlertTriangle size={13} />
-                  </div>
-                  <span>{t('staff.lookup.accountInactive')}</span>
-                </div>
-                <p className="mt-1.5 pl-7 text-[11.5px] text-muted leading-relaxed">
-                  {t('staff.lookup.accountInactiveHelp')}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        <StaffLookupFeedback
+          isValidEmail={isValidEmail}
+          isSearching={lookupQ.isFetching && isValidEmail}
+          isError={lookupQ.isError}
+          error={lookupQ.error}
+          data={lookupData}
+          onRetry={() => lookupQ.refetch()}
+          isRetrying={lookupQ.isFetching && lookupQ.isError}
+        />
 
         {/* Station Select */}
         <Field label={t('staff.assign.stationLabel')}>
@@ -293,6 +175,23 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
             </div>
           </div>
         </Field>
+
+        {/* Assignment Mutation Error Feedback if any */}
+        {assignMutation.isError && (
+          <div className="rounded-xl border border-bad/30 bg-bad-soft p-3 text-[12px] flex items-start gap-2.5 animate-fadeIn">
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bad/20 text-bad-deep mt-0.5">
+              <IconAlertCircle size={13} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="font-bold text-bad-deep">
+                {t('staff.assign.failed', { defaultValue: 'Phân công nhân viên không thành công' })}
+              </span>
+              <p className="mt-0.5 text-[11.5px] text-ink/80 leading-relaxed">
+                {getApiErrorMessage(assignMutation.error)}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Submit Button */}
         <Button
@@ -392,7 +291,7 @@ const EmailSearchInput = memo(function EmailSearchInput({
         placeholder={placeholder}
         className={`w-full rounded-xl border bg-surface pl-3.5 pr-10 py-2.5 text-[13px] font-medium text-ink transition-colors focus:outline-none focus:ring-2 ${
           hasError
-            ? 'border-danger/60 focus:border-danger focus:ring-danger/15'
+            ? 'border-bad/60 focus:border-bad focus:ring-bad/15'
             : 'border-line focus:border-owner focus:ring-owner/15'
         }`}
       />
@@ -404,7 +303,7 @@ const EmailSearchInput = memo(function EmailSearchInput({
             aria-label="Loading"
           />
         ) : isValidEmail && hasError ? (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-danger/20 text-danger">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-bad/20 text-bad-deep">
             <IconAlertCircle size={12} />
           </span>
         ) : isValidEmail && lookupStatus === 'ELIGIBLE' ? (

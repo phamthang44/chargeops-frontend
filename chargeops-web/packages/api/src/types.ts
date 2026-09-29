@@ -114,6 +114,212 @@ export interface BookingSummary {
   refundedVnd: number;
 }
 
+/* ---------- BKG-047 / FE-15 Owner Bookings Contract ---------- */
+
+export type ApiBookingStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'CHECKED_IN'
+  | 'CHARGING'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'EXPIRED';
+
+export type CancellationReason =
+  | 'DRIVER_CANCELLED'
+  | 'NO_SHOW'
+  | 'STATION_FAILURE';
+
+export interface StationSnapshot {
+  stationId: string;
+  stationName: string;
+  stationAddress: string;
+  chargePointCode: string;
+  connectorId: string;
+  connectorCode: string;
+}
+
+export type PeriodCode = 'NORMAL' | 'PEAK' | 'OFF_PEAK';
+
+export interface PriceLine {
+  sequence: number;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  label: string;
+  periodCode: PeriodCode;
+  rateVndPerKwh: number;
+  estimatedEnergyKwh: number;
+  amount: number;
+}
+
+export interface PriceBasis {
+  kind: 'ESTIMATED_ENERGY_FIXED_PACKAGE';
+  rateUnit: 'VND_PER_KWH';
+  formulaVersion: string;
+  energyFactor: number;
+  powerKw: number;
+  energyDecimalPlaces: number;
+}
+
+export type PaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'FAILED'
+  | 'PARTIALLY_REFUNDED'
+  | 'REFUNDED';
+
+export interface Payment {
+  paymentId: string;
+  status: PaymentStatus;
+  method: string;
+  expectedAmount: number;
+  collectedAmount: number;
+  appliedToPackageAmount: number;
+  packageRefundedAmount: number;
+  excessAmount: number;
+  unallocatedAmount: number;
+  currency: 'VND';
+}
+
+export type CheckoutStatus =
+  | 'NOT_CREATED'
+  | 'READY'
+  | 'UNAVAILABLE'
+  | 'EXPIRED';
+
+export interface Checkout {
+  status: CheckoutStatus;
+  method: string;
+  expiresAt?: string;
+  instruction?: string;
+  checkoutReference?: string;
+  checkoutUrl?: string;
+}
+
+export type RefundReason =
+  | 'VOLUNTARY_GRACE'
+  | 'STATION_FAILURE'
+  | 'EXCESS_PAYMENT'
+  | 'LATE_PAYMENT'
+  | 'UNAPPLIED_PAYMENT';
+
+export interface RefundSummary {
+  refundId: string;
+  amount: number;
+  reason: RefundReason;
+  status: RefundStatus;
+  executionPolicy?: string;
+  requiresAdminAction?: boolean;
+}
+
+export interface OwnerActions {
+  canCancelForStationFailure: boolean;
+  canViewFinancials: boolean;
+  canReportIncident: boolean;
+}
+
+export interface OwnerBookingListItem {
+  bookingId: string;
+  bookingCode: string;
+  status: ApiBookingStatus;
+  persistedStatus: ApiBookingStatus;
+  stateReconciliationPending: boolean;
+  cancellationReason?: CancellationReason | null;
+  stationId: string;
+  stationName: string;
+  connectorId: string;
+  connectorCode: string;
+  driverDisplayName: string;
+  startAt: string;
+  endAt: string;
+  checkInDeadline?: string | null;
+  checkedInAt?: string | null;
+  totalAmount: number;
+  currency: 'VND';
+}
+
+export interface OwnerBookingSummary {
+  totalBookings: number;
+  pending: number;
+  confirmed: number;
+  inSession: number;
+  completed: number;
+  cancelled: number;
+  expired: number;
+  noShow: number;
+}
+
+export interface OperationalBooking {
+  bookingId: string;
+  bookingCode: string;
+  status: ApiBookingStatus;
+  cancellationReason?: CancellationReason | null;
+  stationId: string;
+  connectorId: string;
+  connectorCode: string;
+  driverDisplayName: string;
+  startAt: string;
+  endAt: string;
+  checkInDeadline: string;
+  checkedInAt?: string | null;
+}
+
+export interface OwnerBookingDetail {
+  bookingId: string;
+  bookingCode: string;
+  status: ApiBookingStatus;
+  persistedStatus: ApiBookingStatus;
+  stateReconciliationPending: boolean;
+  cancellationReason?: CancellationReason | null;
+  version: number;
+  driverDisplayName: string;
+  station: StationSnapshot;
+  timezone: string;
+  startAt: string;
+  endAt: string;
+  durationMin: number;
+  totalAmount: number;
+  currency: 'VND';
+  priceLines: PriceLine[];
+  pricingBasis: PriceBasis;
+  policyVersion: string;
+  paymentHoldExpiresAt: string;
+  paymentConfirmedAt?: string | null;
+  freeCancellationDeadline?: string | null;
+  checkInOpensAt: string;
+  checkInDeadline: string;
+  checkedInAt?: string | null;
+  chargingStartedAt?: string | null;
+  completedAt?: string | null;
+  payment: Payment;
+  checkout: Checkout;
+  refunds: RefundSummary[];
+  actions: OwnerActions;
+}
+
+export interface OwnerBookingFilter {
+  stationId?: string;
+  connectorId?: string;
+  from?: string; // ISO Instant
+  to?: string;   // ISO Instant
+  status?: ApiBookingStatus;
+}
+
+export interface OwnerBookingListParams extends OwnerBookingFilter {
+  page?: number;     // UI zero-based
+  pageSize?: number; // UI page size
+}
+
+export interface OwnerActiveBookingParams {
+  stationId: string;
+  chargePointId?: string;
+  connectorId?: string;
+  page?: number;
+  size?: number;
+}
+
+
 /* ---------- charge points & connectors (FR10, FR14) ---------- */
 
 /**

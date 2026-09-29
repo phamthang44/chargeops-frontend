@@ -44,17 +44,8 @@ export function Staff() {
   }, [stationsQ.data]);
 
   const staffQ = useQuery({
-    queryKey: ['staff', 'mine', stationFilter, stationsList.map((s) => s.id).join(',')],
-    queryFn: async () => {
-      if (stationFilter !== 'ALL') {
-        return api.staff.list(stationFilter);
-      }
-      if (stationsList.length === 0) return [];
-      const results = await Promise.all(
-        stationsList.map((s) => api.staff.list(s.id).catch(() => []))
-      );
-      return results.flat();
-    },
+    queryKey: ['staff', 'mine', stationFilter],
+    queryFn: () => api.staff.list(stationFilter === 'ALL' ? undefined : stationFilter),
     enabled: stationsQ.isSuccess,
   });
 

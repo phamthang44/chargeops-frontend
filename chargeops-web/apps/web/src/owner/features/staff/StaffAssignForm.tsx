@@ -49,6 +49,7 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
     queryFn: () => api.staff.lookup(effectiveStationId, debouncedEmail),
     enabled: isValidEmail && Boolean(effectiveStationId),
     staleTime: 1000 * 60, // 60s
+    retry: false,
   });
 
   const assignMutation = useMutation({
@@ -111,12 +112,40 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
             placeholder={t('staff.assign.emailPlaceholder')}
             isSearching={lookupQ.isFetching && isValidEmail}
             isValidEmail={isValidEmail}
+            hasError={isValidEmail && !lookupQ.isFetching && lookupQ.isError}
             lookupStatus={lookupData?.status}
             resetSignal={resetSignal}
           />
         </Field>
 
         {/* Live Lookup State Feedback */}
+        {isValidEmail && !lookupQ.isFetching && lookupQ.isError && (
+          <div className="animate-fadeIn transition-all duration-200">
+            <div className="rounded-xl border border-danger/30 bg-danger-soft/30 p-3.5 text-[12px] flex items-start gap-2.5">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-danger/20 text-danger mt-0.5">
+                <IconAlertCircle size={13} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-danger">
+                    {t('staff.lookup.error', { defaultValue: 'Lỗi tra cứu tài khoản' })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => lookupQ.refetch()}
+                    className="text-[11px] font-semibold text-danger hover:underline cursor-pointer"
+                  >
+                    {t('common.retry', { defaultValue: 'Thử lại' })}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11.5px] text-muted leading-relaxed">
+                  {getApiErrorMessage(lookupQ.error)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isValidEmail && !lookupQ.isFetching && lookupData && (
           <div className="animate-fadeIn transition-all duration-200">
             {lookupData.status === 'ELIGIBLE' && (
@@ -294,6 +323,7 @@ interface EmailSearchInputProps {
   placeholder?: string;
   isSearching: boolean;
   isValidEmail: boolean;
+  hasError?: boolean;
   lookupStatus?: string;
   resetSignal: number;
 }
@@ -303,6 +333,7 @@ const EmailSearchInput = memo(function EmailSearchInput({
   placeholder,
   isSearching,
   isValidEmail,
+  hasError,
   lookupStatus,
   resetSignal,
 }: EmailSearchInputProps) {
@@ -359,7 +390,11 @@ const EmailSearchInput = memo(function EmailSearchInput({
         autoCapitalize="off"
         spellCheck={false}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-line bg-surface pl-3.5 pr-10 py-2.5 text-[13px] font-medium text-ink transition-colors focus:border-owner focus:outline-none focus:ring-2 focus:ring-owner/15"
+        className={`w-full rounded-xl border bg-surface pl-3.5 pr-10 py-2.5 text-[13px] font-medium text-ink transition-colors focus:outline-none focus:ring-2 ${
+          hasError
+            ? 'border-danger/60 focus:border-danger focus:ring-danger/15'
+            : 'border-line focus:border-owner focus:ring-owner/15'
+        }`}
       />
       {/* Status icon or Clear button */}
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
@@ -368,6 +403,10 @@ const EmailSearchInput = memo(function EmailSearchInput({
             className="h-4 w-4 animate-spin rounded-full border-2 border-owner border-t-transparent"
             aria-label="Loading"
           />
+        ) : isValidEmail && hasError ? (
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-danger/20 text-danger">
+            <IconAlertCircle size={12} />
+          </span>
         ) : isValidEmail && lookupStatus === 'ELIGIBLE' ? (
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-good text-white shadow-xs">
             <IconCheck size={11} strokeWidth={3} />

@@ -145,6 +145,9 @@
       "activeSub": "confirmed · charging",
       "completed": "COMPLETED",
       "cancelled": "CANCELLED",
+      "expired": "EXPIRED",
+      "expiredSub": "payment hold lapsed",
+      "noShowSub": "incl. {{count}} no-show",
       "grossRevenue": "GROSS REVENUE",
       "revenueSub": "before refunds"
     },
@@ -152,7 +155,8 @@
       "cols": {
         "id": "ID",
         "driver": "DRIVER",
-        "charger": "CHARGER",
+        "station": "STATION",
+        "charger": "CONNECTOR",
         "slot": "TIME RANGE",
         "duration": "DURATION",
         "method": "METHOD",
@@ -268,7 +272,9 @@
       "roleNotAllowed": "Ineligible Role",
       "roleNotAllowedHelp": "This account holds an Admin or Owner role and cannot be assigned as station staff.",
       "accountInactive": "Account is suspended",
-      "accountInactiveHelp": "This account is currently suspended on the platform and cannot be assigned tasks."
+      "accountInactiveHelp": "This account is currently suspended on the platform and cannot be assigned tasks.",
+      "error": "Account lookup failed",
+      "errorHelp": "An error occurred while verifying the account with the identity provider. Please try again later."
     },
     "revokeModal": {
       "title": "Revoke Staff Access",

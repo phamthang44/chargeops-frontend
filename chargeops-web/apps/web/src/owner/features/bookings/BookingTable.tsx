@@ -4,28 +4,28 @@ import {
   formatDuration,
   formatTimeVn,
   formatVnd,
-  type Booking,
+  type OwnerBookingListItem,
 } from '@chargeops/api';
 import { EmptyState, StatusPill } from '@chargeops/ui';
 
-const GRID = '0.9fr 1.2fr 0.8fr 1.1fr 0.7fr 0.8fr 0.9fr 0.7fr';
+const GRID = '0.9fr 1.1fr 1.1fr 0.8fr 1fr 0.7fr 0.9fr 0.8fr';
 
-/** Desktop bookings table. Click a row to open the detail drawer. */
+/** Desktop bookings table (BKG-047 / FE-15). Click a row to open the detail drawer. */
 export function BookingTable({
   rows,
   onOpen,
 }: {
-  rows: Booking[];
-  onOpen: (b: Booking) => void;
+  rows: OwnerBookingListItem[];
+  onOpen: (b: OwnerBookingListItem) => void;
 }) {
   const { t } = useTranslation('owner');
   const headers = [
     t('bookings.table.cols.id'),
     t('bookings.table.cols.driver'),
+    t('bookings.table.cols.station'),
     t('bookings.table.cols.charger'),
     t('bookings.table.cols.slot'),
     t('bookings.table.cols.duration'),
-    t('bookings.table.cols.method'),
     t('bookings.table.cols.amount'),
     t('bookings.table.cols.status'),
   ];
@@ -47,23 +47,24 @@ export function BookingTable({
         <EmptyState>{t('bookings.emptyState')}</EmptyState>
       ) : (
         rows.map((b) => {
-          const meta = BOOKING_STATUS[b.status];
+          const meta = BOOKING_STATUS[b.status] ?? { label: b.status, tone: 'neutral' };
+          const durationMin = Math.max(1, Math.round((new Date(b.endAt).getTime() - new Date(b.startAt).getTime()) / 60000));
           return (
             <div
-              key={b.id}
+              key={b.bookingId}
               onClick={() => onOpen(b)}
               className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-row-hover"
               style={{ gridTemplateColumns: GRID }}
             >
-              <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>
-              <span className="font-semibold">{b.driverName}</span>
-              <span className="text-muted">{b.connectorId}</span>
+              <span className="font-mono text-[11.5px] font-semibold text-brand">{b.bookingCode || b.bookingId}</span>
+              <span className="truncate font-semibold">{b.driverDisplayName}</span>
+              <span className="truncate text-muted">{b.stationName}</span>
+              <span className="text-muted">{b.connectorCode || b.connectorId}</span>
               <span className="text-muted">
                 {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
               </span>
-              <span className="font-mono text-[11.5px] text-muted">{formatDuration(b.durationMin)}</span>
-              <span className="text-muted">{b.method}</span>
-              <span className="text-right font-semibold">{formatVnd(b.amountVnd)}</span>
+              <span className="font-mono text-[11.5px] text-muted">{formatDuration(durationMin)}</span>
+              <span className="text-right font-semibold">{formatVnd(b.totalAmount)}</span>
               <span className="text-center">
                 <StatusPill tone={meta.tone} label={meta.label} />
               </span>

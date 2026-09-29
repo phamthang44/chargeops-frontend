@@ -5,21 +5,17 @@ import { IconCard, SearchInput, SegmentedControl, Select } from '@chargeops/ui';
 export type BookingRange = 'today' | '7d' | '30d' | 'all';
 
 export interface BookingToolbarProps {
-  search: string;
-  onSearch: (v: string) => void;
-  searchIn: BookingSearchField;
-  onSearchIn: (f: BookingSearchField) => void;
   range: BookingRange;
   onRange: (r: BookingRange) => void;
   onExport: () => void;
+  search?: string;
+  onSearch?: (v: string) => void;
+  searchIn?: BookingSearchField;
+  onSearchIn?: (f: BookingSearchField) => void;
 }
 
-/** Search (debounced) + field-scope select + date range + CSV export. */
+/** Date range segmented control + CSV export (BKG-047 / FE-15). */
 export function BookingToolbar({
-  search,
-  onSearch,
-  searchIn,
-  onSearchIn,
   range,
   onRange,
   onExport,
@@ -33,30 +29,8 @@ export function BookingToolbar({
     { key: 'all' as const, label: t('bookings.toolbar.ranges.all') },
   ];
 
-  const searchFields = [
-    { value: 'all', label: t('bookings.toolbar.fields.all') },
-    { value: 'id', label: t('bookings.toolbar.fields.id') },
-    { value: 'driver', label: t('bookings.toolbar.fields.driver') },
-    { value: 'connector', label: t('bookings.toolbar.fields.connector') },
-  ];
-
   return (
     <div className="mb-3 flex flex-wrap items-center gap-[9px]">
-      <SearchInput
-        value={search}
-        onChange={onSearch}
-        accent="owner"
-        placeholder={t('bookings.toolbar.placeholder')}
-        className="max-w-[300px] min-w-[190px] flex-1"
-      />
-      <Select
-        value={searchIn}
-        onChange={(v) => onSearchIn(v as BookingSearchField)}
-        options={searchFields}
-        accent="owner"
-        className="w-[142px]"
-        aria-label={t('bookings.toolbar.searchIn')}
-      />
       <SegmentedControl segments={ranges} active={range} onChange={onRange} />
       <button
         onClick={onExport}

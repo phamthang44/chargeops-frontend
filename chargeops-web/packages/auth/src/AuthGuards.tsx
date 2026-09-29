@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
+import { getKeycloakClient, isKeycloakEnabled } from './keycloak-client';
 import type { Role } from './types';
 
 export function SsoRedirectOverlay() {
@@ -39,8 +40,20 @@ export function SsoRedirectOverlay() {
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { authenticated, error, initializing } = useAuth();
+  const realMode = isKeycloakEnabled();
+  const keycloak = getKeycloakClient();
+  const loginStarted = useRef(false);
 
-  if (initializing) {
+  useEffect(() => {
+    if (initializing || authenticated || error || !realMode || !keycloak || loginStarted.current) return;
+
+    loginStarted.current = true;
+    void keycloak.login({ redirectUri: window.location.href }).catch(() => {
+      loginStarted.current = false;
+    });
+  }, [initializing, authenticated, error, realMode, keycloak]);
+
+  if (initializing || (!authenticated && realMode && !error)) {
     return <SsoRedirectOverlay />;
   }
 

@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ApiProvider,
   createServices,
-  formatTimeVn,
   useApi,
   type OwnerDashboard as OwnerDashboardData,
   type StaffDashboard as StaffDashboardData,
@@ -131,18 +130,6 @@ function OwnerConsoleContent({
             title: `${tk.id} · ${tk.subject}`,
             subtitle: tk.stationName ?? undefined,
             onSelect: () => navigate(`${base}/tickets/${tk.id}`),
-          }));
-        },
-      },
-      {
-        label: t('search.groups.bookings'),
-        run: async (q) => {
-          const res = await api.bookings.list({ search: q, pageSize: 5 });
-          return res.items.map((b) => ({
-            id: b.id,
-            title: `${b.id} · ${b.driverName}`,
-            subtitle: `${b.connectorId} · ${formatTimeVn(b.startAt)}`,
-            onSelect: () => navigate(`${base}/bookings`),
           }));
         },
       },

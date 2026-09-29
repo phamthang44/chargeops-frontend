@@ -39,10 +39,11 @@ export function initializeKeycloak(): Promise<boolean> {
   if (!client) return Promise.resolve(false);
 
   keycloakInitPromise ??= client.init({
-    onLoad: 'login-required',
+    onLoad: 'check-sso',
+    silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+    silentCheckSsoFallback: false,
     pkceMethod: 'S256',
     checkLoginIframe: false,
-    redirectUri: window.location.href,
     locale: keycloakLocale(),
   });
 

@@ -1,18 +1,28 @@
 import { useTranslation } from 'react-i18next';
-import { formatVndCompact, type BookingSummary } from '@chargeops/api';
+import type { OwnerBookingSummary } from '@chargeops/api';
 import { MetricCard } from '@chargeops/ui';
 
-/** Five-metric strip above the bookings table. */
-export function BookingSummaryStrip({ summary }: { summary: BookingSummary }) {
+/** Five-metric count strip above the bookings table (BKG-047 / FE-15). */
+export function BookingSummaryStrip({ summary }: { summary: OwnerBookingSummary }) {
   const { t } = useTranslation('owner');
-  const active = summary.byStatus.confirmed + summary.byStatus.checkedin + summary.byStatus.charging;
+  const active = summary.confirmed + summary.inSession;
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">
-      <MetricCard label={t('bookings.metrics.totalBookings')} value={String(summary.total)} accent="#5b54e8" />
+      <MetricCard label={t('bookings.metrics.totalBookings')} value={String(summary.totalBookings)} accent="#5b54e8" />
       <MetricCard label={t('bookings.metrics.activeBookings')} value={String(active)} sub={t('bookings.metrics.activeSub')} accent="#12a150" />
-      <MetricCard label={t('bookings.metrics.completed')} value={String(summary.byStatus.completed)} accent="var(--color-ink)" />
-      <MetricCard label={t('bookings.metrics.cancelled')} value={String(summary.byStatus.cancelled)} accent="#c0392b" />
-      <MetricCard label={t('bookings.metrics.grossRevenue')} value={formatVndCompact(summary.grossVnd)} sub={t('bookings.metrics.revenueSub')} accent="#0d8a5a" />
+      <MetricCard label={t('bookings.metrics.completed')} value={String(summary.completed)} accent="var(--color-ink)" />
+      <MetricCard
+        label={t('bookings.metrics.cancelled')}
+        value={String(summary.cancelled)}
+        sub={summary.noShow > 0 ? t('bookings.metrics.noShowSub', { count: summary.noShow }) : undefined}
+        accent="#c0392b"
+      />
+      <MetricCard
+        label={t('bookings.metrics.expired')}
+        value={String(summary.expired)}
+        sub={t('bookings.metrics.expiredSub')}
+        accent="#e67e22"
+      />
     </div>
   );
 }

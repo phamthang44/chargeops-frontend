@@ -4,6 +4,13 @@
  * swapping mock → real API is a config change, not a UI change.
  */
 import type {
+  OperationalBooking,
+  OwnerActiveBookingParams,
+  OwnerBookingDetail,
+  OwnerBookingFilter,
+  OwnerBookingListItem,
+  OwnerBookingListParams,
+  OwnerBookingSummary,
   AdminDashboard,
   AdminStationDetail,
   AdminStationFilterParams,
@@ -100,6 +107,17 @@ export interface BookingService {
    * offline: the slot is sold and the driver may already be plugged in.
    */
   activeFor(connectorIds: string[]): Promise<Booking[]>;
+}
+
+/**
+ * BKG-047 / FE-15: Dedicated Station Owner Booking read APIs.
+ * Scoped strictly to the authenticated Owner's stations.
+ */
+export interface OwnerBookingService {
+  list(params?: OwnerBookingListParams): Promise<Page<OwnerBookingListItem>>;
+  get(bookingId: string): Promise<OwnerBookingDetail>;
+  summary(params?: OwnerBookingFilter): Promise<OwnerBookingSummary>;
+  activeFor(params: OwnerActiveBookingParams): Promise<Page<OperationalBooking>>;
 }
 
 export interface ChargePointService {
@@ -408,6 +426,7 @@ export interface Services {
   dashboard: DashboardService;
   analytics: AnalyticsService;
   bookings: BookingService;
+  ownerBookings: OwnerBookingService;
   chargePoints: ChargePointService;
   connectors: ConnectorService;
   stations: StationService;

@@ -36,6 +36,11 @@ import type {
   TransactionSummary,
   UserProfile,
   UserProfileUpdateRequest,
+  ApiBookingStatus,
+  OwnerBookingListItem,
+  OwnerBookingDetail,
+  OwnerBookingSummary,
+  OperationalBooking,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
@@ -418,6 +423,213 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         return db.bookings
           .filter((b) => ids.has(b.connectorId) && (b.status === 'confirmed' || b.status === 'checkedin'))
           .sort((a, b) => (a.startAt < b.startAt ? -1 : 1));
+      },
+    },
+
+    ownerBookings: {
+      async list(params = {}) {
+        await delay();
+        const { status, stationId, connectorId, from, to, page = 0, pageSize = 20 } = params;
+        let rows = scopedBookings();
+        if (stationId) rows = rows.filter((b) => b.stationId === stationId);
+        if (connectorId) rows = rows.filter((b) => b.connectorId === connectorId);
+        if (status && (status as any) !== 'all') {
+          const sUpper = status.toUpperCase();
+          rows = rows.filter((b) => {
+            const bUpper = b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase();
+            return bUpper === sUpper;
+          });
+        }
+        if (from) {
+          const fromMs = new Date(from).getTime();
+          rows = rows.filter((b) => new Date(b.endAt).getTime() > fromMs);
+        }
+        if (to) {
+          const toMs = new Date(to).getTime();
+          rows = rows.filter((b) => new Date(b.startAt).getTime() < toMs);
+        }
+
+        const items: OwnerBookingListItem[] = rows
+          .slice(page * pageSize, (page + 1) * pageSize)
+          .map((b) => {
+            const apiStatus = (b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase()) as ApiBookingStatus;
+            return {
+              bookingId: b.id,
+              bookingCode: b.id,
+              status: apiStatus,
+              persistedStatus: apiStatus,
+              stateReconciliationPending: false,
+              cancellationReason: b.status === 'cancelled' ? 'DRIVER_CANCELLED' : null,
+              stationId: b.stationId,
+              stationName: b.stationName,
+              connectorId: b.connectorId,
+              connectorCode: b.connectorId,
+              driverDisplayName: b.driverName,
+              startAt: b.startAt,
+              endAt: b.endAt,
+              checkInDeadline: b.expiresAt,
+              checkedInAt: b.paymentConfirmedAt,
+              totalAmount: b.amountVnd,
+              currency: 'VND',
+            };
+          });
+
+        return { items, total: rows.length, page, pageSize };
+      },
+
+      async get(bookingId: string) {
+        await delay(150);
+        const b = db.bookings.find((x) => x.id === bookingId);
+        if (!b) throw new Error(`Không tìm thấy đặt chỗ ${bookingId}`);
+        const apiStatus = (b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase()) as ApiBookingStatus;
+        return {
+          bookingId: b.id,
+          bookingCode: b.id,
+          status: apiStatus,
+          persistedStatus: apiStatus,
+          stateReconciliationPending: false,
+          cancellationReason: b.status === 'cancelled' ? 'DRIVER_CANCELLED' : null,
+          version: 1,
+          driverDisplayName: b.driverName,
+          station: {
+            stationId: b.stationId,
+            stationName: b.stationName,
+            stationAddress: 'Trạm sạc ChargeOps',
+            chargePointCode: 'CP-01',
+            connectorId: b.connectorId,
+            connectorCode: b.connectorId,
+          },
+          timezone: 'Asia/Ho_Chi_Minh',
+          startAt: b.startAt,
+          endAt: b.endAt,
+          durationMin: b.durationMin,
+          totalAmount: b.amountVnd,
+          currency: 'VND',
+          priceLines: (b.priceLines ?? []).map((pl, idx) => ({
+            sequence: idx + 1,
+            startAt: pl.fromAt,
+            endAt: pl.toAt,
+            durationMin: Math.max(1, Math.round((new Date(pl.toAt).getTime() - new Date(pl.fromAt).getTime()) / 60000)),
+            label: pl.rateKind === 'peak' ? 'Giờ cao điểm' : pl.rateKind === 'offpeak' ? 'Giờ thấp điểm' : 'Giờ thường',
+            periodCode: pl.rateKind === 'peak' ? 'PEAK' : pl.rateKind === 'offpeak' ? 'OFF_PEAK' : 'NORMAL',
+            rateVndPerKwh: pl.rateVndPerKwh,
+            estimatedEnergyKwh: pl.energyKwh,
+            amount: pl.amountVnd,
+          })),
+          pricingBasis: {
+            kind: 'ESTIMATED_ENERGY_FIXED_PACKAGE',
+            rateUnit: 'VND_PER_KWH',
+            formulaVersion: 'v4.9',
+            energyFactor: 0.62,
+            powerKw: b.powerKw,
+            energyDecimalPlaces: 1,
+          },
+          policyVersion: 'booking-v4.9',
+          paymentHoldExpiresAt: b.expiresAt || new Date(Date.now() + 600000).toISOString(),
+          paymentConfirmedAt: b.paymentConfirmedAt,
+          freeCancellationDeadline: b.freeCancellationDeadline,
+          checkInOpensAt: b.startAt,
+          checkInDeadline: b.endAt,
+          checkedInAt: b.paymentConfirmedAt,
+          payment: {
+            paymentId: `PAY-${b.id}`,
+            status: b.status === 'pending' ? 'PENDING' : b.status === 'cancelled' ? 'REFUNDED' : 'PAID',
+            method: 'SIMULATOR',
+            expectedAmount: b.amountVnd,
+            collectedAmount: b.status === 'pending' ? 0 : b.amountVnd,
+            appliedToPackageAmount: b.status === 'pending' ? 0 : b.amountVnd,
+            packageRefundedAmount: b.refundVnd || 0,
+            excessAmount: 0,
+            unallocatedAmount: 0,
+            currency: 'VND',
+          },
+          checkout: {
+            status: b.status === 'pending' ? 'READY' : 'UNAVAILABLE',
+            method: 'SIMULATOR',
+            instruction: 'Quét mã VietQR hoặc sử dụng cổng Simulator để thanh toán.',
+          },
+          refunds: b.refundVnd ? [{
+            refundId: `REF-${b.id}`,
+            amount: b.refundVnd,
+            reason: 'VOLUNTARY_GRACE',
+            status: 'SUCCEEDED',
+          }] : [],
+          actions: {
+            canCancelForStationFailure: true,
+            canViewFinancials: true,
+            canReportIncident: true,
+          },
+        } as OwnerBookingDetail;
+      },
+
+      async summary(params = {}) {
+        await delay();
+        const { status, stationId, connectorId, from, to } = params;
+        let rows = scopedBookings();
+        if (stationId) rows = rows.filter((b) => b.stationId === stationId);
+        if (connectorId) rows = rows.filter((b) => b.connectorId === connectorId);
+        if (status && (status as any) !== 'all') {
+          const sUpper = status.toUpperCase();
+          rows = rows.filter((b) => (b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase()) === sUpper);
+        }
+        if (from) {
+          const fromMs = new Date(from).getTime();
+          rows = rows.filter((b) => new Date(b.endAt).getTime() > fromMs);
+        }
+        if (to) {
+          const toMs = new Date(to).getTime();
+          rows = rows.filter((b) => new Date(b.startAt).getTime() < toMs);
+        }
+
+        const pending = rows.filter((b) => b.status === 'pending').length;
+        const confirmed = rows.filter((b) => b.status === 'confirmed').length;
+        const inSession = rows.filter((b) => b.status === 'checkedin' || b.status === 'charging').length;
+        const completed = rows.filter((b) => b.status === 'completed').length;
+        const cancelled = rows.filter((b) => b.status === 'cancelled').length;
+
+        return {
+          totalBookings: rows.length,
+          pending,
+          confirmed,
+          inSession,
+          completed,
+          cancelled,
+          expired: 0,
+          noShow: 0,
+        } as OwnerBookingSummary;
+      },
+
+      async activeFor(params) {
+        await delay(180);
+        const { stationId, chargePointId, connectorId, page = 0, size = 20 } = params;
+        let rows = scopedBookings().filter(
+          (b) => b.status === 'confirmed' || b.status === 'checkedin' || b.status === 'charging' || b.status === 'pending'
+        );
+        if (stationId) rows = rows.filter((b) => b.stationId === stationId);
+        if (connectorId) rows = rows.filter((b) => b.connectorId === connectorId);
+        if (chargePointId) {
+          const cp = db.chargePoints.find((x) => x.id === chargePointId);
+          const cIds = new Set((cp?.connectors ?? []).map((c) => c.id));
+          if (cIds.size > 0) rows = rows.filter((b) => cIds.has(b.connectorId));
+        }
+        rows = rows.sort((a, b) => (a.startAt < b.startAt ? -1 : 1));
+
+        const items: OperationalBooking[] = rows.slice(page * size, (page + 1) * size).map((b) => ({
+          bookingId: b.id,
+          bookingCode: b.id,
+          status: (b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase()) as ApiBookingStatus,
+          cancellationReason: b.status === 'cancelled' ? 'DRIVER_CANCELLED' : null,
+          stationId: b.stationId,
+          connectorId: b.connectorId,
+          connectorCode: b.connectorId,
+          driverDisplayName: b.driverName,
+          startAt: b.startAt,
+          endAt: b.endAt,
+          checkInDeadline: b.endAt,
+          checkedInAt: b.paymentConfirmedAt,
+        }));
+
+        return { items, total: rows.length, page, pageSize: size };
       },
     },
 

@@ -145,6 +145,9 @@
       "activeSub": "xác nhận · sạc",
       "completed": "HOÀN TẤT",
       "cancelled": "ĐÃ HỦY",
+      "expired": "HẾT HẠN",
+      "expiredSub": "quá hạn giữ chỗ",
+      "noShowSub": "gồm {{count}} no-show",
       "grossRevenue": "TỔNG THU",
       "revenueSub": "trừ hoàn tiền sau"
     },
@@ -152,7 +155,8 @@
       "cols": {
         "id": "MÃ",
         "driver": "TÀI XẾ",
-        "charger": "TRỤ",
+        "station": "TRẠM",
+        "charger": "CỔNG SẠC",
         "slot": "KHUNG GIỜ",
         "duration": "THỜI LƯỢNG",
         "method": "P.THỨC",
@@ -268,7 +272,9 @@
       "roleNotAllowed": "Vai trò không hợp lệ",
       "roleNotAllowedHelp": "Tài khoản này có vai trò Quản trị viên hoặc Chủ trạm, không thể phân công làm nhân viên vận hành.",
       "accountInactive": "Tài khoản đang bị tạm khóa",
-      "accountInactiveHelp": "Tài khoản này đang bị tạm dừng hoặc khóa trên hệ thống, không thể phân công nhiệm vụ."
+      "accountInactiveHelp": "Tài khoản này đang bị tạm dừng hoặc khóa trên hệ thống, không thể phân công nhiệm vụ.",
+      "error": "Lỗi tra cứu tài khoản",
+      "errorHelp": "Đã xảy ra lỗi khi kiểm tra thông tin tài khoản với hệ thống định danh. Vui lòng thử lại sau."
     },
     "revokeModal": {
       "title": "Thu hồi quyền nhân viên",

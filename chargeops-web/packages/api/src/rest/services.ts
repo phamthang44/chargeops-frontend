@@ -8,6 +8,10 @@
 import type { HttpClient } from '../http';
 import type { Services } from '../services';
 import type {
+  OperationalBooking,
+  OwnerBookingDetail,
+  OwnerBookingListItem,
+  OwnerBookingSummary,
   ChargePoint,
   ChargePointStatusEvent,
   Connector,
@@ -265,6 +269,154 @@ export function createRestServices(http: HttpClient): Services {
       summary: () => http.get('/bookings/summary'),
       cancel: (id) => http.post(`/bookings/${id}/cancel`),
       activeFor: (connectorIds) => http.get('/bookings/active', { connectorIds: connectorIds.join(',') }),
+    },
+
+    ownerBookings: {
+      list: async (params = {}) => {
+        const query: Record<string, any> = {};
+        if (params.stationId) query.stationId = params.stationId;
+        if (params.connectorId) query.connectorId = params.connectorId;
+        if (params.from) query.from = params.from;
+        if (params.to) query.to = params.to;
+        if (params.status && (params.status as any) !== 'all') query.status = params.status;
+        query.page = (params.page ?? 0) + 1; // UI 0-based to API 1-based
+        query.size = params.pageSize ?? 20;
+
+        const res: any = await http.get('/owner/bookings', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+
+        return {
+          items: rawItems.map((item: any) => ({
+            bookingId: item.bookingId,
+            bookingCode: item.bookingCode,
+            status: item.status,
+            persistedStatus: item.persistedStatus ?? item.status,
+            stateReconciliationPending: Boolean(item.stateReconciliationPending),
+            cancellationReason: item.cancellationReason ?? null,
+            stationId: item.stationId,
+            stationName: item.stationName,
+            connectorId: item.connectorId,
+            connectorCode: item.connectorCode,
+            driverDisplayName: item.driverDisplayName || 'Tài xế',
+            startAt: item.startAt,
+            endAt: item.endAt,
+            checkInDeadline: item.checkInDeadline ?? null,
+            checkedInAt: item.checkedInAt ?? null,
+            totalAmount: Number(item.totalAmount ?? 0),
+            currency: item.currency ?? 'VND',
+          })),
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
+
+      get: async (bookingId: string) => {
+        const res: any = await http.get(`/owner/bookings/${bookingId}`);
+        const data = res?.data ?? res;
+        return {
+          ...data,
+          bookingId: data.bookingId,
+          bookingCode: data.bookingCode,
+          status: data.status,
+          persistedStatus: data.persistedStatus ?? data.status,
+          stateReconciliationPending: Boolean(data.stateReconciliationPending),
+          cancellationReason: data.cancellationReason ?? null,
+          version: Number(data.version ?? 0),
+          driverDisplayName: data.driverDisplayName || 'Tài xế',
+          station: data.station,
+          timezone: data.timezone || 'Asia/Ho_Chi_Minh',
+          startAt: data.startAt,
+          endAt: data.endAt,
+          durationMin: Number(data.durationMin ?? 0),
+          totalAmount: Number(data.totalAmount ?? 0),
+          currency: data.currency ?? 'VND',
+          priceLines: Array.isArray(data.priceLines) ? data.priceLines : [],
+          pricingBasis: data.pricingBasis,
+          policyVersion: data.policyVersion,
+          paymentHoldExpiresAt: data.paymentHoldExpiresAt,
+          paymentConfirmedAt: data.paymentConfirmedAt ?? null,
+          freeCancellationDeadline: data.freeCancellationDeadline ?? null,
+          checkInOpensAt: data.checkInOpensAt,
+          checkInDeadline: data.checkInDeadline,
+          checkedInAt: data.checkedInAt ?? null,
+          chargingStartedAt: data.chargingStartedAt ?? null,
+          completedAt: data.completedAt ?? null,
+          payment: data.payment,
+          checkout: data.checkout,
+          refunds: Array.isArray(data.refunds) ? data.refunds : [],
+          actions: {
+            canCancelForStationFailure: Boolean(data.actions?.canCancelForStationFailure),
+            canViewFinancials: Boolean(data.actions?.canViewFinancials),
+            canReportIncident: Boolean(data.actions?.canReportIncident),
+          },
+        } as OwnerBookingDetail;
+      },
+
+      summary: async (params = {}) => {
+        const query: Record<string, any> = {};
+        if (params.stationId) query.stationId = params.stationId;
+        if (params.connectorId) query.connectorId = params.connectorId;
+        if (params.from) query.from = params.from;
+        if (params.to) query.to = params.to;
+        if (params.status && (params.status as any) !== 'all') query.status = params.status;
+
+        const res: any = await http.get('/owner/bookings/summary', query);
+        const data = res?.data ?? res;
+        return {
+          totalBookings: Number(data?.totalBookings ?? 0),
+          pending: Number(data?.pending ?? 0),
+          confirmed: Number(data?.confirmed ?? 0),
+          inSession: Number(data?.inSession ?? 0),
+          completed: Number(data?.completed ?? 0),
+          cancelled: Number(data?.cancelled ?? 0),
+          expired: Number(data?.expired ?? 0),
+          noShow: Number(data?.noShow ?? 0),
+        } as OwnerBookingSummary;
+      },
+
+      activeFor: async (params) => {
+        const query: Record<string, any> = {
+          stationId: params.stationId,
+        };
+        if (params.chargePointId) query.chargePointId = params.chargePointId;
+        if (params.connectorId) query.connectorId = params.connectorId;
+        query.page = (params.page ?? 0) + 1;
+        query.size = params.size ?? 20;
+
+        const res: any = await http.get('/owner/bookings/active-for', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+
+        return {
+          items: rawItems.map((item: any) => ({
+            bookingId: item.bookingId,
+            bookingCode: item.bookingCode,
+            status: item.status,
+            cancellationReason: item.cancellationReason ?? null,
+            stationId: item.stationId,
+            connectorId: item.connectorId,
+            connectorCode: item.connectorCode,
+            driverDisplayName: item.driverDisplayName || 'Tài xế',
+            startAt: item.startAt,
+            endAt: item.endAt,
+            checkInDeadline: item.checkInDeadline,
+            checkedInAt: item.checkedInAt ?? null,
+          })),
+          total,
+          page: params.page ?? 0,
+          pageSize: params.size ?? 20,
+        };
+      },
     },
 
     chargePoints: {
@@ -546,10 +698,13 @@ export function createRestServices(http: HttpClient): Services {
     staff: {
       currentContext: () => http.get('/me/staff-context'),
       list: async (stationId, params = {}) => {
-        if (!stationId) return [];
+        const queryParams: Record<string, unknown> = { ...params };
+        if (stationId && stationId !== 'ALL') {
+          queryParams.stationId = stationId;
+        }
         const res = await http.get<StationStaffMember[] | { items?: StationStaffMember[] }>(
-          `/owner/stations/${stationId}/staffs`,
-          params,
+          '/owner/staffs',
+          queryParams,
         );
         if (Array.isArray(res)) return res;
         return (res as { items?: StationStaffMember[] })?.items ?? [];

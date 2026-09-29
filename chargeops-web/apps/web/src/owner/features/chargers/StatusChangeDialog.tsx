@@ -5,10 +5,10 @@ import {
   BOOKING_STATUS,
   formatTimeVn,
   useApi,
-  type Booking,
   type ChargePoint,
   type Connector,
   type ConnectorRuntimeStatus,
+  type OperationalBooking,
   type OperationalChargePointStatus,
 } from '@chargeops/api';
 import { Button, IconAlertTriangle, IconBolt, IconClock, IconLock, Modal, Skeleton, StatusPill } from '@chargeops/ui';
@@ -36,7 +36,7 @@ function isGoingDown(intent: StatusIntent): boolean {
 
 const REASON_PRESETS: Record<string, string[]> = {
   MAINTENANCE: [
-    'Bảo trì định kỳ phần cứng',
+    'Bảo trì định kỳ phần hardware',
     'Kiểm tra an toàn đường dây & trạm biến áp',
     'Bảo dưỡng và vệ sinh đầu súng sạc',
     'Nâng cấp firmware / phần mềm điều khiển',
@@ -66,11 +66,20 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
   const goingDown = intent ? isGoingDown(intent) : false;
   const isMaint = intent?.next === 'MAINTENANCE';
 
+  const stationId = intent?.chargePoint.stationId;
+  const chargePointId = intent?.kind === 'chargePoint' ? intent.chargePoint.id : undefined;
+  const connectorId = intent?.kind === 'connector' ? intent.connector.id : undefined;
+
   // Only an offline transition can be blocked, so only look bookings up then.
   const blockersQ = useQuery({
-    queryKey: ['bookings', 'active', connectors.map((c) => c.id).sort()],
-    queryFn: () => api.bookings.activeFor(connectors.map((c) => c.id)),
-    enabled: !!intent && goingDown,
+    queryKey: ['ownerBookings', 'active', { stationId, chargePointId, connectorId }],
+    queryFn: () =>
+      api.ownerBookings.activeFor({
+        stationId: stationId!,
+        chargePointId,
+        connectorId,
+      }),
+    enabled: Boolean(intent && goingDown && stationId),
   });
 
   if (!intent) return null;
@@ -80,7 +89,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
       ? intent.chargePoint.name
       : `${intent.connector.connectorCode || intent.connector.id} (${intent.connector.connectorType})`;
 
-  const blockers = blockersQ.data ?? [];
+  const blockers = blockersQ.data?.items ?? [];
   const checking = goingDown && blockersQ.isLoading;
   const blocked = goingDown && blockers.length > 0;
   const requiresReason = goingDown;
@@ -198,7 +207,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
 }
 
 /** BR-CHG-05 refusal — name the bookings standing in the way. */
-function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: Booking[] }) {
+function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: OperationalBooking[] }) {
   const { t } = useTranslation('owner');
   return (
     <>
@@ -213,18 +222,23 @@ function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: Boo
           const meta = BOOKING_STATUS[b.status];
           return (
             <div
-              key={b.id}
+              key={b.bookingId}
               className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-2.5 text-[12px] last:border-b-0"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>
-                <span className="truncate font-medium text-muted">{b.driverName}</span>
+                <span className="font-mono text-[11.5px] font-semibold text-brand">
+                  {b.bookingCode || b.bookingId}
+                </span>
+                <span className="truncate font-medium text-muted">
+                  {b.driverDisplayName}
+                  {b.connectorCode && ` · ${b.connectorCode}`}
+                </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <span className="font-mono text-[11px] text-muted">
                   {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
                 </span>
-                <StatusPill tone={meta.tone} label={meta.label} />
+                <StatusPill tone={meta?.tone ?? 'neutral'} label={meta?.label ?? b.status} />
               </div>
             </div>
           );

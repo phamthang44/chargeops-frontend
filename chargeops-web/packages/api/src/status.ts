@@ -4,7 +4,9 @@
  * render every status identically.
  */
 import type {
+  ApiBookingStatus,
   BookingStatus,
+  CancellationReason,
   ConnectorRuntimeStatus,
   LicenseStatus,
   ProvisioningStatus,
@@ -22,13 +24,27 @@ export interface StatusMeta {
   tone: Tone;
 }
 
-export const BOOKING_STATUS: Record<BookingStatus, StatusMeta> = {
+export const BOOKING_STATUS: Record<BookingStatus | ApiBookingStatus, StatusMeta> = {
   pending: { label: 'Chờ thanh toán', tone: 'warn' },
   confirmed: { label: 'Đã xác nhận', tone: 'brand' },
   checkedin: { label: 'Đã check-in', tone: 'good' },
   charging: { label: 'Đang sạc', tone: 'good' },
   completed: { label: 'Hoàn tất', tone: 'neutral' },
   cancelled: { label: 'Đã hủy', tone: 'bad' },
+
+  PENDING: { label: 'Chờ thanh toán', tone: 'warn' },
+  CONFIRMED: { label: 'Đã xác nhận', tone: 'brand' },
+  CHECKED_IN: { label: 'Đã check-in', tone: 'good' },
+  CHARGING: { label: 'Đang sạc', tone: 'good' },
+  COMPLETED: { label: 'Hoàn tất', tone: 'neutral' },
+  CANCELLED: { label: 'Đã hủy', tone: 'bad' },
+  EXPIRED: { label: 'Đã hết hạn', tone: 'bad' },
+};
+
+export const CANCELLATION_REASON: Record<CancellationReason, StatusMeta> = {
+  DRIVER_CANCELLED: { label: 'Tài xế tự hủy', tone: 'neutral' },
+  NO_SHOW: { label: 'Quá hạn check-in (No-show)', tone: 'bad' },
+  STATION_FAILURE: { label: 'Sự cố kỹ thuật trạm', tone: 'warn' },
 };
 
 /** Charge Point lifecycle (FR14) — admin owns PENDING_ACTIVATION / SUSPENDED; owner owns AVAILABLE / OFFLINE. */

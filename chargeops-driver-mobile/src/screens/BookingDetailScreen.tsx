@@ -3,10 +3,11 @@ import { useIsFocused, useNavigation, useRoute, type RouteProp } from '@react-na
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Image, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
+  AppBackButton,
   AppButton,
   BookingTimelineStepper,
   CancelBookingSheet,
@@ -309,15 +310,7 @@ export function BookingDetailScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
         <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
-          <GlassButton
-            size={40}
-            glassEffectStyle="regular"
-            fallbackColor={themeColors.surfaceAlt}
-            accessibilityLabel={t('common.back')}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
-          </GlassButton>
+          <AppBackButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()} />
           <View style={styles.headerTitleBlock}>
             <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
           </View>
@@ -382,15 +375,7 @@ export function BookingDetailScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
         <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
-          <GlassButton
-            size={40}
-            glassEffectStyle="regular"
-            fallbackColor={themeColors.surfaceAlt}
-            accessibilityLabel={t('common.back')}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
-          </GlassButton>
+          <AppBackButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()} />
           <View style={styles.headerTitleBlock}>
             <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
           </View>
@@ -627,15 +612,7 @@ export function BookingDetailScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
-        <GlassButton
-          size={40}
-          glassEffectStyle="regular"
-          fallbackColor={themeColors.surfaceAlt}
-          accessibilityLabel={t('common.back')}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={22} color={themeColors.textStrong} />
-        </GlassButton>
+        <AppBackButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()} />
         <View style={styles.headerTitleBlock}>
           <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
           <Text style={[styles.headerRole, { color: themeColors.primary }]}>{t('bookingDetail.role')}</Text>
@@ -1130,13 +1107,28 @@ export function BookingDetailScreen() {
 
       {(isCompleted || isCancelled || isExpired) && canReportIssue && (
         <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
-          <AppButton
-            label={t('bookingDetail.reportIssue', 'Báo cáo sự cố trạm sạc')}
-            variant="secondary"
+          <Pressable
+            style={[
+              styles.reportIssueBtn,
+              {
+                backgroundColor: isDark ? 'rgba(245, 158, 11, 0.12)' : '#FEF3C7',
+                borderColor: isDark ? '#D97706' : '#F59E0B',
+              },
+            ]}
             onPress={() => {
-              navigation.goBack();
+              navigation.navigate('CreateTicket', {
+                bookingId: booking.id,
+                stationId: booking.stationId,
+                stationName: booking.stationName,
+                defaultCategory: 'CHARGING_ISSUE',
+              });
             }}
-          />
+          >
+            <Ionicons name="alert-circle-outline" size={20} color={isDark ? '#FBBF24' : '#D97706'} />
+            <Text style={[styles.reportIssueBtnText, { color: isDark ? '#FBBF24' : '#B45309' }]}>
+              {t('bookingDetail.reportIssueShort', 'Báo cáo sự cố')}
+            </Text>
+          </Pressable>
         </View>
       )}
 
@@ -1571,5 +1563,18 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
     gap: spacing.sm,
+  },
+  reportIssueBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: 14,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+  },
+  reportIssueBtnText: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
   },
 });

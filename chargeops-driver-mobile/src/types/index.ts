@@ -462,3 +462,5 @@ export type {
   BackendStationDiscoverySort,
   BackendTimeRangeResponse,
 } from '@/services/stationAdapter';
+
+export * from './ticket';

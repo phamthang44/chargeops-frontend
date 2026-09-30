@@ -440,6 +440,10 @@
       },
       "requestTitle": "Gửi yêu cầu hỗ trợ",
       "requestBody": "Khi hoàn thiện, yêu cầu sẽ được gửi qua hệ thống ChargeOps. Môi trường demo sẽ tiếp nhận nội bộ mà không gửi email thật ra ngoài.",
+      "myTicketsTitle": "Phiếu hỗ trợ của tôi",
+      "myTicketsBody": "Theo dõi tiến độ, trao đổi với kỹ thuật trạm & kết luận hoàn phí",
+      "newTicketTitle": "Gửi yêu cầu hỗ trợ mới",
+      "newTicketBody": "Báo cáo lỗi sạc trạm, đặt chỗ, thanh toán hoặc khiếu nại",
       "close": "Đã hiểu"
     },
     "logout": "Đăng xuất tài khoản",
@@ -985,6 +989,7 @@
     "graceHint": "Hủy miễn phí đến {{time}}",
     "refundNow": "Hủy bây giờ được hoàn",
     "reportIssue": "Báo cáo sự cố trạm sạc",
+    "reportIssueShort": "Báo cáo sự cố",
     "checkInOpensIn": "Mở check-in lúc {{time}}",
     "checkInClosed": "Cửa sổ check-in đã đóng",
     "timelineTitle": "Tiến trình đặt chỗ",
@@ -1140,6 +1145,111 @@
     "finish": "Kết thúc phiên sạc",
     "finishWarn": "Dừng ở mức {{percent}}% — không thể hoàn tác",
     "finishFull": "Hoàn tất phiên sạc"
+  },
+  "ticket": {
+    "create": {
+      "title": "Báo sự cố & Hỗ trợ",
+      "subtitle": "TRỰC TUYẾN 24/7",
+      "bookingContext": "BÁO CÁO THEO ĐƠN ĐẶT CHỖ",
+      "stationLabel": "Trạm:",
+      "bookingCodeLabel": "Mã đơn:",
+      "categoryTitle": "Loại sự cố *",
+      "priorityTitle": "Mức độ ưu tiên",
+      "quickSuggestionsTitle": "Gợi ý nhanh sự cố thường gặp",
+      "subjectLabel": "Tóm tắt sự cố *",
+      "subjectPlaceholder": "Ví dụ: Súng sạc trụ 02 tự ngắt khi mới sạc...",
+      "descLabel": "Mô tả chi tiết sự cố *",
+      "descPlaceholder": "Mô tả cụ thể thời điểm, mã trụ/súng, thông báo lỗi trên màn hình trụ sạc...",
+      "charCount": "{{count}}/500 ký tự",
+      "submitBtn": "Gửi phiếu hỗ trợ sự cố",
+      "submitting": "Đang gửi phiếu...",
+      "errorNoSubjectTitle": "Chưa nhập tiêu đề",
+      "errorNoSubjectBody": "Vui lòng nhập hoặc chọn tóm tắt sự cố bạn đang gặp phải.",
+      "errorNoDescTitle": "Chưa nhập mô tả",
+      "errorNoDescBody": "Vui lòng mô tả chi tiết để kỹ thuật viên có thể hỗ trợ nhanh nhất.",
+      "errorFailed": "Không thể tạo phiếu hỗ trợ"
+    },
+    "list": {
+      "title": "Phiếu hỗ trợ của tôi",
+      "countRecorded": "{{count}} phiếu đã ghi nhận",
+      "emptySubtitleHeader": "Trung tâm sự cố & khiếu nại",
+      "newTicket": "Tạo phiếu mới",
+      "loading": "Đang tải danh sách phiếu...",
+      "emptyTitle": "Không có sự cố nào",
+      "emptyAllDesc": "Bạn chưa tạo phiếu hỗ trợ nào. Mọi phiên sạc đều diễn ra suôn sẻ!",
+      "emptyFilteredDesc": "Không có phiếu nào ở trạng thái này.",
+      "emptyCreateBtn": "Gửi yêu cầu hỗ trợ"
+    },
+    "detail": {
+      "title": "Chi tiết phiếu",
+      "supportSubtitle": "Hỗ trợ kỹ thuật",
+      "createdAt": "Tạo lúc: {{time}}",
+      "contextBooking": "Bối cảnh đơn sạc:",
+      "contextStation": "Trạm: {{name}}",
+      "findingsTitle": "Kết luận kỹ thuật & Khắc phục",
+      "refundLabel": "Bồi hoàn cho tài xế:",
+      "refund100Badge": "Đã hoàn cọc 100%",
+      "inputPlaceholder": "Nhập tin nhắn trao đổi...",
+      "closedNotice": "Phiếu này đã được đóng. Bạn không thể gửi thêm phản hồi.",
+      "sendA11y": "Gửi phản hồi",
+      "emptyMsgTitle": "Nội dung trống",
+      "emptyMsgBody": "Vui lòng nhập nội dung tin nhắn.",
+      "sendError": "Không thể gửi tin nhắn"
+    },
+    "card": {
+      "codeLabel": "Mã phiếu:",
+      "bookingLabel": "Liên quan đơn sạc:",
+      "hasFindings": "Đã có kết luận kỹ thuật",
+      "latestMsg": "Mới nhất:",
+      "repliesCount": "{{count}} phản hồi",
+      "refundNote": "Trạm đã xác nhận lỗi — Đã duyệt hoàn tiền 100%"
+    },
+    "category": {
+      "CHARGING_ISSUE": "Sự cố sạc pin",
+      "BOOKING": "Lỗi đặt chỗ",
+      "PAYMENT": "Thanh toán & Phí",
+      "ACCOUNT": "Tài khoản",
+      "OTHER": "Vấn đề khác"
+    },
+    "priority": {
+      "LOW": "Thấp",
+      "MEDIUM": "Bình thường",
+      "HIGH": "Khẩn cấp",
+      "CRITICAL": "Nghiêm trọng"
+    },
+    "status": {
+      "OPEN": "Mới mở",
+      "IN_PROGRESS": "Đang xử lý",
+      "RESOLVED": "Đã giải quyết",
+      "CLOSED": "Đã đóng"
+    },
+    "filter": {
+      "all": "Tất cả",
+      "inProgress": "Đang xử lý",
+      "resolved": "Đã giải quyết"
+    },
+    "role": {
+      "REPORTER": "TÀI XẾ (BẠN)",
+      "STAFF": "KỸ THUẬT VIÊN",
+      "OWNER": "CHỦ TRẠM",
+      "ADMIN": "QUẢN TRỊ VIÊN"
+    },
+    "quickSubjects": {
+      "CHARGING_ISSUE_1": "Súng sạc không cấp điện khi cắm",
+      "CHARGING_ISSUE_2": "Trụ sạc báo lỗi đèn đỏ liên tục",
+      "CHARGING_ISSUE_3": "Sạc bị tự ngắt giữa chừng",
+      "CHARGING_ISSUE_4": "Công suất sạc chậm hơn cam kết",
+      "BOOKING_1": "Không check-in QR được tại trạm",
+      "BOOKING_2": "Chỗ đỗ sạc bị xe khác chiếm giữ",
+      "BOOKING_3": "Đơn đặt chỗ hiển thị sai thời gian",
+      "PAYMENT_1": "Bị trừ tiền hai lần cho một phiên",
+      "PAYMENT_2": "Yêu cầu hoàn cọc đặt chỗ",
+      "PAYMENT_3": "Không xuất được hóa đơn điện tử",
+      "ACCOUNT_1": "Không thay đổi được số điện thoại",
+      "ACCOUNT_2": "Lỗi liên kết phương tiện sạc",
+      "OTHER_1": "Khu vực sạc thiếu ánh sáng ban đêm",
+      "OTHER_2": "Trạm sạc bị rào chắn không vào được"
+    }
   }
 }
 

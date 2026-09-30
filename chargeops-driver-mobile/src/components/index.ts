@@ -22,6 +22,7 @@ export {
 export { StationPin, type PinStatus } from './StationPin';
 export { StationThumb } from './StationThumb';
 export { Checkbox } from './Checkbox';
+export { AppBackButton } from './AppBackButton';
 export { GlassButton } from './GlassButton';
 export { GlassSurface } from './GlassSurface';
 export { LanguageSwitcher } from './LanguageSwitcher';

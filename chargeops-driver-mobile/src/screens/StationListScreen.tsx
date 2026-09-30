@@ -282,6 +282,11 @@ export function StationListScreen() {
         trailing={
           <>
             <HeaderActionBtn
+              icon="help-buoy-outline"
+              onPress={() => navigation.navigate('MyTickets')}
+              accessibilityLabel="Hỗ trợ & Báo sự cố"
+            />
+            <HeaderActionBtn
               icon="settings-outline"
               onPress={() => setSettingsOpen(true)}
               accessibilityLabel={t('settings.title')}

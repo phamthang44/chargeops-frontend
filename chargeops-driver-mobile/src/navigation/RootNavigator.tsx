@@ -20,6 +20,9 @@ import { RegisterScreen } from '@/screens/RegisterScreen';
 import { StationDetailScreen } from '@/screens/StationDetailScreen';
 import { TimeRangePickerScreen } from '@/screens/TimeRangePickerScreen';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
+import { CreateTicketScreen } from '@/screens/CreateTicketScreen';
+import { MyTicketsScreen } from '@/screens/MyTicketsScreen';
+import { TicketDetailScreen } from '@/screens/TicketDetailScreen';
 import { BottomTabs } from './BottomTabs';
 import type { RootStackParamList } from './types';
 
@@ -148,6 +151,31 @@ export function RootNavigator() {
                 headerShown: false,
                 gestureEnabled: false,
                 title: t('chargingSession.title', { defaultValue: 'Phiên sạc' }),
+              }}
+            />
+            {/* Support Ticket screens (FE-13) */}
+            <Stack.Screen
+              name="CreateTicket"
+              component={CreateTicketScreen}
+              options={{
+                headerShown: false,
+                title: 'Báo sự cố & Hỗ trợ',
+              }}
+            />
+            <Stack.Screen
+              name="MyTickets"
+              component={MyTicketsScreen}
+              options={{
+                headerShown: false,
+                title: 'Phiếu hỗ trợ của tôi',
+              }}
+            />
+            <Stack.Screen
+              name="TicketDetail"
+              component={TicketDetailScreen}
+              options={{
+                headerShown: false,
+                title: 'Chi tiết hỗ trợ',
               }}
             />
           </>

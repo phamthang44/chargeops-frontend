@@ -440,6 +440,10 @@
       },
       "requestTitle": "Send a support request",
       "requestBody": "Once completed, requests will go through ChargeOps. The demo environment will capture them internally without sending real email.",
+      "myTicketsTitle": "My Support Tickets",
+      "myTicketsBody": "Track progress, chat with technicians & review refund conclusions",
+      "newTicketTitle": "Submit New Support Request",
+      "newTicketBody": "Report charging issues, booking glitches, payment disputes, or feedback",
       "close": "Got it"
     },
     "logout": "Log out account",
@@ -980,6 +984,7 @@
     "graceHint": "Free cancellation until {{time}}",
     "refundNow": "Refund if cancelled now",
     "reportIssue": "Report station issue",
+    "reportIssueShort": "Report Issue",
     "checkInOpensIn": "Check-in opens at {{time}}",
     "checkInClosed": "Check-in window has closed",
     "timelineTitle": "Booking Progress",
@@ -1135,6 +1140,111 @@
     "finish": "End charging session",
     "finishWarn": "Stops at {{percent}}% — this can't be undone",
     "finishFull": "Complete session"
+  },
+  "ticket": {
+    "create": {
+      "title": "Report Issue & Support",
+      "subtitle": "ONLINE 24/7",
+      "bookingContext": "LINKED TO BOOKING",
+      "stationLabel": "Station:",
+      "bookingCodeLabel": "Booking ID:",
+      "categoryTitle": "Issue Category *",
+      "priorityTitle": "Priority Level",
+      "quickSuggestionsTitle": "Common issue suggestions",
+      "subjectLabel": "Issue Summary *",
+      "subjectPlaceholder": "e.g., Charger connector 02 auto-stopped during session...",
+      "descLabel": "Detailed Description *",
+      "descPlaceholder": "Describe the incident time, connector ID, error code on screen...",
+      "charCount": "{{count}}/500 characters",
+      "submitBtn": "Submit Support Ticket",
+      "submitting": "Submitting ticket...",
+      "errorNoSubjectTitle": "Summary required",
+      "errorNoSubjectBody": "Please enter or select a summary of the issue you encountered.",
+      "errorNoDescTitle": "Description required",
+      "errorNoDescBody": "Please provide details so technical staff can assist promptly.",
+      "errorFailed": "Unable to create support ticket"
+    },
+    "list": {
+      "title": "My Support Tickets",
+      "countRecorded": "{{count}} tickets logged",
+      "emptySubtitleHeader": "Incidents & Dispute Center",
+      "newTicket": "New Ticket",
+      "loading": "Loading tickets...",
+      "emptyTitle": "No Issues Logged",
+      "emptyAllDesc": "You haven't submitted any tickets. All your charging sessions have run smoothly!",
+      "emptyFilteredDesc": "No tickets found with this status.",
+      "emptyCreateBtn": "Submit Support Request"
+    },
+    "detail": {
+      "title": "Ticket Details",
+      "supportSubtitle": "Technical Support",
+      "createdAt": "Created at: {{time}}",
+      "contextBooking": "Booking Context:",
+      "contextStation": "Station: {{name}}",
+      "findingsTitle": "Technical Findings & Resolution",
+      "refundLabel": "Driver Compensation:",
+      "refund100Badge": "100% Deposit Refunded",
+      "inputPlaceholder": "Type your message...",
+      "closedNotice": "This ticket has been closed. You cannot send further replies.",
+      "sendA11y": "Send reply",
+      "emptyMsgTitle": "Empty message",
+      "emptyMsgBody": "Please enter a message to send.",
+      "sendError": "Failed to send message"
+    },
+    "card": {
+      "codeLabel": "Ticket ID:",
+      "bookingLabel": "Linked Booking:",
+      "hasFindings": "Technical findings available",
+      "latestMsg": "Latest:",
+      "repliesCount": "{{count}} replies",
+      "refundNote": "Station confirmed fault — 100% refund approved"
+    },
+    "category": {
+      "CHARGING_ISSUE": "Charging Issue",
+      "BOOKING": "Booking Error",
+      "PAYMENT": "Payment & Fees",
+      "ACCOUNT": "Account",
+      "OTHER": "Other Issues"
+    },
+    "priority": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "Urgent",
+      "CRITICAL": "Critical"
+    },
+    "status": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In Progress",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "filter": {
+      "all": "All",
+      "inProgress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "role": {
+      "REPORTER": "DRIVER (YOU)",
+      "STAFF": "TECHNICIAN",
+      "OWNER": "STATION OWNER",
+      "ADMIN": "ADMINISTRATOR"
+    },
+    "quickSubjects": {
+      "CHARGING_ISSUE_1": "Connector not supplying power when plugged",
+      "CHARGING_ISSUE_2": "Charger showing persistent red fault light",
+      "CHARGING_ISSUE_3": "Session stopped unexpectedly mid-charge",
+      "CHARGING_ISSUE_4": "Charging speed significantly slower than promised",
+      "BOOKING_1": "Cannot scan check-in QR code at station",
+      "BOOKING_2": "Reserved charging bay blocked by another vehicle",
+      "BOOKING_3": "Booking shows incorrect reservation timeframe",
+      "PAYMENT_1": "Charged twice for a single charging session",
+      "PAYMENT_2": "Request deposit refund for cancelled booking",
+      "PAYMENT_3": "Unable to export electronic tax invoice",
+      "ACCOUNT_1": "Cannot update registered phone number",
+      "ACCOUNT_2": "Vehicle linkage error in driver profile",
+      "OTHER_1": "Station area lacks sufficient night illumination",
+      "OTHER_2": "Station entrance blocked by road barrier"
+    }
   }
 }
 

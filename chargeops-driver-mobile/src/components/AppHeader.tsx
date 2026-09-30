@@ -74,6 +74,8 @@ export interface AppHeaderProps {
   role?: string;
   /** Optional icon in the squircle badge (defaults to 'flash') */
   icon?: keyof typeof Ionicons.glyphMap;
+  /** Optional leading component (e.g. back button) placed at the start of the top row */
+  leading?: ReactNode;
   /** Slogan lines displayed in center: [line1, line2] or false to hide. */
   slogan?: [string, string] | false;
   /** Optional trailing action buttons rendered at the right */
@@ -103,6 +105,7 @@ export function AppHeader({
   accent,
   role,
   icon = 'flash',
+  leading,
   slogan,
   trailing,
   children,
@@ -147,6 +150,7 @@ export function AppHeader({
       <View style={[styles.headerTopRow, topRowStyle]}>
         {/* Left: Squircle Icon + Title Block */}
         <View style={styles.headerLeftCol}>
+          {leading ? <View style={styles.leadingContainer}>{leading}</View> : null}
           <View style={styles.brandRow}>
             <View style={styles.brandIconSquircle}>
               <Ionicons name={icon} size={22} color="#FFFFFF" />
@@ -246,6 +250,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexShrink: 1,
     marginRight: 6,
+  },
+  leadingContainer: {
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   brandRow: {
     flexDirection: 'row',

@@ -51,4 +51,13 @@ export type RootStackParamList = {
   QRCheckIn: { bookingId?: string };
   // Live charging session after a successful check-in.
   ChargingSession: { bookingId?: string };
+  // Support & Issue Ticket screens (FE-13)
+  CreateTicket: {
+    bookingId?: string;
+    stationId?: string;
+    stationName?: string;
+    defaultCategory?: 'CHARGING_ISSUE' | 'BOOKING' | 'PAYMENT' | 'ACCOUNT' | 'OTHER';
+  };
+  MyTickets: undefined;
+  TicketDetail: { ticketId: string };
 };

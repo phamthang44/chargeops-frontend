@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, useTabBarInset, useTabBarScroll } from '@/components';
+import { AppHeader, BookingCard, EmptyState, HeaderActionBtn, LiveDot, SettingsModal, useTabBarInset, useTabBarScroll } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -50,6 +50,7 @@ export function BookingsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>('upcoming');
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [now, setNow] = useState(getBookingNowMs());
 
   const TONE_BG: Record<ActionTone, string> = {
@@ -419,6 +420,11 @@ export function BookingsScreen() {
         trailing={
           <>
             <HeaderActionBtn
+              icon="settings-outline"
+              onPress={() => setSettingsOpen(true)}
+              accessibilityLabel={t('settings.title')}
+            />
+            <HeaderActionBtn
               icon="qr-code-outline"
               onPress={() => {
                 const confirmed = upcoming.find((b) => b.status === 'CONFIRMED');
@@ -526,6 +532,7 @@ export function BookingsScreen() {
           ))}
         </ScrollView>
       )}
+      <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </View>
   );
 }

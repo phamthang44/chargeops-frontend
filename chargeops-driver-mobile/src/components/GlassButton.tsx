@@ -15,7 +15,9 @@ interface GlassButtonProps {
   glassEffectStyle?: 'clear' | 'regular';
   /** Solid background used when Liquid Glass is unavailable. Default suits over-image use. */
   fallbackColor?: string;
+  borderColor?: string;
   style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -31,7 +33,9 @@ export function GlassButton({
   accessibilityLabel,
   glassEffectStyle = 'clear',
   fallbackColor = colors.overlay,
+  borderColor,
   style,
+  contentStyle,
 }: GlassButtonProps) {
   const shape = { width: size, height: size, borderRadius: size / 2 };
 
@@ -44,11 +48,11 @@ export function GlassButton({
       style={style}
     >
       {LIQUID_GLASS ? (
-        <GlassView style={[styles.center, shape]} glassEffectStyle={glassEffectStyle} isInteractive>
+        <GlassView style={[styles.center, shape, contentStyle]} glassEffectStyle={glassEffectStyle} isInteractive>
           {children}
         </GlassView>
       ) : (
-        <View style={[styles.center, shape, { backgroundColor: fallbackColor }]}>{children}</View>
+        <View style={[styles.center, shape, { backgroundColor: fallbackColor, borderColor }, contentStyle]}>{children}</View>
       )}
     </Pressable>
   );

@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 
-import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, useTabBarInset, useTabBarScroll } from '@/components';
+import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, SettingsModal, useTabBarInset, useTabBarScroll } from '@/components';
 import { HistoryBookingCard } from '@/components/HistoryBookingCard';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
@@ -86,6 +86,7 @@ export function BookingHistoryScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const updateCountsSafely = (newCounts: Record<HistoryStatusFilter, number>, activeFilter: HistoryStatusFilter, newTotal: number) => {
     setCounts((prev) => ({
@@ -387,11 +388,18 @@ export function BookingHistoryScreen() {
         icon="time-outline"
         slogan={[t('history.slogan1', 'Minh bạch chi phí'), t('history.slogan2', 'Tiết kiệm tối đa')]}
         trailing={
-          <HeaderActionBtn
-            icon="refresh-outline"
-            onPress={() => setReloadKey((current) => current + 1)}
-            accessibilityLabel={t('common.retry', 'Làm mới')}
-          />
+          <>
+            <HeaderActionBtn
+              icon="settings-outline"
+              onPress={() => setSettingsOpen(true)}
+              accessibilityLabel={t('settings.title')}
+            />
+            <HeaderActionBtn
+              icon="refresh-outline"
+              onPress={() => setReloadKey((current) => current + 1)}
+              accessibilityLabel={t('common.retry', 'Làm mới')}
+            />
+          </>
         }
       />
 
@@ -491,6 +499,7 @@ export function BookingHistoryScreen() {
           )
         }
       />
+      <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </View>
   );
 }

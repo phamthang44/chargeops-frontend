@@ -1,9 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import type { RootStackParamList } from '@/navigation/types';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import { AppButton } from './AppButton';
@@ -28,6 +31,7 @@ const HELP_TOPICS: {
 
 /** In-app self-service help that does not pretend a production mail channel exists. */
 export function SupportCenterModal({ visible, onClose }: SupportCenterModalProps) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { themeColors, isDark } = usePreferences();
@@ -126,22 +130,61 @@ export function SupportCenterModal({ visible, onClose }: SupportCenterModalProps
               ))}
             </View>
 
-            <View
-              style={[
-                styles.requestCard,
-                { backgroundColor: isDark ? '#2A2108' : '#FFFBEB', borderColor: '#F59E0B' },
-              ]}
-            >
-              <View style={styles.requestHeader}>
-                <Ionicons name="chatbubble-ellipses-outline" size={20} color="#F59E0B" />
-                <Text style={[styles.requestTitle, { color: themeColors.textStrong }]}>
-                  {t('profile.support.requestTitle')}
-                </Text>
-                <StatusBadge variant="warning" dot label={t('settings.comingSoon')} />
-              </View>
-              <Text style={[styles.requestBody, { color: themeColors.textMuted }]}>
-                {t('profile.support.requestBody')}
-              </Text>
+            {/* Interactive Support Ticket Center (FE-13) */}
+            <View style={styles.ticketActionsSection}>
+              <Pressable
+                style={[
+                  styles.ticketActionBtn,
+                  {
+                    backgroundColor: themeColors.primarySoft,
+                    borderColor: themeColors.primary,
+                  },
+                ]}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('MyTickets');
+                }}
+              >
+                <View style={[styles.ticketActionIcon, { backgroundColor: themeColors.primary }]}>
+                  <Ionicons name="chatbubbles" size={20} color="#FFFFFF" />
+                </View>
+                <View style={styles.ticketActionCopy}>
+                  <Text style={[styles.ticketActionTitle, { color: themeColors.primaryDark }]}>
+                    {t('profile.support.myTicketsTitle')}
+                  </Text>
+                  <Text style={[styles.ticketActionSub, { color: themeColors.textBody }]}>
+                    {t('profile.support.myTicketsBody')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={themeColors.primary} />
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.ticketActionBtn,
+                  {
+                    backgroundColor: themeColors.surfaceAlt,
+                    borderColor: themeColors.border,
+                  },
+                ]}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('CreateTicket', {});
+                }}
+              >
+                <View style={[styles.ticketActionIcon, { backgroundColor: isDark ? '#1E293B' : '#EFF6FF' }]}>
+                  <Ionicons name="add-circle-outline" size={22} color="#3B82F6" />
+                </View>
+                <View style={styles.ticketActionCopy}>
+                  <Text style={[styles.ticketActionTitle, { color: themeColors.textStrong }]}>
+                    {t('profile.support.newTicketTitle')}
+                  </Text>
+                  <Text style={[styles.ticketActionSub, { color: themeColors.textMuted }]}>
+                    {t('profile.support.newTicketBody')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+              </Pressable>
             </View>
           </ScrollView>
 
@@ -222,4 +265,23 @@ const styles = StyleSheet.create({
   requestHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   requestTitle: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
   requestBody: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption },
+  ticketActionsSection: { gap: spacing.sm },
+  ticketActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
+  ticketActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ticketActionCopy: { flex: 1, gap: 2 },
+  ticketActionTitle: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  ticketActionSub: { fontSize: fontSizes.caption - 1, lineHeight: 16 },
 });

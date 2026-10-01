@@ -1126,7 +1126,15 @@ export interface AssistantAnswer {
 
 /* ---------- support tickets (FR-cross-cutting) ---------- */
 
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type TicketStatus =
+  | 'OPEN'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'open'
+  | 'in_progress'
+  | 'resolved'
+  | 'closed';
 
 /**
  * FR16 categories. Also the routing key (BR-TKT-01): CHARGING_ISSUE and
@@ -1134,6 +1142,11 @@ export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
  * ACCOUNT and OTHER go to Admin.
  */
 export type TicketCategory =
+  | 'CHARGING_ISSUE'
+  | 'BOOKING'
+  | 'PAYMENT'
+  | 'ACCOUNT'
+  | 'OTHER'
   | 'charging_issue'
   | 'booking'
   | 'payment'
@@ -1141,45 +1154,155 @@ export type TicketCategory =
   | 'other';
 
 /** Categories an Owner/Staff console may see, provided the ticket is station-linked. */
-export const STATION_SCOPED_CATEGORIES: readonly TicketCategory[] = ['charging_issue', 'booking'];
+export const STATION_SCOPED_CATEGORIES: readonly TicketCategory[] = [
+  'CHARGING_ISSUE',
+  'BOOKING',
+  'charging_issue',
+  'booking',
+];
+
+export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export type TicketAuthorRole = 'driver' | 'station_staff' | 'station_owner' | 'platform_admin';
+export type TicketActorKind = 'REPORTER' | 'STAFF' | 'OWNER' | 'ADMIN';
+
+export type TicketCloseReason = 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE';
+
+export type TicketEventType =
+  | 'CLAIMED'
+  | 'ASSIGNED'
+  | 'REASSIGNED'
+  | 'RESOLVED'
+  | 'AUTO_CLOSED_NO_RESPONSE'
+  | 'REPORTER_CONFIRMED'
+  | 'REOPENED_PERSISTENT';
+
+export type TicketFindingConclusion =
+  | 'STATION_FAULT'
+  | 'USER_ERROR'
+  | 'VEHICLE_FAULT'
+  | 'POWER_OUTAGE'
+  | 'FORCE_MAJEURE'
+  | 'NO_ISSUE';
+
+export interface TicketFinding {
+  id?: string;
+  findingId: string;
+  conclusion: TicketFindingConclusion | string;
+  affectedAt: string;
+  reason: string;
+  recordedAt: string;
+  recordedBy?: string | null;
+}
 
 /** Append-only — no edit/delete once posted. */
 export interface TicketMessage {
-  id: string;
-  ticketId: string;
-  authorName: string;
-  authorRole: TicketAuthorRole;
+  id?: string;
+  messageId?: string;
+  ticketId?: string;
+  authorId?: string;
+  authorName?: string;
+  authorDisplayName?: string;
+  authorRole?: TicketAuthorRole;
+  authorKind?: TicketActorKind;
   body: string;
   createdAt: string; // ISO
+}
+
+/** BKG-052 append-only immutable audit event trail. */
+export interface TicketEvent {
+  id: string;
+  ticketId: string;
+  actorId?: string | null;
+  actorName?: string | null;
+  actorKind: TicketActorKind | 'SYSTEM';
+  eventType: TicketEventType;
+  fromStatus: TicketStatus;
+  toStatus: TicketStatus;
+  fromHandlerId?: string | null;
+  fromHandlerName?: string | null;
+  toHandlerId?: string | null;
+  toHandlerName?: string | null;
+  resolutionCycle: number;
+  reason?: string | null;
+  createdAt: string;
+}
+
+/** BKG-052 Station Staff operational KPI metrics aggregate. */
+export interface StationTicketKpis {
+  stationId: string;
+  periodFrom: string;
+  periodTo: string;
+  selfClaimedTickets: number;
+  assignedTickets: number;
+  resolvedTickets: number;
+  completedTickets: number;
+  reporterConfirmedCompletedTickets: number;
+  autoClosedCompletedTickets: number;
+}
+
+export interface AssignTicketRequest {
+  expectedVersion?: number;
+  handlerId: string;
+  reason?: string;
+}
+
+export interface ResolveTicketRequest {
+  expectedVersion?: number;
+  reason: string;
 }
 
 /** Linked context (station/booking) is shown in the detail header when present. */
 export interface Ticket {
   id: string;
+  ticketId?: string;
   /** Human-readable reference quoted to the reporter, alongside the system id (FR16). */
-  ticketNo: string;
+  ticketNo?: string;
+  ticketCode?: string;
   subject: string;
+  title?: string;
+  description?: string;
   category: TicketCategory;
+  priority?: TicketPriority;
   status: TicketStatus;
+  version?: number;
   stationId: string | null;
   stationName: string | null;
   bookingId: string | null;
+  reporterId?: string;
+  reporterUserId?: string;
   reporterName: string;
+  driverName?: string;
+  driverId?: string;
   reporterPhone: string | null;
   /** null = unassigned. */
-  assigneeName: string | null;
+  assigneeName?: string | null;
+  assignedToName?: string | null;
+  assignedToUserId?: string | null;
+  assignedHandlerId?: string | null;
+  assignedHandlerName?: string | null;
+  resolvedAt?: string | null;
+  autoCloseAt?: string | null;
+  closeReason?: TicketCloseReason | null;
+  resolutionCycle?: number;
+  resolutionReason?: string | null;
   createdAt: string;
   updatedAt: string;
-  lastMessagePreview: string;
-  messageCount: number;
+  closedAt?: string;
+  lastMessagePreview?: string;
+  messageCount?: number;
+  messages?: TicketMessage[];
+  findings?: TicketFinding[];
+  refundIds?: string[];
 }
 
 export interface TicketListParams {
   /** Owner/staff console is implicitly scoped server-side by token; admin sees all. */
   status?: TicketStatus | 'all';
   category?: TicketCategory | 'all';
+  stationId?: string | 'all';
+  queueScope?: 'station' | 'my' | 'platform' | 'all';
+  assignedHandlerId?: string | 'unassigned' | 'me' | 'all';
   search?: string;
   page?: number;
   pageSize?: number;
@@ -1187,7 +1310,12 @@ export interface TicketListParams {
 
 export interface TicketSummary {
   total: number;
-  byStatus: Record<TicketStatus, number>;
+  byStatus: Record<string, number>;
+  open?: number;
+  inProgress?: number;
+  resolved?: number;
+  closed?: number;
+  avgResponseMinutes?: number;
 }
 
 /* ---------- dashboards ---------- */

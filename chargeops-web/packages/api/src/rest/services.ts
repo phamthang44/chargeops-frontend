@@ -29,6 +29,16 @@ import type {
   RefundDetail,
   RefundAttemptItem,
   RefundStatus,
+  Ticket,
+  TicketMessage,
+  TicketFinding,
+  TicketListParams,
+  TicketSummary,
+  TicketEvent,
+  StationTicketKpis,
+  AssignTicketRequest,
+  ResolveTicketRequest,
+  Page,
 } from '../types';
 
 function generateUuidV4(): string {
@@ -40,6 +50,109 @@ function generateUuidV4(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+function normalizeTicketMessage(m: any, defaultTicketId = ''): TicketMessage {
+  const id = m?.messageId || m?.id || generateUuidV4();
+  const rawAuthorKind = m?.authorKind || 'REPORTER';
+  const authorRole = m?.authorRole || (
+    rawAuthorKind === 'REPORTER' ? 'driver' :
+    rawAuthorKind === 'OWNER' ? 'owner' :
+    rawAuthorKind === 'ADMIN' ? 'admin' : 'staff'
+  );
+  return {
+    id,
+    ticketId: m?.ticketId || defaultTicketId,
+    authorId: m?.authorId || m?.authorDisplayName || 'user',
+    authorName: m?.authorDisplayName || m?.authorName || 'Người gửi',
+    authorRole,
+    authorKind: m?.authorKind,
+    authorDisplayName: m?.authorDisplayName,
+    body: m?.body || '',
+    createdAt: m?.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeTicketFinding(f: any): TicketFinding {
+  return {
+    id: f?.findingId || f?.id || generateUuidV4(),
+    findingId: f?.findingId || f?.id,
+    conclusion: f?.conclusion || 'OTHER',
+    affectedAt: f?.affectedAt,
+    reason: f?.reason || '',
+    recordedAt: f?.recordedAt || new Date().toISOString(),
+    recordedBy: f?.recordedBy,
+  };
+}
+
+function normalizeTicketEvent(e: any): TicketEvent {
+  return {
+    id: e?.id || e?.eventId || generateUuidV4(),
+    ticketId: e?.ticketId || '',
+    actorId: e?.actorId || null,
+    actorName: e?.actorName || null,
+    actorKind: e?.actorKind || 'SYSTEM',
+    eventType: e?.eventType || 'CLAIMED',
+    fromStatus: e?.fromStatus || 'OPEN',
+    toStatus: e?.toStatus || 'IN_PROGRESS',
+    fromHandlerId: e?.fromHandlerId || null,
+    fromHandlerName: e?.fromHandlerName || null,
+    toHandlerId: e?.toHandlerId || null,
+    toHandlerName: e?.toHandlerName || null,
+    resolutionCycle: Number(e?.resolutionCycle ?? 0),
+    reason: e?.reason || null,
+    createdAt: e?.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeTicket(t: any): Ticket {
+  const id = t?.ticketId || t?.id || '';
+  const title = t?.subject || t?.title || 'Phiếu hỗ trợ';
+  const messages = Array.isArray(t?.messages)
+    ? t.messages.map((m: any) => normalizeTicketMessage(m, id))
+    : undefined;
+  const findings = Array.isArray(t?.findings)
+    ? t.findings.map(normalizeTicketFinding)
+    : undefined;
+  const refundIds = Array.isArray(t?.refundIds)
+    ? t.refundIds.map((r: any) => String(r))
+    : undefined;
+
+  return {
+    ...t,
+    id,
+    ticketCode: t?.ticketCode || (id ? `TKT-${id.slice(0, 8).toUpperCase()}` : undefined),
+    stationId: t?.stationId,
+    stationName: t?.stationName,
+    driverId: t?.reporterId || t?.driverId,
+    driverName: t?.reporterName || t?.driverName,
+    reporterUserId: t?.reporterId || t?.reporterUserId,
+    reporterName: t?.reporterName,
+    reporterId: t?.reporterId,
+    assignedToUserId: t?.assignedHandlerId || t?.assignedToUserId,
+    assignedToName: t?.assignedHandlerName || t?.assignedToName,
+    assignedHandlerId: t?.assignedHandlerId || t?.assignedToUserId,
+    assignedHandlerName: t?.assignedHandlerName || t?.assignedToName,
+    version: typeof t?.version === 'number' ? t.version : 0,
+    resolvedAt: t?.resolvedAt || null,
+    autoCloseAt: t?.autoCloseAt || null,
+    closeReason: t?.closeReason || null,
+    resolutionCycle: typeof t?.resolutionCycle === 'number' ? t.resolutionCycle : 0,
+    resolutionReason: t?.resolutionReason || null,
+    bookingId: t?.bookingId,
+    title,
+    subject: t?.subject || title,
+    description: t?.description || '',
+    category: t?.category || 'CHARGING_ISSUE',
+    priority: t?.priority || 'MEDIUM',
+    status: t?.status || 'OPEN',
+    createdAt: t?.createdAt || new Date().toISOString(),
+    updatedAt: t?.updatedAt || t?.createdAt,
+    closedAt: t?.closedAt,
+    messages,
+    findings,
+    refundIds,
+  };
 }
 
 function normalizeRefundAttempt(a: any): RefundAttemptItem {
@@ -766,12 +879,141 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     tickets: {
-      list: (params = {}) => http.get('/tickets', params),
-      get: (id) => http.get(`/tickets/${id}`),
-      messages: (id) => http.get(`/tickets/${id}/messages`),
-      summary: () => http.get('/tickets/summary'),
-      reply: (id, body) => http.post(`/tickets/${id}/messages`, { body }),
-      setStatus: (id, status) => http.patch(`/tickets/${id}/status`, { status }),
+      list: async (params: TicketListParams = {}) => {
+        const query: Record<string, any> = {};
+        if (params.status && params.status !== 'all') {
+          query.status = String(params.status).toUpperCase();
+        }
+        if (params.stationId && params.stationId !== 'all') {
+          query.stationId = params.stationId;
+        }
+        // Spring Boot is 1-indexed
+        query.page = (params.page ?? 0) + 1;
+        query.size = params.pageSize ?? 20;
+
+        const res: any = await http.get('/tickets', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+
+        return {
+          items: rawItems.map(normalizeTicket),
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
+      get: async (id: string) => {
+        const res: any = await http.get(`/tickets/${id}`);
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      messages: async (id: string) => {
+        try {
+          const res: any = await http.get(`/tickets/${id}/messages`);
+          const items = Array.isArray(res) ? res : res?.data ?? [];
+          return items.map((m: any) => normalizeTicketMessage(m, id));
+        } catch {
+          // Fallback: fetch ticket which includes messages list
+          const res: any = await http.get(`/tickets/${id}`);
+          const data = res?.data ?? res;
+          const ticket = normalizeTicket(data);
+          return ticket.messages ?? [];
+        }
+      },
+      summary: async () => {
+        try {
+          return await http.get<TicketSummary>('/tickets/summary');
+        } catch {
+          // Fallback summary from ticket list
+          const res: any = await http.get('/tickets', { page: 1, size: 100 }).catch(() => ({ items: [] }));
+          const items: any[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+          const open = items.filter((t) => String(t.status).toLowerCase() === 'open').length;
+          const inProgress = items.filter((t) => String(t.status).toLowerCase() === 'in_progress').length;
+          const resolved = items.filter((t) => String(t.status).toLowerCase() === 'resolved').length;
+          const closed = items.filter((t) => String(t.status).toLowerCase() === 'closed').length;
+          return {
+            total: items.length,
+            byStatus: { open, in_progress: inProgress, resolved, closed },
+            open,
+            inProgress,
+            resolved,
+            avgResponseMinutes: 15,
+          };
+        }
+      },
+      reply: async (id: string, body: string) => {
+        const clientMessageId = generateUuidV4();
+        const res: any = await http.post(
+          `/tickets/${id}/messages`,
+          { body },
+          { headers: { 'Client-Message-Id': clientMessageId } },
+        );
+        const data = res?.data ?? res;
+        return normalizeTicketMessage(data, id);
+      },
+      claim: async (id: string, expectedVersion?: number) => {
+        const res: any = await http.post(`/tickets/${id}/claim`, { expectedVersion });
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      assign: async (id: string, request: AssignTicketRequest) => {
+        const res: any = await http.post(`/tickets/${id}/assignment`, request);
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      resolve: async (id: string, request: ResolveTicketRequest) => {
+        const res: any = await http.patch(`/tickets/${id}/status`, {
+          status: 'RESOLVED',
+          expectedVersion: request.expectedVersion,
+          reason: request.reason,
+        });
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      confirm: async (id: string, expectedVersion?: number) => {
+        const res: any = await http.patch(`/tickets/${id}/status`, {
+          status: 'CLOSED',
+          expectedVersion,
+          reason: 'REPORTER_CONFIRMED',
+        });
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      reopen: async (id: string, request: { expectedVersion?: number; reason: string }) => {
+        const res: any = await http.patch(`/tickets/${id}/status`, {
+          status: 'IN_PROGRESS',
+          expectedVersion: request.expectedVersion,
+          reason: request.reason,
+        });
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
+      events: async (id: string) => {
+        try {
+          const res: any = await http.get(`/tickets/${id}/events`);
+          const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+          return items.map(normalizeTicketEvent);
+        } catch {
+          return [];
+        }
+      },
+      kpis: async (stationId: string, params = {}) => {
+        const res: any = await http.get(`/stations/${stationId}/ticket-kpis`, params);
+        return res?.data ?? res;
+      },
+      setStatus: async (id, status, options) => {
+        const res: any = await http.patch(`/tickets/${id}/status`, {
+          status,
+          expectedVersion: options?.expectedVersion,
+          reason: options?.reason,
+        });
+        const data = res?.data ?? res;
+        return normalizeTicket(data);
+      },
       reassign: (id, stationName) => http.post(`/admin/tickets/${id}/reassign`, { stationName }),
       escalate: (id) => http.post(`/admin/tickets/${id}/escalate`),
     },
@@ -786,18 +1028,69 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     notifications: {
-      list: (params) =>
-        http.get<import('../notificationTypes').AppNotification[]>('/notifications', {
+      list: async (params) => {
+        const res = await http.get<any>('/notifications', {
           unread: params?.unreadOnly ? 'true' : undefined,
           category: params?.category && params.category !== 'all' ? params.category : undefined,
-        }),
+        });
+        const rawItems: any[] = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.items)
+            ? res.items
+            : Array.isArray(res?.data)
+              ? res.data
+              : [];
+
+        return rawItems.map((raw: any) => {
+          const createdAt = raw.createdAt ? String(raw.createdAt) : new Date().toISOString();
+          const actionUrl = raw.actionUrl || raw.primaryAction?.actionUrl;
+          const actionLabel = raw.actionLabel || raw.primaryAction?.label || (actionUrl ? 'Xem chi tiết' : undefined);
+
+          return {
+            id: String(raw.id),
+            title: raw.title ?? '',
+            subtitle: raw.subtitle ?? raw.body ?? '',
+            body: raw.body ?? '',
+            createdAt,
+            time: raw.time,
+            read: Boolean(raw.read || raw.readAt),
+            category: (raw.category as any) ?? 'system',
+            severity: raw.severity ?? (raw.category === 'alert' ? 'bad' : raw.category === 'ticket' ? 'warn' : 'neutral'),
+            tone: raw.tone ?? raw.severity ?? (raw.category === 'alert' ? 'bad' : raw.category === 'ticket' ? 'warn' : 'neutral'),
+            referenceId: raw.referenceId,
+            stationName: raw.stationName,
+            chargerId: raw.chargerId,
+            metrics: raw.metrics,
+            badge: raw.badge,
+            actionLabel,
+            primaryAction: actionUrl
+              ? {
+                  label: actionLabel || 'Xem chi tiết',
+                  actionUrl,
+                  actionType: 'link' as const,
+                }
+              : raw.primaryAction,
+            secondaryAction: raw.secondaryAction,
+          };
+        });
+      },
       unreadCount: async () => {
         const res = await http.get<{ count: number }>('/notifications/unread-count');
         return res?.count ?? 0;
       },
       markAsRead: (id) => http.patch(`/notifications/${id}/read`),
       markAllAsRead: () => http.patch('/notifications/read-all'),
-      delete: (id) => http.delete(`/notifications/${id}`),
+      delete: async (id) => {
+        try {
+          await http.delete(`/notifications/${id}`);
+        } catch {
+          try {
+            await http.patch(`/notifications/${id}/read`);
+          } catch {
+            // Ignore if already deleted/read
+          }
+        }
+      },
     },
   };
 }

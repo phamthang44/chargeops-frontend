@@ -33,6 +33,10 @@ import type {
   StationStatusHistory,
   TicketMessage,
   TicketStatus,
+  TicketEvent,
+  StationTicketKpis,
+  AssignTicketRequest,
+  ResolveTicketRequest,
   TransactionSummary,
   UserProfile,
   UserProfileUpdateRequest,
@@ -2085,11 +2089,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     tickets: {
       async list(params = {}) {
         await delay();
-        const { status = 'all', category = 'all', search = '', page = 0, pageSize = 10 } = params;
+        const { status = 'all', category = 'all', search = '', stationId = 'all', page = 0, pageSize = 10 } = params;
         const q = search.trim().toLowerCase();
         let rows = scopedTickets();
         if (status !== 'all') rows = rows.filter((tk) => tk.status === status);
         if (category !== 'all') rows = rows.filter((tk) => tk.category === category);
+        if (stationId !== 'all') rows = rows.filter((tk) => tk.stationId === stationId);
         if (q) {
           rows = rows.filter(
             (tk) =>
@@ -2133,16 +2138,109 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         };
         (db.ticketMessages[id] ??= []).push(reply);
         tk.lastMessagePreview = body.slice(0, 120);
-        tk.messageCount += 1;
+        tk.messageCount = (tk.messageCount ?? 0) + 1;
         tk.updatedAt = now;
         if (tk.status === 'open') tk.status = 'in_progress';
         return reply;
       },
-      async setStatus(id, status) {
+      async claim(id, expectedVersion) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = 'IN_PROGRESS';
+        tk.assignedHandlerId = scope.ownerView ? 'user-staff-01' : 'user-admin-01';
+        tk.assignedHandlerName = scope.ownerView ? 'Nhân viên trạm (Bạn)' : 'Quản trị viên (Bạn)';
+        tk.version = (tk.version ?? 0) + 1;
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
+      },
+      async assign(id, request) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = 'IN_PROGRESS';
+        tk.assignedHandlerId = request.handlerId;
+        const staff = (db.stationStaff || []).find((s) => s.userId === request.handlerId || s.assignmentId === request.handlerId);
+        tk.assignedHandlerName = staff?.displayName || staff?.name || 'Nhân viên chỉ định';
+        tk.version = (tk.version ?? 0) + 1;
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
+      },
+      async resolve(id, request) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        const now = new Date();
+        const autoCloseDate = new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000);
+        tk.status = 'RESOLVED';
+        tk.resolvedAt = now.toISOString();
+        tk.autoCloseAt = autoCloseDate.toISOString();
+        tk.resolutionCycle = (tk.resolutionCycle ?? 0) + 1;
+        tk.resolutionReason = request.reason;
+        tk.version = (tk.version ?? 0) + 1;
+        tk.updatedAt = now.toISOString();
+        return { ...tk };
+      },
+      async confirm(id, expectedVersion) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = 'CLOSED';
+        tk.closeReason = 'REPORTER_CONFIRMED';
+        tk.closedAt = new Date().toISOString();
+        tk.version = (tk.version ?? 0) + 1;
+        tk.updatedAt = tk.closedAt;
+        return { ...tk };
+      },
+      async reopen(id, request) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        tk.status = 'IN_PROGRESS';
+        tk.autoCloseAt = null;
+        tk.version = (tk.version ?? 0) + 1;
+        tk.updatedAt = new Date().toISOString();
+        return { ...tk };
+      },
+      async events(id) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        return [
+          {
+            id: 'EVT-01',
+            ticketId: id,
+            actorId: tk?.driverId || 'USR-01',
+            actorName: tk?.driverName || 'Tài xế',
+            actorKind: 'REPORTER',
+            eventType: 'CLAIMED',
+            fromStatus: 'OPEN',
+            toStatus: 'IN_PROGRESS',
+            resolutionCycle: 0,
+            createdAt: tk?.createdAt || new Date().toISOString(),
+          },
+        ];
+      },
+      async kpis(stationId, params = {}) {
+        await delay();
+        return {
+          stationId,
+          periodFrom: params.from || new Date().toISOString(),
+          periodTo: params.to || new Date().toISOString(),
+          selfClaimedTickets: 12,
+          assignedTickets: 5,
+          resolvedTickets: 15,
+          completedTickets: 14,
+          reporterConfirmedCompletedTickets: 11,
+          autoClosedCompletedTickets: 3,
+        };
+      },
+      async setStatus(id, status, options) {
         await delay();
         const tk = db.tickets.find((x) => x.id === id);
         if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
         tk.status = status;
+        if (options?.reason) tk.resolutionReason = options.reason;
+        tk.version = (tk.version ?? 0) + 1;
         tk.updatedAt = new Date().toISOString();
         return { ...tk };
       },
@@ -2160,7 +2258,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const tk = db.tickets.find((x) => x.id === id);
         if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
-        tk.status = 'in_progress';
+        tk.status = 'IN_PROGRESS';
         tk.assigneeName = 'Đội vận hành trung tâm';
         tk.updatedAt = new Date().toISOString();
         return { ...tk };

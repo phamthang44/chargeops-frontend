@@ -24,7 +24,7 @@ export function __clearMockTickets() {
   mockTickets = [];
 }
 
-/** Tạo UUIDv4 chuẩn phía client để làm Idempotency-Key */
+/** Tạo UUIDv4 cho Client-Message-Id tùy chọn của tin nhắn ticket */
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -32,6 +32,77 @@ function generateUUID(): string {
     return v.toString(16);
   });
 }
+
+export class TicketServiceError extends Error {
+  code?: string;
+  messageKey?: string;
+  status?: number;
+
+  constructor(message: string, code?: string, messageKey?: string, status?: number) {
+    super(message);
+    this.name = 'TicketServiceError';
+    this.code = code;
+    this.messageKey = messageKey;
+    this.status = status;
+  }
+}
+
+export function getLocalizedTicketErrorMessage(err: any, t: any): string {
+  const code = (err?.code || '').toUpperCase();
+  const key = err?.messageKey || '';
+  const msg = String(err?.message || err || '').trim();
+
+  if (
+    code === 'TKT_ACCESS_DENIED' ||
+    key === 'error.ticket.accessDenied' ||
+    msg.includes('You do not have access to this support ticket') ||
+    msg.includes('accessDenied')
+  ) {
+    return t('ticket.errors.accessDenied', 'Bạn không có quyền truy cập hoặc thực hiện thao tác trên phiếu hỗ trợ này.');
+  }
+
+  if (
+    code === 'TKT_NOT_FOUND' ||
+    key === 'error.ticket.notFound' ||
+    msg.includes('Support ticket was not found')
+  ) {
+    return t('ticket.errors.notFound', 'Không tìm thấy phiếu hỗ trợ được yêu cầu.');
+  }
+
+  if (
+    code === 'TKT_CLOSED' ||
+    key === 'error.ticket.closed' ||
+    msg.includes('A closed support ticket cannot receive new messages')
+  ) {
+    return t('ticket.errors.closed', 'Phiếu hỗ trợ đã đóng hoàn tất, không thể gửi thêm tin nhắn.');
+  }
+
+  if (
+    code === 'TKT_VERSION_CONFLICT' ||
+    key === 'error.ticket.versionConflict' ||
+    msg.includes('Support ticket data changed')
+  ) {
+    return t('ticket.errors.versionConflict', 'Dữ liệu phiếu đã thay đổi. Vui lòng vuốt xuống để làm mới.');
+  }
+
+  if (code === 'TKT_STATE_CONFLICT' || key === 'error.ticket.stateConflict') {
+    return t('ticket.errors.stateConflict', 'Trạng thái phiếu hiện tại không thể thực hiện thao tác này.');
+  }
+
+  if (code === 'TKT_INVALID_SCOPE' || key === 'error.ticket.invalidScope') {
+    return t('ticket.errors.invalidScope', 'Đơn đặt chỗ hoặc trạm sạc không khớp với phiếu hỗ trợ này. Vui lòng kiểm tra lại phiên sạc đã chọn.');
+  }
+
+  return msg || t('ticket.errors.generic', 'Đã xảy ra lỗi khi xử lý phiếu hỗ trợ.');
+}
+
+function buildTicketError(res: Response, errJson: any, fallbackMessage: string): TicketServiceError {
+  const code = errJson?.error?.code || errJson?.code;
+  const messageKey = errJson?.error?.messageKey || errJson?.messageKey;
+  const message = errJson?.error?.message || errJson?.message || fallbackMessage;
+  return new TicketServiceError(message, code, messageKey, res.status);
+}
+
 
 /**
  * Tạo phiếu hỗ trợ / báo sự cố mới (POST /api/v1/tickets)
@@ -59,7 +130,7 @@ export async function createTicket(
       return json?.data ?? json;
     }
     const errJson = await res.json().catch(() => null);
-    throw new Error(errJson?.error?.message || errJson?.message || `Lỗi tạo phiếu: ${res.status}`);
+    throw buildTicketError(res, errJson, `Lỗi tạo phiếu: ${res.status}`);
   }
 
   // Mock implementation (chỉ chạy khi EXPO_PUBLIC_USE_MOCKS='true')
@@ -132,7 +203,7 @@ export async function getTickets(
       };
     }
     const errJson = await res.json().catch(() => null);
-    throw new Error(errJson?.error?.message || errJson?.message || `Lỗi tải danh sách phiếu: ${res.status}`);
+    throw buildTicketError(res, errJson, `Lỗi tải danh sách phiếu: ${res.status}`);
   }
 
   // Mock implementation (chỉ chạy khi EXPO_PUBLIC_USE_MOCKS='true')
@@ -173,7 +244,7 @@ export async function getTicketDetail(
       return json?.data ?? json;
     }
     const errJson = await res.json().catch(() => null);
-    throw new Error(errJson?.error?.message || errJson?.message || 'Không tìm thấy phiếu');
+    throw buildTicketError(res, errJson, 'Không tìm thấy phiếu');
   }
 
   // Mock implementation (chỉ chạy khi EXPO_PUBLIC_USE_MOCKS='true')
@@ -186,7 +257,7 @@ export async function getTicketDetail(
 
 /**
  * Phản hồi thêm tin nhắn vào phiếu (POST /api/v1/tickets/:ticketId/messages)
- * Kèm Idempotency-Key và Silent Safe Replay
+ * Có thể kèm Client-Message-Id để tránh lưu hai bản ghi khi cùng request được gửi lại
  */
 export async function replyTicket(
   ticketId: string,
@@ -201,7 +272,6 @@ export async function replyTicket(
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Idempotency-Key': effectiveKey,
       'Client-Message-Id': effectiveKey,
     };
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -217,7 +287,7 @@ export async function replyTicket(
       return json?.data ?? json;
     }
     const errJson = await res.json().catch(() => null);
-    throw new Error(errJson?.error?.message || errJson?.message || 'Không thể gửi phản hồi');
+    throw buildTicketError(res, errJson, 'Không thể gửi phản hồi');
   }
 
   // Mock implementation (chỉ chạy khi EXPO_PUBLIC_USE_MOCKS='true')

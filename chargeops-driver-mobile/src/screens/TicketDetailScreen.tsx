@@ -23,7 +23,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { TicketMessageBubble } from '@/components/ticket/TicketMessageBubble';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { getTicketDetail, replyTicket } from '@/services/ticketService';
+import { getLocalizedTicketErrorMessage, getTicketDetail, replyTicket } from '@/services/ticketService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Ticket, TicketStatus } from '@/types';
 
@@ -40,6 +40,15 @@ const STATUS_CONFIG: Record<
   CLOSED: { label: 'Đã đóng', variant: 'neutral' },
 };
 
+const CONCLUSION_CONFIG: Record<string, string> = {
+  HARDWARE_FAULT: 'Sự cố thiết bị trạm sạc',
+  SOFTWARE_FAULT: 'Sự cố phần mềm kết nối',
+  USER_ERROR: 'Thao tác chưa phù hợp',
+  GRID_FAILURE: 'Mất nguồn điện lưới',
+  NO_FAULT_FOUND: 'Trạm hoạt động bình thường',
+  OTHER: 'Nguyên nhân khác',
+};
+
 export function TicketDetailScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
@@ -53,23 +62,53 @@ export function TicketDetailScreen() {
   const [sending, setSending] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
+  const prevMessagesCountRef = useRef<number>(0);
 
-  const fetchDetail = useCallback(async () => {
+  const fetchDetail = useCallback(async (silent = false) => {
     try {
+      if (!silent) setLoading(true);
       const data = await getTicketDetail(ticketId);
-      setTicket(data);
+      setTicket(prev => {
+        if (!prev) {
+          prevMessagesCountRef.current = data.messages?.length || 0;
+          return data;
+        }
+        const prevCount = prev.messages?.length || 0;
+        const newCount = data.messages?.length || 0;
+        if (newCount > prevCount) {
+          setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+          }, 150);
+        }
+        prevMessagesCountRef.current = newCount;
+        return data;
+      });
     } catch (err: any) {
-      Alert.alert(t('common.error', 'Lỗi'), err.message || t('ticket.detail.title', 'Không thể tải thông tin phiếu hỗ trợ'), [
-        { text: t('common.back', 'Quay lại'), onPress: () => navigation.goBack() },
-      ]);
+      if (!silent) {
+        const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+        Alert.alert(t('common.error', 'Lỗi'), localizedMsg, [
+          { text: t('common.back', 'Quay lại'), onPress: () => navigation.goBack() },
+        ]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [ticketId, navigation, t]);
 
   useEffect(() => {
-    fetchDetail();
+    fetchDetail(false);
   }, [fetchDetail]);
+
+  // Live polling for real-time messages when ticket is open or in progress
+  useEffect(() => {
+    if (!ticket || ticket.status === 'CLOSED') return;
+
+    const timer = setInterval(() => {
+      fetchDetail(true);
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, [ticket?.status, fetchDetail]);
 
   const handleSendReply = async () => {
     if (!replyText.trim() || sending) return;
@@ -85,7 +124,8 @@ export function TicketDetailScreen() {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     } catch (err: any) {
-      Alert.alert(t('ticket.detail.sendError', 'Không thể gửi'), err.message || t('common.networkError', 'Lỗi mạng khi gửi phản hồi'));
+      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+      Alert.alert(t('ticket.detail.sendError', 'Không thể gửi'), localizedMsg);
     } finally {
       setSending(false);
     }
@@ -151,14 +191,14 @@ export function TicketDetailScreen() {
                   {ticket.subject}
                 </Text>
                 <View style={styles.metaRow}>
-                  <Ionicons name="time-outline" size={13} color={themeColors.textMuted} />
+                  <Ionicons name="time-outline" size={15} color={themeColors.textMuted} />
                   <Text style={[styles.metaTime, { color: themeColors.textMuted }]}>
                     {t('ticket.detail.createdAt', { time: new Date(ticket.createdAt).toLocaleString() })}
                   </Text>
                 </View>
                 {ticket.bookingId && (
                   <View style={styles.metaRow}>
-                    <Ionicons name="receipt-outline" size={13} color="#3B82F6" />
+                    <Ionicons name="receipt-outline" size={15} color="#3B82F6" />
                     <Text style={[styles.metaTime, { color: '#3B82F6' }]}>
                       {t('ticket.card.bookingLabel', 'Liên quan đơn sạc:')} {ticket.bookingId}
                     </Text>
@@ -178,21 +218,27 @@ export function TicketDetailScreen() {
                   ]}
                 >
                   <View style={styles.resolutionHeader}>
-                    <Ionicons name="shield-checkmark" size={18} color="#10B981" />
+                    <Ionicons name="shield-checkmark" size={20} color="#10B981" />
                     <Text style={[styles.resolutionTitle, { color: '#059669' }]}>
                       {t('ticket.detail.findingsTitle', 'Kết luận Kỹ thuật & Quyền lợi hoàn phí')}
                     </Text>
                   </View>
-                  {ticket.findings.map((f, i) => (
-                    <Text key={f.findingId || i} style={[styles.resolutionBody, { color: themeColors.textBody }]}>
-                      • {f.reason} ({f.conclusion})
-                    </Text>
-                  ))}
+                  {ticket.findings.map((f, i) => {
+                    const conclusionText = t(
+                      `ticket.conclusion.${f.conclusion}`,
+                      CONCLUSION_CONFIG[f.conclusion] || f.conclusion
+                    );
+                    return (
+                      <Text key={f.findingId || i} style={[styles.resolutionBody, { color: themeColors.textBody }]}>
+                        • {f.reason ? `${f.reason} (${conclusionText})` : conclusionText}
+                      </Text>
+                    );
+                  })}
                   {hasRefund && (
                     <View style={styles.refundTag}>
-                      <Ionicons name="cash-outline" size={14} color="#10B981" />
+                      <Ionicons name="cash-outline" size={16} color="#10B981" />
                       <Text style={[styles.refundTagText, { color: '#10B981' }]}>
-                        {t('ticket.card.refundNote', 'Khoản thanh toán được duyệt HOÀN 100% vào tài khoản của bạn.')}
+                        {t('ticket.card.refundNote', 'Trạm đã xác nhận lỗi — Đã duyệt hoàn tiền 100%')}
                       </Text>
                     </View>
                   )}
@@ -224,9 +270,9 @@ export function TicketDetailScreen() {
               { backgroundColor: themeColors.surface, borderTopColor: themeColors.border },
             ]}
           >
-            <Ionicons name="lock-closed-outline" size={16} color={themeColors.textMuted} />
+            <Ionicons name="lock-closed-outline" size={18} color={themeColors.textMuted} />
             <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
-              {t('ticket.detail.closedNotice', 'Phiếu hỗ trợ này đã hoàn tất đóng. Cần hỗ trợ thêm vui lòng tạo phiếu mới.')}
+              {t('ticket.detail.closedNotice', 'Phiếu hỗ trợ này đã hoàn tất và đóng. Nếu cần hỗ trợ thêm, bạn có thể tạo phiếu mới.')}
             </Text>
           </View>
         ) : (
@@ -269,7 +315,7 @@ export function TicketDetailScreen() {
               ) : (
                 <Ionicons
                   name="send"
-                  size={18}
+                  size={20}
                   color={replyText.trim() ? '#FFFFFF' : themeColors.textMuted}
                 />
               )}
@@ -289,7 +335,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
   },
-  loadingText: { fontSize: fontSizes.caption },
+  loadingText: {
+    fontSize: 14,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -304,15 +352,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
   },
   headerTitle: {
-    fontSize: fontSizes.heading - 1,
+    fontSize: 18,
     fontWeight: fontWeights.bold,
     textAlign: 'center',
     letterSpacing: -0.2,
   },
   headerSubtitle: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: 13,
     marginTop: 2,
-    maxWidth: 220,
+    maxWidth: 240,
     textAlign: 'center',
   },
   headerRightAction: {
@@ -330,91 +378,96 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   metaCard: {
-    padding: spacing.md,
+    padding: 14,
     borderRadius: radius.md,
     borderWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   metaSubject: {
-    fontSize: fontSizes.body,
+    fontSize: 16.5,
     fontWeight: fontWeights.bold,
+    lineHeight: 22,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
   },
   metaTime: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: 13.5,
+    fontWeight: fontWeights.medium,
   },
   resolutionCard: {
-    padding: spacing.md,
+    padding: 14,
     borderRadius: radius.md,
     borderWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   resolutionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   resolutionTitle: {
-    fontSize: fontSizes.caption,
+    fontSize: 15,
     fontWeight: fontWeights.bold,
   },
   resolutionBody: {
-    fontSize: fontSizes.caption,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 21,
   },
   refundTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 4,
-    paddingTop: 4,
+    marginTop: 6,
+    paddingTop: 6,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#A7F3D0',
   },
   refundTagText: {
-    fontSize: fontSizes.caption,
+    fontSize: 14,
     fontWeight: fontWeights.bold,
   },
   streamDivider: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginVertical: spacing.xs,
+    marginVertical: spacing.md,
   },
   dividerLine: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
   },
   streamLabel: {
-    fontSize: 10,
+    fontSize: 12.5,
     fontWeight: fontWeights.bold,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   textInput: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    fontSize: fontSizes.body,
-    maxHeight: 100,
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 15.5,
+    lineHeight: 21,
+    minHeight: 46,
+    maxHeight: 120,
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -422,12 +475,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    padding: spacing.md,
+    gap: 8,
+    padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   closedText: {
-    fontSize: fontSizes.caption,
+    fontSize: 13.5,
+    lineHeight: 20,
     textAlign: 'center',
   },
 });

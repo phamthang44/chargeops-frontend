@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -22,9 +22,10 @@ import { AppButton } from '@/components/AppButton';
 import { Card } from '@/components/Card';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { createTicket } from '@/services/ticketService';
-import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
-import type { TicketCategory, TicketPriority } from '@/types';
+import { getActiveBookings, getBookingHistory } from '@/services/bookingService';
+import { createTicket, getLocalizedTicketErrorMessage } from '@/services/ticketService';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+import type { Booking, TicketCategory, TicketPriority } from '@/types';
 
 type Route = RouteProp<RootStackParamList, 'CreateTicket'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'CreateTicket'>;
@@ -71,18 +72,84 @@ export function CreateTicketScreen() {
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Candidate sessions/bookings state
+  const [candidateBookings, setCandidateBookings] = useState<Booking[]>([]);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(bookingId ?? null);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(stationId ?? null);
+  const [selectedStationName, setSelectedStationName] = useState<string | null>(stationName ?? null);
+
+  const isStationCategory = category === 'CHARGING_ISSUE' || category === 'BOOKING';
+  const isPlatformCategory = !isStationCategory;
+
+  useEffect(() => {
+    if (bookingId) return;
+
+    let isMounted = true;
+    async function loadCandidateBookings() {
+      try {
+        setLoadingCandidates(true);
+        const [actives, history] = await Promise.all([
+          getActiveBookings().catch(() => []),
+          getBookingHistory({}, { pageIndex: 1, limit: 10 }).catch(() => ({ items: [] })),
+        ]);
+        if (!isMounted) return;
+
+        const combined = [...actives, ...(history.items || [])];
+        const unique = Array.from(new Map(combined.map((b) => [b.id, b])).values());
+        setCandidateBookings(unique);
+
+        if (unique.length > 0 && !selectedBookingId) {
+          const defaultTarget = unique.find((b) => b.status === 'CHARGING' || b.status === 'CHECKED_IN' || b.status === 'CONFIRMED') || unique[0];
+          if (defaultTarget) {
+            setSelectedBookingId(defaultTarget.id);
+            setSelectedStationId(defaultTarget.stationId);
+            setSelectedStationName(defaultTarget.stationName || null);
+          }
+        }
+      } finally {
+        if (isMounted) setLoadingCandidates(false);
+      }
+    }
+
+    loadCandidateBookings();
+    return () => {
+      isMounted = false;
+    };
+  }, [bookingId]);
+
   const handleSubmit = async () => {
     if (!subject.trim()) {
       Alert.alert(
         t('ticket.create.errorNoSubjectTitle', 'Chưa nhập tiêu đề'),
-        t('ticket.create.errorNoSubjectBody', 'Vui lòng nhập tóm tắt sự cố')
+        t('ticket.create.errorNoSubjectBody', 'Vui lòng nhập tóm tắt sự cố bạn đang gặp phải.')
       );
       return;
     }
     if (!description.trim()) {
       Alert.alert(
         t('ticket.create.errorNoDescTitle', 'Chưa nhập mô tả'),
-        t('ticket.create.errorNoDescBody', 'Vui lòng mô tả chi tiết vấn đề bạn gặp phải')
+        t('ticket.create.errorNoDescBody', 'Vui lòng mô tả chi tiết để kỹ thuật viên có thể hỗ trợ nhanh nhất.')
+      );
+      return;
+    }
+
+    const effectiveBookingId = selectedBookingId || bookingId || null;
+    const effectiveStationId = selectedStationId || stationId || null;
+
+    // Scope Validation (BR-TKT-SCOPE)
+    if (category === 'CHARGING_ISSUE' && !effectiveBookingId) {
+      Alert.alert(
+        t('ticket.create.errorBookingRequiredTitle', 'Cần chọn phiên sạc'),
+        t('ticket.create.errorBookingRequiredBody', 'Sự cố sạc pin yêu cầu liên kết với phiên sạc cụ thể để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc.')
+      );
+      return;
+    }
+
+    if (category === 'BOOKING' && !effectiveBookingId && !effectiveStationId) {
+      Alert.alert(
+        t('ticket.create.errorStationRequiredTitle', 'Cần chọn trạm hoặc đơn đặt chỗ'),
+        t('ticket.create.errorStationRequiredBody', 'Lỗi đặt chỗ yêu cầu chọn trạm sạc hoặc đơn đặt chỗ gặp sự cố.')
       );
       return;
     }
@@ -94,14 +161,15 @@ export function CreateTicketScreen() {
         priority,
         subject: subject.trim(),
         description: description.trim(),
-        bookingId: bookingId ?? null,
-        stationId: stationId ?? null,
+        bookingId: isStationCategory ? effectiveBookingId : null,
+        stationId: isStationCategory ? effectiveStationId : null,
       });
 
-      // Điều hướng ngay sang màn hình chi tiết trao đổi
+      // Navigate immediately to ticket thread
       navigation.replace('TicketDetail', { ticketId: created.ticketId });
     } catch (err: any) {
-      Alert.alert(t('common.error', 'Lỗi'), err.message || t('ticket.create.errorFailed', 'Không thể tạo phiếu hỗ trợ'));
+      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+      Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +177,7 @@ export function CreateTicketScreen() {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]} edges={['top', 'bottom']}>
-      {/* Universal Sub-Screen Clean Navigation Header */}
+      {/* Header */}
       <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
         <AppBackButton onPress={() => navigation.goBack()} />
         <View style={styles.headerTitleBlock}>
@@ -132,7 +200,7 @@ export function CreateTicketScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Linked Booking context banner (nếu có) */}
+          {/* Pre-linked Booking Banner (when navigating from active session) */}
           {bookingId && (
             <View
               style={[
@@ -144,7 +212,7 @@ export function CreateTicketScreen() {
               ]}
             >
               <View style={styles.contextHeader}>
-                <Ionicons name="link-outline" size={18} color="#3B82F6" />
+                <Ionicons name="link-outline" size={19} color="#3B82F6" />
                 <Text style={[styles.contextTitle, { color: '#3B82F6' }]}>
                   {t('ticket.create.bookingContext', 'BÁO CÁO THEO ĐƠN ĐẶT CHỖ')}
                 </Text>
@@ -155,7 +223,7 @@ export function CreateTicketScreen() {
                   : t('ticket.create.bookingContext', 'Sự cố gắn liền với đơn sạc hiện tại')}
               </Text>
               <Text style={[styles.contextSub, { color: themeColors.textMuted }]}>
-                {t('ticket.create.bookingCodeLabel', 'Mã đơn:')} {bookingId}
+                {t('ticket.create.bookingCodeLabel', 'Mã đơn:')} #{String(bookingId).slice(0, 10).toUpperCase()}
               </Text>
             </View>
           )}
@@ -180,7 +248,7 @@ export function CreateTicketScreen() {
                     ]}
                     onPress={() => setCategory(cat.key)}
                   >
-                    <Ionicons name={cat.icon} size={20} color={isSelected ? cat.color : themeColors.textMuted} />
+                    <Ionicons name={cat.icon} size={22} color={isSelected ? cat.color : themeColors.textMuted} />
                     <Text
                       style={[
                         styles.categoryItemLabel,
@@ -194,6 +262,143 @@ export function CreateTicketScreen() {
               })}
             </View>
           </Card>
+
+          {/* Scope Selector: Booking Session Selection for Station Incidents */}
+          {!bookingId && isStationCategory && (
+            <Card style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+              <View style={styles.sessionHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
+                    {category === 'CHARGING_ISSUE'
+                      ? t('ticket.create.selectSessionTitle', 'Chọn phiên sạc gặp sự cố *')
+                      : t('ticket.create.selectStationTitle', 'Chọn trạm hoặc phiên đặt chỗ *')}
+                  </Text>
+                  <Text style={[styles.sessionHelpText, { color: themeColors.textMuted }]}>
+                    {category === 'CHARGING_ISSUE'
+                      ? t('ticket.create.selectSessionHelp', 'Sự cố sạc pin yêu cầu liên kết với phiên sạc để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc 100%.')
+                      : t('ticket.create.selectStationHelp', 'Lỗi đặt chỗ yêu cầu liên kết với trạm sạc hoặc phiên đặt chỗ liên quan.')}
+                  </Text>
+                </View>
+              </View>
+
+              {loadingCandidates ? (
+                <View style={styles.loadingBox}>
+                  <ActivityIndicator size="small" color={themeColors.primary} />
+                  <Text style={[styles.loadingBoxText, { color: themeColors.textMuted }]}>
+                    {t('common.loading', 'Đang tải danh sách phiên sạc...')}
+                  </Text>
+                </View>
+              ) : candidateBookings.length === 0 ? (
+                <View
+                  style={[
+                    styles.warningBox,
+                    {
+                      backgroundColor: isDark ? '#2E1A0A' : '#FFFBEB',
+                      borderColor: isDark ? '#78350F' : '#FDE68A',
+                    },
+                  ]}
+                >
+                  <Ionicons name="warning-outline" size={20} color="#D97706" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.warningTitle, { color: '#B45309' }]}>
+                      {t('ticket.create.noSessionsFound', 'Không tìm thấy phiên sạc nào trên tài khoản')}
+                    </Text>
+                    <Text style={[styles.warningBody, { color: themeColors.textMuted }]}>
+                      {t('ticket.create.noSessionsWarning', 'Để báo "Sự cố sạc pin", bạn cần chọn một phiên sạc đã thực hiện. Nếu gặp sự cố chung, vui lòng chọn loại "Thanh toán & Phí" hoặc "Vấn đề khác".')}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.candidateList}>
+                  {candidateBookings.map((b) => {
+                    const isSelected = selectedBookingId === b.id;
+                    const startTimeStr = b.startAt
+                      ? new Date(b.startAt).toLocaleString([], {
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '—';
+
+                    return (
+                      <Pressable
+                        key={b.id}
+                        style={[
+                          styles.candidateItem,
+                          {
+                            backgroundColor: isSelected ? (isDark ? '#0D3827' : '#ECFDF5') : themeColors.surfaceAlt,
+                            borderColor: isSelected ? '#10B981' : themeColors.border,
+                          },
+                        ]}
+                        onPress={() => {
+                          setSelectedBookingId(b.id);
+                          setSelectedStationId(b.stationId);
+                          setSelectedStationName(b.stationName || null);
+                        }}
+                      >
+                        <View style={styles.candidateLeft}>
+                          <View
+                            style={[
+                              styles.radioCircle,
+                              {
+                                borderColor: isSelected ? '#10B981' : themeColors.border,
+                                backgroundColor: isSelected ? '#10B981' : 'transparent',
+                              },
+                            ]}
+                          >
+                            {isSelected && <Ionicons name="checkmark" size={13} color="#FFFFFF" />}
+                          </View>
+                          <View style={{ flex: 1, gap: 2 }}>
+                            <View style={styles.candidateRow}>
+                              <Text style={[styles.candidateStation, { color: themeColors.textStrong }]} numberOfLines={1}>
+                                {b.stationName || t('common.station', 'Trạm sạc')}
+                              </Text>
+                              <Text style={[styles.candidateCode, { color: '#3B82F6' }]}>
+                                #{String(b.id).slice(0, 8).toUpperCase()}
+                              </Text>
+                            </View>
+                            <View style={styles.candidateSubRow}>
+                              <Ionicons name="time-outline" size={13} color={themeColors.textMuted} />
+                              <Text style={[styles.candidateTime, { color: themeColors.textMuted }]}>
+                                {startTimeStr}
+                              </Text>
+                              <Text style={[styles.candidateStatus, { color: themeColors.textMuted }]}>
+                                · {b.status}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
+            </Card>
+          )}
+
+          {/* Platform Scope Information Box */}
+          {isPlatformCategory && (
+            <View
+              style={[
+                styles.platformCard,
+                {
+                  backgroundColor: isDark ? '#1A182E' : '#F5F3FF',
+                  borderColor: isDark ? '#4C1D95' : '#DDD6FE',
+                },
+              ]}
+            >
+              <View style={styles.contextHeader}>
+                <Ionicons name="shield-checkmark" size={19} color="#7C3AED" />
+                <Text style={[styles.contextTitle, { color: '#7C3AED' }]}>
+                  {t('ticket.create.platformScopeBadge', 'Hàng chờ Nền tảng & Thanh toán')}
+                </Text>
+              </View>
+              <Text style={[styles.platformHelpText, { color: themeColors.textBody }]}>
+                {t('ticket.create.platformScopeHelp', 'Sự cố này được chuyển thẳng tới Quản trị viên ChargeOps để tra soát giao dịch/tài khoản. Không yêu cầu trạm sạc.')}
+              </Text>
+            </View>
+          )}
 
           {/* Priority selection */}
           <Card style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
@@ -267,7 +472,7 @@ export function CreateTicketScreen() {
                   borderColor: themeColors.border,
                 },
               ]}
-              placeholder={t('ticket.create.subjectPlaceholder', 'Ví dụ: Súng sạc trụ 02 tự ngắt...')}
+              placeholder={t('ticket.create.subjectPlaceholder', 'Ví dụ: Súng sạc trụ 02 tự ngắt khi mới sạc...')}
               placeholderTextColor={themeColors.textMuted}
               value={subject}
               onChangeText={setSubject}
@@ -291,7 +496,7 @@ export function CreateTicketScreen() {
                   borderColor: themeColors.border,
                 },
               ]}
-              placeholder={t('ticket.create.descPlaceholder', 'Mô tả cụ thể thời điểm, mã trụ/súng...')}
+              placeholder={t('ticket.create.descPlaceholder', 'Mô tả cụ thể thời điểm, mã trụ/súng, thông báo lỗi trên màn hình trụ sạc...')}
               placeholderTextColor={themeColors.textMuted}
               value={description}
               onChangeText={setDescription}
@@ -306,7 +511,7 @@ export function CreateTicketScreen() {
         {/* Action Submit Footer */}
         <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
           <AppButton
-            label={submitting ? t('ticket.create.submitting', 'Đang gửi...') : t('ticket.create.submitBtn', 'Gửi phiếu hỗ trợ sự cố')}
+            label={submitting ? t('ticket.create.submitting', 'Đang gửi phiếu...') : t('ticket.create.submitBtn', 'Gửi phiếu hỗ trợ sự cố')}
             disabled={submitting}
             onPress={handleSubmit}
           />
@@ -332,12 +537,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
   },
   headerTitle: {
-    fontSize: fontSizes.heading,
+    fontSize: 18.5,
     fontWeight: fontWeights.bold,
     textAlign: 'center',
+    letterSpacing: -0.2,
   },
   headerSubtitle: {
-    fontSize: 10,
+    fontSize: 11.5,
     fontWeight: fontWeights.bold,
     letterSpacing: 0.8,
     marginTop: 2,
@@ -355,35 +561,36 @@ const styles = StyleSheet.create({
   },
   contextCard: {
     padding: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    gap: 4,
+    gap: 5,
   },
   contextHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
   },
   contextTitle: {
-    fontSize: fontSizes.caption,
+    fontSize: 13.5,
     fontWeight: fontWeights.bold,
+    letterSpacing: 0.3,
   },
   contextText: {
-    fontSize: fontSizes.body,
+    fontSize: 15,
     fontWeight: fontWeights.bold,
   },
   contextSub: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: 13,
     fontFamily: 'monospace',
   },
   card: {
     padding: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.sm,
   },
   sectionTitle: {
-    fontSize: fontSizes.body,
+    fontSize: 15.5,
     fontWeight: fontWeights.bold,
     marginBottom: 4,
   },
@@ -395,15 +602,109 @@ const styles = StyleSheet.create({
   categoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
+    gap: 7,
+    paddingHorizontal: 13,
     paddingVertical: 10,
     borderRadius: radius.md,
     borderWidth: 1,
   },
   categoryItemLabel: {
-    fontSize: fontSizes.caption,
+    fontSize: 13.5,
     fontWeight: fontWeights.bold,
+  },
+  sessionHeaderRow: {
+    marginBottom: 4,
+  },
+  sessionHelpText: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  loadingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  loadingBoxText: {
+    fontSize: 13,
+  },
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
+  warningTitle: {
+    fontSize: 13.5,
+    fontWeight: fontWeights.bold,
+  },
+  warningBody: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  candidateList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  candidateItem: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: 12,
+  },
+  candidateLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  candidateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  candidateStation: {
+    fontSize: 14.5,
+    fontWeight: fontWeights.bold,
+    flex: 1,
+  },
+  candidateCode: {
+    fontSize: 12.5,
+    fontWeight: fontWeights.bold,
+    fontFamily: 'monospace',
+  },
+  candidateSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  candidateTime: {
+    fontSize: 12.5,
+  },
+  candidateStatus: {
+    fontSize: 12.5,
+  },
+  platformCard: {
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: 5,
+  },
+  platformHelpText: {
+    fontSize: 13,
+    lineHeight: 19,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -413,26 +714,26 @@ const styles = StyleSheet.create({
   priorityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
+    gap: 7,
+    paddingHorizontal: 13,
     paddingVertical: 8,
     borderRadius: radius.full,
     borderWidth: 1,
   },
   priorityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
   },
   priorityLabel: {
-    fontSize: fontSizes.caption,
+    fontSize: 13.5,
     fontWeight: fontWeights.medium,
   },
   quickChipsSection: {
-    gap: 6,
+    gap: 7,
   },
   quickChipsTitle: {
-    fontSize: fontSizes.caption,
+    fontSize: 13,
     fontWeight: fontWeights.medium,
     paddingHorizontal: spacing.xs,
   },
@@ -441,25 +742,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
     borderRadius: radius.full,
     borderWidth: 1,
   },
   chipText: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: 13,
   },
   inputLabel: {
-    fontSize: fontSizes.caption,
+    fontSize: 14.5,
     fontWeight: fontWeights.bold,
     marginTop: 4,
   },
   textInput: {
     borderWidth: 1,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    fontSize: fontSizes.body,
+    paddingVertical: 11,
+    fontSize: 15.5,
+    lineHeight: 22,
   },
   descHeader: {
     flexDirection: 'row',
@@ -468,15 +770,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   charCount: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: 12.5,
   },
   textArea: {
     borderWidth: 1,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    fontSize: fontSizes.body,
-    minHeight: 110,
+    paddingVertical: 11,
+    fontSize: 15.5,
+    lineHeight: 22,
+    minHeight: 120,
   },
   footer: {
     padding: spacing.md,

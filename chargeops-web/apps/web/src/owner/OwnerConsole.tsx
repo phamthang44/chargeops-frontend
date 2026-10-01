@@ -9,6 +9,7 @@ import {
   type OwnerDashboard as OwnerDashboardData,
   type StaffDashboard as StaffDashboardData,
   type Station,
+  type AppNotification,
 } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
@@ -200,38 +201,65 @@ function OwnerConsoleContent({
   const deleteNotif = useDeleteNotification();
 
   const notificationItems = useMemo<NotificationItem[]>(() => {
-    // 1. Convert notifications from useNotifications hook
-    const items: NotificationItem[] = serverNotifications.map((n) => ({
-      id: n.id,
-      title: n.title,
-      subtitle: n.subtitle,
-      body: n.body,
-      time: n.time,
-      tone: n.tone ?? n.severity,
-      read: n.read,
-      category: n.category,
-      stationName: n.stationName,
-      chargerId: n.chargerId,
-      metrics: n.metrics,
-      badge: n.badge,
-      actionLabel: n.actionLabel || n.primaryAction?.label,
-      onSelect: () => {
-        if (n.primaryAction?.actionUrl) {
-          navigate(`${base}${n.primaryAction.actionUrl}`);
-        } else if (n.category === 'alert' || n.category === 'session') {
-          navigate(`${base}/chargers`);
-        } else if (n.category === 'ticket') {
-          navigate(`${base}/tickets`);
-        } else {
-          navigate(`${base}/notifications`);
+    // 1. Defensively extract notifications array regardless of envelope shape
+    const notifArray: AppNotification[] = Array.isArray(serverNotifications)
+      ? serverNotifications
+      : Array.isArray((serverNotifications as any)?.items)
+        ? (serverNotifications as any).items
+        : Array.isArray((serverNotifications as any)?.data)
+          ? (serverNotifications as any).data
+          : [];
+
+    const items: NotificationItem[] = notifArray.map((n) => {
+      let displayTime = n.time;
+      if (!displayTime && n.createdAt) {
+        try {
+          const diffMs = Date.now() - new Date(n.createdAt).getTime();
+          const diffMins = Math.floor(diffMs / 60_000);
+          if (diffMins < 1) displayTime = 'Vừa xong';
+          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
+          else {
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
+            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
+          }
+        } catch {
+          displayTime = undefined;
         }
-      },
-      onAction: () => {
-        if (n.primaryAction?.actionUrl) {
-          navigate(`${base}${n.primaryAction.actionUrl}`);
-        }
-      },
-    }));
+      }
+
+      return {
+        id: n.id,
+        title: n.title,
+        subtitle: n.subtitle,
+        body: n.body,
+        time: displayTime,
+        tone: n.tone ?? n.severity,
+        read: n.read,
+        category: n.category,
+        stationName: n.stationName,
+        chargerId: n.chargerId,
+        metrics: n.metrics,
+        badge: n.badge,
+        actionLabel: n.actionLabel || n.primaryAction?.label,
+        onSelect: () => {
+          if (n.primaryAction?.actionUrl) {
+            navigate(`${base}${n.primaryAction.actionUrl}`);
+          } else if (n.category === 'alert' || n.category === 'session') {
+            navigate(`${base}/chargers`);
+          } else if (n.category === 'ticket') {
+            navigate(`${base}/tickets`);
+          } else {
+            navigate(`${base}/notifications`);
+          }
+        },
+        onAction: () => {
+          if (n.primaryAction?.actionUrl) {
+            navigate(`${base}${n.primaryAction.actionUrl}`);
+          }
+        },
+      };
+    });
 
     // 2. Add dynamic dashboard warnings if any and not already present
     if (dashboardQuery.data) {

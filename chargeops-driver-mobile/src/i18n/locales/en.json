@@ -1158,10 +1158,22 @@
       "charCount": "{{count}}/500 characters",
       "submitBtn": "Submit Support Ticket",
       "submitting": "Submitting ticket...",
+      "selectSessionTitle": "Select Affected Charging Session *",
+      "selectSessionHelp": "Charging issues require linking to a specific session so station technicians can audit charger telemetry and issue a 100% deposit refund.",
+      "noSessionsFound": "No charging sessions found on your account",
+      "noSessionsWarning": "Reporting a 'Charging Issue' requires selecting an existing charging session. For general inquiries, please select 'Billing & Fees' or 'Other'.",
+      "selectStationTitle": "Select Affected Station or Reservation *",
+      "selectStationHelp": "Booking issues require linking to an affected station or reservation.",
+      "platformScopeBadge": "Platform & Billing Queue",
+      "platformScopeHelp": "This incident is routed directly to ChargeOps Platform Administrators to audit transactions or account details. No station required.",
       "errorNoSubjectTitle": "Summary required",
       "errorNoSubjectBody": "Please enter or select a summary of the issue you encountered.",
       "errorNoDescTitle": "Description required",
       "errorNoDescBody": "Please provide details so technical staff can assist promptly.",
+      "errorBookingRequiredTitle": "Session selection required",
+      "errorBookingRequiredBody": "Charging issues require linking to a specific session so technicians can audit charger telemetry and refund deposits.",
+      "errorStationRequiredTitle": "Station or reservation required",
+      "errorStationRequiredBody": "Booking issues require selecting the affected charging station or reservation.",
       "errorFailed": "Unable to create support ticket"
     },
     "list": {
@@ -1206,6 +1218,14 @@
       "ACCOUNT": "Account",
       "OTHER": "Other Issues"
     },
+    "conclusion": {
+      "HARDWARE_FAULT": "Station Hardware Issue",
+      "SOFTWARE_FAULT": "Software Connection Issue",
+      "USER_ERROR": "Operating Mistake",
+      "GRID_FAILURE": "Power Grid Failure",
+      "NO_FAULT_FOUND": "Station Operating Normally",
+      "OTHER": "Other Cause"
+    },
     "priority": {
       "LOW": "Low",
       "MEDIUM": "Medium",
@@ -1244,6 +1264,18 @@
       "ACCOUNT_2": "Vehicle linkage error in driver profile",
       "OTHER_1": "Station area lacks sufficient night illumination",
       "OTHER_2": "Station entrance blocked by road barrier"
+    },
+    "errors": {
+      "accessDenied": "You do not have access to view or reply to this support ticket.",
+      "notFound": "Support ticket was not found.",
+      "invalidScope": "The booking or station context is invalid for this ticket.",
+      "stateConflict": "The ticket cannot be modified in its current state.",
+      "versionConflict": "Ticket data has changed. Please pull down to refresh.",
+      "closed": "A closed support ticket cannot receive new messages.",
+      "assignmentInvalid": "The selected handler cannot process this support ticket.",
+      "findingInvalid": "The station-failure finding is invalid for this support ticket.",
+      "codeConflict": "The support ticket code already exists.",
+      "generic": "An error occurred while processing this support ticket."
     }
   }
 }

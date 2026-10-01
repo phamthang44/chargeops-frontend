@@ -12,7 +12,10 @@ export function useNotifications(params?: NotificationListParams) {
   const api = useApi();
   return useQuery({
     queryKey: [...NOTIFICATIONS_KEY, params ?? {}],
-    queryFn: () => api.notifications.list(params),
+    queryFn: async () => {
+      const res = await api.notifications.list(params);
+      return Array.isArray(res) ? res : ((res as any)?.items ?? []);
+    },
     staleTime: 30_000,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
@@ -51,9 +54,18 @@ export function useMarkAsRead() {
       const prevCount = qc.getQueryData<number>(UNREAD_COUNT_KEY);
 
       // Optimistically mark as read across all notification queries
-      qc.setQueriesData<AppNotification[]>({ queryKey: NOTIFICATIONS_KEY }, (old) => {
-        if (!old) return [];
-        return old.map((n) => (n.id === id ? { ...n, read: true } : n));
+      qc.setQueriesData({ queryKey: NOTIFICATIONS_KEY }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((n: AppNotification) => (n.id === id ? { ...n, read: true } : n));
+        }
+        if (Array.isArray(old?.items)) {
+          return {
+            ...old,
+            items: old.items.map((n: AppNotification) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        }
+        return old;
       });
 
       // Optimistically decrement count
@@ -95,9 +107,18 @@ export function useMarkAllAsRead() {
       const prevNotifications = qc.getQueriesData<AppNotification[]>({ queryKey: NOTIFICATIONS_KEY });
       const prevCount = qc.getQueryData<number>(UNREAD_COUNT_KEY);
 
-      qc.setQueriesData<AppNotification[]>({ queryKey: NOTIFICATIONS_KEY }, (old) => {
-        if (!old) return [];
-        return old.map((n) => ({ ...n, read: true }));
+      qc.setQueriesData({ queryKey: NOTIFICATIONS_KEY }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((n: AppNotification) => ({ ...n, read: true }));
+        }
+        if (Array.isArray(old?.items)) {
+          return {
+            ...old,
+            items: old.items.map((n: AppNotification) => ({ ...n, read: true })),
+          };
+        }
+        return old;
       });
       qc.setQueryData(UNREAD_COUNT_KEY, 0);
 
@@ -135,11 +156,22 @@ export function useDeleteNotification() {
       const prevCount = qc.getQueryData<number>(UNREAD_COUNT_KEY);
 
       let wasUnread = false;
-      qc.setQueriesData<AppNotification[]>({ queryKey: NOTIFICATIONS_KEY }, (old) => {
-        if (!old) return [];
-        const target = old.find((n) => n.id === id);
-        if (target && !target.read) wasUnread = true;
-        return old.filter((n) => n.id !== id);
+      qc.setQueriesData({ queryKey: NOTIFICATIONS_KEY }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          const target = old.find((n: AppNotification) => n.id === id);
+          if (target && !target.read) wasUnread = true;
+          return old.filter((n: AppNotification) => n.id !== id);
+        }
+        if (Array.isArray(old?.items)) {
+          const target = old.items.find((n: AppNotification) => n.id === id);
+          if (target && !target.read) wasUnread = true;
+          return {
+            ...old,
+            items: old.items.filter((n: AppNotification) => n.id !== id),
+          };
+        }
+        return old;
       });
 
       if (wasUnread && prevCount !== undefined && prevCount > 0) {

@@ -203,7 +203,7 @@ export function RefundExecutionDrawer({
         toast(
           t(
             'refunds.drawer.toastFailed',
-            'Đã ghi nhận lần thử thất bại (FAILED). Khoản hoàn tiền vẫn được bảo lưu ở trạng thái PENDING (BR-PAY-13).'
+            'Đã ghi nhận lần thử chưa thành công. Yêu cầu hoàn tiền vẫn được bảo lưu ở trạng thái Chờ xử lý.'
           ),
           'info',
         );
@@ -358,7 +358,7 @@ export function RefundExecutionDrawer({
             <IconShield size={16} className="text-good shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-semibold text-good block">
-                {t('refunds.drawer.graceEntitlementTitle', 'Đủ điều kiện hoàn 100% (Xác lập tự động theo BR-PAY-08)')}
+                {t('refunds.drawer.graceEntitlementTitle', 'Đủ điều kiện hoàn 100% (Theo chính sách bảo vệ khách hàng)')}
               </span>
               <span className="text-[11.5px] text-muted leading-relaxed block">
                 {t(
@@ -566,7 +566,7 @@ export function RefundExecutionDrawer({
                       Tùy chọn kết quả mô phỏng (Chỉ dùng cho mục đích Demo / Kiểm thử ngoại lệ):
                     </div>
                     <p className="text-muted leading-relaxed">
-                      Bạn có thể chọn kịch bản để kiểm tra xử lý lỗi. Lưu ý: dù lần thử có FAILED thì quyền hoàn tiền PENDING của tài xế vẫn được bảo lưu (BR-PAY-13).
+                      Bạn có thể chọn kịch bản để kiểm tra xử lý lỗi. Lưu ý: nếu giao dịch gặp lỗi thì quyền hoàn tiền của khách hàng vẫn được bảo toàn ở trạng thái Chờ xử lý.
                     </p>
                     <div className="flex gap-4 pt-1">
                       <label className="flex items-center gap-2 cursor-pointer font-medium">
@@ -669,13 +669,13 @@ export function RefundExecutionDrawer({
 
           <div className="rounded-lg bg-surface-2 p-3 text-[11.5px] text-muted space-y-1.5">
             <div className="font-semibold text-body">
-              {t('refunds.drawer.protectionTitle', 'Nguyên tắc vận hành & bảo vệ dữ liệu (BR-PAY-08 / BR-PAY-13):')}
+              {t('refunds.drawer.protectionTitle', 'Nguyên tắc vận hành & bảo vệ quyền lợi:')}
             </div>
             <p>
-              • {t('refunds.drawer.protectionPoint1', 'Mỗi thao tác gửi lệnh đi kèm Idempotency-Key tự sinh theo chuẩn BKG-034 để chống trùng lặp dòng tiền.')}
+              • {t('refunds.drawer.protectionPoint1', 'Mỗi giao dịch gửi đi đều kèm mã định danh bảo mật riêng biệt nhằm ngăn chặn hoàn tiền trùng lặp.')}
             </p>
             <p>
-              • {t('refunds.drawer.protectionPoint2', 'Tách bạch Quyền lợi và Thực thi: Quyền hoàn tiền đã được chốt bởi chính sách. Nếu lần thử gặp lỗi (FAILED), khoản hoàn vẫn được giữ nguyên trạng thái PENDING. Quyền lợi của tài xế không bao giờ bị mất.')}
+              • {t('refunds.drawer.protectionPoint2', 'Đảm bảo quyền lợi khách hàng: Nếu lệnh chuyển tiền tạm thời chưa thành công, yêu cầu hoàn tiền vẫn được bảo lưu ở trạng thái Chờ xử lý. Quyền lợi của khách hàng luôn được bảo toàn.')}
             </p>
           </div>
         </form>

@@ -1,39 +1,303 @@
 {
-  "title": "Hỗ trợ",
-  "subtitle": "Ticket được định tuyến tới trạm của bạn.",
-  "subtitleAdmin": "Toàn bộ ticket hỗ trợ trên nền tảng.",
-  "searchPlaceholder": "Tìm mã, tài xế, tiêu đề…",
-  "emptyState": "Không có ticket nào khớp bộ lọc.",
+  "title": "Hỗ trợ & Xử lý Sự cố",
+  "subtitle": "Phiếu hỗ trợ được định tuyến tới trạm của bạn theo phân công.",
+  "subtitleAdmin": "Toàn bộ phiếu hỗ trợ trên toàn mạng lưới trạm sạc.",
+  "searchPlaceholder": "Tìm mã vé, tên tài xế, tiêu đề sự cố…",
+  "emptyState": "Không có phiếu hỗ trợ nào khớp bộ lọc.",
+  "kpi": {
+    "pending": "Cần xử lý",
+    "critical": "Ưu tiên cao / Khẩn",
+    "resolved": "Đã giải quyết",
+    "unassigned": "Chờ tiếp nhận",
+    "unassignedHelp": "Nhân viên trạm có thể tiếp nhận",
+    "unassignedHelpAdmin": "Phiếu sự cố chờ phân công hoặc tiếp nhận",
+    "inProgress": "Đang xử lý",
+    "inProgressHelp": "Đang có nhân viên xử lý",
+    "inProgressHelpAdmin": "Đang có chuyên viên hoặc trạm xử lý",
+    "resolvingWatch": "Chờ tài xế (10 ngày)",
+    "resolvingWatchAdmin": "Chờ tài xế phản hồi",
+    "resolvingWatchHelp": "Tự động đóng sau 10 ngày",
+    "resolvingWatchHelpAdmin": "Tự động đóng theo chính sách nếu không phản hồi",
+    "completed": "Đã hoàn tất",
+    "completedHelp": "Đã hoàn thành và đóng"
+  },
+  "workstream": {
+    "all": "Toàn bộ hệ thống",
+    "platform": "Sự cố Nền tảng & Thanh toán",
+    "station": "Giám sát Sự cố Trạm",
+    "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến ví tiền, nạp cọc, giao dịch thanh toán và tài khoản tài xế.",
+    "stationHelp": "Chủ trạm & Kỹ thuật viên trạm chịu trách nhiệm trực tiếp tại trụ sạc. Admin thực hiện giám sát SLA, kết luận kỹ thuật (BR-TKT-05) và thẩm định bồi hoàn cọc."
+  },
+  "supervisory": {
+    "badge": "Giám sát Vận hành Trạm",
+    "bannerTitle": "Chế độ Giám sát Trạm sạc (SLA & Kỹ thuật)",
+    "bannerDesc": "Sự cố trạm sạc thuộc trách nhiệm xử lý của Đơn vị vận hành và Kỹ thuật viên trạm {{station}}. Admin thực hiện giám sát tiến độ, ghi nhận kết luận kỹ thuật và bồi hoàn nếu xảy ra lỗi hạ tầng.",
+    "stationUnit": "Đơn vị vận hành trạm",
+    "stationAssignedNotice": "Kỹ thuật viên trạm đang trực tiếp kiểm tra và xử lý sự cố thiết bị tại chỗ.",
+    "stationUnassignedNotice": "Chủ trạm hoặc nhân viên trực trạm chịu trách nhiệm tiếp nhận và phân công kỹ thuật viên cho phiếu này.",
+    "findingsSectionTitle": "Kết luận Giám định Kỹ thuật (Admin)",
+    "findingsBtn": "Ghi nhận lỗi trạm",
+    "escalateBtn": "Báo cáo khẩn"
+  },
+  "platformQueue": {
+    "badge": "Hàng chờ Nền tảng & Thanh toán",
+    "claimBtn": "Tiếp nhận xử lý sự cố",
+    "assignAdminBtn": "Phân công chuyên viên",
+    "handlerTitle": "Chuyên viên Nền tảng",
+    "unassignedNotice": "Phiếu sự cố hệ thống đang chờ Chuyên viên Nền tảng tiếp nhận xử lý."
+  },
+  "live": {
+    "badge": "Trực tiếp",
+    "refreshTooltip": "Làm mới tin nhắn"
+  },
+  "filters": {
+    "allStationsAdmin": "Tất cả trạm hệ thống",
+    "allStationsOwner": "Tất cả trạm của tôi"
+  },
   "tabs": {
-    "all": "Tất cả"
+    "all": "Tất cả",
+    "open": "Đang mở",
+    "in_progress": "Đang xử lý",
+    "resolved": "Đã giải quyết",
+    "closed": "Đã đóng"
+  },
+  "status": {
+    "open": "Đang mở",
+    "in_progress": "Đang xử lý",
+    "resolved": "Đã giải quyết",
+    "closed": "Đã đóng",
+    "OPEN": "Đang mở",
+    "IN_PROGRESS": "Đang xử lý",
+    "RESOLVED": "Đã giải quyết",
+    "CLOSED": "Đã đóng"
+  },
+  "closeReason": {
+    "auto": "Tự đóng sau 10 ngày",
+    "confirmed": "Tài xế xác nhận"
+  },
+  "countdown": {
+    "autoClosePrefix": "Tự đóng sau:",
+    "expired": "Đã quá hạn 10 ngày (Hệ thống đang tự đóng)"
   },
   "category": {
-    "all": "Tất cả danh mục"
+    "all": "Tất cả danh mục",
+    "charging_issue": "Sự cố sạc",
+    "booking": "Đặt chỗ",
+    "payment": "Thanh toán",
+    "account": "Tài khoản",
+    "other": "Khác",
+    "CHARGING_ISSUE": "Sự cố sạc",
+    "BOOKING": "Đặt chỗ",
+    "PAYMENT": "Thanh toán",
+    "ACCOUNT": "Tài khoản",
+    "OTHER": "Khác"
+  },
+  "priority": {
+    "LOW": "Thấp",
+    "MEDIUM": "Trung bình",
+    "HIGH": "Cao",
+    "CRITICAL": "Khẩn cấp"
+  },
+  "actor": {
+    "ADMIN": "Quản trị viên ChargeOps",
+    "OWNER": "Chủ trạm",
+    "STAFF": "Nhân viên trạm",
+    "REPORTER": "Tài xế (Người báo cáo)",
+    "driver": "Tài xế",
+    "SYSTEM": "Hệ thống tự động"
+  },
+  "events": {
+    "CLAIMED": "Tiếp nhận xử lý",
+    "ASSIGNED": "Phân công",
+    "REASSIGNED": "Chuyển giao",
+    "RESOLVED": "Đã giải quyết",
+    "AUTO_CLOSED_NO_RESPONSE": "Tự đóng sau 10 ngày",
+    "REPORTER_CONFIRMED": "Tài xế xác nhận đóng",
+    "REOPENED_PERSISTENT": "Vấn đề vẫn còn"
+  },
+  "common": {
+    "cancel": "Hủy",
+    "saving": "Đang xử lý...",
+    "platform": "Nền tảng"
+  },
+  "stepper": {
+    "ariaLabel": "Tiến trình xử lý phiếu hỗ trợ",
+    "created": "1. Khởi tạo",
+    "createdSub": "Đã ghi nhận",
+    "createdWaiting": "Hệ thống đã ghi nhận",
+    "createdDone": "Đã tiếp nhận",
+    "inProgress": "2. Đang xử lý",
+    "unassigned": "Chưa phân công",
+    "unassignedWait": "Chờ phân công",
+    "handlingActive": "Đang xử lý kỹ thuật",
+    "handledDone": "Đã khắc phục xong",
+    "resolved": "3. Chờ xác nhận",
+    "resolvedSub": "10 ngày phản hồi",
+    "resolvingWatch": "Chờ phản hồi (10 ngày)",
+    "verifiedDone": "Đã nghiệm thu",
+    "closed": "4. Đóng vé",
+    "closedSub": "Lưu trữ hồ sơ"
   },
   "table": {
     "cols": {
       "id": "MÃ",
+      "priority": "ƯU TIÊN",
       "content": "NỘI DUNG",
       "station": "TRẠM",
+      "handler": "NGƯỜI PHỤ TRÁCH",
       "status": "TRẠNG THÁI"
-    }
+    },
+    "unassigned": "Chờ tiếp nhận"
   },
   "detail": {
-    "back": "Danh sách",
+    "back": "Quay lại danh sách",
+    "defaultSubject": "Phiếu hỗ trợ",
+    "deadline": "Hạn chót: {{time}} ngày {{date}}",
+    "cycleBadge": "Lần #{{cycle}}",
+    "cycleInitial": "Khởi tạo",
+    "claimBtn": "Tự nhận xử lý",
+    "claiming": "Đang nhận việc...",
+    "claimSuccess": "Bạn đã nhận xử lý phiếu hỗ trợ này thành công!",
+    "assignBtn": "Gán nhân viên",
+    "assignBtnShort": "Phân công",
+    "assignSuccess": "Phân công nhân viên xử lý thành công!",
+    "reassignBtn": "Điều chuyển",
+    "resolveBtn": "Đánh dấu Đã giải quyết",
+    "resolveSuccess": "Đã đánh dấu giải quyết sự cố và gửi thông báo cho tài xế!",
+    "editResolution": "Cập nhật kết quả",
+    "conflictWarning": "Dữ liệu vé đã thay đổi trên hệ thống. Đang tải lại phiên bản mới nhất...",
+    "resolvedBannerTitle": "Sự cố đã được đánh dấu giải quyết",
+    "resolutionOutcome": "Kết quả xử lý",
+    "autoClosePolicyDisclaimer": "Chính sách hỗ trợ: Hệ thống đã gửi thông báo cho tài xế. Nếu không nhận được phản hồi sau 10 ngày, phiếu sẽ tự động đóng theo quy định. Việc đọc thông báo không tính là phản hồi.",
+    "closedBannerTitle": "Phiếu hỗ trợ đã được đóng và hoàn tất",
+    "closedHelp": "Phiếu hỗ trợ này đã hoàn thành. Nếu có thắc mắc hoặc sự cố phát sinh sau thời điểm này, vui lòng tạo phiếu hỗ trợ mới.",
+    "noMessages": "Chưa có phản hồi nào trong luồng này.",
+    "sendFirst": "Gửi tin nhắn để bắt đầu trao đổi với khách hàng.",
+    "composerClosedNotice": "Phiếu hỗ trợ này đã được đóng hoàn tất. Không thể gửi thêm tin nhắn phản hồi.",
+    "composerResolvedWarning": "Lưu ý: Gửi thêm tin nhắn trong lúc này sẽ chuyển vé về trạng thái Đang xử lý và hủy hạn đếm ngược 10 ngày.",
+    "senderFallback": "Người gửi",
+    "userFallback": "Người dùng",
+    "handlerCard": {
+      "title": "Người phụ trách",
+      "activeBadge": "Đang phụ trách",
+      "unassignedBadge": "Chờ phân công",
+      "changeBtn": "Điều chuyển",
+      "techFallback": "Kỹ thuật viên",
+      "stationTechFallback": "Kỹ thuật viên trạm",
+      "stationAssigned": "Trạm phụ trách",
+      "techRole": "Kỹ thuật viên",
+      "unassignedTitle": "Chưa có người phụ trách",
+      "unassignedDesc": "Phiếu hỗ trợ đang trong hàng đợi xử lý. Quản lý hoặc nhân viên trạm có thể nhận xử lý trực tiếp hoặc phân công cho kỹ thuật viên."
+    },
+    "tabs": {
+      "thread": "Luồng trao đổi",
+      "events": "Nhật ký sự kiện (Audit Trail)"
+    },
+    "escalateBtn": "Báo cáo khẩn cấp",
+    "escalateSuccess": "Đã nâng cấp {{id}} lên đội vận hành trung tâm",
     "context": {
-      "reporter": "Người báo cáo"
+      "title": "Bối cảnh liên quan",
+      "reporter": "Người báo cáo",
+      "scope": "Phạm vi",
+      "platformScope": "Cổng thanh toán & Nền tảng",
+      "station": "Trạm sạc",
+      "unknownStation": "Trạm sạc",
+      "allSystem": "Toàn hệ thống",
+      "booking": "Đơn sạc liên kết",
+      "viewBooking": "Xem đơn",
+      "createdAt": "Thời điểm khởi tạo",
+      "atTime": "{{date}} lúc {{time}}"
+    },
+    "findings": {
+      "title": "Kết luận kỹ thuật",
+      "empty": "Chưa có kết luận kỹ thuật nào được ghi nhận cho phiếu này.",
+      "recordedAt": "Ghi nhận: {{time}}",
+      "HARDWARE_FAULT": "Lỗi phần cứng trụ sạc",
+      "STATION_OFFLINE": "Trạm mất kết nối mạng",
+      "SOFTWARE_BUG": "Sự cố phần mềm / firmware",
+      "USER_ERROR": "Thao tác phía người dùng",
+      "OTHER": "Nguyên nhân khác"
+    },
+    "refund": {
+      "title": "Chính sách bồi hoàn cọc",
+      "autoGranted": "Đã hoàn cọc 100% tự động",
+      "autoGrantedBadge": "Hoàn cọc 100%",
+      "desc": "Hệ thống tự động kích hoạt bồi hoàn do sự cố thuộc trách nhiệm hạ tầng trạm sạc.",
+      "viewDetail": "Chi tiết hoàn tiền →",
+      "policyNotice": "Theo chính sách bảo vệ tài xế, nếu sự cố trạm được xác nhận là lỗi phần cứng hoặc ngoại tuyến, tài xế sẽ được hoàn 100% tiền cọc tự động."
     },
     "loadError": "Không tải được ticket: {{message}}",
-    "thread": "Trao đổi",
-    "threadHint": "cũ nhất trước · chỉ thêm",
-    "composerPlaceholder": "Nhập phản hồi…",
+    "thread": "Luồng trao đổi & giải quyết sự cố",
+    "composerPlaceholder": "Nhập phản hồi hoặc hướng dẫn xử lý…",
     "send": "Gửi",
-    "sending": "Đang gửi…",
-    "statusSuccess": "Đã cập nhật trạng thái",
-    "reassignPlaceholder": "Tên trạm…",
-    "reassignBtn": "Chuyển",
-    "reassignSuccess": "Đã điều phối {{id}} tới {{station}}",
-    "escalateBtn": "Nâng cấp lên trung tâm",
-    "escalateSuccess": "Đã nâng cấp {{id}} lên đội vận hành trung tâm"
+    "sending": "Đang gửi…"
+  },
+  "resolveModal": {
+    "title": "Xác nhận Giải quyết Sự cố",
+    "cycle": "Lần xử lý thứ {{cycle}}",
+    "tenDaysBadge": "10 ngày tự đóng",
+    "reasonLabel": "Kết quả & Nội dung xử lý sự cố",
+    "reasonHelp": "Mô tả chi tiết giải pháp kỹ thuật đã khắc phục. Nội dung này sẽ được thông báo trực tiếp cho tài xế.",
+    "reasonPlaceholder": "Ví dụ: Đã kiểm tra lại cáp tín hiệu, khởi động lại trụ sạc DC và kiểm thử phiên sạc thành công...",
+    "notificationPreviewTitle": "Xem trước thông báo gửi cho tài xế:",
+    "disclaimer": "* Sau khi gửi, hệ thống dành 10 ngày để tài xế phản hồi hoặc xác nhận. Nếu tài xế gửi tin nhắn hoặc báo vấn đề vẫn còn, phiếu sẽ tự động chuyển về trạng thái Đang xử lý.",
+    "submitting": "Đang cập nhật...",
+    "submit": "Hoàn tất & Đánh dấu Giải quyết"
+  },
+  "assignModal": {
+    "titleAssign": "Phân công Nhân viên Phụ trách",
+    "titleReassign": "Điều chuyển Người xử lý Vé",
+    "selectStaffLabel": "Chọn nhân viên phụ trách",
+    "selectStaffHelp": "Chỉ nhân viên đang hoạt động tại trạm mới có quyền tiếp nhận và xử lý phiếu hỗ trợ này.",
+    "noActiveStaff": "Không tìm thấy nhân viên nào đang làm việc tại trạm này. Vui lòng phân công nhân viên vào trạm trước.",
+    "goToStaff": "Quản lý nhân viên trạm →",
+    "selectAdminLabel": "Chọn chuyên viên Quản trị viên phụ trách",
+    "selectAdminHelp": "Chuyên viên Quản trị viên (Admin) chịu trách nhiệm tiếp nhận và giải quyết sự cố cấp nền tảng & thanh toán này.",
+    "noAdmins": "Chưa tìm thấy chuyên viên Quản trị viên nào trong hệ thống.",
+    "goToUsers": "Quản lý người dùng toàn hệ thống →",
+    "adminStationScopeTitle": "Trách nhiệm thuộc Đơn vị vận hành trạm",
+    "adminStationScopeDesc": "Sự cố tại trụ sạc do Chủ trạm và nhân viên kỹ thuật trạm trực tiếp xử lý. Thẩm quyền phân công nhân sự tại trạm thuộc về Chủ trạm. Admin thực hiện giám sát tiến độ SLA và kỹ thuật.",
+    "goToStations": "Xem danh sách trạm hệ thống →",
+    "scopePlatform": "Phạm vi: Cổng thanh toán & Nền tảng",
+    "current": "Hiện tại",
+    "activePill": "Đang làm việc",
+    "adminRolePill": "Quản trị viên",
+    "reasonLabel": "Lý do điều chuyển",
+    "reasonHelp": "Bắt buộc ghi rõ lý do bàn giao (đổi ca trực, sự cố vượt cấp, v.v.). Người phụ trách trước đó sẽ chuyển giao toàn bộ quyền xử lý.",
+    "reasonPlaceholder": "Ví dụ: Đổi ca trực chiều, bàn giao cho chuyên viên xử lý...",
+    "submitAssign": "Xác nhận Phân công",
+    "submitReassign": "Xác nhận Điều chuyển"
+  },
+  "timeline": {
+    "emptyTitle": "Chưa có nhật ký hoạt động nào",
+    "emptyHelp": "Các thao tác tiếp nhận, phân công, giải quyết vé sẽ được ghi lại tại đây.",
+    "statusTransition": "Trạng thái:",
+    "assignedTo": "Phân công cho:"
+  },
+  "errors": {
+    "title": "Thông báo lỗi",
+    "accessDeniedTitle": "Từ chối quyền truy cập",
+    "accessDenied": "Bạn không có quyền truy cập hoặc thực hiện thao tác trên phiếu hỗ trợ này.",
+    "notFoundTitle": "Không tìm thấy phiếu hỗ trợ",
+    "notFound": "Phiếu hỗ trợ được yêu cầu không tồn tại hoặc đã bị xóa khỏi hệ thống.",
+    "invalidScopeTitle": "Bối cảnh không hợp lệ",
+    "invalidScope": "Đơn sạc hoặc trạm liên kết không phù hợp với phạm vi phiếu hỗ trợ này.",
+    "stateConflictTitle": "Trạng thái không hợp lệ",
+    "stateConflict": "Trạng thái hiện tại của phiếu không cho phép thực hiện thao tác này.",
+    "versionConflictTitle": "Dữ liệu đã thay đổi",
+    "versionConflict": "Dữ liệu phiếu đã được cập nhật bởi một thao tác khác. Vui lòng làm mới trang.",
+    "closedTitle": "Phiếu đã đóng",
+    "closed": "Phiếu hỗ trợ này đã hoàn tất và đóng, không thể gửi thêm phản hồi.",
+    "assignmentInvalidTitle": "Phân công không hợp lệ",
+    "assignmentInvalid": "Nhân viên được chọn không hợp lệ hoặc không có quyền phụ trách trạm này.",
+    "findingInvalidTitle": "Kết luận không hợp lệ",
+    "findingInvalid": "Kết luận sự cố kỹ thuật không phù hợp với phiếu hỗ trợ này.",
+    "codeConflictTitle": "Mã phiếu đã tồn tại",
+    "codeConflict": "Mã phiếu hỗ trợ đã tồn tại trên hệ thống. Vui lòng thử lại.",
+    "genericTitle": "Thao tác không thành công",
+    "generic": "Đã xảy ra sự cố khi xử lý yêu cầu. Vui lòng thử lại sau.",
+    "refreshAction": "Tải lại trang",
+    "backToList": "Quay lại danh sách phiếu"
   }
 }
+

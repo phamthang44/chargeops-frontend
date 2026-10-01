@@ -41,20 +41,22 @@ export function NotificationCenter({
   const [selectedSeverity, setSelectedSeverity] = useState<'all' | 'bad' | 'warn' | 'good' | 'neutral'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+
   // Statistics counters
   const stats = useMemo(() => {
-    const total = items.length;
-    const unread = items.filter((i) => !i.read).length;
-    const critical = items.filter((i) => i.tone === 'bad').length;
-    const warning = items.filter((i) => i.tone === 'warn').length;
-    const sessions = items.filter((i) => i.category === 'session').length;
-    const tickets = items.filter((i) => i.category === 'ticket').length;
+    const total = safeItems.length;
+    const unread = safeItems.filter((i) => !i.read).length;
+    const critical = safeItems.filter((i) => i.tone === 'bad').length;
+    const warning = safeItems.filter((i) => i.tone === 'warn').length;
+    const sessions = safeItems.filter((i) => i.category === 'session').length;
+    const tickets = safeItems.filter((i) => i.category === 'ticket').length;
     return { total, unread, critical, warning, sessions, tickets };
-  }, [items]);
+  }, [safeItems]);
 
   // Filtering logic
   const filteredItems = useMemo(() => {
-    return items.filter((item) => {
+    return safeItems.filter((item) => {
       // Category filter
       if (activeTab !== 'all') {
         const cat = item.category || (item.tone === 'bad' || item.tone === 'warn' ? 'alert' : 'system');

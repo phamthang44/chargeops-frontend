@@ -129,7 +129,7 @@ export function NotificationBell({
 
   // Sync external items into local state while tracking read status
   useEffect(() => {
-    setLocalItems(initialItems);
+    setLocalItems(Array.isArray(initialItems) ? initialItems : []);
   }, [initialItems]);
 
   useEffect(() => {

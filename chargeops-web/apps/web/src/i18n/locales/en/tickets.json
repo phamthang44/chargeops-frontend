@@ -1,39 +1,303 @@
 {
-  "title": "Support",
-  "subtitle": "Tickets routed to your station.",
-  "subtitleAdmin": "All support tickets across the platform.",
-  "searchPlaceholder": "Search ID, driver, subject...",
+  "title": "Support & Incident Handling",
+  "subtitle": "Tickets routed to your station based on assignments.",
+  "subtitleAdmin": "All support tickets across the entire charging network.",
+  "searchPlaceholder": "Search ticket ID, driver, subject...",
   "emptyState": "No tickets matched the filters.",
+  "kpi": {
+    "pending": "Needs Attention",
+    "critical": "Critical / High",
+    "resolved": "Resolved",
+    "unassigned": "Pending Claim",
+    "unassignedHelp": "Station staff can claim",
+    "unassignedHelpAdmin": "Tickets awaiting assignment or review",
+    "inProgress": "In Progress",
+    "inProgressHelp": "Staff assigned",
+    "inProgressHelpAdmin": "Under investigation by staff or specialists",
+    "resolvingWatch": "Awaiting Driver (10 days)",
+    "resolvingWatchAdmin": "Awaiting driver response",
+    "resolvingWatchHelp": "Auto-closes after 10 days",
+    "resolvingWatchHelpAdmin": "Auto-closes per policy if no response received",
+    "completed": "Completed",
+    "completedHelp": "Closed & completed"
+  },
+  "workstream": {
+    "all": "All System Tickets",
+    "platform": "Platform & Payment Issues",
+    "station": "Station Supervisory Queue",
+    "platformHelp": "Directly handled by Platform Admins for wallet deposits, payment gateways, and driver accounts.",
+    "stationHelp": "Directly handled by Station Owners & Staff. Admin oversees SLA, technical findings, and refund approvals."
+  },
+  "supervisory": {
+    "badge": "Station Supervisory Mode",
+    "bannerTitle": "Station Supervisory Mode (SLA & Technical Audit)",
+    "bannerDesc": "Station charging incidents are handled by the Station Operator & Technicians at {{station}}. Admin monitors SLA, records technical findings, and approves deposit refunds.",
+    "stationUnit": "Station Operations Unit",
+    "stationAssignedNotice": "Station technician is actively investigating and resolving hardware issues on-site.",
+    "stationUnassignedNotice": "Station owner or staff will claim and assign a technician for this physical ticket.",
+    "findingsSectionTitle": "Technical Audit Findings (Admin)",
+    "findingsBtn": "Record Technical Finding",
+    "escalateBtn": "Escalate"
+  },
+  "platformQueue": {
+    "badge": "Platform & Payment Queue",
+    "claimBtn": "Claim Platform Issue",
+    "assignAdminBtn": "Assign Specialist",
+    "handlerTitle": "Platform Specialist",
+    "unassignedNotice": "Platform incident awaiting assignment by an Admin specialist."
+  },
+  "live": {
+    "badge": "Live Sync",
+    "refreshTooltip": "Refresh messages"
+  },
+  "filters": {
+    "allStationsAdmin": "All system stations",
+    "allStationsOwner": "All my stations"
+  },
   "tabs": {
-    "all": "All"
+    "all": "All",
+    "open": "Open",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "status": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "OPEN": "Open",
+    "IN_PROGRESS": "In Progress",
+    "RESOLVED": "Resolved",
+    "CLOSED": "Closed"
+  },
+  "closeReason": {
+    "auto": "10-Day Auto-Closed",
+    "confirmed": "Driver Confirmed"
+  },
+  "countdown": {
+    "autoClosePrefix": "Auto-closes in:",
+    "expired": "10-day period expired (System auto-closing)"
   },
   "category": {
-    "all": "All categories"
+    "all": "All categories",
+    "charging_issue": "Charging Issue",
+    "booking": "Booking",
+    "payment": "Payment",
+    "account": "Account",
+    "other": "Other",
+    "CHARGING_ISSUE": "Charging Issue",
+    "BOOKING": "Booking",
+    "PAYMENT": "Payment",
+    "ACCOUNT": "Account",
+    "OTHER": "Other"
+  },
+  "priority": {
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+    "CRITICAL": "Critical"
+  },
+  "actor": {
+    "ADMIN": "ChargeOps Admin",
+    "OWNER": "Station Owner",
+    "STAFF": "Station Staff",
+    "REPORTER": "Driver (Reporter)",
+    "driver": "Driver",
+    "SYSTEM": "Automated System"
+  },
+  "events": {
+    "CLAIMED": "Ticket Claimed",
+    "ASSIGNED": "Assigned",
+    "REASSIGNED": "Reassigned",
+    "RESOLVED": "Resolved",
+    "AUTO_CLOSED_NO_RESPONSE": "10-Day Auto-Closed",
+    "REPORTER_CONFIRMED": "Driver Confirmed Closure",
+    "REOPENED_PERSISTENT": "Issue Persists"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "saving": "Processing...",
+    "platform": "Platform"
+  },
+  "stepper": {
+    "ariaLabel": "Support ticket lifecycle progress",
+    "created": "1. Created",
+    "createdSub": "Recorded",
+    "createdWaiting": "Recorded by system",
+    "createdDone": "Request received",
+    "inProgress": "2. In Progress",
+    "unassigned": "Unassigned",
+    "unassignedWait": "Awaiting assignment",
+    "handlingActive": "Technical troubleshooting",
+    "handledDone": "Issue resolved",
+    "resolved": "3. Awaiting Driver",
+    "resolvedSub": "10-day response window",
+    "resolvingWatch": "Awaiting response (10 days)",
+    "verifiedDone": "Verified & Accepted",
+    "closed": "4. Closed",
+    "closedSub": "Archived"
   },
   "table": {
     "cols": {
       "id": "ID",
+      "priority": "PRIORITY",
       "content": "CONTENT",
       "station": "STATION",
+      "handler": "ASSIGNED STAFF",
       "status": "STATUS"
-    }
+    },
+    "unassigned": "Pending Claim"
   },
   "detail": {
     "back": "Ticket list",
+    "defaultSubject": "Support Ticket",
+    "deadline": "Deadline: {{time}} on {{date}}",
+    "cycleBadge": "Cycle #{{cycle}}",
+    "cycleInitial": "Initial",
+    "claimBtn": "Claim Ticket",
+    "claiming": "Claiming...",
+    "claimSuccess": "You have claimed this ticket successfully!",
+    "assignBtn": "Assign Staff",
+    "assignBtnShort": "Assign",
+    "assignSuccess": "Assigned staff member successfully!",
+    "reassignBtn": "Reassign",
+    "resolveBtn": "Mark as Resolved",
+    "resolveSuccess": "Ticket marked as resolved and notification sent to driver!",
+    "editResolution": "Edit outcome",
+    "conflictWarning": "Ticket data has been updated on the server. Reloading latest version...",
+    "resolvedBannerTitle": "Issue marked as resolved",
+    "resolutionOutcome": "Resolution outcome",
+    "autoClosePolicyDisclaimer": "Support Policy: An in-app notification has been sent to the driver. If no response is received within 10 days, this ticket will automatically close. Viewing notifications does not count as a response.",
+    "closedBannerTitle": "Ticket has been closed and completed",
+    "closedHelp": "Support workflow has ended. Any new issues arising after this must be submitted as a new ticket.",
+    "noMessages": "No messages in this thread yet.",
+    "sendFirst": "Send a message to start communicating with the reporter.",
+    "composerClosedNotice": "This ticket has been closed. No further replies can be sent.",
+    "composerResolvedWarning": "Note: Sending a message now will move the ticket back to In Progress and cancel the 10-day countdown timer.",
+    "senderFallback": "Sender",
+    "userFallback": "User",
+    "handlerCard": {
+      "title": "Assigned Staff",
+      "activeBadge": "Assigned",
+      "unassignedBadge": "Awaiting Assignment",
+      "changeBtn": "Reassign",
+      "techFallback": "Technician",
+      "stationTechFallback": "Station Technician",
+      "stationAssigned": "Assigned Station",
+      "techRole": "Technician",
+      "unassignedTitle": "No handler assigned",
+      "unassignedDesc": "This ticket is in the processing queue. Managers or station staff can claim directly or assign to a technician."
+    },
+    "tabs": {
+      "thread": "Live Thread",
+      "events": "Activity History (Audit Trail)"
+    },
+    "escalateBtn": "Escalate to Central Ops",
+    "escalateSuccess": "Escalated {{id}} to central operations team",
     "context": {
-      "reporter": "Reporter"
+      "title": "Related Context",
+      "reporter": "Reporter",
+      "scope": "Scope",
+      "platformScope": "Platform & Payment Gateway",
+      "station": "Charging Station",
+      "unknownStation": "Charging Station",
+      "allSystem": "System-wide",
+      "booking": "Linked Booking",
+      "viewBooking": "View Booking",
+      "createdAt": "Creation Time",
+      "atTime": "{{date}} at {{time}}"
+    },
+    "findings": {
+      "title": "Technical Findings",
+      "empty": "No technical findings recorded yet for this ticket.",
+      "recordedAt": "Recorded: {{time}}",
+      "HARDWARE_FAULT": "Charger hardware fault",
+      "STATION_OFFLINE": "Station network outage",
+      "SOFTWARE_BUG": "Software / firmware bug",
+      "USER_ERROR": "User operating mistake",
+      "OTHER": "Other cause"
+    },
+    "refund": {
+      "title": "Deposit Refund Policy",
+      "autoGranted": "100% deposit refunded automatically",
+      "autoGrantedBadge": "100% Refund Approved",
+      "desc": "The platform automatically initiates full refund when the station encounters hardware or offline outage.",
+      "viewDetail": "Refund Details →",
+      "policyNotice": "Under driver protection policy, if the station incident is verified as hardware failure or offline station, the driver will receive an automatic 100% deposit refund."
     },
     "loadError": "Could not load ticket: {{message}}",
-    "thread": "Conversation",
-    "threadHint": "oldest first · append-only",
-    "composerPlaceholder": "Type a reply...",
+    "thread": "Troubleshooting & Communication Thread",
+    "composerPlaceholder": "Type a response or resolution advice…",
     "send": "Send",
-    "sending": "Sending...",
-    "statusSuccess": "Status updated",
-    "reassignPlaceholder": "Station name...",
-    "reassignBtn": "Reassign",
-    "reassignSuccess": "Reassigned {{id}} to {{station}}",
-    "escalateBtn": "Escalate to central ops",
-    "escalateSuccess": "Escalated {{id}} to the central ops team"
+    "sending": "Sending..."
+  },
+  "resolveModal": {
+    "title": "Confirm Incident Resolution",
+    "cycle": "Resolution attempt #{{cycle}}",
+    "tenDaysBadge": "10-day auto-close",
+    "reasonLabel": "Resolution Outcome & Corrective Action",
+    "reasonHelp": "Describe in detail the technical fix performed. This note will be dispatched directly to the driver.",
+    "reasonPlaceholder": "E.g., Reconnected communication cable, restarted DC charger unit and verified charge cycle successfully...",
+    "notificationPreviewTitle": "Live driver notification preview:",
+    "disclaimer": "* After submission, the driver has 10 days to reply or confirm. If the driver replies or indicates the issue persists, the ticket will automatically return to In Progress.",
+    "submitting": "Updating...",
+    "submit": "Complete & Mark Resolved"
+  },
+  "assignModal": {
+    "titleAssign": "Assign Staff Member",
+    "titleReassign": "Reassign Ticket",
+    "selectStaffLabel": "Select Station Staff",
+    "selectStaffHelp": "Only staff members actively assigned to this station are authorized to process this ticket.",
+    "noActiveStaff": "No active staff found for this station. Please assign staff to this station first.",
+    "goToStaff": "Station Staff Management →",
+    "selectAdminLabel": "Select Platform Administrator in charge",
+    "selectAdminHelp": "Platform Administrators (Admin) are responsible for resolving platform and billing level incidents.",
+    "noAdmins": "No platform administrators found in the system.",
+    "goToUsers": "Global User Management →",
+    "adminStationScopeTitle": "Responsibility of Station Operator",
+    "adminStationScopeDesc": "Station charging incidents are handled directly by the Station Owner and technicians. Staff allocation is managed by the Station Owner. Admin oversees SLA and technical integrity.",
+    "goToStations": "View System Stations →",
+    "scopePlatform": "Scope: Platform & Payment Gateway",
+    "current": "Current",
+    "activePill": "Active",
+    "adminRolePill": "Administrator",
+    "reasonLabel": "Reassignment Reason",
+    "reasonHelp": "Mandatory explanation for transferring this ticket (shift change, technical escalation, etc.). The previous staff member hands over handling responsibility.",
+    "reasonPlaceholder": "E.g., Afternoon shift change, handed over to platform specialist...",
+    "submitAssign": "Confirm Assignment",
+    "submitReassign": "Confirm Reassignment"
+  },
+  "timeline": {
+    "emptyTitle": "No activity logged yet",
+    "emptyHelp": "Actions such as claiming, assigning, and resolving tickets will be permanently logged here.",
+    "statusTransition": "Status:",
+    "assignedTo": "Assigned to:"
+  },
+  "errors": {
+    "title": "Error Notification",
+    "accessDeniedTitle": "Access Denied",
+    "accessDenied": "You do not have access to view or perform actions on this support ticket.",
+    "notFoundTitle": "Ticket Not Found",
+    "notFound": "The requested support ticket was not found or has been removed.",
+    "invalidScopeTitle": "Invalid Scope",
+    "invalidScope": "The booking or station context is invalid for this support ticket.",
+    "stateConflictTitle": "State Conflict",
+    "stateConflict": "The support ticket cannot be modified in its current state.",
+    "versionConflictTitle": "Data Changed",
+    "versionConflict": "Ticket data has been updated by another user or session. Please refresh the page.",
+    "closedTitle": "Ticket Closed",
+    "closed": "This support ticket is closed and cannot accept new replies.",
+    "assignmentInvalidTitle": "Invalid Assignment",
+    "assignmentInvalid": "The selected staff member cannot be assigned to this ticket.",
+    "findingInvalidTitle": "Invalid Finding",
+    "findingInvalid": "The station-failure finding is invalid for this support ticket.",
+    "codeConflictTitle": "Code Conflict",
+    "codeConflict": "The support ticket code already exists. Please try again.",
+    "genericTitle": "Operation Failed",
+    "generic": "An error occurred while processing your request. Please try again later.",
+    "refreshAction": "Refresh Page",
+    "backToList": "Back to Tickets List"
   }
 }
+

@@ -115,7 +115,7 @@
     "cancelBtn": "Hủy thay khách",
     "canceling": "Đang hủy…",
     "ownerCancelDisabledBtn": "Hủy đặt chỗ",
-    "ownerCancelDisabled": "Chủ trạm chỉ được hủy khi trạm gặp sự cố (BKG-056)",
+    "ownerCancelDisabled": "Chủ trạm chỉ được phép hủy lịch sạc khi trạm phát sinh sự cố kỹ thuật.",
     "contactBtn": "Liên hệ khách",
     "emptyState": "Không có lượt đặt nào khớp bộ lọc.",
     "rangeLabel": "KHOẢNG THỜI GIAN · LIÊN TỤC",

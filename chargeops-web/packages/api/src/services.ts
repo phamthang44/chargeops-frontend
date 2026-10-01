@@ -66,10 +66,14 @@ import type {
   RegisterStationAssetInput,
   ImageKitAuthResponse,
   Ticket,
+  TicketEvent,
   TicketListParams,
   TicketMessage,
   TicketStatus,
   TicketSummary,
+  AssignTicketRequest,
+  ResolveTicketRequest,
+  StationTicketKpis,
   Transaction,
   TransactionSummary,
   TransactionType,
@@ -333,7 +337,22 @@ export interface TicketService {
   summary(): Promise<TicketSummary>;
   /** Append-only reply; first reply on an open ticket also flips it to in_progress. */
   reply(id: string, body: string): Promise<TicketMessage>;
-  setStatus(id: string, status: TicketStatus): Promise<Ticket>;
+  /** BKG-052 claim atomic mutation */
+  claim(id: string, expectedVersion?: number): Promise<Ticket>;
+  /** BKG-052 assign/reassign handler mutation */
+  assign(id: string, request: AssignTicketRequest): Promise<Ticket>;
+  /** BKG-052 resolve ticket with mandatory reason and 10-day auto-close countdown */
+  resolve(id: string, request: ResolveTicketRequest): Promise<Ticket>;
+  /** BKG-052 reporter confirmation or auto-close */
+  confirm(id: string, expectedVersion?: number): Promise<Ticket>;
+  /** BKG-052 reporter persists issue (reopen to IN_PROGRESS) */
+  reopen(id: string, request: { expectedVersion?: number; reason: string }): Promise<Ticket>;
+  /** BKG-052 append-only audit event trail */
+  events(id: string): Promise<TicketEvent[]>;
+  /** BKG-052 Station Staff operational KPI metrics */
+  kpis(stationId: string, params?: { from?: string; to?: string; staffId?: string }): Promise<StationTicketKpis>;
+  /** Legacy status changer */
+  setStatus(id: string, status: TicketStatus, options?: { expectedVersion?: number; reason?: string }): Promise<Ticket>;
   /** Admin only — moves the ticket to a different station's queue. */
   reassign(id: string, stationName: string): Promise<Ticket>;
   /** Admin only — pulls the ticket into central ops. */

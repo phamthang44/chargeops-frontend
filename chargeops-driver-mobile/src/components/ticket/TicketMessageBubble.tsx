@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
-import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { TicketActorKind, TicketMessage } from '@/types';
 
 interface TicketMessageBubbleProps {
@@ -18,27 +18,27 @@ const ACTOR_STYLE: Record<
 > = {
   REPORTER: {
     icon: 'person-outline',
-    color: '#10B981',
+    color: '#059669',
     bgLight: '#D1FAE5',
-    bgDark: '#113322',
+    bgDark: '#0D3827',
   },
   STAFF: {
     icon: 'construct-outline',
-    color: '#3B82F6',
+    color: '#2563EB',
     bgLight: '#EFF6FF',
     bgDark: '#172554',
   },
   OWNER: {
     icon: 'business-outline',
-    color: '#F59E0B',
-    bgLight: '#FFFBEB',
-    bgDark: '#3B1D0B',
+    color: '#D97706',
+    bgLight: '#FEF3C7',
+    bgDark: '#451A03',
   },
   ADMIN: {
     icon: 'shield-checkmark',
-    color: '#8B5CF6',
-    bgLight: '#F5F3FF',
-    bgDark: '#2E1065',
+    color: '#7C3AED',
+    bgLight: '#F3E8FF',
+    bgDark: '#3B0764',
   },
 };
 
@@ -61,13 +61,13 @@ export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProp
             styles.bubble,
             styles.selfBubble,
             {
-              backgroundColor: isDark ? '#1F3F2E' : themeColors.primarySoft,
-              borderColor: isDark ? '#2E6649' : '#A7F3D0',
+              backgroundColor: isDark ? '#0E3827' : '#ECFDF5',
+              borderColor: isDark ? '#155E3E' : '#A7F3D0',
             },
           ]}
         >
           <Text style={[styles.messageBody, { color: themeColors.textStrong }]}>{message.body}</Text>
-          <Text style={[styles.timestamp, styles.selfTimestamp, { color: themeColors.textMuted }]}>
+          <Text style={[styles.timestamp, styles.selfTimestamp, { color: isDark ? '#6EE7B7' : '#059669' }]}>
             {formattedTime}
           </Text>
         </View>
@@ -77,7 +77,7 @@ export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProp
 
   return (
     <View style={[styles.bubbleContainer, styles.incomingContainer]}>
-      {/* Sender Role Badge */}
+      {/* Sender Header with Role Badge & Display Name */}
       <View style={styles.senderHeader}>
         <View
           style={[
@@ -90,19 +90,19 @@ export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProp
           <Ionicons name={actor.icon} size={13} color={actor.color} />
           <Text style={[styles.roleText, { color: actor.color }]}>{roleLabel}</Text>
         </View>
-        <Text style={[styles.senderName, { color: themeColors.textMuted }]} numberOfLines={1}>
-          {message.authorDisplayName}
+        <Text style={[styles.senderName, { color: themeColors.textStrong }]} numberOfLines={1}>
+          {message.authorDisplayName || t('ticket.detail.senderFallback', 'Chuyên viên hỗ trợ')}
         </Text>
       </View>
 
-      {/* Message Content */}
+      {/* Message Content Bubble */}
       <View
         style={[
           styles.bubble,
           styles.incomingBubble,
           {
-            backgroundColor: themeColors.surface,
-            borderColor: themeColors.border,
+            backgroundColor: isDark ? '#1C1C24' : '#FFFFFF',
+            borderColor: isDark ? '#2E2E38' : '#E5E7EB',
           },
         ]}
       >
@@ -115,8 +115,8 @@ export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProp
 
 const styles = StyleSheet.create({
   bubbleContainer: {
-    marginVertical: spacing.xs,
-    maxWidth: '85%',
+    marginVertical: 6,
+    maxWidth: '86%',
   },
   selfContainer: {
     alignSelf: 'flex-end',
@@ -127,46 +127,48 @@ const styles = StyleSheet.create({
   senderHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
+    gap: 8,
+    marginBottom: 5,
     paddingLeft: spacing.xs,
   },
   roleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: radius.full,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
   roleText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: fontWeights.bold,
+    letterSpacing: 0.3,
   },
   senderName: {
-    fontSize: fontSizes.caption - 1,
-    fontWeight: fontWeights.medium,
+    fontSize: 13,
+    fontWeight: fontWeights.semibold,
   },
   bubble: {
-    borderRadius: radius.md,
+    borderRadius: 18,
     borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    gap: 4,
+    paddingHorizontal: 15,
+    paddingVertical: 11,
+    gap: 5,
   },
   selfBubble: {
-    borderBottomRightRadius: 2,
+    borderBottomRightRadius: 4,
   },
   incomingBubble: {
-    borderBottomLeftRadius: 2,
+    borderBottomLeftRadius: 4,
   },
   messageBody: {
-    fontSize: fontSizes.body,
-    lineHeight: lineHeights.body,
+    fontSize: 15.5,
+    lineHeight: 22.5,
   },
   timestamp: {
-    fontSize: 10,
+    fontSize: 11,
     alignSelf: 'flex-end',
+    fontWeight: fontWeights.medium,
   },
   selfTimestamp: {
     marginTop: 2,

@@ -700,8 +700,8 @@
   },
   "payment": {
     "title": "Phương thức thanh toán",
-    "SIMULATOR": "Thanh toán giả lập (Demo Sandbox)",
-    "SIMULATOR_desc": "Mô phỏng thanh toán tức thì phục vụ demo đồ án",
+    "SIMULATOR": "Thanh toán thử nghiệm (Sandbox)",
+    "SIMULATOR_desc": "Mô phỏng thanh toán tức thì trong môi trường thử nghiệm",
     "VNPAY": "Cổng thanh toán VNPAY",
     "VNPAY_desc": "Thẻ ATM nội địa, QR Pay, Thẻ quốc tế",
     "MOMO": "Ví MoMo",
@@ -720,8 +720,8 @@
     "updateLater": "Sẽ cập nhật sau",
     "paidVia": "Thanh toán qua {{method}}",
     "methodLabel": "Phương thức",
-    "simulatorTitle": "Thanh toán VietQR (Demo Sandbox)",
-    "simulatorSubtitle": "Mô phỏng thanh toán chuyển khoản VietQR phục vụ đồ án",
+    "simulatorTitle": "Thanh toán VietQR (Thử nghiệm)",
+    "simulatorSubtitle": "Mô phỏng thanh toán chuyển khoản VietQR trong môi trường thử nghiệm",
     "simulatorNote": "Đây là môi trường thử nghiệm (Sandbox). Bạn có thể dùng app ngân hàng quét thử mã QR để kiểm tra thông tin điền sẵn. Nhấn \"Xác nhận thanh toán mô phỏng\" ở thanh bên dưới để hoàn tất giao dịch.",
     "simulatorCta": "Xác nhận thanh toán mô phỏng",
     "iHaveTransferred": "Tôi đã chuyển khoản",
@@ -794,8 +794,8 @@
       "SLOT_UNAVAILABLE": "Khung giờ sạc này không còn khả dụng.",
       "DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED": "Bạn đã đạt giới hạn số lượt đặt chỗ đang hoạt động.",
       "UNAUTHORIZED": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-      "TIME_INVALID": "Khung giờ đặt chỗ không hợp lệ hoặc không đúng bước nhảy (30 phút).",
-      "START_NOT_ON_GRID": "Giờ bắt đầu phải tròn theo bước nhảy 30 phút (ví dụ: 08:00, 08:30).",
+      "TIME_INVALID": "Khung giờ đặt chỗ không hợp lệ hoặc không theo khung 30 phút.",
+      "START_NOT_ON_GRID": "Giờ bắt đầu cần chọn theo mốc 30 phút (ví dụ: 08:00, 08:30).",
       "MINIMUM_ADVANCE_NOT_MET": "Phải đặt trước tối thiểu 60 phút so với thời điểm hiện tại.",
       "OUTSIDE_OPERATING_HOURS": "Khung giờ nằm ngoài thời gian hoạt động của trạm.",
       "SYS_003": "Dữ liệu đặt chỗ không hợp lệ ({{fields}}). Vui lòng chọn lại.",
@@ -924,7 +924,7 @@
     "title": "Đặt chỗ thành công!",
     "subtitle": "Chỗ sạc của bạn đã được giữ và thanh toán thành công",
     "codeLabel": "MÃ ĐẶT CHỖ",
-    "code": "Mã booking: {{code}}",
+    "code": "Mã đặt chỗ: {{code}}",
     "copyCode": "Sao chép",
     "codeCopied": "Đã sao chép",
     "txTitle": "Chi tiết giao dịch",
@@ -1163,10 +1163,22 @@
       "charCount": "{{count}}/500 ký tự",
       "submitBtn": "Gửi phiếu hỗ trợ sự cố",
       "submitting": "Đang gửi phiếu...",
+      "selectSessionTitle": "Chọn phiên sạc gặp sự cố *",
+      "selectSessionHelp": "Sự cố sạc pin yêu cầu liên kết với phiên sạc để kỹ thuật viên trạm kiểm tra và kích hoạt bồi hoàn cọc 100%.",
+      "noSessionsFound": "Không tìm thấy phiên sạc nào trên tài khoản",
+      "noSessionsWarning": "Để báo 'Sự cố sạc pin', bạn cần chọn một phiên sạc đã thực hiện. Nếu gặp vấn đề khác, vui lòng chọn loại 'Thanh toán & Phí' hoặc 'Vấn đề khác'.",
+      "selectStationTitle": "Chọn trạm hoặc phiên đặt chỗ *",
+      "selectStationHelp": "Lỗi đặt chỗ yêu cầu liên kết với trạm sạc hoặc phiên đặt chỗ liên quan.",
+      "platformScopeBadge": "Hàng chờ Nền tảng & Thanh toán",
+      "platformScopeHelp": "Sự cố này được chuyển thẳng tới Quản trị viên ChargeOps để tra soát giao dịch/tài khoản. Không yêu cầu trạm sạc.",
       "errorNoSubjectTitle": "Chưa nhập tiêu đề",
       "errorNoSubjectBody": "Vui lòng nhập hoặc chọn tóm tắt sự cố bạn đang gặp phải.",
       "errorNoDescTitle": "Chưa nhập mô tả",
       "errorNoDescBody": "Vui lòng mô tả chi tiết để kỹ thuật viên có thể hỗ trợ nhanh nhất.",
+      "errorBookingRequiredTitle": "Cần chọn phiên sạc",
+      "errorBookingRequiredBody": "Sự cố sạc pin yêu cầu liên kết với phiên sạc cụ thể để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc.",
+      "errorStationRequiredTitle": "Cần chọn trạm hoặc đơn đặt chỗ",
+      "errorStationRequiredBody": "Lỗi đặt chỗ yêu cầu chọn trạm sạc hoặc đơn đặt chỗ gặp sự cố.",
       "errorFailed": "Không thể tạo phiếu hỗ trợ"
     },
     "list": {
@@ -1211,6 +1223,14 @@
       "ACCOUNT": "Tài khoản",
       "OTHER": "Vấn đề khác"
     },
+    "conclusion": {
+      "HARDWARE_FAULT": "Sự cố thiết bị trạm sạc",
+      "SOFTWARE_FAULT": "Sự cố phần mềm kết nối",
+      "USER_ERROR": "Thao tác chưa phù hợp",
+      "GRID_FAILURE": "Mất nguồn điện lưới",
+      "NO_FAULT_FOUND": "Trạm hoạt động bình thường",
+      "OTHER": "Nguyên nhân khác"
+    },
     "priority": {
       "LOW": "Thấp",
       "MEDIUM": "Bình thường",
@@ -1249,6 +1269,18 @@
       "ACCOUNT_2": "Lỗi liên kết phương tiện sạc",
       "OTHER_1": "Khu vực sạc thiếu ánh sáng ban đêm",
       "OTHER_2": "Trạm sạc bị rào chắn không vào được"
+    },
+    "errors": {
+      "accessDenied": "Bạn không có quyền truy cập hoặc thực hiện thao tác trên phiếu hỗ trợ này.",
+      "notFound": "Không tìm thấy phiếu hỗ trợ được yêu cầu.",
+      "invalidScope": "Đơn đặt chỗ hoặc trạm sạc không khớp với phiếu hỗ trợ này.",
+      "stateConflict": "Trạng thái phiếu hiện tại không thể thực hiện thao tác này.",
+      "versionConflict": "Dữ liệu phiếu đã thay đổi. Vui lòng vuốt xuống để làm mới.",
+      "closed": "Phiếu hỗ trợ đã đóng hoàn tất, không thể gửi thêm tin nhắn.",
+      "assignmentInvalid": "Người xử lý được chọn không hợp lệ.",
+      "findingInvalid": "Kết luận kỹ thuật không hợp lệ.",
+      "codeConflict": "Mã phiếu hỗ trợ đã tồn tại.",
+      "generic": "Đã xảy ra lỗi khi xử lý phiếu hỗ trợ."
     }
   }
 }

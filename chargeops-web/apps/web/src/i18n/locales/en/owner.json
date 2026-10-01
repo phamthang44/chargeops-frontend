@@ -115,7 +115,7 @@
     "cancelBtn": "Cancel for Guest",
     "canceling": "Cancelling...",
     "ownerCancelDisabledBtn": "Cancel Booking",
-    "ownerCancelDisabled": "Owner cancellation is only permitted for station failure (BKG-056)",
+    "ownerCancelDisabled": "Owner cancellation is only permitted during station technical issues.",
     "contactBtn": "Contact Guest",
     "emptyState": "No bookings matched the filter.",
     "rangeLabel": "TIME RANGE · CONTINUOUS",

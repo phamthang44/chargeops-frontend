@@ -46,7 +46,7 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
           })}
         </span>
         <span className="text-[11px] font-semibold text-brand">
-          {t('refunds.timeline.notice', 'Bảo lưu PENDING khi FAILED (BR-PAY-13)')}
+          {t('refunds.timeline.notice', 'Bảo lưu quyền hoàn tiền khi giao dịch gián đoạn')}
         </span>
       </div>
 
@@ -55,10 +55,10 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
           <IconAlertTriangle size={15} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <span className="font-semibold text-amber-800 dark:text-amber-200 block">
-              Bảo lưu quyền hoàn tiền theo BR-PAY-13:
+              Bảo lưu quyền hoàn tiền của khách hàng:
             </span>
             <span className="text-muted leading-relaxed block">
-              Lần thực thi thất bại chỉ phản ánh sự cố kỹ thuật hoặc cổng mô phỏng. Quyền lợi hoàn tiền 100% của tài xế vẫn còn nguyên vẹn ở trạng thái PENDING. Admin có thể thực hiện attempt mới hoặc chuyển sang ghi nhận đối soát chuyển khoản ngoài.
+              Lần thực thi chưa thành công chỉ phản ánh sự cố kết nối tạm thời. Quyền lợi hoàn tiền 100% của khách hàng vẫn được bảo lưu ở trạng thái Chờ xử lý. Quản trị viên có thể gửi lại yêu cầu hoặc ghi nhận đối soát chuyển khoản ngân hàng.
             </span>
           </div>
         </div>

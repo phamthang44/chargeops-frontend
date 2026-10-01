@@ -13,7 +13,11 @@ import type {
   StationOperatingState,
   StationOperationalStatus,
   StationStatus,
+  TicketActorKind,
   TicketCategory,
+  TicketCloseReason,
+  TicketEventType,
+  TicketPriority,
   TicketStatus,
   UserStatus,
 } from './types';
@@ -95,6 +99,10 @@ export const TICKET_STATUS: Record<TicketStatus, StatusMeta> = {
   in_progress: { label: 'Đang xử lý', tone: 'brand' },
   resolved: { label: 'Đã giải quyết', tone: 'good' },
   closed: { label: 'Đã đóng', tone: 'neutral' },
+  OPEN: { label: 'Đang mở', tone: 'warn' },
+  IN_PROGRESS: { label: 'Đang xử lý', tone: 'brand' },
+  RESOLVED: { label: 'Đã giải quyết', tone: 'good' },
+  CLOSED: { label: 'Đã đóng', tone: 'neutral' },
 };
 
 export const TICKET_CATEGORY: Record<TicketCategory, string> = {
@@ -103,6 +111,48 @@ export const TICKET_CATEGORY: Record<TicketCategory, string> = {
   payment: 'Thanh toán',
   account: 'Tài khoản',
   other: 'Khác',
+  CHARGING_ISSUE: 'Sự cố sạc',
+  BOOKING: 'Đặt chỗ',
+  PAYMENT: 'Thanh toán',
+  ACCOUNT: 'Tài khoản',
+  OTHER: 'Khác',
+};
+
+export const TICKET_PRIORITY: Record<TicketPriority, StatusMeta> = {
+  LOW: { label: 'Thấp', tone: 'neutral' },
+  MEDIUM: { label: 'Trung bình', tone: 'brand' },
+  HIGH: { label: 'Cao', tone: 'warn' },
+  CRITICAL: { label: 'Khẩn cấp', tone: 'bad' },
+};
+
+export const TICKET_ACTOR_KIND: Record<TicketActorKind, { label: string; tone: Tone }> = {
+  REPORTER: { label: 'Người tạo vé', tone: 'neutral' },
+  STAFF: { label: 'Nhân viên trạm', tone: 'brand' },
+  OWNER: { label: 'Chủ trạm', tone: 'brand' },
+  ADMIN: { label: 'Quản trị viên', tone: 'good' },
+};
+
+export const TICKET_CLOSE_REASON: Record<TicketCloseReason, { label: string; tone: Tone; description: string }> = {
+  REPORTER_CONFIRMED: {
+    label: 'Khách hàng xác nhận',
+    tone: 'good',
+    description: 'Tài xế đã chủ động xác nhận sự cố được giải quyết thỏa đáng.',
+  },
+  AUTO_CLOSED_NO_RESPONSE: {
+    label: 'Tự động đóng (Hết 10 ngày)',
+    tone: 'neutral',
+    description: 'Hệ thống tự động đóng vé do tài xế không phản hồi sau 10 ngày.',
+  },
+};
+
+export const TICKET_EVENT_TYPE: Record<TicketEventType, { label: string; tone: Tone }> = {
+  CLAIMED: { label: 'Tự nhận vé', tone: 'brand' },
+  ASSIGNED: { label: 'Phân công', tone: 'brand' },
+  REASSIGNED: { label: 'Chuyển giao', tone: 'warn' },
+  RESOLVED: { label: 'Đã giải quyết', tone: 'good' },
+  AUTO_CLOSED_NO_RESPONSE: { label: 'Tự đóng 10 ngày', tone: 'neutral' },
+  REPORTER_CONFIRMED: { label: 'Khách xác nhận đóng', tone: 'good' },
+  REOPENED_PERSISTENT: { label: 'Vấn đề vẫn còn', tone: 'bad' },
 };
 
 /** Role badge colours (mono chips) — CSS var references so dark mode repaints them via inline style. */

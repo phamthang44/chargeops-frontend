@@ -328,31 +328,36 @@ export interface PolicyService {
   ask(question: string): Promise<AssistantAnswer>;
 }
 
+export interface TicketRoleOptions {
+  role?: 'owner' | 'admin' | 'staff';
+  workstream?: 'all' | 'platform' | 'station';
+}
+
 export interface TicketService {
   /** Owner/staff: tickets routed to stations they have access to. Admin: all tickets. */
   list(params?: TicketListParams): Promise<Page<Ticket>>;
-  get(id: string): Promise<Ticket>;
+  get(id: string, options?: TicketRoleOptions): Promise<Ticket>;
   /** Oldest-first. */
-  messages(id: string): Promise<TicketMessage[]>;
-  summary(): Promise<TicketSummary>;
+  messages(id: string, options?: TicketRoleOptions): Promise<TicketMessage[]>;
+  summary(options?: TicketRoleOptions): Promise<TicketSummary>;
   /** Append-only reply; first reply on an open ticket also flips it to in_progress. */
-  reply(id: string, body: string): Promise<TicketMessage>;
+  reply(id: string, body: string, options?: TicketRoleOptions): Promise<TicketMessage>;
   /** BKG-052 claim atomic mutation */
-  claim(id: string, expectedVersion?: number): Promise<Ticket>;
+  claim(id: string, expectedVersion?: number, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 assign/reassign handler mutation */
-  assign(id: string, request: AssignTicketRequest): Promise<Ticket>;
+  assign(id: string, request: AssignTicketRequest, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 resolve ticket with mandatory reason and 10-day auto-close countdown */
-  resolve(id: string, request: ResolveTicketRequest): Promise<Ticket>;
+  resolve(id: string, request: ResolveTicketRequest, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 reporter confirmation or auto-close */
-  confirm(id: string, expectedVersion?: number): Promise<Ticket>;
+  confirm(id: string, expectedVersion?: number, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 reporter persists issue (reopen to IN_PROGRESS) */
-  reopen(id: string, request: { expectedVersion?: number; reason: string }): Promise<Ticket>;
+  reopen(id: string, request: { expectedVersion?: number; reason: string }, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 append-only audit event trail */
-  events(id: string): Promise<TicketEvent[]>;
+  events(id: string, options?: TicketRoleOptions): Promise<TicketEvent[]>;
   /** BKG-052 Station Staff operational KPI metrics */
   kpis(stationId: string, params?: { from?: string; to?: string; staffId?: string }): Promise<StationTicketKpis>;
   /** Legacy status changer */
-  setStatus(id: string, status: TicketStatus, options?: { expectedVersion?: number; reason?: string }): Promise<Ticket>;
+  setStatus(id: string, status: TicketStatus, options?: { expectedVersion?: number; reason?: string; role?: 'owner' | 'admin' }): Promise<Ticket>;
   /** Admin only — moves the ticket to a different station's queue. */
   reassign(id: string, stationName: string): Promise<Ticket>;
   /** Admin only — pulls the ticket into central ops. */

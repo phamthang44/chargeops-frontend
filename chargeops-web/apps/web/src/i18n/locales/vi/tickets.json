@@ -297,7 +297,9 @@
     "genericTitle": "Thao tác không thành công",
     "generic": "Đã xảy ra sự cố khi xử lý yêu cầu. Vui lòng thử lại sau.",
     "refreshAction": "Tải lại trang",
-    "backToList": "Quay lại danh sách phiếu"
+    "backToList": "Quay lại danh sách phiếu",
+    "platformScopeOwnerWarningTitle": "Phiếu thuộc phạm vi Nền tảng ChargeOps",
+    "platformScopeOwnerWarning": "Sự cố này liên quan đến Cổng thanh toán, Tài khoản hoặc Hạ tầng hệ thống do Ban Quản trị ChargeOps tiếp nhận và xử lý trực tiếp. Chủ trạm không quản lý phiếu này."
   }
 }
 

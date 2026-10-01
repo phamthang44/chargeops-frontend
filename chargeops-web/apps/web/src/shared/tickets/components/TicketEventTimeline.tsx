@@ -11,15 +11,16 @@ import { Avatar, Skeleton, StatusPill, IconHistory, IconAlertCircle } from '@cha
 
 interface TicketEventTimelineProps {
   ticketId: string;
+  role?: 'owner' | 'admin';
 }
 
-export function TicketEventTimeline({ ticketId }: TicketEventTimelineProps) {
+export function TicketEventTimeline({ ticketId, role }: TicketEventTimelineProps) {
   const { t } = useTranslation('tickets');
   const api = useApi();
 
   const eventsQuery = useQuery({
-    queryKey: ['tickets', 'events', ticketId],
-    queryFn: () => api.tickets.events(ticketId),
+    queryKey: ['tickets', 'events', ticketId, role],
+    queryFn: () => api.tickets.events(ticketId, { role }),
   });
 
   const events: TicketEvent[] = eventsQuery.data ?? [];

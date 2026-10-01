@@ -297,7 +297,9 @@
     "genericTitle": "Operation Failed",
     "generic": "An error occurred while processing your request. Please try again later.",
     "refreshAction": "Refresh Page",
-    "backToList": "Back to Tickets List"
+    "backToList": "Back to Tickets List",
+    "platformScopeOwnerWarningTitle": "Platform-Scoped Support Ticket",
+    "platformScopeOwnerWarning": "This ticket pertains to Billing, User Accounts, or Platform Infrastructure managed directly by ChargeOps Platform Admins. Station Owners do not have authority over this ticket."
   }
 }
 

@@ -52,8 +52,8 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
   };
 
   const summaryQuery = useQuery({
-    queryKey: ['tickets', 'summary'],
-    queryFn: () => api.tickets.summary(),
+    queryKey: ['tickets', 'summary', { role: admin ? 'admin' : 'owner', workstream }],
+    queryFn: () => api.tickets.summary({ role: admin ? 'admin' : 'owner', workstream }),
     refetchInterval: 10000,
   });
 
@@ -63,7 +63,7 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
   });
 
   const listQuery = useQuery({
-    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page }],
+    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page, role: admin ? 'admin' : 'owner', workstream }],
     queryFn: () =>
       api.tickets.list({
         status,
@@ -73,6 +73,8 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
         search,
         page,
         pageSize: PAGE_SIZE,
+        role: admin ? 'admin' : 'owner',
+        workstream,
       }),
     placeholderData: keepPreviousData,
     refetchInterval: 10000,

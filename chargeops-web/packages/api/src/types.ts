@@ -1306,6 +1306,8 @@ export interface TicketListParams {
   search?: string;
   page?: number;
   pageSize?: number;
+  role?: 'owner' | 'admin' | 'staff';
+  workstream?: 'all' | 'platform' | 'station';
 }
 
 export interface TicketSummary {

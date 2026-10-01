@@ -103,6 +103,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
   const qc = useQueryClient();
   const toast = useToast();
   const accent = admin ? 'brand' : 'owner';
+  const roleOption: 'owner' | 'admin' = admin ? 'admin' : 'owner';
 
   const [draft, setDraft] = useState('');
   const [activeTab, setActiveTab] = useState<'thread' | 'events'>('thread');
@@ -113,14 +114,14 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
   const prevMessagesLength = useRef<number>(0);
 
   const ticketQuery = useQuery({
-    queryKey: ['tickets', 'get', id],
-    queryFn: () => api.tickets.get(id),
+    queryKey: ['tickets', 'get', id, roleOption],
+    queryFn: () => api.tickets.get(id, { role: roleOption }),
     refetchInterval: (query) => (query.state.data?.status !== 'CLOSED' ? 6000 : false),
     refetchIntervalInBackground: false,
   });
   const messagesQuery = useQuery({
-    queryKey: ['tickets', 'messages', id],
-    queryFn: () => api.tickets.messages(id),
+    queryKey: ['tickets', 'messages', id, roleOption],
+    queryFn: () => api.tickets.messages(id, { role: roleOption }),
     refetchInterval: () => (ticketQuery.data?.status !== 'CLOSED' ? 3000 : false),
     refetchIntervalInBackground: false,
   });
@@ -167,7 +168,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
   };
 
   const reply = useMutation({
-    mutationFn: (body: string) => api.tickets.reply(id, body),
+    mutationFn: (body: string) => api.tickets.reply(id, body, { role: roleOption }),
     onSuccess: () => {
       setDraft('');
       invalidateAll();
@@ -176,7 +177,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
   });
 
   const claim = useMutation({
-    mutationFn: () => api.tickets.claim(id, ticketQuery.data?.version),
+    mutationFn: () => api.tickets.claim(id, ticketQuery.data?.version, { role: roleOption }),
     onSuccess: () => {
       toast(t('detail.claimSuccess', 'Bạn đã nhận xử lý vé này thành công!'), 'success');
       invalidateAll();
@@ -186,11 +187,15 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
 
   const assign = useMutation({
     mutationFn: (data: { handlerId: string; reason?: string }) =>
-      api.tickets.assign(id, {
-        expectedVersion: ticketQuery.data?.version,
-        handlerId: data.handlerId,
-        reason: data.reason,
-      }),
+      api.tickets.assign(
+        id,
+        {
+          expectedVersion: ticketQuery.data?.version,
+          handlerId: data.handlerId,
+          reason: data.reason,
+        },
+        { role: roleOption }
+      ),
     onSuccess: () => {
       toast(t('detail.assignSuccess', 'Phân công nhân viên xử lý thành công!'), 'success');
       setIsAssignDrawerOpen(false);
@@ -201,10 +206,14 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
 
   const resolve = useMutation({
     mutationFn: (reason: string) =>
-      api.tickets.resolve(id, {
-        expectedVersion: ticketQuery.data?.version,
-        reason,
-      }),
+      api.tickets.resolve(
+        id,
+        {
+          expectedVersion: ticketQuery.data?.version,
+          reason,
+        },
+        { role: roleOption }
+      ),
     onSuccess: () => {
       toast(t('detail.resolveSuccess', 'Đã đánh dấu giải quyết sự cố và gửi thông báo cho tài xế!'), 'success');
       setIsResolveModalOpen(false);
@@ -309,6 +318,51 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
   const isPlatformTicket = !isStationTicket;
   const isAdminStationSupervisory = admin && isStationTicket;
   const isAdminPlatformDirect = admin && isPlatformTicket;
+
+  if (!admin && isPlatformTicket) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => navigate('..')}
+          type="button"
+          className="inline-flex cursor-pointer items-center gap-1.5 text-[12.5px] font-medium text-muted transition-colors hover:text-ink"
+        >
+          <IconArrowLeft size={14} strokeWidth={2.2} />
+          {t('errors.backToList', 'Quay lại danh sách phiếu')}
+        </button>
+
+        <Card className="rounded-2xl p-6 sm:p-8 border border-amber-500/25 bg-surface text-center shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <IconShieldAlert size={28} strokeWidth={2} />
+          </div>
+
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <h2 className="text-lg font-bold text-ink sm:text-xl">
+              {t('errors.platformScopeOwnerWarningTitle', 'Phiếu thuộc phạm vi Nền tảng ChargeOps')}
+            </h2>
+          </div>
+
+          <p className="mt-2 text-[13.5px] leading-relaxed text-muted max-w-lg mx-auto">
+            {t(
+              'errors.platformScopeOwnerWarning',
+              'Sự cố này liên quan đến Cổng thanh toán, Tài khoản hoặc Hạ tầng hệ thống do Ban Quản trị ChargeOps tiếp nhận và xử lý trực tiếp. Chủ trạm không quản lý phiếu này.'
+            )}
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button
+              variant="primary"
+              accent="owner"
+              size="sm"
+              onClick={() => navigate('..')}
+            >
+              {t('errors.backToList', 'Quay lại danh sách phiếu')}
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const staffList = Array.isArray(staffQuery.data) ? staffQuery.data : [];
   const assignedStaff = tk.assignedHandlerId
@@ -781,7 +835,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
             )}
 
             {/* Tab Content: Audit Events Timeline */}
-            {activeTab === 'events' && <TicketEventTimeline ticketId={id} />}
+            {activeTab === 'events' && <TicketEventTimeline ticketId={id} role={roleOption} />}
           </Card>
         </div>
 

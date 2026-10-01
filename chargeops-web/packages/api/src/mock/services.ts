@@ -2089,9 +2089,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     tickets: {
       async list(params = {}) {
         await delay();
-        const { status = 'all', category = 'all', search = '', stationId = 'all', page = 0, pageSize = 10 } = params;
+        const { status = 'all', category = 'all', search = '', stationId = 'all', page = 0, pageSize = 10, role } = params;
         const q = search.trim().toLowerCase();
         let rows = scopedTickets();
+        if (role === 'owner' || scope.ownerView) {
+          rows = rows.filter((tk) => tk.stationId && tk.category !== 'PAYMENT' && tk.category !== 'ACCOUNT' && tk.category !== 'OTHER');
+        }
         if (status !== 'all') rows = rows.filter((tk) => tk.status === status);
         if (category !== 'all') rows = rows.filter((tk) => tk.category === category);
         if (stationId !== 'all') rows = rows.filter((tk) => tk.stationId === stationId);
@@ -2106,19 +2109,28 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         rows = [...rows].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
         return { items: rows.slice(page * pageSize, (page + 1) * pageSize), total: rows.length, page, pageSize };
       },
-      async get(id) {
+      async get(id, options) {
         await delay(150);
         const tk = db.tickets.find((x) => x.id === id);
         if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        if (options?.role === 'owner' && (!tk.stationId || tk.category === 'PAYMENT' || tk.category === 'ACCOUNT' || tk.category === 'OTHER')) {
+          const err: any = new Error('Bạn không có quyền truy cập hoặc thực hiện thao tác trên phiếu hỗ trợ này.');
+          err.code = 'TKT_ACCESS_DENIED';
+          err.status = 403;
+          throw err;
+        }
         return tk;
       },
-      async messages(id) {
+      async messages(id, _options) {
         await delay(150);
         return [...(db.ticketMessages[id] ?? [])];
       },
-      async summary() {
+      async summary(options) {
         await delay();
-        const rows = scopedTickets();
+        let rows = scopedTickets();
+        if (options?.role === 'owner' || scope.ownerView) {
+          rows = rows.filter((tk) => tk.stationId && tk.category !== 'PAYMENT' && tk.category !== 'ACCOUNT' && tk.category !== 'OTHER');
+        }
         const byStatus = { open: 0, in_progress: 0, resolved: 0, closed: 0 } as Record<TicketStatus, number>;
         for (const tk of rows) byStatus[tk.status]++;
         return { total: rows.length, byStatus };

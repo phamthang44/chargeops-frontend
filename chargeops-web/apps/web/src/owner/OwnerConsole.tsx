@@ -125,7 +125,7 @@ function OwnerConsoleContent({
       {
         label: t('search.groups.tickets'),
         run: async (q) => {
-          const res = await api.tickets.list({ search: q, pageSize: 5 });
+          const res = await api.tickets.list({ search: q, pageSize: 5, role: 'owner' });
           return res.items.map((tk) => ({
             id: tk.id,
             title: `${tk.id} · ${tk.subject}`,

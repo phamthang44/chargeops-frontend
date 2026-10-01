@@ -6,7 +6,7 @@
  * Keycloak token — the client never passes an owner id.
  */
 import type { HttpClient } from '../http';
-import type { Services } from '../services';
+import type { Services, TicketRoleOptions } from '../services';
 import type {
   OperationalBooking,
   OwnerBookingDetail,
@@ -891,7 +891,18 @@ export function createRestServices(http: HttpClient): Services {
         query.page = (params.page ?? 0) + 1;
         query.size = params.pageSize ?? 20;
 
-        const res: any = await http.get('/tickets', query);
+        let endpoint = '/tickets';
+        if (params.role === 'owner') {
+          endpoint = '/owner/tickets';
+        } else if (params.role === 'admin') {
+          if (params.workstream === 'station') {
+            endpoint = '/admin/tickets/station-audit';
+          } else if (params.workstream === 'platform') {
+            endpoint = '/admin/tickets';
+          }
+        }
+
+        const res: any = await http.get(endpoint, query);
         const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
         const total = typeof res?.total === 'number'
           ? res.total
@@ -906,67 +917,103 @@ export function createRestServices(http: HttpClient): Services {
           pageSize: params.pageSize ?? 20,
         };
       },
-      get: async (id: string) => {
-        const res: any = await http.get(`/tickets/${id}`);
+      get: async (id: string, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}`;
+
+        const res: any = await http.get(endpoint);
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      messages: async (id: string) => {
+      messages: async (id: string, options?: TicketRoleOptions) => {
         try {
-          const res: any = await http.get(`/tickets/${id}/messages`);
+          let endpoint = `/tickets/${id}/messages`;
+          if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/messages`;
+          else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/messages`;
+
+          const res: any = await http.get(endpoint);
           const items = Array.isArray(res) ? res : res?.data ?? [];
           return items.map((m: any) => normalizeTicketMessage(m, id));
         } catch {
           // Fallback: fetch ticket which includes messages list
-          const res: any = await http.get(`/tickets/${id}`);
+          let endpoint = `/tickets/${id}`;
+          if (options?.role === 'owner') endpoint = `/owner/tickets/${id}`;
+          else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}`;
+
+          const res: any = await http.get(endpoint);
           const data = res?.data ?? res;
           const ticket = normalizeTicket(data);
           return ticket.messages ?? [];
         }
       },
-      summary: async () => {
+      summary: async (options?: TicketRoleOptions) => {
+        let endpoint = '/tickets';
+        if (options?.role === 'owner') endpoint = '/owner/tickets';
+        else if (options?.role === 'admin') {
+          if (options?.workstream === 'platform') endpoint = '/admin/tickets';
+          else if (options?.workstream === 'station') endpoint = '/admin/tickets/station-audit';
+        }
         try {
-          return await http.get<TicketSummary>('/tickets/summary');
+          if (endpoint === '/tickets') {
+            return await http.get<TicketSummary>('/tickets/summary');
+          }
         } catch {
           // Fallback summary from ticket list
-          const res: any = await http.get('/tickets', { page: 1, size: 100 }).catch(() => ({ items: [] }));
-          const items: any[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
-          const open = items.filter((t) => String(t.status).toLowerCase() === 'open').length;
-          const inProgress = items.filter((t) => String(t.status).toLowerCase() === 'in_progress').length;
-          const resolved = items.filter((t) => String(t.status).toLowerCase() === 'resolved').length;
-          const closed = items.filter((t) => String(t.status).toLowerCase() === 'closed').length;
-          return {
-            total: items.length,
-            byStatus: { open, in_progress: inProgress, resolved, closed },
-            open,
-            inProgress,
-            resolved,
-            avgResponseMinutes: 15,
-          };
         }
+        const res: any = await http.get(endpoint, { page: 1, size: 100 }).catch(() => ({ items: [] }));
+        const items: any[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const open = items.filter((t) => String(t.status).toLowerCase() === 'open').length;
+        const inProgress = items.filter((t) => String(t.status).toLowerCase() === 'in_progress').length;
+        const resolved = items.filter((t) => String(t.status).toLowerCase() === 'resolved').length;
+        const closed = items.filter((t) => String(t.status).toLowerCase() === 'closed').length;
+        return {
+          total: items.length,
+          byStatus: { open, in_progress: inProgress, resolved, closed },
+          open,
+          inProgress,
+          resolved,
+          avgResponseMinutes: 15,
+        };
       },
-      reply: async (id: string, body: string) => {
+      reply: async (id: string, body: string, options?: TicketRoleOptions) => {
         const clientMessageId = generateUuidV4();
+        let endpoint = `/tickets/${id}/messages`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/messages`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/messages`;
+
         const res: any = await http.post(
-          `/tickets/${id}/messages`,
+          endpoint,
           { body },
           { headers: { 'Client-Message-Id': clientMessageId } },
         );
         const data = res?.data ?? res;
         return normalizeTicketMessage(data, id);
       },
-      claim: async (id: string, expectedVersion?: number) => {
-        const res: any = await http.post(`/tickets/${id}/claim`, { expectedVersion });
+      claim: async (id: string, expectedVersion?: number, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}/claim`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/claim`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/claim`;
+
+        const res: any = await http.post(endpoint, { expectedVersion });
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      assign: async (id: string, request: AssignTicketRequest) => {
-        const res: any = await http.post(`/tickets/${id}/assignment`, request);
+      assign: async (id: string, request: AssignTicketRequest, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}/assignment`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/assignment`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/assignment`;
+
+        const res: any = await http.post(endpoint, request);
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      resolve: async (id: string, request: ResolveTicketRequest) => {
-        const res: any = await http.patch(`/tickets/${id}/status`, {
+      resolve: async (id: string, request: ResolveTicketRequest, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}/status`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/status`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/status`;
+
+        const res: any = await http.patch(endpoint, {
           status: 'RESOLVED',
           expectedVersion: request.expectedVersion,
           reason: request.reason,
@@ -974,8 +1021,12 @@ export function createRestServices(http: HttpClient): Services {
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      confirm: async (id: string, expectedVersion?: number) => {
-        const res: any = await http.patch(`/tickets/${id}/status`, {
+      confirm: async (id: string, expectedVersion?: number, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}/status`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/status`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/status`;
+
+        const res: any = await http.patch(endpoint, {
           status: 'CLOSED',
           expectedVersion,
           reason: 'REPORTER_CONFIRMED',
@@ -983,8 +1034,12 @@ export function createRestServices(http: HttpClient): Services {
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      reopen: async (id: string, request: { expectedVersion?: number; reason: string }) => {
-        const res: any = await http.patch(`/tickets/${id}/status`, {
+      reopen: async (id: string, request: { expectedVersion?: number; reason: string }, options?: TicketRoleOptions) => {
+        let endpoint = `/tickets/${id}/status`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/status`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/status`;
+
+        const res: any = await http.patch(endpoint, {
           status: 'IN_PROGRESS',
           expectedVersion: request.expectedVersion,
           reason: request.reason,
@@ -992,9 +1047,13 @@ export function createRestServices(http: HttpClient): Services {
         const data = res?.data ?? res;
         return normalizeTicket(data);
       },
-      events: async (id: string) => {
+      events: async (id: string, options?: TicketRoleOptions) => {
         try {
-          const res: any = await http.get(`/tickets/${id}/events`);
+          let endpoint = `/tickets/${id}/events`;
+          if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/events`;
+          else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/events`;
+
+          const res: any = await http.get(endpoint);
           const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
           return items.map(normalizeTicketEvent);
         } catch {
@@ -1006,7 +1065,11 @@ export function createRestServices(http: HttpClient): Services {
         return res?.data ?? res;
       },
       setStatus: async (id, status, options) => {
-        const res: any = await http.patch(`/tickets/${id}/status`, {
+        let endpoint = `/tickets/${id}/status`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/status`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/status`;
+
+        const res: any = await http.patch(endpoint, {
           status,
           expectedVersion: options?.expectedVersion,
           reason: options?.reason,

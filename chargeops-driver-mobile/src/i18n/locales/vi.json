@@ -1217,6 +1217,36 @@
       "emptyMsgBody": "Vui lòng nhập nội dung tin nhắn.",
       "sendError": "Không thể gửi tin nhắn"
     },
+    "escalation": {
+      "countdownTitle": "Thời hạn xử lý trực tiếp của trạm sạc",
+      "countdownRemaining": "Còn lại: {{time}}",
+      "countdownDesc": "Trạm sạc có tối đa 24 giờ để kiểm tra và khắc phục sự cố. Sau thời gian này hoặc nếu trạm xác định không có lỗi thiết bị, bạn sẽ được mở quyền chuyển vụ việc lên Admin phân xử độc lập.",
+      "eligibleTitle": "Quyền Yêu cầu Quản trị viên Phân xử",
+      "triggerUnresponsive": "Trạm sạc đã quá thời hạn 24 giờ chưa xử lý sự cố",
+      "triggerDisputedFinding": "Trạm đã kết luận không lỗi thiết bị — Bạn có thể khiếu nại",
+      "eligibleDesc": "Nếu không đồng thuận với kết luận của trạm hoặc trạm không phản hồi, bạn có quyền chuyển vụ việc lên Admin để phân xử độc lập và công tâm.",
+      "escalateBtn": "Yêu cầu Admin phân xử ngay",
+      "escalatedBadge": "Đang phân xử",
+      "escalatedTitle": "Vụ việc đang được Quản trị viên Phân xử",
+      "arbiterRole": "Admin là Trọng tài Độc lập (Dispute Arbiter)",
+      "escalatedDesc": "Hồ sơ sự cố đã được chuyển lên Quản trị viên hệ thống để kiểm tra đối soát nhật ký phiên sạc và trạm. Phán quyết phân xử khách quan sẽ được gửi tới bạn.",
+      "reasonLabel": "Nội dung đề nghị phân xử:",
+      "modal": {
+        "title": "Yêu cầu Admin Phân xử Tranh chấp",
+        "roleNotice": "Admin sẽ vào vai trò Trọng tài độc lập, kiểm tra telemetry log và đưa ra quyết định xử lý khách quan.",
+        "reasonLabel": "Lý do khiếu nại lên Admin",
+        "reasonUnresponsive": "Trạm sạc không phản hồi quá 24h",
+        "reasonDisputedFinding": "Không đồng thuận với kết luận của trạm",
+        "reasonOther": "Lý do khác",
+        "detailsLabel": "Mô tả chi tiết khiếu nại (tối thiểu 10 ký tự)",
+        "detailsPlaceholder": "Nêu rõ nguyên nhân bạn yêu cầu Admin can thiệp phân xử...",
+        "cancelBtn": "Hủy",
+        "submitBtn": "Gửi yêu cầu phân xử",
+        "submitting": "Đang gửi...",
+        "successTitle": "Đã gửi khiếu nại",
+        "success": "Đã gửi yêu cầu phân xử lên Admin thành công!"
+      }
+    },
     "card": {
       "codeLabel": "Mã phiếu:",
       "bookingLabel": "Liên quan đơn sạc:",

@@ -11,12 +11,14 @@ import {
   type TicketStatus,
 } from '@chargeops/api';
 import {
+  Button,
   Card,
   FilterTabs,
   IconAlertCircle,
   IconCheckCircle,
   IconClock,
   IconLock,
+  IconRefreshCw,
   IconUsers,
   PageHeader,
   Pagination,
@@ -31,14 +33,14 @@ const PAGE_SIZE = 10;
 type StatusKey = TicketStatus | 'all';
 type CategoryKey = TicketCategory | 'all';
 type QueueScope = 'all' | 'my' | 'unassigned';
-type AdminWorkstream = 'all' | 'platform' | 'station';
+type AdminWorkstream = 'platform' | 'escalated';
 
 export function TicketsPage({ admin = false }: { admin?: boolean }) {
   const { t } = useTranslation('tickets');
   const api = useApi();
   const navigate = useNavigate();
 
-  const [workstream, setWorkstream] = useState<AdminWorkstream>('all');
+  const [workstream, setWorkstream] = useState<AdminWorkstream>('platform');
   const [status, setStatus] = useState<StatusKey>('all');
   const [category, setCategory] = useState<CategoryKey>('all');
   const [stationId, setStationId] = useState<string | 'all'>('all');
@@ -52,30 +54,56 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
   };
 
   const summaryQuery = useQuery({
-    queryKey: ['tickets', 'summary', { role: admin ? 'admin' : 'owner', workstream }],
-    queryFn: () => api.tickets.summary({ role: admin ? 'admin' : 'owner', workstream }),
-    refetchInterval: 10000,
+    queryKey: ['tickets', 'summary', { role: admin ? 'admin' : 'owner', workstream: admin ? workstream : undefined }],
+    queryFn: async () => {
+      if (admin && workstream === 'escalated') {
+        const s = await api.ticketEscalations.summary();
+        return {
+          total: s.totalEscalated,
+          open: s.pendingArbiter,
+          inProgress: s.unresponsive24hCount,
+          resolved: s.disputedFindingCount,
+          closed: 0,
+          byStatus: {
+            open: s.pendingArbiter,
+            in_progress: s.unresponsive24hCount,
+            resolved: s.disputedFindingCount,
+          },
+        };
+      }
+      return api.tickets.summary({ role: admin ? 'admin' : 'owner', workstream: admin ? 'platform' : undefined });
+    },
+    refetchInterval: 30000,
   });
 
   const stationsQuery = useQuery({
     queryKey: ['stations', admin ? 'all' : 'mine'],
     queryFn: () => (admin ? api.stations.all() : api.stations.mine()),
+    enabled: !admin,
   });
 
   const listQuery = useQuery({
-    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page, role: admin ? 'admin' : 'owner', workstream }],
-    queryFn: () =>
-      api.tickets.list({
+    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page, role: admin ? 'admin' : 'owner', workstream: admin ? workstream : undefined }],
+    queryFn: () => {
+      if (admin && workstream === 'escalated') {
+        return api.ticketEscalations.adminEscalatedTickets({
+          status: status === 'all' ? undefined : status,
+          page,
+          pageSize: PAGE_SIZE,
+        });
+      }
+      return api.tickets.list({
         status,
-        category,
-        stationId: admin && workstream === 'platform' ? undefined : stationId,
+        category: admin ? (category === 'all' ? undefined : category) : category,
+        stationId: admin ? undefined : stationId,
         queueScope: queueScope === 'all' ? undefined : (queueScope as any),
         search,
         page,
         pageSize: PAGE_SIZE,
         role: admin ? 'admin' : 'owner',
-        workstream,
-      }),
+        workstream: admin ? 'platform' : undefined,
+      });
+    },
     placeholderData: keepPreviousData,
     refetchInterval: 10000,
   });
@@ -123,7 +151,7 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
     let cats: TicketCategory[] = Object.keys(TICKET_CATEGORY) as TicketCategory[];
     if (admin && workstream === 'platform') {
       cats = ['PAYMENT', 'ACCOUNT', 'OTHER'];
-    } else if (admin && workstream === 'station') {
+    } else if (admin && workstream === 'escalated') {
       cats = ['CHARGING_ISSUE', 'BOOKING'];
     }
     return [
@@ -136,9 +164,7 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
   }, [admin, workstream, t]);
 
   const stationOptions = useMemo(() => {
-    const defaultLabel = admin
-      ? t('filters.allStationsAdmin', 'Tất cả trạm hệ thống')
-      : t('filters.allStationsOwner', 'Tất cả trạm của tôi');
+    const defaultLabel = t('filters.allStationsOwner', 'Tất cả trạm của tôi');
     const raw = stationsQuery.data;
     const list: any[] = Array.isArray(raw)
       ? raw
@@ -154,17 +180,13 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
         label: s.name || s.stationName || s.id,
       })),
     ];
-  }, [stationsQuery.data, admin, t]);
+  }, [stationsQuery.data, t]);
 
   const displayedItems = useMemo(() => {
     let items = Array.isArray(data?.items) ? data.items : [];
     if (admin && workstream === 'platform') {
       items = items.filter(
         (t) => t.category === 'PAYMENT' || t.category === 'ACCOUNT' || t.category === 'OTHER' || !t.stationId,
-      );
-    } else if (admin && workstream === 'station') {
-      items = items.filter(
-        (t) => t.category === 'CHARGING_ISSUE' || t.category === 'BOOKING' || Boolean(t.stationId),
       );
     }
     if (category !== 'all') {
@@ -189,7 +211,25 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
 
   return (
     <>
-      <PageHeader title={t('title')} subtitle={admin ? t('subtitleAdmin') : t('subtitle')} />
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <PageHeader title={t('title')} subtitle={admin ? t('subtitleAdmin') : t('subtitle')} />
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            summaryQuery.refetch();
+            listQuery.refetch();
+          }}
+          disabled={summaryQuery.isFetching || listQuery.isFetching}
+          className="flex items-center gap-1.5 h-[34px]"
+        >
+          <IconRefreshCw
+            size={13}
+            className={summaryQuery.isFetching || listQuery.isFetching ? 'animate-spin' : ''}
+          />
+          <span className="text-[12px]">{t('live.refreshBtn', 'Làm mới')}</span>
+        </Button>
+      </div>
 
       {/* BKG-052 4-Box Asymmetric Bento Metric Header (Clean Single-Bezel) */}
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -280,24 +320,10 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
         </Card>
       </div>
 
-      {/* Admin Workstream Separation (BKG-052 / Platform vs Station Scope) */}
+      {/* Admin Workstream Separation (Platform Issues vs Station Dispute Escalations) */}
       {admin && (
         <div className="mb-3.5 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setWorkstream('all');
-                resetTo(() => setCategory('all'));
-              }}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold transition-all ${
-                workstream === 'all'
-                  ? 'bg-surface text-ink border border-line shadow-2xs font-bold'
-                  : 'text-muted hover:text-ink hover:bg-surface-2'
-              }`}
-            >
-              <span>🌐 {t('workstream.all', 'Toàn bộ hệ thống')}</span>
-            </button>
             <button
               type="button"
               onClick={() => {
@@ -310,34 +336,34 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
                   : 'text-muted hover:text-ink hover:bg-surface-2'
               }`}
             >
-              <span>🛡️ {t('workstream.platform', 'Sự cố Nền tảng & Thanh toán')}</span>
+              <span>🛡️ {t('workstream.platform', 'Sự cố Nền tảng & Hệ thống')}</span>
             </button>
             <button
               type="button"
               onClick={() => {
-                setWorkstream('station');
+                setWorkstream('escalated');
                 resetTo(() => setCategory('all'));
               }}
               className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold transition-all ${
-                workstream === 'station'
-                  ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 shadow-2xs font-bold'
+                workstream === 'escalated'
+                  ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 shadow-2xs font-bold'
                   : 'text-muted hover:text-ink hover:bg-surface-2'
               }`}
             >
-              <span>⚡ {t('workstream.station', 'Giám sát Sự cố Trạm')}</span>
+              <span>⚖️ {t('workstream.escalated', 'Trạm Yêu cầu Phân xử (Dispute Escalations)')}</span>
             </button>
           </div>
 
           {workstream === 'platform' && (
             <div className="flex items-start gap-2 rounded-xl border border-brand-line/60 bg-brand-soft/30 p-2.5 text-[11.5px] text-brand-deep">
               <span className="font-bold">ℹ️</span>
-              <span>{t('workstream.platformHelp', 'Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến ví tiền, nạp cọc, giao dịch thanh toán và tài khoản tài xế.')}</span>
+              <span>{t('workstream.platformHelp', 'Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến tài khoản tài xế, app lỗi, nạp rút tiền cọc và thanh toán toàn nền tảng.')}</span>
             </div>
           )}
-          {workstream === 'station' && (
-            <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-[11.5px] text-amber-900 dark:text-amber-200">
-              <span className="font-bold">ℹ️</span>
-              <span>{t('workstream.stationHelp', 'Chủ trạm & Kỹ thuật viên trạm chịu trách nhiệm trực tiếp tại trụ sạc. Admin thực hiện giám sát SLA, kết luận kỹ thuật (BR-TKT-05) và thẩm định bồi hoàn cọc.')}</span>
+          {workstream === 'escalated' && (
+            <div className="flex items-start gap-2 rounded-xl border border-purple-500/20 bg-purple-500/10 p-2.5 text-[11.5px] text-purple-900 dark:text-purple-200">
+              <span className="font-bold">⚖️</span>
+              <span>{t('workstream.escalatedHelp', 'Tuyến Trọng tài Phân xử Độc lập: Sự cố trạm sạc được Driver hoặc Chủ trạm leo thang lên Admin sau 24h trạm im lặng hoặc khi tài xế bác bỏ kết luận lỗi của trạm. Admin đóng vai trò trọng tài khách quan, lắng nghe hai phía và phân xử công bằng.')}</span>
             </div>
           )}
         </div>
@@ -352,7 +378,7 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
           className="flex-1"
         />
 
-        {(!admin || workstream !== 'platform') && (
+        {!admin && (
           <Select
             value={stationId}
             onChange={(v) => resetTo(() => setStationId(v as string))}

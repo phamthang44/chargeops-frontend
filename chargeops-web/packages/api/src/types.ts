@@ -1044,6 +1044,105 @@ export interface RefundQueueSummary {
   totalSucceededAmountVnd: number;
 }
 
+/* ---------- owner finance (BKG-056 refactor baseline) ---------- */
+
+export interface OwnerFinanceReceipt {
+  receiptId: string;
+  transactionRef: string;
+  amount: number;
+  receivedAt: string;
+}
+
+export interface OwnerFinanceBooking {
+  bookingId: string;
+  bookingCode: string;
+  stationId: string;
+  stationName: string;
+  paymentStatus: string;
+  collectedAmount: number;
+  refundedAmount: number;
+  pendingRefundAmount: number;
+  netRecordedAmount: number;
+  refundStatus: RefundStatus | null;
+  paidAt: string | null;
+  receipts: OwnerFinanceReceipt[];
+}
+
+/* ---------- owner refunds (BKG-056 refactor baseline) ---------- */
+
+export type OwnerRefundReason = 'VOLUNTARY_GRACE' | 'STATION_UNAVAILABLE' | 'OPERATIONAL_ISSUE' | string;
+export type RefundAttemptStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
+
+export interface OwnerRefundAttempt {
+  attemptId: string;
+  sequenceNo: number;
+  executionMode: 'SIMULATOR' | 'MANUAL_RECORD' | string;
+  status: RefundAttemptStatus;
+  startedAt: string;
+  completedAt: string | null;
+  failureReason: string | null;
+}
+
+export interface OwnerRefund {
+  refundId: string;
+  bookingId: string;
+  bookingCode: string;
+  stationId: string;
+  amount: number;
+  currency: string;
+  reason: OwnerRefundReason;
+  status: RefundStatus;
+  requiresOwnerAction: boolean;
+  version: number;
+  decisionAt: string;
+  completedAt: string | null;
+  attempts: OwnerRefundAttempt[];
+}
+
+export interface OwnerRefundRetryPayload {
+  expectedVersion: number;
+}
+
+/* ---------- ticket dispute escalation (BKG-057 baseline) ---------- */
+
+export interface TicketEscalation {
+  ticketId: string;
+  requestedBy: string;
+  requestedAt: string;
+  reason: string;
+  notes?: string;
+  requestedByRole?: string;
+}
+
+export interface EscalateTicketPayload {
+  reason: string;
+}
+
+export interface OwnerFinanceSummary {
+  grossVnd: number;
+  refundedVnd: number;
+  netVnd: number;
+  pendingRefundVnd: number;
+  totalBookings: number;
+  paidBookings: number;
+}
+
+export interface OwnerRefundsSummary {
+  totalPendingCount: number;
+  totalSucceededCount: number;
+  totalFailedAttemptsCount: number;
+  requiresOwnerActionCount: number;
+  totalRefundAmountVnd: number;
+  pendingRefundAmountVnd: number;
+}
+
+export interface TicketEscalationsSummary {
+  totalEscalated: number;
+  pendingArbiter: number;
+  unresponsive24hCount: number;
+  disputedFindingCount: number;
+}
+
 /* ---------- pricing & hours (FR11) ---------- */
 
 /** One day's operating window. open/close are "HH:mm"; ignored when closed. */

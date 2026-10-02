@@ -34,7 +34,6 @@ import { Licenses } from './pages/Licenses';
 import { Analytics } from './pages/Analytics';
 import { PolicyKB } from './pages/PolicyKB';
 import { Bookings } from './pages/Bookings';
-import { Transactions } from './pages/Transactions';
 import { Observability } from './pages/Observability';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
@@ -49,7 +48,6 @@ const PAGES: Record<string, ComponentType> = {
   approvals: Approvals,
   provisioning: Provisioning,
   bookings: Bookings,
-  transactions: Transactions,
   licenses: Licenses,
   users: Users,
   analytics: Analytics,
@@ -75,7 +73,6 @@ export function AdminConsole({ base }: { base: string }) {
     { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
     { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
     { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
-    { key: 'transactions', label: t('console.nav.transactions.label'), icon: <IconCard size={17} />, title: t('console.nav.transactions.title') },
     { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
     { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
     { key: 'analytics', label: t('console.nav.analytics.label'), icon: <IconBarChart size={17} />, title: t('console.nav.analytics.title') },

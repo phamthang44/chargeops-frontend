@@ -41,9 +41,9 @@
         "subtitle": "Grant and revoke staff access to your stations."
       },
       "revenue": {
-        "label": "Revenue",
-        "title": "Revenue",
-        "subtitle": "Transactions, refunds, and net revenue."
+        "label": "Finance & Refunds",
+        "title": "Finance & Refunds",
+        "subtitle": "Simulation revenue ledger and station refund operations."
       },
       "license": {
         "label": "License",
@@ -531,8 +531,17 @@
     }
   },
   "revenue": {
-    "title": "Revenue",
-    "subtitle": "Transactions, refunds, and your net revenue.",
+    "title": "Finance & Refunds",
+    "subtitle": "Simulation revenue ledger and station refund management via Simulator.",
+    "refreshBtn": "Refresh",
+    "tabs": {
+      "ledger": "Finance Ledger",
+      "refunds": "Station Refunds"
+    },
+    "simulatorNotice": {
+      "title": "Simulation Payment & Reconciliation (Simulator Money)",
+      "desc": "All revenue and refund figures operate within the simulation sandbox. The platform does not support real payouts or individual spendable wallets."
+    },
     "kpis": {
       "gross": "GROSS REVENUE",
       "refunded": "TOTAL REFUNDS",

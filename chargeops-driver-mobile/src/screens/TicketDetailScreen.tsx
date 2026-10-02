@@ -20,12 +20,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppBackButton } from '@/components/AppBackButton';
 import { GlassButton } from '@/components/GlassButton';
 import { StatusBadge } from '@/components/StatusBadge';
-import { TicketMessageBubble } from '@/components/ticket/TicketMessageBubble';
+import {
+  DriverEscalateModal,
+  TicketDisputeEscalationCard,
+  TicketMessageBubble,
+} from '@/components/ticket';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
-import { getLocalizedTicketErrorMessage, getTicketDetail, replyTicket } from '@/services/ticketService';
+import {
+  getLocalizedTicketErrorMessage,
+  getTicketDetail,
+  getTicketEscalation,
+  replyTicket,
+  requestTicketEscalation,
+} from '@/services/ticketService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
-import type { Ticket, TicketStatus } from '@/types';
+import type { Ticket, TicketEscalation, TicketStatus } from '@/types';
 
 type Route = RouteProp<RootStackParamList, 'TicketDetail'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'TicketDetail'>;
@@ -61,8 +71,21 @@ export function TicketDetailScreen() {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
 
+  const [escalation, setEscalation] = useState<TicketEscalation | null>(null);
+  const [isEscalateModalVisible, setIsEscalateModalVisible] = useState(false);
+  const [isSubmittingEscalation, setIsSubmittingEscalation] = useState(false);
+
   const flatListRef = useRef<FlatList>(null);
   const prevMessagesCountRef = useRef<number>(0);
+
+  const fetchEscalation = useCallback(async () => {
+    try {
+      const esc = await getTicketEscalation(ticketId);
+      setEscalation(esc);
+    } catch {
+      // Non-critical, ignore
+    }
+  }, [ticketId]);
 
   const fetchDetail = useCallback(async (silent = false) => {
     try {
@@ -97,7 +120,8 @@ export function TicketDetailScreen() {
 
   useEffect(() => {
     fetchDetail(false);
-  }, [fetchDetail]);
+    fetchEscalation();
+  }, [fetchDetail, fetchEscalation]);
 
   // Live polling for real-time messages when ticket is open or in progress
   useEffect(() => {
@@ -109,6 +133,24 @@ export function TicketDetailScreen() {
 
     return () => clearInterval(timer);
   }, [ticket?.status, fetchDetail]);
+
+  const handleEscalateSubmit = async (reason: string) => {
+    setIsSubmittingEscalation(true);
+    try {
+      await requestTicketEscalation(ticketId, reason);
+      Alert.alert(
+        t('ticket.escalation.modal.successTitle', 'Đã gửi khiếu nại'),
+        t('ticket.escalation.modal.success', 'Đã gửi yêu cầu phân xử lên Admin thành công!'),
+      );
+      setIsEscalateModalVisible(false);
+      await Promise.all([fetchDetail(true), fetchEscalation()]);
+    } catch (err: any) {
+      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+      Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
+    } finally {
+      setIsSubmittingEscalation(false);
+    }
+  };
 
   const handleSendReply = async () => {
     if (!replyText.trim() || sending) return;
@@ -164,7 +206,11 @@ export function TicketDetailScreen() {
         </View>
 
         <View style={styles.headerRightAction}>
-          <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+          {ticket.isEscalated || escalation ? (
+            <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang phân xử')} dot />
+          ) : (
+            <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+          )}
         </View>
       </View>
 
@@ -245,6 +291,13 @@ export function TicketDetailScreen() {
                 </View>
               )}
 
+              {/* Dispute Escalation & 24h SLA Countdown Card */}
+              <TicketDisputeEscalationCard
+                ticket={ticket}
+                escalation={escalation}
+                onOpenEscalate={() => setIsEscalateModalVisible(true)}
+              />
+
               <View style={styles.streamDivider}>
                 <View style={[styles.dividerLine, { backgroundColor: themeColors.border }]} />
                 <Text style={[styles.streamLabel, { color: themeColors.textMuted }]}>
@@ -323,6 +376,14 @@ export function TicketDetailScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
+
+      <DriverEscalateModal
+        visible={isEscalateModalVisible}
+        ticket={ticket}
+        onClose={() => setIsEscalateModalVisible(false)}
+        onSubmit={handleEscalateSubmit}
+        isSubmitting={isSubmittingEscalation}
+      />
     </SafeAreaView>
   );
 }

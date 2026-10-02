@@ -14,3 +14,4 @@ export * from './TicketHandlerCard';
 export * from './TicketContextCard';
 export * from './TicketFindingsCard';
 export * from './TicketRefundCard';
+export * from './EscalateTicketModal';

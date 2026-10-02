@@ -37,6 +37,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const [activeTab, setActiveTab] = useState<'thread' | 'events'>('thread');
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [isAssignDrawerOpen, setIsAssignDrawerOpen] = useState(false);
+  const [isEscalateModalOpen, setIsEscalateModalOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesLength = useRef<number>(0);
@@ -59,6 +60,19 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     queryKey: ['staff', 'station', ticketQuery.data?.stationId],
     queryFn: () => (ticketQuery.data?.stationId ? api.staff.list(ticketQuery.data.stationId) : Promise.resolve([])),
     enabled: !admin && Boolean(ticketQuery.data?.stationId),
+  });
+
+  const escalationQuery = useQuery({
+    queryKey: ['tickets', 'escalation', id],
+    queryFn: async () => {
+      try {
+        return await api.ticketEscalations.get(id);
+      } catch {
+        return null;
+      }
+    },
+    enabled: Boolean(id),
+    retry: false,
   });
 
   useEffect(() => {
@@ -165,6 +179,17 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     onError: handleMutationError,
   });
 
+  const escalate = useMutation({
+    mutationFn: (reason: string) => api.ticketEscalations.request(id, { reason }),
+    onSuccess: () => {
+      toast(t('escalation.requestSuccess', 'Đã gửi yêu cầu phân xử tranh chấp lên Admin thành công!'), 'success');
+      setIsEscalateModalOpen(false);
+      invalidateAll();
+      qc.invalidateQueries({ queryKey: ['tickets', 'escalation', id] });
+    },
+    onError: handleMutationError,
+  });
+
   const tk = ticketQuery.data;
   const statusKey = (String(tk?.status || 'OPEN').toUpperCase()) as TicketStatus;
   const meta = TICKET_STATUS[statusKey] ?? { label: tk?.status || '', tone: 'neutral' as const };
@@ -224,12 +249,15 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     setIsResolveModalOpen,
     isAssignDrawerOpen,
     setIsAssignDrawerOpen,
+    isEscalateModalOpen,
+    setIsEscalateModalOpen,
     messagesEndRef,
     reply,
     claim,
     assign,
     recordFinding,
     resolve,
+    escalate,
     invalidateAll,
     // Derived ticket state
     ticket: tk,
@@ -256,5 +284,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     resolvedHandlerName,
     isAssigned,
     closeReasonMeta,
+    escalation: escalationQuery.data,
+    isEscalated: Boolean(escalationQuery.data?.ticketId || (tk as any)?.isEscalated || (tk as any)?.escalatedAt),
   };
 }

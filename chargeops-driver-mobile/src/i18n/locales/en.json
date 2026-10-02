@@ -1212,6 +1212,36 @@
       "emptyMsgBody": "Please enter a message to send.",
       "sendError": "Failed to send message"
     },
+    "escalation": {
+      "countdownTitle": "Direct Station Resolution Window (24h SLA)",
+      "countdownRemaining": "Remaining: {{time}}",
+      "countdownDesc": "The station has up to 24 hours to investigate and resolve this issue. After this period, or if the station disputes the fault, you can escalate to an Admin for independent arbitration.",
+      "eligibleTitle": "Request Administrator Dispute Arbitration",
+      "triggerUnresponsive": "Station has been unresponsive for more than 24 hours",
+      "triggerDisputedFinding": "Station recorded non-station-fault finding — You can dispute",
+      "eligibleDesc": "If you disagree with the station's findings or received no response, you have the right to escalate this case to ChargeOps Admin for fair dispute arbitration.",
+      "escalateBtn": "Escalate to Admin Now",
+      "escalatedBadge": "In Arbitration",
+      "escalatedTitle": "Incident Under Dispute Arbitration by Admin",
+      "arbiterRole": "Admin as Objective Arbiter (Dispute Arbiter)",
+      "escalatedDesc": "This ticket has been escalated to the system administrator to audit charging session logs and station data. A fair final ruling will be communicated to you.",
+      "reasonLabel": "Arbitration Request Notes:",
+      "modal": {
+        "title": "Request Admin Dispute Arbitration",
+        "roleNotice": "Admin acts as an independent arbiter, reviewing telemetry logs to provide an objective resolution.",
+        "reasonLabel": "Reason for Requesting Admin Intervention",
+        "reasonUnresponsive": "Station unresponsive for more than 24 hours",
+        "reasonDisputedFinding": "Disagree with station's technical conclusion",
+        "reasonOther": "Other reason",
+        "detailsLabel": "Detailed explanation (min. 10 characters)",
+        "detailsPlaceholder": "Explain why you are requesting Administrator arbitration...",
+        "cancelBtn": "Cancel",
+        "submitBtn": "Submit Dispute Request",
+        "submitting": "Submitting...",
+        "successTitle": "Dispute Submitted",
+        "success": "Your dispute arbitration request has been submitted to Admin successfully!"
+      }
+    },
     "card": {
       "codeLabel": "Ticket ID:",
       "bookingLabel": "Linked Booking:",

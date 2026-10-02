@@ -43,11 +43,17 @@ function Meta({ t: tk }: { t: Ticket }) {
   const reporter = tk.reporterName || tk.driverName || 'Tài xế';
   const timestamp = tk.updatedAt || tk.createdAt;
   const hasRefund = Boolean(tk.refundIds && tk.refundIds.length > 0);
+  const isEscalated = Boolean((tk as any).isEscalated || (tk as any).escalatedAt);
 
   return (
     <div className="min-w-0 pr-3">
       <div className="flex items-center gap-2">
         <span className="truncate font-semibold text-ink">{tk.subject || tk.title || 'Phiếu hỗ trợ'}</span>
+        {isEscalated && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 text-[10px] font-bold border border-purple-500/25">
+            <span>⚡ {t('meta.escalatedBadge', 'Chờ phân xử')}</span>
+          </span>
+        )}
         {hasRefund && (
           <span className="inline-flex shrink-0 items-center gap-1 rounded bg-good-soft px-1.5 py-0.5 text-[10px] font-bold text-good-deep">
             <IconCheckCircle size={11} strokeWidth={2.2} />

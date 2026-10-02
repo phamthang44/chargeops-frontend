@@ -23,10 +23,47 @@
   },
   "workstream": {
     "all": "All System Tickets",
-    "platform": "Platform & Payment Issues",
+    "platform": "Platform & System Issues",
+    "escalated": "Station Dispute Escalations",
     "station": "Station Supervisory Queue",
-    "platformHelp": "Directly handled by Platform Admins for wallet deposits, payment gateways, and driver accounts.",
-    "stationHelp": "Station Owners and Staff handle incidents. Admin may chat, route a station handler, and record findings; refunds follow a separate decision flow."
+    "platformHelp": "Directly handled by Platform Admins for app errors, driver accounts, and platform-level wallet/deposit questions.",
+    "escalatedHelp": "Independent Dispute Arbiter: Station incidents escalated after 24h of station unresponsiveness or when a driver disputes a non-fault finding. Admin acts as an objective arbiter.",
+    "stationHelp": "Station Owners and Staff handle incidents directly. Admin acts as an arbiter; refunds follow the Owner Finance Ledger."
+  },
+  "meta": {
+    "escalatedBadge": "Escalated"
+  },
+  "escalation": {
+    "badge": "Dispute Escalated",
+    "bannerTitle": "Incident Escalated to Admin for Dispute Arbitration",
+    "requestedBy": "Escalated By",
+    "roleDriver": "Driver",
+    "roleOwner": "Station Owner",
+    "reasonLabel": "Escalation Reason",
+    "notesLabel": "Additional Notes",
+    "reasons": {
+      "unresponsive24h": "Station unresponsive for more than 24 hours",
+      "disputedFinding": "Driver disputed non-station-fault finding",
+      "other": "Dispute Escalation"
+    },
+    "arbiterDisclaimer": "Admin Role: Objective arbiter collecting evidence from both parties to deliver a fair dispute ruling. Admin does not directly manage station hardware.",
+    "arbiterRolePill": "Admin Arbiter Queue",
+    "ownerEscalateBtn": "Request Admin Arbitration",
+    "requestSuccess": "Dispute arbitration request submitted to Admin successfully!",
+    "modal": {
+      "title": "Request Admin Dispute Arbitration",
+      "stationFallback": "Charging Station",
+      "roleNoticeTitle": "Admin Objective Arbiter Role",
+      "roleNoticeDesc": "When requested, this ticket will be forwarded to the Administrator's Dispute Arbitration queue. The Admin will review charging session telemetry logs and issue a final resolution ruling.",
+      "reasonLabel": "Reason for Requesting Admin Intervention",
+      "reasonHelp": "Clearly describe points of disagreement and technical findings. Minimum 10 characters.",
+      "reasonPlaceholder": "e.g., Station checked hardware telemetry logs and verified normal connector operation. Both parties could not reach an agreement regarding reimbursement...",
+      "minCharsNotice": "{{count}} characters remaining",
+      "validNotice": "Valid",
+      "cancelBtn": "Cancel",
+      "submitting": "Submitting...",
+      "submitBtn": "Confirm & Send to Admin"
+    }
   },
   "supervisory": {
     "badge": "Station Supervisory Mode",

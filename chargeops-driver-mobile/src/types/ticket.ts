@@ -45,9 +45,15 @@ export interface Ticket {
   version: number;
   bookingId?: string | null;
   stationId?: string | null;
+  stationName?: string | null;
   reporterId: string;
   assignedHandlerId?: string | null;
   createdAt: string;
+  isEscalated?: boolean;
+  escalatedAt?: string | null;
+  resolutionCycle?: number;
+  autoCloseAt?: string | null;
+  resolvedAt?: string | null;
   messages: TicketMessage[];
   findings: TicketFinding[];
   refundIds: string[];
@@ -75,4 +81,15 @@ export interface TicketListResult {
   size: number;
   totalElements: number;
   totalPages: number;
+}
+
+export interface TicketEscalation {
+  ticketId: string;
+  requestedBy: string;
+  requestedAt: string;
+  reason: string;
+}
+
+export interface EscalateTicketPayload {
+  reason: string;
 }

@@ -4,6 +4,7 @@ import type {
   TicketListParams,
   TicketListResult,
   TicketMessage,
+  TicketEscalation,
 } from '@/types';
 import { apiBaseUrl, isMockMode, resolveAccessToken } from './stationService';
 
@@ -327,4 +328,77 @@ export async function replyTicket(
   };
   ticket.messages.push(newMessage);
   return newMessage;
+}
+
+/**
+ * Gửi yêu cầu chuyển case lên Ban Quản Trị ChargeOps để phân xử
+ * POST /api/v1/tickets/{ticketId}/escalation
+ */
+export async function escalateTicket(
+  ticketId: string,
+  reason: string,
+  accessToken?: string | null
+): Promise<TicketEscalation> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(accessToken);
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/escalation`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ reason }),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      return json?.data ?? json;
+    }
+    const errJson = await res.json().catch(() => null);
+    throw buildTicketError(res, errJson, 'Không thể gửi khiếu nại lên ban quản trị');
+  }
+
+  return {
+    ticketId,
+    requestedBy: 'current-driver',
+    requestedAt: new Date().toISOString(),
+    reason,
+  };
+}
+
+export const requestTicketEscalation = escalateTicket;
+
+/**
+ * Lấy thông tin đơn chuyển case đã gửi (nếu có)
+ * GET /api/v1/tickets/{ticketId}/escalation
+ */
+export async function getTicketEscalation(
+  ticketId: string,
+  accessToken?: string | null
+): Promise<TicketEscalation | null> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(accessToken);
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/escalation`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      return json?.data ?? json;
+    }
+    if (res.status === 404) return null;
+    const errJson = await res.json().catch(() => null);
+    throw buildTicketError(res, errJson, 'Không thể kiểm tra trạng thái khiếu nại');
+  }
+
+  return null;
 }

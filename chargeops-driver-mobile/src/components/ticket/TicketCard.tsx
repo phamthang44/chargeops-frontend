@@ -66,7 +66,11 @@ export function TicketCard({ ticket, onPress }: TicketCardProps) {
           <Ionicons name="pricetag-outline" size={14} color={themeColors.primary} />
           <Text style={[styles.codeText, { color: themeColors.textStrong }]}>{ticket.ticketCode}</Text>
         </View>
-        <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+        {ticket.isEscalated ? (
+          <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang phân xử')} dot />
+        ) : (
+          <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+        )}
       </View>
 
       {/* Category & Subject */}

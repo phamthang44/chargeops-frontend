@@ -23,10 +23,47 @@
   },
   "workstream": {
     "all": "Toàn bộ hệ thống",
-    "platform": "Sự cố Nền tảng & Thanh toán",
+    "platform": "Sự cố Nền tảng & Hệ thống",
+    "escalated": "Trạm Yêu cầu Phân xử (Dispute Escalations)",
     "station": "Giám sát Sự cố Trạm",
-    "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến ví tiền, nạp cọc, giao dịch thanh toán và tài khoản tài xế.",
-    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin có thể trao đổi, điều hướng người đúng trạm và ghi kết luận kỹ thuật; hoàn tiền thuộc luồng quyết định riêng."
+    "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến tài khoản tài xế, app lỗi, nạp rút tiền cọc và thanh toán toàn nền tảng.",
+    "escalatedHelp": "Tuyến Trọng tài Phân xử Độc lập: Sự cố trạm sạc được Driver hoặc Chủ trạm leo thang lên Admin sau 24h trạm im lặng hoặc khi tài xế bác bỏ kết luận lỗi của trạm. Admin đóng vai trò trọng tài khách quan, lắng nghe hai phía và phân xử công bằng.",
+    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin có thể trao đổi và ghi nhận định; hoàn tiền thuộc luồng quyết định của trạm."
+  },
+  "meta": {
+    "escalatedBadge": "Chờ phân xử"
+  },
+  "escalation": {
+    "badge": "Đang phân xử (Escalated)",
+    "bannerTitle": "Vụ việc đã được chuyển lên Quản trị viên phân xử (Dispute Escalation)",
+    "requestedBy": "Bên đề nghị phân xử",
+    "roleDriver": "Tài xế",
+    "roleOwner": "Chủ trạm",
+    "reasonLabel": "Lý do khiếu nại",
+    "notesLabel": "Ghi chú bổ sung",
+    "reasons": {
+      "unresponsive24h": "Trạm sạc không phản hồi quá 24h",
+      "disputedFinding": "Tài xế khiếu nại kết luận không phải lỗi trạm",
+      "other": "Khiếu nại phân xử"
+    },
+    "arbiterDisclaimer": "Vai trò Admin: Trọng tài công tâm, thu thập bằng chứng từ hai phía và đưa ra phán quyết hỗ trợ. Admin không trực tiếp can thiệp kỹ thuật tại trạm.",
+    "arbiterRolePill": "Tuyến phân xử Admin",
+    "ownerEscalateBtn": "Yêu cầu Admin phân xử",
+    "requestSuccess": "Đã gửi yêu cầu phân xử tranh chấp lên Admin thành công!",
+    "modal": {
+      "title": "Yêu cầu Admin Phân xử Tranh chấp",
+      "stationFallback": "Trạm sạc",
+      "roleNoticeTitle": "Vai trò trọng tài độc lập của Admin",
+      "roleNoticeDesc": "Khi bạn gửi yêu cầu, phiếu hỗ trợ sẽ được chuyển sang hàng chờ Phân xử Tranh chấp của Quản trị viên (Dispute Arbiter). Admin sẽ kiểm tra đối chiếu nhật ký phiên sạc và đưa ra quyết định xử lý cuối cùng.",
+      "reasonLabel": "Lý do trạm yêu cầu Admin can thiệp",
+      "reasonHelp": "Nêu rõ điểm bất đồng, kết quả kỹ thuật trạm đã kiểm tra. Tối thiểu 10 ký tự.",
+      "reasonPlaceholder": "Ví dụ: Trạm đã kiểm tra camera và log phần cứng, trụ sạc hoạt động bình thường theo đúng chuẩn. Hai bên không đạt được đồng thuận về việc bồi hoàn...",
+      "minCharsNotice": "Còn thiếu {{count}} ký tự",
+      "validNotice": "Hợp lệ",
+      "cancelBtn": "Hủy",
+      "submitting": "Đang gửi...",
+      "submitBtn": "Xác nhận chuyển Admin"
+    }
   },
   "supervisory": {
     "badge": "Giám sát Vận hành Trạm",

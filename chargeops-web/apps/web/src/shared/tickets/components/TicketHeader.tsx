@@ -24,6 +24,7 @@ export interface TicketHeaderProps extends TicketActionDockProps {
   categoryKey: string;
   categoryLabel: string;
   hasRefund: boolean;
+  isEscalated?: boolean;
 }
 
 export function TicketHeader(props: TicketHeaderProps) {
@@ -40,6 +41,7 @@ export function TicketHeader(props: TicketHeaderProps) {
     isAdminStationSupervisory,
     isAdminPlatformDirect,
     hasRefund,
+    isEscalated,
   } = props;
 
   return (
@@ -57,7 +59,14 @@ export function TicketHeader(props: TicketHeaderProps) {
             </span>
             <StatusPill tone={statusMeta.tone} label={t(`status.${statusKey}`, statusMeta.label)} />
 
-            {isAdminStationSupervisory && (
+            {isEscalated && (
+              <span className="inline-flex items-center gap-1 rounded bg-purple-500/15 px-2.5 py-0.5 text-[11px] font-bold text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                <IconShieldAlert size={12} strokeWidth={2.2} />
+                <span>{t('escalation.badge', 'Đang phân xử (Escalated)')}</span>
+              </span>
+            )}
+
+            {isAdminStationSupervisory && !isEscalated && (
               <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300 border border-amber-500/25">
                 <IconShieldAlert size={12} strokeWidth={2.2} />
                 <span>{t('supervisory.badge', 'Giám sát Vận hành Trạm')}</span>

@@ -10,6 +10,7 @@ import {
   formatTimeVn,
   TICKET_CLOSE_REASON,
   type Ticket,
+  type TicketEscalation,
 } from '@chargeops/api';
 import { TicketCountdownTimer } from './TicketCountdownTimer';
 
@@ -18,6 +19,8 @@ export interface TicketStatusBannersProps {
   isAdminStationSupervisory: boolean;
   isResolved: boolean;
   isClosed: boolean;
+  isEscalated?: boolean;
+  escalation?: TicketEscalation | null;
 }
 
 export function TicketStatusBanners({
@@ -25,12 +28,61 @@ export function TicketStatusBanners({
   isAdminStationSupervisory,
   isResolved,
   isClosed,
+  isEscalated = false,
+  escalation,
 }: TicketStatusBannersProps) {
   const { t } = useTranslation('tickets');
   const closeReasonMeta = ticket.closeReason ? TICKET_CLOSE_REASON[ticket.closeReason] : undefined;
 
   return (
     <>
+      {/* Dispute Escalation Arbitration Banner */}
+      {(isEscalated || escalation) && (
+        <div className="flex items-start gap-3 rounded-2xl border border-purple-500/30 bg-purple-500/10 p-4 text-[12.5px] text-purple-950 dark:text-purple-200 shadow-xs">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold mt-0.5">
+            <IconShieldAlert size={18} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-[13.5px]">
+                {t('escalation.bannerTitle', 'Vụ việc đã được chuyển lên Quản trị viên phân xử (Dispute Escalation)')}
+              </span>
+              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10.5px] font-extrabold text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                {t('escalation.badge', 'Đang phân xử')}
+              </span>
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] bg-surface/60 rounded-xl p-2.5 border border-purple-500/20">
+              <div>
+                <span className="text-muted font-medium">{t('escalation.requestedBy', 'Bên đề nghị phân xử')}: </span>
+                <span className="font-semibold text-ink">
+                  {escalation?.requestedByRole === 'driver' ? t('escalation.roleDriver', 'Tài xế') : t('escalation.roleOwner', 'Chủ trạm')}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted font-medium">{t('escalation.reasonLabel', 'Lý do khiếu nại')}: </span>
+                <span className="font-semibold text-ink">
+                  {escalation?.reason === 'DRIVER_UNRESPONSIVE_24H'
+                    ? t('escalation.reasons.unresponsive24h', 'Trạm sạc không phản hồi quá 24h')
+                    : escalation?.reason === 'DISPUTED_NOT_STATION_FAILURE'
+                    ? t('escalation.reasons.disputedFinding', 'Tài xế khiếu nại kết luận không phải lỗi trạm')
+                    : escalation?.reason || t('escalation.reasons.other', 'Khiếu nại phân xử')}
+                </span>
+              </div>
+              {escalation?.notes && (
+                <div className="sm:col-span-2">
+                  <span className="text-muted font-medium">{t('escalation.notesLabel', 'Ghi chú bổ sung')}: </span>
+                  <span className="text-body italic">“{escalation.notes}”</span>
+                </div>
+              )}
+            </div>
+
+            <p className="mt-2 text-[11px] leading-relaxed text-muted">
+              * {t('escalation.arbiterDisclaimer', 'Vai trò Admin: Trọng tài công tâm, thu thập bằng chứng từ hai phía và đưa ra phán quyết hỗ trợ. Admin không trực tiếp can thiệp kỹ thuật tại trạm.')}
+            </p>
+          </div>
+        </div>
+      )}
       {/* Contextual Supervisory Banner for Admin on Station Tickets */}
       {isAdminStationSupervisory && (
         <div className="flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/5 p-3.5 text-[12px] text-amber-900 dark:text-amber-200">

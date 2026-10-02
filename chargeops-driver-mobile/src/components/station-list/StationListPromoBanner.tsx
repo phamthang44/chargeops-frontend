@@ -11,11 +11,18 @@ interface StationListPromoBannerProps {
   onDismiss: () => void;
 }
 
+/**
+ * Feature flag bật/tắt hiển thị banner ưu đãi (Giảm 20% ngoài giờ cao điểm).
+ * Tạm thời đặt `false` vì app chưa áp dụng chính sách giảm giá/voucher thực tế.
+ * Đổi thành `true` khi muốn kích hoạt hiển thị lại.
+ */
+export const ENABLE_PROMO_BANNER = false;
+
 export function StationListPromoBanner({ visible, onDismiss }: StationListPromoBannerProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
-  if (!visible) return null;
+  if (!ENABLE_PROMO_BANNER || !visible) return null;
 
   return (
     <View

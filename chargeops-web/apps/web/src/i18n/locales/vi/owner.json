@@ -41,9 +41,9 @@
         "subtitle": "Cấp và thu hồi quyền nhân viên cho các trạm của bạn."
       },
       "revenue": {
-        "label": "Doanh thu",
-        "title": "Doanh thu",
-        "subtitle": "Giao dịch, hoàn tiền và doanh thu ròng."
+        "label": "Tài chính & Hoàn tiền",
+        "title": "Tài chính & Hoàn tiền",
+        "subtitle": "Sổ đối chiếu doanh thu mô phỏng và xử lý hoàn tiền trạm."
       },
       "license": {
         "label": "Giấy phép",
@@ -531,8 +531,17 @@
     }
   },
   "revenue": {
-    "title": "Doanh thu",
-    "subtitle": "Giao dịch, hoàn tiền và doanh thu ròng của bạn.",
+    "title": "Tài chính & Hoàn tiền",
+    "subtitle": "Sổ đối chiếu doanh thu mô phỏng (Simulator) và xử lý hoàn tiền trạm sạc.",
+    "refreshBtn": "Làm mới",
+    "tabs": {
+      "ledger": "Sổ đối chiếu thu - hoàn",
+      "refunds": "Quản lý hoàn tiền"
+    },
+    "simulatorNotice": {
+      "title": "Cổng thanh toán & đối chiếu mô phỏng (Simulator Money)",
+      "desc": "Toàn bộ doanh thu và các khoản hoàn tiền trên hệ thống đều thuộc môi trường giả lập. Nền tảng không hỗ trợ rút tiền thật (No Payouts) hoặc ví chi tiêu cá nhân."
+    },
     "kpis": {
       "gross": "TỔNG THU",
       "refunded": "ĐÃ HOÀN",

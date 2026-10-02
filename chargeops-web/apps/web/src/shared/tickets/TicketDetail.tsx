@@ -9,6 +9,7 @@ import {
 } from '@chargeops/ui';
 import {
   AssignTicketDrawer,
+  EscalateTicketModal,
   ResolveTicketModal,
   TicketContextCard,
   TicketErrorState,
@@ -41,12 +42,15 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
     setIsResolveModalOpen,
     isAssignDrawerOpen,
     setIsAssignDrawerOpen,
+    isEscalateModalOpen,
+    setIsEscalateModalOpen,
     messagesEndRef,
     reply,
     claim,
     assign,
     recordFinding,
     resolve,
+    escalate,
     ticket: tk,
     statusKey,
     meta,
@@ -68,6 +72,8 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
     assignedStaff,
     resolvedHandlerName,
     isAssigned,
+    escalation,
+    isEscalated,
   } = useTicketDetail({ admin });
 
   if (ticketQuery.error) {
@@ -128,6 +134,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         categoryKey={categoryKey}
         categoryLabel={categoryLabel}
         hasRefund={hasRefund}
+        isEscalated={isEscalated}
         isAdminStationSupervisory={isAdminStationSupervisory}
         isAdminPlatformDirect={isAdminPlatformDirect}
         isOpen={isOpen}
@@ -138,6 +145,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         onClaim={() => claim.mutate()}
         onOpenAssign={() => setIsAssignDrawerOpen(true)}
         onOpenResolve={() => setIsResolveModalOpen(true)}
+        onOpenEscalate={() => setIsEscalateModalOpen(true)}
       />
 
       {/* Status & Policy Banners */}
@@ -146,6 +154,8 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         isAdminStationSupervisory={isAdminStationSupervisory}
         isResolved={isResolved}
         isClosed={isClosed}
+        isEscalated={isEscalated}
+        escalation={escalation}
       />
 
       {/* Lifecycle Progress Stepper */}
@@ -300,6 +310,16 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         }}
         isPending={assign.isPending}
         admin={admin}
+      />
+
+      <EscalateTicketModal
+        open={isEscalateModalOpen}
+        onClose={() => setIsEscalateModalOpen(false)}
+        ticket={tk}
+        onSubmit={async (reason) => {
+          await escalate.mutateAsync(reason);
+        }}
+        isPending={escalate.isPending}
       />
     </div>
   );

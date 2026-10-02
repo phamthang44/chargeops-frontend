@@ -38,6 +38,14 @@ import type {
   RefundDetail,
   RefundQueueSummary,
   RefundStatus,
+  OwnerFinanceBooking,
+  OwnerFinanceSummary,
+  OwnerRefund,
+  OwnerRefundsSummary,
+  OwnerRefundRetryPayload,
+  TicketEscalation,
+  TicketEscalationsSummary,
+  EscalateTicketPayload,
   RenewLicenseRequest,
   OperationalChargePointStatus,
   OwnerDashboard,
@@ -263,6 +271,19 @@ export interface RefundService {
   ): Promise<RefundDetail>;
 }
 
+export interface OwnerFinanceService {
+  summary(): Promise<OwnerFinanceSummary>;
+  list(params?: { page?: number; pageSize?: number }): Promise<Page<OwnerFinanceBooking>>;
+  get(bookingId: string): Promise<OwnerFinanceBooking>;
+}
+
+export interface OwnerRefundService {
+  summary(): Promise<OwnerRefundsSummary>;
+  list(params?: { status?: RefundStatus; page?: number; pageSize?: number }): Promise<Page<OwnerRefund>>;
+  get(refundId: string): Promise<OwnerRefund>;
+  retry(refundId: string, payload: OwnerRefundRetryPayload, idempotencyKey?: string): Promise<OwnerRefund>;
+}
+
 
 export interface LicenseService {
   /** Admin: issue an active license to a station (POST /stations/{stationId}/licenses). */
@@ -368,6 +389,14 @@ export interface TicketService {
   escalate(id: string): Promise<Ticket>;
 }
 
+export interface TicketEscalationService {
+  summary(): Promise<TicketEscalationsSummary>;
+  request(ticketId: string, payload: EscalateTicketPayload): Promise<TicketEscalation>;
+  get(ticketId: string): Promise<TicketEscalation>;
+  adminQueue(params?: { page?: number; pageSize?: number }): Promise<Page<TicketEscalation>>;
+  adminEscalatedTickets(params?: { stationId?: string; status?: string; page?: number; pageSize?: number }): Promise<Page<Ticket>>;
+}
+
 export interface ProfileService {
   get(): Promise<UserProfile>;
   update(request: UserProfileUpdateRequest): Promise<UserProfile>;
@@ -460,6 +489,8 @@ export interface Services {
   stations: StationService;
   transactions: TransactionService;
   refunds: RefundService;
+  ownerFinance: OwnerFinanceService;
+  ownerRefunds: OwnerRefundService;
   licenses: LicenseService;
   users: UserService;
   staff: StaffService;
@@ -467,6 +498,7 @@ export interface Services {
   policies: PolicyService;
   legalDocuments: LegalDocumentsService;
   tickets: TicketService;
+  ticketEscalations: TicketEscalationService;
   challenge: ChallengeService;
   media: MediaService;
   notifications: NotificationService;

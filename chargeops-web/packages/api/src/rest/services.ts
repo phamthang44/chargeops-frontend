@@ -29,6 +29,14 @@ import type {
   RefundDetail,
   RefundAttemptItem,
   RefundStatus,
+  OwnerFinanceBooking,
+  OwnerFinanceSummary,
+  OwnerRefund,
+  OwnerRefundsSummary,
+  OwnerRefundRetryPayload,
+  TicketEscalation,
+  TicketEscalationsSummary,
+  EscalateTicketPayload,
   Ticket,
   TicketMessage,
   TicketFinding,
@@ -768,6 +776,131 @@ export function createRestServices(http: HttpClient): Services {
       },
     },
 
+    ownerFinance: {
+      summary: async () => {
+        try {
+          const res: any = await http.get('/owner/finance/summary');
+          return (res?.data ?? res) as OwnerFinanceSummary;
+        } catch {
+          // Fallback calculating from available ledger items
+          const query = { page: 1, size: 100 };
+          const res: any = await http.get('/owner/finance/bookings', query).catch(() => ({ items: [], total: 0 }));
+          const items: OwnerFinanceBooking[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+          let grossVnd = 0;
+          let refundedVnd = 0;
+          let pendingRefundVnd = 0;
+          let paidBookings = 0;
+          for (const b of items) {
+            grossVnd += b.collectedAmount || 0;
+            refundedVnd += b.refundedAmount || 0;
+            pendingRefundVnd += b.pendingRefundAmount || 0;
+            if (b.paymentStatus === 'PAID') paidBookings++;
+          }
+          return {
+            grossVnd,
+            refundedVnd,
+            netVnd: grossVnd - refundedVnd,
+            pendingRefundVnd,
+            totalBookings: typeof res?.total === 'number' ? res.total : items.length,
+            paidBookings,
+          };
+        }
+      },
+      list: async (params = {}) => {
+        const query: Record<string, any> = {
+          page: (params.page ?? 0) + 1,
+          size: params.pageSize ?? 20,
+        };
+        const res: any = await http.get('/owner/finance/bookings', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+        return {
+          items: rawItems,
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
+      get: async (bookingId: string) => {
+        const res: any = await http.get(`/owner/finance/bookings/${bookingId}`);
+        return (res?.data ?? res) as OwnerFinanceBooking;
+      },
+    },
+
+    ownerRefunds: {
+      summary: async () => {
+        try {
+          const res: any = await http.get('/owner/refunds/summary');
+          return (res?.data ?? res) as OwnerRefundsSummary;
+        } catch {
+          // Fallback calculating from refund items
+          const res: any = await http.get('/owner/refunds', { page: 1, size: 100 }).catch(() => ({ items: [], total: 0 }));
+          const items: OwnerRefund[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+          let totalPendingCount = 0;
+          let totalSucceededCount = 0;
+          let totalFailedAttemptsCount = 0;
+          let requiresOwnerActionCount = 0;
+          let totalRefundAmountVnd = 0;
+          let pendingRefundAmountVnd = 0;
+          for (const r of items) {
+            if (r.status === 'PENDING') {
+              totalPendingCount++;
+              pendingRefundAmountVnd += r.amount || 0;
+            } else if (r.status === 'SUCCEEDED') {
+              totalSucceededCount++;
+              totalRefundAmountVnd += r.amount || 0;
+            }
+            if (r.requiresOwnerAction) requiresOwnerActionCount++;
+            if (r.attempts?.some((a) => a.status === 'FAILED')) totalFailedAttemptsCount++;
+          }
+          return {
+            totalPendingCount,
+            totalSucceededCount,
+            totalFailedAttemptsCount,
+            requiresOwnerActionCount,
+            totalRefundAmountVnd,
+            pendingRefundAmountVnd,
+          };
+        }
+      },
+      list: async (params = {}) => {
+        const query: Record<string, any> = {};
+        if (params.status) query.status = params.status;
+        query.page = (params.page ?? 0) + 1;
+        query.size = params.pageSize ?? 20;
+        const res: any = await http.get('/owner/refunds', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+        return {
+          items: rawItems,
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
+      get: async (refundId: string) => {
+        const res: any = await http.get(`/owner/refunds/${refundId}`);
+        return (res?.data ?? res) as OwnerRefund;
+      },
+      retry: async (refundId: string, payload: OwnerRefundRetryPayload, idempotencyKey?: string) => {
+        const key = idempotencyKey || generateUuidV4();
+        const res: any = await http.post(
+          `/owner/refunds/${refundId}/retry`,
+          payload,
+          { headers: { 'Idempotency-Key': key } },
+        );
+        return (res?.data ?? res) as OwnerRefund;
+      },
+    },
+
     licenses: {
       issue: (stationId, input) =>
         http
@@ -898,7 +1031,7 @@ export function createRestServices(http: HttpClient): Services {
           endpoint = '/owner/tickets';
         } else if (params.role === 'admin') {
           if (params.workstream === 'station') {
-            endpoint = '/admin/tickets/station-audit';
+            endpoint = '/admin/tickets/escalated';
           } else if (params.workstream === 'platform') {
             endpoint = '/admin/tickets';
           }
@@ -954,7 +1087,7 @@ export function createRestServices(http: HttpClient): Services {
         if (options?.role === 'owner') endpoint = '/owner/tickets';
         else if (options?.role === 'admin') {
           if (options?.workstream === 'platform') endpoint = '/admin/tickets';
-          else if (options?.workstream === 'station') endpoint = '/admin/tickets/station-audit';
+          else if (options?.workstream === 'station') endpoint = '/admin/tickets/escalated';
         }
         try {
           if (endpoint === '/tickets') {
@@ -1090,6 +1223,80 @@ export function createRestServices(http: HttpClient): Services {
       },
       reassign: (id, stationName) => http.post(`/admin/tickets/${id}/reassign`, { stationName }),
       escalate: (id) => http.post(`/admin/tickets/${id}/escalate`),
+    },
+
+    ticketEscalations: {
+      summary: async () => {
+        try {
+          const res: any = await http.get('/admin/ticket-escalations/summary');
+          return (res?.data ?? res) as TicketEscalationsSummary;
+        } catch {
+          // Fallback calculating from queue
+          const res: any = await http.get('/admin/ticket-escalations', { page: 1, size: 100 }).catch(() => ({ items: [], total: 0 }));
+          const items: TicketEscalation[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+          let unresponsive24hCount = 0;
+          let disputedFindingCount = 0;
+          for (const item of items) {
+            if (item.reason === 'DRIVER_UNRESPONSIVE_24H') unresponsive24hCount++;
+            if (item.reason === 'DISPUTED_NOT_STATION_FAILURE') disputedFindingCount++;
+          }
+          const total = typeof res?.total === 'number' ? res.total : items.length;
+          return {
+            totalEscalated: total,
+            pendingArbiter: total,
+            unresponsive24hCount,
+            disputedFindingCount,
+          };
+        }
+      },
+      request: async (ticketId: string, payload: EscalateTicketPayload) => {
+        const res: any = await http.post(`/tickets/${ticketId}/escalation`, payload);
+        return (res?.data ?? res) as TicketEscalation;
+      },
+      get: async (ticketId: string) => {
+        const res: any = await http.get(`/tickets/${ticketId}/escalation`);
+        return (res?.data ?? res) as TicketEscalation;
+      },
+      adminQueue: async (params = {}) => {
+        const query: Record<string, any> = {
+          page: (params.page ?? 0) + 1,
+          size: params.pageSize ?? 20,
+        };
+        const res: any = await http.get('/admin/ticket-escalations', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+        return {
+          items: rawItems,
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
+      adminEscalatedTickets: async (params = {}) => {
+        const query: Record<string, any> = {
+          page: (params.page ?? 0) + 1,
+          size: params.pageSize ?? 20,
+        };
+        if (params.stationId) query.stationId = params.stationId;
+        if (params.status) query.status = params.status;
+        const res: any = await http.get('/admin/tickets/escalated', query);
+        const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = typeof res?.total === 'number'
+          ? res.total
+          : typeof res?.meta?.totalElements === 'number'
+          ? res.meta.totalElements
+          : rawItems.length;
+        return {
+          items: rawItems.map(normalizeTicket),
+          total,
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 20,
+        };
+      },
     },
 
     challenge: {

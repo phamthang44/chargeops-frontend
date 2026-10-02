@@ -23,6 +23,14 @@ import type {
   RefundDetail,
   RefundQueueSummary,
   RefundStatus,
+  OwnerFinanceBooking,
+  OwnerFinanceSummary,
+  OwnerRefund,
+  OwnerRefundsSummary,
+  OwnerRefundRetryPayload,
+  TicketEscalation,
+  TicketEscalationsSummary,
+  EscalateTicketPayload,
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
@@ -1356,6 +1364,223 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
     },
 
+    ownerFinance: {
+      async summary() {
+        await delay();
+        let grossVnd = 0;
+        let refundedVnd = 0;
+        let paidBookings = 0;
+        for (const b of db.bookings) {
+          grossVnd += b.amountVnd || 0;
+          refundedVnd += b.refundVnd || 0;
+          if (b.status === 'completed' || b.status === 'confirmed') paidBookings++;
+        }
+        return {
+          grossVnd,
+          refundedVnd,
+          netVnd: grossVnd - refundedVnd,
+          pendingRefundVnd: 0,
+          totalBookings: db.bookings.length,
+          paidBookings,
+        };
+      },
+      async list(params = {}) {
+        await delay();
+        const items: OwnerFinanceBooking[] = db.bookings.map((b) => {
+          const collected = b.amountVnd || 0;
+          const refunded = b.refundVnd || 0;
+          const hasRefund = Boolean(b.refundVnd);
+          return {
+            bookingId: b.id,
+            bookingCode: (b as any).code || b.id.toUpperCase(),
+            stationId: b.stationId,
+            stationName: b.stationName,
+            paymentStatus: b.status === 'completed' || b.status === 'confirmed' ? 'PAID' : 'PENDING',
+            collectedAmount: collected,
+            refundedAmount: refunded,
+            pendingRefundAmount: 0,
+            netRecordedAmount: collected - refunded,
+            refundStatus: hasRefund ? 'SUCCEEDED' : null,
+            paidAt: b.startAt,
+            receipts: [
+              {
+                receiptId: `rcpt-${b.id}`,
+                transactionRef: `SIM-TX-${b.id.slice(-6)}`,
+                amount: collected,
+                receivedAt: b.startAt,
+              },
+            ],
+          };
+        });
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 20;
+        return {
+          items: items.slice(page * pageSize, (page + 1) * pageSize),
+          total: items.length,
+          page,
+          pageSize,
+        };
+      },
+      async get(bookingId: string) {
+        await delay();
+        const b = db.bookings.find((x) => x.id === bookingId);
+        if (!b) throw new Error(`Không tìm thấy booking ${bookingId}`);
+        const collected = b.amountVnd || 0;
+        const refunded = b.refundVnd || 0;
+        return {
+          bookingId: b.id,
+          bookingCode: (b as any).code || b.id.toUpperCase(),
+          stationId: b.stationId,
+          stationName: b.stationName,
+          paymentStatus: 'PAID',
+          collectedAmount: collected,
+          refundedAmount: refunded,
+          pendingRefundAmount: 0,
+          netRecordedAmount: collected - refunded,
+          refundStatus: refunded ? 'SUCCEEDED' : null,
+          paidAt: b.startAt,
+          receipts: [
+            {
+              receiptId: `rcpt-${b.id}`,
+              transactionRef: `SIM-TX-${b.id.slice(-6)}`,
+              amount: collected,
+              receivedAt: b.startAt,
+            },
+          ],
+        };
+      },
+    },
+
+    ownerRefunds: {
+      async summary() {
+        await delay();
+        let totalPendingCount = 0;
+        let totalSucceededCount = 0;
+        let totalFailedAttemptsCount = 0;
+        let requiresOwnerActionCount = 0;
+        let totalRefundAmountVnd = 0;
+        let pendingRefundAmountVnd = 0;
+        for (const r of db.refunds) {
+          if (r.status === 'PENDING') {
+            totalPendingCount++;
+            pendingRefundAmountVnd += r.amount || 0;
+          } else if (r.status === 'SUCCEEDED') {
+            totalSucceededCount++;
+            totalRefundAmountVnd += r.amount || 0;
+          }
+          if (r.requiresAdminAction) requiresOwnerActionCount++;
+          if (r.attempts?.some((a: any) => a.status === 'FAILED')) totalFailedAttemptsCount++;
+        }
+        return {
+          totalPendingCount,
+          totalSucceededCount,
+          totalFailedAttemptsCount,
+          requiresOwnerActionCount,
+          totalRefundAmountVnd,
+          pendingRefundAmountVnd,
+        };
+      },
+      async list(params = {}) {
+        await delay();
+        let rows: OwnerRefund[] = db.refunds.map((r) => ({
+          refundId: r.id,
+          bookingId: r.bookingId,
+          bookingCode: r.bookingCode || r.bookingId,
+          stationId: r.basisId || 'st-default',
+          amount: r.amount,
+          currency: r.currency || 'VND',
+          reason: (r.reason as any) || 'VOLUNTARY_GRACE',
+          status: r.status,
+          requiresOwnerAction: Boolean(r.requiresAdminAction),
+          version: r.version || 1,
+          decisionAt: r.decisionAt || new Date().toISOString(),
+          completedAt: r.completedAt || null,
+          attempts: (r.attempts || []).map((a, i) => ({
+            attemptId: a.id || `att-${i}`,
+            sequenceNo: a.sequenceNo || i + 1,
+            executionMode: a.executionMode || 'SIMULATOR',
+            status: a.status === 'SUCCEEDED' ? 'SUCCEEDED' : a.status === 'FAILED' ? 'FAILED' : 'PENDING',
+            startedAt: a.startedAt,
+            completedAt: a.completedAt || null,
+            failureReason: a.failureCode || null,
+          })),
+        }));
+        if (params.status) {
+          rows = rows.filter((x) => x.status === params.status);
+        }
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 20;
+        return {
+          items: rows.slice(page * pageSize, (page + 1) * pageSize),
+          total: rows.length,
+          page,
+          pageSize,
+        };
+      },
+      async get(refundId: string) {
+        await delay();
+        const r = db.refunds.find((x) => x.id === refundId || x.refundId === refundId);
+        if (!r) throw new Error(`Không tìm thấy hoàn tiền ${refundId}`);
+        return {
+          refundId: r.id,
+          bookingId: r.bookingId,
+          bookingCode: r.bookingCode || r.bookingId,
+          stationId: r.basisId || 'st-default',
+          amount: r.amount,
+          currency: r.currency || 'VND',
+          reason: (r.reason as any) || 'VOLUNTARY_GRACE',
+          status: r.status,
+          requiresOwnerAction: Boolean(r.requiresAdminAction),
+          version: r.version || 1,
+          decisionAt: r.decisionAt || new Date().toISOString(),
+          completedAt: r.completedAt || null,
+          attempts: (r.attempts || []).map((a, i) => ({
+            attemptId: a.id || `att-${i}`,
+            sequenceNo: a.sequenceNo || i + 1,
+            executionMode: a.executionMode || 'SIMULATOR',
+            status: a.status === 'SUCCEEDED' ? 'SUCCEEDED' : a.status === 'FAILED' ? 'FAILED' : 'PENDING',
+            startedAt: a.startedAt,
+            completedAt: a.completedAt || null,
+            failureReason: a.failureCode || null,
+          })),
+        };
+      },
+      async retry(refundId: string, payload: OwnerRefundRetryPayload) {
+        await delay();
+        const r = db.refunds.find((x) => x.id === refundId || x.refundId === refundId);
+        if (!r) throw new Error(`Không tìm thấy hoàn tiền ${refundId}`);
+        r.status = 'SUCCEEDED';
+        r.requiresAdminAction = false;
+        r.version = (payload.expectedVersion || r.version) + 1;
+        r.completedAt = new Date().toISOString();
+        return {
+          refundId: r.id,
+          bookingId: r.bookingId,
+          bookingCode: r.bookingCode || r.bookingId,
+          stationId: r.basisId || 'st-default',
+          amount: r.amount,
+          currency: r.currency || 'VND',
+          reason: (r.reason as any) || 'VOLUNTARY_GRACE',
+          status: 'SUCCEEDED' as const,
+          requiresOwnerAction: false,
+          version: r.version,
+          decisionAt: r.decisionAt || new Date().toISOString(),
+          completedAt: r.completedAt,
+          attempts: [
+            ...(r.attempts || []).map((a, i) => ({
+              attemptId: a.id || `att-${i}`,
+              sequenceNo: a.sequenceNo || i + 1,
+              executionMode: a.executionMode || 'SIMULATOR',
+              status: 'SUCCEEDED' as const,
+              startedAt: a.startedAt,
+              completedAt: new Date().toISOString(),
+              failureReason: null,
+            })),
+          ],
+        };
+      },
+    },
+
     licenses: {
       async issue(stationId, input) {
         await delay();
@@ -2302,6 +2527,69 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         tk.assigneeName = 'Đội vận hành trung tâm';
         tk.updatedAt = new Date().toISOString();
         return { ...tk };
+      },
+    },
+
+    ticketEscalations: {
+      async summary() {
+        await delay();
+        const escalated = db.tickets.filter((t) => t.category === 'CHARGING_ISSUE').slice(0, 5);
+        return {
+          totalEscalated: escalated.length,
+          pendingArbiter: escalated.length,
+          unresponsive24hCount: Math.ceil(escalated.length / 2),
+          disputedFindingCount: Math.floor(escalated.length / 2),
+        };
+      },
+      async request(ticketId: string, payload: EscalateTicketPayload) {
+        await delay();
+        return {
+          ticketId,
+          requestedBy: 'user-current',
+          requestedAt: new Date().toISOString(),
+          reason: payload.reason,
+        };
+      },
+      async get(ticketId: string) {
+        await delay();
+        return {
+          ticketId,
+          requestedBy: 'user-current',
+          requestedAt: new Date().toISOString(),
+          reason: 'Bất đồng quan điểm về sự cố trạm sạc',
+        };
+      },
+      async adminQueue(params = {}) {
+        await delay();
+        const escalated = db.tickets.filter((t) => t.category === 'CHARGING_ISSUE').slice(0, 5);
+        const items: TicketEscalation[] = escalated.map((t) => ({
+          ticketId: t.id,
+          requestedBy: t.driverName || 'driver-1',
+          requestedAt: t.updatedAt,
+          reason: 'Trạm từ chối xử lý sự cố lỗi sạc',
+        }));
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 20;
+        return {
+          items: items.slice(page * pageSize, (page + 1) * pageSize),
+          total: items.length,
+          page,
+          pageSize,
+        };
+      },
+      async adminEscalatedTickets(params = {}) {
+        await delay();
+        let rows = db.tickets.filter((t) => t.stationId);
+        if (params.stationId) rows = rows.filter((t) => t.stationId === params.stationId);
+        if (params.status) rows = rows.filter((t) => t.status === params.status);
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 20;
+        return {
+          items: rows.slice(page * pageSize, (page + 1) * pageSize),
+          total: rows.length,
+          page,
+          pageSize,
+        };
       },
     },
 

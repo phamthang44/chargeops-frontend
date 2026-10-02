@@ -136,6 +136,13 @@ export function BookingPaymentCard({
             {t('payment.paidVia', { method: t(`payment.${booking.paymentMethod}`) })}
           </Text>
         </View>
+
+        <View style={[styles.simulatorNotice, { backgroundColor: `${themeColors.info}0C`, borderColor: `${themeColors.info}25` }]}>
+          <Ionicons name="information-circle-outline" size={13} color={themeColors.info} />
+          <Text style={[styles.simulatorNoticeText, { color: themeColors.textMuted }]}>
+            {t('payment.simulatorNotice', 'Giao dịch qua cổng thử nghiệm mô phỏng (Payment Simulator).')}
+          </Text>
+        </View>
       </View>
     </>
   );
@@ -181,6 +188,20 @@ const styles = StyleSheet.create({
   energyValue: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
   paidViaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   paidVia: { fontSize: fontSizes.caption },
+  simulatorNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    marginTop: -spacing.xs,
+  },
+  simulatorNoticeText: {
+    fontSize: 11.5,
+    flex: 1,
+  },
 
   accountingCard: {
     borderRadius: radius.md,

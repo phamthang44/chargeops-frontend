@@ -27,21 +27,16 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           <p className="mt-1 text-muted leading-relaxed">
             {t(
               'detail.refund.desc',
-              'Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận ticket không phải bằng chứng đã chuyển tiền.'
+              'Khoản hoàn được hạch toán trong Sổ đối chiếu tài chính của Chủ trạm. Simulator tự động hoàn cọc theo chính sách hệ thống.'
             )}
           </p>
           <div className="mt-2.5 space-y-1">
             {ticket.refundIds?.map((refId) => (
-              <div key={refId} className="flex items-center justify-between text-[11px]">
-                <span className="font-mono text-muted">#{refId.slice(0, 10)}...</span>
-                {admin && (
-                  <Link
-                    to={`/admin/refunds?search=${refId}`}
-                    className="font-medium text-brand hover:underline"
-                  >
-                    {t('detail.refund.viewDetail', 'Chi tiết hoàn tiền →')}
-                  </Link>
-                )}
+              <div key={refId} className="flex items-center justify-between text-[11px] py-1 border-b border-hairline last:border-0">
+                <span className="font-mono text-muted">ID: #{refId.slice(0, 14)}...</span>
+                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-mono text-faint">
+                  {t('detail.refund.ownerLedgerBadge', 'Sổ trạm')}
+                </span>
               </div>
             ))}
           </div>
@@ -50,7 +45,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
         <p className="text-[12px] leading-relaxed text-muted">
           {t(
             'detail.refund.policyNotice',
-            'Nếu xác nhận lỗi phía trạm, Admin xem xét nghĩa vụ hoàn đủ giá gói theo chính sách. Ghi kết luận không tự chuyển tiền.'
+            'Khi xác nhận lỗi thuộc phía trạm (STATION_FAILURE), hệ thống tự động ghi nhận nghĩa vụ hoàn 100% trên Sổ đối chiếu tài chính của trạm sạc.'
           )}
         </p>
       )}

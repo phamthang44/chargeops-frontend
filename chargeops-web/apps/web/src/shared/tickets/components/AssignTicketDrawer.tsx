@@ -56,7 +56,9 @@ export function AssignTicketDrawer({
   const stationHandlersQuery = useQuery({
     queryKey: ['tickets', 'station-handlers', ticket.id],
     queryFn: () => api.tickets.stationHandlers(ticket.id),
-    enabled: open && isAdminStation,
+    // The GET /admin/tickets/{id}/station-handlers endpoint has been removed.
+    // Admin can no longer assign handlers on station tickets — query disabled.
+    enabled: false,
   });
 
   // Admin users query (for admin platform ticket assignment)
@@ -71,21 +73,13 @@ export function AssignTicketDrawer({
     return raw.filter((s) => String(s.status).toUpperCase() === 'ACTIVE');
   }, [staffQuery.data]);
 
-  const stationChoices = isAdminStation
-    ? (stationHandlersQuery.data ?? []).map((person) => ({
-        userId: person.userId,
-        displayName: person.displayName,
-        role: person.role,
-        email: '',
-        maskedPhone: '',
-      }))
-    : activeStaffList.map((person) => ({
-        userId: person.userId,
-        displayName: person.displayName || person.name || person.email,
-        role: 'STAFF' as const,
-        email: person.email,
-        maskedPhone: person.maskedPhone,
-      }));
+  const stationChoices = activeStaffList.map((person) => ({
+    userId: person.userId,
+    displayName: person.displayName || person.name || person.email,
+    role: 'STAFF' as const,
+    email: person.email,
+    maskedPhone: person.maskedPhone,
+  }));
 
   const activeAdminList = useMemo(() => {
     const raw: UserAccount[] = Array.isArray(adminUsersQuery.data) ? adminUsersQuery.data : [];
@@ -230,7 +224,7 @@ export function AssignTicketDrawer({
             </p>
 
             <div className="mt-2.5 max-h-56 overflow-y-auto space-y-2 pr-1">
-              {(isAdminStation ? stationHandlersQuery : staffQuery).isLoading ? (
+              {staffQuery.isLoading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-12 w-full rounded-xl" />
                   <Skeleton className="h-12 w-full rounded-xl" />
@@ -284,7 +278,7 @@ export function AssignTicketDrawer({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <StatusPill tone="good" label={staff.role === 'OWNER' ? t('assignModal.ownerRole', 'Chủ trạm') : t('assignModal.activePill', 'Đang làm việc')} />
+                        <StatusPill tone="good" label={(staff.role as string) === 'OWNER' ? t('assignModal.ownerRole', 'Chủ trạm') : t('assignModal.activePill', 'Đang làm việc')} />
                         {isSelected && (
                           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white">
                             <IconCheck size={12} strokeWidth={2.5} />

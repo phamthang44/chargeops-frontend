@@ -86,16 +86,14 @@ export function TicketHandlerCard({
               </div>
             </div>
 
-            {!isClosed && !isResolved && (
+            {!isClosed && !isResolved && !isAdminStationSupervisory && (
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={onOpenAssign}
                 icon={<IconUsers size={13} strokeWidth={2} />}
               >
-                  {isAdminStationSupervisory
-                    ? t('supervisory.routeHandler', 'Điều hướng người xử lý')
-                    : t('detail.handlerCard.changeBtn', 'Điều chuyển')}
+                {t('detail.handlerCard.changeBtn', 'Điều chuyển')}
               </Button>
             )}
           </div>
@@ -198,10 +196,6 @@ export function TicketHandlerCard({
                     {t('detail.assignBtnShort', 'Phân công')}
                   </Button>
                 </>
-              ) : isAdminStationSupervisory ? (
-                <Button variant="secondary" size="sm" onClick={onOpenAssign} icon={<IconUsers size={13} />}>
-                  {t('supervisory.routeHandler', 'Điều hướng người xử lý')}
-                </Button>
               ) : null}
             </div>
           )}

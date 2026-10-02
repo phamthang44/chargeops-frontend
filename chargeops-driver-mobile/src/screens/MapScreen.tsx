@@ -246,6 +246,8 @@ export function MapScreen() {
       <SettingsModal
         visible={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        onOpenTickets={() => navigation.navigate('MyTickets')}
+        onOpenNotifications={() => setNotifOpen(true)}
       />
 
       {/* Filter Drawer */}

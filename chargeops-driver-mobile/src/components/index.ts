@@ -9,6 +9,8 @@ export { BottomSheet } from './BottomSheet';
 export { BrandMark, Logo } from './brand/Logo';
 export { CancelBookingSheet } from './CancelBookingSheet';
 export { Card } from './Card';
+export { EditProfileModal } from './EditProfileModal';
+export { HistoryBookingCard } from './HistoryBookingCard';
 export { EmptyState, type EmptyVariant } from './illustrations/EmptyState';
 export { FeatureArt, type FeatureName } from './illustrations/FeatureArt';
 export {
@@ -35,6 +37,7 @@ export { SettingsModal } from './SettingsModal';
 export { StarRating } from './StarRating';
 export { StatusBadge } from './StatusBadge';
 export type { BadgeVariant } from './StatusBadge';
+export { SupportCenterModal } from './SupportCenterModal';
 export { TextField } from './TextField';
 export type { TextFieldProps } from './TextField';
 export { TopUpModal } from './TopUpModal';

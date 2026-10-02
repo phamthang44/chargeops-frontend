@@ -197,10 +197,12 @@ export function StationListScreen() {
         onUnreadChange={setUnreadCount}
       />
 
-      {/* Settings modal (theme, language, demo simulation) */}
+      {/* Settings modal (theme, language, support & demo simulation) */}
       <SettingsModal
         visible={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        onOpenTickets={() => navigation.navigate('MyTickets')}
+        onOpenNotifications={() => setNotifOpen(true)}
       />
 
       {/* Discovery Advanced Filter Drawer */}

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
-import { GlassButton } from '@/components';
+import { GlassButton } from '@/components/GlassButton';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, spacing } from '@/theme';
 

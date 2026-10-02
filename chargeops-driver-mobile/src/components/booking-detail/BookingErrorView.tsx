@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppBackButton, AppButton } from '@/components';
+import { AppBackButton } from '@/components/AppBackButton';
+import { AppButton } from '@/components/AppButton';
 import { usePreferences } from '@/context/PreferencesContext';
 import { BookingApiError } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';

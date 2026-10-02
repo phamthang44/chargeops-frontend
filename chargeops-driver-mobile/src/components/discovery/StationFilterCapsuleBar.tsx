@@ -9,7 +9,11 @@ import type { DiscoveryFilterState } from './StationFilterDrawer';
 
 interface StationFilterCapsuleBarProps {
   filters: DiscoveryFilterState;
-  onUpdateFilters: (updater: (prev: DiscoveryFilterState) => DiscoveryFilterState) => void;
+  onUpdateFilters: (
+    updater:
+      | DiscoveryFilterState
+      | ((prev: DiscoveryFilterState) => DiscoveryFilterState),
+  ) => void;
   onOpenDrawer: () => void;
   onClearAll: () => void;
 }

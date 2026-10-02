@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppButton } from '@/components';
+import { AppButton } from '@/components/AppButton';
 import { usePreferences } from '@/context/PreferencesContext';
 import { isMockMode } from '@/services/stationService';
 import { fontSizes, fontWeights, spacing } from '@/theme';

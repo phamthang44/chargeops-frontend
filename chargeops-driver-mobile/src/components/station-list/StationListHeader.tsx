@@ -1,18 +1,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AppHeader, HeaderActionBtn } from '@/components/AppHeader';
 import {
-  AppHeader,
-  HeaderActionBtn,
   StationFilterCapsuleBar,
   StationSearchBar,
   type DiscoveryFilterState,
-} from '@/components';
+} from '@/components/discovery';
 import { StationLocationBar } from './StationLocationBar';
 
 interface StationListHeaderProps {
   unreadCount: number;
-  onOpenTickets: () => void;
+  onOpenTickets?: () => void;
   onOpenSettings: () => void;
   onOpenNotifications: () => void;
   selectedProvinceCode: string;
@@ -22,7 +21,11 @@ interface StationListHeaderProps {
   onChangeQuery: (text: string) => void;
   onOpenDrawer: () => void;
   filterState: DiscoveryFilterState;
-  onUpdateFilters: (filters: DiscoveryFilterState) => void;
+  onUpdateFilters: (
+    updater:
+      | DiscoveryFilterState
+      | ((prev: DiscoveryFilterState) => DiscoveryFilterState),
+  ) => void;
   onClearFilters: () => void;
 }
 
@@ -51,11 +54,6 @@ export function StationListHeader({
       slogan={[t('stationList.slogan1', 'Sạc xanh hơn'), t('stationList.slogan2', 'Hành trình xa hơn')]}
       trailing={
         <>
-          <HeaderActionBtn
-            icon="help-buoy-outline"
-            onPress={onOpenTickets}
-            accessibilityLabel="Hỗ trợ & Báo sự cố"
-          />
           <HeaderActionBtn
             icon="settings-outline"
             onPress={onOpenSettings}

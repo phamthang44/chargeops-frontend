@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { EmptyState } from '@/components/EmptyState';
+import { EmptyState } from '@/components/illustrations/EmptyState';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import { StationListSkeleton } from './StationListSkeleton';

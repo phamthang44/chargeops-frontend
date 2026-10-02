@@ -21,39 +21,84 @@ export function formatRate(value: number): string {
   return `${groupThousands(value)}đ/kWh`;
 }
 
+/**
+ * Safely parse any date input (ISO string, epoch number, timestamp array from Jackson, etc.)
+ * into a valid Date object. Returns null if invalid or missing, never throws.
+ */
+export function parseSafeDate(val: any): Date | null {
+  if (val === null || val === undefined || val === '') return null;
+  if (val instanceof Date) {
+    return isNaN(val.getTime()) ? null : val;
+  }
+  // Array from Java Jackson Instant/LocalDateTime e.g. [2026, 10, 2, 15, 30, 0]
+  if (Array.isArray(val) && val.length >= 3) {
+    const [y, m, d, h = 0, min = 0, s = 0, nano = 0] = val;
+    const ms = Math.floor(nano / 1_000_000);
+    const date = new Date(Date.UTC(y, m - 1, d, h, min, s, ms));
+    return isNaN(date.getTime()) ? null : date;
+  }
+  // Number (epoch timestamp in seconds or ms)
+  if (typeof val === 'number') {
+    const ms = val < 1e11 ? val * 1000 : val;
+    const date = new Date(ms);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed || trimmed.toLowerCase().includes('invalid date')) return null;
+    const normalized = trimmed.includes(' ') && !trimmed.includes('T') ? trimmed.replace(' ', 'T') : trimmed;
+    const date = new Date(normalized);
+    if (!isNaN(date.getTime())) return date;
+    const num = Number(trimmed);
+    if (!isNaN(num) && num > 0) {
+      const ms = num < 1e11 ? num * 1000 : num;
+      const dNum = new Date(ms);
+      if (!isNaN(dNum.getTime())) return dNum;
+    }
+  }
+  return null;
+}
+
 /** Format an ISO datetime as a short Vietnamese date, e.g. "15/06/2026". */
-export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '--/--/----';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '--/--/----';
+export function formatDate(iso: any): string {
+  const d = parseSafeDate(iso);
+  if (!d) return '--/--/----';
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
 /** Format an ISO datetime as a 24h time label, e.g. "08:00". */
-export function formatTime(iso: string | null | undefined): string {
-  if (!iso) return '--:--';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '--:--';
+export function formatTime(iso: any): string {
+  const d = parseSafeDate(iso);
+  if (!d) return '--:--';
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+/** Format an ISO datetime as full date-time, e.g. "15:30 15/06/2026". Never returns "Invalid Date". */
+export function formatDateTime(iso: any, fallback = '--:-- --/--/----'): string {
+  const d = parseSafeDate(iso);
+  if (!d) return fallback;
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${hours}:${minutes} ${dd}/${mm}/${d.getFullYear()}`;
+}
+
 /** Format a start/end ISO pair as a 24h time range, e.g. "14:00 - 15:00" or "23:00 - 02:00 (+1)". */
-export function formatTimeRange(startIso: string | null | undefined, endIso: string | null | undefined): string {
-  if (!startIso || !endIso) return '--:-- - --:--';
-  const s = new Date(startIso);
-  const e = new Date(endIso);
-  if (isNaN(s.getTime()) || isNaN(e.getTime())) return '--:-- - --:--';
+export function formatTimeRange(startIso: any, endIso: any): string {
+  const s = parseSafeDate(startIso);
+  const e = parseSafeDate(endIso);
+  if (!s || !e) return '--:-- - --:--';
   const isDiffDay = s.getFullYear() !== e.getFullYear() || s.getMonth() !== e.getMonth() || s.getDate() !== e.getDate();
-  return `${formatTime(startIso)} - ${formatTime(endIso)}${isDiffDay ? ' (+1)' : ''}`;
+  return `${formatTime(s)} - ${formatTime(e)}${isDiffDay ? ' (+1)' : ''}`;
 }
 
 /** Format an ISO datetime as a short day/month, e.g. "20/06". */
-export function formatDayMonth(iso: string | null | undefined): string {
-  if (!iso) return '--/--';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '--/--';
+export function formatDayMonth(iso: any): string {
+  const d = parseSafeDate(iso);
+  if (!d) return '--/--';
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 

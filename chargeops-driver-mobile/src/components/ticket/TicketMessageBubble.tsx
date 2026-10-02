@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { TicketActorKind, TicketMessage } from '@/types';
+import { formatTime } from '@/utils/format';
 
 interface TicketMessageBubbleProps {
   message: TicketMessage;
@@ -48,10 +49,7 @@ export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProp
   const actor = ACTOR_STYLE[message.authorKind] ?? ACTOR_STYLE.STAFF;
   const roleLabel = t(`ticket.role.${message.authorKind}`, message.authorKind);
 
-  const formattedTime = new Date(message.createdAt).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const formattedTime = formatTime(message.createdAt);
 
   if (isSelf || message.authorKind === 'REPORTER') {
     return (

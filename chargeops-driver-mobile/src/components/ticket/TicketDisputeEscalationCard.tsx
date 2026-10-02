@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Ticket, TicketEscalation } from '@/types';
+import { parseSafeDate } from '@/utils/format';
 
 export interface TicketDisputeEscalationCardProps {
   ticket: Ticket;
@@ -99,8 +100,9 @@ export function TicketDisputeEscalationCard({
   // If closed without escalation, don't show active cards
   if (isClosed) return null;
 
-  // Calculate elapsed time from ticket creation
-  const createdAtMs = new Date(ticket.createdAt).getTime();
+  // Calculate elapsed time from ticket creation safely
+  const parsedDate = parseSafeDate(ticket.createdAt);
+  const createdAtMs = parsedDate ? parsedDate.getTime() : Date.now();
   const elapsedMs = Math.max(0, Date.now() - createdAtMs);
   const isPast24h = elapsedMs >= 24 * 60 * 60 * 1000;
   const remainingMs = Math.max(0, 24 * 60 * 60 * 1000 - elapsedMs);

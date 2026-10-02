@@ -6,6 +6,7 @@ import type {
   TicketMessage,
   TicketEscalation,
 } from '@/types';
+import { parseSafeDate } from '@/utils/format';
 import { apiBaseUrl, isMockMode, resolveAccessToken } from './stationService';
 
 /**
@@ -212,7 +213,8 @@ export async function getTickets(
     const res = await fetch(`${apiBaseUrl}/api/v1/tickets?${query.toString()}`, { headers });
     if (res.ok) {
       const json = await res.json();
-      const items = json?.data ?? [];
+      const rawItems = json?.data ?? [];
+      const items = rawItems.map(normalizeTicket);
       const meta = json?.meta ?? {};
       return {
         items,
@@ -247,6 +249,104 @@ export async function getTickets(
 }
 
 /**
+ * Chuẩn hóa đối tượng Ticket từ TicketDetailResponse hoặc TicketResponse
+ */
+export function normalizeTicket(rawInput: any): Ticket {
+  if (!rawInput) return rawInput;
+  const raw = rawInput?.data ?? rawInput;
+
+  // Hỗ trợ cấu trúc TicketDetailResponse mới từ backend (overview, station, booking, conversation, resolution)
+  if (raw.overview) {
+    const o = raw.overview || {};
+    const st = raw.station || {};
+    const bk = raw.booking || {};
+    const pt = raw.participants || {};
+    const cv = raw.conversation || {};
+    const rs = raw.resolution || {};
+
+    const rawCreatedAt = o.createdAt ?? raw.createdAt;
+    const dateObj = parseSafeDate(rawCreatedAt);
+    const createdAtIso = dateObj ? dateObj.toISOString() : new Date().toISOString();
+
+    const rawMessages = cv.messages ?? raw.messages;
+    const messages: TicketMessage[] = Array.isArray(rawMessages)
+      ? rawMessages.map((m: any) => {
+          const mDate = parseSafeDate(m?.createdAt);
+          return {
+            messageId: m?.messageId || m?.id || '',
+            authorDisplayName: m?.authorDisplayName || 'Hệ thống',
+            authorKind: m?.authorKind || 'STAFF',
+            body: m?.body || '',
+            createdAt: mDate ? mDate.toISOString() : new Date().toISOString(),
+          };
+        })
+      : [];
+
+    const esc = raw.escalation || o.escalation || null;
+    const isEsc = Boolean(raw.isEscalated || esc || o.isEscalated);
+
+    return {
+      ticketId: o.ticketId || raw.ticketId || '',
+      ticketCode: o.ticketCode || raw.ticketCode || (o.ticketId ? `TKT-${String(o.ticketId).slice(0, 8).toUpperCase()}` : ''),
+      category: o.category || raw.category || 'OTHER',
+      priority: o.priority || raw.priority || 'MEDIUM',
+      subject: o.subject || raw.subject || raw.title || 'Phiếu hỗ trợ',
+      status: o.status || raw.status || 'OPEN',
+      version: typeof o.version === 'number' ? o.version : (typeof raw.version === 'number' ? raw.version : 0),
+      bookingId: bk.bookingId || raw.bookingId,
+      stationId: st.stationId || raw.stationId,
+      stationName: st.name || raw.stationName,
+      reporterId: pt.reporterId || raw.reporterId,
+      assignedHandlerId: pt.assignedHandlerId || raw.assignedHandlerId,
+      createdAt: createdAtIso,
+      isEscalated: isEsc,
+      escalatedAt: esc?.requestedAt || raw.escalatedAt || null,
+      escalation: esc,
+      resolutionCycle: typeof rs.resolutionCycle === 'number' ? rs.resolutionCycle : (typeof raw.resolutionCycle === 'number' ? raw.resolutionCycle : 0),
+      autoCloseAt: rs.autoCloseAt || raw.autoCloseAt || null,
+      resolvedAt: rs.resolvedAt || raw.resolvedAt || null,
+      messages,
+      findings: Array.isArray(rs.findings) ? rs.findings : (Array.isArray(raw.findings) ? raw.findings : []),
+      refundIds: Array.isArray(rs.refundIds) ? rs.refundIds.map(String) : (Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : []),
+    };
+  }
+
+  // Cấu trúc phẳng cũ hoặc list item
+  const rawCreatedAt = raw.createdAt;
+  const dateObj = parseSafeDate(rawCreatedAt);
+  const createdAtIso = dateObj ? dateObj.toISOString() : new Date().toISOString();
+  const esc = raw.escalation || null;
+
+  const rawMessages = raw.messages;
+  const messages: TicketMessage[] = Array.isArray(rawMessages)
+    ? rawMessages.map((m: any) => {
+        const mDate = parseSafeDate(m?.createdAt);
+        return {
+          messageId: m?.messageId || m?.id || '',
+          authorDisplayName: m?.authorDisplayName || 'Hệ thống',
+          authorKind: m?.authorKind || 'STAFF',
+          body: m?.body || '',
+          createdAt: mDate ? mDate.toISOString() : new Date().toISOString(),
+        };
+      })
+    : [];
+
+  return {
+    ...raw,
+    ticketId: raw.ticketId || raw.id || '',
+    ticketCode: raw.ticketCode || (raw.ticketId ? `TKT-${String(raw.ticketId).slice(0, 8).toUpperCase()}` : ''),
+    subject: raw.subject || raw.title || 'Phiếu hỗ trợ',
+    status: raw.status || 'OPEN',
+    createdAt: createdAtIso,
+    messages,
+    findings: Array.isArray(raw.findings) ? raw.findings : [],
+    refundIds: Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : [],
+    isEscalated: Boolean(raw.isEscalated || esc),
+    escalation: esc,
+  };
+}
+
+/**
  * Lấy chi tiết phiếu hỗ trợ kèm messages & findings (GET /api/v1/tickets/:ticketId)
  */
 export async function getTicketDetail(
@@ -261,7 +361,8 @@ export async function getTicketDetail(
     const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}`, { headers });
     if (res.ok) {
       const json = await res.json();
-      return json?.data ?? json;
+      const raw = json?.data ?? json;
+      return normalizeTicket(raw);
     }
     const errJson = await res.json().catch(() => null);
     throw buildTicketError(res, errJson, 'Không tìm thấy phiếu');

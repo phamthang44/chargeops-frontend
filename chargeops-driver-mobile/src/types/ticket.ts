@@ -51,6 +51,7 @@ export interface Ticket {
   createdAt: string;
   isEscalated?: boolean;
   escalatedAt?: string | null;
+  escalation?: TicketEscalation | null;
   resolutionCycle?: number;
   autoCloseAt?: string | null;
   resolvedAt?: string | null;

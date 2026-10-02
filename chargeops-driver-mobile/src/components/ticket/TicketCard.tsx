@@ -7,6 +7,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Ticket, TicketCategory, TicketStatus } from '@/types';
+import { formatDate } from '@/utils/format';
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -112,7 +113,7 @@ export function TicketCard({ ticket, onPress }: TicketCardProps) {
         <View style={styles.footerItem}>
           <Ionicons name="time-outline" size={13} color={themeColors.textMuted} />
           <Text style={[styles.footerText, { color: themeColors.textMuted }]}>
-            {new Date(ticket.createdAt).toLocaleDateString()}
+            {formatDate(ticket.createdAt)}
           </Text>
         </View>
         <View style={styles.footerItem}>

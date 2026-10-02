@@ -115,53 +115,70 @@ function normalizeTicketEvent(e: any): TicketEvent {
   };
 }
 
-function normalizeTicket(t: any): Ticket {
-  const id = t?.ticketId || t?.id || '';
-  const title = t?.subject || t?.title || 'Phiếu hỗ trợ';
-  const messages = Array.isArray(t?.messages)
-    ? t.messages.map((m: any) => normalizeTicketMessage(m, id))
+function normalizeTicket(rawInput: any): Ticket {
+  const t = rawInput?.data ?? rawInput;
+  const o = t?.overview;
+  const st = t?.station;
+  const bk = t?.booking;
+  const pt = t?.participants;
+  const cv = t?.conversation;
+  const rs = t?.resolution;
+
+  const id = o?.ticketId || t?.ticketId || t?.id || '';
+  const ticketCode = o?.ticketCode || t?.ticketCode || (id ? `TKT-${id.slice(0, 8).toUpperCase()}` : undefined);
+  const title = o?.subject || t?.subject || t?.title || 'Phiếu hỗ trợ';
+  const rawMessages = cv?.messages ?? t?.messages;
+  const messages = Array.isArray(rawMessages)
+    ? rawMessages.map((m: any) => normalizeTicketMessage(m, id))
     : undefined;
-  const findings = Array.isArray(t?.findings)
-    ? t.findings.map(normalizeTicketFinding)
+  const rawFindings = rs?.findings ?? t?.findings;
+  const findings = Array.isArray(rawFindings)
+    ? rawFindings.map(normalizeTicketFinding)
     : undefined;
-  const refundIds = Array.isArray(t?.refundIds)
-    ? t.refundIds.map((r: any) => String(r))
+  const rawRefundIds = rs?.refundIds ?? t?.refundIds;
+  const refundIds = Array.isArray(rawRefundIds)
+    ? rawRefundIds.map((r: any) => String(r))
     : undefined;
+
+  const createdAt = o?.createdAt || t?.createdAt || new Date().toISOString();
+  const updatedAt = o?.updatedAt || t?.updatedAt || createdAt;
 
   return {
     ...t,
     id,
-    ticketCode: t?.ticketCode || (id ? `TKT-${id.slice(0, 8).toUpperCase()}` : undefined),
-    stationId: t?.stationId,
-    stationName: t?.stationName,
-    driverId: t?.reporterId || t?.driverId,
-    driverName: t?.reporterName || t?.driverName,
-    reporterUserId: t?.reporterId || t?.reporterUserId,
-    reporterName: t?.reporterName,
-    reporterId: t?.reporterId,
-    assignedToUserId: t?.assignedHandlerId || t?.assignedToUserId,
-    assignedToName: t?.assignedHandlerName || t?.assignedToName,
-    assignedHandlerId: t?.assignedHandlerId || t?.assignedToUserId,
-    assignedHandlerName: t?.assignedHandlerName || t?.assignedToName,
-    version: typeof t?.version === 'number' ? t.version : 0,
-    resolvedAt: t?.resolvedAt || null,
-    autoCloseAt: t?.autoCloseAt || null,
-    closeReason: t?.closeReason || null,
-    resolutionCycle: typeof t?.resolutionCycle === 'number' ? t.resolutionCycle : 0,
-    resolutionReason: t?.resolutionReason || null,
-    bookingId: t?.bookingId,
+    ticketCode,
+    stationId: st?.stationId || t?.stationId,
+    stationName: st?.name || t?.stationName,
+    driverId: pt?.reporterId || t?.reporterId || t?.driverId,
+    driverName: pt?.reporterName || t?.reporterName || t?.driverName,
+    reporterUserId: pt?.reporterId || t?.reporterId || t?.reporterUserId,
+    reporterName: pt?.reporterName || t?.reporterName,
+    reporterId: pt?.reporterId || t?.reporterId,
+    assignedToUserId: pt?.assignedHandlerId || t?.assignedHandlerId || t?.assignedToUserId,
+    assignedToName: pt?.assignedHandlerName || t?.assignedHandlerName || t?.assignedToName,
+    assignedHandlerId: pt?.assignedHandlerId || t?.assignedHandlerId || t?.assignedToUserId,
+    assignedHandlerName: pt?.assignedHandlerName || t?.assignedHandlerName || t?.assignedToName,
+    version: typeof o?.version === 'number' ? o.version : (typeof t?.version === 'number' ? t.version : 0),
+    resolvedAt: rs?.resolvedAt || t?.resolvedAt || null,
+    autoCloseAt: rs?.autoCloseAt || t?.autoCloseAt || null,
+    closeReason: rs?.closeReason || t?.closeReason || null,
+    resolutionCycle: typeof rs?.resolutionCycle === 'number' ? rs.resolutionCycle : (typeof t?.resolutionCycle === 'number' ? t.resolutionCycle : 0),
+    resolutionReason: rs?.resolutionReason || t?.resolutionReason || null,
+    bookingId: bk?.bookingId || t?.bookingId,
     title,
-    subject: t?.subject || title,
-    description: t?.description || '',
-    category: t?.category || 'CHARGING_ISSUE',
-    priority: t?.priority || 'MEDIUM',
-    status: t?.status || 'OPEN',
-    createdAt: t?.createdAt || new Date().toISOString(),
-    updatedAt: t?.updatedAt || t?.createdAt,
-    closedAt: t?.closedAt,
+    subject: o?.subject || t?.subject || title,
+    description: o?.description || t?.description || '',
+    category: o?.category || t?.category || 'CHARGING_ISSUE',
+    priority: o?.priority || t?.priority || 'MEDIUM',
+    status: o?.status || t?.status || 'OPEN',
+    createdAt,
+    updatedAt,
+    closedAt: rs?.closedAt || t?.closedAt,
     messages,
     findings,
     refundIds,
+    isEscalated: Boolean(t?.isEscalated || t?.escalation),
+    escalation: t?.escalation || null,
   };
 }
 
@@ -172,7 +189,7 @@ function normalizeRefundAttempt(a: any): RefundAttemptItem {
     id: attemptId,
     attemptId,
     sequenceNo: Number(a?.sequenceNo ?? 1),
-    executionMode: a?.executionMode ?? 'SIMULATOR',
+    executionMode: a?.executionMode ?? 'AUTO',
     executionTrigger: a?.executionTrigger ?? (a?.performedBy ? 'ADMIN' : 'SYSTEM_POLICY'),
     status: a?.status ?? 'STARTED',
     transferReference: a?.transferReference,

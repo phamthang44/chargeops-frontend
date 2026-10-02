@@ -34,6 +34,7 @@ import {
   replyTicket,
   requestTicketEscalation,
 } from '@/services/ticketService';
+import { formatDateTime } from '@/utils/format';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Ticket, TicketEscalation, TicketStatus } from '@/types';
 
@@ -198,15 +199,15 @@ export function TicketDetailScreen() {
 
         <View style={styles.headerTitleBlock}>
           <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
-            {ticket.ticketCode}
+            {ticket.ticketCode || (ticket.ticketId ? `TKT-${String(ticket.ticketId).slice(0, 8).toUpperCase()}` : t('ticket.detail.titleFallback', 'Phiếu hỗ trợ'))}
           </Text>
           <Text style={[styles.headerSubtitle, { color: themeColors.textMuted }]} numberOfLines={1}>
-            {ticket.subject}
+            {ticket.subject || t('ticket.detail.subjectFallback', 'Chi tiết sự cố')}
           </Text>
         </View>
 
         <View style={styles.headerRightAction}>
-          {ticket.isEscalated || escalation ? (
+          {ticket.isEscalated || ticket.escalation || escalation ? (
             <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang phân xử')} dot />
           ) : (
             <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
@@ -234,12 +235,12 @@ export function TicketDetailScreen() {
                 ]}
               >
                 <Text style={[styles.metaSubject, { color: themeColors.textStrong }]}>
-                  {ticket.subject}
+                  {ticket.subject || ticket.ticketCode || t('ticket.detail.titleFallback', 'Phiếu hỗ trợ')}
                 </Text>
                 <View style={styles.metaRow}>
                   <Ionicons name="time-outline" size={15} color={themeColors.textMuted} />
                   <Text style={[styles.metaTime, { color: themeColors.textMuted }]}>
-                    {t('ticket.detail.createdAt', { time: new Date(ticket.createdAt).toLocaleString() })}
+                    {t('ticket.detail.createdAt', { time: formatDateTime(ticket.createdAt) })}
                   </Text>
                 </View>
                 {ticket.bookingId && (
@@ -294,7 +295,7 @@ export function TicketDetailScreen() {
               {/* Dispute Escalation & 24h SLA Countdown Card */}
               <TicketDisputeEscalationCard
                 ticket={ticket}
-                escalation={escalation}
+                escalation={ticket.escalation || escalation}
                 onOpenEscalate={() => setIsEscalateModalVisible(true)}
               />
 

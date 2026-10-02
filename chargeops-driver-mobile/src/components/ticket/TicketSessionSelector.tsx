@@ -7,6 +7,7 @@ import { Card } from '@/components/Card';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontWeights, radius, spacing } from '@/theme';
 import type { Booking, TicketCategory } from '@/types';
+import { formatDateTime } from '@/utils/format';
 
 interface TicketSessionSelectorProps {
   category: TicketCategory;
@@ -74,14 +75,7 @@ export function TicketSessionSelector({
         <View style={styles.candidateList}>
           {candidateBookings.map((b) => {
             const isSelected = selectedBookingId === b.id;
-            const startTimeStr = b.startAt
-              ? new Date(b.startAt).toLocaleString([], {
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-              : '—';
+            const startTimeStr = formatDateTime(b.startAt, '—');
 
             return (
               <Pressable

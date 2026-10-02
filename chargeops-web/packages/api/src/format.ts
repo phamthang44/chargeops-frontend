@@ -19,23 +19,27 @@ export function formatVndCompact(n: number): string {
 
 /**
  * Helper to ensure an ISO timestamp string from backend (Instant / UTC)
- * is parsed correctly with fallback 'Z' if missing.
+ * is parsed correctly with fallback 'Z' if missing. Returns null if invalid.
  */
-function parseUtcDate(iso: string | Date): Date {
-  if (iso instanceof Date) return iso;
-  if (!iso) return new Date();
+function parseUtcDate(iso: string | Date | null | undefined): Date | null {
+  if (iso instanceof Date) return isNaN(iso.getTime()) ? null : iso;
+  if (!iso) return null;
   const str = String(iso).trim();
+  if (!str || str.toLowerCase().includes('invalid date')) return null;
   // If ISO string doesn't specify timezone offset or 'Z', append 'Z' to treat as UTC Instant
   const normalized = str.includes('Z') || str.includes('+') || (str.includes('-') && str.length > 19)
     ? str
     : `${str}Z`;
   const d = new Date(normalized);
-  return isNaN(d.getTime()) ? new Date(str) : d;
+  if (!isNaN(d.getTime())) return d;
+  const dRaw = new Date(str);
+  return isNaN(dRaw.getTime()) ? null : dRaw;
 }
 
 /** "2026-06-28T01:15:00Z" → "28/06/2026" (in Asia/Ho_Chi_Minh, UTC+7) */
-export function formatDateVn(iso: string | Date): string {
+export function formatDateVn(iso: string | Date | null | undefined): string {
   const d = parseUtcDate(iso);
+  if (!d) return '--/--/----';
   return d.toLocaleDateString('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
     day: '2-digit',
@@ -45,8 +49,9 @@ export function formatDateVn(iso: string | Date): string {
 }
 
 /** "2026-06-28T01:15:00Z" → "08:15" (in Asia/Ho_Chi_Minh, UTC+7) */
-export function formatTimeVn(iso: string | Date): string {
+export function formatTimeVn(iso: string | Date | null | undefined): string {
   const d = parseUtcDate(iso);
+  if (!d) return '--:--';
   return d.toLocaleTimeString('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
     hour: '2-digit',
@@ -56,8 +61,9 @@ export function formatTimeVn(iso: string | Date): string {
 }
 
 /** "2026-06-28T01:15:00Z" → "08:15 · 28/06/2026" (in Asia/Ho_Chi_Minh, UTC+7) */
-export function formatDateTimeVn(iso: string | Date): string {
+export function formatDateTimeVn(iso: string | Date | null | undefined): string {
   const d = parseUtcDate(iso);
+  if (!d) return '--:-- · --/--/----';
   const time = formatTimeVn(d);
   const date = formatDateVn(d);
   return `${time} · ${date}`;

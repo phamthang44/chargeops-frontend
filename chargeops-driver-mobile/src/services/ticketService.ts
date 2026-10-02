@@ -305,6 +305,8 @@ export function normalizeTicket(rawInput: any): Ticket {
       resolutionCycle: typeof rs.resolutionCycle === 'number' ? rs.resolutionCycle : (typeof raw.resolutionCycle === 'number' ? raw.resolutionCycle : 0),
       autoCloseAt: rs.autoCloseAt || raw.autoCloseAt || null,
       resolvedAt: rs.resolvedAt || raw.resolvedAt || null,
+      closeReason: rs.closeReason || raw.closeReason || null,
+      resolvedBy: rs.resolvedBy || raw.resolvedBy || null,
       messages,
       findings: Array.isArray(rs.findings) ? rs.findings : (Array.isArray(raw.findings) ? raw.findings : []),
       refundIds: Array.isArray(rs.refundIds) ? rs.refundIds.map(String) : (Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : []),
@@ -338,6 +340,8 @@ export function normalizeTicket(rawInput: any): Ticket {
     subject: raw.subject || raw.title || 'Phiếu hỗ trợ',
     status: raw.status || 'OPEN',
     createdAt: createdAtIso,
+    closeReason: raw.closeReason || null,
+    resolvedBy: raw.resolvedBy || null,
     messages,
     findings: Array.isArray(raw.findings) ? raw.findings : [],
     refundIds: Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : [],
@@ -502,4 +506,48 @@ export async function getTicketEscalation(
   }
 
   return null;
+}
+
+/**
+ * Driver xác nhận phiếu đã giải quyết: RESOLVED → CLOSED
+ * PATCH /api/v1/tickets/{ticketId}/status
+ * Body: { status: 'CLOSED', expectedVersion }
+ * Ghi audit reason: REPORTER_CONFIRMED
+ */
+export async function confirmTicketClosed(
+  ticketId: string,
+  expectedVersion: number,
+  accessToken?: string | null
+): Promise<Ticket> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(accessToken);
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/status`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ status: 'CLOSED', expectedVersion }),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      const raw = json?.data ?? json;
+      return normalizeTicket(raw);
+    }
+    const errJson = await res.json().catch(() => null);
+    throw buildTicketError(res, errJson, 'Không thể xác nhận phiếu đã giải quyết');
+  }
+
+  // Mock implementation
+  const ticket = mockTickets.find((t) => t.ticketId === ticketId);
+  if (!ticket) throw new Error('Phiếu hỗ trợ không tồn tại');
+  if (ticket.status !== 'RESOLVED') throw new Error('Chỉ xác nhận phiếu ở trạng thái RESOLVED');
+  ticket.status = 'CLOSED';
+  ticket.closeReason = 'REPORTER_CONFIRMED';
+  ticket.version = (ticket.version || 0) + 1;
+  return ticket;
 }

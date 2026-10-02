@@ -8,6 +8,11 @@ export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
+/**
+ * Lý do đóng phiếu — Driver chủ động xác nhận hoặc hệ thống tự đóng sau hạn.
+ */
+export type TicketCloseReason = 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE' | string;
+
 export type TicketActorKind = 'REPORTER' | 'OWNER' | 'STAFF' | 'ADMIN';
 
 export type TicketFindingConclusion =
@@ -58,6 +63,10 @@ export interface Ticket {
   messages: TicketMessage[];
   findings: TicketFinding[];
   refundIds: string[];
+  /** Lý do đóng phiếu: 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE' */
+  closeReason?: TicketCloseReason | null;
+  /** ID người đã resolve (để phân biệt ai xác nhận) */
+  resolvedBy?: string | null;
 }
 
 export interface CreateTicketPayload {

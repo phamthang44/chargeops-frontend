@@ -18,7 +18,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppBackButton } from '@/components/AppBackButton';
-import { GlassButton } from '@/components/GlassButton';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   DriverEscalateModal,
@@ -33,6 +32,7 @@ import {
   getTicketEscalation,
   replyTicket,
   requestTicketEscalation,
+  confirmTicketClosed,
 } from '@/services/ticketService';
 import { formatDateTime } from '@/utils/format';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -75,6 +75,7 @@ export function TicketDetailScreen() {
   const [escalation, setEscalation] = useState<TicketEscalation | null>(null);
   const [isEscalateModalVisible, setIsEscalateModalVisible] = useState(false);
   const [isSubmittingEscalation, setIsSubmittingEscalation] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
   const prevMessagesCountRef = useRef<number>(0);
@@ -124,16 +125,18 @@ export function TicketDetailScreen() {
     fetchEscalation();
   }, [fetchDetail, fetchEscalation]);
 
-  // Live polling for real-time messages when ticket is open or in progress
+  // Live polling: poll khi ticket chưa đóng (bao gồm RESOLVED để cập nhật phiếu khi chờ xác nhận)
   useEffect(() => {
     if (!ticket || ticket.status === 'CLOSED') return;
 
+    const interval = ticket.status === 'RESOLVED' ? 5000 : 3500;
     const timer = setInterval(() => {
       fetchDetail(true);
-    }, 3500);
+      if (ticket.status === 'RESOLVED') fetchEscalation();
+    }, interval);
 
     return () => clearInterval(timer);
-  }, [ticket?.status, fetchDetail]);
+  }, [ticket?.status, fetchDetail, fetchEscalation]);
 
   const handleEscalateSubmit = async (reason: string) => {
     setIsSubmittingEscalation(true);
@@ -151,6 +154,49 @@ export function TicketDetailScreen() {
     } finally {
       setIsSubmittingEscalation(false);
     }
+  };
+
+  const handleConfirmResolved = () => {
+    Alert.alert(
+      t('ticket.confirm.title', 'Xác nhận giải quyết'),
+      t(
+        'ticket.confirm.message',
+        'Bạn xác nhận sự cố đã được xử lý hoàn tất? Phiếu hỗ trợ sẽ được đóng sau khi bạn xác nhận.'
+      ),
+      [
+        { text: t('common.cancel', 'Hủy'), style: 'cancel' },
+        {
+          text: t('ticket.confirm.confirmBtn', 'Đồng ý, đã giải quyết'),
+          style: 'default',
+          onPress: async () => {
+            if (!ticket || isConfirming) return;
+            setIsConfirming(true);
+            try {
+              const updated = await confirmTicketClosed(ticketId, ticket.version ?? 0);
+              setTicket(updated);
+              Alert.alert(
+                t('ticket.confirm.successTitle', 'Cảm ơn bạn!'),
+                t('ticket.confirm.successMessage', 'Phếu hỗ trợ đã được đóng. Chúng tôi rất vui khi sự cố đã được giải quyết.'),
+              );
+            } catch (err: any) {
+              const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+              if (localizedMsg.includes('version') || localizedMsg.includes('thay đổi')) {
+                // Version conflict: refresh and retry
+                await fetchDetail(true);
+                Alert.alert(
+                  t('ticket.errors.versionConflict', 'Dữ liệu đã thay đổi'),
+                  t('ticket.confirm.retryMessage', 'Phiếu vừa được cập nhật, vui lòng thử xác nhận lại.'),
+                );
+              } else {
+                Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
+              }
+            } finally {
+              setIsConfirming(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleSendReply = async () => {
@@ -188,8 +234,13 @@ export function TicketDetailScreen() {
   const statusMeta = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.OPEN;
   const statusLabel = t(`ticket.status.${ticket.status}`, statusMeta.label);
   const isClosed = ticket.status === 'CLOSED';
+  const isResolved = ticket.status === 'RESOLVED';
   const hasRefund = ticket.refundIds && ticket.refundIds.length > 0;
   const hasFinding = ticket.findings && ticket.findings.length > 0;
+  const isReporterConfirmed = isClosed && ticket.closeReason === 'REPORTER_CONFIRMED';
+  const isAutoClosedNoResponse = isClosed && ticket.closeReason === 'AUTO_CLOSED_NO_RESPONSE';
+  // Nếu chưa có closeReason nhưng đã CLOSED thì hiển thị generic
+  const isClosedGeneric = isClosed && !isReporterConfirmed && !isAutoClosedNoResponse;
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]} edges={['top', 'bottom']}>
@@ -289,6 +340,114 @@ export function TicketDetailScreen() {
                       </Text>
                     </View>
                   )}
+                </View>
+              )}
+
+              {/* RESOLVED — Awaiting Driver Confirmation Banner */}
+              {isResolved && (
+                <View
+                  style={[
+                    styles.resolvedBanner,
+                    {
+                      backgroundColor: isDark ? '#0f2a1a' : '#F0FDF4',
+                      borderColor: isDark ? '#1a5c30' : '#86EFAC',
+                    },
+                  ]}
+                >
+                  <View style={styles.resolvedBannerHeader}>
+                    <Ionicons name="checkmark-circle" size={22} color="#22C55E" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.resolvedBannerTitle, { color: isDark ? '#4ade80' : '#15803D' }]}>
+                        {t('ticket.resolved.bannerTitle', 'Sự cố đã được xử lý')}
+                      </Text>
+                      <Text style={[styles.resolvedBannerBody, { color: themeColors.textMuted }]}>
+                        {t(
+                          'ticket.resolved.bannerBody',
+                          'Nhân viên kỹ thuật đã báo cáo xử lý xong. Vui lòng xác nhận để đóng phiếu, hoặc phiếu sẽ tự đóng sau khi hết hạn phản hồi.'
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Pressable
+                    onPress={handleConfirmResolved}
+                    disabled={isConfirming}
+                    style={[styles.confirmBtn, isConfirming && { opacity: 0.6 }]}
+                  >
+                    <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
+                    <Text style={styles.confirmBtnText}>
+                      {isConfirming
+                        ? t('ticket.confirm.confirming', 'Đang xác nhận...')
+                        : t('ticket.confirm.confirmBtn', 'Đồng ý, đã giải quyết')}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* CLOSED — Reporter Confirmed */}
+              {isReporterConfirmed && (
+                <View
+                  style={[
+                    styles.closedBanner,
+                    {
+                      backgroundColor: isDark ? '#0a1f1a' : '#F0FDF4',
+                      borderColor: isDark ? '#14532d' : '#BBF7D0',
+                    },
+                  ]}
+                >
+                  <Ionicons name="shield-checkmark" size={20} color="#16A34A" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.closedBannerTitle, { color: isDark ? '#4ade80' : '#15803D' }]}>
+                      {t('ticket.closed.confirmedTitle', 'Bạn đã xác nhận giải quyết')}
+                    </Text>
+                    <Text style={[styles.closedBannerBody, { color: themeColors.textMuted }]}>
+                      {t('ticket.closed.confirmedBody', 'Cảm ơn bạn đã phản hồi. Phiếu hỗ trợ đã được đóng và lưu trữ vào lịch sử.')}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* CLOSED — Auto-closed after no response */}
+              {isAutoClosedNoResponse && (
+                <View
+                  style={[
+                    styles.closedBanner,
+                    {
+                      backgroundColor: isDark ? '#1c1a10' : '#FEFCE8',
+                      borderColor: isDark ? '#44390a' : '#FDE68A',
+                    },
+                  ]}
+                >
+                  <Ionicons name="time-outline" size={20} color="#CA8A04" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.closedBannerTitle, { color: isDark ? '#facc15' : '#92400E' }]}>
+                      {t('ticket.closed.autoClosedTitle', 'Phiếu tự đóng sau khi hết hạn')}
+                    </Text>
+                    <Text style={[styles.closedBannerBody, { color: themeColors.textMuted }]}>
+                      {t(
+                        'ticket.closed.autoClosedBody',
+                        'Không có phản hồi trong thời gian quy định. Hệ thống đã tự đóng phiếu. Nếu vấn đề chưa được giải quyết, vui lòng tạo phiếu mới.'
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* CLOSED — Generic fallback (no closeReason) */}
+              {isClosedGeneric && (
+                <View
+                  style={[
+                    styles.closedBanner,
+                    {
+                      backgroundColor: isDark ? '#18181b' : '#F4F4F5',
+                      borderColor: isDark ? '#3f3f46' : '#D4D4D8',
+                    },
+                  ]}
+                >
+                  <Ionicons name="lock-closed-outline" size={20} color={themeColors.textMuted} />
+                  <Text style={[styles.closedBannerBody, { color: themeColors.textMuted }]}>
+                    {t('ticket.closed.genericBody', 'Phiếu hỗ trợ này đã hoàn tất và được đóng.')}
+                  </Text>
                 </View>
               )}
 
@@ -545,5 +704,58 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 20,
     textAlign: 'center',
+  },
+  resolvedBanner: {
+    padding: 14,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    gap: 12,
+  },
+  resolvedBannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  resolvedBannerTitle: {
+    fontSize: 15,
+    fontWeight: fontWeights.bold,
+    marginBottom: 3,
+  },
+  resolvedBannerBody: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  confirmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#16A34A',
+    borderRadius: radius.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  confirmBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: fontWeights.bold,
+    letterSpacing: -0.2,
+  },
+  closedBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    padding: 12,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
+  closedBannerTitle: {
+    fontSize: 14,
+    fontWeight: fontWeights.bold,
+    marginBottom: 2,
+  },
+  closedBannerBody: {
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

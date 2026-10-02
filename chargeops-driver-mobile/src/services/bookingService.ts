@@ -1251,7 +1251,7 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'Không thể tải thông tin booking trước khi mô phỏng thanh toán.',
+            : 'Không thể tải thông tin booking trước khi thanh toán.',
       };
     }
 
@@ -1260,7 +1260,7 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
         status: 'FAILED',
         booking: null,
         errorCode: 'BOOKING_NOT_FOUND',
-        errorMessage: 'Không tìm thấy booking cần mô phỏng thanh toán.',
+        errorMessage: 'Không tìm thấy booking cần thanh toán.',
       };
     }
 
@@ -1304,8 +1304,8 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
             booking: updatedBooking ?? booking,
             errorCode: classification ?? 'PAYMENT_NOT_APPLIED',
             errorMessage: classification
-              ? `Thanh toán mô phỏng chưa được áp dụng: ${classification}.`
-              : 'Thanh toán mô phỏng chưa xác nhận được booking.',
+              ? `Thanh toán chưa được áp dụng: ${classification}.`
+              : 'Thanh toán chưa xác nhận được booking.',
           };
         }
 
@@ -1323,10 +1323,10 @@ export async function confirmPayment(id: string): Promise<PaymentResult> {
       const message =
         errObj?.message ||
         (response.status === 404
-          ? 'Không tìm thấy API mô phỏng thanh toán trên máy chủ. Vui lòng kiểm tra hoặc khởi động lại backend.'
+          ? 'Không tìm thấy API thanh toán trên máy chủ. Vui lòng thử lại sau.'
           : response.status === 403
-          ? 'Tài khoản không có quyền thực hiện mô phỏng thanh toán.'
-          : 'Thanh toán mô phỏng không thành công trên máy chủ.');
+          ? 'Tài khoản không có quyền thực hiện thanh toán này.'
+          : 'Thanh toán không thành công trên máy chủ.');
 
       console.warn('POST /api/v1/bookings/:id/simulate-payment failed:', response.status, errObj);
 

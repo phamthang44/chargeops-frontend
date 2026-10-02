@@ -380,7 +380,7 @@ export function QRCheckInScreen() {
             )}
             {result.code === 'TOO_EARLY' && result.booking && (
               <AppButton
-                label="⚡ Check-in ngay (Mô phỏng Demo)"
+                label="⚡ Kích hoạt check-in ngay"
                 loading={committing}
                 onPress={forceDemoCheckIn}
                 style={{ alignSelf: 'stretch' }}

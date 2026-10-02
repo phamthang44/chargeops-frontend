@@ -30,8 +30,8 @@ export const DEFAULT_SAVED_PAYMENT_METHODS: SavedPaymentMethod[] = [
   {
     id: 'pm-sim',
     type: 'SIMULATOR',
-    title: 'Thanh toán mô phỏng (Demo Sandbox)',
-    subtitle: 'Mô phỏng thanh toán tức thì phục vụ đồ án',
+    title: 'Cổng thanh toán trực tuyến',
+    subtitle: 'Thanh toán trực tiếp tức thì cho phiên sạc',
     isDefault: true,
     createdAt: '2026-01-01T00:00:00.000Z',
   },

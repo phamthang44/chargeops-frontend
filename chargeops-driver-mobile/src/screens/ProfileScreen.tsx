@@ -66,7 +66,7 @@ export function ProfileScreen() {
   const preferredPaymentTitle =
     savedPaymentMethods.find(
       (m) => m.type === preferredPaymentMethod || m.isDefault,
-    )?.title ?? 'Thanh toán mô phỏng (Demo Sandbox)';
+    )?.title ?? 'Cổng thanh toán trực tuyến';
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.surfaceAlt }]}>

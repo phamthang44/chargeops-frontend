@@ -59,8 +59,8 @@
     "appVersion": "v1.2.0 • Build 2026.1",
     "recommended": "Đề xuất",
     "comingSoon": "Sắp ra mắt",
-    "demo": "Demo (giả lập)",
-    "demoHint": "Chọn kết quả giả lập để minh họa các trạng thái thanh toán & đặt chỗ.",
+    "demo": "Tùy chọn kịch bản",
+    "demoHint": "Chọn kịch bản kiểm tra để minh họa các trạng thái thanh toán & đặt chỗ.",
     "demoPayment": "Kết quả thanh toán",
     "demoBooking": "Kết quả tạo đặt chỗ",
     "simPayment": {
@@ -460,7 +460,7 @@
     "paymentMethodsModal": {
       "title": "Phương thức thanh toán",
       "subtitle": "Quản lý tài khoản & phương thức ưu tiên khi đặt sạc",
-      "notice": "ChargeOps thanh toán trực tiếp theo từng lượt sạc qua cổng giao dịch (VietQR SePay / Sandbox). Hệ thống không lưu giữ tiền số dư của tài xế.",
+      "notice": "ChargeOps thanh toán trực tiếp theo từng lượt sạc qua cổng giao dịch trực tuyến an toàn. Hệ thống không lưu giữ tiền số dư của tài xế.",
       "defaultBadge": "Mặc định",
       "setDefault": "Đặt làm mặc định",
       "addMethod": "Thêm tài khoản / phương thức thanh toán",
@@ -480,7 +480,7 @@
       "updateLater": "Sẽ cập nhật sau",
       "comingSoon": "Sẽ cập nhật sau",
       "crudDisabledNotice": "Tính năng thêm/sửa/xóa phương thức thanh toán đang được phát triển và sẽ ra mắt ở phiên bản tiếp theo. Hiện tại hệ thống hỗ trợ phương thức mặc định.",
-      "sepayDisabledNotice": "Cổng chuyển khoản VietQR SePay đang được bảo trì tích hợp và sẽ cập nhật ở phiên bản tiếp theo. Vui lòng sử dụng Demo Sandbox để tiếp tục thử nghiệm."
+      "sepayDisabledNotice": "Cổng chuyển khoản VietQR đang được đồng bộ và sẽ hoàn tất trong phiên bản tiếp theo. Vui lòng chọn cổng thanh toán trực tuyến để tiếp tục."
     },
     "ownerModal": {
       "title": "Chế độ Chủ trạm sạc",
@@ -755,7 +755,7 @@
       "PAY_AMOUNT_INVALID": "Số tiền thanh toán không khớp với hóa đơn đặt chỗ.",
       "PAY_CHECKOUT_REQUIRED": "Chưa khởi tạo phiên thanh toán cho đơn này. Vui lòng tải lại trang.",
       "PAY_RECEIPT_INVALID": "Biên lai thanh toán không hợp lệ hoặc bị từ chối.",
-      "PAY_SIMULATION_REQUEST_INVALID": "Dữ liệu thanh toán mô phỏng không hợp lệ. Vui lòng thử lại.",
+      "PAY_SIMULATION_REQUEST_INVALID": "Dữ liệu yêu cầu thanh toán không hợp lệ. Vui lòng thử lại.",
       "PAY_RECONCILIATION_REQUIRED": "Giao dịch đang chờ ngân hàng đối soát. Vui lòng đợi trong giây lát.",
       "PAY_PROJECTION_BOUNDS_VIOLATED": "Số tiền giao dịch vượt quá giới hạn cho phép.",
       "BKG_HOLD_EXPIRED": "Thời gian giữ chỗ (10 phút) đã hết hạn. Đơn đặt chỗ đã tự động hủy.",
@@ -775,7 +775,7 @@
       "error.payment.methodInvalid": "Phương thức thanh toán đã chọn hiện không khả dụng.",
       "error.payment.amountInvalid": "Số tiền thanh toán không khớp với hóa đơn đặt chỗ.",
       "error.payment.receiptInvalid": "Biên lai thanh toán không hợp lệ.",
-      "error.payment.simulationRequestInvalid": "Dữ liệu thanh toán mô phỏng không hợp lệ.",
+      "error.payment.simulationRequestInvalid": "Dữ liệu yêu cầu thanh toán không hợp lệ.",
       "error.payment.reconciliationRequired": "Giao dịch đang chờ ngân hàng đối soát.",
       "error.payment.projectionBoundsViolated": "Số tiền giao dịch vượt quá giới hạn cho phép.",
       "error.common.resourceNotFound": "Dịch vụ thanh toán chưa sẵn sàng hoặc không tìm thấy đơn đặt chỗ.",
@@ -1083,8 +1083,8 @@
   "qrCheckIn": {
     "title": "Quét QR Check-in",
     "scanHint": "Đưa mã QR trên trụ sạc vào khung hình để check-in.",
-    "simulate": "Quét mã (Giả lập)",
-    "kioskModalBtn": "Màn hình Trụ Sạc (Demo Kiosk)",
+    "simulate": "Nhập mã trụ sạc",
+    "kioskModalBtn": "Màn hình Kiosk Trụ Sạc",
     "scanning": "Đang quét…",
     "permissionTitle": "Cần quyền truy cập camera",
     "permissionBody": "ChargeOps cần dùng camera để quét mã QR trên trụ sạc khi check-in.",

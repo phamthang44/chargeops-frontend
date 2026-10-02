@@ -96,7 +96,7 @@ export function paymentErrorMessage(t: TFunction, error: unknown): string {
       case 'PAY_RECEIPT_INVALID':
         return t('payment.errors.PAY_RECEIPT_INVALID', 'Biên lai thanh toán không hợp lệ hoặc bị từ chối.');
       case 'PAY_SIMULATION_REQUEST_INVALID':
-        return t('payment.errors.PAY_SIMULATION_REQUEST_INVALID', 'Dữ liệu thanh toán mô phỏng không hợp lệ. Vui lòng thử lại.');
+        return t('payment.errors.PAY_SIMULATION_REQUEST_INVALID', 'Dữ liệu yêu cầu thanh toán không hợp lệ. Vui lòng thử lại.');
       case 'PAY_RECONCILIATION_REQUIRED':
         return t('payment.errors.PAY_RECONCILIATION_REQUIRED', 'Giao dịch đang chờ ngân hàng đối soát. Vui lòng đợi trong giây lát.');
       case 'BKG_HOLD_EXPIRED':

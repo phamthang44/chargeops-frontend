@@ -59,8 +59,8 @@
     "appVersion": "v1.2.0 • Build 2026.1",
     "recommended": "Recommended",
     "comingSoon": "Coming soon",
-    "demo": "Demo (simulation)",
-    "demoHint": "Force a simulated outcome to showcase the payment & booking states.",
+    "demo": "Scenario options",
+    "demoHint": "Select a test scenario to showcase payment & booking states.",
     "demoPayment": "Payment outcome",
     "demoBooking": "Booking-creation outcome",
     "simPayment": {
@@ -460,7 +460,7 @@
     "paymentMethodsModal": {
       "title": "Payment Methods",
       "subtitle": "Manage payment accounts & preferred method for bookings",
-      "notice": "ChargeOps settles charges directly per session via payment gateways (VietQR SePay / Sandbox). The platform does not hold customer balances.",
+      "notice": "ChargeOps settles charges directly per session via secure online payment gateways. The platform does not hold customer balances.",
       "defaultBadge": "Default",
       "setDefault": "Set as default",
       "addMethod": "Add payment method / account",
@@ -479,8 +479,8 @@
       "deleteConfirmBody": "Are you sure you want to delete \"{{title}}\"?",
       "updateLater": "Will update later",
       "comingSoon": "Will update later",
-      "crudDisabledNotice": "Custom payment method management is under development and will be released in an upcoming update. The system currently uses default sandbox methods.",
-      "sepayDisabledNotice": "VietQR SePay gateway is currently under maintenance/integration. Please use Demo Sandbox for testing."
+      "crudDisabledNotice": "Custom payment method management is under development and will be released in an upcoming update. The system currently supports default methods.",
+      "sepayDisabledNotice": "VietQR gateway is currently being synchronized and will be available in the upcoming update. Please use the online gateway to proceed."
     },
     "ownerModal": {
       "title": "Station Owner Mode",
@@ -755,7 +755,7 @@
       "PAY_AMOUNT_INVALID": "Payment amount does not match booking invoice.",
       "PAY_CHECKOUT_REQUIRED": "Payment checkout session not initialized yet. Please refresh.",
       "PAY_RECEIPT_INVALID": "Payment receipt is invalid or rejected.",
-      "PAY_SIMULATION_REQUEST_INVALID": "Simulated payment request is invalid. Please try again.",
+      "PAY_SIMULATION_REQUEST_INVALID": "Payment request is invalid. Please try again.",
       "PAY_RECONCILIATION_REQUIRED": "Transaction requires reconciliation. Please wait a moment.",
       "PAY_PROJECTION_BOUNDS_VIOLATED": "Transaction amount exceeds allowed limit.",
       "BKG_HOLD_EXPIRED": "The 10-minute hold window has expired. Booking was cancelled.",
@@ -775,7 +775,7 @@
       "error.payment.methodInvalid": "The selected payment method is not supported.",
       "error.payment.amountInvalid": "Payment amount does not match booking invoice.",
       "error.payment.receiptInvalid": "Payment receipt is invalid.",
-      "error.payment.simulationRequestInvalid": "Simulated payment request is invalid.",
+      "error.payment.simulationRequestInvalid": "Payment request data is invalid.",
       "error.payment.reconciliationRequired": "Transaction requires bank reconciliation.",
       "error.payment.projectionBoundsViolated": "Transaction amount exceeds allowed limit.",
       "error.common.resourceNotFound": "Requested resource was not found.",
@@ -1078,8 +1078,8 @@
   "qrCheckIn": {
     "title": "QR Check-in",
     "scanHint": "Position the QR code on the charger within the frame to check in.",
-    "simulate": "Scan code (Simulated)",
-    "kioskModalBtn": "Charger Screen (Demo Kiosk)",
+    "simulate": "Enter charger ID",
+    "kioskModalBtn": "Charger Kiosk Screen",
     "scanning": "Scanning…",
     "permissionTitle": "Camera access needed",
     "permissionBody": "ChargeOps uses the camera to scan the QR code on the charger when you check in.",

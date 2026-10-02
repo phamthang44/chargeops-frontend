@@ -197,7 +197,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
               <Text style={[styles.noticeText, { color: isDark ? '#A7F3D0' : '#065F46' }]}>
                 {t(
                   'profile.paymentMethodsModal.notice',
-                  'ChargeOps thanh toán trực tiếp theo từng lượt sạc qua cổng giao dịch (VietQR SePay / Sandbox). Hệ thống không lưu giữ tiền số dư của tài xế.',
+                  'ChargeOps thanh toán trực tiếp theo từng lượt sạc qua cổng giao dịch trực tuyến an toàn. Hệ thống không lưu giữ tiền số dư của tài xế.',
                 )}
               </Text>
             </View>
@@ -219,7 +219,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
                       t('common.notice', 'Thông báo'),
                       t(
                         'profile.paymentMethodsModal.sepayDisabledNotice',
-                        'Cổng chuyển khoản VietQR SePay đang được bảo trì tích hợp và sẽ cập nhật ở phiên bản tiếp theo. Vui lòng sử dụng Demo Sandbox để tiếp tục thử nghiệm.',
+                        'Cổng chuyển khoản VietQR đang được đồng bộ và sẽ hoàn tất trong phiên bản tiếp theo. Vui lòng chọn cổng thanh toán trực tuyến để tiếp tục.',
                       ),
                     );
                     return;

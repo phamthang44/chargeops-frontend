@@ -37,6 +37,8 @@ import type {
   TicketEvent,
   StationTicketKpis,
   AssignTicketRequest,
+  TicketHandlerCandidate,
+  RecordTicketFindingRequest,
   ResolveTicketRequest,
   Page,
 } from '../types';
@@ -1007,6 +1009,15 @@ export function createRestServices(http: HttpClient): Services {
         const res: any = await http.post(endpoint, request);
         const data = res?.data ?? res;
         return normalizeTicket(data);
+      },
+      stationHandlers: async (id: string): Promise<TicketHandlerCandidate[]> => {
+        const res: any = await http.get(`/admin/tickets/${id}/station-handlers`);
+        const data = res?.data ?? res;
+        return Array.isArray(data) ? data : data?.items ?? [];
+      },
+      recordFinding: async (id: string, request: RecordTicketFindingRequest) => {
+        const res: any = await http.post(`/tickets/${id}/findings`, request);
+        return normalizeTicket(res?.data ?? res);
       },
       resolve: async (id: string, request: ResolveTicketRequest, options?: TicketRoleOptions) => {
         let endpoint = `/tickets/${id}/status`;

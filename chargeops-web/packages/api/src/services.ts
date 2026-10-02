@@ -72,6 +72,8 @@ import type {
   TicketStatus,
   TicketSummary,
   AssignTicketRequest,
+  TicketHandlerCandidate,
+  RecordTicketFindingRequest,
   ResolveTicketRequest,
   StationTicketKpis,
   Transaction,
@@ -346,6 +348,8 @@ export interface TicketService {
   claim(id: string, expectedVersion?: number, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 assign/reassign handler mutation */
   assign(id: string, request: AssignTicketRequest, options?: TicketRoleOptions): Promise<Ticket>;
+  stationHandlers(id: string): Promise<TicketHandlerCandidate[]>;
+  recordFinding(id: string, request: RecordTicketFindingRequest): Promise<Ticket>;
   /** BKG-052 resolve ticket with mandatory reason and 10-day auto-close countdown */
   resolve(id: string, request: ResolveTicketRequest, options?: TicketRoleOptions): Promise<Ticket>;
   /** BKG-052 reporter confirmation or auto-close */

@@ -2178,6 +2178,34 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         tk.updatedAt = new Date().toISOString();
         return { ...tk };
       },
+      async stationHandlers(id) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk?.stationId) return [];
+        return (db.stationStaff || [])
+          .filter((staff) => staff.stationId === tk.stationId && String(staff.status).toUpperCase() === 'ACTIVE')
+          .map((staff) => ({
+            userId: staff.userId,
+            displayName: staff.displayName || staff.name || staff.email,
+            role: 'STAFF' as const,
+          }));
+      },
+      async recordFinding(id, request) {
+        await delay();
+        const tk = db.tickets.find((x) => x.id === id);
+        if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        const finding = {
+          findingId: 'FND-' + seq++,
+          conclusion: request.conclusion,
+          affectedAt: request.affectedAt,
+          reason: request.reason,
+          recordedAt: new Date().toISOString(),
+          recordedBy: 'mock-user',
+        };
+        tk.findings = [...(tk.findings ?? []), finding];
+        tk.version = (tk.version ?? 0) + 1;
+        return { ...tk };
+      },
       async resolve(id, request) {
         await delay();
         const tk = db.tickets.find((x) => x.id === id);

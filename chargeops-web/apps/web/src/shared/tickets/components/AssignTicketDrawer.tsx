@@ -13,7 +13,6 @@ import {
   IconUsers,
   IconAlertCircle,
   IconShield,
-  IconShieldAlert,
   IconPin,
 } from '@chargeops/ui';
 
@@ -54,6 +53,12 @@ export function AssignTicketDrawer({
     enabled: open && !admin && Boolean(ticket.stationId),
   });
 
+  const stationHandlersQuery = useQuery({
+    queryKey: ['tickets', 'station-handlers', ticket.id],
+    queryFn: () => api.tickets.stationHandlers(ticket.id),
+    enabled: open && isAdminStation,
+  });
+
   // Admin users query (for admin platform ticket assignment)
   const adminUsersQuery = useQuery({
     queryKey: ['users', 'admins'],
@@ -66,6 +71,22 @@ export function AssignTicketDrawer({
     return raw.filter((s) => String(s.status).toUpperCase() === 'ACTIVE');
   }, [staffQuery.data]);
 
+  const stationChoices = isAdminStation
+    ? (stationHandlersQuery.data ?? []).map((person) => ({
+        userId: person.userId,
+        displayName: person.displayName,
+        role: person.role,
+        email: '',
+        maskedPhone: '',
+      }))
+    : activeStaffList.map((person) => ({
+        userId: person.userId,
+        displayName: person.displayName || person.name || person.email,
+        role: 'STAFF' as const,
+        email: person.email,
+        maskedPhone: person.maskedPhone,
+      }));
+
   const activeAdminList = useMemo(() => {
     const raw: UserAccount[] = Array.isArray(adminUsersQuery.data) ? adminUsersQuery.data : [];
     return raw.filter((u) => u.status === 'active' || String(u.status).toUpperCase() === 'ACTIVE');
@@ -73,11 +94,10 @@ export function AssignTicketDrawer({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isAdminStation) return;
     if (!selectedHandlerId || isPending) return;
-    if (isReassign && !reassignReason.trim()) return;
+    if (!reassignReason.trim()) return;
 
-    await onSubmit(selectedHandlerId, reassignReason.trim() || undefined);
+    await onSubmit(selectedHandlerId, reassignReason.trim());
     onClose();
   };
 
@@ -122,38 +142,7 @@ export function AssignTicketDrawer({
           </div>
         </div>
 
-        {/* CASE 1: Admin viewing Station Ticket (Supervisory - No Direct Station Staff Assignment) */}
-        {isAdminStation ? (
-          <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-[12px] space-y-3">
-            <div className="flex items-start gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold mt-0.5">
-                <IconShieldAlert size={16} />
-              </div>
-              <div className="space-y-1">
-                <div className="font-bold text-amber-900 dark:text-amber-200">
-                  {t('assignModal.adminStationScopeTitle', 'Trách nhiệm thuộc Đơn vị vận hành trạm')}
-                </div>
-                <p className="text-muted leading-relaxed">
-                  {t('assignModal.adminStationScopeDesc', 'Sự cố tại trụ sạc do Chủ trạm và nhân viên kỹ thuật trạm trực tiếp xử lý. Thẩm quyền phân công nhân sự tại trạm thuộc về Chủ trạm. Admin thực hiện giám sát tiến độ SLA và kỹ thuật.')}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center pt-1 border-t border-amber-500/15">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  onClose();
-                  navigate('/admin/stations');
-                }}
-              >
-                {t('assignModal.goToStations', 'Xem danh sách trạm hệ thống →')}
-              </Button>
-            </div>
-          </div>
-        ) : isAdminPlatform ? (
+        {isAdminPlatform ? (
           /* CASE 2: Admin viewing Platform Ticket (Assigning Platform Admins) */
           <div>
             <label className="block text-[12.5px] font-semibold text-ink">
@@ -241,16 +230,16 @@ export function AssignTicketDrawer({
             </p>
 
             <div className="mt-2.5 max-h-56 overflow-y-auto space-y-2 pr-1">
-              {staffQuery.isLoading ? (
+              {(isAdminStation ? stationHandlersQuery : staffQuery).isLoading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-12 w-full rounded-xl" />
                   <Skeleton className="h-12 w-full rounded-xl" />
                 </div>
-              ) : activeStaffList.length === 0 ? (
+              ) : stationChoices.length === 0 ? (
                 <div className="rounded-xl border border-line bg-surface p-4 text-center text-[12px] text-muted space-y-2.5">
                   <IconAlertCircle size={20} className="mx-auto text-warn" />
-                  <div>{t('assignModal.noActiveStaff', 'Không tìm thấy nhân viên nào đang làm việc tại trạm này. Vui lòng phân công nhân viên vào trạm trước.')}</div>
-                  <Button
+                  <div>{t('assignModal.noActiveStaff', 'Không tìm thấy nhân viên nào đang làm việc tại trạm này. Vui lòng liên hệ Chủ trạm.')}</div>
+                  {!isAdminStation && <Button
                     type="button"
                     variant="secondary"
                     size="sm"
@@ -260,18 +249,18 @@ export function AssignTicketDrawer({
                     }}
                   >
                     {t('assignModal.goToStaff', 'Quản lý nhân viên trạm →')}
-                  </Button>
+                  </Button>}
                 </div>
               ) : (
-                activeStaffList.map((staff) => {
-                  const handlerUserId = staff.userId || staff.assignmentId;
+                stationChoices.map((staff) => {
+                  const handlerUserId = staff.userId;
                   const isSelected = selectedHandlerId === handlerUserId;
                   const isCurrent = ticket.assignedHandlerId === handlerUserId;
-                  const displayName = staff.displayName || staff.name || staff.email;
+                  const displayName = staff.displayName;
 
                   return (
                     <div
-                      key={staff.assignmentId || handlerUserId}
+                      key={handlerUserId}
                       onClick={() => setSelectedHandlerId(handlerUserId)}
                       className={`flex cursor-pointer items-center justify-between rounded-xl border p-3 transition-all ${
                         isSelected
@@ -295,7 +284,7 @@ export function AssignTicketDrawer({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <StatusPill tone="good" label={t('assignModal.activePill', 'Đang làm việc')} />
+                        <StatusPill tone="good" label={staff.role === 'OWNER' ? t('assignModal.ownerRole', 'Chủ trạm') : t('assignModal.activePill', 'Đang làm việc')} />
                         {isSelected && (
                           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white">
                             <IconCheck size={12} strokeWidth={2.5} />
@@ -310,8 +299,8 @@ export function AssignTicketDrawer({
           </div>
         )}
 
-        {/* Reassign Reason (Mandatory when reassigning) */}
-        {!isAdminStation && isReassign && (
+        {/* Assignment and transfer always leave a reason in the audit trail. */}
+        {(
           <div>
             <label className="block text-[12.5px] font-semibold text-ink">
               {t('assignModal.reasonLabel', 'Lý do điều chuyển')} <span className="text-bad">*</span>
@@ -333,13 +322,13 @@ export function AssignTicketDrawer({
         {/* Modal Actions */}
         <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-hairline">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
-            {isAdminStation ? t('common.close', 'Đóng') : t('common.cancel', 'Hủy')}
+            {t('common.cancel', 'Hủy')}
           </Button>
-          {!isAdminStation && (
+          {(
             <Button
               type="submit"
               accent="brand"
-              disabled={!selectedHandlerId || (isReassign && !reassignReason.trim()) || isPending}
+              disabled={!selectedHandlerId || !reassignReason.trim() || isPending}
               icon={<IconUsers size={14} strokeWidth={2.2} />}
             >
               {isPending

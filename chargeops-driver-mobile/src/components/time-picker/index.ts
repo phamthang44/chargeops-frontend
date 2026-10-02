@@ -5,3 +5,6 @@ export { TimePickerPeriodTabs, type TimeFilterPeriod } from './TimePickerPeriodT
 export { TimePickerSlotItem } from './TimePickerSlotItem';
 export { TimePickerQuoteCard } from './TimePickerQuoteCard';
 export { TimePickerStickyBar } from './TimePickerStickyBar';
+export { TimePickerHeader } from './TimePickerHeader';
+export { TimePickerSlotGrid } from './TimePickerSlotGrid';
+export { TimePickerHelpModal } from './TimePickerHelpModal';

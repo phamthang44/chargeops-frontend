@@ -93,6 +93,25 @@ export function getLocalizedTicketErrorMessage(err: any, t: any): string {
     return t('ticket.errors.invalidScope', 'Đơn đặt chỗ hoặc trạm sạc không khớp với phiếu hỗ trợ này. Vui lòng kiểm tra lại phiên sạc đã chọn.');
   }
 
+  if (
+    code === 'TKT_CLAIM_REQUIRED' ||
+    code === 'CLAIM_REQUIRED' ||
+    key === 'error.ticket.claimRequired' ||
+    msg.includes('Claim this support ticket before sending a reply')
+  ) {
+    return t('ticket.errors.claimRequired', 'Bạn cần tiếp nhận xử lý phiếu trước khi gửi tin nhắn phản hồi.');
+  }
+
+  if (
+    code === 'TKT_NOT_CURRENT_HANDLER' ||
+    code === 'NOT_CURRENT_HANDLER' ||
+    key === 'error.ticket.notCurrentHandler' ||
+    msg.includes('assigned to another handler') ||
+    msg.includes('only the current handler can reply')
+  ) {
+    return t('ticket.errors.notCurrentHandler', 'Phiếu hỗ trợ đang do nhân sự khác phụ trách; chỉ người phụ trách hiện tại mới có quyền phản hồi.');
+  }
+
   return msg || t('ticket.errors.generic', 'Đã xảy ra lỗi khi xử lý phiếu hỗ trợ.');
 }
 

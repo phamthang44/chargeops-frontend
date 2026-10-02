@@ -26,18 +26,19 @@
     "platform": "Platform & Payment Issues",
     "station": "Station Supervisory Queue",
     "platformHelp": "Directly handled by Platform Admins for wallet deposits, payment gateways, and driver accounts.",
-    "stationHelp": "Directly handled by Station Owners & Staff. Admin oversees SLA, technical findings, and refund approvals."
+    "stationHelp": "Station Owners and Staff handle incidents. Admin may chat, route a station handler, and record findings; refunds follow a separate decision flow."
   },
   "supervisory": {
     "badge": "Station Supervisory Mode",
     "bannerTitle": "Station Supervisory Mode (SLA & Technical Audit)",
-    "bannerDesc": "Station charging incidents are handled by the Station Operator & Technicians at {{station}}. Admin monitors SLA, records technical findings, and approves deposit refunds.",
+    "bannerDesc": "The Owner and Staff at {{station}} handle the incident. Admin may chat, route a station handler, and record findings; refund decisions follow a separate flow.",
     "stationUnit": "Station Operations Unit",
     "stationAssignedNotice": "Station technician is actively investigating and resolving hardware issues on-site.",
-    "stationUnassignedNotice": "Station owner or staff will claim and assign a technician for this physical ticket.",
+    "stationUnassignedNotice": "The Owner or Staff handles this ticket. Admin may route it to an active person at this station.",
     "findingsSectionTitle": "Technical Audit Findings (Admin)",
     "findingsBtn": "Record Technical Finding",
-    "escalateBtn": "Escalate"
+    "escalateBtn": "Escalate",
+    "routeHandler": "Route to station handler"
   },
   "platformQueue": {
     "badge": "Platform & Payment Queue",
@@ -174,7 +175,7 @@
     "noMessages": "No messages in this thread yet.",
     "sendFirst": "Send a message to start communicating with the reporter.",
     "composerClosedNotice": "This ticket has been closed. No further replies can be sent.",
-    "composerResolvedWarning": "Note: Sending a message now will move the ticket back to In Progress and cancel the 10-day countdown timer.",
+    "composerResolvedWarning": "Waiting for the reporter to confirm or say the issue persists. Handlers cannot send messages at this stage.",
     "senderFallback": "Sender",
     "userFallback": "User",
     "handlerCard": {
@@ -212,6 +213,12 @@
       "title": "Technical Findings",
       "empty": "No technical findings recorded yet for this ticket.",
       "recordedAt": "Recorded: {{time}}",
+      "STATION_FAILURE": "Station failure",
+      "NOT_STATION_FAILURE": "Not a station failure",
+      "auditNote": "Findings are audited and do not approve or execute a refund.",
+      "reasonPlaceholder": "Reason and supporting evidence",
+      "save": "Record finding",
+      "saved": "Technical finding recorded.",
       "HARDWARE_FAULT": "Charger hardware fault",
       "STATION_OFFLINE": "Station network outage",
       "SOFTWARE_BUG": "Software / firmware bug",
@@ -220,11 +227,11 @@
     },
     "refund": {
       "title": "Deposit Refund Policy",
-      "autoGranted": "100% deposit refunded automatically",
-      "autoGrantedBadge": "100% Refund Approved",
-      "desc": "The platform automatically initiates full refund when the station encounters hardware or offline outage.",
+      "autoGranted": "Refund record exists",
+      "autoGrantedBadge": "Refund record exists",
+      "desc": "Check each refund record for its current status. A ticket finding does not prove money was transferred.",
       "viewDetail": "Refund Details →",
-      "policyNotice": "Under driver protection policy, if the station incident is verified as hardware failure or offline station, the driver will receive an automatic 100% deposit refund."
+      "policyNotice": "If a station failure is confirmed, Admin reviews the full package refund obligation. Recording a finding does not transfer money."
     },
     "loadError": "Could not load ticket: {{message}}",
     "thread": "Troubleshooting & Communication Thread",
@@ -278,6 +285,10 @@
     "title": "Error Notification",
     "accessDeniedTitle": "Access Denied",
     "accessDenied": "You do not have access to view or perform actions on this support ticket.",
+    "claimRequiredTitle": "Claim Required",
+    "claimRequired": "Claim this support ticket before sending a reply.",
+    "notCurrentHandlerTitle": "Not Current Handler",
+    "notCurrentHandler": "This support ticket is assigned to another handler; only the current handler can reply.",
     "notFoundTitle": "Ticket Not Found",
     "notFound": "The requested support ticket was not found or has been removed.",
     "invalidScopeTitle": "Invalid Scope",

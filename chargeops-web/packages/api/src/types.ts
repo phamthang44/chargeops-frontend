@@ -1178,6 +1178,8 @@ export type TicketEventType =
   | 'REOPENED_PERSISTENT';
 
 export type TicketFindingConclusion =
+  | 'STATION_FAILURE'
+  | 'NOT_STATION_FAILURE'
   | 'STATION_FAULT'
   | 'USER_ERROR'
   | 'VEHICLE_FAULT'
@@ -1245,6 +1247,19 @@ export interface AssignTicketRequest {
   expectedVersion?: number;
   handlerId: string;
   reason?: string;
+}
+
+export interface TicketHandlerCandidate {
+  userId: string;
+  displayName: string;
+  role: 'OWNER' | 'STAFF';
+}
+
+export interface RecordTicketFindingRequest {
+  expectedVersion: number;
+  conclusion: 'STATION_FAILURE' | 'NOT_STATION_FAILURE';
+  affectedAt: string;
+  reason: string;
 }
 
 export interface ResolveTicketRequest {

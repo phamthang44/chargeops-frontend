@@ -34,6 +34,37 @@ export function getTicketErrorMeta(error: any, t: TFunction): TicketErrorMeta {
     };
   }
 
+  // 1b. CLAIM REQUIRED
+  if (
+    code === 'TKT_CLAIM_REQUIRED' ||
+    code === 'CLAIM_REQUIRED' ||
+    messageKey === 'error.ticket.claimRequired' ||
+    rawMsg.includes('Claim this support ticket before sending a reply') ||
+    rawMsg.includes('claimRequired')
+  ) {
+    return {
+      title: t('errors.claimRequiredTitle', 'Cần nhận xử lý phiếu'),
+      message: t('errors.claimRequired', 'Bạn cần nhận xử lý phiếu này trước khi gửi tin nhắn phản hồi.'),
+      code: 'TKT_CLAIM_REQUIRED',
+    };
+  }
+
+  // 1c. NOT CURRENT HANDLER
+  if (
+    code === 'TKT_NOT_CURRENT_HANDLER' ||
+    code === 'NOT_CURRENT_HANDLER' ||
+    messageKey === 'error.ticket.notCurrentHandler' ||
+    rawMsg.includes('assigned to another handler') ||
+    rawMsg.includes('only the current handler can reply') ||
+    rawMsg.includes('notCurrentHandler')
+  ) {
+    return {
+      title: t('errors.notCurrentHandlerTitle', 'Không phải người phụ trách'),
+      message: t('errors.notCurrentHandler', 'Phiếu hỗ trợ này đang được phân công cho nhân sự khác; chỉ người phụ trách hiện tại mới có quyền phản hồi.'),
+      code: 'TKT_NOT_CURRENT_HANDLER',
+    };
+  }
+
   // 2. NOT FOUND
   if (
     code === 'TKT_NOT_FOUND' ||

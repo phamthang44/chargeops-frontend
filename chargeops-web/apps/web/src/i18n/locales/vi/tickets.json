@@ -26,18 +26,19 @@
     "platform": "Sự cố Nền tảng & Thanh toán",
     "station": "Giám sát Sự cố Trạm",
     "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến ví tiền, nạp cọc, giao dịch thanh toán và tài khoản tài xế.",
-    "stationHelp": "Chủ trạm & Kỹ thuật viên trạm chịu trách nhiệm trực tiếp tại trụ sạc. Admin thực hiện giám sát SLA, kết luận kỹ thuật (BR-TKT-05) và thẩm định bồi hoàn cọc."
+    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin có thể trao đổi, điều hướng người đúng trạm và ghi kết luận kỹ thuật; hoàn tiền thuộc luồng quyết định riêng."
   },
   "supervisory": {
     "badge": "Giám sát Vận hành Trạm",
     "bannerTitle": "Chế độ Giám sát Trạm sạc (SLA & Kỹ thuật)",
-    "bannerDesc": "Sự cố trạm sạc thuộc trách nhiệm xử lý của Đơn vị vận hành và Kỹ thuật viên trạm {{station}}. Admin thực hiện giám sát tiến độ, ghi nhận kết luận kỹ thuật và bồi hoàn nếu xảy ra lỗi hạ tầng.",
+    "bannerDesc": "Chủ trạm và Staff trạm {{station}} trực tiếp xử lý. Admin có thể trao đổi và điều hướng người phù hợp, ghi kết luận kỹ thuật; quyết định hoàn tiền nằm ở luồng riêng.",
     "stationUnit": "Đơn vị vận hành trạm",
     "stationAssignedNotice": "Kỹ thuật viên trạm đang trực tiếp kiểm tra và xử lý sự cố thiết bị tại chỗ.",
-    "stationUnassignedNotice": "Chủ trạm hoặc nhân viên trực trạm chịu trách nhiệm tiếp nhận và phân công kỹ thuật viên cho phiếu này.",
+    "stationUnassignedNotice": "Chủ trạm hoặc Staff trực tiếp xử lý. Admin có thể điều hướng phiếu đến người đang hoạt động tại đúng trạm.",
     "findingsSectionTitle": "Kết luận Giám định Kỹ thuật (Admin)",
     "findingsBtn": "Ghi nhận lỗi trạm",
-    "escalateBtn": "Báo cáo khẩn"
+    "escalateBtn": "Báo cáo khẩn",
+    "routeHandler": "Điều hướng người xử lý"
   },
   "platformQueue": {
     "badge": "Hàng chờ Nền tảng & Thanh toán",
@@ -174,7 +175,7 @@
     "noMessages": "Chưa có phản hồi nào trong luồng này.",
     "sendFirst": "Gửi tin nhắn để bắt đầu trao đổi với khách hàng.",
     "composerClosedNotice": "Phiếu hỗ trợ này đã được đóng hoàn tất. Không thể gửi thêm tin nhắn phản hồi.",
-    "composerResolvedWarning": "Lưu ý: Gửi thêm tin nhắn trong lúc này sẽ chuyển vé về trạng thái Đang xử lý và hủy hạn đếm ngược 10 ngày.",
+    "composerResolvedWarning": "Đang chờ tài xế xác nhận hoặc báo vấn đề vẫn còn. Bên xử lý không thể gửi tin nhắn trong giai đoạn này.",
     "senderFallback": "Người gửi",
     "userFallback": "Người dùng",
     "handlerCard": {
@@ -212,6 +213,12 @@
       "title": "Kết luận kỹ thuật",
       "empty": "Chưa có kết luận kỹ thuật nào được ghi nhận cho phiếu này.",
       "recordedAt": "Ghi nhận: {{time}}",
+      "STATION_FAILURE": "Lỗi phía trạm",
+      "NOT_STATION_FAILURE": "Không phải lỗi phía trạm",
+      "auditNote": "Kết luận được lưu vào audit, không tự quyết định hoặc thực hiện hoàn tiền.",
+      "reasonPlaceholder": "Lý do và bằng chứng kết luận",
+      "save": "Ghi kết luận",
+      "saved": "Đã ghi kết luận kỹ thuật.",
       "HARDWARE_FAULT": "Lỗi phần cứng trụ sạc",
       "STATION_OFFLINE": "Trạm mất kết nối mạng",
       "SOFTWARE_BUG": "Sự cố phần mềm / firmware",
@@ -220,11 +227,11 @@
     },
     "refund": {
       "title": "Chính sách bồi hoàn cọc",
-      "autoGranted": "Đã hoàn cọc 100% tự động",
-      "autoGrantedBadge": "Hoàn cọc 100%",
-      "desc": "Hệ thống tự động kích hoạt bồi hoàn do sự cố thuộc trách nhiệm hạ tầng trạm sạc.",
+      "autoGranted": "Đã có hồ sơ hoàn tiền",
+      "autoGrantedBadge": "Có hồ sơ hoàn tiền",
+      "desc": "Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận ticket không phải bằng chứng đã chuyển tiền.",
       "viewDetail": "Chi tiết hoàn tiền →",
-      "policyNotice": "Theo chính sách bảo vệ tài xế, nếu sự cố trạm được xác nhận là lỗi phần cứng hoặc ngoại tuyến, tài xế sẽ được hoàn 100% tiền cọc tự động."
+      "policyNotice": "Nếu xác nhận lỗi phía trạm, Admin xem xét nghĩa vụ hoàn đủ giá gói theo chính sách. Ghi kết luận không tự chuyển tiền."
     },
     "loadError": "Không tải được ticket: {{message}}",
     "thread": "Luồng trao đổi & giải quyết sự cố",
@@ -278,6 +285,10 @@
     "title": "Thông báo lỗi",
     "accessDeniedTitle": "Từ chối quyền truy cập",
     "accessDenied": "Bạn không có quyền truy cập hoặc thực hiện thao tác trên phiếu hỗ trợ này.",
+    "claimRequiredTitle": "Cần nhận xử lý phiếu",
+    "claimRequired": "Bạn cần nhận xử lý phiếu này trước khi gửi tin nhắn phản hồi.",
+    "notCurrentHandlerTitle": "Không phải người phụ trách",
+    "notCurrentHandler": "Phiếu hỗ trợ này đang được phân công cho nhân sự khác; chỉ người phụ trách hiện tại mới có quyền phản hồi.",
     "notFoundTitle": "Không tìm thấy phiếu hỗ trợ",
     "notFound": "Phiếu hỗ trợ được yêu cầu không tồn tại hoặc đã bị xóa khỏi hệ thống.",
     "invalidScopeTitle": "Bối cảnh không hợp lệ",

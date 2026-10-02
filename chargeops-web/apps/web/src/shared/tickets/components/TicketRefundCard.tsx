@@ -27,7 +27,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           <p className="mt-1 text-muted leading-relaxed">
             {t(
               'detail.refund.desc',
-              'Khoản hoàn được hạch toán trong Sổ đối chiếu tài chính của Chủ trạm. Simulator tự động hoàn cọc theo chính sách hệ thống.'
+              'Khoản hoàn được hạch toán trong Sổ đối chiếu tài chính của Chủ trạm. Hệ thống tự động hoàn tiền theo chính sách quy định.'
             )}
           </p>
           <div className="mt-2.5 space-y-1">

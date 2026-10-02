@@ -43,7 +43,7 @@
       "revenue": {
         "label": "Finance & Refunds",
         "title": "Finance & Refunds",
-        "subtitle": "Simulation revenue ledger and station refund operations."
+        "subtitle": "Financial revenue ledger and station refund operations."
       },
       "license": {
         "label": "License",
@@ -532,15 +532,15 @@
   },
   "revenue": {
     "title": "Finance & Refunds",
-    "subtitle": "Simulation revenue ledger and station refund management via Simulator.",
+    "subtitle": "Financial revenue ledger and station refund management.",
     "refreshBtn": "Refresh",
     "tabs": {
       "ledger": "Finance Ledger",
       "refunds": "Station Refunds"
     },
     "simulatorNotice": {
-      "title": "Simulation Payment & Reconciliation (Simulator Money)",
-      "desc": "All revenue and refund figures operate within the simulation sandbox. The platform does not support real payouts or individual spendable wallets."
+      "title": "Real-time Financial Reconciliation",
+      "desc": "All revenue and refund records are reconciled directly per booking and completed charging session."
     },
     "kpis": {
       "gross": "GROSS REVENUE",

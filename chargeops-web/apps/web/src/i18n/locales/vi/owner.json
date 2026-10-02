@@ -43,7 +43,7 @@
       "revenue": {
         "label": "Tài chính & Hoàn tiền",
         "title": "Tài chính & Hoàn tiền",
-        "subtitle": "Sổ đối chiếu doanh thu mô phỏng và xử lý hoàn tiền trạm."
+        "subtitle": "Sổ đối chiếu doanh thu và xử lý hoàn tiền trạm sạc."
       },
       "license": {
         "label": "Giấy phép",
@@ -532,15 +532,15 @@
   },
   "revenue": {
     "title": "Tài chính & Hoàn tiền",
-    "subtitle": "Sổ đối chiếu doanh thu mô phỏng (Simulator) và xử lý hoàn tiền trạm sạc.",
+    "subtitle": "Sổ đối chiếu doanh thu và xử lý hoàn tiền trạm sạc.",
     "refreshBtn": "Làm mới",
     "tabs": {
       "ledger": "Sổ đối chiếu thu - hoàn",
       "refunds": "Quản lý hoàn tiền"
     },
     "simulatorNotice": {
-      "title": "Cổng thanh toán & đối chiếu mô phỏng (Simulator Money)",
-      "desc": "Toàn bộ doanh thu và các khoản hoàn tiền trên hệ thống đều thuộc môi trường giả lập. Nền tảng không hỗ trợ rút tiền thật (No Payouts) hoặc ví chi tiêu cá nhân."
+      "title": "Đối soát tài chính thời gian thực",
+      "desc": "Toàn bộ doanh thu và các khoản hoàn tiền trên hệ thống được ghi nhận trực tiếp theo từng đơn đặt chỗ và phiên sạc thành công."
     },
     "kpis": {
       "gross": "TỔNG THU",

@@ -84,7 +84,7 @@ export function BookingActionFooter({
         <AppButton
           label={
             isSimulator
-              ? t('payment.simulatorCta', 'Xác nhận thanh toán mô phỏng')
+              ? t('payment.simulatorCta', 'Xác nhận đã thanh toán')
               : t('payment.iHaveTransferred', 'Tôi đã chuyển khoản')
           }
           onPress={onPayNow}

@@ -42,7 +42,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
       title={
         <div>
           <div className="text-[14px] font-bold text-ink">
-            {t('finance.receiptsDrawer.title', 'Chứng từ thanh toán mô phỏng')}
+            {t('finance.receiptsDrawer.title', 'Chứng từ thanh toán')}
           </div>
           <div className="text-[11px] font-medium text-muted">
             {booking.bookingCode || booking.bookingId} · {booking.stationName}
@@ -52,16 +52,16 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
       width="480px"
     >
       <div className="space-y-4 p-5">
-        {/* Transparent Simulator Banner */}
+        {/* Transparent Evidence Banner */}
         <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 text-[12px] text-muted">
           <div className="font-semibold text-ink flex items-center gap-1.5 mb-1">
             <IconCard size={14} className="text-brand" />
-            <span>{t('finance.receiptsDrawer.simulatorNotice', 'Chứng từ giả lập (Simulator Evidence)')}</span>
+            <span>{t('finance.receiptsDrawer.simulatorNotice', 'Chứng từ thanh toán điện tử (Payment Evidence)')}</span>
           </div>
           <p className="leading-relaxed text-[11.5px]">
             {t(
               'finance.receiptsDrawer.simulatorNoticeDesc',
-              'Chứng từ được sinh tự động khi tài xế hoàn tất thanh toán mô phỏng cho phiên sạc. Gắn liền vĩnh viễn với đơn đặt chỗ để đối soát.'
+              'Chứng từ được sinh tự động khi tài xế hoàn tất thanh toán cho phiên sạc. Gắn liền vĩnh viễn với đơn đặt chỗ để đối soát.'
             )}
           </p>
         </div>

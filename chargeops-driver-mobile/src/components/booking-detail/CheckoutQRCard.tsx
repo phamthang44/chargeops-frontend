@@ -35,9 +35,9 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
     ? rawBankAccount || `96247${booking.code.replace(/[^a-zA-Z0-9]/g, '').slice(-8)}`
     : rawBankAccount;
 
-  const bankName = (booking.checkout as any)?.bankName ?? (isSimulator ? 'MBBank (Mô phỏng Sandbox)' : null);
+  const bankName = (booking.checkout as any)?.bankName ?? (isSimulator ? 'MBBank (Ngân hàng Quân Đội)' : null);
   const accountHolder =
-    (booking.checkout as any)?.accountHolder ?? (isSimulator ? 'CHARGEOPS CORP (DEMO)' : null);
+    (booking.checkout as any)?.accountHolder ?? (isSimulator ? 'CHARGEOPS EV NETWORK' : null);
 
   const rawQrUrl = booking.checkout?.checkoutUrl;
   const qrUrl =
@@ -63,7 +63,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
         styles.card,
         {
           backgroundColor: themeColors.surface,
-          borderColor: isSimulator ? `${themeColors.warning}50` : `${themeColors.primary}40`,
+          borderColor: `${themeColors.primary}40`,
           shadowColor: isDark ? '#000000' : themeColors.textStrong,
         },
       ]}
@@ -73,32 +73,23 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
         <View
           style={[
             styles.headerIconWrap,
-            { backgroundColor: isSimulator ? `${themeColors.warning}18` : `${themeColors.primary}18` },
+            { backgroundColor: `${themeColors.primary}18` },
           ]}
         >
           <Ionicons
-            name={isSimulator ? 'flash-outline' : 'qr-code-outline'}
+            name="qr-code-outline"
             size={18}
-            color={isSimulator ? themeColors.warning : themeColors.primary}
+            color={themeColors.primary}
           />
         </View>
         <View style={styles.headerTitleWrap}>
           <View style={styles.titleRow}>
             <Text style={[styles.title, { color: themeColors.textStrong }]}>
-              {isSimulator
-                ? t('payment.simulatorTitle', 'Thanh toán VietQR (Demo Sandbox)')
-                : t('bookingDetail.transferInfoTitle', 'Thanh toán chuyển khoản VietQR')}
+              {t('bookingDetail.transferInfoTitle', 'Thanh toán chuyển khoản VietQR')}
             </Text>
-            {isSimulator && (
-              <View style={[styles.sandboxBadge, { backgroundColor: `${themeColors.warning}20` }]}>
-                <Text style={[styles.sandboxBadgeText, { color: themeColors.warning }]}>SANDBOX</Text>
-              </View>
-            )}
           </View>
           <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
-            {isSimulator
-              ? t('payment.simulatorSubtitle', 'Mô phỏng thanh toán tức thì phục vụ đồ án')
-              : qrUrl
+            {qrUrl
               ? t('bookingDetail.transferInfoSubtitle', 'Quét mã VietQR hoặc chuyển khoản theo thông tin dưới')
               : t('bookingDetail.transferPendingSubtitle', 'Thông tin chuyển khoản cho đơn đặt chỗ')}
           </Text>
@@ -133,7 +124,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
                   {t('payment.methodLabel', 'Phương thức')}
                 </Text>
                 <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>
-                  {t('payment.SIMULATOR', 'Thanh toán giả lập (Demo Sandbox)')}
+                  {t('payment.SIMULATOR', 'Cổng thanh toán trực tuyến')}
                 </Text>
               </View>
             </View>
@@ -282,7 +273,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
           <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
             {t(
               'payment.simulatorNote',
-              'Đây là môi trường thử nghiệm (Sandbox). Bạn có thể dùng app ngân hàng quét thử mã QR để kiểm tra thông tin điền sẵn. Nhấn "Xác nhận thanh toán mô phỏng" ở thanh bên dưới để hoàn tất giao dịch.',
+              'Quét mã QR bằng ứng dụng ngân hàng bất kỳ để thanh toán cho phiên sạc. Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận.',
             )}
           </Text>
         </View>

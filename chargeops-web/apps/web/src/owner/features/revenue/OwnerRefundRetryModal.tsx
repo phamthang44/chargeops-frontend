@@ -39,7 +39,7 @@ export function OwnerRefundRetryModal({
 
       toast(
         t('finance.refunds.retrySuccess', {
-          defaultValue: 'Yêu cầu hoàn tiền mô phỏng đã được gửi lại thành công!',
+          defaultValue: 'Yêu cầu hoàn tiền đã được gửi lại thành công!',
         }),
         'success',
       );
@@ -63,7 +63,7 @@ export function OwnerRefundRetryModal({
       <div className="mb-4 flex items-center justify-between border-b border-hairline pb-3">
         <div>
           <h3 className="text-base font-bold text-ink">
-            {t('finance.refunds.retryModal.title', 'Xác nhận thử lại hoàn tiền mô phỏng')}
+            {t('finance.refunds.retryModal.title', 'Xác nhận thử lại hoàn tiền')}
           </h3>
           <p className="text-[11px] text-muted">
             Refund #{refund.refundId} · Booking #{refund.bookingCode || refund.bookingId}

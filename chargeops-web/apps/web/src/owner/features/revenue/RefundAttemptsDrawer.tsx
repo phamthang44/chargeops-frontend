@@ -91,7 +91,7 @@ export function RefundAttemptsDrawer({
               <span>
                 {t(
                   'finance.attemptsDrawer.actionRequiredNotice',
-                  'Lần thử tự động của Simulator đã thất bại. Vui lòng kiểm tra lý do lỗi và bấm "Thử lại hoàn tiền" để gửi yêu cầu mới.'
+                  'Lần thử tự động qua cổng thanh toán đã thất bại. Vui lòng kiểm tra lý do lỗi và bấm "Thử lại hoàn tiền" để gửi yêu cầu mới.'
                 )}
               </span>
             </div>
@@ -140,7 +140,7 @@ export function RefundAttemptsDrawer({
                     <div className="rounded-xl border border-hairline bg-surface p-3.5 shadow-2xs space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-[12.5px] text-ink">
-                          Lần #{att.sequenceNo || idx + 1} · {att.executionMode === 'SIMULATOR' ? 'Simulator Tự Động' : 'Thủ Công'}
+                          Lần #{att.sequenceNo || idx + 1} · {att.executionMode === 'SIMULATOR' ? 'Tự động' : 'Thủ công'}
                         </span>
                         <StatusPill
                           tone={isSuccess ? 'good' : isFailed ? 'bad' : 'warn'}

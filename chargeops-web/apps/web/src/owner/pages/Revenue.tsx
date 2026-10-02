@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@chargeops/api';
 import {
   Button,
-  IconAlertCircle,
   IconCard,
   IconLifebuoy,
   IconRefreshCw,
@@ -90,7 +89,7 @@ export function Revenue() {
           title={t('revenue.title', 'Tài chính & Hoàn tiền')}
           subtitle={t(
             'revenue.subtitle',
-            'Sổ đối chiếu doanh thu mô phỏng (Simulator) và xử lý hoàn tiền trạm sạc.',
+            'Sổ đối chiếu doanh thu và xử lý hoàn tiền trạm sạc.',
           )}
         />
         <Button
@@ -103,20 +102,6 @@ export function Revenue() {
           <IconRefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
           <span className="text-[12px]">{t('revenue.refreshBtn', 'Làm mới')}</span>
         </Button>
-      </div>
-
-      {/* Simulator Environment Notice */}
-      <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
-        <IconAlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
-        <div>
-          <span className="font-semibold">
-            {t('revenue.simulatorNotice.title', 'Cổng thanh toán & đối chiếu mô phỏng (Simulator Money)')}:
-          </span>{' '}
-          {t(
-            'revenue.simulatorNotice.desc',
-            'Toàn bộ doanh thu và các khoản hoàn tiền trên hệ thống đều thuộc môi trường giả lập. Nền tảng không hỗ trợ rút tiền thật (No Payouts) hoặc ví chi tiêu cá nhân.',
-          )}
-        </div>
       </div>
 
       {/* Segmented Tab Switcher */}

@@ -55,24 +55,8 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
 
   const summaryQuery = useQuery({
     queryKey: ['tickets', 'summary', { role: admin ? 'admin' : 'owner', workstream: admin ? workstream : undefined }],
-    queryFn: async () => {
-      if (admin && workstream === 'escalated') {
-        const s = await api.ticketEscalations.summary();
-        return {
-          total: s.totalEscalated,
-          open: s.pendingArbiter,
-          inProgress: s.unresponsive24hCount,
-          resolved: s.disputedFindingCount,
-          closed: 0,
-          byStatus: {
-            open: s.pendingArbiter,
-            in_progress: s.unresponsive24hCount,
-            resolved: s.disputedFindingCount,
-          },
-        };
-      }
-      return api.tickets.summary({ role: admin ? 'admin' : 'owner', workstream: admin ? 'platform' : undefined });
-    },
+    queryFn: () => api.tickets.summary({ role: admin ? 'admin' : 'owner',
+      workstream: admin ? (workstream === 'escalated' ? 'station' : 'platform') : undefined }),
     refetchInterval: 30000,
   });
 
@@ -232,90 +216,90 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
       </div>
 
       {/* BKG-052 4-Box Asymmetric Bento Metric Header (Clean Single-Bezel) */}
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Box 1: OPEN (Unassigned / Pending Claim) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">
+        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.unassigned', 'Chờ tiếp nhận')}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-amber-500 font-mono">
+              <div className="mt-1 text-2xl font-bold tracking-tight text-warn-deep font-mono">
                 {summaryQuery.isLoading ? '—' : openCount}
               </div>
-              <div className="mt-0.5 text-[10.5px] text-faint">
-                {admin
-                  ? t('kpi.unassignedHelpAdmin', 'Phiếu sự cố chờ phân công hoặc tiếp nhận')
-                  : t('kpi.unassignedHelp', 'Nhân viên trạm có thể tiếp nhận')}
-              </div>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-500">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warn-pill text-warn-deep border border-warn-border">
               <IconAlertCircle size={20} strokeWidth={2.2} />
             </div>
+          </div>
+          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
+            {admin
+              ? t('kpi.unassignedHelpAdmin', 'Phiếu sự cố chờ phân công hoặc tiếp nhận')
+              : t('kpi.unassignedHelp', 'Nhân viên trạm có thể tiếp nhận')}
           </div>
         </Card>
 
         {/* Box 2: IN_PROGRESS (Active SLA) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">
+        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.inProgress', 'Đang xử lý')}
               </div>
               <div className="mt-1 text-2xl font-bold tracking-tight text-brand font-mono">
                 {summaryQuery.isLoading ? '—' : inProgressCount}
               </div>
-              <div className="mt-0.5 text-[10.5px] text-faint">
-                {admin
-                  ? t('kpi.inProgressHelpAdmin', 'Đang có chuyên viên hoặc trạm xử lý')
-                  : t('kpi.inProgressHelp', 'Đang có nhân viên xử lý')}
-              </div>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-deep">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-deep">
               <IconUsers size={20} strokeWidth={2} />
             </div>
+          </div>
+          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
+            {admin
+              ? t('kpi.inProgressHelpAdmin', 'Đang có chuyên viên hoặc trạm xử lý')
+              : t('kpi.inProgressHelp', 'Đang có nhân viên xử lý')}
           </div>
         </Card>
 
         {/* Box 3: RESOLVED (10-Day Auto-Close Watch) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">
+        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
                 {admin ? t('kpi.resolvingWatchAdmin', 'Chờ tài xế phản hồi') : t('kpi.resolvingWatch', 'Chờ tài xế (10 ngày)')}
               </div>
               <div className="mt-1 text-2xl font-bold tracking-tight text-emerald-500 font-mono">
                 {summaryQuery.isLoading ? '—' : resolvedWatchCount}
               </div>
-              <div className="mt-0.5 text-[10.5px] text-faint">
-                {admin
-                  ? t('kpi.resolvingWatchHelpAdmin', 'Tự động đóng theo chính sách nếu không phản hồi')
-                  : t('kpi.resolvingWatchHelp', 'Tự động đóng sau 10 ngày')}
-              </div>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
               <IconClock size={20} strokeWidth={2.2} />
             </div>
+          </div>
+          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
+            {admin
+              ? t('kpi.resolvingWatchHelpAdmin', 'Tự động đóng theo chính sách nếu không phản hồi')
+              : t('kpi.resolvingWatchHelp', 'Tự động đóng sau 10 ngày')}
           </div>
         </Card>
 
         {/* Box 4: CLOSED (Terminal Completed) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted">
+        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.completed', 'Đã hoàn tất')}
               </div>
               <div className="mt-1 text-2xl font-bold tracking-tight text-ink font-mono">
                 {summaryQuery.isLoading ? '—' : closedCount}
               </div>
-              <div className="mt-0.5 text-[10.5px] text-faint">
-                {t('kpi.completedHelp', 'Đã hoàn thành và đóng')}
-              </div>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-muted">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-muted">
               <IconCheckCircle size={20} strokeWidth={2} />
             </div>
+          </div>
+          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
+            {t('kpi.completedHelp', 'Đã hoàn thành và đóng')}
           </div>
         </Card>
       </div>
@@ -346,11 +330,11 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
               }}
               className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold transition-all ${
                 workstream === 'escalated'
-                  ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 shadow-2xs font-bold'
+                  ? 'bg-brand-soft text-brand border border-brand-line shadow-2xs font-bold'
                   : 'text-muted hover:text-ink hover:bg-surface-2'
               }`}
             >
-              <span>⚖️ {t('workstream.escalated', 'Trạm Yêu cầu Phân xử (Dispute Escalations)')}</span>
+              <span>{t('workstream.escalated', 'Yêu cầu Admin xem xét từ trạm')}</span>
             </button>
           </div>
 
@@ -361,9 +345,9 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
             </div>
           )}
           {workstream === 'escalated' && (
-            <div className="flex items-start gap-2 rounded-xl border border-purple-500/20 bg-purple-500/10 p-2.5 text-[11.5px] text-purple-900 dark:text-purple-200">
+            <div className="flex items-start gap-2 rounded-xl border border-brand-line bg-brand-soft/40 p-2.5 text-[11.5px] text-ink">
               <span className="font-bold">⚖️</span>
-              <span>{t('workstream.escalatedHelp', 'Tuyến Trọng tài Phân xử Độc lập: Sự cố trạm sạc được Driver hoặc Chủ trạm leo thang lên Admin sau 24h trạm im lặng hoặc khi tài xế bác bỏ kết luận lỗi của trạm. Admin đóng vai trò trọng tài khách quan, lắng nghe hai phía và phân xử công bằng.')}</span>
+              <span>{t('workstream.escalatedHelp', 'Admin xem xét yêu cầu hỗ trợ và trả lại trạm hoặc kết thúc support case với lý do rõ ràng.')}</span>
             </div>
           )}
         </div>

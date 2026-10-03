@@ -24,19 +24,23 @@
   "workstream": {
     "all": "Toàn bộ hệ thống",
     "platform": "Sự cố Nền tảng & Hệ thống",
-    "escalated": "Trạm Yêu cầu Phân xử (Dispute Escalations)",
+    "escalated": "Yêu cầu Admin xem xét từ trạm",
     "station": "Giám sát Sự cố Trạm",
     "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến tài khoản tài xế, app lỗi, nạp rút tiền cọc và thanh toán toàn nền tảng.",
-    "escalatedHelp": "Tuyến Trọng tài Phân xử Độc lập: Sự cố trạm sạc được Driver hoặc Chủ trạm leo thang lên Admin sau 24h trạm im lặng hoặc khi tài xế bác bỏ kết luận lỗi của trạm. Admin đóng vai trò trọng tài khách quan, lắng nghe hai phía và phân xử công bằng.",
-    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin có thể trao đổi và ghi nhận định; hoàn tiền thuộc luồng quyết định của trạm."
+    "escalatedHelp": "Admin xem xét các yêu cầu hỗ trợ được chuyển cấp, trả về trạm để tiếp tục xử lý hoặc kết thúc support case với lý do rõ ràng.",
+    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin chỉ xem xét ticket trạm khi có yêu cầu chuyển cấp đang mở."
   },
   "meta": {
-    "escalatedBadge": "Chờ phân xử"
+    "escalatedBadge": "Chờ Admin xem xét"
   },
   "escalation": {
-    "badge": "Đang phân xử (Escalated)",
-    "bannerTitle": "Vụ việc đã được chuyển lên Quản trị viên phân xử (Dispute Escalation)",
-    "requestedBy": "Bên đề nghị phân xử",
+    "badge": "Đang được Admin xem xét",
+    "bannerTitle": "Yêu cầu hỗ trợ đã được chuyển lên Admin xem xét",
+    "bannerClosedTitle": "Yêu cầu xem xét đã hoàn tất cùng hồ sơ phiếu",
+    "bannerResolvedAwaitingTitle": "Sự cố đã được giải quyết, đang chờ tài xế xác nhận",
+    "cannotReviewClosed": "Không thể xem xét yêu cầu chuyển cấp trên phiếu đã giải quyết hoặc đã đóng.",
+    "noActiveEscalation": "Không có yêu cầu xem xét đang mở.",
+    "requestedBy": "Người yêu cầu xem xét",
     "roleDriver": "Tài xế",
     "roleOwner": "Chủ trạm",
     "reasonLabel": "Lý do khiếu nại",
@@ -44,17 +48,37 @@
     "reasons": {
       "unresponsive24h": "Trạm sạc không phản hồi quá 24h",
       "disputedFinding": "Tài xế khiếu nại kết luận không phải lỗi trạm",
-      "other": "Khiếu nại phân xử"
+      "stationDenied": "Khiếu nại kết luận từ chối của trạm",
+      "other": "Yêu cầu hỗ trợ chuyển cấp"
     },
-    "arbiterDisclaimer": "Vai trò Admin: Trọng tài công tâm, thu thập bằng chứng từ hai phía và đưa ra phán quyết hỗ trợ. Admin không trực tiếp can thiệp kỹ thuật tại trạm.",
-    "arbiterRolePill": "Tuyến phân xử Admin",
-    "ownerEscalateBtn": "Yêu cầu Admin phân xử",
-    "requestSuccess": "Đã gửi yêu cầu phân xử tranh chấp lên Admin thành công!",
+    "arbiterDisclaimer": "Admin điều phối hỗ trợ vận hành; kết quả xem xét không xác định trách nhiệm pháp lý của các bên.",
+    "arbiterRolePill": "Admin xem xét hỗ trợ",
+    "ownerEscalateBtn": "Yêu cầu Admin xem xét",
+    "requestSuccess": "Đã gửi yêu cầu Admin xem xét.",
+    "review": {
+      "returnTitle": "Trả lại trạm xử lý",
+      "closeTitle": "Kết thúc xử lý hỗ trợ",
+      "returnDescription": "Yêu cầu xem xét sẽ kết thúc; trạm tiếp tục xử lý ticket và có thể ghi kết luận kỹ thuật mới.",
+      "closeDescription": "Đóng quy trình hỗ trợ với lý do và ghi chú xử lý rõ ràng.",
+      "resultLabel": "Kết quả xem xét:",
+      "noteLabel": "Ghi chú biên bản:",
+      "closureReason": "Lý do kết thúc",
+      "note": "Ghi chú xem xét của Admin",
+      "cancel": "Hủy",
+      "saving": "Đang lưu...",
+      "reasons": {
+        "RESOLVED_EXTERNALLY": "Đã xử lý ngoài hệ thống",
+        "INSUFFICIENT_INFORMATION": "Không đủ thông tin để tiếp tục",
+        "NO_PLATFORM_ACTION_REQUIRED": "Nền tảng đã hoàn tất điều phối",
+        "OUT_OF_SUPPORT_SCOPE": "Ngoài phạm vi hỗ trợ",
+        "OTHER": "Lý do khác"
+      }
+    },
     "modal": {
-      "title": "Yêu cầu Admin Phân xử Tranh chấp",
+      "title": "Yêu cầu Admin xem xét hỗ trợ",
       "stationFallback": "Trạm sạc",
-      "roleNoticeTitle": "Vai trò trọng tài độc lập của Admin",
-      "roleNoticeDesc": "Khi bạn gửi yêu cầu, phiếu hỗ trợ sẽ được chuyển sang hàng chờ Phân xử Tranh chấp của Quản trị viên (Dispute Arbiter). Admin sẽ kiểm tra đối chiếu nhật ký phiên sạc và đưa ra quyết định xử lý cuối cùng.",
+      "roleNoticeTitle": "Admin điều phối hỗ trợ",
+      "roleNoticeDesc": "Admin xem xét bối cảnh, ghi chú xử lý, sau đó trả lại trạm hoặc kết thúc support case với lý do rõ ràng.",
       "reasonLabel": "Lý do trạm yêu cầu Admin can thiệp",
       "reasonHelp": "Nêu rõ điểm bất đồng, kết quả kỹ thuật trạm đã kiểm tra. Tối thiểu 10 ký tự.",
       "reasonPlaceholder": "Ví dụ: Trạm đã kiểm tra camera và log phần cứng, trụ sạc hoạt động bình thường theo đúng chuẩn. Hai bên không đạt được đồng thuận về việc bồi hoàn...",
@@ -68,7 +92,7 @@
   "supervisory": {
     "badge": "Giám sát Vận hành Trạm",
     "bannerTitle": "Chế độ Giám sát Trạm sạc (SLA & Kỹ thuật)",
-    "bannerDesc": "Chủ trạm và Staff trạm {{station}} trực tiếp xử lý. Admin có thể trao đổi và điều hướng người phù hợp, ghi kết luận kỹ thuật; quyết định hoàn tiền nằm ở luồng riêng.",
+    "bannerDesc": "Chủ trạm và Staff trạm {{station}} trực tiếp xử lý. Khi có yêu cầu chuyển cấp, Admin xem xét và ghi chú hành chính; quyết định hoàn tiền nằm ở luồng riêng.",
     "stationUnit": "Đơn vị vận hành trạm",
     "stationAssignedNotice": "Kỹ thuật viên trạm đang trực tiếp kiểm tra và xử lý sự cố thiết bị tại chỗ.",
     "stationUnassignedNotice": "Chủ trạm hoặc Staff trực tiếp xử lý. Admin có thể điều hướng phiếu đến người đang hoạt động tại đúng trạm.",
@@ -260,7 +284,15 @@
       "STATION_OFFLINE": "Trạm mất kết nối mạng",
       "SOFTWARE_BUG": "Sự cố phần mềm / firmware",
       "USER_ERROR": "Thao tác phía người dùng",
-      "OTHER": "Nguyên nhân khác"
+      "OTHER": "Nguyên nhân khác",
+      "adminArbitrationBadge": "Ghi nhận kỹ thuật của Admin",
+      "initialStationBadge": "Biên bản ban đầu (Trạm sạc)",
+      "additionalStationBadge": "Biên bản bổ sung của Trạm (Lần #{{cycle}})",
+      "affectedAtLabel": "Thời điểm sự cố:",
+      "closedTitle": "Phiếu hỗ trợ đã đóng",
+      "closedDesc": "Biên bản kỹ thuật đã được lưu trữ vĩnh viễn vào nhật ký đối soát. Không thể cập nhật thêm.",
+      "escalatedLockedTitle": "Admin đang xem xét yêu cầu hỗ trợ",
+      "escalatedLockedDesc": "Trạm tạm dừng ghi kết luận kỹ thuật trong thời gian Admin xem xét. Sau khi trả lại trạm, việc xử lý được tiếp tục."
     },
     "refund": {
       "title": "Chính sách bồi hoàn cọc",

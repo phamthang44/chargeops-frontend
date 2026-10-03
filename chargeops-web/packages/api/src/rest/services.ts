@@ -12,6 +12,7 @@ import type {
   OwnerBookingDetail,
   OwnerBookingListItem,
   OwnerBookingSummary,
+  AdminOperationsSummary,
   ChargePoint,
   ChargePointStatusEvent,
   Connector,
@@ -37,6 +38,7 @@ import type {
   TicketEscalation,
   TicketEscalationsSummary,
   EscalateTicketPayload,
+  ReviewTicketEscalationPayload,
   Ticket,
   TicketMessage,
   TicketFinding,
@@ -73,7 +75,9 @@ function normalizeTicketMessage(m: any, defaultTicketId = ''): TicketMessage {
   return {
     id,
     ticketId: m?.ticketId || defaultTicketId,
-    authorId: m?.authorId || m?.authorDisplayName || 'user',
+    // Không bao giờ giả mạo authorId bằng tên hiển thị: thiếu authorId thì client
+    // hiển thị trung tính (không nhận là "tin của mình").
+    authorId: m?.authorId,
     authorName: m?.authorDisplayName || m?.authorName || 'Người gửi',
     authorRole,
     authorKind: m?.authorKind,
@@ -92,6 +96,7 @@ function normalizeTicketFinding(f: any): TicketFinding {
     reason: f?.reason || '',
     recordedAt: f?.recordedAt || new Date().toISOString(),
     recordedBy: f?.recordedBy,
+    recordedByRole: f?.recordedByRole ?? null,
   };
 }
 
@@ -395,7 +400,7 @@ export function createRestServices(http: HttpClient): Services {
 
     dashboard: {
       owner: () => http.get('/dashboard/owner'),
-      admin: () => http.get('/dashboard/admin'),
+      admin: () => http.get<AdminOperationsSummary>('/admin/dashboard/summary'),
       staff: () => http.get('/dashboard/staff'),
     },
 
@@ -1100,12 +1105,13 @@ export function createRestServices(http: HttpClient): Services {
         }
       },
       summary: async (options?: TicketRoleOptions) => {
+        if (options?.role === 'admin') {
+          return http.get<TicketSummary>(options.workstream === 'station'
+            ? '/admin/tickets/escalated/summary'
+            : '/admin/tickets/summary');
+        }
         let endpoint = '/tickets';
         if (options?.role === 'owner') endpoint = '/owner/tickets';
-        else if (options?.role === 'admin') {
-          if (options?.workstream === 'platform') endpoint = '/admin/tickets';
-          else if (options?.workstream === 'station') endpoint = '/admin/tickets/escalated';
-        }
         try {
           if (endpoint === '/tickets') {
             return await http.get<TicketSummary>('/tickets/summary');
@@ -1270,6 +1276,10 @@ export function createRestServices(http: HttpClient): Services {
         const res: any = await http.post(`/tickets/${ticketId}/escalation`, payload);
         return (res?.data ?? res) as TicketEscalation;
       },
+      review: async (ticketId: string, payload: ReviewTicketEscalationPayload) => {
+        const res: any = await http.patch(`/admin/tickets/${ticketId}/escalation`, payload);
+        return (res?.data ?? res) as TicketEscalation;
+      },
       get: async (ticketId: string) => {
         const res: any = await http.get(`/tickets/${ticketId}/escalation`);
         return (res?.data ?? res) as TicketEscalation;
@@ -1298,8 +1308,12 @@ export function createRestServices(http: HttpClient): Services {
           page: (params.page ?? 0) + 1,
           size: params.pageSize ?? 20,
         };
-        if (params.stationId) query.stationId = params.stationId;
-        if (params.status) query.status = params.status;
+        if (params.stationId && params.stationId !== 'all') {
+          query.stationId = params.stationId;
+        }
+        if (params.status && params.status !== 'all') {
+          query.status = String(params.status).toUpperCase();
+        }
         const res: any = await http.get('/admin/tickets/escalated', query);
         const rawItems = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
         const total = typeof res?.total === 'number'

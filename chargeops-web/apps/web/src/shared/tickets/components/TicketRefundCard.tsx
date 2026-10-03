@@ -13,14 +13,14 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
   const { t } = useTranslation('tickets');
 
   return (
-    <Card className="rounded-2xl p-4 shadow-sm">
+    <Card className="rounded-2xl p-4 shadow-sm border border-line bg-surface">
       <div className="mb-2 flex items-center gap-1.5 text-[13px] font-bold text-ink">
         <IconCheckCircle size={15} className="text-good-deep" />
         <span>{t('detail.refund.title', 'Chính sách bồi hoàn cọc')}</span>
       </div>
 
       {hasRefund ? (
-        <div className="rounded-xl border border-good-line bg-good-soft/30 p-3 text-[12px]">
+        <div className="rounded-xl border border-good/20 bg-good-soft/30 p-3 text-[12px]">
           <div className="font-semibold text-good-deep">
             {t('detail.refund.autoGranted', 'Đã có hồ sơ hoàn tiền')}
           </div>

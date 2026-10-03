@@ -24,18 +24,22 @@
   "workstream": {
     "all": "All System Tickets",
     "platform": "Platform & System Issues",
-    "escalated": "Station Dispute Escalations",
+    "escalated": "Station Support Reviews",
     "station": "Station Supervisory Queue",
     "platformHelp": "Directly handled by Platform Admins for app errors, driver accounts, and platform-level wallet/deposit questions.",
-    "escalatedHelp": "Independent Dispute Arbiter: Station incidents escalated after 24h of station unresponsiveness or when a driver disputes a non-fault finding. Admin acts as an objective arbiter.",
-    "stationHelp": "Station Owners and Staff handle incidents directly. Admin acts as an arbiter; refunds follow the Owner Finance Ledger."
+    "escalatedHelp": "Admin reviews escalated support requests, returns them to the station or closes the support case with a documented reason.",
+    "stationHelp": "Station Owners and Staff handle incidents directly. Refunds follow the Owner Finance Ledger."
   },
   "meta": {
     "escalatedBadge": "Escalated"
   },
   "escalation": {
-    "badge": "Dispute Escalated",
-    "bannerTitle": "Incident Escalated to Admin for Dispute Arbitration",
+    "badge": "Under Admin Review",
+    "bannerTitle": "Support request sent to Admin for review",
+    "bannerClosedTitle": "Escalation review concluded alongside ticket closure",
+    "bannerResolvedAwaitingTitle": "Issue resolved, awaiting driver confirmation",
+    "cannotReviewClosed": "Cannot review escalation on a resolved or closed ticket.",
+    "noActiveEscalation": "No open escalation request.",
     "requestedBy": "Escalated By",
     "roleDriver": "Driver",
     "roleOwner": "Station Owner",
@@ -44,17 +48,37 @@
     "reasons": {
       "unresponsive24h": "Station unresponsive for more than 24 hours",
       "disputedFinding": "Driver disputed non-station-fault finding",
-      "other": "Dispute Escalation"
+      "stationDenied": "Driver disputed station non-fault finding",
+      "other": "Escalated support request"
     },
-    "arbiterDisclaimer": "Admin Role: Objective arbiter collecting evidence from both parties to deliver a fair dispute ruling. Admin does not directly manage station hardware.",
-    "arbiterRolePill": "Admin Arbiter Queue",
-    "ownerEscalateBtn": "Request Admin Arbitration",
-    "requestSuccess": "Dispute arbitration request submitted to Admin successfully!",
+    "arbiterDisclaimer": "Admin coordinates operational support; the review does not determine legal responsibility.",
+    "arbiterRolePill": "Admin Support Review",
+    "ownerEscalateBtn": "Request Admin Review",
+    "requestSuccess": "Admin review requested.",
+    "review": {
+      "returnTitle": "Return to station support",
+      "closeTitle": "Close support case",
+      "returnDescription": "The review will end; station support can continue handling the ticket and record new technical findings.",
+      "closeDescription": "Close the support process with a clear reason and review note.",
+      "resultLabel": "Review result:",
+      "noteLabel": "Review note:",
+      "closureReason": "Closure reason",
+      "note": "Admin review note",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "reasons": {
+        "RESOLVED_EXTERNALLY": "Resolved outside the platform",
+        "INSUFFICIENT_INFORMATION": "Insufficient information to continue",
+        "NO_PLATFORM_ACTION_REQUIRED": "No further platform action required",
+        "OUT_OF_SUPPORT_SCOPE": "Outside support scope",
+        "OTHER": "Other reason"
+      }
+    },
     "modal": {
-      "title": "Request Admin Dispute Arbitration",
+      "title": "Request Admin Support Review",
       "stationFallback": "Charging Station",
-      "roleNoticeTitle": "Admin Objective Arbiter Role",
-      "roleNoticeDesc": "When requested, this ticket will be forwarded to the Administrator's Dispute Arbitration queue. The Admin will review charging session telemetry logs and issue a final resolution ruling.",
+      "roleNoticeTitle": "Admin coordinates support",
+      "roleNoticeDesc": "Admin reviews the context, records a note, and either returns the case to station support or closes the support process with a documented reason.",
       "reasonLabel": "Reason for Requesting Admin Intervention",
       "reasonHelp": "Clearly describe points of disagreement and technical findings. Minimum 10 characters.",
       "reasonPlaceholder": "e.g., Station checked hardware telemetry logs and verified normal connector operation. Both parties could not reach an agreement regarding reimbursement...",
@@ -68,7 +92,7 @@
   "supervisory": {
     "badge": "Station Supervisory Mode",
     "bannerTitle": "Station Supervisory Mode (SLA & Technical Audit)",
-    "bannerDesc": "The Owner and Staff at {{station}} handle the incident. Admin may chat, route a station handler, and record findings; refund decisions follow a separate flow.",
+    "bannerDesc": "The Owner and Staff at {{station}} handle the incident. On escalation, Admin records an administrative review; refunds follow a separate flow.",
     "stationUnit": "Station Operations Unit",
     "stationAssignedNotice": "Station technician is actively investigating and resolving hardware issues on-site.",
     "stationUnassignedNotice": "The Owner or Staff handles this ticket. Admin may route it to an active person at this station.",
@@ -260,7 +284,15 @@
       "STATION_OFFLINE": "Station network outage",
       "SOFTWARE_BUG": "Software / firmware bug",
       "USER_ERROR": "User operating mistake",
-      "OTHER": "Other cause"
+      "OTHER": "Other cause",
+      "adminArbitrationBadge": "Admin technical record",
+      "initialStationBadge": "Initial Finding (Charging Station)",
+      "additionalStationBadge": "Station Additional Finding (#{{cycle}})",
+      "affectedAtLabel": "Incident occurred at:",
+      "closedTitle": "Support Ticket Closed",
+      "closedDesc": "Technical findings have been permanently archived in the audit log. Further updates are locked.",
+      "escalatedLockedTitle": "Admin is reviewing this support request",
+      "escalatedLockedDesc": "Station findings are paused during Admin review. Station support can continue after the case is returned."
     },
     "refund": {
       "title": "Deposit Refund Policy",

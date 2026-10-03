@@ -11,7 +11,11 @@ import { parseSafeDate } from '@/utils/format';
 export interface TicketDisputeEscalationCardProps {
   ticket: Ticket;
   escalation?: TicketEscalation | null;
-  onOpenEscalate: () => void;
+  /**
+   * Chỉ người báo cáo (Reporter) mới được khởi tạo khiếu nại phân xử.
+   * Khi không truyền vào, ẩn nút — card vẫn hiển thị trạng thái/đếm ngược.
+   */
+  onOpenEscalate?: () => void;
 }
 
 export function TicketDisputeEscalationCard({
@@ -39,8 +43,11 @@ export function TicketDisputeEscalationCard({
 
   if (!isStationTicket) return null;
 
-  const isEscalated = Boolean(ticket.isEscalated || escalation?.ticketId);
+  const isEscalated = Boolean(escalation ? !escalation.resolvedAt : ticket.isEscalated);
   const isClosed = ticket.status === 'CLOSED';
+
+  // If ticket is closed, incident is finished - hide active escalation cards
+  if (isClosed) return null;
 
   // State 1: Already Escalated
   if (isEscalated) {
@@ -60,10 +67,10 @@ export function TicketDisputeEscalationCard({
           </View>
           <View style={styles.headerTextBlock}>
             <Text style={[styles.cardTitle, { color: isDark ? '#D8B4FE' : '#6D28D9' }]}>
-              {t('ticket.escalation.escalatedTitle', 'Vụ việc đang được Quản trị viên Phân xử')}
+              {t('ticket.escalation.escalatedTitle', 'Admin đang xem xét yêu cầu hỗ trợ')}
             </Text>
             <Text style={[styles.cardSubtitle, { color: isDark ? '#A78BFA' : '#7C3AED' }]}>
-              {t('ticket.escalation.arbiterRole', 'Admin là Trọng tài Độc lập (Dispute Arbiter)')}
+              {t('ticket.escalation.arbiterRole', 'Admin điều phối hỗ trợ vận hành')}
             </Text>
           </View>
         </View>
@@ -71,7 +78,7 @@ export function TicketDisputeEscalationCard({
         <Text style={[styles.bodyText, { color: themeColors.textBody }]}>
           {t(
             'ticket.escalation.escalatedDesc',
-            'Hồ sơ sự cố đã được chuyển lên Quản trị viên hệ thống để kiểm tra đối soát nhật ký phiên sạc và trạm. Phán quyết phân xử khách quan sẽ được gửi tới bạn.',
+            'Admin sẽ xem xét và trả lại trạm xử lý hoặc kết thúc quy trình hỗ trợ với lý do rõ ràng.',
           )}
         </Text>
 
@@ -86,7 +93,7 @@ export function TicketDisputeEscalationCard({
             ]}
           >
             <Text style={[styles.reasonLabel, { color: isDark ? '#E9D5FF' : '#5B21B6' }]}>
-              {t('ticket.escalation.reasonLabel', 'Nội dung đề nghị phân xử:')}
+              {t('ticket.escalation.reasonLabel', 'Nội dung yêu cầu xem xét:')}
             </Text>
             <Text style={[styles.reasonText, { color: isDark ? '#F5F3FF' : '#4C1D95' }]}>
               “{escalation.reason}”
@@ -116,7 +123,9 @@ export function TicketDisputeEscalationCard({
       (f as any).conclusion === 'NO_FAULT_FOUND',
   );
 
-  const canEscalate = isPast24h || Boolean(nonStationFaultFinding);
+  const canEscalate = ticket.status !== 'RESOLVED' && (
+    ticket.escalationAvailability?.canRequest ?? (isPast24h || Boolean(nonStationFaultFinding))
+  );
 
   // State 2: Eligible for Escalation
   if (canEscalate) {
@@ -151,25 +160,27 @@ export function TicketDisputeEscalationCard({
         <Text style={[styles.bodyText, { color: themeColors.textBody }]}>
           {t(
             'ticket.escalation.eligibleDesc',
-            'Nếu không đồng thuận với kết luận của trạm hoặc trạm không phản hồi, bạn có quyền chuyển vụ việc lên Admin để phân xử độc lập và công tâm.',
+            'Bạn có thể yêu cầu Admin xem xét hỗ trợ khi trạm không phản hồi hoặc cần thêm điều phối.',
           )}
         </Text>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={onOpenEscalate}
-          style={({ pressed }) => [
-            styles.escalateButton,
-            {
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}
-        >
-          <Ionicons name="shield-checkmark-outline" size={16} color="#FFFFFF" />
-          <Text style={styles.escalateButtonText}>
-            {t('ticket.escalation.escalateBtn', 'Yêu cầu Admin phân xử ngay')}
-          </Text>
-        </Pressable>
+        {onOpenEscalate && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onOpenEscalate}
+            style={({ pressed }) => [
+              styles.escalateButton,
+              {
+                opacity: pressed ? 0.85 : 1,
+              },
+            ]}
+          >
+            <Ionicons name="shield-checkmark-outline" size={16} color="#FFFFFF" />
+            <Text style={styles.escalateButtonText}>
+              {t('ticket.escalation.escalateBtn', 'Yêu cầu Admin xem xét')}
+            </Text>
+          </Pressable>
+        )}
       </View>
     );
   }
@@ -206,7 +217,7 @@ export function TicketDisputeEscalationCard({
       <Text style={[styles.bodyText, { color: themeColors.textBody }]}>
         {t(
           'ticket.escalation.countdownDesc',
-          'Trạm sạc có tối đa 24 giờ để kiểm tra và khắc phục sự cố. Sau thời gian này hoặc nếu trạm xác định không có lỗi thiết bị, bạn sẽ được mở quyền chuyển vụ việc lên Admin phân xử độc lập.',
+          'Khi đủ điều kiện, bạn có thể gửi yêu cầu Admin xem xét hỗ trợ.',
         )}
       </Text>
     </View>

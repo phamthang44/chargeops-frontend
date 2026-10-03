@@ -194,7 +194,7 @@ export function DriverEscalateModal({
               ]}
               placeholder={t(
                 'ticket.escalation.modal.detailsPlaceholder',
-                'Nêu rõ nguyên nhân bạn yêu cầu Admin can thiệp phân xử...',
+                'Nêu rõ nguyên nhân bạn yêu cầu Admin xem xét hỗ trợ...',
               )}
               placeholderTextColor={themeColors.textMuted}
               value={details}
@@ -242,7 +242,7 @@ export function DriverEscalateModal({
                     { color: isDetailsValid ? '#FFFFFF' : themeColors.textMuted },
                   ]}
                 >
-                  {t('ticket.escalation.modal.submitBtn', 'Gửi yêu cầu phân xử')}
+                  {t('ticket.escalation.modal.submitBtn', 'Gửi yêu cầu xem xét')}
                 </Text>
               )}
             </Pressable>

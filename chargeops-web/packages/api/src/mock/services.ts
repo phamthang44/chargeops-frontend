@@ -31,6 +31,7 @@ import type {
   TicketEscalation,
   TicketEscalationsSummary,
   EscalateTicketPayload,
+  ReviewTicketEscalationPayload,
   Station,
   StationApprovalDetail,
   StationApprovalSummary,
@@ -141,6 +142,7 @@ let seq = 3304;
 
 export function createMockServices(scope: { ownerView: boolean } = { ownerView: true }): Services {
   const db = buildMockDb();
+  const reviewedEscalations = new Map<string, TicketEscalation>();
 
   /** Owner console sees only its stations' bookings; admin sees the platform. */
   const scopedBookings = () =>
@@ -162,7 +164,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
    * only (CHARGING_ISSUE, and BOOKING when linked to a station) and only for
    * their own stations. PAYMENT, ACCOUNT and OTHER are platform matters and
    * route to Admin — station access alone does not entitle an owner to a
-   * driver's payment or account thread. Admin sees everything.
+   * driver's payment or account thread. Admin platform queue is separate.
    */
   const scopedTickets = () =>
     scope.ownerView
@@ -273,29 +275,10 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async admin() {
         await delay();
         return {
-          kpis: {
-            activeStations: 24,
-            stationsDeltaWeek: 2,
-            pendingApprovals: db.approvalQueue.length,
-            newApprovalsToday: 2,
-            bookingsToday: 132,
-            bookingsDeltaPct: 12,
-            revenueMonthVnd: 86_400_000,
-            revenueDeltaPct: 18,
-          },
-          actionQueue: {
-            pendingStations: db.approvalQueue.length,
-            expiringLicenses: db.licenses.filter((l) => l.expiringSoon || (l.daysLeft != null && l.daysLeft > 0 && l.daysLeft <= 15)).length,
-            expiringDaysMin: 11,
-            expiredLicenses: db.licenses.filter((l) => l.status === 'EXPIRED' || l.status === 'expired' || (l.daysLeft != null && l.daysLeft < 0)).length,
-            reportedFaults: db.connectors.reduce((n, c) => n + (c.faultCount ?? 0), 0),
-          },
-          topStations: [
-            { name: 'Trạm Cầu Giấy', revenueVnd: 15_800_000 },
-            { name: 'Trạm Hà Đông', revenueVnd: 12_400_000 },
-            { name: 'Trạm Thanh Xuân', revenueVnd: 9_100_000 },
-            { name: 'Trạm Long Biên', revenueVnd: 7_600_000 },
-          ],
+          activeStations: db.stationsDirectory.length,
+          pendingApprovals: db.approvalQueue.length,
+          platformOpenTickets: db.tickets.filter((t) => !t.stationId && ['open', 'in_progress'].includes(t.status)).length,
+          escalatedOpenCases: 0,
         };
       },
       async staff() {
@@ -2317,7 +2300,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const { status = 'all', category = 'all', search = '', stationId = 'all', page = 0, pageSize = 10, role } = params;
         const q = search.trim().toLowerCase();
         let rows = scopedTickets();
-        if (role === 'owner' || scope.ownerView) {
+        if (role === 'admin' && params.workstream === 'platform') {
+          rows = rows.filter((tk) => !tk.stationId);
+        } else if (role === 'owner' || scope.ownerView) {
           rows = rows.filter((tk) => tk.stationId && tk.category !== 'PAYMENT' && tk.category !== 'ACCOUNT' && tk.category !== 'OTHER');
         }
         if (status !== 'all') rows = rows.filter((tk) => tk.status === status);
@@ -2353,7 +2338,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async summary(options) {
         await delay();
         let rows = scopedTickets();
-        if (options?.role === 'owner' || scope.ownerView) {
+        if (options?.role === 'admin') {
+          rows = rows.filter((tk) => options.workstream === 'station' ? Boolean(tk.stationId) : !tk.stationId);
+        } else if (options?.role === 'owner' || scope.ownerView) {
           rows = rows.filter((tk) => tk.stationId && tk.category !== 'PAYMENT' && tk.category !== 'ACCOUNT' && tk.category !== 'OTHER');
         }
         const byStatus = { open: 0, in_progress: 0, resolved: 0, closed: 0 } as Record<TicketStatus, number>;
@@ -2368,6 +2355,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const reply: TicketMessage = {
           id: 'MSG-' + seq++,
           ticketId: id,
+          authorId: '11111111-1111-1111-1111-111111111111',
           authorName: scope.ownerView ? 'Bạn' : 'Quản trị viên',
           authorRole: scope.ownerView ? 'station_staff' : 'platform_admin',
           body,
@@ -2419,6 +2407,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const tk = db.tickets.find((x) => x.id === id);
         if (!tk) throw new Error(`Không tìm thấy ticket ${id}`);
+        if (tk.status === 'CLOSED') throw new Error('Phiếu hỗ trợ đã đóng, không thể ghi kết luận');
         const finding = {
           findingId: 'FND-' + seq++,
           conclusion: request.conclusion,
@@ -2543,15 +2532,37 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async request(ticketId: string, payload: EscalateTicketPayload) {
         await delay();
-        return {
+        const escalation: TicketEscalation = {
           ticketId,
           requestedBy: 'user-current',
           requestedAt: new Date().toISOString(),
           reason: payload.reason,
         };
+        reviewedEscalations.set(ticketId, escalation);
+        return escalation;
+      },
+      async review(ticketId: string, payload: ReviewTicketEscalationPayload) {
+        await delay();
+        const ticket = db.tickets.find((item) => item.id === ticketId);
+        if (ticket) ticket.status = payload.action === 'CLOSE_SUPPORT_CASE' ? 'CLOSED' : 'IN_PROGRESS';
+        const escalation: TicketEscalation = {
+          ticketId,
+          requestedBy: reviewedEscalations.get(ticketId)?.requestedBy ?? 'user-current',
+          requestedAt: reviewedEscalations.get(ticketId)?.requestedAt ?? new Date().toISOString(),
+          reason: reviewedEscalations.get(ticketId)?.reason ?? 'Yêu cầu hỗ trợ cấp nền tảng',
+          resolvedAt: new Date().toISOString(),
+          resolvedBy: 'admin-current',
+          resolutionType: payload.action,
+          resolutionNote: payload.note,
+          closureReason: payload.closureReason,
+        };
+        reviewedEscalations.set(ticketId, escalation);
+        return escalation;
       },
       async get(ticketId: string) {
         await delay();
+        const recorded = reviewedEscalations.get(ticketId);
+        if (recorded) return recorded;
         return {
           ticketId,
           requestedBy: 'user-current',

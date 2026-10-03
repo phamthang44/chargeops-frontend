@@ -67,8 +67,8 @@ export function TicketCard({ ticket, onPress }: TicketCardProps) {
           <Ionicons name="pricetag-outline" size={14} color={themeColors.primary} />
           <Text style={[styles.codeText, { color: themeColors.textStrong }]}>{ticket.ticketCode}</Text>
         </View>
-        {ticket.isEscalated ? (
-          <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang phân xử')} dot />
+        {ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && ticket.isEscalated ? (
+          <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang được Admin xem xét')} dot />
         ) : (
           <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
         )}
@@ -98,12 +98,12 @@ export function TicketCard({ ticket, onPress }: TicketCardProps) {
         </View>
       )}
 
-      {/* Compensation / Finding highlight banner */}
+      {/* Refund applied to booking — neutral label, NOT tied to station fault */}
       {hasRefund && (
         <View style={[styles.refundBadge, { backgroundColor: isDark ? '#113322' : '#ECFDF5' }]}>
-          <Ionicons name="checkmark-circle" size={15} color="#10B981" />
+          <Ionicons name="cash-outline" size={15} color="#10B981" />
           <Text style={[styles.refundText, { color: '#10B981' }]}>
-            {t('ticket.card.refundNote', 'Trạm đã xác nhận lỗi — Đã duyệt hoàn tiền 100%')}
+            {t('ticket.card.refundApplied', 'Đã hoàn tiền đơn sạc liên quan')}
           </Text>
         </View>
       )}

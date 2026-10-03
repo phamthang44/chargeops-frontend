@@ -7,7 +7,7 @@ export function getActorMeta(m: TicketMessage) {
   if (kind === 'ADMIN') {
     return {
       label: 'Quản trị viên ChargeOps',
-      badgeClass: 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900',
+      badgeClass: 'bg-solid text-solid-fg',
       tone: 'brand' as const,
       isInternal: true,
     };
@@ -28,9 +28,9 @@ export function getActorMeta(m: TicketMessage) {
       isInternal: true,
     };
   }
-  // Reporter or driver
+  // Reporter or user
   return {
-    label: 'Tài xế (Người báo cáo)',
+    label: 'Người báo cáo',
     badgeClass: 'bg-chip text-muted border border-hairline',
     tone: 'neutral' as const,
     isInternal: false,
@@ -40,12 +40,17 @@ export function getActorMeta(m: TicketMessage) {
 export interface TicketMessageBubbleProps {
   message: TicketMessage;
   accent: 'brand' | 'owner';
+  /** Profile id của người xem — "tin của mình" chỉ khi authorId khớp. */
+  currentUserId?: string;
 }
 
-export function TicketMessageBubble({ message, accent }: TicketMessageBubbleProps) {
+export function TicketMessageBubble({ message, accent, currentUserId }: TicketMessageBubbleProps) {
   const { t } = useTranslation('tickets');
   const actor = getActorMeta(message);
-  const isMine = actor.isInternal;
+  // Không suy "của mình" từ authorKind/tên hiển thị: thiếu authorId → hiển thị trung tính.
+  const isMine = Boolean(
+    currentUserId && message.authorId && message.authorId === currentUserId
+  );
   const actorKey = message.authorKind || message.authorRole || 'REPORTER';
   const actorLabel = t(`actor.${actorKey}`, actor.label);
 
@@ -62,20 +67,20 @@ export function TicketMessageBubble({ message, accent }: TicketMessageBubbleProp
         size="sm"
         tone={isMine ? accent : 'neutral'}
       />
-      <div className={`flex max-w-[80%] flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-        <div className="mb-1 flex items-center gap-1.5 text-[11px] text-faint">
-          <span className="font-semibold text-ink">
+      <div className={`flex max-w-[88%] sm:max-w-[80%] flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+        <div className={`mb-1 flex flex-wrap items-center gap-1 sm:gap-1.5 text-[10.5px] sm:text-[11px] text-faint ${isMine ? 'justify-end' : 'justify-start'}`}>
+          <span className="font-semibold text-ink truncate max-w-[120px] sm:max-w-none">
             {message.authorDisplayName || message.authorName || t('detail.senderFallback', 'Người gửi')}
           </span>
-          <span className={`rounded px-1.5 py-0.2 text-[9.5px] font-medium ${actor.badgeClass}`}>
+          <span className={`rounded px-1.5 py-0.2 text-[9px] sm:text-[9.5px] font-medium ${actor.badgeClass}`}>
             {actorLabel}
           </span>
-          <span>·</span>
-          <span>
+          <span className="hidden xs:inline">·</span>
+          <span className="shrink-0">
             {formatDateVn(message.createdAt)} {formatTimeVn(message.createdAt)}
           </span>
         </div>
-        <div className={`rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-ink shadow-sm ${bubbleClass}`}>
+        <div className={`rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-ink shadow-sm break-words [overflow-wrap:anywhere] whitespace-pre-wrap ${bubbleClass}`}>
           {message.body}
         </div>
       </div>

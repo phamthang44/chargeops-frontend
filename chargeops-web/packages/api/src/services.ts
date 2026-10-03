@@ -11,7 +11,7 @@ import type {
   OwnerBookingListItem,
   OwnerBookingListParams,
   OwnerBookingSummary,
-  AdminDashboard,
+  AdminOperationsSummary,
   AdminStationDetail,
   AdminStationFilterParams,
   AdminStationListItem,
@@ -46,6 +46,7 @@ import type {
   TicketEscalation,
   TicketEscalationsSummary,
   EscalateTicketPayload,
+  ReviewTicketEscalationPayload,
   RenewLicenseRequest,
   OperationalChargePointStatus,
   OwnerDashboard,
@@ -100,7 +101,7 @@ export interface LocationService {
 
 export interface DashboardService {
   owner(): Promise<OwnerDashboard>;
-  admin(): Promise<AdminDashboard>;
+  admin(): Promise<AdminOperationsSummary>;
   /** Ops-only KPIs — no revenue/license fields exist on this DTO (see StaffDashboard). */
   staff(): Promise<StaffDashboard>;
 }
@@ -392,6 +393,7 @@ export interface TicketService {
 export interface TicketEscalationService {
   summary(): Promise<TicketEscalationsSummary>;
   request(ticketId: string, payload: EscalateTicketPayload): Promise<TicketEscalation>;
+  review(ticketId: string, payload: ReviewTicketEscalationPayload): Promise<TicketEscalation>;
   get(ticketId: string): Promise<TicketEscalation>;
   adminQueue(params?: { page?: number; pageSize?: number }): Promise<Page<TicketEscalation>>;
   adminEscalatedTickets(params?: { stationId?: string; status?: string; page?: number; pageSize?: number }): Promise<Page<Ticket>>;

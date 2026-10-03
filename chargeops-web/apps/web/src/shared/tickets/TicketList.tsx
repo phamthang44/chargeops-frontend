@@ -43,15 +43,17 @@ function Meta({ t: tk }: { t: Ticket }) {
   const reporter = tk.reporterName || tk.driverName || 'Tài xế';
   const timestamp = tk.updatedAt || tk.createdAt;
   const hasRefund = Boolean(tk.refundIds && tk.refundIds.length > 0);
-  const isEscalated = Boolean((tk as any).isEscalated || (tk as any).escalatedAt);
+  const isTicketClosed = String(tk.status || '').toUpperCase() === 'CLOSED';
+  const isTicketResolved = String(tk.status || '').toUpperCase() === 'RESOLVED';
+  const isEscalated = !isTicketClosed && !isTicketResolved && Boolean((tk as any).isEscalated || (tk as any).escalatedAt);
 
   return (
     <div className="min-w-0 pr-3">
       <div className="flex items-center gap-2">
         <span className="truncate font-semibold text-ink">{tk.subject || tk.title || 'Phiếu hỗ trợ'}</span>
         {isEscalated && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 text-[10px] font-bold border border-purple-500/25">
-            <span>⚡ {t('meta.escalatedBadge', 'Chờ phân xử')}</span>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-brand-soft text-brand px-1.5 py-0.5 text-[10px] font-bold border border-brand-line">
+            <span>⚡ {t('meta.escalatedBadge', 'Chờ Admin xem xét')}</span>
           </span>
         )}
         {hasRefund && (
@@ -132,7 +134,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
                   <span className="truncate text-[12px] text-ink font-medium">{handlerName}</span>
                 </>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-2 py-0.5 text-[10.5px] font-bold text-amber-500">
+                <span className="inline-flex items-center gap-1 rounded bg-warn-pill px-2 py-0.5 text-[10.5px] font-bold text-warn-deep border border-warn-border">
                   <IconUsers size={11} strokeWidth={2} />
                   <span>{t('table.unassigned', 'Chờ tiếp nhận')}</span>
                 </span>
@@ -142,7 +144,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
             <div className="flex flex-col items-center gap-1">
               <StatusPill tone={meta.tone} label={statusLabel} />
               {statusKey === 'RESOLVED' && tk.autoCloseAt && (
-                <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-amber-500">
+                <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
                   <IconClock size={10} strokeWidth={2.2} />
                   <span>10 ngày</span>
                 </span>

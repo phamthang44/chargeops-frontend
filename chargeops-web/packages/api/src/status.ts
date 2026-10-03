@@ -143,6 +143,11 @@ export const TICKET_CLOSE_REASON: Record<TicketCloseReason, { label: string; ton
     tone: 'neutral',
     description: 'Hệ thống tự động đóng vé do tài xế không phản hồi sau 10 ngày.',
   },
+  ADMIN_SUPPORT_CASE_CLOSED: {
+    label: 'Admin kết thúc hỗ trợ',
+    tone: 'neutral',
+    description: 'Admin kết thúc quy trình hỗ trợ sau khi xem xét yêu cầu chuyển cấp; đây không phải phán quyết trách nhiệm.',
+  },
 };
 
 export const TICKET_EVENT_TYPE: Record<TicketEventType, { label: string; tone: Tone }> = {
@@ -153,6 +158,8 @@ export const TICKET_EVENT_TYPE: Record<TicketEventType, { label: string; tone: T
   AUTO_CLOSED_NO_RESPONSE: { label: 'Tự đóng 10 ngày', tone: 'neutral' },
   REPORTER_CONFIRMED: { label: 'Khách xác nhận đóng', tone: 'good' },
   REOPENED_PERSISTENT: { label: 'Vấn đề vẫn còn', tone: 'bad' },
+  RETURN_TO_STATION: { label: 'Admin trả lại trạm xử lý', tone: 'brand' },
+  CLOSE_SUPPORT_CASE: { label: 'Admin kết thúc hỗ trợ', tone: 'neutral' },
 };
 
 /** Role badge colours (mono chips) — CSS var references so dark mode repaints them via inline style. */

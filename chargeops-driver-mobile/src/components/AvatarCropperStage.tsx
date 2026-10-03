@@ -19,6 +19,7 @@ import {
   CROP_CIRCLE_DIAMETER,
   CROP_RADIUS,
   CROP_STAGE_SIZE,
+  calculateCropBounds,
   calculateInitialOffset,
   CropOffset,
   MAX_ZOOM,
@@ -51,32 +52,79 @@ export function AvatarCropperStage({
   const panOffsetRef = useRef<CropOffset>(panOffset);
   panOffsetRef.current = panOffset;
   const dragStartRef = useRef<CropOffset>({ x: 0, y: 0 });
+  const zoomRef = useRef<number>(zoom);
+  zoomRef.current = zoom;
+  const initialPinchDistRef = useRef<number | null>(null);
+  const initialPinchZoomRef = useRef<number>(zoom);
 
-  // PanResponder for mobile touch with stable empty dependencies
+  // PanResponder for mobile touch with smooth clamping & pinch-to-zoom
   const panResponder = useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => !disabled,
         onMoveShouldSetPanResponder: () => !disabled,
-        onPanResponderGrant: () => {
+        onPanResponderGrant: (e: GestureResponderEvent) => {
           setIsDragging(true);
           dragStartRef.current = { ...panOffsetRef.current };
+          const touches = e.nativeEvent.touches;
+          if (touches && touches.length >= 2) {
+            const dx = touches[0].pageX - touches[1].pageX;
+            const dy = touches[0].pageY - touches[1].pageY;
+            initialPinchDistRef.current = Math.hypot(dx, dy);
+            initialPinchZoomRef.current = zoomRef.current;
+          } else {
+            initialPinchDistRef.current = null;
+          }
         },
-        onPanResponderMove: (_: GestureResponderEvent, gestureState) => {
-          const nextX = Math.round(dragStartRef.current.x + gestureState.dx);
-          const nextY = Math.round(dragStartRef.current.y + gestureState.dy);
-          const nextOffset = { x: nextX, y: nextY };
+        onPanResponderMove: (e: GestureResponderEvent, gestureState) => {
+          const touches = e.nativeEvent.touches;
+          if (touches && touches.length >= 2) {
+            // Pinch-to-zoom multi-touch gesture
+            const dx = touches[0].pageX - touches[1].pageX;
+            const dy = touches[0].pageY - touches[1].pageY;
+            const currentDist = Math.hypot(dx, dy);
+
+            if (initialPinchDistRef.current === null) {
+              initialPinchDistRef.current = currentDist;
+              initialPinchZoomRef.current = zoomRef.current;
+            } else if (initialPinchDistRef.current > 0) {
+              const scale = currentDist / initialPinchDistRef.current;
+              const nextZoom = Math.min(
+                MAX_ZOOM,
+                Math.max(MIN_ZOOM, Number((initialPinchZoomRef.current * scale).toFixed(2))),
+              );
+              onZoomChange(nextZoom);
+            }
+            return;
+          }
+
+          // Single finger pan with boundary constraint so circle is never exposed
+          initialPinchDistRef.current = null;
+          const currentBounds = calculateCropBounds(aspect, zoomRef.current);
+          const rawX = dragStartRef.current.x + gestureState.dx;
+          const rawY = dragStartRef.current.y + gestureState.dy;
+
+          const clampedX = Math.round(
+            Math.min(currentBounds.maxPanX, Math.max(-currentBounds.maxPanX, rawX)),
+          );
+          const clampedY = Math.round(
+            Math.min(currentBounds.maxPanY, Math.max(-currentBounds.maxPanY, rawY)),
+          );
+
+          const nextOffset = { x: clampedX, y: clampedY };
           panOffsetRef.current = nextOffset;
           onPanChange(nextOffset);
         },
         onPanResponderRelease: () => {
           setIsDragging(false);
+          initialPinchDistRef.current = null;
         },
         onPanResponderTerminate: () => {
           setIsDragging(false);
+          initialPinchDistRef.current = null;
         },
       }),
-    [disabled, onPanChange],
+    [disabled, onPanChange, onZoomChange, aspect],
   );
 
   // Web desktop smooth mouse drag (binds window mousemove/mouseup for continuous 60fps tracking)

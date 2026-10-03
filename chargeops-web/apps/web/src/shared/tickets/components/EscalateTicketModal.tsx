@@ -35,12 +35,12 @@ export function EscalateTicketModal({
     <Modal open={open} onClose={onClose} maxWidth={520}>
       <div className="mb-4 flex items-center justify-between border-b border-hairline pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand border border-brand-line">
             <IconShieldAlert size={18} strokeWidth={2.2} />
           </div>
           <div>
             <h3 className="text-base font-bold text-ink">
-              {t('escalation.modal.title', 'Yêu cầu Admin Phân xử Tranh chấp')}
+              {t('escalation.modal.title', 'Yêu cầu Admin xem xét hỗ trợ')}
             </h3>
             <p className="text-[11px] text-muted">
               {ticketCode} · {ticket.stationName || t('escalation.modal.stationFallback', 'Trạm sạc')}
@@ -58,15 +58,15 @@ export function EscalateTicketModal({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Arbiter Role Guidance Callout */}
-        <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-3.5 text-[12px] leading-relaxed text-purple-800 dark:text-purple-200">
-          <div className="flex items-center gap-1.5 font-semibold text-purple-900 dark:text-purple-100">
+        <div className="rounded-xl border border-brand-line bg-brand-soft/40 p-3.5 text-[12px] leading-relaxed text-ink">
+          <div className="flex items-center gap-1.5 font-semibold text-brand">
             <IconAlertCircle size={14} strokeWidth={2.2} className="shrink-0" />
-            <span>{t('escalation.modal.roleNoticeTitle', 'Vai trò trọng tài độc lập của Admin')}</span>
+            <span>{t('escalation.modal.roleNoticeTitle', 'Admin điều phối hỗ trợ')}</span>
           </div>
-          <p className="mt-1 text-[11.5px] opacity-90">
+          <p className="mt-1 text-[11.5px] text-muted">
             {t(
               'escalation.modal.roleNoticeDesc',
-              'Khi bạn gửi yêu cầu, phiếu hỗ trợ sẽ được chuyển sang hàng chờ Phân xử Tranh chấp của Quản trị viên (Dispute Arbiter). Admin sẽ kiểm tra đối chiếu nhật ký phiên sạc và đưa ra quyết định xử lý cuối cùng.',
+              'Admin sẽ xem xét bối cảnh, ghi chú kết quả và trả lại trạm hoặc kết thúc support case với lý do rõ ràng.',
             )}
           </p>
         </div>
@@ -92,7 +92,7 @@ export function EscalateTicketModal({
               'escalation.modal.reasonPlaceholder',
               'Ví dụ: Trạm đã kiểm tra camera và log phần cứng, trụ sạc hoạt động bình thường theo đúng chuẩn. Hai bên không đạt được đồng thuận về việc bồi hoàn...',
             )}
-            className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-2 text-[12.5px] leading-relaxed text-ink placeholder:text-faint focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/15"
+            className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-2 text-[12.5px] leading-relaxed text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
           />
           <div className="mt-1 flex justify-between text-[11px] text-faint">
             <span>
@@ -107,16 +107,17 @@ export function EscalateTicketModal({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 border-t border-hairline pt-3">
-          <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isPending}>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 border-t border-hairline pt-3">
+          <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isPending} className="w-full sm:w-auto justify-center">
             {t('escalation.modal.cancelBtn', 'Hủy')}
           </Button>
           <Button
             type="submit"
+            variant="primary"
             accent="brand"
             size="md"
             disabled={reason.trim().length < 10 || isPending}
-            className="bg-purple-600 hover:bg-purple-700 text-white border-none"
+            className="w-full sm:w-auto justify-center"
           >
             {isPending
               ? t('escalation.modal.submitting', 'Đang gửi...')

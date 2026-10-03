@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi, formatDateVn, type StationStaffMember, type Station } from '@chargeops/api';
 import {
+  Avatar,
   Button,
   Card,
   EmptyState,
@@ -192,9 +193,7 @@ export function Staff() {
                         >
                           <div className="flex items-start gap-3 min-w-0">
                             {/* Avatar */}
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-owner-soft text-owner font-bold text-[13px] shadow-sm">
-                              {staffName.charAt(0).toUpperCase()}
-                            </div>
+                            <Avatar name={staffName} src={m.avatarUrl} size="md" tone="owner" />
 
                             {/* Details */}
                             <div className="min-w-0 flex-1">

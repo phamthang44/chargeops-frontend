@@ -14,6 +14,7 @@ import {
   type TicketMessage,
   type TicketPriority,
   type TicketStatus,
+  type ReviewTicketEscalationPayload,
 } from '@chargeops/api';
 import { useToast } from '@chargeops/ui';
 import { getTicketErrorMeta } from '../utils/ticketErrors';
@@ -45,15 +46,22 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const ticketQuery = useQuery({
     queryKey: ['tickets', 'get', id, roleOption],
     queryFn: () => api.tickets.get(id, { role: roleOption }),
-    refetchInterval: (query) => (query.state.data?.status !== 'CLOSED' ? 6000 : false),
-    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 
   const messagesQuery = useQuery({
     queryKey: ['tickets', 'messages', id, roleOption],
     queryFn: () => api.tickets.messages(id, { role: roleOption }),
-    refetchInterval: () => (ticketQuery.data?.status !== 'CLOSED' ? 3000 : false),
-    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+  });
+
+  // Danh tính người xem — dùng để nhận diện "tin của mình" theo authorId,
+  // không suy ra từ authorKind hay tên hiển thị.
+  const profileQuery = useQuery({
+    queryKey: ['me', 'profile'],
+    queryFn: () => api.profile.get(),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 
   const staffQuery = useQuery({
@@ -75,13 +83,8 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     retry: false,
   });
 
-  useEffect(() => {
-    const msgs = messagesQuery.data ?? ticketQuery.data?.messages ?? [];
-    if (msgs.length > prevMessagesLength.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-    prevMessagesLength.current = msgs.length;
-  }, [messagesQuery.data?.length, ticketQuery.data?.messages?.length]);
+  // Note: Message scrolling is managed internally within TicketThreadTab on its self-contained
+  // scroll container to prevent scrollIntoView from moving the outer window or page scrollbar.
 
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ['tickets'] });
@@ -182,8 +185,24 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const escalate = useMutation({
     mutationFn: (reason: string) => api.ticketEscalations.request(id, { reason }),
     onSuccess: () => {
-      toast(t('escalation.requestSuccess', 'Đã gửi yêu cầu phân xử tranh chấp lên Admin thành công!'), 'success');
+      toast(t('escalation.requestSuccess', 'Đã gửi yêu cầu Admin xem xét.'), 'success');
       setIsEscalateModalOpen(false);
+      invalidateAll();
+      qc.invalidateQueries({ queryKey: ['tickets', 'escalation', id] });
+    },
+    onError: handleMutationError,
+  });
+
+  const reviewEscalation = useMutation({
+    mutationFn: (payload: ReviewTicketEscalationPayload) => {
+      const currentStatus = String(ticketQuery.data?.status || 'OPEN').toUpperCase();
+      if (currentStatus === 'CLOSED' || currentStatus === 'RESOLVED') {
+        throw new Error(t('escalation.cannotReviewClosed', 'Không thể xem xét yêu cầu trên phiếu đã giải quyết hoặc đã đóng.'));
+      }
+      return api.ticketEscalations.review(id, payload);
+    },
+    onSuccess: () => {
+      toast('Đã lưu kết quả xem xét của Admin.', 'success');
       invalidateAll();
       qc.invalidateQueries({ queryKey: ['tickets', 'escalation', id] });
     },
@@ -241,6 +260,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     ticketQuery,
     messagesQuery,
     staffQuery,
+    currentUserId: profileQuery.data?.id,
     draft,
     setDraft,
     activeTab,
@@ -258,6 +278,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     recordFinding,
     resolve,
     escalate,
+    reviewEscalation,
     invalidateAll,
     // Derived ticket state
     ticket: tk,
@@ -284,7 +305,27 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     resolvedHandlerName,
     isAssigned,
     closeReasonMeta,
-    escalation: escalationQuery.data,
-    isEscalated: Boolean(escalationQuery.data?.ticketId || (tk as any)?.isEscalated || (tk as any)?.escalatedAt),
+    escalation: (() => {
+      const rawEsc = escalationQuery.data || (tk as any)?.escalation || null;
+      if (!rawEsc) return null;
+      const baseEsc = (tk as any)?.escalation ?? {};
+      const merged = { ...baseEsc, ...rawEsc };
+      const requestedByRole =
+        merged.requestedByRole ||
+        (merged.requestedBy && (merged.requestedBy === tk?.reporterId || merged.requestedBy === tk?.driverId)
+          ? 'driver'
+          : (tk as any)?.stationOwnerId && merged.requestedBy === (tk as any)?.stationOwnerId
+          ? 'owner'
+          : undefined);
+      return { ...merged, requestedByRole };
+    })(),
+    isEscalated: Boolean(
+      !isClosed &&
+      !isResolved &&
+      (isOpen || isInProgress) &&
+      (escalationQuery.data?.ticketId
+        ? !escalationQuery.data.resolvedAt
+        : (tk as any)?.isEscalated && !(tk as any)?.escalation?.resolvedAt)
+    ),
   };
 }

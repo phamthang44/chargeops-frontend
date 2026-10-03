@@ -185,7 +185,12 @@ export function AssignTicketDrawer({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar name={displayName} size="sm" tone={isSelected ? 'brand' : 'neutral'} />
+                        <Avatar
+                          name={displayName}
+                          src={(adminUser as any).avatarUrl}
+                          size="sm"
+                          tone={isSelected ? 'brand' : 'neutral'}
+                        />
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[12.5px] font-bold text-ink">{displayName}</span>
@@ -263,7 +268,12 @@ export function AssignTicketDrawer({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar name={displayName} size="sm" tone={isSelected ? 'brand' : 'neutral'} />
+                        <Avatar
+                          name={displayName}
+                          src={(staff as any).avatarUrl}
+                          size="sm"
+                          tone={isSelected ? 'brand' : 'neutral'}
+                        />
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[12.5px] font-bold text-ink">{displayName}</span>
@@ -314,24 +324,23 @@ export function AssignTicketDrawer({
         )}
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-hairline">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-2.5 pt-2 border-t border-hairline">
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending} className="w-full sm:w-auto justify-center">
             {t('common.cancel', 'Hủy')}
           </Button>
-          {(
-            <Button
-              type="submit"
-              accent="brand"
-              disabled={!selectedHandlerId || !reassignReason.trim() || isPending}
-              icon={<IconUsers size={14} strokeWidth={2.2} />}
-            >
-              {isPending
-                ? t('common.saving', 'Đang xử lý...')
-                : isReassign
-                ? t('assignModal.submitReassign', 'Xác nhận Điều chuyển')
-                : t('assignModal.submitAssign', 'Xác nhận Phân công')}
-            </Button>
-          )}
+          <Button
+            type="submit"
+            accent="brand"
+            disabled={!selectedHandlerId || !reassignReason.trim() || isPending}
+            className="w-full sm:w-auto justify-center"
+            icon={<IconUsers size={14} strokeWidth={2.2} />}
+          >
+            {isPending
+              ? t('common.saving', 'Đang xử lý...')
+              : isReassign
+              ? t('assignModal.submitReassign', 'Xác nhận Điều chuyển')
+              : t('assignModal.submitAssign', 'Xác nhận Phân công')}
+          </Button>
         </div>
       </form>
     </Modal>

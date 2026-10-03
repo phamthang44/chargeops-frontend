@@ -99,7 +99,7 @@ export function RootNavigator() {
             <Stack.Screen
               name="Tabs"
               component={BottomTabs}
-              options={{ headerShown: false, title: t('nav.stationList') }}
+              options={{ headerShown: false, title: t('nav.map') }}
             />
             <Stack.Screen
               name="StationDetail"

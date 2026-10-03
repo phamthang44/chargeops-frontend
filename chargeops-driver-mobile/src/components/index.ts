@@ -4,6 +4,7 @@ export { AppHeader, HeaderActionBtn } from './AppHeader';
 export { AvatarCropperStage } from './AvatarCropperStage';
 export { AvatarUploadModal } from './AvatarUploadModal';
 export { AvatarViewerModal } from './AvatarViewerModal';
+export { CameraPortraitModal } from './CameraPortraitModal';
 export { BookingCard } from './BookingCard';
 export { BottomSheet } from './BottomSheet';
 export { BrandMark, Logo } from './brand/Logo';

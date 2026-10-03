@@ -1,6 +1,7 @@
 import type {
   CreateTicketPayload,
   Ticket,
+  TicketActorKind,
   TicketListParams,
   TicketListResult,
   TicketMessage,
@@ -209,6 +210,9 @@ export async function getTickets(
     if (params?.stationId) {
       query.set('stationId', params.stationId);
     }
+    if (params?.scope) {
+      query.set('scope', params.scope === 'reporter' ? 'REPORTER' : 'ACTOR');
+    }
 
     const res = await fetch(`${apiBaseUrl}/api/v1/tickets?${query.toString()}`, { headers });
     if (res.ok) {
@@ -274,6 +278,7 @@ export function normalizeTicket(rawInput: any): Ticket {
           const mDate = parseSafeDate(m?.createdAt);
           return {
             messageId: m?.messageId || m?.id || '',
+            authorId: m?.authorId,
             authorDisplayName: m?.authorDisplayName || 'Hệ thống',
             authorKind: m?.authorKind || 'STAFF',
             body: m?.body || '',
@@ -283,7 +288,7 @@ export function normalizeTicket(rawInput: any): Ticket {
       : [];
 
     const esc = raw.escalation || o.escalation || null;
-    const isEsc = Boolean(raw.isEscalated || esc || o.isEscalated);
+    const isEsc = Boolean(esc ? !esc.resolvedAt : (raw.isEscalated || o.isEscalated));
 
     return {
       ticketId: o.ticketId || raw.ticketId || '',
@@ -302,6 +307,7 @@ export function normalizeTicket(rawInput: any): Ticket {
       isEscalated: isEsc,
       escalatedAt: esc?.requestedAt || raw.escalatedAt || null,
       escalation: esc,
+      escalationAvailability: raw.escalationAvailability ?? null,
       resolutionCycle: typeof rs.resolutionCycle === 'number' ? rs.resolutionCycle : (typeof raw.resolutionCycle === 'number' ? raw.resolutionCycle : 0),
       autoCloseAt: rs.autoCloseAt || raw.autoCloseAt || null,
       resolvedAt: rs.resolvedAt || raw.resolvedAt || null,
@@ -325,6 +331,7 @@ export function normalizeTicket(rawInput: any): Ticket {
         const mDate = parseSafeDate(m?.createdAt);
         return {
           messageId: m?.messageId || m?.id || '',
+          authorId: m?.authorId,
           authorDisplayName: m?.authorDisplayName || 'Hệ thống',
           authorKind: m?.authorKind || 'STAFF',
           body: m?.body || '',
@@ -345,7 +352,7 @@ export function normalizeTicket(rawInput: any): Ticket {
     messages,
     findings: Array.isArray(raw.findings) ? raw.findings : [],
     refundIds: Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : [],
-    isEscalated: Boolean(raw.isEscalated || esc),
+    isEscalated: Boolean(esc ? !esc.resolvedAt : raw.isEscalated),
     escalation: esc,
   };
 }
@@ -362,7 +369,9 @@ export async function getTicketDetail(
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}`, { headers });
+    // scope=reporter: server chặn quyền đọc nếu ticket không do mình báo cáo
+    // (contextual authorization — không gian Driver không thấy dữ liệu Owner/Staff).
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}?scope=REPORTER`, { headers });
     if (res.ok) {
       const json = await res.json();
       const raw = json?.data ?? json;
@@ -378,6 +387,44 @@ export async function getTicketDetail(
     throw new Error('Phiếu hỗ trợ không tồn tại');
   }
   return found;
+}
+
+/**
+ * Lấy danh sách tin nhắn của phiếu hỗ trợ (GET /api/v1/tickets/:ticketId/messages)
+ */
+export async function getTicketMessages(
+  ticketId: string,
+  accessToken?: string | null
+): Promise<TicketMessage[]> {
+  if (!isMockMode()) {
+    const token = resolveAccessToken(accessToken);
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/messages?scope=REPORTER`, { headers });
+    if (res.ok) {
+      const json = await res.json();
+      const list = json?.data ?? json ?? [];
+      return Array.isArray(list)
+        ? list.map((m: any) => {
+            const mDate = parseSafeDate(m?.createdAt);
+            return {
+              messageId: m?.messageId || m?.id || '',
+              authorId: m?.authorId,
+              authorDisplayName: m?.authorDisplayName || 'Hệ thống',
+              authorKind: m?.authorKind || 'STAFF',
+              body: m?.body || '',
+              createdAt: mDate ? mDate.toISOString() : new Date().toISOString(),
+            };
+          })
+        : [];
+    }
+    const errJson = await res.json().catch(() => null);
+    throw buildTicketError(res, errJson, 'Không lấy được danh sách tin nhắn');
+  }
+
+  const ticket = await getTicketDetail(ticketId, accessToken);
+  return ticket.messages || [];
 }
 
 /**
@@ -409,7 +456,15 @@ export async function replyTicket(
 
     if (res.ok) {
       const json = await res.json();
-      return json?.data ?? json;
+      const raw = json?.data ?? json;
+      return {
+        messageId: String(raw.messageId || raw.id || effectiveKey),
+        authorId: raw.authorId,
+        authorDisplayName: raw.authorDisplayName || 'Bạn',
+        authorKind: (raw.authorKind as TicketActorKind) || 'REPORTER',
+        body: raw.body || body,
+        createdAt: raw.createdAt ? new Date(raw.createdAt).toISOString() : new Date().toISOString(),
+      };
     }
     const errJson = await res.json().catch(() => null);
     throw buildTicketError(res, errJson, 'Không thể gửi phản hồi');
@@ -548,6 +603,47 @@ export async function confirmTicketClosed(
   if (ticket.status !== 'RESOLVED') throw new Error('Chỉ xác nhận phiếu ở trạng thái RESOLVED');
   ticket.status = 'CLOSED';
   ticket.closeReason = 'REPORTER_CONFIRMED';
+  ticket.version = (ticket.version || 0) + 1;
+  return ticket;
+}
+
+/** Driver explicitly reports that the issue remains: RESOLVED → IN_PROGRESS. */
+export async function continueTicket(
+  ticketId: string,
+  expectedVersion: number,
+  reason: string,
+  accessToken?: string | null
+): Promise<Ticket> {
+  const explanation = reason.trim();
+  if (!explanation) throw new Error('Vui lòng mô tả vấn đề vẫn còn');
+
+  if (!isMockMode()) {
+    const token = resolveAccessToken(accessToken);
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/status`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ status: 'IN_PROGRESS', expectedVersion, reason: explanation }),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      return normalizeTicket(json?.data ?? json);
+    }
+    const errJson = await res.json().catch(() => null);
+    throw buildTicketError(res, errJson, 'Không thể báo vấn đề vẫn còn');
+  }
+
+  const ticket = mockTickets.find((item) => item.ticketId === ticketId);
+  if (!ticket) throw new Error('Phiếu hỗ trợ không tồn tại');
+  if (ticket.status !== 'RESOLVED') throw new Error('Chỉ mở lại phiếu ở trạng thái RESOLVED');
+  ticket.status = 'IN_PROGRESS';
+  ticket.autoCloseAt = null;
   ticket.version = (ticket.version || 0) + 1;
   return ticket;
 }

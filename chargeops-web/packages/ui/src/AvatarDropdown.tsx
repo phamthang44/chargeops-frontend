@@ -6,6 +6,7 @@ import { IconSettings, IconLogout, IconSun, IconMoon } from './icons';
 export interface AvatarDropdownProps {
   userName: string;
   userEmail?: string;
+  userAvatarUrl?: string | null;
   rolePill: {
     label: string;
     bg: string;
@@ -19,6 +20,7 @@ export interface AvatarDropdownProps {
 export function AvatarDropdown({
   userName,
   userEmail,
+  userAvatarUrl,
   rolePill,
   accent,
   onSettings,
@@ -76,7 +78,7 @@ export function AvatarDropdown({
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <Avatar name={userName} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />
+        <Avatar name={userName} src={userAvatarUrl} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />
       </button>
 
       {open && (
@@ -87,7 +89,7 @@ export function AvatarDropdown({
         >
           {/* User Profile Header */}
           <div className="flex items-center gap-3 px-2.5 py-2">
-            <Avatar name={userName} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />
+            <Avatar name={userName} src={userAvatarUrl} size="md" tone={accent === 'owner' ? 'owner' : 'brand'} />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[14px] font-semibold text-ink leading-tight">
                 {userName}

@@ -5,11 +5,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
+  AppState,
+  type AppStateStatus,
   FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -18,12 +20,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppBackButton } from '@/components/AppBackButton';
+import { AppButton } from '@/components/AppButton';
 import { StatusBadge } from '@/components/StatusBadge';
+import { DriverContinueTicketModal } from '@/components/ticket/DriverContinueTicketModal';
 import {
+  ConfirmSheet,
   DriverEscalateModal,
+  ResolvedResolutionCard,
   TicketDisputeEscalationCard,
   TicketMessageBubble,
+  type ConfirmSheetTone,
 } from '@/components/ticket';
+import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -33,10 +41,12 @@ import {
   replyTicket,
   requestTicketEscalation,
   confirmTicketClosed,
+  continueTicket,
 } from '@/services/ticketService';
+import { isMockMode } from '@/services/stationService';
 import { formatDateTime } from '@/utils/format';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
-import type { Ticket, TicketEscalation, TicketStatus } from '@/types';
+import type { Ticket, TicketEscalation, TicketMessage, TicketStatus } from '@/types';
 
 type Route = RouteProp<RootStackParamList, 'TicketDetail'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'TicketDetail'>;
@@ -52,23 +62,33 @@ const STATUS_CONFIG: Record<
 };
 
 const CONCLUSION_CONFIG: Record<string, string> = {
-  HARDWARE_FAULT: 'Sự cố thiết bị trạm sạc',
-  SOFTWARE_FAULT: 'Sự cố phần mềm kết nối',
-  USER_ERROR: 'Thao tác chưa phù hợp',
-  GRID_FAILURE: 'Mất nguồn điện lưới',
-  NO_FAULT_FOUND: 'Trạm hoạt động bình thường',
+  STATION_FAILURE: 'Lỗi phía trạm sạc',
+  NOT_STATION_FAILURE: 'Không phải lỗi trạm',
+  HARDWARE_FAULT: 'Lỗi phần cứng trụ sạc',
+  STATION_OFFLINE: 'Trạm mất kết nối mạng',
+  SOFTWARE_BUG: 'Sự cố phần mềm / firmware',
+  USER_ERROR: 'Thao tác phía người dùng',
   OTHER: 'Nguyên nhân khác',
 };
+
+/** Nội dung hộp thoại thông báo (thay thế `Alert.alert` — no-op trên web). */
+interface NoticeState {
+  title: string;
+  message?: string;
+  tone: ConfirmSheetTone;
+}
 
 export function TicketDetailScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { themeColors, isDark } = usePreferences();
+  const { profile, profileStatus } = useAuth();
   const { ticketId } = route.params;
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -76,6 +96,10 @@ export function TicketDetailScreen() {
   const [isEscalateModalVisible, setIsEscalateModalVisible] = useState(false);
   const [isSubmittingEscalation, setIsSubmittingEscalation] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isContinueModalVisible, setIsContinueModalVisible] = useState(false);
+  const [isContinuing, setIsContinuing] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
   const prevMessagesCountRef = useRef<number>(0);
@@ -98,22 +122,34 @@ export function TicketDetailScreen() {
           prevMessagesCountRef.current = data.messages?.length || 0;
           return data;
         }
+
+        // Merge messages: keep server messages + any optimistic messages currently pending
+        const serverMessages = data.messages || [];
+        const pendingOptimistic = (prev.messages || []).filter(
+          m => m.messageId.startsWith('temp-') && !serverMessages.some(sm => sm.body === m.body && sm.authorKind === m.authorKind)
+        );
+        const mergedMessages = [...serverMessages, ...pendingOptimistic];
+
         const prevCount = prev.messages?.length || 0;
-        const newCount = data.messages?.length || 0;
+        const newCount = mergedMessages.length;
         if (newCount > prevCount) {
           setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
           }, 150);
         }
         prevMessagesCountRef.current = newCount;
-        return data;
+        return {
+          ...data,
+          messages: mergedMessages,
+        };
       });
     } catch (err: any) {
-      if (!silent) {
+      // Server từ chối (scope=reporter): chuyển sang màn "không có quyền" thay vì alert.
+      if (err?.status === 403 || err?.code === 'TKT_ACCESS_DENIED') {
+        setAccessDenied(true);
+      } else if (!silent) {
         const localizedMsg = getLocalizedTicketErrorMessage(err, t);
-        Alert.alert(t('common.error', 'Lỗi'), localizedMsg, [
-          { text: t('common.back', 'Quay lại'), onPress: () => navigation.goBack() },
-        ]);
+        setNotice({ tone: 'error', title: t('common.error', 'Lỗi'), message: localizedMsg });
       }
     } finally {
       if (!silent) setLoading(false);
@@ -125,110 +161,268 @@ export function TicketDetailScreen() {
     fetchEscalation();
   }, [fetchDetail, fetchEscalation]);
 
-  // Live polling: poll khi ticket chưa đóng (bao gồm RESOLVED để cập nhật phiếu khi chờ xác nhận)
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([fetchDetail(true), fetchEscalation()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchDetail, fetchEscalation]);
+
+  // Tự động tải lại khi ứng dụng quay trở lại từ background (foreground active)
   useEffect(() => {
-    if (!ticket || ticket.status === 'CLOSED') return;
-
-    const interval = ticket.status === 'RESOLVED' ? 5000 : 3500;
-    const timer = setInterval(() => {
-      fetchDetail(true);
-      if (ticket.status === 'RESOLVED') fetchEscalation();
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [ticket?.status, fetchDetail, fetchEscalation]);
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active' && !accessDenied && ticket && ticket.status !== 'CLOSED') {
+        fetchDetail(true);
+        if (ticket.status === 'RESOLVED') fetchEscalation();
+      }
+    };
+    const sub = AppState.addEventListener('change', handleAppStateChange);
+    return () => sub.remove();
+  }, [accessDenied, ticket?.status, fetchDetail, fetchEscalation]);
 
   const handleEscalateSubmit = async (reason: string) => {
     setIsSubmittingEscalation(true);
     try {
       await requestTicketEscalation(ticketId, reason);
-      Alert.alert(
-        t('ticket.escalation.modal.successTitle', 'Đã gửi khiếu nại'),
-        t('ticket.escalation.modal.success', 'Đã gửi yêu cầu phân xử lên Admin thành công!'),
-      );
       setIsEscalateModalVisible(false);
       await Promise.all([fetchDetail(true), fetchEscalation()]);
+      setNotice({
+        tone: 'success',
+        title: t('ticket.escalation.modal.successTitle', 'Đã gửi khiếu nại'),
+        message: t('ticket.escalation.modal.success', 'Đã gửi yêu cầu Admin xem xét thành công!'),
+      });
     } catch (err: any) {
       const localizedMsg = getLocalizedTicketErrorMessage(err, t);
-      Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
+      setNotice({ tone: 'error', title: t('common.error', 'Lỗi'), message: localizedMsg });
     } finally {
       setIsSubmittingEscalation(false);
     }
   };
 
-  const handleConfirmResolved = () => {
-    Alert.alert(
-      t('ticket.confirm.title', 'Xác nhận giải quyết'),
-      t(
-        'ticket.confirm.message',
-        'Bạn xác nhận sự cố đã được xử lý hoàn tất? Phiếu hỗ trợ sẽ được đóng sau khi bạn xác nhận.'
-      ),
-      [
-        { text: t('common.cancel', 'Hủy'), style: 'cancel' },
-        {
-          text: t('ticket.confirm.confirmBtn', 'Đồng ý, đã giải quyết'),
-          style: 'default',
-          onPress: async () => {
-            if (!ticket || isConfirming) return;
-            setIsConfirming(true);
-            try {
-              const updated = await confirmTicketClosed(ticketId, ticket.version ?? 0);
-              setTicket(updated);
-              Alert.alert(
-                t('ticket.confirm.successTitle', 'Cảm ơn bạn!'),
-                t('ticket.confirm.successMessage', 'Phếu hỗ trợ đã được đóng. Chúng tôi rất vui khi sự cố đã được giải quyết.'),
-              );
-            } catch (err: any) {
-              const localizedMsg = getLocalizedTicketErrorMessage(err, t);
-              if (localizedMsg.includes('version') || localizedMsg.includes('thay đổi')) {
-                // Version conflict: refresh and retry
-                await fetchDetail(true);
-                Alert.alert(
-                  t('ticket.errors.versionConflict', 'Dữ liệu đã thay đổi'),
-                  t('ticket.confirm.retryMessage', 'Phiếu vừa được cập nhật, vui lòng thử xác nhận lại.'),
-                );
-              } else {
-                Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
-              }
-            } finally {
-              setIsConfirming(false);
-            }
-          },
-        },
-      ]
-    );
+  /** Xác nhận đóng phiếu: RESOLVED → CLOSED (gọi từ ConfirmSheet, không dùng Alert). */
+  const handleConfirmResolved = async () => {
+    if (!ticket || isConfirming) return;
+    setIsConfirming(true);
+    try {
+      const updated = await confirmTicketClosed(ticketId, ticket.version ?? 0);
+      setTicket(updated);
+      setConfirmVisible(false);
+      await Promise.all([fetchDetail(true), fetchEscalation()]);
+      setNotice({
+        tone: 'success',
+        title: t('ticket.confirm.successTitle', 'Cảm ơn bạn!'),
+        message: t(
+          'ticket.confirm.successMessage',
+          'Phiếu hỗ trợ đã được đóng. Chúng tôi rất vui khi sự cố đã được giải quyết.'
+        ),
+      });
+    } catch (err: any) {
+      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+      setConfirmVisible(false);
+      if (localizedMsg.includes('version') || localizedMsg.includes('thay đổi')) {
+        // Version conflict: refresh and retry
+        await fetchDetail(true);
+        setNotice({
+          tone: 'warning',
+          title: t('ticket.errors.versionConflict', 'Dữ liệu đã thay đổi'),
+          message: t('ticket.confirm.retryMessage', 'Phiếu vừa được cập nhật, vui lòng thử xác nhận lại.'),
+        });
+      } else {
+        setNotice({ tone: 'error', title: t('common.error', 'Lỗi'), message: localizedMsg });
+      }
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   const handleSendReply = async () => {
-    if (!replyText.trim() || sending) return;
+    if (!replyText.trim() || sending || ticket?.status === 'RESOLVED') return;
 
     const messageContent = replyText.trim();
+    const tempId = `temp-${Date.now()}`;
+    const isReporter = profile?.id != null && ticket?.reporterId === profile.id;
+    const optimisticMsg: TicketMessage = {
+      messageId: tempId,
+      authorId: profile?.id,
+      authorDisplayName: profile?.displayName || t('ticket.author.you', 'Bạn'),
+      authorKind: isReporter ? 'REPORTER' : 'STAFF',
+      body: messageContent,
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Optimistic update: clear input and show message bubble immediately
     setReplyText('');
+    setTicket(prev =>
+      prev
+        ? {
+            ...prev,
+            messages: [...(prev.messages || []), optimisticMsg],
+          }
+        : prev
+    );
+
+    // Scroll to bottom immediately
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 50);
+
     setSending(true);
 
     try {
-      await replyTicket(ticketId, messageContent);
-      await fetchDetail();
+      const serverMsg = await replyTicket(ticketId, messageContent, tempId);
+
+      // 2. Replace optimistic message with server message
+      setTicket(prev => {
+        if (!prev) return prev;
+        const updatedMessages = (prev.messages || []).map(m => {
+          if (m.messageId !== tempId) return m;
+          const settled = serverMsg || m;
+          // Mock mode chưa trả authorId — giữ authorId của bản optimistic để
+          // bong bóng không bị nhảy sang phía "của người khác".
+          return { ...settled, authorId: settled.authorId ?? m.authorId };
+        });
+        return { ...prev, messages: updatedMessages };
+      });
+
+      // 3. Silently sync ticket details (version, status, etc.) without reloading page/spinner!
+      await fetchDetail(true);
+
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     } catch (err: any) {
+      // Rollback optimistic message & restore draft text so user does not lose their typed message
+      setTicket(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          messages: (prev.messages || []).filter(m => m.messageId !== tempId),
+        };
+      });
+      setReplyText(messageContent);
+
       const localizedMsg = getLocalizedTicketErrorMessage(err, t);
-      Alert.alert(t('ticket.detail.sendError', 'Không thể gửi'), localizedMsg);
+      setNotice({
+        tone: 'error',
+        title: t('ticket.detail.sendError', 'Không thể gửi'),
+        message: localizedMsg,
+      });
     } finally {
       setSending(false);
     }
   };
 
-  if (loading || !ticket) {
+  const handleContinueTicket = async (reason: string) => {
+    if (!ticket || ticket.status !== 'RESOLVED' || isContinuing) return;
+    setIsContinuing(true);
+    try {
+      const updated = await continueTicket(ticketId, ticket.version ?? 0, reason);
+      setTicket(updated);
+      setIsContinueModalVisible(false);
+      await Promise.all([fetchDetail(true), fetchEscalation()]);
+    } catch (err: any) {
+      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+      await fetchDetail(true);
+      setNotice({ tone: 'error', title: t('common.error', 'Lỗi'), message: localizedMsg });
+    } finally {
+      setIsContinuing(false);
+    }
+  };
+
+  /**
+   * Đóng thông báo. Nếu màn hình đang kẹt ở trạng thái spinner (tải chi tiết
+   * thất bại, chưa có ticket) thì quay lại thay vì để người dùng không lối thoát.
+   */
+  const closeNotice = () => {
+    setNotice(null);
+    if (!ticket && !loading && !accessDenied) navigation.goBack();
+  };
+
+  // Hộp thoại dùng chung cho mọi nhánh return của màn hình.
+  const sheets = (
+    <>
+      <ConfirmSheet
+        visible={confirmVisible}
+        mode="confirm"
+        tone="success"
+        title={t('ticket.confirm.title', 'Xác nhận giải quyết')}
+        message={t(
+          'ticket.confirm.message',
+          'Bạn xác nhận sự cố đã được xử lý hoàn tất? Phiếu hỗ trợ sẽ được đóng sau khi bạn xác nhận.'
+        )}
+        confirmLabel={t('ticket.confirm.confirmBtn', 'Đồng ý, đã giải quyết')}
+        cancelLabel={t('common.cancel', 'Hủy')}
+        loading={isConfirming}
+        onConfirm={handleConfirmResolved}
+        onClose={() => setConfirmVisible(false)}
+      />
+      <ConfirmSheet
+        visible={notice !== null}
+        mode="notice"
+        tone={notice?.tone ?? 'neutral'}
+        title={notice?.title ?? ''}
+        message={notice?.message}
+        confirmLabel={t('common.close', 'Đóng')}
+        onClose={closeNotice}
+      />
+    </>
+  );
+
+  // Không gian Driver ("Phiếu tôi đã báo"): chỉ mở được ticket do chính mình báo cáo.
+  // - accessDenied: server trả 403 với scope=reporter (deep link / quyền Owner "rò" sang).
+  // - ownsTicket: kiểm tra phía client (mock mode dùng reporterId giả nên bỏ qua).
+  const accessDeniedView = (
+    <SafeAreaView
+      style={[styles.centerRoot, { backgroundColor: themeColors.surfaceAlt }]}
+      edges={['top', 'bottom']}
+    >
+      <View style={[styles.accessIconCircle, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+        <Ionicons name="lock-closed-outline" size={40} color={themeColors.textMuted} />
+      </View>
+      <Text style={[styles.accessTitle, { color: themeColors.textStrong }]}>
+        {t('ticket.detail.notReporterTitle', 'Không có quyền trong không gian Driver')}
+      </Text>
+      <Text style={[styles.accessBody, { color: themeColors.textMuted }]}>
+        {t(
+          'ticket.detail.notReporterBody',
+          'Phiếu này không do bạn báo cáo. Vui lòng mở từ không gian Chủ trạm (Owner Console) để xem và phản hồi.'
+        )}
+      </Text>
+      <View style={{ marginTop: spacing.md, width: '70%' }}>
+        <AppButton
+          label={t('common.back', 'Quay lại')}
+          variant="secondary"
+          onPress={() => navigation.goBack()}
+        />
+      </View>
+      {sheets}
+    </SafeAreaView>
+  );
+
+  if (accessDenied) {
+    return accessDeniedView;
+  }
+
+  if (loading || !ticket || profileStatus === 'loading' || profileStatus === 'idle') {
     return (
       <SafeAreaView style={[styles.centerRoot, { backgroundColor: themeColors.surfaceAlt }]}>
         <ActivityIndicator size="large" color={themeColors.primary} />
         <Text style={[styles.loadingText, { color: themeColors.textMuted }]}>
           {t('ticket.list.loading', 'Đang tải thông tin trao đổi...')}
         </Text>
+        {sheets}
       </SafeAreaView>
     );
+  }
+
+  const ownsTicket =
+    isMockMode() || !ticket.reporterId || !profile?.id || ticket.reporterId === profile.id;
+
+  if (!ownsTicket) {
+    return accessDeniedView;
   }
 
   const statusMeta = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.OPEN;
@@ -258,8 +452,10 @@ export function TicketDetailScreen() {
         </View>
 
         <View style={styles.headerRightAction}>
-          {ticket.isEscalated || ticket.escalation || escalation ? (
-            <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang phân xử')} dot />
+          {isClosed || isResolved ? (
+            <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+          ) : ticket.isEscalated || (escalation && !escalation.resolvedAt) ? (
+            <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang được Admin xem xét')} dot />
           ) : (
             <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
           )}
@@ -276,6 +472,14 @@ export function TicketDetailScreen() {
           keyExtractor={(item, index) => item.messageId || String(index)}
           contentContainerStyle={styles.messagesList}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[themeColors.primary]}
+              tintColor={themeColors.primary}
+            />
+          }
           ListHeaderComponent={
             <View style={styles.headerComponent}>
               {/* Meta Card */}
@@ -304,8 +508,39 @@ export function TicketDetailScreen() {
                 )}
               </View>
 
-              {/* Technical Finding & Refund Announcement Banner */}
-              {(hasFinding || hasRefund) && (
+              {/* Technical Finding Card — shows audit conclusion independently of any refund */}
+              {hasFinding && (
+                <View
+                  style={[
+                    styles.resolutionCard,
+                    {
+                      backgroundColor: isDark ? '#0f1f2d' : '#EFF6FF',
+                      borderColor: isDark ? '#1e3a5f' : '#BFDBFE',
+                    },
+                  ]}
+                >
+                  <View style={styles.resolutionHeader}>
+                    <Ionicons name="document-text-outline" size={20} color="#3B82F6" />
+                    <Text style={[styles.resolutionTitle, { color: isDark ? '#60A5FA' : '#1D4ED8' }]}>
+                      {t('ticket.detail.findingsTitle', 'Kết luận kỹ thuật')}
+                    </Text>
+                  </View>
+                  {ticket.findings.map((f, i) => {
+                    const conclusionText = t(
+                      `ticket.conclusion.${f.conclusion}`,
+                      CONCLUSION_CONFIG[f.conclusion] || f.conclusion
+                    );
+                    return (
+                      <Text key={f.findingId || i} style={[styles.resolutionBody, { color: themeColors.textBody }]}>
+                        • {f.reason ? `${conclusionText} — ${f.reason}` : conclusionText}
+                      </Text>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Refund Note — booking-level, neutral wording: does NOT imply station fault */}
+              {hasRefund && (
                 <View
                   style={[
                     styles.resolutionCard,
@@ -316,72 +551,27 @@ export function TicketDetailScreen() {
                   ]}
                 >
                   <View style={styles.resolutionHeader}>
-                    <Ionicons name="shield-checkmark" size={20} color="#10B981" />
+                    <Ionicons name="cash-outline" size={20} color="#10B981" />
                     <Text style={[styles.resolutionTitle, { color: '#059669' }]}>
-                      {t('ticket.detail.findingsTitle', 'Kết luận Kỹ thuật & Quyền lợi hoàn phí')}
+                      {t('ticket.detail.refundAppliedTitle', 'Hoàn tiền đơn sạc')}
                     </Text>
                   </View>
-                  {ticket.findings.map((f, i) => {
-                    const conclusionText = t(
-                      `ticket.conclusion.${f.conclusion}`,
-                      CONCLUSION_CONFIG[f.conclusion] || f.conclusion
-                    );
-                    return (
-                      <Text key={f.findingId || i} style={[styles.resolutionBody, { color: themeColors.textBody }]}>
-                        • {f.reason ? `${f.reason} (${conclusionText})` : conclusionText}
-                      </Text>
-                    );
-                  })}
-                  {hasRefund && (
-                    <View style={styles.refundTag}>
-                      <Ionicons name="cash-outline" size={16} color="#10B981" />
-                      <Text style={[styles.refundTagText, { color: '#10B981' }]}>
-                        {t('ticket.card.refundNote', 'Trạm đã xác nhận lỗi — Đã duyệt hoàn tiền 100%')}
-                      </Text>
-                    </View>
-                  )}
+                  <Text style={[styles.resolutionBody, { color: themeColors.textBody }]}>
+                    {t(
+                      'ticket.detail.refundAppliedBody',
+                      'Khoản hoàn tiền liên quan đến phiếu này đã được ghi nhận theo chính sách đặt chỗ. Vui lòng kiểm tra mục Lịch sử đặt chỗ để biết chi tiết.'
+                    )}
+                  </Text>
                 </View>
               )}
 
-              {/* RESOLVED — Awaiting Driver Confirmation Banner */}
+              {/* RESOLVED — Awaiting Driver Confirmation (Double-Bezel card) */}
               {isResolved && (
-                <View
-                  style={[
-                    styles.resolvedBanner,
-                    {
-                      backgroundColor: isDark ? '#0f2a1a' : '#F0FDF4',
-                      borderColor: isDark ? '#1a5c30' : '#86EFAC',
-                    },
-                  ]}
-                >
-                  <View style={styles.resolvedBannerHeader}>
-                    <Ionicons name="checkmark-circle" size={22} color="#22C55E" />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.resolvedBannerTitle, { color: isDark ? '#4ade80' : '#15803D' }]}>
-                        {t('ticket.resolved.bannerTitle', 'Sự cố đã được xử lý')}
-                      </Text>
-                      <Text style={[styles.resolvedBannerBody, { color: themeColors.textMuted }]}>
-                        {t(
-                          'ticket.resolved.bannerBody',
-                          'Nhân viên kỹ thuật đã báo cáo xử lý xong. Vui lòng xác nhận để đóng phiếu, hoặc phiếu sẽ tự đóng sau khi hết hạn phản hồi.'
-                        )}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Pressable
-                    onPress={handleConfirmResolved}
-                    disabled={isConfirming}
-                    style={[styles.confirmBtn, isConfirming && { opacity: 0.6 }]}
-                  >
-                    <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
-                    <Text style={styles.confirmBtnText}>
-                      {isConfirming
-                        ? t('ticket.confirm.confirming', 'Đang xác nhận...')
-                        : t('ticket.confirm.confirmBtn', 'Đồng ý, đã giải quyết')}
-                    </Text>
-                  </Pressable>
-                </View>
+                <ResolvedResolutionCard
+                  confirming={isConfirming}
+                  onConfirm={() => setConfirmVisible(true)}
+                  onContinue={() => setIsContinueModalVisible(true)}
+                />
               )}
 
               {/* CLOSED — Reporter Confirmed */}
@@ -452,10 +642,22 @@ export function TicketDetailScreen() {
               )}
 
               {/* Dispute Escalation & 24h SLA Countdown Card */}
+              {(ticket.escalation || escalation)?.resolvedAt && (
+                <View style={[styles.resolvedInputNotice, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+                  <Text style={{ color: themeColors.textStrong, fontWeight: '700' }}>
+                    {(ticket.escalation || escalation)?.resolutionType === 'RETURN_TO_STATION'
+                      ? 'Admin đã trả lại trạm để tiếp tục xử lý'
+                      : 'Admin đã kết thúc quy trình hỗ trợ'}
+                  </Text>
+                  <Text style={{ color: themeColors.textMuted }}>
+                    {(ticket.escalation || escalation)?.resolutionNote || ''}
+                  </Text>
+                </View>
+              )}
               <TicketDisputeEscalationCard
                 ticket={ticket}
                 escalation={ticket.escalation || escalation}
-                onOpenEscalate={() => setIsEscalateModalVisible(true)}
+                onOpenEscalate={isResolved ? undefined : () => setIsEscalateModalVisible(true)}
               />
 
               <View style={styles.streamDivider}>
@@ -470,7 +672,7 @@ export function TicketDetailScreen() {
           renderItem={({ item }) => (
             <TicketMessageBubble
               message={item}
-              isSelf={item.authorKind === 'REPORTER'}
+              isSelf={Boolean(item.authorId) && item.authorId === profile?.id}
             />
           )}
         />
@@ -486,6 +688,12 @@ export function TicketDetailScreen() {
             <Ionicons name="lock-closed-outline" size={18} color={themeColors.textMuted} />
             <Text style={[styles.closedText, { color: themeColors.textMuted }]}>
               {t('ticket.detail.closedNotice', 'Phiếu hỗ trợ này đã hoàn tất và đóng. Nếu cần hỗ trợ thêm, bạn có thể tạo phiếu mới.')}
+            </Text>
+          </View>
+        ) : isResolved ? (
+          <View style={[styles.resolvedInputNotice, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+            <Text style={{ color: themeColors.textMuted, textAlign: 'center' }}>
+              {t('ticket.continue.inputNotice', 'Chọn “Vấn đề vẫn còn” ở phía trên để mở lại phiếu và mô tả sự cố.')}
             </Text>
           </View>
         ) : (
@@ -517,7 +725,7 @@ export function TicketDetailScreen() {
               style={[
                 styles.sendButton,
                 {
-                  backgroundColor: replyText.trim() ? themeColors.primary : themeColors.surfaceAlt,
+                  backgroundColor: replyText.trim() || sending ? themeColors.primary : themeColors.surfaceAlt,
                 },
               ]}
               disabled={!replyText.trim() || sending}
@@ -544,6 +752,13 @@ export function TicketDetailScreen() {
         onSubmit={handleEscalateSubmit}
         isSubmitting={isSubmittingEscalation}
       />
+      <DriverContinueTicketModal
+        visible={isContinueModalVisible}
+        submitting={isContinuing}
+        onClose={() => setIsContinueModalVisible(false)}
+        onSubmit={handleContinueTicket}
+      />
+      {sheets}
     </SafeAreaView>
   );
 }
@@ -558,6 +773,28 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
+  },
+  accessIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+  },
+  accessTitle: {
+    fontSize: 17,
+    fontWeight: fontWeights.bold,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  accessBody: {
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.xs,
   },
   header: {
     flexDirection: 'row',
@@ -705,41 +942,10 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
-  resolvedBanner: {
-    padding: 14,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    gap: 12,
-  },
-  resolvedBannerHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  resolvedBannerTitle: {
-    fontSize: 15,
-    fontWeight: fontWeights.bold,
-    marginBottom: 3,
-  },
-  resolvedBannerBody: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  confirmBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#16A34A',
-    borderRadius: radius.sm,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  confirmBtnText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: fontWeights.bold,
-    letterSpacing: -0.2,
+  resolvedInputNotice: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   closedBanner: {
     flexDirection: 'row',

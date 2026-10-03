@@ -9,7 +9,15 @@
     "role": "TÀI XẾ",
     "cancel": "Hủy",
     "close": "Đóng",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "error": "Lỗi",
+    "eyebrow": {
+      "confirm": "XÁC NHẬN",
+      "success": "THÀNH CÔNG",
+      "error": "LỖI",
+      "warning": "CẢNH BÁO",
+      "info": "THÔNG BÁO"
+    }
   },
   "nav": {
     "stationList": "Tìm trạm",
@@ -1156,6 +1164,36 @@
     "finishFull": "Hoàn tất phiên sạc"
   },
   "ticket": {
+    "resolved": {
+      "eyebrow": "ĐÃ XỬ LÝ",
+      "bannerTitle": "Sự cố đã được xử lý",
+      "bannerBody": "Nhân viên kỹ thuật đã báo cáo xử lý xong. Vui lòng xác nhận để đóng phiếu, hoặc phiếu sẽ tự đóng sau khi hết hạn phản hồi."
+    },
+    "confirm": {
+      "title": "Xác nhận giải quyết",
+      "message": "Bạn xác nhận sự cố đã được xử lý hoàn tất? Phiếu hỗ trợ sẽ được đóng sau khi bạn xác nhận.",
+      "confirmBtn": "Đồng ý, đã giải quyết",
+      "confirming": "Đang xác nhận...",
+      "successTitle": "Cảm ơn bạn!",
+      "successMessage": "Phiếu hỗ trợ đã được đóng. Chúng tôi rất vui khi sự cố đã được giải quyết.",
+      "retryMessage": "Phiếu vừa được cập nhật, vui lòng thử xác nhận lại."
+    },
+    "continue": {
+      "action": "Vấn đề vẫn còn",
+      "inputNotice": "Chọn “Vấn đề vẫn còn” ở phía trên để mở lại phiếu và mô tả sự cố.",
+      "title": "Vấn đề vẫn còn",
+      "description": "Mô tả điều chưa được xử lý. Phiếu sẽ trở lại trạng thái Đang xử lý để các bên tiếp tục theo dõi.",
+      "reasonLabel": "Mô tả vấn đề vẫn còn",
+      "placeholder": "Ví dụ: Tôi đã thử sạc lại nhưng trụ vẫn ngắt kết nối...",
+      "submit": "Báo vấn đề vẫn còn"
+    },
+    "closed": {
+      "confirmedTitle": "Bạn đã xác nhận giải quyết",
+      "confirmedBody": "Cảm ơn bạn đã phản hồi. Phiếu hỗ trợ đã được đóng và lưu trữ vào lịch sử.",
+      "autoClosedTitle": "Phiếu tự đóng sau khi hết hạn",
+      "autoClosedBody": "Không có phản hồi trong thời gian quy định. Hệ thống đã tự đóng phiếu. Nếu vấn đề chưa được giải quyết, vui lòng tạo phiếu mới.",
+      "genericBody": "Phiếu hỗ trợ này đã hoàn tất và được đóng."
+    },
     "create": {
       "title": "Báo sự cố & Hỗ trợ",
       "subtitle": "TRỰC TUYẾN 24/7",
@@ -1169,7 +1207,8 @@
       "subjectPlaceholder": "Ví dụ: Súng sạc trụ 02 tự ngắt khi mới sạc...",
       "descLabel": "Mô tả chi tiết sự cố *",
       "descPlaceholder": "Mô tả cụ thể thời điểm, mã trụ/súng, thông báo lỗi trên màn hình trụ sạc...",
-      "charCount": "{{count}}/500 ký tự",
+      "charCount": "{{count}}/{{max}} ký tự",
+      "subjectCharCount": "{{count}}/{{max}} ký tự",
       "submitBtn": "Gửi phiếu hỗ trợ sự cố",
       "submitting": "Đang gửi phiếu...",
       "selectSessionTitle": "Chọn phiên sạc gặp sự cố *",
@@ -1188,7 +1227,19 @@
       "errorBookingRequiredBody": "Sự cố sạc pin yêu cầu liên kết với phiên sạc cụ thể để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc.",
       "errorStationRequiredTitle": "Cần chọn trạm hoặc đơn đặt chỗ",
       "errorStationRequiredBody": "Lỗi đặt chỗ yêu cầu chọn trạm sạc hoặc đơn đặt chỗ gặp sự cố.",
-      "errorFailed": "Không thể tạo phiếu hỗ trợ"
+      "errorFailed": "Không thể tạo phiếu hỗ trợ",
+      "errSubjectRequired": "Vui lòng nhập tóm tắt sự cố",
+      "errSubjectMin": "Tóm tắt cần ít nhất {{min}} ký tự",
+      "errDescRequired": "Vui lòng mô tả chi tiết sự cố",
+      "errDescMin": "Mô tả cần ít nhất {{min}} ký tự",
+      "errSessionRequired": "Hãy chọn phiên sạc phát sinh sự cố",
+      "errStationRequired": "Hãy chọn trạm hoặc đơn đặt chỗ liên quan",
+      "errSummaryTitle": "Có {{count}} lỗi cần khắc phục",
+      "errSummaryHint": "Chạm vào lỗi bên dưới để tới trường đó",
+      "errFooterCount": "Còn {{count}} trường bắt buộc chưa hợp lệ",
+      "errFieldSession": "Phiên sạc / trạm liên quan",
+      "errFieldSubject": "Tóm tắt sự cố",
+      "errFieldDescription": "Mô tả chi tiết"
     },
     "list": {
       "title": "Phiếu hỗ trợ của tôi",
@@ -1207,7 +1258,9 @@
       "createdAt": "Tạo lúc: {{time}}",
       "contextBooking": "Bối cảnh đơn sạc:",
       "contextStation": "Trạm: {{name}}",
-      "findingsTitle": "Kết luận kỹ thuật & Khắc phục",
+      "findingsTitle": "Kết luận kỹ thuật",
+      "refundAppliedTitle": "Hoàn tiền đơn sạc",
+      "refundAppliedBody": "Khoản hoàn tiền liên quan đến phiếu này đã được ghi nhận theo chính sách đặt chỗ. Vui lòng kiểm tra mục Lịch sử đặt chỗ để biết chi tiết.",
       "refundLabel": "Bồi hoàn cho tài xế:",
       "refund100Badge": "Đã hoàn cọc 100%",
       "inputPlaceholder": "Nhập tin nhắn trao đổi...",
@@ -1220,31 +1273,31 @@
     "escalation": {
       "countdownTitle": "Thời hạn xử lý trực tiếp của trạm sạc",
       "countdownRemaining": "Còn lại: {{time}}",
-      "countdownDesc": "Trạm sạc có tối đa 24 giờ để kiểm tra và khắc phục sự cố. Sau thời gian này hoặc nếu trạm xác định không có lỗi thiết bị, bạn sẽ được mở quyền chuyển vụ việc lên Admin phân xử độc lập.",
-      "eligibleTitle": "Quyền Yêu cầu Quản trị viên Phân xử",
+      "countdownDesc": "Nếu trạm không phản hồi theo thời hạn hoặc bạn cần hỗ trợ thêm, bạn có thể yêu cầu Admin xem xét ở cấp nền tảng.",
+      "eligibleTitle": "Yêu cầu Admin xem xét hỗ trợ",
       "triggerUnresponsive": "Trạm sạc đã quá thời hạn 24 giờ chưa xử lý sự cố",
       "triggerDisputedFinding": "Trạm đã kết luận không lỗi thiết bị — Bạn có thể khiếu nại",
-      "eligibleDesc": "Nếu không đồng thuận với kết luận của trạm hoặc trạm không phản hồi, bạn có quyền chuyển vụ việc lên Admin để phân xử độc lập và công tâm.",
-      "escalateBtn": "Yêu cầu Admin phân xử ngay",
-      "escalatedBadge": "Đang phân xử",
-      "escalatedTitle": "Vụ việc đang được Quản trị viên Phân xử",
-      "arbiterRole": "Admin là Trọng tài Độc lập (Dispute Arbiter)",
-      "escalatedDesc": "Hồ sơ sự cố đã được chuyển lên Quản trị viên hệ thống để kiểm tra đối soát nhật ký phiên sạc và trạm. Phán quyết phân xử khách quan sẽ được gửi tới bạn.",
-      "reasonLabel": "Nội dung đề nghị phân xử:",
+      "eligibleDesc": "Admin xem xét bối cảnh hỗ trợ và trả lại trạm xử lý hoặc kết thúc support case với lý do rõ ràng.",
+      "escalateBtn": "Yêu cầu Admin xem xét",
+      "escalatedBadge": "Đang được Admin xem xét",
+      "escalatedTitle": "Admin đang xem xét yêu cầu hỗ trợ",
+      "arbiterRole": "Admin điều phối hỗ trợ vận hành",
+      "escalatedDesc": "Admin sẽ xem xét và trả lại trạm xử lý hoặc kết thúc quy trình hỗ trợ với lý do rõ ràng.",
+      "reasonLabel": "Nội dung yêu cầu xem xét:",
       "modal": {
-        "title": "Yêu cầu Admin Phân xử Tranh chấp",
-        "roleNotice": "Admin sẽ vào vai trò Trọng tài độc lập, kiểm tra telemetry log và đưa ra quyết định xử lý khách quan.",
+        "title": "Yêu cầu Admin xem xét hỗ trợ",
+        "roleNotice": "Admin điều phối hỗ trợ vận hành và ghi rõ kết quả xem xét.",
         "reasonLabel": "Lý do khiếu nại lên Admin",
         "reasonUnresponsive": "Trạm sạc không phản hồi quá 24h",
         "reasonDisputedFinding": "Không đồng thuận với kết luận của trạm",
         "reasonOther": "Lý do khác",
         "detailsLabel": "Mô tả chi tiết khiếu nại (tối thiểu 10 ký tự)",
-        "detailsPlaceholder": "Nêu rõ nguyên nhân bạn yêu cầu Admin can thiệp phân xử...",
+        "detailsPlaceholder": "Nêu rõ nguyên nhân bạn yêu cầu Admin xem xét...",
         "cancelBtn": "Hủy",
-        "submitBtn": "Gửi yêu cầu phân xử",
+        "submitBtn": "Gửi yêu cầu xem xét",
         "submitting": "Đang gửi...",
         "successTitle": "Đã gửi khiếu nại",
-        "success": "Đã gửi yêu cầu phân xử lên Admin thành công!"
+        "success": "Đã gửi yêu cầu Admin xem xét thành công!"
       }
     },
     "card": {
@@ -1253,7 +1306,7 @@
       "hasFindings": "Đã có kết luận kỹ thuật",
       "latestMsg": "Mới nhất:",
       "repliesCount": "{{count}} phản hồi",
-      "refundNote": "Trạm đã xác nhận lỗi — Đã duyệt hoàn tiền 100%"
+      "refundApplied": "Đã hoàn tiền đơn sạc liên quan"
     },
     "category": {
       "CHARGING_ISSUE": "Sự cố sạc pin",
@@ -1263,11 +1316,12 @@
       "OTHER": "Vấn đề khác"
     },
     "conclusion": {
-      "HARDWARE_FAULT": "Sự cố thiết bị trạm sạc",
-      "SOFTWARE_FAULT": "Sự cố phần mềm kết nối",
-      "USER_ERROR": "Thao tác chưa phù hợp",
-      "GRID_FAILURE": "Mất nguồn điện lưới",
-      "NO_FAULT_FOUND": "Trạm hoạt động bình thường",
+      "STATION_FAILURE": "Lỗi phía trạm sạc",
+      "NOT_STATION_FAILURE": "Không phải lỗi trạm",
+      "HARDWARE_FAULT": "Lỗi phần cứng trụ sạc",
+      "STATION_OFFLINE": "Trạm mất kết nối mạng",
+      "SOFTWARE_BUG": "Sự cố phần mềm / firmware",
+      "USER_ERROR": "Thao tác phía người dùng",
       "OTHER": "Nguyên nhân khác"
     },
     "priority": {

@@ -7,6 +7,7 @@ export interface AuthUser {
   email: string;
   roles: Role[];
   initials: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthContextValue {

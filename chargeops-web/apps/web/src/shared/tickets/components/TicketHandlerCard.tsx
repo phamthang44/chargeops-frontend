@@ -50,12 +50,12 @@ export function TicketHandlerCard({
         </div>
 
         {isAssigned ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-good-soft px-2.5 py-0.5 text-[10.5px] font-bold text-good-deep border border-good/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-good animate-pulse" />
             {t('detail.handlerCard.activeBadge', 'Đang phụ trách')}
           </span>
         ) : (
-          <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10.5px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
+          <span className="rounded-full bg-warn-pill px-2 py-0.5 text-[10.5px] font-semibold text-warn-deep border border-warn-border">
             {t('detail.handlerCard.unassignedBadge', 'Chờ phân công')}
           </span>
         )}
@@ -63,40 +63,44 @@ export function TicketHandlerCard({
 
       {isAssigned ? (
         <div className="space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Avatar
-                  name={resolvedHandlerName || t('detail.handlerCard.techFallback', 'Kỹ thuật viên')}
-                  size="md"
-                  tone="brand"
-                />
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
+          <div className="flex items-center gap-3">
+            <div className="relative shrink-0">
+              <Avatar
+                name={resolvedHandlerName || (isAdminPlatformDirect ? t('platformQueue.handlerFallback', 'Chuyên viên Nền tảng') : t('detail.handlerCard.techFallback', 'Kỹ thuật viên'))}
+                size="md"
+                tone="brand"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-good" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-bold text-ink text-[13.5px] truncate">
+                {resolvedHandlerName || (isAdminPlatformDirect ? t('platformQueue.handlerFallback', 'Chuyên viên Nền tảng') : t('detail.handlerCard.stationTechFallback', 'Kỹ thuật viên trạm'))}
               </div>
-              <div className="min-w-0">
-                <div className="font-bold text-ink text-[13.5px] truncate">
-                  {resolvedHandlerName || t('detail.handlerCard.stationTechFallback', 'Kỹ thuật viên trạm')}
-                </div>
-                <div className="font-mono text-[11px] text-muted truncate">
-                  {ticket.assignedHandlerId ? `#${ticket.assignedHandlerId.slice(0, 8)}` : t('detail.handlerCard.stationAssigned', 'Trạm phụ trách')} ·{' '}
-                  {isAdminPlatformDirect
-                    ? t('platformQueue.handlerTitle', 'Chuyên viên Nền tảng')
-                    : t('detail.handlerCard.techRole', 'Kỹ thuật viên')}
-                </div>
+              <div className="font-mono text-[11px] text-muted truncate">
+                {ticket.assignedHandlerId ? `#${ticket.assignedHandlerId.slice(0, 8)}` : (isAdminPlatformDirect ? t('platformQueue.adminDirect', 'Nền tảng trực tiếp') : t('detail.handlerCard.stationAssigned', 'Trạm phụ trách'))} ·{' '}
+                {isAdminPlatformDirect
+                  ? t('platformQueue.handlerTitle', 'Chuyên viên Nền tảng')
+                  : t('detail.handlerCard.techRole', 'Kỹ thuật viên')}
               </div>
             </div>
+          </div>
 
-            {!isClosed && !isResolved && !isAdminStationSupervisory && (
+          {!isClosed && !isResolved && !isAdminStationSupervisory && (
+            <div className="pt-2 border-t border-hairline">
               <Button
                 size="sm"
                 variant="secondary"
+                fullWidth
                 onClick={onOpenAssign}
                 icon={<IconUsers size={13} strokeWidth={2} />}
+                className="w-full justify-center"
               >
-                {t('detail.handlerCard.changeBtn', 'Điều chuyển')}
+                {isAdminPlatformDirect
+                  ? t('platformQueue.reassignAdminBtn', 'Điều chuyển chuyên viên khác')
+                  : t('detail.handlerCard.changeBtn', 'Điều chuyển nhân sự')}
               </Button>
-            )}
-          </div>
+            </div>
+          )}
 
           {isAdminStationSupervisory && (
             <div className="rounded-xl bg-surface-2 p-2.5 text-[11.5px] text-muted border border-hairline leading-relaxed">
@@ -124,13 +128,13 @@ export function TicketHandlerCard({
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3.5 text-[12px]">
+        <div className="rounded-xl border border-warn-border bg-warn-soft p-3.5 text-[12px]">
           <div className="flex items-start gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold mt-0.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-pill text-warn-deep font-bold mt-0.5 border border-warn-border">
               <IconUsers size={15} />
             </div>
             <div>
-              <div className="font-semibold text-amber-900 dark:text-amber-200">
+              <div className="font-semibold text-warn-deep">
                 {t('detail.handlerCard.unassignedTitle', 'Chưa có người phụ trách')}
               </div>
               <p className="mt-0.5 text-[11px] text-muted leading-relaxed">

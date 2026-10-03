@@ -46,6 +46,8 @@ export interface AppShellProps {
   userName: string;
   /** User's email address displayed in profile menu. */
   userEmail?: string;
+  /** User's avatar URL from user profile API. */
+  userAvatarUrl?: string | null;
   /** The whole search box (HeaderSearch) — console-specific, since what's searchable differs by role. */
   search: ReactNode;
   /** Optional platform/perspective switcher element in the top bar. */
@@ -165,6 +167,7 @@ export function AppShell({
   onSelectStation,
   userName,
   userEmail,
+  userAvatarUrl,
   search,
   platformSwitcher,
   notifications,
@@ -268,6 +271,7 @@ export function AppShell({
           <AvatarDropdown
             userName={userName}
             userEmail={userEmail}
+            userAvatarUrl={userAvatarUrl}
             rolePill={rolePill}
             accent={accent}
             onSettings={onSettings}

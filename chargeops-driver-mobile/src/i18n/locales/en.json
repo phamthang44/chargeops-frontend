@@ -9,7 +9,15 @@
     "role": "DRIVER",
     "cancel": "Cancel",
     "close": "Close",
-    "retry": "Try again"
+    "retry": "Try again",
+    "error": "Error",
+    "eyebrow": {
+      "confirm": "CONFIRM",
+      "success": "SUCCESS",
+      "error": "ERROR",
+      "warning": "WARNING",
+      "info": "NOTICE"
+    }
   },
   "nav": {
     "stationList": "Stations",
@@ -1151,6 +1159,36 @@
     "finishFull": "Complete session"
   },
   "ticket": {
+    "resolved": {
+      "eyebrow": "RESOLVED",
+      "bannerTitle": "Issue has been resolved",
+      "bannerBody": "Our technician has reported the fix. Please confirm to close the ticket, or it will close automatically after the response window."
+    },
+    "confirm": {
+      "title": "Confirm resolution",
+      "message": "Do you confirm the issue has been fully handled? The ticket will be closed once you confirm.",
+      "confirmBtn": "Yes, it's resolved",
+      "confirming": "Confirming...",
+      "successTitle": "Thank you!",
+      "successMessage": "Your ticket has been closed. We're glad the issue was resolved.",
+      "retryMessage": "The ticket was just updated, please try confirming again."
+    },
+    "continue": {
+      "action": "Issue still remains",
+      "inputNotice": "Tap “Issue still remains” above to reopen the ticket and describe the problem.",
+      "title": "Issue still remains",
+      "description": "Describe what is still unresolved. The ticket returns to In Progress so everyone can keep track.",
+      "reasonLabel": "Describe the remaining issue",
+      "placeholder": "e.g. I retried charging but the charger keeps disconnecting...",
+      "submit": "Report remaining issue"
+    },
+    "closed": {
+      "confirmedTitle": "You confirmed the resolution",
+      "confirmedBody": "Thanks for your feedback. The ticket has been closed and moved to history.",
+      "autoClosedTitle": "Ticket closed automatically",
+      "autoClosedBody": "No response within the allowed window, so the system closed the ticket. If the issue persists, please create a new one.",
+      "genericBody": "This support ticket is complete and has been closed."
+    },
     "create": {
       "title": "Report Issue & Support",
       "subtitle": "ONLINE 24/7",
@@ -1164,7 +1202,8 @@
       "subjectPlaceholder": "e.g., Charger connector 02 auto-stopped during session...",
       "descLabel": "Detailed Description *",
       "descPlaceholder": "Describe the incident time, connector ID, error code on screen...",
-      "charCount": "{{count}}/500 characters",
+      "charCount": "{{count}}/{{max}} characters",
+      "subjectCharCount": "{{count}}/{{max}} characters",
       "submitBtn": "Submit Support Ticket",
       "submitting": "Submitting ticket...",
       "selectSessionTitle": "Select Affected Charging Session *",
@@ -1183,7 +1222,19 @@
       "errorBookingRequiredBody": "Charging issues require linking to a specific session so technicians can audit charger telemetry and refund deposits.",
       "errorStationRequiredTitle": "Station or reservation required",
       "errorStationRequiredBody": "Booking issues require selecting the affected charging station or reservation.",
-      "errorFailed": "Unable to create support ticket"
+      "errorFailed": "Unable to create support ticket",
+      "errSubjectRequired": "Please enter an issue summary",
+      "errSubjectMin": "Summary needs at least {{min}} characters",
+      "errDescRequired": "Please describe the issue in detail",
+      "errDescMin": "Description needs at least {{min}} characters",
+      "errSessionRequired": "Select the charging session where the issue happened",
+      "errStationRequired": "Select the related station or reservation",
+      "errSummaryTitle": "{{count}} issues need your attention",
+      "errSummaryHint": "Tap an issue below to jump to that field",
+      "errFooterCount": "{{count}} required fields still need attention",
+      "errFieldSession": "Related session / station",
+      "errFieldSubject": "Issue summary",
+      "errFieldDescription": "Detailed description"
     },
     "list": {
       "title": "My Support Tickets",
@@ -1202,7 +1253,9 @@
       "createdAt": "Created at: {{time}}",
       "contextBooking": "Booking Context:",
       "contextStation": "Station: {{name}}",
-      "findingsTitle": "Technical Findings & Resolution",
+      "findingsTitle": "Technical Finding",
+      "refundAppliedTitle": "Booking Refund Applied",
+      "refundAppliedBody": "A refund linked to this ticket has been recorded under the booking cancellation policy. Please check Booking History for details.",
       "refundLabel": "Driver Compensation:",
       "refund100Badge": "100% Deposit Refunded",
       "inputPlaceholder": "Type your message...",
@@ -1215,31 +1268,31 @@
     "escalation": {
       "countdownTitle": "Direct Station Resolution Window (24h SLA)",
       "countdownRemaining": "Remaining: {{time}}",
-      "countdownDesc": "The station has up to 24 hours to investigate and resolve this issue. After this period, or if the station disputes the fault, you can escalate to an Admin for independent arbitration.",
-      "eligibleTitle": "Request Administrator Dispute Arbitration",
+      "countdownDesc": "If the station does not respond in time or you need more support, you can request an Admin review.",
+      "eligibleTitle": "Request Admin Support Review",
       "triggerUnresponsive": "Station has been unresponsive for more than 24 hours",
       "triggerDisputedFinding": "Station recorded non-station-fault finding — You can dispute",
-      "eligibleDesc": "If you disagree with the station's findings or received no response, you have the right to escalate this case to ChargeOps Admin for fair dispute arbitration.",
+      "eligibleDesc": "Admin reviews the support context and either returns the case to the station or closes the support process with a documented reason.",
       "escalateBtn": "Escalate to Admin Now",
-      "escalatedBadge": "In Arbitration",
-      "escalatedTitle": "Incident Under Dispute Arbitration by Admin",
-      "arbiterRole": "Admin as Objective Arbiter (Dispute Arbiter)",
-      "escalatedDesc": "This ticket has been escalated to the system administrator to audit charging session logs and station data. A fair final ruling will be communicated to you.",
-      "reasonLabel": "Arbitration Request Notes:",
+      "escalatedBadge": "Under Admin Review",
+      "escalatedTitle": "Admin is reviewing this support request",
+      "arbiterRole": "Admin coordinates operational support",
+      "escalatedDesc": "Admin will review the case and return it to station support or close the support process with a documented reason.",
+      "reasonLabel": "Review request notes:",
       "modal": {
-        "title": "Request Admin Dispute Arbitration",
-        "roleNotice": "Admin acts as an independent arbiter, reviewing telemetry logs to provide an objective resolution.",
+        "title": "Request Admin Support Review",
+        "roleNotice": "Admin coordinates operational support and documents the review outcome.",
         "reasonLabel": "Reason for Requesting Admin Intervention",
         "reasonUnresponsive": "Station unresponsive for more than 24 hours",
         "reasonDisputedFinding": "Disagree with station's technical conclusion",
         "reasonOther": "Other reason",
         "detailsLabel": "Detailed explanation (min. 10 characters)",
-        "detailsPlaceholder": "Explain why you are requesting Administrator arbitration...",
+        "detailsPlaceholder": "Explain why you are requesting Admin review...",
         "cancelBtn": "Cancel",
-        "submitBtn": "Submit Dispute Request",
+        "submitBtn": "Submit Review Request",
         "submitting": "Submitting...",
         "successTitle": "Dispute Submitted",
-        "success": "Your dispute arbitration request has been submitted to Admin successfully!"
+        "success": "Your Admin review request has been submitted successfully!"
       }
     },
     "card": {
@@ -1248,7 +1301,7 @@
       "hasFindings": "Technical findings available",
       "latestMsg": "Latest:",
       "repliesCount": "{{count}} replies",
-      "refundNote": "Station confirmed fault — 100% refund approved"
+      "refundApplied": "Refund applied to linked booking"
     },
     "category": {
       "CHARGING_ISSUE": "Charging Issue",
@@ -1258,11 +1311,12 @@
       "OTHER": "Other Issues"
     },
     "conclusion": {
-      "HARDWARE_FAULT": "Station Hardware Issue",
-      "SOFTWARE_FAULT": "Software Connection Issue",
-      "USER_ERROR": "Operating Mistake",
-      "GRID_FAILURE": "Power Grid Failure",
-      "NO_FAULT_FOUND": "Station Operating Normally",
+      "STATION_FAILURE": "Station Fault Confirmed",
+      "NOT_STATION_FAILURE": "No Station Fault",
+      "HARDWARE_FAULT": "Charger Hardware Issue",
+      "STATION_OFFLINE": "Station Offline / Lost Connection",
+      "SOFTWARE_BUG": "Firmware / Software Bug",
+      "USER_ERROR": "User Operating Error",
       "OTHER": "Other Cause"
     },
     "priority": {

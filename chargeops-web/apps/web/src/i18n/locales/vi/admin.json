@@ -6,7 +6,7 @@
       "dashboard": {
         "label": "Tổng quan",
         "title": "Tổng quan nền tảng",
-        "subtitle": "Toàn bộ trạm, đặt chỗ và doanh thu · Thứ Bảy, 28/06/2026"
+        "subtitle": "Số liệu vận hành nền tảng và các case cần Admin xem xét."
       },
       "notifications": {
         "label": "Thông báo",
@@ -342,6 +342,13 @@
   },
   "dashboard": {
     "error": "Không tải được dữ liệu tổng quan: {{message}}",
+    "ops": {
+      "platformOpenTickets": "Ticket nền tảng đang mở",
+      "escalatedOpenCases": "Case trạm cần xem xét",
+      "escalatedOpenCasesHint": "Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.",
+      "escalatedBadge": "Cần xem xét",
+      "openTickets": "Mở hỗ trợ"
+    },
     "kpi": {
       "activeStations": "TRẠM HOẠT ĐỘNG",
       "activeStationsDelta": "+{{count}} trong tuần này",

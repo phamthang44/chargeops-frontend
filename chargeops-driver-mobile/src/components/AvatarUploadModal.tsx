@@ -2,11 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import * as ImagePicker from 'expo-image-picker';
 import {
   ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -31,6 +33,7 @@ import { getAvatarUrl } from '@/utils/imagekit';
 import { AppButton } from './AppButton';
 import { AvatarCropperStage } from './AvatarCropperStage';
 import { AvatarViewerModal } from './AvatarViewerModal';
+import { CameraPortraitModal } from './CameraPortraitModal';
 
 interface AvatarUploadModalProps {
   visible: boolean;
@@ -57,6 +60,7 @@ export function AvatarUploadModal({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [viewerVisible, setViewerVisible] = useState(false);
+  const [cameraVisible, setCameraVisible] = useState(false);
 
   // Interactive Cropping states
   const [cropImageUri, setCropImageUri] = useState<string | null>(null);
@@ -75,6 +79,79 @@ export function AvatarUploadModal({
     : 'EV';
 
   const activeAvatar = previewUrl || currentAvatarUrl;
+
+  const handlePickNativeGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Quyền thư viện bị từ chối',
+          'Vui lòng cấp quyền truy cập thư viện ảnh trong Cài đặt hệ thống để tải ảnh lên.',
+          [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+          ],
+        );
+        return;
+      }
+
+      setError(null);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        const uri = result.assets[0].uri;
+        setCropImageUri(uri);
+        setImgAspect(1);
+        setPanOffset({ x: 0, y: 0 });
+        setZoom(1);
+        setRawFile(null);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể mở thư viện ảnh.';
+      setError(msg);
+    }
+  };
+
+  const handleLaunchQuickCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Quyền camera bị từ chối',
+          'Vui lòng cấp quyền camera trong Cài đặt hệ thống để chụp ảnh đại diện.',
+          [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+          ],
+        );
+        return;
+      }
+
+      setError(null);
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        const uri = result.assets[0].uri;
+        setCropImageUri(uri);
+        setImgAspect(1);
+        setPanOffset({ x: 0, y: 0 });
+        setZoom(1);
+        setRawFile(null);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể khởi động camera chụp ảnh.';
+      setError(msg);
+    }
+  };
 
   const handlePickWebFile = () => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') {
@@ -253,6 +330,33 @@ export function AvatarUploadModal({
     setPanOffset({ x: 0, y: 0 });
     setError(null);
     onClose();
+  };
+
+  /**
+   * Called by CameraPortraitModal after a photo is captured.
+   * Feeds the local URI into the crop stage — same flow as picking a file.
+   */
+  const handleCameraCapture = (uri: string) => {
+    setError(null);
+    Image.getSize(
+      uri,
+      (w, h) => {
+        const rawAspect = w > 0 && h > 0 ? w / h : 0.75;
+        // iPhone camera sensor returns raw landscape dimensions (w > h) even when captured in portrait mode.
+        // Invert to correct portrait ratio if rawAspect > 1 on mobile.
+        const aspect = Platform.OS !== 'web' && rawAspect > 1 ? 1 / rawAspect : rawAspect;
+        setImgAspect(aspect);
+        const initialOffset = calculateInitialOffset(aspect);
+        setPanOffset(initialOffset);
+      },
+      () => {
+        setImgAspect(0.75);
+        setPanOffset({ x: 0, y: 0 });
+      },
+    );
+    setCropImageUri(uri);
+    setRawFile(null);
+    setZoom(1);
   };
 
   return (
@@ -465,19 +569,67 @@ export function AvatarUploadModal({
 
                   {/* Action Buttons */}
                   <View style={styles.actions}>
-                    {/* Button 1: Pick & Crop */}
-                    <Pressable
-                      style={[
-                        styles.primaryBtn,
-                        { backgroundColor: themeColors.primary },
-                        uploading && { opacity: 0.7 },
-                      ]}
-                      onPress={handlePickWebFile}
-                      disabled={uploading}
-                    >
-                      <Ionicons name="crop-outline" size={18} color="#FFFFFF" />
-                      <Text style={styles.primaryBtnText}>Chọn ảnh & Căn chỉnh 1:1</Text>
-                    </Pressable>
+                    {Platform.OS !== 'web' ? (
+                      <>
+                        {/* Native Button 1: Chụp ảnh & Cắt 1:1 ngay bằng camera hệ thống */}
+                        <Pressable
+                          style={[
+                            styles.primaryBtn,
+                            { backgroundColor: themeColors.primary },
+                            uploading && { opacity: 0.7 },
+                          ]}
+                          onPress={handleLaunchQuickCamera}
+                          disabled={uploading}
+                        >
+                          <Ionicons name="camera" size={18} color="#FFFFFF" />
+                          <Text style={styles.primaryBtnText}>Chụp ảnh & Cắt 1:1</Text>
+                        </Pressable>
+
+                        {/* Native Button 2: Chọn từ thư viện & Cắt 1:1 bằng công cụ iOS/Android */}
+                        <Pressable
+                          style={[
+                            styles.primaryBtn,
+                            { backgroundColor: '#0F172A' },
+                            uploading && { opacity: 0.7 },
+                          ]}
+                          onPress={handlePickNativeGallery}
+                          disabled={uploading}
+                        >
+                          <Ionicons name="images-outline" size={18} color="#FFFFFF" />
+                          <Text style={styles.primaryBtnText}>Chọn ảnh từ thư viện máy</Text>
+                        </Pressable>
+
+                        {/* Native Button 3: Chụp chân dung căn khung Oval in-app */}
+                        <Pressable
+                          style={[
+                            styles.outlineBtn,
+                            { borderColor: themeColors.border, backgroundColor: themeColors.surfaceAlt },
+                            uploading && { opacity: 0.7 },
+                          ]}
+                          onPress={() => setCameraVisible(true)}
+                          disabled={uploading}
+                        >
+                          <Ionicons name="scan-outline" size={18} color={themeColors.primary} />
+                          <Text style={[styles.outlineBtnText, { color: themeColors.textStrong }]}>
+                            Chụp chân dung căn khung Oval
+                          </Text>
+                        </Pressable>
+                      </>
+                    ) : (
+                      /* Web Button: Chọn tệp ảnh từ máy tính */
+                      <Pressable
+                        style={[
+                          styles.primaryBtn,
+                          { backgroundColor: themeColors.primary },
+                          uploading && { opacity: 0.7 },
+                        ]}
+                        onPress={handlePickWebFile}
+                        disabled={uploading}
+                      >
+                        <Ionicons name="crop-outline" size={18} color="#FFFFFF" />
+                        <Text style={styles.primaryBtnText}>Chọn ảnh từ máy tính & Căn 1:1</Text>
+                      </Pressable>
+                    )}
 
                     {/* View Avatar Button if avatar exists */}
                     {Boolean(activeAvatar) && (
@@ -570,6 +722,13 @@ export function AvatarUploadModal({
         onClose={() => setViewerVisible(false)}
         avatarUrl={activeAvatar}
         displayName={displayName}
+      />
+
+      {/* Camera Portrait Modal — opens fullscreen camera for selfie capture */}
+      <CameraPortraitModal
+        visible={cameraVisible}
+        onClose={() => setCameraVisible(false)}
+        onCapture={handleCameraCapture}
       />
     </Modal>
   );

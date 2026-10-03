@@ -82,23 +82,23 @@ export function TicketCountdownTimer({ autoCloseAt, resolvedAt, className = '' }
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3.5 py-1 text-amber-500 shadow-sm backdrop-blur-sm ${className}`}
+      className={`inline-flex items-center gap-2 rounded-full border border-warn-border bg-warn-pill px-3.5 py-1 text-warn-deep shadow-xs ${className}`}
     >
-      <IconClock size={14} strokeWidth={2.2} className="shrink-0 text-amber-500 animate-pulse" />
-      <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-900 dark:text-amber-100">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+      <IconClock size={14} strokeWidth={2.2} className="shrink-0 text-warn animate-pulse" />
+      <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-ink">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-warn-deep">
           {t('countdown.autoClosePrefix', 'Tự đóng sau:')}
         </span>
-        <span className="font-mono font-bold tracking-tight text-amber-500">
+        <span className="font-mono font-bold tracking-tight text-warn-deep">
           {timeLeft.days > 0 && `${timeLeft.days}d `}
           {String(timeLeft.hours).padStart(2, '0')}h : {String(timeLeft.minutes).padStart(2, '0')}m : {String(timeLeft.seconds).padStart(2, '0')}s
         </span>
       </div>
 
       {/* Micro progress pill */}
-      <div className="hidden h-1.5 w-12 overflow-hidden rounded-full bg-amber-500/20 sm:block">
+      <div className="hidden h-1.5 w-12 overflow-hidden rounded-full bg-warn-border sm:block">
         <div
-          className="h-full bg-amber-500 transition-all duration-1000"
+          className="h-full bg-warn transition-all duration-1000"
           style={{ width: `${timeLeft.progressPercent}%` }}
         />
       </div>

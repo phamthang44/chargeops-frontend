@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
+import { TicketFieldError } from '@/components/ticket/TicketFieldError';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontWeights, radius, spacing } from '@/theme';
 import type { Booking, TicketCategory } from '@/types';
@@ -15,6 +16,8 @@ interface TicketSessionSelectorProps {
   candidateBookings: Booking[];
   selectedBookingId: string | null;
   onSelectBooking: (booking: Booking) => void;
+  /** Scope validation error (BR-TKT-SCOPE) — turns the card border red. */
+  error?: string;
 }
 
 export function TicketSessionSelector({
@@ -23,15 +26,28 @@ export function TicketSessionSelector({
   candidateBookings,
   selectedBookingId,
   onSelectBooking,
+  error,
 }: TicketSessionSelectorProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
   return (
-    <Card style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+    <Card
+      style={[
+        styles.card,
+        {
+          backgroundColor: themeColors.surface,
+          borderColor: error ? themeColors.error : themeColors.border,
+          shadowColor: themeColors.error,
+          shadowOpacity: error ? 0.22 : 0,
+          shadowRadius: error ? 10 : 0,
+          elevation: error ? 3 : 0,
+        },
+      ]}
+    >
       <View style={styles.sessionHeaderRow}>
         <View style={styles.headerCol}>
-          <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
+          <Text style={[styles.sectionTitle, { color: error ? themeColors.error : themeColors.textStrong }]}>
             {category === 'CHARGING_ISSUE'
               ? t('ticket.create.selectSessionTitle', 'Chọn phiên sạc gặp sự cố *')
               : t('ticket.create.selectStationTitle', 'Chọn trạm hoặc phiên đặt chỗ *')}
@@ -126,6 +142,8 @@ export function TicketSessionSelector({
           })}
         </View>
       )}
+
+      <TicketFieldError message={error} />
     </Card>
   );
 }

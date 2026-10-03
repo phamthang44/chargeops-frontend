@@ -10,6 +10,8 @@ interface ResolveTicketModalProps {
   onSubmit: (reason: string) => Promise<void>;
   isPending: boolean;
   accent?: 'brand' | 'owner';
+  hasFindings?: boolean;
+  isEscalated?: boolean;
 }
 
 export function ResolveTicketModal({
@@ -19,9 +21,14 @@ export function ResolveTicketModal({
   onSubmit,
   isPending,
   accent = 'brand',
+  hasFindings = false,
+  isEscalated = false,
 }: ResolveTicketModalProps) {
   const { t } = useTranslation('tickets');
   const [reason, setReason] = useState('');
+
+  const isStationTicketWithBooking = Boolean(ticket.stationId && ticket.bookingId);
+  const isMissingFinding = isStationTicketWithBooking && !hasFindings;
 
   const deadlinePreview = useMemo(() => {
     const deadline = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -61,7 +68,7 @@ export function ResolveTicketModal({
               {t('resolveModal.cycle', 'Lần xử lý thứ {{cycle}}', { cycle: nextCycle })}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10.5px] font-bold text-amber-500">
+          <span className="inline-flex items-center gap-1 rounded-full bg-warn-pill px-2 py-0.5 text-[10.5px] font-bold text-warn-deep border border-warn-border">
             <IconClock size={11} strokeWidth={2.2} />
             <span>{t('resolveModal.tenDaysBadge', '10 ngày tự đóng')}</span>
           </span>
@@ -99,6 +106,38 @@ export function ResolveTicketModal({
           </p>
         </div>
 
+        {/* Escalated to Admin Notice */}
+        {isEscalated && (
+          <div className="rounded-xl border border-brand-line bg-brand-soft/40 p-3 text-[12px] text-ink">
+            <div className="flex items-center gap-1.5 font-bold text-brand">
+              <IconAlertCircle size={14} strokeWidth={2.2} />
+              <span>{t('resolveModal.escalatedTitle', 'Admin đang xem xét yêu cầu hỗ trợ')}</span>
+            </div>
+            <p className="mt-1 leading-relaxed text-muted">
+              {t(
+                'resolveModal.escalatedDesc',
+                'Trạm tạm dừng đánh dấu giải quyết cho tới khi Admin trả lại ticket để tiếp tục xử lý.'
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Missing Technical Finding Alert */}
+        {isMissingFinding && !isEscalated && (
+          <div className="rounded-xl border border-warn-border bg-warn-soft p-3 text-[12px] text-ink">
+            <div className="flex items-center gap-1.5 font-bold text-warn-deep">
+              <IconAlertCircle size={14} strokeWidth={2.2} />
+              <span>{t('resolveModal.missingFindingTitle', 'Yêu cầu Kết luận kỹ thuật trước khi giải quyết')}</span>
+            </div>
+            <p className="mt-1 leading-relaxed text-muted">
+              {t(
+                'resolveModal.missingFindingDesc',
+                'Phiếu hỗ trợ này gắn liền với sự cố trạm sạc và đơn sạc. Quy trình bắt buộc phải ghi nhận Kết luận kỹ thuật (Lỗi trạm / Không phải lỗi trạm) tại thẻ bên cạnh trước khi hoàn tất phiên làm việc.'
+              )}
+            </p>
+          </div>
+        )}
+
         {/* Policy Disclaimer */}
         <p className="text-[11px] text-muted leading-relaxed">
           {t(
@@ -108,14 +147,15 @@ export function ResolveTicketModal({
         </p>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-hairline">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-2.5 pt-2 border-t border-hairline">
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending} className="w-full sm:w-auto justify-center">
             {t('common.cancel', 'Hủy')}
           </Button>
           <Button
             type="submit"
             accent={accent}
-            disabled={!reason.trim() || isPending}
+            disabled={!reason.trim() || isPending || isMissingFinding || isEscalated}
+            className={`w-full sm:w-auto justify-center ${isMissingFinding || isEscalated ? 'opacity-50 cursor-not-allowed' : ''}`}
             icon={<IconCheckCircle size={14} strokeWidth={2.2} />}
           >
             {isPending ? t('resolveModal.submitting', 'Đang cập nhật...') : t('resolveModal.submit', 'Hoàn tất & Đánh dấu Giải quyết')}

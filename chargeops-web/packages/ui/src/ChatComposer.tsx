@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 
 export interface ChatComposerProps {
   value: string;
@@ -28,20 +28,29 @@ export function ChatComposer({
   actions,
   className = '',
 }: ChatComposerProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const ring = accent === 'owner' ? 'focus-within:border-owner focus-within:ring-owner/15' : 'focus-within:border-brand focus-within:ring-brand/15';
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (value.trim()) {
+        onSubmit();
+        textareaRef.current?.focus();
+      }
+    }
+  };
+
   return (
     <div
+      onClick={() => textareaRef.current?.focus()}
       className={`flex items-end gap-2 rounded-[12px] border border-line bg-surface p-2 transition focus-within:ring-2 ${ring} ${className}`}
     >
       <textarea
+        ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (value.trim()) onSubmit();
-          }
-        }}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         rows={1}
         disabled={disabled}

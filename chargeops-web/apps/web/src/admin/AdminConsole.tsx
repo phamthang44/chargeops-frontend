@@ -7,10 +7,8 @@ import { useAuth } from '@chargeops/auth';
 import {
   AppShell,
   ComingSoon,
-  IconBarChart,
   IconBell,
   IconBook,
-  IconCalendar,
   IconCard,
   IconClipboardCheck,
   IconGrid,
@@ -31,9 +29,7 @@ import { Approvals } from './pages/Approvals';
 import { Provisioning } from './pages/Provisioning';
 import { Users } from './pages/Users';
 import { Licenses } from './pages/Licenses';
-import { Analytics } from './pages/Analytics';
 import { PolicyKB } from './pages/PolicyKB';
-import { Bookings } from './pages/Bookings';
 import { Observability } from './pages/Observability';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
@@ -47,16 +43,14 @@ const PAGES: Record<string, ComponentType> = {
   stations: Stations,
   approvals: Approvals,
   provisioning: Provisioning,
-  bookings: Bookings,
   licenses: Licenses,
   users: Users,
-  analytics: Analytics,
   observability: Observability,
   kb: PolicyKB,
   tickets: () => <TicketsRoute admin />,
 };
 
-// Admin console sees platform-wide (unscoped) data.
+// Admin console exposes platform operations and escalated station cases.
 /** Platform admin console, mounted at `/admin`. */
 export function AdminConsole({ base }: { base: string }) {
   const { t } = useTranslation('admin');
@@ -71,11 +65,9 @@ export function AdminConsole({ base }: { base: string }) {
     { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
     { key: 'stations', label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
     { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
-    { key: 'bookings', label: t('console.nav.bookings.label'), icon: <IconCalendar size={17} />, title: t('console.nav.bookings.title') },
     { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
     { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
     { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
-    { key: 'analytics', label: t('console.nav.analytics.label'), icon: <IconBarChart size={17} />, title: t('console.nav.analytics.title') },
     { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
     { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
   ];
@@ -91,18 +83,6 @@ export function AdminConsole({ base }: { base: string }) {
             title: `${tk.id} · ${tk.subject}`,
             subtitle: tk.stationName ?? undefined,
             onSelect: () => navigate(`${base}/tickets/${tk.id}`),
-          }));
-        },
-      },
-      {
-        label: t('search.groups.bookings'),
-        run: async (q) => {
-          const res = await services.bookings.list({ search: q, pageSize: 5 });
-          return res.items.map((b) => ({
-            id: b.id,
-            title: `${b.id} · ${b.driverName}`,
-            subtitle: b.stationName,
-            onSelect: () => navigate(`${base}/bookings`),
           }));
         },
       },
@@ -124,15 +104,20 @@ export function AdminConsole({ base }: { base: string }) {
 
   // Same queryKey/queryFn the admin Dashboard page uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery({ queryKey: ['dashboard', 'admin'], queryFn: () => services.dashboard.admin() });
+  const profileQuery = useQuery({
+    queryKey: ['user-profile', 'me'],
+    queryFn: () => services.profile.get(),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const notificationItems = useMemo<NotificationItem[]>(() => {
-    const q = dashboardQuery.data?.actionQueue;
+    const q = dashboardQuery.data;
     if (!q) return [];
     const items: NotificationItem[] = [];
-    if (q.pendingStations > 0) {
+    if (q.pendingApprovals > 0) {
       items.push({
         id: 'approvals',
-        title: t('notifications.pendingStations', { count: q.pendingStations }),
+        title: t('notifications.pendingStations', { count: q.pendingApprovals }),
         subtitle: t('notifications.items.pendingStations.subtitle', { defaultValue: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.' }),
         tone: 'warn',
         category: 'system',
@@ -142,46 +127,17 @@ export function AdminConsole({ base }: { base: string }) {
         onAction: () => navigate(`${base}/approvals`),
       });
     }
-    if (q.expiringLicenses > 0) {
+    if (q.escalatedOpenCases > 0) {
       items.push({
-        id: 'expiring',
-        title: t('notifications.expiringLicenses', { count: q.expiringLicenses, days: q.expiringDaysMin }),
-        subtitle: t('notifications.items.expiringLicenses.subtitle', {
-          days: q.expiringDaysMin,
-          defaultValue: `Gói giấy phép trạm sẽ hết hạn trong ${q.expiringDaysMin} ngày tới.`,
-        }),
-        tone: 'warn',
-        category: 'system',
-        badge: t('notifications.items.expiringLicenses.badge', { defaultValue: 'Sắp hết hạn' }),
-        actionLabel: t('notifications.items.expiringLicenses.action', { defaultValue: 'Xem giấy phép' }),
-        onSelect: () => navigate(`${base}/licenses`),
-        onAction: () => navigate(`${base}/licenses`),
-      });
-    }
-    if (q.expiredLicenses > 0) {
-      items.push({
-        id: 'expired',
-        title: t('notifications.expiredLicenses', { count: q.expiredLicenses }),
-        subtitle: t('notifications.items.expiredLicenses.subtitle', { defaultValue: 'Giấy phép hoạt động trạm đã hết hạn sử dụng.' }),
+        id: 'escalated-cases',
+        title: t('dashboard.ops.escalatedOpenCases', { defaultValue: 'Case trạm cần xem xét' }) + `: ${q.escalatedOpenCases}`,
+        subtitle: t('dashboard.ops.escalatedOpenCasesHint', { defaultValue: 'Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.' }),
         tone: 'bad',
         category: 'alert',
-        badge: t('notifications.items.expiredLicenses.badge', { defaultValue: 'Hết hạn' }),
-        actionLabel: t('notifications.items.expiredLicenses.action', { defaultValue: 'Xử lý ngay' }),
-        onSelect: () => navigate(`${base}/licenses`),
-        onAction: () => navigate(`${base}/licenses`),
-      });
-    }
-    if (q.reportedFaults > 0) {
-      items.push({
-        id: 'faults',
-        title: t('notifications.reportedFaults', { count: q.reportedFaults }),
-        subtitle: t('notifications.items.reportedFaults.subtitle', { defaultValue: 'Trụ sạc báo lỗi phần cứng hoặc quá nhiệt kết nối.' }),
-        tone: 'bad',
-        category: 'alert',
-        badge: t('notifications.items.reportedFaults.badge', { defaultValue: 'Sự cố trụ' }),
-        actionLabel: t('notifications.items.reportedFaults.action', { defaultValue: 'Kiểm tra' }),
-        onSelect: () => navigate(`${base}/provisioning`),
-        onAction: () => navigate(`${base}/provisioning`),
+        badge: t('dashboard.ops.escalatedBadge', { defaultValue: 'Cần xem xét' }),
+        actionLabel: t('dashboard.ops.openTickets', { defaultValue: 'Mở hỗ trợ' }),
+        onSelect: () => navigate(`${base}/tickets`),
+        onAction: () => navigate(`${base}/tickets`),
       });
     }
     return items;
@@ -197,6 +153,7 @@ export function AdminConsole({ base }: { base: string }) {
         rolePill={{ label: t('console.role'), bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' }}
         userName={user?.name ?? '···'}
         userEmail={user?.email}
+        userAvatarUrl={profileQuery.data?.avatarUrl}
         search={<HeaderSearch searchers={searchers} placeholder={t('console.searchPlaceholder')} />}
         platformSwitcher={<PlatformSwitcher />}
         notifications={

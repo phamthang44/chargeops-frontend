@@ -73,7 +73,19 @@ export async function uploadAvatarToImageKit({
     fileName || `avatar_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
 
   const formData = new FormData();
-  formData.append('file', file);
+  if (
+    Platform.OS !== 'web' &&
+    typeof file === 'string' &&
+    (file.startsWith('file://') || file.startsWith('content://') || file.startsWith('/'))
+  ) {
+    formData.append('file', {
+      uri: file,
+      name: resolvedFileName,
+      type: 'image/jpeg',
+    } as any);
+  } else {
+    formData.append('file', file);
+  }
   formData.append('fileName', resolvedFileName);
   formData.append('publicKey', auth.publicKey || '');
   formData.append('signature', auth.signature);

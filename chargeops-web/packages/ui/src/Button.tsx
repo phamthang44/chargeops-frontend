@@ -39,12 +39,13 @@ function variantClass(variant: ButtonVariant, accent: ButtonAccent): string {
 
 /** Standard button: hover/active/disabled states, tactile press, focus ring. */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', accent = 'brand', size = 'md', fullWidth, icon, className = '', children, ...rest },
+  { variant = 'primary', accent = 'brand', size = 'md', fullWidth, icon, type = 'button', className = '', children, ...rest },
   ref,
 ) {
   return (
     <button
       ref={ref}
+      type={type}
       className={[
         'inline-flex select-none items-center justify-center font-semibold transition-all duration-150',
         'active:translate-y-px active:scale-[0.99]',

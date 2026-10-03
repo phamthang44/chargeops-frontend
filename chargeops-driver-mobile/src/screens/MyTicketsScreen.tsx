@@ -46,10 +46,13 @@ export function MyTicketsScreen() {
 
   const fetchTickets = useCallback(async () => {
     try {
+      // Server-side reporter scope: tổng số/phân trang được tính đúng theo
+      // ticket do chính tôi báo cáo (không lọc client sau phân trang).
       const res = await getTickets({
         status: activeTab === 'ALL' ? undefined : activeTab,
         page: 1,
         size: 50,
+        scope: 'reporter',
       });
       setTickets(res.items);
     } catch {

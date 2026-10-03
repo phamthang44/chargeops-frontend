@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@chargeops/auth';
+import { useUserProfile } from '../profile/useUserProfile';
 import {
   Avatar,
   Card,
@@ -17,6 +18,7 @@ import { SUPPORTED_THEMES, useTheme, type Theme } from '../../theme';
 export function SettingsPage({ accent = 'brand' }: { accent?: 'brand' | 'owner' }) {
   const { t, i18n } = useTranslation('settings');
   const { user } = useAuth();
+  const { profile, avatarUrl } = useUserProfile();
   const { theme, setTheme } = useTheme();
 
   const langSegments = SUPPORTED_LANGUAGES.map((l) => ({
@@ -54,10 +56,17 @@ export function SettingsPage({ accent = 'brand' }: { accent?: 'brand' | 'owner' 
       <div className="flex max-w-[600px] flex-col gap-4">
         {/* Profile card */}
         <Card className="flex items-center gap-[14px] p-[18px]">
-          <Avatar name={user?.name ?? '···'} size="lg" tone={accent} />
+          <Avatar
+            name={profile?.displayName || user?.name || '···'}
+            src={avatarUrl}
+            size="lg"
+            tone={accent}
+          />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[15px] font-bold text-ink">{user?.name ?? '···'}</div>
-            <div className="truncate text-[12.5px] text-muted">{user?.email}</div>
+            <div className="truncate text-[15px] font-bold text-ink">
+              {profile?.displayName || user?.name || '···'}
+            </div>
+            <div className="truncate text-[12.5px] text-muted">{profile?.email || user?.email}</div>
           </div>
           <span className="hidden shrink-0 rounded-full bg-chip px-3 py-[5px] text-[11px] font-semibold uppercase tracking-[0.05em] text-muted sm:inline-block">
             {user?.roles?.[0] ?? 'USER'}

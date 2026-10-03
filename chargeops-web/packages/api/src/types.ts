@@ -926,6 +926,7 @@ export interface StationStaffMember {
   userId: string;
   email: string;
   displayName: string;
+  avatarUrl?: string | null;
   maskedPhone?: string;
   status: StaffAssignmentStatus;
   note?: string;
@@ -1112,6 +1113,25 @@ export interface TicketEscalation {
   reason: string;
   notes?: string;
   requestedByRole?: string;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  resolutionType?: 'RETURN_TO_STATION' | 'CLOSE_SUPPORT_CASE' | null;
+  resolutionNote?: string | null;
+  closureReason?: TicketEscalationClosureReason | null;
+}
+
+export type TicketEscalationClosureReason =
+  | 'RESOLVED_EXTERNALLY'
+  | 'INSUFFICIENT_INFORMATION'
+  | 'NO_PLATFORM_ACTION_REQUIRED'
+  | 'OUT_OF_SUPPORT_SCOPE'
+  | 'OTHER';
+
+export interface ReviewTicketEscalationPayload {
+  expectedVersion: number;
+  action: 'RETURN_TO_STATION' | 'CLOSE_SUPPORT_CASE';
+  closureReason?: TicketEscalationClosureReason | null;
+  note: string;
 }
 
 export interface EscalateTicketPayload {
@@ -1265,7 +1285,7 @@ export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type TicketAuthorRole = 'driver' | 'station_staff' | 'station_owner' | 'platform_admin';
 export type TicketActorKind = 'REPORTER' | 'STAFF' | 'OWNER' | 'ADMIN';
 
-export type TicketCloseReason = 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE';
+export type TicketCloseReason = 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE' | 'ADMIN_SUPPORT_CASE_CLOSED';
 
 export type TicketEventType =
   | 'CLAIMED'
@@ -1274,7 +1294,9 @@ export type TicketEventType =
   | 'RESOLVED'
   | 'AUTO_CLOSED_NO_RESPONSE'
   | 'REPORTER_CONFIRMED'
-  | 'REOPENED_PERSISTENT';
+  | 'REOPENED_PERSISTENT'
+  | 'RETURN_TO_STATION'
+  | 'CLOSE_SUPPORT_CASE';
 
 export type TicketFindingConclusion =
   | 'STATION_FAILURE'
@@ -1294,6 +1316,7 @@ export interface TicketFinding {
   reason: string;
   recordedAt: string;
   recordedBy?: string | null;
+  recordedByRole?: string | null;
 }
 
 /** Append-only — no edit/delete once posted. */
@@ -1520,6 +1543,14 @@ export interface AdminDashboard {
   topStations: { name: string; revenueVnd: number }[];
 }
 
+/** Platform operations only; contains no Owner booking or finance data. */
+export interface AdminOperationsSummary {
+  activeStations: number;
+  pendingApprovals: number;
+  platformOpenTickets: number;
+  escalatedOpenCases: number;
+}
+
 export interface UserProfile {
   id: string;
   keycloakId: string;
@@ -1528,9 +1559,13 @@ export interface UserProfile {
   phone?: string;
   status: UserStatus;
   profileCompleted: boolean;
+  avatarUrl?: string | null;
+  avatarStorageKey?: string | null;
 }
 
 export interface UserProfileUpdateRequest {
-  displayName: string;
-  phone: string;
+  displayName?: string;
+  phone?: string;
+  avatarUrl?: string | null;
+  avatarStorageKey?: string | null;
 }

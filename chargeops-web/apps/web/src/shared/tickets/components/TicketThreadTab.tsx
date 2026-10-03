@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -21,8 +21,11 @@ export interface TicketThreadTabProps {
   isSending: boolean;
   isResolved: boolean;
   isClosed: boolean;
+  readOnlyNotice?: string;
   accent: 'brand' | 'owner';
-  messagesEndRef: RefObject<HTMLDivElement | null>;
+  /** Profile id của người xem — để nhận diện "tin của mình" theo authorId. */
+  currentUserId?: string;
+  messagesEndRef?: RefObject<HTMLDivElement | null>;
 }
 
 export function TicketThreadTab({
@@ -34,14 +37,44 @@ export function TicketThreadTab({
   isSending,
   isResolved,
   isClosed,
+  readOnlyNotice,
   accent,
+  currentUserId,
   messagesEndRef,
 }: TicketThreadTabProps) {
   const { t } = useTranslation('tickets');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevCountRef = useRef<number>(0);
+  const isInitialLoadRef = useRef<boolean>(true);
+
+  // Self-contained scroll to bottom inside this container only
+  useEffect(() => {
+    if (!scrollContainerRef.current || isLoading) return;
+
+    const el = scrollContainerRef.current;
+    const currentCount = messages.length;
+
+    if (currentCount > prevCountRef.current) {
+      const behavior: ScrollBehavior = isInitialLoadRef.current ? 'instant' : 'smooth';
+      requestAnimationFrame(() => {
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior,
+          });
+        }
+      });
+      isInitialLoadRef.current = false;
+    }
+    prevCountRef.current = currentCount;
+  }, [messages.length, isLoading]);
 
   return (
     <>
-      <div className="flex min-h-[340px] max-h-[550px] overflow-y-auto flex-col gap-4 p-4">
+      <div
+        ref={scrollContainerRef}
+        className="flex h-[360px] sm:h-[440px] lg:h-[500px] overflow-y-auto flex-col gap-3 sm:gap-4 p-3 sm:p-4 overscroll-contain"
+      >
         {isLoading ? (
           <>
             <Skeleton className="h-14 w-3/4" />
@@ -60,7 +93,12 @@ export function TicketThreadTab({
         ) : (
           <>
             {messages.map((m) => (
-              <TicketMessageBubble key={m.id} message={m} accent={accent} />
+              <TicketMessageBubble
+                key={m.id}
+                message={m}
+                accent={accent}
+                currentUserId={currentUserId}
+              />
             ))}
             <div ref={messagesEndRef} />
           </>
@@ -79,9 +117,14 @@ export function TicketThreadTab({
               )}
             </span>
           </div>
+        ) : readOnlyNotice ? (
+          <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-3 text-sm text-muted">
+            <IconLock size={16} />
+            <span>{readOnlyNotice}</span>
+          </div>
         ) : isResolved ? (
           <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-amber-700 dark:text-amber-300 px-1">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-warn-deep px-1">
               <IconClock size={12} strokeWidth={2.2} />
               <span>
                 {t(
@@ -101,6 +144,7 @@ export function TicketThreadTab({
             accent={accent}
             actions={
               <Button
+                type="button"
                 accent={accent}
                 size="md"
                 icon={<IconSend size={14} strokeWidth={2.2} />}

@@ -6,7 +6,7 @@
       "dashboard": {
         "label": "Overview",
         "title": "Platform Overview",
-        "subtitle": "Total stations, bookings, and revenue · Saturday, 28/06/2026"
+        "subtitle": "Platform operations and cases requiring Admin review."
       },
       "notifications": {
         "label": "Notifications",
@@ -342,6 +342,13 @@
   },
   "dashboard": {
     "error": "Failed to load overview data: {{message}}",
+    "ops": {
+      "platformOpenTickets": "Open platform tickets",
+      "escalatedOpenCases": "Station cases for review",
+      "escalatedOpenCasesHint": "A Driver or Owner has requested administrative review.",
+      "escalatedBadge": "Needs review",
+      "openTickets": "Open support"
+    },
     "kpi": {
       "activeStations": "ACTIVE STATIONS",
       "activeStationsDelta": "+{{count}} this week",

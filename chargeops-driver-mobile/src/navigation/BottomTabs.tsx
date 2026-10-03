@@ -16,7 +16,7 @@ import type { BottomTabParamList } from './types';
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 /**
- * Bottom tabs (5): Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ
+ * Bottom tabs (5): Bản đồ / Tìm trạm / Đặt chỗ / Lịch sử / Hồ sơ
  *
  * Uses the custom `FloatingTabBar` — a frosted-glass floating pill with an
  * elevated emerald FAB for the center "Đặt chỗ" tab. Supports auto-hiding on
@@ -29,25 +29,26 @@ export function BottomTabs() {
   return (
     <TabBarVisibilityProvider>
       <Tab.Navigator
+        initialRouteName="Map"
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{
           headerShown: false,
         }}
       >
         <Tab.Screen
-          name="StationList"
-          component={StationListScreen}
-          options={{
-            title: t('nav.stationList'),
-            tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
-          }}
-        />
-        <Tab.Screen
           name="Map"
           component={MapScreen}
           options={{
             title: t('nav.map'),
             tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
+          }}
+        />
+        <Tab.Screen
+          name="StationList"
+          component={StationListScreen}
+          options={{
+            title: t('nav.stationList'),
+            tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
           }}
         />
         <Tab.Screen

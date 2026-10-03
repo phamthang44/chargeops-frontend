@@ -6,7 +6,7 @@ export const CROP_STAGE_SIZE = 300;
 export const CROP_CIRCLE_DIAMETER = 220;
 export const CROP_RADIUS = CROP_CIRCLE_DIAMETER / 2;
 export const CROP_CENTER = CROP_STAGE_SIZE / 2;
-export const MIN_ZOOM = 0.7;
+export const MIN_ZOOM = 1.0;
 export const MAX_ZOOM = 2.5;
 
 export interface CropOffset {
@@ -15,14 +15,33 @@ export interface CropOffset {
 }
 
 /**
+  * Calculates boundary limits so the image always completely covers the crop circle.
+  */
+export function calculateCropBounds(
+  aspect: number,
+  zoom: number,
+): { maxPanX: number; maxPanY: number } {
+  const safeAspect = aspect > 0 ? aspect : 1;
+  const baseW = safeAspect >= 1 ? CROP_CIRCLE_DIAMETER * safeAspect : CROP_CIRCLE_DIAMETER;
+  const baseH = safeAspect >= 1 ? CROP_CIRCLE_DIAMETER : CROP_CIRCLE_DIAMETER / safeAspect;
+  const currentW = baseW * zoom;
+  const currentH = baseH * zoom;
+  return {
+    maxPanX: Math.max(0, Math.round((currentW - CROP_CIRCLE_DIAMETER) / 2)),
+    maxPanY: Math.max(0, Math.round((currentH - CROP_CIRCLE_DIAMETER) / 2)),
+  };
+}
+
+/**
  * Calculates a sensible initial offset for portrait images
  * so the person's face/eyes (typically in the upper 25-35%) are centered inside the circle.
  */
 export function calculateInitialOffset(aspect: number): CropOffset {
-  if (aspect < 0.95 && aspect > 0) {
+  if (aspect < 0.98 && aspect > 0) {
     const baseHeight = CROP_CIRCLE_DIAMETER / aspect;
-    const diffH = baseHeight - CROP_CIRCLE_DIAMETER;
-    return { x: 0, y: Math.round(diffH * 0.32) };
+    const diffH = (baseHeight - CROP_CIRCLE_DIAMETER) / 2;
+    // Keep offset within safe half-difference so crop circle stays covered
+    return { x: 0, y: Math.round(Math.min(diffH, (baseHeight - CROP_CIRCLE_DIAMETER) * 0.25)) };
   }
   return { x: 0, y: 0 };
 }

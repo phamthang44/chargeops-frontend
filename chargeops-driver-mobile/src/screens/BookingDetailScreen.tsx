@@ -100,7 +100,7 @@ export function BookingDetailScreen() {
         onCopy={handleCopy}
         onGoBack={() => navigation.goBack()}
         onNavigateMyBookings={() => navigation.navigate('Tabs', { screen: 'Bookings' })}
-        onNavigateHome={() => navigation.navigate('Tabs', { screen: 'StationList' })}
+        onNavigateHome={() => navigation.navigate('Tabs', { screen: 'Map' })}
       />
     );
   }

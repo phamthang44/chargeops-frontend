@@ -60,14 +60,14 @@ export function TicketHeader(props: TicketHeaderProps) {
             <StatusPill tone={statusMeta.tone} label={t(`status.${statusKey}`, statusMeta.label)} />
 
             {isEscalated && (
-              <span className="inline-flex items-center gap-1 rounded bg-purple-500/15 px-2.5 py-0.5 text-[11px] font-bold text-purple-700 dark:text-purple-300 border border-purple-500/30">
+              <span className="inline-flex items-center gap-1 rounded bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand border border-brand-line">
                 <IconShieldAlert size={12} strokeWidth={2.2} />
-                <span>{t('escalation.badge', 'Đang phân xử (Escalated)')}</span>
+                <span>{t('escalation.badge', 'Đang được Admin xem xét')}</span>
               </span>
             )}
 
             {isAdminStationSupervisory && !isEscalated && (
-              <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300 border border-amber-500/25">
+              <span className="inline-flex items-center gap-1 rounded bg-warn-soft px-2.5 py-0.5 text-[11px] font-semibold text-warn-deep border border-warn-border">
                 <IconShieldAlert size={12} strokeWidth={2.2} />
                 <span>{t('supervisory.badge', 'Giám sát Vận hành Trạm')}</span>
               </span>
@@ -88,23 +88,23 @@ export function TicketHeader(props: TicketHeaderProps) {
             )}
           </div>
 
-          <h1 className="mt-2 text-lg font-bold text-ink sm:text-xl">
+          <h1 className="mt-2 text-base font-bold text-ink sm:text-lg lg:text-xl break-words leading-snug">
             {ticket.subject || ticket.title || t('detail.defaultSubject', 'Phiếu hỗ trợ')}
           </h1>
 
           {ticket.description && (
-            <p className="mt-1.5 text-[13px] leading-relaxed text-body">
+            <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-body break-words">
               {ticket.description}
             </p>
           )}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-1 text-[11px] font-medium text-muted">
               {t(`category.${categoryKey}`, categoryLabel)}
             </span>
             {ticket.stationName && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-1 text-[11px] font-medium text-muted">
-                <IconPin size={12} strokeWidth={2.2} /> {ticket.stationName}
+              <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-1 text-[11px] font-medium text-muted truncate max-w-[240px] sm:max-w-none">
+                <IconPin size={12} strokeWidth={2.2} /> <span className="truncate">{ticket.stationName}</span>
               </span>
             )}
             {ticket.bookingId && (
@@ -116,7 +116,9 @@ export function TicketHeader(props: TicketHeaderProps) {
         </div>
 
         {/* Action Dock */}
-        <TicketActionDock {...props} />
+        <div className="w-full sm:w-auto pt-3 border-t border-hairline sm:pt-0 sm:border-0 shrink-0">
+          <TicketActionDock {...props} />
+        </div>
       </div>
     </Card>
   );

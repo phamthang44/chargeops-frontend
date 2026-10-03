@@ -19,6 +19,10 @@ export interface Colors {
 
   // Status
   success: string;
+  /** Tinted success surface (banner / card shells). */
+  successSoft: string;
+  /** Hairline that frames a success shell (Double-Bezel outer ring). */
+  successBorder: string;
   warning: string;
   error: string;
   info: string;
@@ -48,6 +52,8 @@ export const classicLightColors: Colors = {
   border: '#E5E7EB',
 
   success: '#10B981',
+  successSoft: '#ECFDF5',
+  successBorder: '#A7F3D0',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
@@ -73,6 +79,8 @@ export const classicDarkColors: Colors = {
   border: '#2A312F',
 
   success: '#10B981',
+  successSoft: '#0F2A1A',
+  successBorder: '#1A5C30',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
@@ -101,6 +109,8 @@ export const balancedDarkColors: Colors = {
   border: '#27312E',
 
   success: '#10C98A',
+  successSoft: '#0E241C',
+  successBorder: '#1C5138',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
@@ -126,6 +136,8 @@ export const balancedLightColors: Colors = {
   border: '#DFE5E2',
 
   success: '#0E9F6E',
+  successSoft: '#E9F8F1',
+  successBorder: '#B9E9D4',
   warning: '#D97706',
   error: '#DC2626',
   info: '#2563EB',

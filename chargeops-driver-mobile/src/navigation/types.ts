@@ -2,11 +2,11 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 /**
  * Bottom tab routes (5 tabs, matching the design):
- * Tìm trạm / Bản đồ / Đặt chỗ / Lịch sử / Hồ sơ.
+ * Bản đồ / Tìm trạm / Đặt chỗ / Lịch sử / Hồ sơ.
  */
 export type BottomTabParamList = {
-  StationList: undefined; // Tìm trạm (home / discovery)
-  Map: undefined; // Bản đồ
+  Map: undefined; // Bản đồ (màn hình mặc định)
+  StationList: undefined; // Tìm trạm (danh sách)
   Bookings: undefined; // Đặt chỗ (upcoming/active bookings)
   BookingHistory: undefined; // Lịch sử
   Profile: undefined; // Hồ sơ

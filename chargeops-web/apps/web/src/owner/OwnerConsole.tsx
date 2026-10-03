@@ -52,6 +52,7 @@ import { NotificationsShowcase } from './pages/NotificationsShowcase';
 import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
+import { useUserProfile } from '../shared/profile/useUserProfile';
 import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
 import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
 
@@ -118,6 +119,7 @@ function OwnerConsoleContent({
   const { user, logout } = useAuth();
   const { t } = useTranslation('owner');
   const api = useApi();
+  const { avatarUrl } = useUserProfile();
   const { stations, selectedStationId, setSelectedStationId, currentStation } = useOwnerStation();
 
   const searchers = useMemo<Searcher[]>(() => {
@@ -345,6 +347,7 @@ function OwnerConsoleContent({
       onSelectStation={reduced ? undefined : setSelectedStationId}
       userName={user?.name ?? '···'}
       userEmail={user?.email}
+      userAvatarUrl={avatarUrl}
       search={<HeaderSearch searchers={searchers} accent="owner" />}
       platformSwitcher={<PlatformSwitcher />}
       notifications={

@@ -16,15 +16,17 @@ export type TicketCloseReason = 'REPORTER_CONFIRMED' | 'AUTO_CLOSED_NO_RESPONSE'
 export type TicketActorKind = 'REPORTER' | 'OWNER' | 'STAFF' | 'ADMIN';
 
 export type TicketFindingConclusion =
-  | 'STATION_FAULT'
+  | 'STATION_FAILURE'
+  | 'NOT_STATION_FAILURE'
+  | 'HARDWARE_FAULT'
+  | 'STATION_OFFLINE'
+  | 'SOFTWARE_BUG'
   | 'USER_ERROR'
-  | 'VEHICLE_FAULT'
-  | 'POWER_OUTAGE'
-  | 'FORCE_MAJEURE'
-  | 'NO_ISSUE';
+  | 'OTHER';
 
 export interface TicketMessage {
   messageId: string;
+  authorId?: string;
   authorDisplayName: string;
   authorKind: TicketActorKind;
   body: string;
@@ -57,6 +59,7 @@ export interface Ticket {
   isEscalated?: boolean;
   escalatedAt?: string | null;
   escalation?: TicketEscalation | null;
+  escalationAvailability?: { canRequest: boolean; availableAt?: string | null; reason?: string | null } | null;
   resolutionCycle?: number;
   autoCloseAt?: string | null;
   resolvedAt?: string | null;
@@ -83,6 +86,11 @@ export interface TicketListParams {
   size?: number;
   status?: TicketStatus | 'ALL';
   stationId?: string;
+  /**
+   * Phân vùng server: 'reporter' chỉ trả ticket do chính tôi báo cáo
+   * (không gian Driver — "Phiếu tôi đã báo").
+   */
+  scope?: 'actor' | 'reporter';
 }
 
 export interface TicketListResult {
@@ -98,6 +106,11 @@ export interface TicketEscalation {
   requestedBy: string;
   requestedAt: string;
   reason: string;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  resolutionType?: 'RETURN_TO_STATION' | 'CLOSE_SUPPORT_CASE' | null;
+  resolutionNote?: string | null;
+  closureReason?: string | null;
 }
 
 export interface EscalateTicketPayload {

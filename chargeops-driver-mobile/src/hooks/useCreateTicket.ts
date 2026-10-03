@@ -9,6 +9,13 @@ import type { RootStackParamList } from '@/navigation/types';
 import { getActiveBookings, getBookingHistory } from '@/services/bookingService';
 import { createTicket, getLocalizedTicketErrorMessage } from '@/services/ticketService';
 import type { Booking, TicketCategory, TicketPriority } from '@/types';
+import {
+  errorCount as countErrors,
+  firstErrorKey,
+  validateTicketForm,
+  type TicketFormErrorKey,
+  type TicketFormErrors,
+} from '@/utils/ticketValidation';
 
 type Route = RouteProp<RootStackParamList, 'CreateTicket'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'CreateTicket'>;
@@ -83,6 +90,43 @@ export function useCreateTicket() {
   const isStationCategory = category === 'CHARGING_ISSUE' || category === 'BOOKING';
   const isPlatformCategory = !isStationCategory;
 
+  // Per-field validation feedback (shown inline instead of native Alerts).
+  const [errors, setErrors] = useState<TicketFormErrors>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const validate = useCallback(
+    () =>
+      validateTicketForm(
+        {
+          subject,
+          description,
+          category,
+          bookingId: bookingId ?? null,
+          stationId: stationId ?? null,
+          selectedBookingId,
+          selectedStationId,
+        },
+        t,
+      ),
+    [
+      subject,
+      description,
+      category,
+      bookingId,
+      stationId,
+      selectedBookingId,
+      selectedStationId,
+      t,
+    ],
+  );
+
+  // Once the driver has tried to submit, keep re-validating live so an error
+  // disappears the moment the field is fixed (and returns if it breaks again).
+  useEffect(() => {
+    if (!submitAttempted) return;
+    setErrors(validate());
+  }, [submitAttempted, validate]);
+
   useEffect(() => {
     if (bookingId) return;
 
@@ -136,74 +180,57 @@ export function useCreateTicket() {
     [],
   );
 
-  const handleSubmit = useCallback(async () => {
-    if (!subject.trim()) {
-      Alert.alert(
-        t('ticket.create.errorNoSubjectTitle', 'Chưa nhập tiêu đề'),
-        t('ticket.create.errorNoSubjectBody', 'Vui lòng nhập tóm tắt sự cố bạn đang gặp phải.'),
-      );
-      return;
-    }
-    if (!description.trim()) {
-      Alert.alert(
-        t('ticket.create.errorNoDescTitle', 'Chưa nhập mô tả'),
-        t('ticket.create.errorNoDescBody', 'Vui lòng mô tả chi tiết để kỹ thuật viên có thể hỗ trợ nhanh nhất.'),
-      );
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (onInvalid?: (key: TicketFormErrorKey) => void) => {
+      const found = validate();
+      setErrors(found);
+      setSubmitAttempted(true);
 
-    const effectiveBookingId = selectedBookingId || bookingId || null;
-    const effectiveStationId = selectedStationId || stationId || null;
+      // Field-level errors: highlight inline and jump to the topmost one.
+      const firstInvalid = firstErrorKey(found);
+      if (firstInvalid) {
+        onInvalid?.(firstInvalid);
+        return;
+      }
 
-    // Scope Validation (BR-TKT-SCOPE)
-    if (category === 'CHARGING_ISSUE' && !effectiveBookingId) {
-      Alert.alert(
-        t('ticket.create.errorBookingRequiredTitle', 'Cần chọn phiên sạc'),
-        t('ticket.create.errorBookingRequiredBody', 'Sự cố sạc pin yêu cầu liên kết với phiên sạc cụ thể để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc.'),
-      );
-      return;
-    }
+      const effectiveBookingId = selectedBookingId || bookingId || null;
+      const effectiveStationId = selectedStationId || stationId || null;
 
-    if (category === 'BOOKING' && !effectiveBookingId && !effectiveStationId) {
-      Alert.alert(
-        t('ticket.create.errorStationRequiredTitle', 'Cần chọn trạm hoặc đơn đặt chỗ'),
-        t('ticket.create.errorStationRequiredBody', 'Lỗi đặt chỗ yêu cầu chọn trạm sạc hoặc đơn đặt chỗ gặp sự cố.'),
-      );
-      return;
-    }
+      try {
+        setSubmitting(true);
+        const created = await createTicket({
+          category,
+          priority,
+          subject: subject.trim(),
+          description: description.trim(),
+          bookingId: isStationCategory ? effectiveBookingId : null,
+          stationId: isStationCategory ? effectiveStationId : null,
+        });
 
-    try {
-      setSubmitting(true);
-      const created = await createTicket({
-        category,
-        priority,
-        subject: subject.trim(),
-        description: description.trim(),
-        bookingId: isStationCategory ? effectiveBookingId : null,
-        stationId: isStationCategory ? effectiveStationId : null,
-      });
-
-      // Navigate immediately to ticket thread
-      navigation.replace('TicketDetail', { ticketId: created.ticketId });
-    } catch (err: any) {
-      const localizedMsg = getLocalizedTicketErrorMessage(err, t);
-      Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
-    } finally {
-      setSubmitting(false);
-    }
-  }, [
-    subject,
-    description,
-    selectedBookingId,
-    bookingId,
-    selectedStationId,
-    stationId,
-    category,
-    priority,
-    isStationCategory,
-    navigation,
-    t,
-  ]);
+        // Navigate immediately to ticket thread
+        navigation.replace('TicketDetail', { ticketId: created.ticketId });
+      } catch (err: any) {
+        const localizedMsg = getLocalizedTicketErrorMessage(err, t);
+        Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [
+      validate,
+      subject,
+      description,
+      selectedBookingId,
+      bookingId,
+      selectedStationId,
+      stationId,
+      category,
+      priority,
+      isStationCategory,
+      navigation,
+      t,
+    ],
+  );
 
   return {
     // Route info
@@ -225,6 +252,11 @@ export function useCreateTicket() {
     description,
     setDescription,
     submitting,
+
+    // Validation feedback
+    errors,
+    submitAttempted,
+    errorCount: countErrors(errors),
 
     // Scope & candidate sessions
     candidateBookings,

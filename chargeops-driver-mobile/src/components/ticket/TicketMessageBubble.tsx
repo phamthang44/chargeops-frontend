@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import { useAuth } from '@/context/AuthContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { TicketActorKind, TicketMessage } from '@/types';
 import { formatTime } from '@/utils/format';
@@ -46,12 +47,16 @@ const ACTOR_STYLE: Record<
 export function TicketMessageBubble({ message, isSelf }: TicketMessageBubbleProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const { profile } = useAuth();
   const actor = ACTOR_STYLE[message.authorKind] ?? ACTOR_STYLE.STAFF;
   const roleLabel = t(`ticket.role.${message.authorKind}`, message.authorKind);
 
   const formattedTime = formatTime(message.createdAt);
 
-  if (isSelf || message.authorKind === 'REPORTER') {
+  // Không suy "của mình" từ authorKind/tên hiển thị; thiếu authorId → hiển thị trung tính.
+  const isOwnMessage = isSelf || (Boolean(message.authorId) && message.authorId === profile?.id);
+
+  if (isOwnMessage) {
     return (
       <View style={[styles.bubbleContainer, styles.selfContainer]}>
         <View

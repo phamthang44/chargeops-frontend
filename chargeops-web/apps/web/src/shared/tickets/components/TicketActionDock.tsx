@@ -55,19 +55,21 @@ export function TicketActionDock({
 
   return (
     <div className="flex w-full shrink-0 flex-col sm:w-auto sm:flex-row sm:flex-wrap sm:items-center gap-2">
-      {/* Admin coordinates the active station escalation (only when case is active: OPEN or IN_PROGRESS) */}
-      {isAdminStationSupervisory && !isClosed && !isResolved && (
+      {/* Admin must also be able to complete an escalation left active on a closed ticket. */}
+      {isAdminStationSupervisory && isEscalated && (
         <div className="flex flex-wrap items-center gap-2">
           {isEscalated ? (
             <>
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={() => onReviewEscalation?.('RETURN_TO_STATION')}
-                icon={<IconRefreshCw size={13} strokeWidth={2.2} className="text-muted" />}
-              >
-                {t('escalation.review.returnTitle', 'Trả lại trạm xử lý')}
-              </Button>
+              {!isClosed && !isResolved && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => onReviewEscalation?.('RETURN_TO_STATION')}
+                  icon={<IconRefreshCw size={13} strokeWidth={2.2} className="text-muted" />}
+                >
+                  {t('escalation.review.returnTitle', 'Trả lại trạm xử lý')}
+                </Button>
+              )}
               <Button
                 variant="primary"
                 accent="brand"
@@ -75,7 +77,7 @@ export function TicketActionDock({
                 onClick={() => onReviewEscalation?.('CLOSE_SUPPORT_CASE')}
                 icon={<IconCheckCircle size={14} strokeWidth={2.2} />}
               >
-                {t('escalation.review.closeTitle', 'Kết thúc xử lý hỗ trợ')}
+                {isClosed ? 'Hoàn tất yêu cầu xem xét' : t('escalation.review.closeTitle', 'Kết thúc xử lý hỗ trợ')}
               </Button>
             </>
           ) : (

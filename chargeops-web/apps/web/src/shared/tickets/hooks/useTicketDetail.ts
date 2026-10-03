@@ -196,7 +196,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const reviewEscalation = useMutation({
     mutationFn: (payload: ReviewTicketEscalationPayload) => {
       const currentStatus = String(ticketQuery.data?.status || 'OPEN').toUpperCase();
-      if (currentStatus === 'CLOSED' || currentStatus === 'RESOLVED') {
+      if ((currentStatus === 'CLOSED' || currentStatus === 'RESOLVED') && payload.action !== 'CLOSE_SUPPORT_CASE') {
         throw new Error(t('escalation.cannotReviewClosed', 'Không thể xem xét yêu cầu trên phiếu đã giải quyết hoặc đã đóng.'));
       }
       return api.ticketEscalations.review(id, payload);
@@ -320,9 +320,6 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
       return { ...merged, requestedByRole };
     })(),
     isEscalated: Boolean(
-      !isClosed &&
-      !isResolved &&
-      (isOpen || isInProgress) &&
       (escalationQuery.data?.ticketId
         ? !escalationQuery.data.resolvedAt
         : (tk as any)?.isEscalated && !(tk as any)?.escalation?.resolvedAt)

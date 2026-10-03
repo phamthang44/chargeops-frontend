@@ -165,7 +165,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         onOpenResolve={() => setIsResolveModalOpen(true)}
         onOpenEscalate={() => setIsEscalateModalOpen(true)}
         onReviewEscalation={(act) => {
-          if (isClosed || isResolved || !isEscalated) return;
+          if (!isEscalated || ((isClosed || isResolved) && act !== 'CLOSE_SUPPORT_CASE')) return;
           setReviewAction(act);
         }}
       />
@@ -444,7 +444,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
         isPending={escalate.isPending}
       />
 
-      {reviewAction && !isClosed && !isResolved && isEscalated && (
+      {reviewAction && isEscalated && (
         <ReviewEscalationModal
           open
           action={reviewAction}

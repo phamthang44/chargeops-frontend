@@ -68,6 +68,7 @@ import type {
   StationScheduleHistoryItem,
   ProvisioningStatus,
   RegisterStationRequest,
+  StationRegistrationDetail,
   StaffDashboard,
   StaffLookupResponse,
   StaffAssignmentStatus,
@@ -242,6 +243,9 @@ export interface StationService {
   /** Owner: own stations, any status. */
   mine(params?: { pageNo?: number; pageSize?: number }): Promise<Station[]>;
   register(input: RegisterStationRequest | StationRegistration): Promise<Station>;
+  registration(id: string): Promise<StationRegistrationDetail>;
+  updateRegistration(id: string, version: number, input: RegisterStationRequest): Promise<StationRegistrationDetail>;
+  withdrawRegistration(id: string, version: number): Promise<void>;
   /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
   updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
   /** Owner: change operational status (OPERATING, PAUSED, MAINTENANCE). */

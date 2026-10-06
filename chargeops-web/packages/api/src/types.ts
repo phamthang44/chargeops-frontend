@@ -534,6 +534,7 @@ export interface StationOperationalStatusResponse {
 }
 
 export interface Station {
+  contactPhone?: string;
   id: string;
   stationCode?: string;
   name: string;
@@ -570,7 +571,20 @@ export interface Station {
   assets?: StationAsset[];
 }
 
+export interface StationRegistrationDetail extends Station {
+  addressLine: string;
+  description?: string;
+  provinceCode: string;
+  wardCode: string;
+  latitude: number;
+  longitude: number;
+  contactPhone: string;
+  plannedChargePointCount: number;
+  version: number;
+}
+
 export interface OwnerStationSummary {
+  contactPhone?: string;
   id: string;
   stationCode: string;
   name: string;
@@ -1113,6 +1127,7 @@ export interface OwnerRefundRetryPayload {
 /* ---------- ticket dispute escalation (BKG-057 baseline) ---------- */
 
 export interface TicketEscalation {
+  escalationId?: string;
   ticketId: string;
   requestedBy: string;
   requestedAt: string;
@@ -1412,6 +1427,9 @@ export interface Ticket {
   stationId: string | null;
   stationName: string | null;
   bookingId: string | null;
+  bookingCode?: string;
+  bookingStartAt?: string | null;
+  bookingEndAt?: string | null;
   reporterId?: string;
   reporterUserId?: string;
   reporterName: string;
@@ -1649,16 +1667,95 @@ export interface AdminRefundPolicyContext {
   ticketId: string;
   ticketVersion: number;
   escalationId: string;
+  /** Escalation still open — only then may Admin issue a new financial decision. */
+  active: boolean;
   bookingId: string;
+  bookingCode?: string;
+  packageAmountVnd?: number | null;
   bookingVersion: number;
   decisionVersion: number;
   bookingStatus: ApiBookingStatus;
   evaluatedAt: string;
-  eligibleRefundAmountVnd: number;
+  eligibleRefundAmountVnd: number | null;
   reviewEligibility: StationFailureEligibility;
+  grantEligibility?: StationFailureEligibility;
+  insufficientEligibility?: StationFailureEligibility;
   latestDecision?: ServiceFailureDecisionSummary | null;
   refundSummary?: ServiceFailureRefundSummary | null;
   historyDecisions: ServiceFailureDecisionSummary[];
+  dossier?: AdminBookingDossier | null;
+}
+
+/**
+ * Case-scoped booking dossier served by refund-policy-context. Derived from the
+ * ticket's own booking relation — the Admin never supplies a booking id.
+ */
+export interface AdminBookingDossier {
+  currency: string;
+  window: AdminBookingWindow;
+  snapshot: AdminBookingSnapshot;
+  policy: AdminBookingPolicy;
+  timeline: AdminBookingTimeline;
+  payment?: AdminDossierPayment | null;
+  receipt?: AdminDossierReceipt | null;
+  priceLines: AdminDossierPriceLine[];
+}
+
+export interface AdminBookingWindow {
+  startAt?: string | null;
+  endAt?: string | null;
+  durationMin: number;
+}
+
+export interface AdminBookingSnapshot {
+  stationName?: string | null;
+  stationAddress?: string | null;
+  chargePointCode?: string | null;
+  connectorCode?: string | null;
+}
+
+export interface AdminBookingPolicy {
+  version?: string | null;
+  cancellationGraceMin?: number | null;
+  checkInCloseBeforeEndMin?: number | null;
+  stationFailureRefundPercent?: number | null;
+  voluntaryRefundPercent?: number | null;
+}
+
+export interface AdminBookingTimeline {
+  expiresAt?: string | null;
+  paymentConfirmedAt?: string | null;
+  freeCancellationDeadline?: string | null;
+  checkInDeadline?: string | null;
+  checkedInAt?: string | null;
+  chargingStartedAt?: string | null;
+  completedAt?: string | null;
+  cancelledAt?: string | null;
+  cancellationReason?: string | null;
+}
+
+export interface AdminDossierPayment {
+  status: PaymentStatus;
+  amount: number;
+  paidAt?: string | null;
+  environment?: string;
+  needsReconciliation: boolean;
+}
+
+export interface AdminDossierReceipt {
+  receiptId: string;
+  transactionRef?: string | null;
+  amount: number;
+  currency?: string | null;
+  receivedAt?: string | null;
+  classification: 'APPLIED' | 'UNAPPLIED' | string;
+}
+
+export interface AdminDossierPriceLine {
+  label: string;
+  periodCode?: string | null;
+  durationMin: number;
+  amount: number;
 }
 
 export interface OwnerCancelBookingPayload {

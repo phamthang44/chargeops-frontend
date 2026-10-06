@@ -6,6 +6,7 @@
  * Keycloak token — the client never passes an owner id.
  */
 import type { HttpClient } from '../http';
+import { normalizeRefundPolicyContext } from './refundPolicyContext';
 import type { Services, TicketRoleOptions } from '../services';
 import type {
   OperationalBooking,
@@ -35,6 +36,7 @@ import type {
   PricingConfig,
   ProvisioningStatus,
   Station,
+  StationRegistrationDetail,
   StationOperationalStatusResponse,
   StationStaffMember,
   UserProfile,
@@ -251,6 +253,9 @@ function normalizeTicket(rawInput: any): Ticket {
     resolutionCycle: typeof rs?.resolutionCycle === 'number' ? rs.resolutionCycle : (typeof t?.resolutionCycle === 'number' ? t.resolutionCycle : 0),
     resolutionReason: rs?.resolutionReason || t?.resolutionReason || null,
     bookingId: bk?.bookingId || t?.bookingId,
+    bookingCode: bk?.code || t?.bookingCode,
+    bookingStartAt: bk?.startAt || t?.bookingStartAt || null,
+    bookingEndAt: bk?.endAt || t?.bookingEndAt || null,
     title,
     subject: o?.subject || t?.subject || title,
     description: o?.description || t?.description || '',
@@ -825,10 +830,11 @@ export function createRestServices(http: HttpClient): Services {
         http
           .get<Station[]>('/owner/stations/mine', params)
           .catch(() => http.get<Station[]>('/stations/mine', params)),
-      register: (input) =>
-        http
-          .post<Station>('/owner/stations', input)
-          .catch(() => http.post<Station>('/stations', input)),
+      // Keep the owner endpoint's error; a failed write must not retry on a legacy route.
+      register: (input) => http.post<Station>('/owner/stations', input),
+      registration: (id) => http.get<StationRegistrationDetail>(`/owner/stations/${id}/registration`),
+      updateRegistration: (id, version, input) => http.put<StationRegistrationDetail>(`/owner/stations/${id}/registration?version=${version}`, input),
+      withdrawRegistration: (id, version) => http.delete(`/owner/stations/${id}/registration?version=${version}`),
       updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
       changeOperationalStatus: (stationId, input) =>
         http.patch<StationOperationalStatusResponse>(`/owner/stations/${stationId}/operational-status`, input),
@@ -1587,7 +1593,11 @@ export function createRestServices(http: HttpClient): Services {
 
       getRefundPolicyContext: async (ticketId: string, escalationId: string) => {
         const res: any = await http.get(`/admin/tickets/${ticketId}/escalations/${escalationId}/refund-policy-context`);
-        return (res?.data ?? res) as AdminRefundPolicyContext;
+        const context = normalizeRefundPolicyContext(res?.data ?? res);
+        if (context.ticketId !== ticketId || context.escalationId !== escalationId) {
+          throw new Error('Refund policy context does not match the requested case');
+        }
+        return context;
       },
 
       reviewRefundPolicy: async (ticketId: string, escalationId: string, payload: AdminReviewRefundPolicyPayload, idempotencyKey: string) => {

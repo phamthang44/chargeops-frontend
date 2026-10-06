@@ -34,6 +34,7 @@ import type {
   EscalateTicketPayload,
   ReviewTicketEscalationPayload,
   Station,
+  StationRegistrationDetail,
   StationApprovalDetail,
   StationApprovalSummary,
   StationAsset,
@@ -56,6 +57,7 @@ import type {
   OwnerBookingSummary,
   OperationalBooking,
   AdminRefundPolicyContext,
+  AdminBookingDossier,
   AdminReviewRefundPolicyPayload,
   AdminReviewRefundPolicyResponse,
   OwnerAcceptStationFailurePayload,
@@ -1089,6 +1091,10 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           city: cityName,
           address: addressText,
           ownerName: 'EVGo Co.',
+          addressLine: input.addressLine,
+          contactPhone: input.contactPhone,
+          plannedChargePointCount: chargers,
+          ...{ description: input.description, provinceCode: input.provinceCode, wardCode: input.wardCode, latitude: input.latitude, longitude: input.longitude, version: 0 },
           chargerCount: chargers,
           onlineCount: 0,
           status: 'pending',
@@ -1101,6 +1107,26 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         };
         db.ownerStations.push(st);
         return { ...st };
+      },
+      async registration(id) {
+        await delay();
+        const st = db.ownerStations.find((s) => s.id === id);
+        if (!st) throw new Error('Station not found');
+        return { ...st } as StationRegistrationDetail;
+      },
+      async updateRegistration(id, version, input) {
+        const st = await this.registration(id);
+        if (!['pending', 'PENDING_APPROVAL'].includes(st.status) || st.version !== version) throw new Error('Registration changed. Reload and try again.');
+        const province = MOCK_PROVINCES.find((p) => p.code === input.provinceCode);
+        const ward = MOCK_WARDS[input.provinceCode]?.find((w) => w.code === input.wardCode);
+        const updated = { ...st, ...input, provinceName: province?.fullName, wardName: ward?.fullName, address: undefined, version: version + 1 };
+        Object.assign(db.ownerStations.find((s) => s.id === id)!, updated);
+        return updated;
+      },
+      async withdrawRegistration(id, version) {
+        const st = await this.registration(id);
+        if (!['pending', 'PENDING_APPROVAL'].includes(st.status) || st.version !== version) throw new Error('Registration changed. Reload and try again.');
+        Object.assign(db.ownerStations.find((s) => s.id === id)!, { status: 'WITHDRAWN', version: version + 1 });
       },
       async updateAmenities(id, amenities) {
         await delay();
@@ -3156,22 +3182,108 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const ticket = db.tickets.find((t) => t.id === ticketId);
         const bookingId = ticket?.bookingId || 'BKG-01';
         const b = db.bookings.find((x) => x.id === bookingId);
+        const active = ticket?.status !== 'CLOSED';
+        const paid = b ? b.status !== 'pending' : false;
+        const shift = (iso: string | null | undefined, minutes: number): string | null => {
+          if (!iso) return null;
+          const d = new Date(iso);
+          if (Number.isNaN(d.getTime())) return null;
+          d.setMinutes(d.getMinutes() + minutes);
+          const p = (n: number) => String(n).padStart(2, '0');
+          return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        };
+        const hhmm = (iso: string | null | undefined): string | null => (iso ? iso.slice(11, 16) : null);
+        const dossier: AdminBookingDossier | null = b
+          ? {
+              currency: 'VND',
+              window: {
+                startAt: b.startAt ?? null,
+                endAt: b.endAt ?? null,
+                durationMin: b.durationMin ?? 0,
+              },
+              snapshot: {
+                stationName: b.stationName ?? null,
+                stationAddress: null,
+                chargePointCode: (b as any).connectorId ?? null,
+                connectorCode: (b as any).connector ?? null,
+              },
+              policy: {
+                version: 'booking-v4.9',
+                cancellationGraceMin: 10,
+                checkInCloseBeforeEndMin: 15,
+                stationFailureRefundPercent: 100,
+                voluntaryRefundPercent: 0,
+              },
+              timeline: {
+                expiresAt: b.expiresAt ?? null,
+                paymentConfirmedAt: b.paymentConfirmedAt ?? null,
+                freeCancellationDeadline: b.freeCancellationDeadline ?? null,
+                checkInDeadline: shift(b.startAt, 15),
+                checkedInAt: b.status === 'checkedin' || b.status === 'charging' || b.status === 'completed'
+                  ? shift(b.startAt, 2)
+                  : null,
+                chargingStartedAt: b.status === 'charging' || b.status === 'completed'
+                  ? shift(b.startAt, 6)
+                  : null,
+                completedAt: b.status === 'completed' ? b.endAt ?? null : null,
+                cancelledAt: b.status === 'cancelled'
+                  ? shift(b.paymentConfirmedAt ?? b.createdAt, 5)
+                  : null,
+                cancellationReason: b.status === 'cancelled' ? 'DRIVER_CANCELLED' : null,
+              },
+              payment: paid
+                ? {
+                    status: b.refundVnd ? 'PARTIALLY_REFUNDED' : 'PAID',
+                    amount: b.amountVnd,
+                    paidAt: b.paymentConfirmedAt ?? null,
+                    environment: 'SIMULATOR',
+                    needsReconciliation: false,
+                  }
+                : { status: 'PENDING', amount: b.amountVnd, paidAt: null, environment: 'SIMULATOR', needsReconciliation: false },
+              receipt: paid
+                ? {
+                    receiptId: `rcpt-${b.id}`,
+                    transactionRef: `SIM-TX-${b.id.slice(-6)}`,
+                    amount: b.amountVnd,
+                    currency: 'VND',
+                    receivedAt: b.paymentConfirmedAt ?? b.startAt ?? null,
+                    classification: 'APPLIED',
+                  }
+                : null,
+              priceLines: (b.priceLines ?? []).map((line) => ({
+                label: `${hhmm(line.fromAt) ?? '?'}–${hhmm(line.toAt) ?? '?'}`,
+                periodCode: line.rateKind,
+                durationMin: Math.max(
+                  0,
+                  Math.round((new Date(line.toAt).getTime() - new Date(line.fromAt).getTime()) / 60000),
+                ),
+                amount: line.amountVnd,
+              })),
+            }
+          : null;
         return {
           ticketId,
           ticketVersion: ticket?.version ?? 1,
           escalationId,
+          active,
           bookingId,
+          bookingCode: b ? ((b as any).code || b.id.toUpperCase()) : undefined,
+          packageAmountVnd: b?.amountVnd ?? null,
           bookingVersion: 1,
           decisionVersion: 0,
           bookingStatus: (b?.status === 'checkedin' ? 'CHECKED_IN' : (b?.status || 'confirmed').toUpperCase()) as ApiBookingStatus,
           evaluatedAt: new Date().toISOString(),
           eligibleRefundAmountVnd: b?.amountVnd ?? 100000,
           reviewEligibility: {
-            allowed: true,
+            allowed: active,
+            reason: active ? 'ELIGIBLE' : 'ESCALATION_NOT_ACTIVE',
           },
+          grantEligibility: { allowed: active, reason: active ? 'ELIGIBLE' : 'ESCALATION_NOT_ACTIVE' },
+          insufficientEligibility: { allowed: active, reason: active ? 'ELIGIBLE' : 'ESCALATION_NOT_ACTIVE' },
           latestDecision: null,
           refundSummary: null,
           historyDecisions: [],
+          dossier,
         };
       },
 

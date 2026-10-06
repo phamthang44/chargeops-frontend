@@ -43,7 +43,9 @@ export function TicketDisputeEscalationCard({
 
   if (!isStationTicket) return null;
 
-  const isEscalated = Boolean(escalation ? !escalation.resolvedAt : ticket.isEscalated);
+  const validEscalation =
+    escalation?.ticketId ? escalation : (ticket.escalation?.ticketId ? ticket.escalation : null);
+  const isEscalated = Boolean(validEscalation ? !validEscalation.resolvedAt : ticket.isEscalated);
   const isClosed = ticket.status === 'CLOSED';
 
   // If ticket is closed, incident is finished - hide active escalation cards
@@ -82,7 +84,7 @@ export function TicketDisputeEscalationCard({
           )}
         </Text>
 
-        {escalation?.reason && (
+        {validEscalation?.reason && (
           <View
             style={[
               styles.reasonBox,
@@ -96,7 +98,7 @@ export function TicketDisputeEscalationCard({
               {t('ticket.escalation.reasonLabel', 'Nội dung yêu cầu xem xét:')}
             </Text>
             <Text style={[styles.reasonText, { color: isDark ? '#F5F3FF' : '#4C1D95' }]}>
-              “{escalation.reason}”
+              “{validEscalation.reason}”
             </Text>
           </View>
         )}

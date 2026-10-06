@@ -178,19 +178,20 @@ function FieldShell({ error, children }: FieldShellProps) {
   }, [error, glow, shake]);
 
   return (
-    <Animated.View
-      style={[
-        styles.shell,
-        {
-          shadowColor: themeColors.error,
-          shadowOpacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.35] }),
-          shadowRadius: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }),
-          elevation: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 5] }),
-          transform: [{ translateX: shake }],
-        },
-      ]}
-    >
-      {children}
+    <Animated.View style={{ transform: [{ translateX: shake }] }}>
+      <Animated.View
+        style={[
+          styles.shell,
+          {
+            shadowColor: themeColors.error,
+            shadowOpacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.35] }),
+            shadowRadius: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }),
+            elevation: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 5] }),
+          },
+        ]}
+      >
+        {children}
+      </Animated.View>
     </Animated.View>
   );
 }

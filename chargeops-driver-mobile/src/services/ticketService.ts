@@ -28,12 +28,27 @@ export function __clearMockTickets() {
 }
 
 /** Tạo UUIDv4 cho Client-Message-Id tùy chọn của tin nhắn ticket */
-function generateUUID(): string {
+export function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+export function isUUID(str?: string | null): boolean {
+  return Boolean(
+    str &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+  );
+}
+
+export function toValidUUID(input?: string | null): string {
+  if (!input) return generateUUID();
+  if (isUUID(input)) return input;
+  const stripped = input.replace(/^temp-/, '');
+  if (isUUID(stripped)) return stripped;
+  return generateUUID();
 }
 
 export class TicketServiceError extends Error {
@@ -113,6 +128,33 @@ export function getLocalizedTicketErrorMessage(err: any, t: any): string {
     msg.includes('only the current handler can reply')
   ) {
     return t('ticket.errors.notCurrentHandler', 'Phiếu hỗ trợ đang do nhân sự khác phụ trách; chỉ người phụ trách hiện tại mới có quyền phản hồi.');
+  }
+
+  if (
+    code === 'SYS_003' ||
+    code === 'VALIDATION_FAILED' ||
+    code === 'INVALID_REQUEST' ||
+    key === 'validation.failed' ||
+    key === 'error.validation' ||
+    msg.toLowerCase().includes('validation failed') ||
+    msg.toLowerCase().includes('invalid uuid string')
+  ) {
+    return t(
+      'ticket.errors.validationFailed',
+      'Dữ liệu gửi lên không hợp lệ hoặc thiếu thông tin bắt buộc. Vui lòng kiểm tra lại.'
+    );
+  }
+
+  if (
+    code === 'SYS_001' ||
+    code === 'SYS_002' ||
+    key === 'common.internalError' ||
+    key === 'common.databaseError'
+  ) {
+    return t(
+      'ticket.errors.internalError',
+      'Hệ thống đang gặp sự cố gián đoạn. Vui lòng thử lại sau giây lát.'
+    );
   }
 
   return msg || t('ticket.errors.generic', 'Đã xảy ra lỗi khi xử lý phiếu hỗ trợ.');
@@ -287,7 +329,8 @@ export function normalizeTicket(rawInput: any): Ticket {
         })
       : [];
 
-    const esc = raw.escalation || o.escalation || null;
+    const rawEsc = raw.escalation || o.escalation || null;
+    const esc = rawEsc && typeof rawEsc === 'object' && rawEsc.ticketId ? rawEsc : null;
     const isEsc = Boolean(esc ? !esc.resolvedAt : (raw.isEscalated || o.isEscalated));
 
     return {
@@ -323,7 +366,8 @@ export function normalizeTicket(rawInput: any): Ticket {
   const rawCreatedAt = raw.createdAt;
   const dateObj = parseSafeDate(rawCreatedAt);
   const createdAtIso = dateObj ? dateObj.toISOString() : new Date().toISOString();
-  const esc = raw.escalation || null;
+  const rawEsc = raw.escalation || null;
+  const esc = rawEsc && typeof rawEsc === 'object' && rawEsc.ticketId ? rawEsc : null;
 
   const rawMessages = raw.messages;
   const messages: TicketMessage[] = Array.isArray(rawMessages)
@@ -352,7 +396,7 @@ export function normalizeTicket(rawInput: any): Ticket {
     messages,
     findings: Array.isArray(raw.findings) ? raw.findings : [],
     refundIds: Array.isArray(raw.refundIds) ? raw.refundIds.map(String) : [],
-    isEscalated: Boolean(esc ? !esc.resolvedAt : raw.isEscalated),
+    isEscalated: Boolean(esc ? !esc.resolvedAt : Boolean(raw.isEscalated)),
     escalation: esc,
   };
 }
@@ -437,7 +481,7 @@ export async function replyTicket(
   clientMessageId?: string,
   accessToken?: string | null
 ): Promise<TicketMessage> {
-  const effectiveKey = clientMessageId || generateUUID();
+  const effectiveKey = toValidUUID(clientMessageId);
 
   if (!isMockMode()) {
     const token = resolveAccessToken(accessToken);
@@ -553,7 +597,8 @@ export async function getTicketEscalation(
 
     if (res.ok) {
       const json = await res.json();
-      return json?.data ?? json;
+      const raw = json && typeof json === 'object' && 'data' in json ? json.data : json;
+      return raw && typeof raw === 'object' && raw.ticketId ? raw : null;
     }
     if (res.status === 404) return null;
     const errJson = await res.json().catch(() => null);

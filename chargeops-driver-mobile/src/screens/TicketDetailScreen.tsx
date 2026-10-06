@@ -36,13 +36,14 @@ import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
+  confirmTicketClosed,
+  continueTicket,
+  generateUUID,
   getLocalizedTicketErrorMessage,
   getTicketDetail,
   getTicketEscalation,
   replyTicket,
   requestTicketEscalation,
-  confirmTicketClosed,
-  continueTicket,
 } from '@/services/ticketService';
 import { isMockMode } from '@/services/stationService';
 import { formatDateTime } from '@/utils/format';
@@ -233,7 +234,8 @@ export function TicketDetailScreen() {
     if (!replyText.trim() || sending || ticket?.status === 'RESOLVED') return;
 
     const messageContent = replyText.trim();
-    const tempId = `temp-${Date.now()}`;
+    const msgUuid = generateUUID();
+    const tempId = `temp-${msgUuid}`;
     const isReporter = profile?.id != null && ticket?.reporterId === profile.id;
     const optimisticMsg: TicketMessage = {
       messageId: tempId,
@@ -263,7 +265,7 @@ export function TicketDetailScreen() {
     setSending(true);
 
     try {
-      const serverMsg = await replyTicket(ticketId, messageContent, tempId);
+      const serverMsg = await replyTicket(ticketId, messageContent, msgUuid);
 
       // 2. Replace optimistic message with server message
       setTicket(prev => {
@@ -445,7 +447,7 @@ export function TicketDetailScreen() {
         <View style={styles.headerRightAction}>
           {isClosed || isResolved ? (
             <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
-          ) : ticket.isEscalated || (escalation && !escalation.resolvedAt) ? (
+          ) : ticket.isEscalated || (escalation?.ticketId && !escalation.resolvedAt) ? (
             <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang được Admin xem xét')} dot />
           ) : (
             <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
@@ -607,7 +609,7 @@ export function TicketDetailScreen() {
               )}
 
               {/* Dispute Escalation & 24h SLA Countdown Card */}
-              {(ticket.escalation || escalation)?.resolvedAt && (
+              {(ticket.escalation?.ticketId || escalation?.ticketId) && (ticket.escalation || escalation)?.resolvedAt && (
                 <View style={[styles.resolvedInputNotice, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
                   <Text style={{ color: themeColors.textStrong, fontWeight: '700' }}>
                     {(ticket.escalation || escalation)?.resolutionType === 'RETURN_TO_STATION'
@@ -621,7 +623,7 @@ export function TicketDetailScreen() {
               )}
               <TicketDisputeEscalationCard
                 ticket={ticket}
-                escalation={ticket.escalation || escalation}
+                escalation={ticket.escalation?.ticketId ? ticket.escalation : (escalation?.ticketId ? escalation : null)}
                 onOpenEscalate={isResolved ? undefined : () => setIsEscalateModalVisible(true)}
               />
 

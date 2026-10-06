@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  Modal,
   Button,
   Card,
   Drawer,
@@ -38,6 +39,8 @@ import {
   type StationStatusHistory,
   type StationStaffMember,
 } from '@chargeops/api';
+import { RegisterStationModal } from './RegisterStationModal';
+import { getApiErrorMessage } from '../../../i18n';
 import { ChangeOperationalStatusModal } from './ChangeOperationalStatusModal';
 
 export interface StationDetailDrawerProps {
@@ -83,6 +86,8 @@ export function StationDetailDrawer({
   const [activeTab, setActiveTab] = useState<StationTab>('overview');
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [changeOperationalStatusOpen, setChangeOperationalStatusOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   // Local state for amenities editing in tab 3
   const [selectedAmenities, setSelectedAmenities] = useState<Amenity[]>([]);
@@ -98,6 +103,27 @@ export function StationDetailDrawer({
   }, [station]);
 
   const stationId = station?.id;
+  const isPending = station?.status === 'PENDING_APPROVAL' || station?.status === 'pending';
+  const registrationQ = useQuery({
+    queryKey: ['stations', 'registration', stationId],
+    queryFn: () => api.stations.registration(stationId!),
+    enabled: Boolean(stationId) && open && isPending,
+  });
+  const withdrawMutation = useMutation({
+    mutationFn: () => api.stations.withdrawRegistration(stationId!, registrationQ.data!.version),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['stations'] });
+      toast(t('stations.edit.withdrawSuccess'), 'success');
+      setWithdrawOpen(false);
+      onClose();
+    },
+    onError: (e) => {
+      toast(getApiErrorMessage(e), 'error');
+      registrationQ.refetch();
+      qc.invalidateQueries({ queryKey: ['stations', 'mine'] });
+    },
+  });
+  useEffect(() => { setEditOpen(false); setWithdrawOpen(false); }, [stationId, open]);
 
   // 1. Hardware & Chargers
   const chargePointsQ = useQuery({
@@ -255,18 +281,38 @@ export function StationDetailDrawer({
         {/* Navigation Tabs */}
         <SegmentedControl<StationTab>
           segments={[
-            { key: 'overview', label: 'Tổng quan' },
-            { key: 'gallery', label: 'Thư viện ảnh' },
-            { key: 'hardware', label: 'Thiết bị & Trụ sạc' },
-            { key: 'hours_amenities', label: 'Giờ & Tiện ích' },
-            { key: 'license', label: 'Giấy phép' },
-            { key: 'staff', label: 'Nhân viên' },
-            { key: 'timeline', label: 'Tiến trình' },
+            { key: 'overview', label: t('stations.drawer.tabs.overview', { defaultValue: 'Tổng quan' }) },
+            { key: 'gallery', label: t('stations.drawer.tabs.gallery', { defaultValue: 'Thư viện ảnh' }) },
+            { key: 'hardware', label: t('stations.drawer.tabs.hardware', { defaultValue: 'Thiết bị & Trụ sạc' }) },
+            { key: 'hours_amenities', label: t('stations.drawer.tabs.hours_amenities', { defaultValue: 'Giờ & Tiện ích' }) },
+            { key: 'license', label: t('stations.drawer.tabs.license', { defaultValue: 'Giấy phép' }) },
+            { key: 'staff', label: t('stations.drawer.tabs.staff', { defaultValue: 'Nhân viên' }) },
+            { key: 'timeline', label: t('stations.drawer.tabs.timeline', { defaultValue: 'Tiến trình' }) },
           ]}
           active={activeTab}
           onChange={setActiveTab}
           accent="owner"
         />
+
+        {isPending && (
+          <Card className="p-4 flex flex-col gap-3">
+            <div className="text-[13px] text-muted">{t('stations.edit.subtitle')}</div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="secondary" disabled={!registrationQ.data || registrationQ.isFetching} onClick={() => setEditOpen(true)}>{t('stations.edit.title')}</Button>
+              <Button size="sm" variant="danger-soft" disabled={!registrationQ.data || registrationQ.isFetching} onClick={() => setWithdrawOpen(true)}>{t('stations.edit.withdraw')}</Button>
+            </div>
+            {registrationQ.isError && <div className="text-[12px] text-bad">{getApiErrorMessage(registrationQ.error)} <button className="underline" onClick={() => registrationQ.refetch()}>{t('stations.edit.retry')}</button></div>}
+          </Card>
+        )}
+        {editOpen && registrationQ.data && <RegisterStationModal key={stationId} open={editOpen} registration={registrationQ.data} onClose={() => setEditOpen(false)} />}
+        <Modal open={withdrawOpen} onClose={() => !withdrawMutation.isPending && setWithdrawOpen(false)} maxWidth={440}>
+          <h2 className="text-[17px] font-bold">{t('stations.edit.withdraw')}</h2>
+          <p className="mt-3 text-[13px] text-muted">{t('stations.edit.withdrawConfirm', { name: station.name })}</p>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button variant="secondary" disabled={withdrawMutation.isPending} onClick={() => setWithdrawOpen(false)}>{t('stations.register.cancelBtn')}</Button>
+            <Button variant="danger" disabled={withdrawMutation.isPending || !registrationQ.data} onClick={() => withdrawMutation.mutate()}>{t('stations.edit.withdraw')}</Button>
+          </div>
+        </Modal>
 
         {/* ==================== TAB 1: OVERVIEW ==================== */}
         {activeTab === 'overview' && (
@@ -333,7 +379,7 @@ export function StationDetailDrawer({
                   onClick={() => setActiveTab('license')}
                   className="mt-2 inline-flex items-center gap-1 font-semibold text-warn-deep hover:underline"
                 >
-                  <span>Xem chi tiết License & Gia hạn</span>
+                  <span>{t('stations.detail.viewLicenseAndRenew', { defaultValue: 'Xem chi tiết License & Gia hạn' })}</span>
                   <span>→</span>
                 </button>
               </div>
@@ -342,17 +388,17 @@ export function StationDetailDrawer({
             {/* Rejection Reason Alert */}
             {(station.status === 'REJECTED' || station.status === 'rejected') && station.rejectionReason && (
               <div className="rounded-[10px] border border-bad-border bg-bad-soft p-3 text-[12px] text-bad-deep">
-                <div className="font-bold">Lý do từ chối phê duyệt từ Quản trị viên:</div>
+                <div className="font-bold">{t('stations.detail.rejectionReasonTitle', { defaultValue: 'Lý do từ chối phê duyệt từ Quản trị viên:' })}</div>
                 <div className="mt-1">{station.rejectionReason}</div>
               </div>
             )}
 
             {/* Basic Info Card */}
             <Card className="p-4 flex flex-col gap-3">
-              <div className="text-[13px] font-bold text-ink">Thông tin Định danh & Liên hệ</div>
+              <div className="text-[13px] font-bold text-ink">{t('stations.detail.identityAndContact', { defaultValue: 'Thông tin Định danh & Liên hệ' })}</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12.5px]">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-faint font-medium">Mã trạm hệ thống</span>
+                  <span className="text-faint font-medium">{t('stations.detail.stationCode', { defaultValue: 'Mã trạm hệ thống' })}</span>
                   <div className="flex items-center gap-2 font-mono font-bold text-ink">
                     <span>{station.stationCode || station.id}</span>
                     <button
@@ -366,15 +412,15 @@ export function StationDetailDrawer({
                 </div>
 
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-faint font-medium">Số điện thoại liên hệ</span>
+                  <span className="text-faint font-medium">{t('stations.detail.contactPhone', { defaultValue: 'Số điện thoại liên hệ' })}</span>
                   <div className="flex items-center gap-1.5 font-medium text-ink">
                     <IconPhone size={14} className="text-faint" />
-                    <span>{(station as any).contactPhone || '—'}</span>
+                    <span>{station.contactPhone || registrationQ.data?.contactPhone || '—'}</span>
                   </div>
                 </div>
 
                 <div className="col-span-full flex flex-col gap-0.5 border-t border-hairline pt-2.5">
-                  <span className="text-faint font-medium">Địa chỉ chi tiết</span>
+                  <span className="text-faint font-medium">{t('stations.detail.fullAddress', { defaultValue: 'Địa chỉ chi tiết' })}</span>
                   <div className="flex items-start gap-1.5 font-medium text-ink">
                     <IconPin size={15} className="text-faint mt-0.5 shrink-0" />
                     <span>{fullAddress}</span>
@@ -384,7 +430,7 @@ export function StationDetailDrawer({
                 {((station as any).latitude || (station as any).longitude) && (
                   <div className="col-span-full flex items-center justify-between border-t border-hairline pt-2.5">
                     <div className="flex items-center gap-2 text-faint">
-                      <span>Tọa độ GPS:</span>
+                      <span>{t('stations.detail.gpsCoordinates', { defaultValue: 'Tọa độ GPS:' })}</span>
                       <span className="font-mono text-ink">
                         {(station as any).latitude}, {(station as any).longitude}
                       </span>

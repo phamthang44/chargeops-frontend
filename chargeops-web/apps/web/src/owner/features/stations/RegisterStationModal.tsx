@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi, type RegisterStationRequest } from '@chargeops/api';
+import { useApi, type StationRegistrationDetail, type RegisterStationRequest } from '@chargeops/api';
 import { Button, FormField, IconHome, Modal, Select, TextInput, useToast } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../../i18n';
 
@@ -34,13 +34,23 @@ const EMPTY: FormState = {
  * client-side here and re-checked by the backend. Business licence is verified
  * off-platform (no document upload in this screen).
  */
-export function RegisterStationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function RegisterStationModal({ open, onClose, registration }: { open: boolean; onClose: () => void; registration?: StationRegistrationDetail }) {
   const { t } = useTranslation('owner');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
-  const [form, setForm] = useState<FormState>(EMPTY);
+  const [form, setForm] = useState<FormState>(() => registration ? {
+    name: registration.name, addressLine: registration.addressLine, description: registration.description ?? '',
+    provinceCode: registration.provinceCode, wardCode: registration.wardCode,
+    latitude: String(registration.latitude), longitude: String(registration.longitude),
+    contactPhone: registration.contactPhone, plannedChargePointCount: registration.plannedChargePointCount,
+  } : EMPTY);
   const [showErrors, setShowErrors] = useState(false);
+  const [serverErrors, setServerErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const setField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
+    setForm((f) => ({ ...f, [field]: value, ...(field === 'provinceCode' ? { wardCode: '' } : {}) }));
+    setServerErrors((errors) => ({ ...errors, [field]: undefined, ...(field === 'provinceCode' ? { wardCode: undefined } : {}) }));
+  };
 
   // Fetch provinces dynamically from Location API
   const provincesQ = useQuery({
@@ -84,33 +94,72 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
     }
   }, [wardsQ.data]);
 
-  const nameInvalid = !form.name.trim();
-  const addrInvalid = !form.addressLine.trim();
-  const provinceInvalid = !form.provinceCode;
-  const wardInvalid = !form.wardCode;
-  const phoneInvalid = !form.contactPhone.trim() || !/^\+?[0-9]{9,15}$/.test(form.contactPhone.replace(/\s+/g, ''));
-  const latInvalid = isNaN(Number(form.latitude)) || Number(form.latitude) < -90 || Number(form.latitude) > 90;
-  const lngInvalid = isNaN(Number(form.longitude)) || Number(form.longitude) < -180 || Number(form.longitude) > 180;
-  const countInvalid = Number(form.plannedChargePointCount) < 1;
+  // Match RegisterStationRequest and PhoneValidator, including formatted numbers and +84.
+  const cleanPhone = form.contactPhone.replace(/\D/g, '').replace(/^84/, '0');
+  const validationKeys: Partial<Record<keyof FormState, string>> = {};
+  const requiredText = (field: 'name' | 'addressLine' | 'contactPhone', key: string, max: number) => {
+    if (!form[field].trim()) validationKeys[field] = 'validation.station.' + key + '.required';
+    else if (form[field].trim().length > max) validationKeys[field] = 'validation.station.' + key + '.maxLength';
+  };
+  requiredText('name', 'name', 100);
+  requiredText('addressLine', 'address', 200);
+  requiredText('contactPhone', 'contactPhone', 20);
+  if (!validationKeys.contactPhone && !/^0[35789]\d{8}$/.test(cleanPhone)) {
+    validationKeys.contactPhone = 'validation.station.contactPhone.invalid';
+  }
+  if (form.description.trim().length > 500) validationKeys.description = 'validation.station.description.maxLength';
+  for (const field of ['provinceCode', 'wardCode'] as const) {
+    if (!form[field]) validationKeys[field] = 'validation.station.' + field + '.required';
+    else if (!/^\d+$/.test(form[field])) validationKeys[field] = 'validation.station.' + field + '.invalid';
+  }
+  for (const [field, limit] of [['latitude', 90], ['longitude', 180]] as const) {
+    if (!form[field].trim()) validationKeys[field] = 'validation.station.' + field + '.required';
+    else if (!Number.isFinite(Number(form[field])) || Math.abs(Number(form[field])) > limit) {
+      validationKeys[field] = 'validation.station.' + field + '.invalid';
+    }
+  }
+  if (!Number.isInteger(form.plannedChargePointCount) || form.plannedChargePointCount < 1 || form.plannedChargePointCount > 2147483647) {
+    validationKeys.plannedChargePointCount = 'validation.station.plannedChargePointCount.min';
+  }
+  const errorFor = (field: keyof FormState) =>
+    serverErrors[field] || (showErrors && validationKeys[field] ? getApiErrorMessage({ messageKey: validationKeys[field] }) : undefined);
 
   const mutation = useMutation({
-    mutationFn: (input: RegisterStationRequest) => api.stations.register(input),
+    mutationFn: (input: RegisterStationRequest) => registration
+      ? api.stations.updateRegistration(registration.id, registration.version, input)
+      : api.stations.register(input),
     onSuccess: (station) => {
       qc.invalidateQueries({ queryKey: ['stations', 'mine'] });
-      toast(t('stations.register.toastSuccess', { name: station.name }), 'success');
+      qc.invalidateQueries({ queryKey: ['stations', 'registration'] });
+      toast(registration ? t('stations.edit.toastSuccess') : t('stations.register.toastSuccess', { name: station.name }), 'success');
       close();
     },
-    onError: (e) => toast(getApiErrorMessage(e), 'error'),
+    onError: (e) => {
+      const details = (e as { details?: unknown }).details;
+      const errors: Partial<Record<keyof FormState, string>> = {};
+      if (details && typeof details === 'object' && !Array.isArray(details)) {
+        for (const [field, failure] of Object.entries(details)) {
+          if (Object.prototype.hasOwnProperty.call(EMPTY, field) && failure && typeof failure === 'object') {
+            errors[field as keyof FormState] = getApiErrorMessage(failure);
+          }
+        }
+      }
+      setServerErrors(errors);
+      toast(Object.values(errors).join('\n') || getApiErrorMessage(e), 'error');
+    },
   });
 
   const close = () => {
     setForm(EMPTY);
     setShowErrors(false);
+    setServerErrors({});
+    mutation.reset();
     onClose();
   };
 
   const submit = () => {
-    if (nameInvalid || addrInvalid || provinceInvalid || wardInvalid || phoneInvalid || latInvalid || lngInvalid || countInvalid) {
+    setServerErrors({});
+    if (Object.keys(validationKeys).length > 0) {
       setShowErrors(true);
       return;
     }
@@ -134,9 +183,9 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
           <IconHome size={20} className="text-owner" />
         </span>
         <div>
-          <div className="text-[17px] font-bold">{t('stations.register.title')}</div>
+          <div className="text-[17px] font-bold">{t(registration ? 'stations.edit.title' : 'stations.register.title')}</div>
           <div className="mt-0.5 text-[12px] text-muted">
-            {t('stations.register.subtitle')}
+            {t(registration ? 'stations.edit.subtitle' : 'stations.register.subtitle')}
           </div>
         </div>
       </div>
@@ -144,26 +193,22 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
       <div className="max-h-[60vh] overflow-y-auto pr-1 flex flex-col gap-[14px]">
         <FormField
           label={t('stations.register.stationName')}
-          hint={
-            showErrors && nameInvalid
-              ? t('stations.register.nameRequired')
-              : t('stations.register.nameHelp')
-          }
-          error={showErrors && nameInvalid}
+          hint={errorFor('name') || t('stations.register.nameHelp')}
+          error={Boolean(errorFor('name'))}
         >
           <TextInput
             value={form.name}
-            onChange={(name) => setForm((f) => ({ ...f, name }))}
+            onChange={(name) => setField('name', name)}
             placeholder={t('stations.register.namePlaceholder')}
-            invalid={showErrors && nameInvalid}
+            invalid={Boolean(errorFor('name'))}
           />
         </FormField>
 
         <div className="grid grid-cols-2 gap-[11px]">
-          <FormField label={t('stations.register.province')}>
+          <FormField label={t('stations.register.province')} hint={errorFor('provinceCode')} error={Boolean(errorFor('provinceCode'))}>
             <Select
               value={form.provinceCode}
-              onChange={(provinceCode) => setForm((f) => ({ ...f, provinceCode, wardCode: '' }))}
+              onChange={(provinceCode) => setField('provinceCode', provinceCode)}
               options={provinceOptions}
               accent="owner"
               searchable
@@ -172,10 +217,10 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
             />
           </FormField>
 
-          <FormField label={t('stations.register.ward')}>
+          <FormField label={t('stations.register.ward')} hint={errorFor('wardCode')} error={Boolean(errorFor('wardCode'))}>
             <Select
               value={form.wardCode}
-              onChange={(wardCode) => setForm((f) => ({ ...f, wardCode }))}
+              onChange={(wardCode) => setField('wardCode', wardCode)}
               options={wardOptions}
               accent="owner"
               searchable
@@ -187,40 +232,37 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
 
         <FormField
           label={t('stations.register.address')}
-          hint={
-            showErrors && addrInvalid
-              ? t('stations.register.addressRequired')
-              : t('stations.register.addressHelp')
-          }
-          error={showErrors && addrInvalid}
+          hint={errorFor('addressLine') || t('stations.register.addressHelp')}
+          error={Boolean(errorFor('addressLine'))}
         >
           <TextInput
             value={form.addressLine}
-            onChange={(addressLine) => setForm((f) => ({ ...f, addressLine }))}
+            onChange={(addressLine) => setField('addressLine', addressLine)}
             placeholder={t('stations.register.addressPlaceholder')}
-            invalid={showErrors && addrInvalid}
+            invalid={Boolean(errorFor('addressLine'))}
           />
         </FormField>
 
         <div className="grid grid-cols-2 gap-[11px]">
           <FormField
             label={t('stations.register.contactPhone')}
-            hint={showErrors && phoneInvalid ? t('stations.register.contactPhoneRequired') : undefined}
-            error={showErrors && phoneInvalid}
+            hint={errorFor('contactPhone')}
+            error={Boolean(errorFor('contactPhone'))}
           >
             <TextInput
               value={form.contactPhone}
-              onChange={(contactPhone) => setForm((f) => ({ ...f, contactPhone }))}
+              onChange={(contactPhone) => setField('contactPhone', contactPhone)}
               placeholder={t('stations.register.contactPhonePlaceholder')}
-              invalid={showErrors && phoneInvalid}
+              invalid={Boolean(errorFor('contactPhone'))}
             />
           </FormField>
 
-          <FormField label={t('stations.register.plannedChargers')}>
+          <FormField label={t('stations.register.plannedChargers')} hint={errorFor('plannedChargePointCount')} error={Boolean(errorFor('plannedChargePointCount'))}>
             <TextInput
+              invalid={Boolean(errorFor('plannedChargePointCount'))}
               value={String(form.plannedChargePointCount)}
               onChange={(v) =>
-                setForm((f) => ({ ...f, plannedChargePointCount: Number(v.replace(/\D/g, '')) || 0 }))
+                setField('plannedChargePointCount', Number(v.replace(/\D/g, '')) || 0)
               }
               mono
             />
@@ -228,31 +270,32 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
         </div>
 
         <div className="grid grid-cols-2 gap-[11px]">
-          <FormField label={t('stations.register.latitude')}>
+          <FormField label={t('stations.register.latitude')} hint={errorFor('latitude')} error={Boolean(errorFor('latitude'))}>
             <TextInput
               value={form.latitude}
-              onChange={(latitude) => setForm((f) => ({ ...f, latitude }))}
-              placeholder="VD: 21.0285"
+              onChange={(latitude) => setField('latitude', latitude)}
+              placeholder={t('stations.register.latitudePlaceholder', { defaultValue: 'VD: 21.0285' })}
               mono
-              invalid={showErrors && latInvalid}
+              invalid={Boolean(errorFor('latitude'))}
             />
           </FormField>
 
-          <FormField label={t('stations.register.longitude')}>
+          <FormField label={t('stations.register.longitude')} hint={errorFor('longitude')} error={Boolean(errorFor('longitude'))}>
             <TextInput
               value={form.longitude}
-              onChange={(longitude) => setForm((f) => ({ ...f, longitude }))}
-              placeholder="VD: 105.8542"
+              onChange={(longitude) => setField('longitude', longitude)}
+              placeholder={t('stations.register.longitudePlaceholder', { defaultValue: 'VD: 105.8542' })}
               mono
-              invalid={showErrors && lngInvalid}
+              invalid={Boolean(errorFor('longitude'))}
             />
           </FormField>
         </div>
 
-        <FormField label={t('stations.register.description')}>
+        <FormField label={t('stations.register.description')} hint={errorFor('description')} error={Boolean(errorFor('description'))}>
           <TextInput
+            invalid={Boolean(errorFor('description'))}
             value={form.description}
-            onChange={(description) => setForm((f) => ({ ...f, description }))}
+            onChange={(description) => setField('description', description)}
             placeholder={t('stations.register.descriptionPlaceholder')}
           />
         </FormField>
@@ -269,7 +312,7 @@ export function RegisterStationModal({ open, onClose }: { open: boolean; onClose
           {t('stations.register.cancelBtn')}
         </Button>
         <Button accent="owner" size="lg" className="flex-[1.4]" onClick={submit} disabled={mutation.isPending}>
-          {mutation.isPending ? t('stations.register.submitting') : t('stations.register.submitBtn')}
+          {mutation.isPending ? t('stations.register.submitting') : t(registration ? 'stations.edit.save' : 'stations.register.submitBtn')}
         </Button>
       </div>
     </Modal>

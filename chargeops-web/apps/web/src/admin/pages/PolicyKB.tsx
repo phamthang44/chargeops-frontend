@@ -38,6 +38,7 @@ import {
   useToast,
 } from '@chargeops/ui';
 import { PolicyMarkdownViewer } from '../../shared/components/PolicyMarkdownViewer';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 type CategoryTab = 'all' | 'foundation' | 'booking' | 'hardware' | 'license';
 
@@ -388,9 +389,13 @@ export function PolicyKB() {
       </div>
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {(error as Error).message}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('policy.title', { defaultValue: 'Kho tài liệu pháp lý' })}
+          title={t('policy.loadError', { defaultValue: 'Không thể tải danh sách tài liệu' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading ? (
         <Skeleton className="h-[420px] rounded-2xl" />
       ) : (

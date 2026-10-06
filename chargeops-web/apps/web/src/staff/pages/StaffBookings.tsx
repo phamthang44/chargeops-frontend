@@ -19,7 +19,7 @@ import {
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
-import { getApiErrorMessage } from '../../i18n';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useStaffStation } from '../context/StaffStationContext';
 import { useStaffEquipment } from '../hooks/useStaffEquipment';
 
@@ -131,9 +131,13 @@ export function StaffBookings() {
       </Card>
 
       {bookingsQ.error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('bookings.loadError', { message: getApiErrorMessage(bookingsQ.error) })}
-        </Card>
+        <ApiErrorState
+          error={bookingsQ.error}
+          eyebrow={t('bookings.error.eyebrow', { defaultValue: 'Lịch đặt chỗ' })}
+          title={t('bookings.error.title', { defaultValue: 'Không thể tải danh sách lịch đặt chỗ' })}
+          onRetry={() => bookingsQ.refetch()}
+          isRetrying={bookingsQ.isFetching}
+        />
       ) : bookingsQ.isLoading ? (
         <Skeleton className="h-[380px] rounded-card" />
       ) : (

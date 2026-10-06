@@ -8,7 +8,7 @@ import {
   type PricingConfig,
   type TouRule,
 } from '@chargeops/api';
-import { Button, Card, PageHeader, Skeleton, useToast } from '@chargeops/ui';
+import { Button, PageHeader, Skeleton, useToast } from '@chargeops/ui';
 import { BaseConfigStep } from '../features/pricing/BaseConfigStep';
 import { OperatingHoursStep } from '../features/pricing/OperatingHoursStep';
 import { TouPricingStep } from '../features/pricing/TouPricingStep';
@@ -17,6 +17,8 @@ import { AddRuleModal } from '../features/pricing/AddRuleModal';
 import { PricingConfirmModal } from '../features/pricing/PricingConfirmModal';
 import { ScheduleHistoryDrawer } from '../features/pricing/ScheduleHistoryDrawer';
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { ResourceStateCard } from '../../shared/components/ResourceStateCard';
 
 /**
  * Pricing & Hours (FR11). All four steps edit a single local draft; "Lưu thay
@@ -36,7 +38,7 @@ export function Pricing() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['pricing', selectedStationId],
     queryFn: () => api.pricing.get(selectedStationId),
     enabled: Boolean(selectedStationId),
@@ -205,16 +207,20 @@ export function Pricing() {
       />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('pricing.loadError', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('pricing.error.eyebrow', { defaultValue: 'Giá & giờ hoạt động' })}
+          title={t('pricing.error.title', { defaultValue: 'Không thể tải cấu hình giá' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : !stationsLoading && stations.length === 0 ? (
-        <Card className="p-8 text-center border-line-2">
-          <div className="text-[16px] font-bold text-ink">Chưa có trạm sạc nào</div>
-          <p className="mt-1.5 text-[13px] text-muted max-w-[440px] mx-auto">
-            Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động.
-          </p>
-        </Card>
+        <ResourceStateCard
+          tone="brand"
+          eyebrow={t('pricing.error.eyebrow', { defaultValue: 'Giá & giờ hoạt động' })}
+          title="Chưa có trạm sạc nào"
+          description="Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động."
+        />
       ) : isLoading || !draft ? (
         <PricingSkeleton />
       ) : (

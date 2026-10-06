@@ -12,7 +12,6 @@ import {
 } from '@chargeops/api';
 import {
   Card,
-  EmptyState,
   IconAlertTriangle,
   IconBolt,
   IconClock,
@@ -28,6 +27,8 @@ import {
 } from '@chargeops/ui';
 
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { ResourceStateCard } from '../../shared/components/ResourceStateCard';
 
 /**
  * FR12 — owner license, status display only. Purchase/renewal happens
@@ -39,7 +40,7 @@ export function License() {
   const { stations: stationList, selectedStationId, setSelectedStationId, currentStation, isLoading: stationsLoading } = useOwnerStation();
   const currentStationId = currentStation?.id ?? selectedStationId ?? null;
 
-  const { data: license, isLoading: licenseLoading, error } = useQuery({
+  const { data: license, isLoading: licenseLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['license', 'mine', currentStationId],
     queryFn: () => api.licenses.mine(currentStationId ?? undefined),
     enabled: Boolean(currentStationId) || stationList.length === 0,
@@ -132,9 +133,23 @@ export function License() {
       ) : null}
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('license.loadError', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('license.error.eyebrow', { defaultValue: 'Giấy phép' })}
+          title={t('license.error.title', { defaultValue: 'Không thể tải thông tin giấy phép' })}
+          missingEyebrow={t('license.error.missingEyebrow', { defaultValue: 'Giấy phép vận hành' })}
+          missingTitle={t('license.error.missingTitle', { defaultValue: 'Chưa có thông tin giấy phép' })}
+          missingDescription={t('license.error.missingDescription', {
+            defaultValue:
+              'Trạm chưa có gói License hoạt động. Việc mua và gia hạn giấy phép được thực hiện ngoài nền tảng và được Quản trị viên ghi nhận trên hệ thống.',
+          })}
+          missingHint={t('license.error.missingHint', {
+            defaultValue:
+              'Đã từng có giấy phép và cho rằng đây là lỗi? Nhấn chọn lại trạm hoặc liên hệ Quản trị viên để kiểm tra bản ghi License của trạm.',
+          })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading ? (
         <div className="grid gap-[13px]">
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -148,12 +163,21 @@ export function License() {
           </div>
         </div>
       ) : !license ? (
-        <Card className="p-12">
-          <EmptyState
-            title="Chưa có thông tin giấy phép"
-            description="Trạm chưa có gói License hoạt động. Việc mua và gia hạn giấy phép được thực hiện ngoài nền tảng và được Quản trị viên ghi nhận trên hệ thống."
-          />
-        </Card>
+        // Also covers the 404 "no license recorded yet" case — a business
+        // state, so it renders as a calm empty card instead of a failure.
+        <ResourceStateCard
+          tone="owner"
+          eyebrow={t('license.error.missingEyebrow', { defaultValue: 'Giấy phép vận hành' })}
+          title={t('license.empty.title', { defaultValue: 'Chưa có thông tin giấy phép' })}
+          description={t('license.error.missingDescription', {
+            defaultValue:
+              'Trạm chưa có gói License hoạt động. Việc mua và gia hạn giấy phép được thực hiện ngoài nền tảng và được Quản trị viên ghi nhận trên hệ thống.',
+          })}
+          hint={t('license.error.missingHint', {
+            defaultValue:
+              'Đã từng có giấy phép và cho rằng đây là lỗi? Nhấn chọn lại trạm hoặc liên hệ Quản trị viên để kiểm tra bản ghi License của trạm.',
+          })}
+        />
       ) : (
         <Body license={license} station={currentStation} history={history ?? []} />
       )}

@@ -11,6 +11,7 @@ import {
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 export interface StaffHistoryTarget {
   type: 'chargePoint' | 'connector';
@@ -42,7 +43,7 @@ export function StaffStatusHistoryDrawer({
   const api = useApi();
   const isConnector = target?.type === 'connector';
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: [
       'staff',
       'history',
@@ -107,9 +108,14 @@ export function StaffStatusHistoryDrawer({
         )}
 
         {!isLoading && error && (
-          <div className="rounded-xl border border-bad/30 bg-bad-soft/40 p-4 text-center text-[12px] text-bad">
-            Không thể tải lịch sử trạng thái: {(error as Error).message}
-          </div>
+          <ApiErrorState
+            error={error}
+            compact
+            eyebrow="Lịch sử trạng thái"
+            title="Không thể tải lịch sử trạng thái"
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
         )}
 
         {!isLoading && !error && events.length === 0 && (

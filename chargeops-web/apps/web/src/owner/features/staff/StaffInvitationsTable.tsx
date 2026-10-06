@@ -18,6 +18,7 @@ import {
   useToast,
 } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../../i18n';
+import { ApiErrorState } from '../../../shared/components/ApiErrorState';
 
 const PAGE_SIZE = 10;
 const GRID = '1.4fr 0.9fr 1fr 1fr 0.9fr';
@@ -95,9 +96,14 @@ export function StaffInvitationsTable({ stationId }: StaffInvitationsTableProps)
 
   if (listQ.error) {
     return (
-      <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-        {t('staff.invitations.loadError', { message: getApiErrorMessage(listQ.error) })}
-      </Card>
+      <ApiErrorState
+        error={listQ.error}
+        compact
+        eyebrow={t('staff.invitations.error.eyebrow', { defaultValue: 'Lời mời nhân viên' })}
+        title={t('staff.invitations.error.title', { defaultValue: 'Không thể tải danh sách lời mời' })}
+        onRetry={() => listQ.refetch()}
+        isRetrying={listQ.isFetching}
+      />
     );
   }
 

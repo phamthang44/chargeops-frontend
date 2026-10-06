@@ -21,6 +21,7 @@ import {
   useToast,
   type FilterTab,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 type RoleKey = UserRole | 'all';
 
@@ -39,7 +40,7 @@ export function Users() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['users'],
     queryFn: () => api.users.list(),
   });
@@ -85,9 +86,13 @@ export function Users() {
       <PageHeader title={t('console.nav.users.title')} subtitle={t('console.nav.users.subtitle')} />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('users.error', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('console.nav.users.title')}
+          title={t('users.error', { defaultValue: 'Không thể tải danh sách người dùng' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading || !data ? (
         <Skeleton className="h-[360px] rounded-card" />
       ) : (

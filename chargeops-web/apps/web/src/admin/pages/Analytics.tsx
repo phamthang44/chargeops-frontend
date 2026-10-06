@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatVndCompact, useApi, type AnalyticsOverview } from '@chargeops/api';
 import { Card, KpiCard, PageHeader, ProgressBar, SegmentedControl, Skeleton } from '@chargeops/ui';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 const CONNECTOR_COLOR: Record<string, string> = {
   CCS2: '#5b54e8',
@@ -38,7 +39,7 @@ export function Analytics() {
   const { t } = useTranslation('admin');
   const api = useApi();
   const [range, setRange] = useState<'30d' | '90d' | '12m'>('12m');
-  const { data, isLoading, error } = useQuery({ queryKey: ['analytics'], queryFn: () => api.analytics.overview() });
+  const { data, isLoading, error, refetch, isFetching } = useQuery({ queryKey: ['analytics'], queryFn: () => api.analytics.overview() });
 
   return (
     <>
@@ -57,9 +58,13 @@ export function Analytics() {
       </div>
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('analytics.error', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('console.nav.analytics.title')}
+          title={t('analytics.error', { defaultValue: 'Không thể tải số liệu phân tích' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading || !data ? (
         <Skeleton className="h-[500px] rounded-card" />
       ) : (

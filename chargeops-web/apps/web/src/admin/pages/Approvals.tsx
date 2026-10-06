@@ -8,6 +8,7 @@ import { ApproveModal } from '../features/approvals/ApproveModal';
 import { IssueLicenseModal } from '../features/approvals/IssueLicenseModal';
 
 import { getApiErrorMessage } from '../../i18n';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 /** FR12 — admin reviews pending station registrations, approve or reject. */
 export function Approvals() {
@@ -20,7 +21,7 @@ export function Approvals() {
   const [approveOpen, setApproveOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['approvals'],
     queryFn: () => api.stations.approvals(),
   });
@@ -73,9 +74,13 @@ export function Approvals() {
       <PageHeader title={t('console.nav.approvals.title')} subtitle={t('console.nav.approvals.subtitle')} />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('approvals.error', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('console.nav.approvals.title')}
+          title={t('approvals.error', { defaultValue: 'Không thể tải danh sách phê duyệt' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading || !data ? (
         <Skeleton className="h-[340px] rounded-card" />
       ) : rows.length === 0 ? (

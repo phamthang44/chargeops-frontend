@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { formatTimeVn, useApi, type StaffStationOverview } from '@chargeops/api';
-import { Card, KpiCard, PageHeader, SidePanel, Skeleton, type SidePanelRow } from '@chargeops/ui';
-import { getApiErrorMessage } from '../../i18n';
+import { KpiCard, PageHeader, SidePanel, Skeleton, type SidePanelRow } from '@chargeops/ui';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useStaffStation } from '../context/StaffStationContext';
 import { useStaffEquipment } from '../hooks/useStaffEquipment';
 
@@ -66,9 +66,17 @@ export function Dashboard() {
       />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('dashboard.loadError', { message: getApiErrorMessage(error) })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('dashboard.error.eyebrow', { defaultValue: 'Bảng điều khiển' })}
+          title={t('dashboard.error.title', { defaultValue: 'Không thể tải bảng điều khiển' })}
+          onRetry={() => {
+            overviewQ.refetch();
+            bookingsQ.refetch();
+            equipment.refetch();
+          }}
+          isRetrying={overviewQ.isFetching || bookingsQ.isFetching}
+        />
       ) : isLoading ? (
         <DashboardSkeleton />
       ) : (

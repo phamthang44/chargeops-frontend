@@ -9,7 +9,6 @@ import {
 import {
   Button,
   Card,
-  EmptyState,
   IconAlertTriangle,
   IconHistory,
   IconWrench,
@@ -20,6 +19,8 @@ import {
   useToast,
 } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../i18n';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { ResourceStateCard } from '../../shared/components/ResourceStateCard';
 import { ReportIncidentModal } from '../../owner/features/chargers/ReportIncidentModal';
 import { ConnectorIncidentDrawer } from '../../owner/features/chargers/ConnectorIncidentDrawer';
 import { useStaffStation } from '../context/StaffStationContext';
@@ -122,15 +123,21 @@ export function StaffChargers() {
       />
 
       {equipment.error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('chargers.loadError', { message: getApiErrorMessage(equipment.error) })}
-        </Card>
+        <ApiErrorState
+          error={equipment.error}
+          eyebrow={t('chargers.error.eyebrow', { defaultValue: 'Cổng sạc' })}
+          title={t('chargers.error.title', { defaultValue: 'Không thể tải danh sách cổng sạc' })}
+          onRetry={() => equipment.refetch()}
+        />
       ) : equipment.isLoading ? (
         <ChargersSkeleton />
       ) : equipment.groups.length === 0 ? (
-        <Card className="p-6">
-          <EmptyState title={t('chargers.emptyTitle')} description={t('chargers.emptyBody')} />
-        </Card>
+        <ResourceStateCard
+          tone="brand"
+          eyebrow={t('chargers.title', { defaultValue: 'Cổng sạc' })}
+          title={t('chargers.emptyTitle')}
+          description={t('chargers.emptyBody')}
+        />
       ) : (
         <>
           <div className="mb-4 grid grid-cols-3 gap-[13px]">

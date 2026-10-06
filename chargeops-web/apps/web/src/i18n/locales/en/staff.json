@@ -83,6 +83,10 @@
     "subtitle": "{{station}} · {{status}}",
     "subtitleFallback": "Today's station activity.",
     "loadError": "Could not load the overview: {{message}}",
+    "error": {
+      "eyebrow": "Dashboard",
+      "title": "Could not load the dashboard"
+    },
     "kpi": {
       "bookingsToday": "Bookings today",
       "bookingsTodaySub": "Total bookings for the day",
@@ -108,6 +112,10 @@
     "subtitle": "{{station}} · Charge points, connectors and incidents",
     "subtitleFallback": "Charge points, connectors and incidents.",
     "loadError": "Could not load equipment: {{message}}",
+    "error": {
+      "eyebrow": "Connectors",
+      "title": "Could not load the connector list"
+    },
     "emptyTitle": "No equipment yet",
     "emptyBody": "This station has no charge points provisioned.",
     "noConnectors": "This charge point has no connectors.",
@@ -148,6 +156,10 @@
     "subtitle": "{{station}} · Bookings at this station",
     "subtitleFallback": "Bookings at your station.",
     "loadError": "Could not load bookings: {{message}}",
+    "error": {
+      "eyebrow": "Bookings",
+      "title": "Could not load the booking list"
+    },
     "emptyState": "No bookings match the filters.",
     "filter": {
       "connector": "Connector",

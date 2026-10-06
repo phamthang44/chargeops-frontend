@@ -19,6 +19,7 @@ import {
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../../../shared/components/ApiErrorState';
 
 interface Props {
   station: Station;
@@ -75,7 +76,7 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
   const { t } = useTranslation('owner');
   const api = useApi();
 
-  const { data: history, isLoading, error } = useQuery({
+  const { data: history, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['stations', 'history', station.id],
     queryFn: () => api.stations.statusHistory(station.id),
     enabled: open,
@@ -128,9 +129,14 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
             <Skeleton className="h-16 w-full rounded-[8px]" />
           </div>
         ) : error ? (
-          <div className="rounded-[9px] border border-bad-border bg-bad-soft p-3.5 text-[12.5px] text-bad-deep">
-            {t('stations.timeline.loadError', { message: (error as Error).message })}
-          </div>
+          <ApiErrorState
+            error={error}
+            compact
+            eyebrow={t('stations.timeline.error.eyebrow', { defaultValue: 'Lịch sử vận hành' })}
+            title={t('stations.timeline.error.title', { defaultValue: 'Không thể tải lịch sử trạng thái' })}
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
         ) : !history || history.length === 0 ? (
           <div className="py-8 text-center text-[13px] text-muted">
             {t('stations.timeline.noHistory')}

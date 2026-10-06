@@ -11,6 +11,8 @@ import {
   IconCheck,
   Skeleton,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../../../shared/components/ApiErrorState';
+import { ResourceStateCard } from '../../../shared/components/ResourceStateCard';
 
 export interface ScheduleHistoryDrawerProps {
   open: boolean;
@@ -59,7 +61,7 @@ export function ScheduleHistoryDrawer({
   const { t } = useTranslation('owner');
   const api = useApi();
 
-  const { data: history = [], isLoading, error } = useQuery({
+  const { data: history = [], isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['pricing-history', stationId],
     queryFn: () => api.pricing.history(stationId),
     enabled: open && Boolean(stationId),
@@ -102,14 +104,22 @@ export function ScheduleHistoryDrawer({
           <Skeleton className="h-28 rounded-panel" />
         </div>
       ) : error ? (
-        <div className="rounded-panel border border-bad-border bg-bad-soft p-4 text-[12.5px] text-bad-deep">
-          {t('pricing.history.loadError', { defaultValue: 'Không thể tải lịch sử giờ hoạt động: ' }) + (error as Error).message}
-        </div>
+        <ApiErrorState
+          error={error}
+          compact
+          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử giờ hoạt động' })}
+          title={t('pricing.history.error.title', { defaultValue: 'Không thể tải lịch sử giờ hoạt động' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : history.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-panel border border-dashed border-line-2 p-8 text-center text-[13px] text-muted">
-          <IconClock size={28} className="mb-2 text-faint" />
-          <span>{t('pricing.history.empty', { defaultValue: 'Chưa có lịch sử thay đổi nào cho trạm này.' })}</span>
-        </div>
+        <ResourceStateCard
+          compact
+          tone="brand"
+          icon={<IconClock size={22} />}
+          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử giờ hoạt động' })}
+          title={t('pricing.history.empty', { defaultValue: 'Chưa có lịch sử thay đổi nào cho trạm này.' })}
+        />
       ) : (
         <div className="flex flex-col gap-3.5">
           {history.map((item, index) => {

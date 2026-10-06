@@ -19,5 +19,27 @@
   "copiedCode": "Copied code {{code}}",
   "error": {
     "generic": "Something went wrong"
+  },
+  "errorCard": {
+    "eyebrow": "Loading error",
+    "title": "Could not load data",
+    "retrying": "Retrying…",
+    "details": "Technical details",
+    "copy": "Copy",
+    "copied": "Copied",
+    "supportHint": "Need help? Share these details with our support team.",
+    "missing": {
+      "eyebrow": "Not available yet",
+      "title": "No data for this section",
+      "description": "The server does not expose the matching endpoint yet (feature not deployed), so there is nothing to show.",
+      "hint": "Data will appear automatically as soon as this feature is ready. You can retry or move to another section."
+    },
+    "hint": {
+      "network": "Cannot reach the server. Check your network connection and try again.",
+      "timeout": "The server took too long to respond. Please try again shortly.",
+      "server": "The server is temporarily unavailable. Please try again in a few seconds.",
+      "auth": "Your session has expired or you lack permission. Please sign in again.",
+      "default": "The system could not complete this request. Please retry — if the issue persists, contact your administrator."
+    }
   }
 }

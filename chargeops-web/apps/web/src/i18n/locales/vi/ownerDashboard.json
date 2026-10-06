@@ -2,6 +2,15 @@
   "title": "Tổng quan",
   "subtitle": "{{station}} · {{date}}",
   "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+  "dashboard": {
+    "error": {
+      "eyebrow": "Bảng điều khiển",
+      "title": "Không thể tải bảng điều khiển",
+      "missingEyebrow": "Bảng điều khiển",
+      "missingTitle": "Dashboard chưa được kết nối dữ liệu",
+      "missingDescription": "Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị."
+    }
+  },
   "license": {
     "active": "ĐANG HOẠT ĐỘNG",
     "expiring": "SẮP HẾT HẠN",

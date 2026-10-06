@@ -7,7 +7,7 @@ import {
   type Connector,
   type OperationalChargePointStatus,
 } from '@chargeops/api';
-import { Card, IconLock, PageHeader, Skeleton, useToast } from '@chargeops/ui';
+import { IconLock, PageHeader, Skeleton, useToast } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../i18n';
 import { ChargerStatsStrip } from '../features/chargers/ChargerStatsStrip';
 import { ChargerTable, type ChargePointGroup } from '../features/chargers/ChargerTable';
@@ -22,6 +22,7 @@ import { ReportIncidentModal } from '../features/chargers/ReportIncidentModal';
 import { ConnectorIncidentDrawer } from '../features/chargers/ConnectorIncidentDrawer';
 
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 export function Chargers() {
   const { t } = useTranslation('owner');
@@ -178,9 +179,16 @@ export function Chargers() {
       />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('chargers.loadError', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('chargers.error.eyebrow', { defaultValue: 'Cổng sạc' })}
+          title={t('chargers.error.title', { defaultValue: 'Không thể tải danh sách cổng sạc' })}
+          onRetry={() => {
+            chargePointsQ.refetch();
+            connectorsQ.refetch();
+          }}
+          isRetrying={chargePointsQ.isFetching || connectorsQ.isFetching}
+        />
       ) : isLoading ? (
         <ChargersSkeleton />
       ) : (

@@ -16,6 +16,7 @@ import {
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../components/ApiErrorState';
 
 export interface EquipmentStatusTarget {
   type: 'chargePoint' | 'connector';
@@ -62,7 +63,7 @@ export function EquipmentStatusHistoryDrawer({
   const api = useApi();
   const isConnector = target?.type === 'connector';
 
-  const { data: history, isLoading, error } = useQuery({
+  const { data: history, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: [
       'equipmentStatusHistory',
       target?.type,
@@ -129,9 +130,14 @@ export function EquipmentStatusHistoryDrawer({
 
         {/* Error state */}
         {!isLoading && error && (
-          <div className="rounded-xl border border-bad/30 bg-bad-soft/40 p-4 text-center text-[12px] text-bad">
-            Không thể tải lịch sử trạng thái: {(error as Error).message}
-          </div>
+          <ApiErrorState
+            error={error}
+            compact
+            eyebrow="Lịch sử trạng thái"
+            title="Không thể tải lịch sử trạng thái"
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
         )}
 
         {/* Empty state */}

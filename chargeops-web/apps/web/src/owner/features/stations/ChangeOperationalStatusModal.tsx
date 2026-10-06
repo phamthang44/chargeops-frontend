@@ -141,7 +141,7 @@ export function ChangeOperationalStatusModal({
                 <span className="text-[13px] font-bold text-ink">
                   {t('stations.operationalStatus.OPERATING', { defaultValue: 'Đang vận hành (Tiếp nhận khách)' })}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.2 text-[10.5px] font-bold text-emerald-600 border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.2 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-300 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Chuẩn
                 </span>
@@ -174,7 +174,7 @@ export function ChangeOperationalStatusModal({
                 <span className="text-[13px] font-bold text-ink">
                   {t('stations.operationalStatus.PAUSED', { defaultValue: 'Tạm dừng đón khách (Paused)' })}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.2 text-[10.5px] font-bold text-rose-600 border border-rose-500/20">
+                <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.2 text-[10.5px] font-bold text-rose-600 dark:text-rose-300 border border-rose-500/20">
                   Chủ động ngưng
                 </span>
               </div>
@@ -206,7 +206,7 @@ export function ChangeOperationalStatusModal({
                 <span className="text-[13px] font-bold text-ink">
                   {t('stations.operationalStatus.MAINTENANCE', { defaultValue: 'Đang bảo trì trạm (Maintenance)' })}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.2 text-[10.5px] font-bold text-amber-600 border border-amber-500/20">
+                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.2 text-[10.5px] font-bold text-amber-600 dark:text-amber-300 border border-amber-500/20">
                   Kỹ thuật
                 </span>
               </div>
@@ -265,7 +265,7 @@ export function ChangeOperationalStatusModal({
             </div>
 
             {validationError && (
-              <div className="text-[11.5px] font-semibold text-rose-600">
+              <div className="text-[11.5px] font-semibold text-rose-600 dark:text-rose-300">
                 ⚠️ {validationError}
               </div>
             )}
@@ -274,8 +274,8 @@ export function ChangeOperationalStatusModal({
 
         {/* Reassurance Callout */}
         {selectedStatus === 'OPERATING' ? (
-          <div className="mb-5 flex items-start gap-2 rounded-[9px] border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-[11.5px] leading-relaxed text-emerald-800">
-            <span className="shrink-0 text-emerald-600 font-bold">✓</span>
+          <div className="mb-5 flex items-start gap-2 rounded-[9px] border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-[11.5px] leading-relaxed text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">
+            <span className="shrink-0 text-emerald-600 dark:text-emerald-300 font-bold">✓</span>
             <div>
               {t('stations.operationalModal.operatingNotice', {
                 defaultValue:

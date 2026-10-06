@@ -274,6 +274,10 @@
     "title": "Chargers",
     "subtitle": "Display names, statuses, and QR check-in codes for each connector.",
     "loadError": "Could not load chargers: {{message}}",
+    "error": {
+      "eyebrow": "Connectors",
+      "title": "Could not load the connector list"
+    },
     "description": "Connector type & power are provisioned by Admin — read-only. You can edit names, zone labels, and status. Click a Charge Point row to view details."
   },
   "chargePoints": {
@@ -426,6 +430,10 @@
       "emptyBody": "Use “Invite staff” above to send an activation invitation.",
       "noStation": "You have no active station to send invitations from.",
       "loadError": "Could not load invitations: {{message}}",
+      "error": {
+        "eyebrow": "Staff invitations",
+        "title": "Could not load the invitation list"
+      },
       "expired": "Expired",
       "resend": "Resend",
       "cancel": "Cancel invite",
@@ -543,6 +551,10 @@
     "subtitle": "Base price, TOU rate windows, and operating hours. Changes only apply to new bookings.",
     "saveSuccess": "Saved pricing and operating hour configurations",
     "loadError": "Could not load configurations: {{message}}",
+    "error": {
+      "eyebrow": "Pricing & hours",
+      "title": "Could not load the pricing configuration"
+    },
     "cancelBtn": "Cancel",
     "saveBtn": "Save Changes",
     "saving": "Saving...",
@@ -665,6 +677,10 @@
     },
     "history": {
       "title": "Operating Hours History",
+      "error": {
+        "eyebrow": "Operating hours history",
+        "title": "Could not load the operating hours history"
+      },
       "subtitle": "Change log of operating hour versions applied to this station",
       "calloutTitle": "Operating Schedule Cycle Specification:",
       "calloutDesc": "Opening hours follow a weekly recurring cycle. Once you confirm Save & Apply Now, previous versions will be archived and this schedule remains active continuously until edited again.",
@@ -752,6 +768,10 @@
     "subtitle": "Register new stations, track approval status, and view all related station details.",
     "registerBtn": "Register New Station",
     "loadError": "Could not load stations: {{message}}",
+    "error": {
+      "eyebrow": "Stations",
+      "title": "Could not load the station list"
+    },
     "searchPlaceholder": "Search by name, code, address…",
     "emptyTitle": "No stations found",
     "emptySearch": "No stations matched your search query.",
@@ -763,7 +783,8 @@
       "active": "Active",
       "pending": "Pending Approval",
       "suspended": "Suspended",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
     },
     "summary": {
       "total": "TOTAL STATIONS",
@@ -813,12 +834,44 @@
       "description": "DESCRIPTION (OPTIONAL)",
       "descriptionPlaceholder": "Location notes or access instructions",
       "latitude": "LATITUDE",
+      "latitudePlaceholder": "E.g. 21.0285",
       "longitude": "LONGITUDE",
+      "longitudePlaceholder": "E.g. 105.8542",
       "plannedChargers": "EST. CHARGER COUNT",
       "licenseHelp": "Business licenses are verified off-platform prior to approval (do not upload files here).",
       "cancelBtn": "Cancel",
       "submitBtn": "Submit Registration",
       "submitting": "Submitting..."
+    },
+    "edit": {
+      "title": "Edit registration",
+      "subtitle": "While approval is pending, you can correct the station information or withdraw the registration.",
+      "save": "Save changes",
+      "toastSuccess": "Station registration updated.",
+      "withdraw": "Withdraw registration",
+      "withdrawConfirm": "Are you sure you want to withdraw the registration for \"{{name}}\"? The registration will leave the approval queue. Its history and submitted data will be retained.",
+      "withdrawSuccess": "Station registration withdrawn successfully.",
+      "retry": "Retry"
+    },
+    "drawer": {
+      "tabs": {
+        "overview": "Overview",
+        "gallery": "Gallery",
+        "hardware": "Hardware & Chargers",
+        "hours_amenities": "Hours & Amenities",
+        "license": "License",
+        "staff": "Staff",
+        "timeline": "Timeline"
+      }
+    },
+    "detail": {
+      "identityAndContact": "Identity & Contact Information",
+      "stationCode": "System Station Code",
+      "contactPhone": "Contact Phone Number",
+      "fullAddress": "Detailed Address",
+      "gpsCoordinates": "GPS Coordinates:",
+      "rejectionReasonTitle": "Rejection Reason from Administrator:",
+      "viewLicenseAndRenew": "View License Details & Renewal"
     },
     "amenities": {
       "wifi": "Free Wi-Fi",
@@ -844,6 +897,10 @@
     "timeline": {
       "title": "Approval Timeline: {{name}}",
       "loadError": "Could not load status history: {{message}}",
+      "error": {
+        "eyebrow": "Operations history",
+        "title": "Could not load the status history"
+      },
       "noHistory": "No status history recorded for this station yet.",
       "performedBy": "Performed by",
       "reasonTitle": "Note / Reason",
@@ -891,6 +948,17 @@
     "title": "Operating License",
     "subtitle": "Track the validity and subscription status of your charging stations.",
     "loadError": "Could not load license: {{message}}",
+    "error": {
+      "eyebrow": "License",
+      "title": "Could not load license details",
+      "missingEyebrow": "Operating license",
+      "missingTitle": "No license information yet",
+      "missingDescription": "This station has no active license package. Licenses are purchased and renewed off-platform and recorded by an administrator.",
+      "missingHint": "Had a license before and think this is wrong? Re-select the station or contact an administrator to check the station's license record."
+    },
+    "empty": {
+      "title": "No license information yet"
+    },
     "plans": {
       "yearly": "Yearly Plan (1 calendar year)",
       "monthly": "Monthly Plan (1 calendar month)"

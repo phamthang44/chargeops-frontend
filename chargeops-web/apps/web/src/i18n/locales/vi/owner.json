@@ -274,6 +274,10 @@
     "title": "Trụ sạc",
     "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng cổng sạc (connector).",
     "loadError": "Không tải được danh sách trụ: {{message}}",
+    "error": {
+      "eyebrow": "Cổng sạc",
+      "title": "Không thể tải danh sách cổng sạc"
+    },
     "description": "Loại đầu cắm & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên, khu vực và trạng thái. Nhấp một Trụ sạc để xem chi tiết."
   },
   "chargePoints": {
@@ -426,6 +430,10 @@
       "emptyBody": "Bấm “Mời nhân viên” ở trên để gửi lời mời kích hoạt quyền vận hành.",
       "noStation": "Bạn chưa có trạm nào đang hoạt động để gửi lời mời.",
       "loadError": "Không tải được danh sách lời mời: {{message}}",
+      "error": {
+        "eyebrow": "Lời mời nhân viên",
+        "title": "Không thể tải danh sách lời mời"
+      },
       "expired": "Đã hết hạn",
       "resend": "Gửi lại",
       "cancel": "Hủy lời mời",
@@ -543,6 +551,10 @@
     "subtitle": "Giá gốc, khung giá TOU và giờ mở cửa. Thay đổi chỉ áp dụng cho đặt chỗ mới.",
     "saveSuccess": "Đã lưu cấu hình giá & giờ hoạt động",
     "loadError": "Không tải được cấu hình: {{message}}",
+    "error": {
+      "eyebrow": "Giá & giờ hoạt động",
+      "title": "Không thể tải cấu hình giá"
+    },
     "cancelBtn": "Hủy bỏ",
     "saveBtn": "Lưu thay đổi",
     "saving": "Đang lưu…",
@@ -665,6 +677,10 @@
     },
     "history": {
       "title": "Lịch sử giờ hoạt động",
+      "error": {
+        "eyebrow": "Lịch sử giờ hoạt động",
+        "title": "Không thể tải lịch sử giờ hoạt động"
+      },
       "subtitle": "Nhật ký các phiên bản giờ mở/đóng đã áp dụng cho trạm",
       "calloutTitle": "Quy cách chu kỳ giờ hoạt động:",
       "calloutDesc": "Giờ mở/đóng là lịch lặp lại hàng tuần. Khi bạn xác nhận Lưu & áp dụng ngay, phiên bản cũ sẽ chốt mốc dừng, và phiên bản mới này sẽ duy trì hiệu lực xuyên suốt các tuần cho đến lần chỉnh sửa tiếp theo.",
@@ -752,6 +768,10 @@
     "subtitle": "Đăng ký trạm mới, theo dõi trạng thái duyệt và quản lý toàn bộ thông tin chi tiết từng trạm.",
     "registerBtn": "Đăng ký trạm mới",
     "loadError": "Không tải được danh sách trạm: {{message}}",
+    "error": {
+      "eyebrow": "Trạm sạc",
+      "title": "Không thể tải danh sách trạm"
+    },
     "searchPlaceholder": "Tìm theo tên, mã trạm, địa chỉ…",
     "emptyTitle": "Không tìm thấy trạm nào",
     "emptySearch": "Không có trạm nào khớp với từ khóa tìm kiếm.",
@@ -763,7 +783,8 @@
       "active": "Đang hoạt động",
       "pending": "Chờ duyệt",
       "suspended": "Tạm ngưng",
-      "rejected": "Bị từ chối"
+      "rejected": "Bị từ chối",
+      "withdrawn": "Đã rút hồ sơ"
     },
     "summary": {
       "total": "TỔNG TRẠM",
@@ -813,12 +834,44 @@
       "description": "MÔ TẢ (TÙY CHỌN)",
       "descriptionPlaceholder": "Mô tả vị trí hoặc hướng dẫn tiếp cận trạm sạc",
       "latitude": "VĨ ĐỘ",
+      "latitudePlaceholder": "VD: 21.0285",
       "longitude": "KINH ĐỘ",
+      "longitudePlaceholder": "VD: 105.8542",
       "plannedChargers": "SỐ TRỤ DỰ KIẾN",
       "licenseHelp": "Giấy phép kinh doanh được xác minh ngoài nền tảng trước khi duyệt (không nộp tài liệu tại đây).",
       "cancelBtn": "Hủy bỏ",
       "submitBtn": "Gửi đăng ký",
       "submitting": "Đang gửi…"
+    },
+    "edit": {
+      "title": "Sửa thông tin đăng ký",
+      "subtitle": "Trong thời gian chờ duyệt, bạn có thể sửa thông tin hoặc hủy đơn đăng ký trạm.",
+      "save": "Lưu thay đổi",
+      "toastSuccess": "Đã cập nhật thông tin đăng ký trạm.",
+      "withdraw": "Hủy đơn đăng ký",
+      "withdrawConfirm": "Bạn có chắc muốn hủy đơn đăng ký cho \"{{name}}\"? Đơn sẽ được rút khỏi hàng chờ duyệt của quản trị viên. Lịch sử và dữ liệu đã khai báo được giữ lại.",
+      "withdrawSuccess": "Đã hủy đơn đăng ký trạm.",
+      "retry": "Thử lại"
+    },
+    "drawer": {
+      "tabs": {
+        "overview": "Tổng quan",
+        "gallery": "Thư viện ảnh",
+        "hardware": "Thiết bị & Trụ sạc",
+        "hours_amenities": "Giờ & Tiện ích",
+        "license": "Giấy phép",
+        "staff": "Nhân viên",
+        "timeline": "Tiến trình"
+      }
+    },
+    "detail": {
+      "identityAndContact": "Thông tin Định danh & Liên hệ",
+      "stationCode": "Mã trạm hệ thống",
+      "contactPhone": "Số điện thoại liên hệ",
+      "fullAddress": "Địa chỉ chi tiết",
+      "gpsCoordinates": "Tọa độ GPS:",
+      "rejectionReasonTitle": "Lý do từ chối phê duyệt từ Quản trị viên:",
+      "viewLicenseAndRenew": "Xem chi tiết License & Gia hạn"
     },
     "amenities": {
       "wifi": "Wifi miễn phí",
@@ -844,6 +897,10 @@
     "timeline": {
       "title": "Tiến trình phê duyệt: {{name}}",
       "loadError": "Không tải được lịch sử trạng thái: {{message}}",
+      "error": {
+        "eyebrow": "Lịch sử vận hành",
+        "title": "Không thể tải lịch sử trạng thái"
+      },
       "noHistory": "Chưa có ghi nhận lịch sử trạng thái nào cho trạm này.",
       "performedBy": "Thực hiện bởi",
       "reasonTitle": "Ghi chú / Lý do",
@@ -891,6 +948,17 @@
     "title": "Giấy phép Vận hành (License)",
     "subtitle": "Theo dõi hiệu lực các gói subscription License cho các trạm sạc của bạn.",
     "loadError": "Không tải được giấy phép: {{message}}",
+    "error": {
+      "eyebrow": "Giấy phép",
+      "title": "Không thể tải thông tin giấy phép",
+      "missingEyebrow": "Giấy phép vận hành",
+      "missingTitle": "Chưa có thông tin giấy phép",
+      "missingDescription": "Trạm chưa có gói License hoạt động. Việc mua và gia hạn giấy phép được thực hiện ngoài nền tảng và được Quản trị viên ghi nhận trên hệ thống.",
+      "missingHint": "Đã từng có giấy phép và cho rằng đây là lỗi? Nhấn chọn lại trạm hoặc liên hệ Quản trị viên để kiểm tra bản ghi License của trạm."
+    },
+    "empty": {
+      "title": "Chưa có thông tin giấy phép"
+    },
     "plans": {
       "yearly": "Gói Năm (1 năm lịch)",
       "monthly": "Gói Tháng (1 tháng lịch)"

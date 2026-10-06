@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { IconAlertCircle, IconAlertTriangle, IconCheckCircle, IconInfo, IconX } from './icons';
 
 export type ToastTone = 'success' | 'error' | 'info' | 'warning';
@@ -126,8 +127,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={toastFn}>
       {children}
       {/* Toast viewport anchored at top-right with comfortable margins & desktop expansion */}
-      <aside
-        className="fixed top-5 right-5 sm:top-6 sm:right-6 z-60 flex flex-col items-end gap-3 pointer-events-none w-full max-w-[calc(100vw-2.5rem)] sm:w-auto"
+      {createPortal(<aside
+        className="fixed top-5 right-5 sm:top-6 sm:right-6 z-[200] flex flex-col items-end gap-3 pointer-events-none w-full max-w-[calc(100vw-2.5rem)] sm:w-auto"
         aria-live="polite"
         aria-label="Thông báo hệ thống"
       >
@@ -154,7 +155,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <ToastCard key={t.id} item={t} onDismiss={() => dismiss(t.id)} />
         ))}
-      </aside>
+      </aside>, document.body)}
     </ToastContext.Provider>
   );
 }

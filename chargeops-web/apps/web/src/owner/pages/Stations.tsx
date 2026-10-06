@@ -20,6 +20,7 @@ import { StationDetailDrawer } from '../features/stations/StationDetailDrawer';
 import { RegisterStationModal } from '../features/stations/RegisterStationModal';
 import { ChangeOperationalStatusModal } from '../features/stations/ChangeOperationalStatusModal';
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 type StatusFilterKey = 'all' | 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'REJECTED';
 
@@ -36,7 +37,7 @@ export function Stations() {
   const [statusFilter, setStatusFilter] = useState<StatusFilterKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['stations', 'mine'],
     queryFn: () => api.stations.mine(),
   });
@@ -147,9 +148,13 @@ export function Stations() {
       />
 
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('stations.loadError', { message: (error as Error).message })}
-        </Card>
+        <ApiErrorState
+          error={error}
+          eyebrow={t('stations.error.eyebrow', { defaultValue: 'Trạm sạc' })}
+          title={t('stations.error.title', { defaultValue: 'Không thể tải danh sách trạm' })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
       ) : isLoading || !data ? (
         <StationsSkeleton />
       ) : (
@@ -234,7 +239,7 @@ export function Stations() {
       {/* Station Detail Drawer */}
       <StationDetailDrawer
         open={Boolean(selectedStation)}
-        station={selectedStation}
+        station={stationList.find((s) => s.id === selectedStation?.id) ?? selectedStation}
         onClose={handleCloseDrawer}
         isActiveInContext={selectedStation?.id === selectedStationId}
         onSelectActive={(id) => setSelectedStationId(id)}

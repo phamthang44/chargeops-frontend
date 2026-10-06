@@ -2,6 +2,15 @@
   "title": "Overview",
   "subtitle": "{{station}} · {{date}}",
   "loadError": "Could not load overview data: {{message}}",
+  "dashboard": {
+    "error": {
+      "eyebrow": "Dashboard",
+      "title": "Could not load the dashboard",
+      "missingEyebrow": "Dashboard",
+      "missingTitle": "Dashboard is not connected yet",
+      "missingDescription": "The dashboard endpoint (owner/dashboard) has not been deployed yet, so there are no figures to show."
+    }
+  },
   "license": {
     "active": "ACTIVE",
     "expiring": "EXPIRING SOON",

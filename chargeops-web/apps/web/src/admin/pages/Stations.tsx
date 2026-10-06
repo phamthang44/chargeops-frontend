@@ -39,6 +39,7 @@ import { StationDetailDrawer } from '../features/stations/StationDetailDrawer';
 import { StationActionModal, type StationActionType } from '../features/stations/StationActionModal';
 import { StationProvisioningWorkspace } from '../features/stations/StationProvisioningWorkspace';
 import { getApiErrorMessage } from '../../i18n';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 type FilterKey = 'all' | 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'REJECTED';
 
@@ -202,9 +203,14 @@ export function Stations() {
         </div>
 
         {error ? (
-          <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-            {(error as Error).message}
-          </Card>
+          <ApiErrorState
+            error={error}
+            compact
+            eyebrow={t('console.nav.stations.title', { defaultValue: 'Trạm sạc' })}
+            title={t('stations.error', { defaultValue: 'Không thể tải danh sách trạm' })}
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
         ) : (
           <>
             {/* Top KPI Metric Cards */}

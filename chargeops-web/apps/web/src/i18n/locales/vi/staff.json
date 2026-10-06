@@ -83,6 +83,10 @@
     "subtitle": "{{station}} · {{status}}",
     "subtitleFallback": "Hoạt động trạm của bạn hôm nay.",
     "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+    "error": {
+      "eyebrow": "Bảng điều khiển",
+      "title": "Không thể tải bảng điều khiển"
+    },
     "kpi": {
       "bookingsToday": "Lịch sạc hôm nay",
       "bookingsTodaySub": "Tổng số lượt đặt chỗ trong ngày",
@@ -108,6 +112,10 @@
     "subtitle": "{{station}} · Trụ sạc, cổng sạc và xử lý sự cố",
     "subtitleFallback": "Trụ sạc, cổng sạc và xử lý sự cố.",
     "loadError": "Không tải được thiết bị: {{message}}",
+    "error": {
+      "eyebrow": "Cổng sạc",
+      "title": "Không thể tải danh sách cổng sạc"
+    },
     "emptyTitle": "Chưa có thiết bị",
     "emptyBody": "Trạm này chưa có trụ sạc nào được cấp.",
     "noConnectors": "Trụ sạc chưa có cổng sạc nào.",
@@ -148,6 +156,10 @@
     "subtitle": "{{station}} · Lịch đặt chỗ tại trạm",
     "subtitleFallback": "Danh sách lượt đặt chỗ tại trạm của bạn.",
     "loadError": "Không tải được lịch sạc: {{message}}",
+    "error": {
+      "eyebrow": "Lịch đặt chỗ",
+      "title": "Không thể tải danh sách lịch đặt chỗ"
+    },
     "emptyState": "Không có lịch sạc nào khớp bộ lọc.",
     "filter": {
       "connector": "Cổng sạc",

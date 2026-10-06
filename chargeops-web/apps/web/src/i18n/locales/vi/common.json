@@ -19,5 +19,27 @@
   "copiedCode": "Đã sao chép mã {{code}}",
   "error": {
     "generic": "Đã có lỗi xảy ra"
+  },
+  "errorCard": {
+    "eyebrow": "Lỗi tải dữ liệu",
+    "title": "Không thể tải dữ liệu",
+    "retrying": "Đang thử lại…",
+    "details": "Chi tiết kỹ thuật",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "supportHint": "Cần hỗ trợ? Hãy gửi các thông tin trên cho bộ phận kỹ thuật.",
+    "missing": {
+      "eyebrow": "Chưa khả dụng",
+      "title": "Chưa có dữ liệu cho mục này",
+      "description": "Máy chủ chưa cung cấp endpoint tương ứng (chức năng chưa được triển khai) nên chưa có dữ liệu để hiển thị.",
+      "hint": "Dữ liệu sẽ tự động hiển thị ngay khi chức năng này sẵn sàng. Bạn có thể thử lại hoặc chuyển sang mục khác."
+    },
+    "hint": {
+      "network": "Không thể kết nối tới máy chủ. Vui lòng kiểm tra đường truyền mạng và thử lại.",
+      "timeout": "Máy chủ phản hồi quá lâu. Vui lòng thử lại sau giây lát.",
+      "server": "Máy chủ đang gặp sự cố tạm thời. Vui lòng thử lại sau vài giây.",
+      "auth": "Phiên đăng nhập đã hết hạn hoặc bạn chưa được cấp quyền. Vui lòng đăng nhập lại.",
+      "default": "Hệ thống chưa thể hoàn tất yêu cầu. Vui lòng thử lại — nếu lỗi kéo dài, hãy liên hệ quản trị viên."
+    }
   }
 }

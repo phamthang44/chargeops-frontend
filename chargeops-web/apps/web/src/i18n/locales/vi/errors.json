@@ -95,7 +95,16 @@
     "COMMON_006": "Lỗi xử lý xác thực tài khoản.",
     "COMMON_007": "Vi phạm tính toàn vẹn dữ liệu hệ thống.",
     "COMMON_008": "Không tìm thấy tài nguyên yêu cầu.",
-    "COMMON_009": "Xung đột tài nguyên dữ liệu."
+    "COMMON_009": "Xung đột tài nguyên dữ liệu.",
+
+    "SYS_001": "Đã xảy ra lỗi hệ thống bất ngờ. Vui lòng thử lại sau.",
+    "SYS_002": "Đã xảy ra lỗi kết nối cơ sở dữ liệu.",
+    "SYS_003": "Yêu cầu gửi lên không hợp lệ.",
+    "SYS_004": "Phương thức yêu cầu không được hỗ trợ.",
+    "SYS_005": "Lỗi xử lý xác thực tài khoản.",
+    "SYS_006": "Vi phạm tính toàn vẹn dữ liệu hệ thống.",
+    "SYS_404": "Không tìm thấy tài nguyên yêu cầu.",
+    "SYS_409": "Dữ liệu đã bị thay đổi hoặc trạng thái đơn không còn hợp lệ. Vui lòng tải lại và thử lại."
   },
   "messages": {
     "error.station.notFound": "Không tìm thấy trạm sạc: {{0}}",
@@ -207,7 +216,7 @@
     "validation.station.longitude.required": "Kinh độ không được để trống.",
     "validation.station.longitude.invalid": "Kinh độ phải là số hợp lệ từ -180 đến 180.",
     "validation.station.contactPhone.required": "Số điện thoại liên hệ không được để trống.",
-    "validation.station.contactPhone.invalid": "Số điện thoại liên hệ không hợp lệ.",
+    "validation.station.contactPhone.invalid": "Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09; có thể dùng +84 thay cho số 0 đầu.",
     "validation.station.contactPhone.maxLength": "Số điện thoại không được vượt quá 20 ký tự.",
     "validation.station.plannedChargePointCount.min": "Số trụ sạc dự kiến phải lớn hơn 0.",
     "validation.approval.reason.required": "Vui lòng nhập lý do từ chối phê duyệt.",

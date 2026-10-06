@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { formatDateVn, formatVndCompact, useApi, type OwnerDashboard } from '@chargeops/api';
 import {
   Banner,
-  Card,
   KpiCard,
   PageHeader,
   SidePanel,
@@ -12,12 +11,14 @@ import {
   TrendChart,
   type SidePanelRow,
 } from '@chargeops/ui';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { ResourceRetryButton, ResourceStateCard } from '../../shared/components/ResourceStateCard';
 
 /** Owner dashboard — data comes from the service layer (mock now, REST later). */
 export function Dashboard() {
   const { t } = useTranslation('ownerDashboard');
   const api = useApi();
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['dashboard', 'owner'],
     queryFn: () => api.dashboard.owner(),
   });
@@ -29,11 +30,32 @@ export function Dashboard() {
         subtitle={t('subtitle', { station: 'Trạm Hà Đông', date: 'Thứ Bảy, 28/06/2026' })}
       />
       {error ? (
-        <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('loadError', { message: (error as Error).message })}
-        </Card>
-      ) : isLoading || !data ? (
+        <ApiErrorState
+          error={error}
+          eyebrow={t('dashboard.error.eyebrow', { defaultValue: 'Bảng điều khiển' })}
+          title={t('dashboard.error.title', { defaultValue: 'Không thể tải bảng điều khiển' })}
+          missingEyebrow={t('dashboard.error.missingEyebrow', { defaultValue: 'Bảng điều khiển' })}
+          missingTitle={t('dashboard.error.missingTitle', { defaultValue: 'Dashboard chưa được kết nối dữ liệu' })}
+          missingDescription={t('dashboard.error.missingDescription', {
+            defaultValue:
+              'Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị.',
+          })}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isLoading ? (
         <DashboardSkeleton />
+      ) : !data ? (
+        <ResourceStateCard
+          tone="brand"
+          eyebrow={t('dashboard.error.missingEyebrow', { defaultValue: 'Bảng điều khiển' })}
+          title={t('dashboard.error.missingTitle', { defaultValue: 'Dashboard chưa được kết nối dữ liệu' })}
+          description={t('dashboard.error.missingDescription', {
+            defaultValue:
+              'Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị.',
+          })}
+          action={<ResourceRetryButton onClick={() => refetch()} isRetrying={isFetching} />}
+        />
       ) : (
         <DashboardBody data={data} />
       )}

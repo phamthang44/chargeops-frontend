@@ -40,6 +40,7 @@ import { RenewLicenseModal } from '../features/licenses/RenewLicenseModal';
 import { LicenseActionModal, type LicenseActionType } from '../features/licenses/LicenseActionModal';
 import { LicenseDetailDrawer } from '../features/licenses/LicenseDetailDrawer';
 import { getApiErrorMessage } from '../../i18n';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 type FilterKey = 'all' | 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'EXPIRED' | 'CANCELLED';
 
@@ -203,9 +204,14 @@ export function Licenses() {
         </div>
 
         {error ? (
-          <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-            {t('licenses.error', { message: (error as Error).message })}
-          </Card>
+          <ApiErrorState
+            error={error}
+            compact
+            eyebrow={t('console.nav.licenses.title', { defaultValue: 'License' })}
+            title={t('licenses.error', { defaultValue: 'Không thể tải danh sách License' })}
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
         ) : (
           <>
             {/* Top Metric Cards */}

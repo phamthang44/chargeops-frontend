@@ -95,7 +95,16 @@
     "COMMON_006": "OAuth processing error.",
     "COMMON_007": "Data integrity violation.",
     "COMMON_008": "Requested resource not found.",
-    "COMMON_009": "Resource conflict."
+    "COMMON_009": "Resource conflict.",
+
+    "SYS_001": "An unexpected server error occurred. Please try again later.",
+    "SYS_002": "A database error occurred.",
+    "SYS_003": "Invalid request.",
+    "SYS_004": "HTTP method not allowed.",
+    "SYS_005": "OAuth processing error.",
+    "SYS_006": "Data integrity violation.",
+    "SYS_404": "Requested resource not found.",
+    "SYS_409": "The data has been modified or the registration is no longer pending approval. Please reload and try again."
   },
   "messages": {
     "error.station.notFound": "Station not found: {{0}}",
@@ -207,7 +216,7 @@
     "validation.station.longitude.required": "Station longitude is required",
     "validation.station.longitude.invalid": "Station longitude must be a valid number between -180 and 180",
     "validation.station.contactPhone.required": "Station contact phone is required",
-    "validation.station.contactPhone.invalid": "Station contact phone is invalid",
+    "validation.station.contactPhone.invalid": "Use a 10-digit phone number starting with 03, 05, 07, 08 or 09; +84 can replace the leading 0.",
     "validation.station.contactPhone.maxLength": "Station contact phone cannot exceed 20 characters",
     "validation.station.plannedChargePointCount.min": "Planned charge point count must be greater than zero",
     "validation.approval.reason.required": "A rejection reason is required",

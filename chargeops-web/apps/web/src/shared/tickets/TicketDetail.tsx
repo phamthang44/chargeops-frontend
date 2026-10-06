@@ -379,6 +379,7 @@ export function TicketDetail({
           <TicketContextCard
             ticket={tk}
             admin={admin}
+            role={roleOption}
             isPlatformTicket={isPlatformTicket}
           />
 

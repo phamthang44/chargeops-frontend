@@ -51,11 +51,11 @@ export function AdminRefundPolicyModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const escalationId = escalation?.ticketId || ticket.id;
+  const escalationId = escalation?.escalationId;
 
   const contextQuery = useQuery({
     queryKey: ['ticketEscalations', 'refundPolicyContext', ticket.id, escalationId],
-    queryFn: () => api.ticketEscalations.getRefundPolicyContext(ticket.id, escalationId),
+    queryFn: () => api.ticketEscalations.getRefundPolicyContext(ticket.id, escalationId!),
     enabled: Boolean(open && ticket.bookingId && escalationId && !context),
   });
 
@@ -63,10 +63,16 @@ export function AdminRefundPolicyModal({
 
   const effectiveContext = context || contextQuery.data;
   const isGrant = outcome === 'GRANT_FULL_REFUND';
-  const refundAmount = effectiveContext?.eligibleRefundAmountVnd ?? 0;
+  const refundAmount = effectiveContext?.eligibleRefundAmountVnd;
+  const matchesCase = Boolean(effectiveContext && effectiveContext.ticketId === ticket.id
+    && effectiveContext.escalationId === escalationId);
+  const selectedEligibility = isGrant ? effectiveContext?.grantEligibility : effectiveContext?.insufficientEligibility;
+  const canSubmit = Boolean(matchesCase && !contextQuery.isFetching && !contextQuery.isError
+    && ticket.status !== 'CLOSED' && effectiveContext?.reviewEligibility.allowed && selectedEligibility?.allowed);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canSubmit || !effectiveContext || !escalationId) return;
     const cleanReason = reason.trim();
     if (cleanReason.length < 5) {
       setValidationError(
@@ -108,9 +114,9 @@ export function AdminRefundPolicyModal({
           ? crypto.randomUUID()
           : `idemp-admin-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      const ticketVersion = ticket.version ?? 0;
-      const expectedBookingVersion = effectiveContext?.bookingVersion ?? 1;
-      const expectedDecisionVersion = effectiveContext?.decisionVersion ?? 0;
+      const ticketVersion = effectiveContext.ticketVersion;
+      const expectedBookingVersion = effectiveContext.bookingVersion;
+      const expectedDecisionVersion = effectiveContext.decisionVersion;
 
       await api.ticketEscalations.reviewRefundPolicy(
         ticket.id,
@@ -186,8 +192,8 @@ export function AdminRefundPolicyModal({
               <p className="mt-0.5 text-[11.5px] text-muted">
                 {t('escalation.refundPolicy.modal.ticketBookingSub', {
                   ticketCode: ticket.ticketCode || ticket.id,
-                  bookingId: ticket.bookingId?.slice(0, 16),
-                  defaultValue: `Phiếu: #${ticket.ticketCode || ticket.id} · Booking: #${ticket.bookingId?.slice(0, 16)}...`,
+                  bookingId: effectiveContext?.bookingCode || ticket.bookingCode || ticket.bookingId,
+                  defaultValue: `Phiếu: #${ticket.ticketCode || ticket.id} · Booking: #${effectiveContext?.bookingCode || ticket.bookingCode || ticket.bookingId}`,
                 })}
               </p>
             </div>
@@ -219,6 +225,12 @@ export function AdminRefundPolicyModal({
           </div>
         </div>
 
+        {(!matchesCase || contextQuery.isError) && <div role="alert" className="rounded-xl border border-bad bg-bad-soft p-3 text-xs text-bad">
+          {t('escalation.refundPolicy.contextUnavailable', 'Không tải được hồ sơ rà soát. Chưa thể xác định khoản hoàn hoặc ban hành quyết định.')}
+        </div>}
+        {matchesCase && !selectedEligibility?.allowed && <p role="status" className="text-xs text-muted">
+          {t('escalation.refundPolicy.actionUnavailable', 'Kết quả đã chọn chưa được phép áp dụng:')} {selectedEligibility?.reason}
+        </p>}
         {/* Outcome Selector Radio Group */}
         <div className="space-y-2">
           <label className="text-[12.5px] font-semibold text-ink">
@@ -249,8 +261,8 @@ export function AdminRefundPolicyModal({
               </div>
               <p className="text-[11px] text-muted leading-relaxed">
                 {t('escalation.refundPolicy.modal.grantDesc', {
-                  amount: formatVnd(refundAmount),
-                  defaultValue: `Đủ căn cứ lỗi trạm. Hệ thống tự động thiết lập nghĩa vụ hoàn đủ 100% giá gói (${formatVnd(refundAmount)}).`,
+                  amount: refundAmount != null ? formatVnd(refundAmount) : t('escalation.refundPolicy.unknownAmount', 'Chưa có dữ liệu'),
+                  defaultValue: `Đủ căn cứ lỗi trạm. Hệ thống tự động thiết lập nghĩa vụ hoàn đủ 100% giá gói (${refundAmount != null ? formatVnd(refundAmount) : t('escalation.refundPolicy.unknownAmount', 'Chưa có dữ liệu')}).`,
                 })}
               </p>
             </div>
@@ -371,7 +383,7 @@ export function AdminRefundPolicyModal({
             type="submit"
             variant="primary"
             accent="brand"
-            disabled={isSubmitting || !reason.trim()}
+            disabled={isSubmitting || !reason.trim() || !canSubmit}
           >
             {isSubmitting
               ? t('escalation.refundPolicy.modal.submitting', 'Đang ban hành...')

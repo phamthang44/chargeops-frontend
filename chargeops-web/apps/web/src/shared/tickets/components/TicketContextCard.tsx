@@ -1,16 +1,45 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Card, IconArrowRight, IconPhone, IconPin, IconShield } from '@chargeops/ui';
-import { formatDateVn, formatTimeVn, type Ticket } from '@chargeops/api';
+import {
+  formatDateVn,
+  formatDateTimeVn,
+  formatTimeVn,
+  type Ticket,
+} from '@chargeops/api';
+
+export type TicketContextRole = 'owner' | 'admin' | 'staff';
 
 export interface TicketContextCardProps {
   ticket: Ticket;
   admin: boolean;
   isPlatformTicket: boolean;
+  role?: TicketContextRole;
 }
 
-export function TicketContextCard({ ticket, admin, isPlatformTicket }: TicketContextCardProps) {
+function bookingWindowLabel(startAt?: string | null, endAt?: string | null): string | null {
+  if (!startAt && !endAt) return null;
+  if (startAt && endAt) {
+    return formatDateVn(startAt) === formatDateVn(endAt)
+      ? `${formatDateVn(startAt)} · ${formatTimeVn(startAt)} – ${formatTimeVn(endAt)}`
+      : `${formatDateVn(startAt)} ${formatTimeVn(startAt)} – ${formatDateVn(endAt)} ${formatTimeVn(endAt)}`;
+  }
+  return formatDateTimeVn(startAt ?? endAt);
+}
+
+export function TicketContextCard({
+  ticket,
+  admin,
+  isPlatformTicket,
+  role,
+}: TicketContextCardProps) {
   const { t } = useTranslation('tickets');
+
+  const roleOption: TicketContextRole = role ?? (admin ? 'admin' : 'owner');
+  const bookingsListPath =
+    roleOption === 'admin' ? null : roleOption === 'staff' ? '/staff/bookings' : '/owner/bookings';
+  const bookingLabel = ticket.bookingCode || (ticket.bookingId ? `#${String(ticket.bookingId).slice(0, 12)}` : '');
+  const bookingWindow = bookingWindowLabel(ticket.bookingStartAt, ticket.bookingEndAt);
 
   return (
     <Card className="rounded-2xl p-4 shadow-sm">
@@ -71,18 +100,38 @@ export function TicketContextCard({ ticket, admin, isPlatformTicket }: TicketCon
             <div className="text-[11px] font-medium text-muted">
               {t('detail.context.booking', 'Đơn sạc liên kết')}
             </div>
-            <div className="mt-1 flex items-center justify-between">
-              <span className="font-mono text-[12px] font-semibold text-brand truncate">
-                #{String(ticket.bookingId).slice(0, 12)}
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <span className="min-w-0 break-all font-mono text-[12px] font-semibold text-brand select-all">
+                {bookingLabel}
               </span>
-              <Link
-                to={admin ? `/admin/bookings` : `/owner/bookings`}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-brand hover:underline"
-              >
-                <span>{t('detail.context.viewBooking', 'Xem đơn')}</span>
-                <IconArrowRight size={11} />
-              </Link>
+              {bookingsListPath && (
+                <Link
+                  to={bookingsListPath}
+                  className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-brand hover:underline"
+                >
+                  <span>{t('detail.context.viewBooking', 'Xem đơn')}</span>
+                  <IconArrowRight size={11} />
+                </Link>
+              )}
             </div>
+
+            {bookingWindow && (
+              <div className="mt-1.5 flex items-start justify-between gap-2 text-[11.5px]">
+                <span className="text-muted">
+                  {t('detail.context.bookingWindow', 'Khung giờ đặt')}
+                </span>
+                <span className="text-right text-ink">{bookingWindow}</span>
+              </div>
+            )}
+
+            {!bookingsListPath && (
+              <p className="mt-1.5 text-[11px] leading-relaxed text-faint">
+                {t(
+                  'detail.context.dossierNote',
+                  'Hồ sơ thanh toán và hoàn tiền của đơn này được rà soát trong chính phiếu.',
+                )}
+              </p>
+            )}
           </div>
         )}
 

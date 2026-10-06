@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { ChargePoint, Connector, OperationalChargePointStatus, ProvisioningStatus } from '@chargeops/api';
 
-import { Button, Card, IconBolt, IconClock, IconHistory, IconLock, IconX } from '@chargeops/ui';
+import { Button, Card, IconBolt, IconClock, IconHistory, IconLock, IconShieldAlert, IconX } from '@chargeops/ui';
 import {
   getChargePointPill,
   getConnectorPill,
@@ -22,6 +22,7 @@ export interface ChargerDetailPanelProps {
   onDownloadQr: (c: Connector) => void;
   onViewCpHistory: (cp: ChargePoint) => void;
   onViewConnectorHistory: (c: Connector) => void;
+  onReportIncident?: (c: Connector) => void;
 }
 
 /** Right-hand editor: Charge Point identity/zone on top, operational status toggle, its Connectors below. */
@@ -36,6 +37,7 @@ export function ChargerDetailPanel({
   onDownloadQr,
   onViewCpHistory,
   onViewConnectorHistory,
+  onReportIncident,
 }: ChargerDetailPanelProps) {
   const { t } = useTranslation('owner');
   const [name, setName] = useState(chargePoint.name);
@@ -79,7 +81,7 @@ export function ChargerDetailPanel({
           onClick={() => onViewCpHistory(chargePoint)}
           className="w-full text-[12px] cursor-pointer"
         >
-          Xem lịch sử trạng thái trụ sạc
+          {t('chargePoints.panel.historyBtn', 'Xem lịch sử trạng thái trụ sạc')}
         </Button>
       </div>
 
@@ -191,6 +193,7 @@ export function ChargerDetailPanel({
             onCycleStatus={onCycleConnectorStatus}
             onDownloadQr={onDownloadQr}
             onViewConnectorHistory={onViewConnectorHistory}
+            onReportIncident={onReportIncident}
           />
         ))}
       </div>
@@ -204,12 +207,14 @@ function ConnectorCard({
   onCycleStatus,
   onDownloadQr,
   onViewConnectorHistory,
+  onReportIncident,
 }: {
   connector: Connector;
   chargePoint: ChargePoint;
   onCycleStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
   onViewConnectorHistory: (c: Connector) => void;
+  onReportIncident?: (c: Connector) => void;
 }) {
   const { t } = useTranslation('owner');
   const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
@@ -222,7 +227,9 @@ function ConnectorCard({
       <div className="mb-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-mono text-[12px] font-semibold text-brand">{c.connectorCode || c.id}</span>
-          <span className="text-[12.5px] font-semibold">{c.name || `Cổng sạc ${c.connectorType}`}</span>
+          <span className="text-[12.5px] font-semibold">
+            {c.name || t('connectors.panel.defaultName', 'Cổng sạc {{type}}', { type: c.connectorType })}
+          </span>
         </div>
         <button
           onClick={() => onCycleStatus(c)}
@@ -241,14 +248,27 @@ function ConnectorCard({
           <IconLock size={11} strokeWidth={2.1} />
           {t('connectors.panel.adminProvided')}
         </span>
-        <button
-          type="button"
-          onClick={() => onViewConnectorHistory(c)}
-          className="inline-flex items-center gap-1 rounded-md border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
-        >
-          <IconHistory size={12} strokeWidth={2} />
-          <span>Lịch sử</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onReportIncident && (
+            <button
+              type="button"
+              onClick={() => onReportIncident(c)}
+              title={t('connectors.panel.reportIncidentTooltip', 'Báo cáo sự cố khẩn cấp trên cổng sạc này (BKG-054)')}
+              className="inline-flex items-center gap-1 rounded-md border border-bad/30 bg-bad-soft px-2 py-1 text-[11px] font-semibold text-bad hover:bg-bad hover:text-white transition cursor-pointer"
+            >
+              <IconShieldAlert size={12} strokeWidth={2} />
+              <span>{t('connectors.panel.incidentBtn', 'Sự cố')}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onViewConnectorHistory(c)}
+            className="inline-flex items-center gap-1 rounded-md border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+          >
+            <IconHistory size={12} strokeWidth={2} />
+            <span>{t('connectors.panel.historyBtn', 'Lịch sử')}</span>
+          </button>
+        </div>
       </div>
       <div className="mb-2.5 flex gap-[11px]">
         <LockedSpec label={t('connectors.panel.connector')} value={c.connectorType} />
@@ -257,7 +277,7 @@ function ConnectorCard({
 
       <div className="mb-2.5 grid grid-cols-2 gap-2.5">
         <PerfStat label={t('connectors.panel.utilization')} value={`${c.utilizationPct}%`} />
-        <PerfStat label="UPTIME 30N" value={`${c.uptime30dPct}%`} />
+        <PerfStat label={t('connectors.panel.uptime30d', 'UPTIME 30N')} value={`${c.uptime30dPct}%`} />
         <PerfStat label={t('connectors.panel.sessions')} value={String(c.sessionsToday)} />
         <PerfStat label={t('connectors.panel.kwh')} value={String(c.kwhToday)} />
       </div>

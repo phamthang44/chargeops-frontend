@@ -15,6 +15,8 @@ export interface TicketHandlerCardProps {
   isClaiming: boolean;
   onClaim: () => void;
   onOpenAssign: () => void;
+  /** Station staff claim tickets themselves — no manual reassignment (Ops-06). */
+  canAssign?: boolean;
 }
 
 export function TicketHandlerCard({
@@ -30,6 +32,7 @@ export function TicketHandlerCard({
   isClaiming,
   onClaim,
   onOpenAssign,
+  canAssign = true,
 }: TicketHandlerCardProps) {
   const { t } = useTranslation('tickets');
 
@@ -85,7 +88,7 @@ export function TicketHandlerCard({
             </div>
           </div>
 
-          {!isClosed && !isResolved && !isAdminStationSupervisory && (
+          {canAssign && !isClosed && !isResolved && !isAdminStationSupervisory && (
             <div className="pt-2 border-t border-hairline">
               <Button
                 size="sm"
@@ -191,14 +194,16 @@ export function TicketHandlerCard({
                   >
                     {isClaiming ? t('detail.claiming', 'Đang nhận...') : t('detail.claimBtn', 'Tự nhận xử lý')}
                   </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onOpenAssign}
-                    icon={<IconUsers size={13} />}
-                  >
-                    {t('detail.assignBtnShort', 'Phân công')}
-                  </Button>
+                  {canAssign && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={onOpenAssign}
+                      icon={<IconUsers size={13} />}
+                    >
+                      {t('detail.assignBtnShort', 'Phân công')}
+                    </Button>
+                  )}
                 </>
               ) : null}
             </div>

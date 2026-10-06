@@ -22,6 +22,17 @@ import type {
   Booking,
   BookingListParams,
   BookingSummary,
+  AdminRefundPolicyContext,
+  AdminReviewRefundPolicyPayload,
+  AdminReviewRefundPolicyResponse,
+  OwnerAcceptStationFailurePayload,
+  OwnerCancelBookingPayload,
+  OwnerStationFailureContext,
+  StationFailureCommandResponse,
+  ConnectorIncidentResponse,
+  ReportConnectorIncidentRequest,
+  RecoverConnectorIncidentRequest,
+  ResolveIncidentSessionRequest,
   ChargePoint,
   ChargePointStatusEvent,
   ConnectorProvisioningGroup,
@@ -62,6 +73,18 @@ import type {
   StaffAssignmentStatus,
   CurrentStaffContextResponse,
   AssignStationStaffRequest,
+  StaffStationOverview,
+  StaffChargePointItem,
+  StaffConnectorItem,
+  StaffEquipmentHistoryItem,
+  StaffEquipmentHistoryParams,
+  StaffChangeChargePointStatusRequest,
+  StaffChangeConnectorStatusRequest,
+  StaffBookingListParams,
+  StaffOperationalBooking,
+  StaffInvitationResponse,
+  StaffInvitationRequest,
+  StaffInvitationListParams,
   Amenity,
   ChangeStationOperationalStatusRequest,
   Station,
@@ -133,6 +156,12 @@ export interface OwnerBookingService {
   get(bookingId: string): Promise<OwnerBookingDetail>;
   summary(params?: OwnerBookingFilter): Promise<OwnerBookingSummary>;
   activeFor(params: OwnerActiveBookingParams): Promise<Page<OperationalBooking>>;
+  /** BKG-056: Read context for station failure cancellation & responsibility admission */
+  getStationFailureContext(bookingId: string): Promise<OwnerStationFailureContext>;
+  /** BKG-056 Bước A: Owner cancel before check-in due to station failure */
+  cancelForStationFailure(bookingId: string, payload: OwnerCancelBookingPayload, idempotencyKey: string): Promise<StationFailureCommandResponse>;
+  /** BKG-056 Bước B: Owner accepts station failure responsibility after booking end or in escalation */
+  admitStationFailure(bookingId: string, payload: OwnerAcceptStationFailurePayload, idempotencyKey: string): Promise<StationFailureCommandResponse>;
 }
 
 export interface ChargePointService {
@@ -336,6 +365,59 @@ export interface StaffService {
   revoke(stationId: string, assignmentId: string): Promise<StationStaffMember | void>;
 }
 
+/**
+ * STAFF Operations console (Ops-01..Ops-05). All calls are scoped to the
+ * caller's ACTIVE station assignment server-side; `stationId` comes from
+ * `staff.currentContext().station.id`.
+ * `page` on every paged method is 0-based (UI convention); the REST layer
+ * converts to the backend's 1-based `page` query param.
+ */
+export interface StaffOperationsService {
+  /** Station operational overview: status + charge point / connector counts. */
+  overview(stationId: string): Promise<StaffStationOverview>;
+  listChargePoints(stationId: string): Promise<StaffChargePointItem[]>;
+  listConnectors(stationId: string, chargePointId: string): Promise<StaffConnectorItem[]>;
+  /** Optimistic-lock status change; throws `STAFF_OP_00x` ApiError on conflict. */
+  changeChargePointStatus(
+    stationId: string,
+    chargePointId: string,
+    input: StaffChangeChargePointStatusRequest,
+  ): Promise<StaffChargePointItem>;
+  changeConnectorStatus(
+    stationId: string,
+    chargePointId: string,
+    connectorId: string,
+    input: StaffChangeConnectorStatusRequest,
+  ): Promise<StaffConnectorItem>;
+  chargePointHistory(
+    stationId: string,
+    chargePointId: string,
+    params?: StaffEquipmentHistoryParams,
+  ): Promise<Page<StaffEquipmentHistoryItem>>;
+  connectorHistory(
+    stationId: string,
+    chargePointId: string,
+    connectorId: string,
+    params?: StaffEquipmentHistoryParams,
+  ): Promise<Page<StaffEquipmentHistoryItem>>;
+  /** BKG-048 operational bookings filtered by connector / time window. */
+  listBookings(stationId: string, params?: StaffBookingListParams): Promise<Page<StaffOperationalBooking>>;
+}
+
+/** Owner: staff invitations (invite, list, resend, cancel) + staff activation. */
+export interface StaffInvitationService {
+  invite(stationId: string, input: StaffInvitationRequest): Promise<StaffInvitationResponse>;
+  list(stationId: string, params?: StaffInvitationListParams): Promise<Page<StaffInvitationResponse>>;
+  resend(stationId: string, invitationId: string): Promise<StaffInvitationResponse>;
+  cancel(stationId: string, invitationId: string): Promise<StaffInvitationResponse>;
+  /**
+   * Staff self-service: `POST /me/staff-invitation/activate` (idempotent).
+   * Call only when the Keycloak realm role STAFF is present but
+   * `currentContext().staff` is false; refetch `currentContext()` afterwards.
+   */
+  activate(): Promise<StaffInvitationResponse>;
+}
+
 export interface PricingService {
   /** Owner's pricing & hours config for one explicitly selected station (FR11). */
   get(stationId: string): Promise<PricingConfig>;
@@ -397,6 +479,10 @@ export interface TicketEscalationService {
   get(ticketId: string): Promise<TicketEscalation>;
   adminQueue(params?: { page?: number; pageSize?: number }): Promise<Page<TicketEscalation>>;
   adminEscalatedTickets(params?: { stationId?: string; status?: string; page?: number; pageSize?: number }): Promise<Page<Ticket>>;
+  /** BKG-057: Admin get refund policy review context for active escalation */
+  getRefundPolicyContext(ticketId: string, escalationId: string): Promise<AdminRefundPolicyContext>;
+  /** BKG-057: Admin review and decide refund policy in active escalation */
+  reviewRefundPolicy(ticketId: string, escalationId: string, payload: AdminReviewRefundPolicyPayload, idempotencyKey: string): Promise<AdminReviewRefundPolicyResponse>;
 }
 
 export interface ProfileService {
@@ -479,6 +565,30 @@ export interface NotificationService {
   delete(id: string): Promise<void>;
 }
 
+/** BKG-054 / BKG-055: Operational emergency incident and recovery service */
+export interface IncidentService {
+  report(
+    stationId: string,
+    connectorId: string,
+    request: ReportConnectorIncidentRequest,
+    idempotencyKey?: string,
+  ): Promise<ConnectorIncidentResponse>;
+  get(stationId: string, incidentId: string): Promise<ConnectorIncidentResponse>;
+  recover(
+    stationId: string,
+    incidentId: string,
+    request: RecoverConnectorIncidentRequest,
+    idempotencyKey?: string,
+  ): Promise<ConnectorIncidentResponse>;
+  resolveSession(
+    stationId: string,
+    incidentId: string,
+    bookingId: string,
+    request: ResolveIncidentSessionRequest,
+    idempotencyKey?: string,
+  ): Promise<ConnectorIncidentResponse>;
+}
+
 export interface Services {
   profile: ProfileService;
   location: LocationService;
@@ -496,6 +606,8 @@ export interface Services {
   licenses: LicenseService;
   users: UserService;
   staff: StaffService;
+  staffOperations: StaffOperationsService;
+  staffInvitations: StaffInvitationService;
   pricing: PricingService;
   policies: PolicyService;
   legalDocuments: LegalDocumentsService;
@@ -504,4 +616,5 @@ export interface Services {
   challenge: ChallengeService;
   media: MediaService;
   notifications: NotificationService;
+  incidents: IncidentService;
 }

@@ -40,6 +40,8 @@ export interface TicketFinding {
   reason: string;
   recordedAt: string;
   recordedBy?: string | null;
+  /** Vai trò người ghi nhận (backend: OWNER | STAFF | ADMIN | DRIVER). */
+  recordedByRole?: string | null;
 }
 
 export interface Ticket {

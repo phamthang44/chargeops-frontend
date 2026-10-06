@@ -11,7 +11,7 @@ import { Avatar, Skeleton, StatusPill, IconHistory, IconAlertCircle } from '@cha
 
 interface TicketEventTimelineProps {
   ticketId: string;
-  role?: 'owner' | 'admin';
+  role?: 'owner' | 'admin' | 'staff';
 }
 
 export function TicketEventTimeline({ ticketId, role }: TicketEventTimelineProps) {

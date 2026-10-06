@@ -35,10 +35,18 @@ type CategoryKey = TicketCategory | 'all';
 type QueueScope = 'all' | 'my' | 'unassigned';
 type AdminWorkstream = 'platform' | 'escalated';
 
-export function TicketsPage({ admin = false }: { admin?: boolean }) {
+export function TicketsPage({
+  admin = false,
+  role,
+}: {
+  admin?: boolean;
+  role?: 'owner' | 'admin' | 'staff';
+}) {
   const { t } = useTranslation('tickets');
   const api = useApi();
   const navigate = useNavigate();
+  const apiRole: 'owner' | 'admin' | 'staff' = role ?? (admin ? 'admin' : 'owner');
+  const isStaffRole = apiRole === 'staff';
 
   const [workstream, setWorkstream] = useState<AdminWorkstream>('platform');
   const [status, setStatus] = useState<StatusKey>('all');
@@ -54,20 +62,22 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
   };
 
   const summaryQuery = useQuery({
-    queryKey: ['tickets', 'summary', { role: admin ? 'admin' : 'owner', workstream: admin ? workstream : undefined }],
-    queryFn: () => api.tickets.summary({ role: admin ? 'admin' : 'owner',
+    queryKey: ['tickets', 'summary', { role: apiRole, workstream: admin ? workstream : undefined }],
+    queryFn: () => api.tickets.summary({ role: apiRole,
       workstream: admin ? (workstream === 'escalated' ? 'station' : 'platform') : undefined }),
     refetchInterval: 30000,
   });
 
+  // Station staff are scoped to their single assignment server-side; the owner
+  // station picker (and its owner-only endpoint) does not apply to them.
   const stationsQuery = useQuery({
     queryKey: ['stations', admin ? 'all' : 'mine'],
     queryFn: () => (admin ? api.stations.all() : api.stations.mine()),
-    enabled: !admin,
+    enabled: !admin && !isStaffRole,
   });
 
   const listQuery = useQuery({
-    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page, role: admin ? 'admin' : 'owner', workstream: admin ? workstream : undefined }],
+    queryKey: ['tickets', 'list', { status, category, stationId, queueScope, search, page, role: apiRole, workstream: admin ? workstream : undefined }],
     queryFn: () => {
       if (admin && workstream === 'escalated') {
         return api.ticketEscalations.adminEscalatedTickets({
@@ -79,12 +89,12 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
       return api.tickets.list({
         status,
         category: admin ? (category === 'all' ? undefined : category) : category,
-        stationId: admin ? undefined : stationId,
+        stationId: admin || isStaffRole ? undefined : stationId,
         queueScope: queueScope === 'all' ? undefined : (queueScope as any),
         search,
         page,
         pageSize: PAGE_SIZE,
-        role: admin ? 'admin' : 'owner',
+        role: apiRole,
         workstream: admin ? 'platform' : undefined,
       });
     },
@@ -362,7 +372,7 @@ export function TicketsPage({ admin = false }: { admin?: boolean }) {
           className="flex-1"
         />
 
-        {!admin && (
+        {!admin && !isStaffRole && (
           <Select
             value={stationId}
             onChange={(v) => resetTo(() => setStationId(v as string))}

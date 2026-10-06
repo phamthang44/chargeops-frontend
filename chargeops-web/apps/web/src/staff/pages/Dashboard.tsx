@@ -1,119 +1,185 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { TICKET_STATUS, useApi, type StaffDashboard as StaffDashboardData } from '@chargeops/api';
+import { formatTimeVn, useApi, type StaffStationOverview } from '@chargeops/api';
 import { Card, KpiCard, PageHeader, SidePanel, Skeleton, type SidePanelRow } from '@chargeops/ui';
+import { getApiErrorMessage } from '../../i18n';
+import { useStaffStation } from '../context/StaffStationContext';
+import { useStaffEquipment } from '../hooks/useStaffEquipment';
+
+/** Local-day boundaries (ISO) so "today" matches the operator's clock. */
+function todayRange(): { from: string; to: string } {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { from: start.toISOString(), to: end.toISOString() };
+}
 
 /**
- * Ops-only — no revenue, license, or analytics anywhere on this screen or its
- * query. Station staff hit `dashboard.staff()`, a separate endpoint/DTO from
- * the owner dashboard, so there is nothing financial to leak via devtools
- * regardless of what this component chooses to render.
+ * Ops-only station overview (Ops-05). Reads the staff-scoped overview
+ * (`/staff/stations/{id}`) — no revenue, licence or analytics DTO is touched by
+ * this screen, so there is nothing financial to leak via devtools.
  */
 export function Dashboard() {
-  const { t } = useTranslation('staffDashboard');
-  const navigate = useNavigate();
+  const { t } = useTranslation('staff');
   const api = useApi();
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard', 'staff'],
-    queryFn: () => api.dashboard.staff(),
+  const navigate = useNavigate();
+  const { selectedStationId, currentStation } = useStaffStation();
+  const equipment = useStaffEquipment(selectedStationId || undefined);
+  const range = todayRange();
+
+  const overviewQ = useQuery<StaffStationOverview>({
+    queryKey: ['staff', 'overview', selectedStationId],
+    queryFn: () => api.staffOperations.overview(selectedStationId as string),
+    enabled: Boolean(selectedStationId),
   });
+
+  // One page of today's bookings: `total` feeds the KPI, `items` the panel.
+  const bookingsQ = useQuery({
+    queryKey: ['staff', 'bookings', 'today', selectedStationId, range.from, range.to],
+    queryFn: () =>
+      api.staffOperations.listBookings(selectedStationId as string, {
+        from: range.from,
+        to: range.to,
+        page: 0,
+        size: 5,
+      }),
+    enabled: Boolean(selectedStationId),
+  });
+
+  const isLoading = overviewQ.isLoading || bookingsQ.isLoading || equipment.isLoading;
+  const error = overviewQ.error || bookingsQ.error || equipment.error;
 
   return (
     <>
-      <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      <PageHeader
+        title={t('dashboard.title')}
+        subtitle={
+          overviewQ.data
+            ? t('dashboard.subtitle', {
+                station: overviewQ.data.name,
+                status: t(`stationStatus.${overviewQ.data.operationalStatus}`),
+              })
+            : currentStation?.name || t('dashboard.subtitleFallback')
+        }
+      />
+
       {error ? (
         <Card className="border-bad-border bg-bad-soft p-5 text-[13px] font-medium text-bad-deep">
-          {t('loadError', { message: (error as Error).message })}
+          {t('dashboard.loadError', { message: getApiErrorMessage(error) })}
         </Card>
-      ) : isLoading || !data ? (
+      ) : isLoading ? (
         <DashboardSkeleton />
       ) : (
-        <DashboardBody data={data} onManageChargers={() => navigate('../chargers')} onAllBookings={() => navigate('../bookings')} onAllTickets={() => navigate('../tickets')} />
+        <DashboardBody
+          overview={overviewQ.data}
+          todayTotal={bookingsQ.data?.total ?? 0}
+          todayRows={bookingsQ.data?.items ?? []}
+          availableConnectors={
+            equipment.connectors.filter((c) => c.runtimeStatus === 'AVAILABLE').length
+          }
+          connectorCount={equipment.connectors.length}
+          offlineConnectors={equipment.offlineConnectors}
+          onAllBookings={() => navigate('../bookings')}
+          onAllChargers={() => navigate('../chargers')}
+        />
       )}
     </>
   );
 }
 
 function DashboardBody({
-  data,
-  onManageChargers,
+  overview,
+  todayTotal,
+  todayRows,
+  availableConnectors,
+  connectorCount,
+  offlineConnectors,
   onAllBookings,
-  onAllTickets,
+  onAllChargers,
 }: {
-  data: StaffDashboardData;
-  onManageChargers: () => void;
+  overview?: StaffStationOverview;
+  todayTotal: number;
+  todayRows: { bookingId: string; bookingCode?: string; startAt: string; endAt: string; driverDisplayName: string; connectorCode?: string; status: string }[];
+  availableConnectors: number;
+  connectorCount: number;
+  offlineConnectors: { id: string; code: string; runtimeStatus: string }[];
   onAllBookings: () => void;
-  onAllTickets: () => void;
+  onAllChargers: () => void;
 }) {
-  const { t } = useTranslation('staffDashboard');
-  const { kpis, chargers, upcomingBookings, recentTickets } = data;
+  const { t } = useTranslation('staff');
 
-  const chargerRow = (c: StaffDashboardData['chargers'][number]): SidePanelRow => {
-    const status = String(c.runtimeStatus || '').toUpperCase().replace(/[-_]/g, '');
-    return status === 'AVAILABLE'
-      ? { label: `${c.id} · ${c.name}`, value: t('charger.available'), dotClass: 'bg-good', valueClass: 'text-good' }
-      : status === 'INUSE'
-        ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
-        : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
-  };
+  const bookingRows: SidePanelRow[] =
+    todayRows.length === 0
+      ? [{ label: t('dashboard.panel.noBookings'), value: '' }]
+      : todayRows.map((b) => ({
+          label: `${b.bookingCode || b.bookingId} · ${formatTimeVn(b.startAt)}`,
+          value: b.driverDisplayName,
+        }));
 
-  const TONE_CLASS: Record<string, string> = { good: 'text-good', warn: 'text-warn', bad: 'text-bad', brand: 'text-brand', neutral: 'text-muted', ink: 'text-ink' };
+  const incidentRows: SidePanelRow[] =
+    offlineConnectors.length === 0
+      ? [{ label: t('dashboard.panel.noIncidents'), value: '' }]
+      : offlineConnectors.map((c) => ({
+          label: c.code || c.id,
+          value: t('runtimeStatus.OFFLINE'),
+          dotClass: 'bg-bad',
+          valueClass: 'text-bad',
+        }));
 
   return (
     <>
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
         <KpiCard
-          label={t('kpi.bookingsToday')}
-          value={String(kpis.bookingsToday)}
-          delta={t('kpi.bookingsDelta', { count: kpis.bookingsDelta })}
-          deltaClass="text-good"
+          label={t('dashboard.kpi.bookingsToday')}
+          value={String(todayTotal)}
+          delta={t('dashboard.kpi.bookingsTodaySub')}
+          deltaClass={todayTotal > 0 ? 'text-brand' : 'text-faint'}
         />
         <KpiCard
-          label={t('kpi.chargersOnline')}
-          value={String(kpis.chargersOnline)}
-          suffix={`/${kpis.chargersTotal}`}
-          delta={kpis.offlineChargerNote ?? t('kpi.allOnline')}
-          deltaClass={kpis.offlineChargerNote ? 'text-bad' : 'text-good'}
-        />
-        <KpiCard
-          label={t('kpi.openTickets')}
-          value={String(kpis.openTickets)}
-          delta={t('kpi.openTicketsSub')}
-          deltaClass={kpis.openTickets > 0 ? 'text-warn' : 'text-faint'}
-        />
-        <KpiCard
-          label={t('kpi.pendingCheckins')}
-          value={String(kpis.pendingCheckins)}
-          delta={t('kpi.pendingCheckinsSub')}
+          label={t('dashboard.kpi.chargePoints')}
+          value={String(overview?.chargePointCount ?? 0)}
+          delta={
+            overview
+              ? t('dashboard.kpi.chargePointsSub', {
+                  status: t(`stationStatus.${overview.operationalStatus}`),
+                })
+              : undefined
+          }
           deltaClass="text-faint"
+        />
+        <KpiCard
+          label={t('dashboard.kpi.connectors')}
+          value={String(connectorCount)}
+          delta={t('dashboard.kpi.connectorsSub', { available: availableConnectors })}
+          deltaClass={availableConnectors === connectorCount ? 'text-good' : 'text-warn'}
+        />
+        <KpiCard
+          label={t('dashboard.kpi.openIncidents')}
+          value={String(offlineConnectors.length)}
+          delta={
+            offlineConnectors.length > 0
+              ? t('dashboard.kpi.openIncidentsSub')
+              : t('dashboard.kpi.noIncidents')
+          }
+          deltaClass={offlineConnectors.length > 0 ? 'text-bad' : 'text-good'}
         />
       </div>
 
       <div className="grid gap-[13px] lg:grid-cols-2">
-        <SidePanel title={t('panel.chargers')} link={t('panel.manageLink')} onLink={onManageChargers} rows={chargers.map(chargerRow)} />
         <SidePanel
-          title={t('panel.upcomingBookings')}
-          link={t('panel.allBookingsLink')}
+          title={t('dashboard.panel.todayBookings')}
+          link={t('dashboard.panel.allBookingsLink')}
           onLink={onAllBookings}
-          rows={upcomingBookings.map((b) => ({ label: `${b.id} · ${b.startTime}`, value: b.driverName }))}
+          rows={bookingRows}
         />
-      </div>
-
-      <div className="mt-[13px]">
         <SidePanel
-          title={t('panel.recentTickets')}
-          link={t('panel.allTicketsLink')}
-          onLink={onAllTickets}
-          rows={
-            recentTickets.length === 0
-              ? [{ label: t('panel.noTickets'), value: '' }]
-              : recentTickets.map((tk) => ({
-                  label: `${tk.id} · ${tk.subject}`,
-                  value: TICKET_STATUS[tk.status].label,
-                  valueClass: TONE_CLASS[TICKET_STATUS[tk.status].tone],
-                }))
-          }
+          title={t('dashboard.panel.offlineConnectors')}
+          link={t('dashboard.panel.allChargersLink')}
+          onLink={onAllChargers}
+          rows={incidentRows}
+          tone={offlineConnectors.length > 0 ? 'warn' : 'white'}
         />
       </div>
     </>
@@ -129,10 +195,9 @@ function DashboardSkeleton() {
         ))}
       </div>
       <div className="grid gap-[13px] lg:grid-cols-2">
-        <Skeleton className="h-[170px] rounded-card" />
-        <Skeleton className="h-[170px] rounded-card" />
+        <Skeleton className="h-[190px] rounded-card" />
+        <Skeleton className="h-[190px] rounded-card" />
       </div>
-      <Skeleton className="mt-[13px] h-[150px] rounded-card" />
     </>
   );
 }

@@ -73,6 +73,20 @@
     "STATION_STAFF_009": "Dịch vụ xác thực tạm thời không khả dụng. Vui lòng thử lại sau.",
     "STATION_STAFF_010": "Không thể xử lý phân quyền trên hệ thống định danh. Vui lòng thử lại.",
 
+    "STAFF_OP_001": "Thiết bị vừa được thay đổi bởi người khác. Vui lòng thử lại.",
+    "STAFF_OP_002": "Thiết bị đang có lượt sạc hoặc đặt chỗ đang hoạt động, không thể đổi trạng thái.",
+    "STAFF_OP_003": "Trạm hoặc thiết bị không khả dụng với phân công của bạn.",
+    "STAFF_OP_004": "Trạng thái thiết bị không được phép chuyển theo cách này.",
+    "STAFF_OP_005": "Vui lòng nhập lý do thay đổi trạng thái.",
+
+    "STAFF_INVITE_001": "Không tìm thấy lời mời nhân viên.",
+    "STAFF_INVITE_002": "Email này đã được liên kết với một tài khoản khác.",
+    "STAFF_INVITE_003": "Lời mời không ở trạng thái có thể thực hiện thao tác này.",
+    "STAFF_INVITE_004": "Thông tin định danh của lời mời không khớp tài khoản.",
+    "STAFF_INVITE_005": "Hệ thống định danh tạm thời không khả dụng. Vui lòng thử lại sau.",
+    "STAFF_INVITE_006": "Không thể khởi tạo quyền nhân viên cho lời mời này.",
+    "STAFF_INVITE_007": "Trạm không ở trạng thái gửi lời mời nhân viên.",
+
     "COMMON_001": "Đã có lỗi không xác định xảy ra.",
     "COMMON_002": "Đã xảy ra lỗi hệ thống bất ngờ. Vui lòng thử lại sau.",
     "COMMON_003": "Đã xảy ra lỗi kết nối cơ sở dữ liệu.",
@@ -155,6 +169,17 @@
     "error.stationStaff.assignmentAlreadyRevoked": "Phân công nhân viên này đã bị thu hồi trước đó.",
     "error.stationStaff.identityProviderUnavailable": "Dịch vụ xác thực tạm thời không khả dụng. Vui lòng thử lại sau.",
     "error.stationStaff.identityRoleOperationFailed": "Không thể xử lý phân quyền trên hệ thống định danh. Vui lòng thử lại.",
+
+    "error.staffOperation.version_conflict": "Thiết bị vừa được thay đổi bởi người khác. Vui lòng tải lại và thử lại.",
+    "error.staffOperation.active_service": "Thiết bị đang có lượt sạc hoặc đặt chỗ đang hoạt động, không thể đổi trạng thái.",
+    "error.staffOperation.station_unavailable": "Trạm hoặc thiết bị không khả dụng với phân công của bạn.",
+    "error.staffOperation.invalid_transition": "Trạng thái thiết bị không được phép chuyển theo cách này.",
+    "error.staffOperation.reason_required": "Vui lòng nhập lý do thay đổi trạng thái.",
+
+    "error.staffInvite.notFound": "Không tìm thấy lời mời nhân viên.",
+    "error.staffInvite.emailInUse": "Email này đã được liên kết với một tài khoản khác.",
+    "error.staffInvite.stateConflict": "Lời mời không ở trạng thái có thể thực hiện thao tác này.",
+    "error.staffInvite.identityConflict": "Thông tin định danh của lời mời không khớp tài khoản.",
 
     "error.common.unknown": "Đã có lỗi không xác định xảy ra.",
     "error.common.internal": "Đã xảy ra lỗi hệ thống bất ngờ.",

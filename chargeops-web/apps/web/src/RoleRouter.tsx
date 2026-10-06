@@ -5,30 +5,32 @@ import { OwnerConsole } from './owner/OwnerConsole';
 import { AdminConsole } from './admin/AdminConsole';
 import { DriverNotice } from './DriverNotice';
 import { SimulatorPage } from './simulator/SimulatorPage';
-import { RequireStaffAssignment, useStaffContext } from './staff/RequireStaffAssignment';
+import { RequireStaffAssignment } from './staff/RequireStaffAssignment';
+import { StaffConsole } from './staff/StaffConsole';
 
 /**
- * Authentication and routing decision tree:
- *   ADMIN                     → /admin
- *   OWNER                     → /owner
- *   Active staff context      → /staff
- *   Remaining (driver-only)   → /driver-notice
+ * Authentication and routing decision tree (by realm role):
+ *   platform_admin            → /admin
+ *   station_owner             → /owner
+ *   staff                     → /staff (RequireStaffAssignment verifies the
+ *                               ACTIVE assignment and activates a pending
+ *                               invitation when needed)
+ *   remaining (driver-only)   → /driver-notice
  */
 export function RoleRouter() {
   const { user } = useAuth();
   const isOwner = user?.roles.includes('station_owner');
   const isAdmin = user?.roles.includes('platform_admin');
-  const staffQ = useStaffContext();
+  const isStaff = user?.roles.includes('staff');
 
   const home = useMemo(() => {
     if (isAdmin) return '/admin';
     if (isOwner) return '/owner';
-    if (staffQ.isLoading) return null;
-    if (staffQ.data?.staff && staffQ.data?.assignmentStatus === 'ACTIVE') return '/staff';
+    if (isStaff) return '/staff';
     return '/driver-notice';
-  }, [isAdmin, isOwner, staffQ.data, staffQ.isLoading]);
+  }, [isAdmin, isOwner, isStaff]);
 
-  if (home === null) {
+  if (!user) {
     return <SsoRedirectOverlay />;
   }
 
@@ -56,7 +58,7 @@ export function RoleRouter() {
         path="/staff/*"
         element={
           <RequireStaffAssignment>
-            <OwnerConsole base="/staff" reduced />
+            <StaffConsole base="/staff" />
           </RequireStaffAssignment>
         }
       />

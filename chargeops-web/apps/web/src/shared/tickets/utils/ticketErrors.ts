@@ -80,6 +80,31 @@ export function getTicketErrorMeta(error: any, t: TFunction): TicketErrorMeta {
     };
   }
 
+  if (code === 'TKT_ESCALATION_NOT_ACTIVE' || messageKey === 'error.ticket.escalationNotActive') {
+    return {
+      title: t('errors.escalationNotActiveTitle', 'Yêu cầu xem xét đã hoàn tất'),
+      message: t('errors.escalationNotActive', 'Không còn yêu cầu xem xét đang mở. Vui lòng tải lại phiếu.'),
+      code: 'TKT_ESCALATION_NOT_ACTIVE',
+      isConflict: true,
+    };
+  }
+
+  if (code === 'TKT_ESCALATION_RETURN_UNAVAILABLE' || messageKey === 'error.ticket.escalationReturnUnavailable') {
+    return {
+      title: t('errors.escalationReturnUnavailableTitle', 'Không thể trả về trạm'),
+      message: t('errors.escalationReturnUnavailable', 'Phiếu đã được giải quyết hoặc đóng. Admin chỉ có thể hoàn tất yêu cầu xem xét còn mở.'),
+      code: 'TKT_ESCALATION_RETURN_UNAVAILABLE',
+    };
+  }
+
+  if (code === 'TKT_ESCALATION_REVIEW_INVALID' || messageKey === 'error.ticket.escalationReviewInvalid') {
+    return {
+      title: t('errors.escalationReviewInvalidTitle', 'Lý do không phù hợp'),
+      message: t('errors.escalationReviewInvalid', 'Chỉ chọn lý do đóng khi kết thúc hỗ trợ; khi kết thúc hỗ trợ cần chọn lý do.'),
+      code: 'TKT_ESCALATION_REVIEW_INVALID',
+    };
+  }
+
   // 3. VERSION CONFLICT
   if (
     code === 'TKT_VERSION_CONFLICT' ||

@@ -1,0 +1,173 @@
+{
+  "guard": {
+    "no-role": {
+      "title": "Bạn chưa được cấp quyền nhân viên",
+      "body": "Tài khoản {{email}} không có vai trò Staff trên hệ thống. Vui lòng liên hệ chủ trạm để được cấp quyền vận hành."
+    },
+    "no-assignment": {
+      "title": "Chưa có phân công trạm",
+      "body": "Tài khoản {{email}} có quyền Staff nhưng chưa được gán vào trạm sạc nào. Vui lòng liên hệ chủ trạm để được phân công."
+    },
+    "revoked": {
+      "title": "Phân công nhân viên đã bị thu hồi",
+      "body": "Quyền vận hành tại trạm của tài khoản {{email}} đã bị thu hồi. Liên hệ chủ trạm để được cấp lại."
+    },
+    "activation-failed": {
+      "title": "Không thể kích hoạt quyền nhân viên",
+      "body": "Lời mời của tài khoản {{email}} không còn hiệu lực (đã hết hạn hoặc bị hủy). Liên hệ chủ trạm gửi lại lời mời."
+    },
+    "load-error": {
+      "title": "Không kiểm tra được phân công",
+      "body": "Không thể tải thông tin phân công của {{email}}. Vui lòng thử lại sau."
+    },
+    "toNotice": "Về trang thông báo",
+    "logout": "Đăng xuất"
+  },
+  "console": {
+    "role": {
+      "staff": "Nhân viên trạm"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard",
+        "title": "Tổng quan vận hành",
+        "subtitle": "Chỉ số vận hành trạm trong ngày."
+      },
+      "chargers": {
+        "label": "Thiết bị",
+        "title": "Thiết bị trạm",
+        "subtitle": "Trụ sạc, cổng sạc, đổi trạng thái và xử lý sự cố."
+      },
+      "bookings": {
+        "label": "Lịch sạc",
+        "title": "Lịch sạc",
+        "subtitle": "Danh sách lượt đặt chỗ tại trạm của bạn."
+      },
+      "tickets": {
+        "label": "Hỗ trợ sự cố",
+        "title": "Hỗ trợ & Xử lý Sự cố",
+        "subtitle": "Tiếp nhận và xử lý phiếu hỗ trợ của trạm."
+      }
+    }
+  },
+  "search": {
+    "groups": {
+      "tickets": "Phiếu hỗ trợ",
+      "chargers": "Thiết bị"
+    },
+    "zonePrefix": "Khu vực"
+  },
+  "stationStatus": {
+    "OPERATING": "Đang vận hành",
+    "PAUSED": "Tạm ngưng",
+    "MAINTENANCE": "Đang bảo trì"
+  },
+  "runtimeStatus": {
+    "AVAILABLE": "Sẵn sàng",
+    "IN_USE": "Đang sạc",
+    "OFFLINE": "Ngoại tuyến"
+  },
+  "status": {
+    "AVAILABLE": "Sẵn sàng",
+    "OFFLINE": "Ngoại tuyến",
+    "MAINTENANCE": "Bảo trì",
+    "IN_USE": "Đang sạc",
+    "ACTIVE": "Hoạt động",
+    "PENDING_ACTIVATION": "Chờ kích hoạt",
+    "SUSPENDED": "Tạm ngưng",
+    "OPERATING": "Đang vận hành",
+    "PAUSED": "Tạm ngưng"
+  },
+  "dashboard": {
+    "title": "Tổng quan",
+    "subtitle": "{{station}} · {{status}}",
+    "subtitleFallback": "Hoạt động trạm của bạn hôm nay.",
+    "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+    "kpi": {
+      "bookingsToday": "Lịch sạc hôm nay",
+      "bookingsTodaySub": "Tổng số lượt đặt chỗ trong ngày",
+      "chargePoints": "Trụ sạc",
+      "chargePointsSub": "Trạm {{status}}",
+      "connectors": "Cổng sạc",
+      "connectorsSub": "{{available}} cổng sẵn sàng",
+      "openIncidents": "Sự cố đang mở",
+      "openIncidentsSub": "Cổng đang ngoại tuyến",
+      "noIncidents": "Không có cổng ngoại tuyến"
+    },
+    "panel": {
+      "todayBookings": "Lịch sạc hôm nay",
+      "allBookingsLink": "Xem tất cả",
+      "noBookings": "Chưa có lịch sạc hôm nay",
+      "offlineConnectors": "Cổng cần xử lý",
+      "allChargersLink": "Mở thiết bị",
+      "noIncidents": "Không có sự cố đang mở"
+    }
+  },
+  "chargers": {
+    "title": "Thiết bị trạm",
+    "subtitle": "{{station}} · Trụ sạc, cổng sạc và xử lý sự cố",
+    "subtitleFallback": "Trụ sạc, cổng sạc và xử lý sự cố.",
+    "loadError": "Không tải được thiết bị: {{message}}",
+    "emptyTitle": "Chưa có thiết bị",
+    "emptyBody": "Trạm này chưa có trụ sạc nào được cấp.",
+    "noConnectors": "Trụ sạc chưa có cổng sạc nào.",
+    "statusUpdated": "Đã cập nhật trạng thái thiết bị",
+    "notProvisioned": "Trụ đang ở trạng thái {{status}} — không thể đổi trạng thái vận hành.",
+    "inUseLock": "Hệ thống tự quản lý trạng thái đang sạc",
+    "historyBtn": "Lịch sử",
+    "reportBtn": "Báo sự cố",
+    "setTo": "→ {{status}}",
+    "kpi": {
+      "chargePoints": "Trụ sạc",
+      "chargePointsSub": "Tổng số trụ trong trạm",
+      "connectors": "Cổng sạc",
+      "connectorsSub": "{{available}} sẵn sàng",
+      "offline": "Cổng ngoại tuyến",
+      "offlineSub": "Cần kiểm tra ngay",
+      "allOnline": "Tất cả cổng đang hoạt động"
+    }
+  },
+  "statusDialog": {
+    "title": "Đổi trạng thái · {{name}}",
+    "impactDevice": "Tạm dừng phục vụ trên toàn bộ {{count}} cổng sạc của trụ.",
+    "impactConnector": "Tạm ngưng tiếp nhận sạc tại cổng này.",
+    "impactHidden": "Không nhận lượt đặt chỗ mới trong khi OFFLINE / Bảo trì.",
+    "impactRestore": "Chuyển lại Sẵn sàng để mở nhận đặt chỗ.",
+    "incidentTitle": "Xảy ra sự cố kỹ thuật hoặc khẩn cấp?",
+    "incidentBody": "Nếu thiết bị hỏng hoặc nguy hiểm cần ngắt điện ngay, kích hoạt báo cáo sự cố để chuyển cổng OFFLINE và chốt snapshot các đơn đặt chỗ.",
+    "incidentBtn": "Kích hoạt Báo sự cố khẩn cấp",
+    "reasonLabel": "Lý do thay đổi trạng thái",
+    "reasonPlaceholder": "Nhập chi tiết lý do (bắt buộc cho trạng thái không phải Sẵn sàng, tối thiểu 3 ký tự)...",
+    "versionNote": "Phiên bản hiện tại: v{{version}} — thao tác dùng khóa lạc quan, nếu thiết bị vừa thay đổi bạn sẽ được yêu cầu thử lại.",
+    "cancel": "Hủy bỏ",
+    "applying": "Đang áp dụng…",
+    "confirm": "Xác nhận thay đổi"
+  },
+  "bookings": {
+    "title": "Lịch sạc",
+    "subtitle": "{{station}} · Lịch đặt chỗ tại trạm",
+    "subtitleFallback": "Danh sách lượt đặt chỗ tại trạm của bạn.",
+    "loadError": "Không tải được lịch sạc: {{message}}",
+    "emptyState": "Không có lịch sạc nào khớp bộ lọc.",
+    "filter": {
+      "connector": "Cổng sạc",
+      "allConnectors": "Tất cả cổng sạc",
+      "from": "Từ thời điểm",
+      "to": "Đến thời điểm",
+      "reset": "Xóa bộ lọc",
+      "resultCount": "{{count}} lịch sạc"
+    },
+    "table": {
+      "cols": {
+        "id": "Mã đặt chỗ",
+        "time": "Thời gian",
+        "driver": "Tài xế",
+        "phone": "SĐT",
+        "connector": "Cổng sạc",
+        "status": "Trạng thái"
+      },
+      "noData": "—",
+      "phoneHiddenHint": "SĐT tài xế không nằm trong response booking vận hành (BKG-048)."
+    }
+  }
+}

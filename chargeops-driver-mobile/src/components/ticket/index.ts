@@ -12,6 +12,7 @@ export * from './TicketFieldError';
 export * from './TicketValidationSummary';
 export * from './TicketSubmitFooter';
 export * from './TicketDisputeEscalationCard';
+export * from './TicketFindingCard';
 export * from './ResolvedResolutionCard';
 export * from './ConfirmSheet';
 export * from './DriverEscalateModal';

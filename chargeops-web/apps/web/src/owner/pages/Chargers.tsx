@@ -18,6 +18,8 @@ import {
   EquipmentStatusHistoryDrawer,
   type EquipmentStatusTarget,
 } from '../../shared/equipment/EquipmentStatusHistoryDrawer';
+import { ReportIncidentModal } from '../features/chargers/ReportIncidentModal';
+import { ConnectorIncidentDrawer } from '../features/chargers/ConnectorIncidentDrawer';
 
 import { useOwnerStation } from '../context/OwnerStationContext';
 
@@ -31,6 +33,8 @@ export function Chargers() {
   /** Pending operational status change awaiting confirmation (null = dialog closed). */
   const [intent, setIntent] = useState<StatusIntent | null>(null);
   const [historyTarget, setHistoryTarget] = useState<EquipmentStatusTarget | null>(null);
+  const [incidentTarget, setIncidentTarget] = useState<{ chargePoint: ChargePoint; connector: Connector } | null>(null);
+  const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
 
   const chargePointsQ = useQuery({
     queryKey: ['chargePoints', 'station', selectedStationId],
@@ -266,6 +270,7 @@ export function Chargers() {
                     connectorCode: c.connectorCode,
                   })
                 }
+                onReportIncident={(c) => setIncidentTarget({ chargePoint: selected.chargePoint, connector: c })}
               />
             )}
           </div>
@@ -277,6 +282,10 @@ export function Chargers() {
         saving={updateChargePoint.isPending || changeOperationalStatus.isPending || updateConnector.isPending}
         onClose={() => setIntent(null)}
         onConfirm={applyIntent}
+        onReportIncident={(cp, c) => {
+          setIntent(null);
+          setIncidentTarget({ chargePoint: cp, connector: c });
+        }}
       />
 
       <EquipmentStatusHistoryDrawer
@@ -284,6 +293,27 @@ export function Chargers() {
         onClose={() => setHistoryTarget(null)}
         stationId={selectedStationId || ''}
         target={historyTarget}
+      />
+
+      {incidentTarget && (
+        <ReportIncidentModal
+          open={Boolean(incidentTarget)}
+          onClose={() => setIncidentTarget(null)}
+          stationId={selectedStationId || ''}
+          chargePoint={incidentTarget.chargePoint}
+          connector={incidentTarget.connector}
+          onSuccess={(inc) => {
+            setIncidentTarget(null);
+            setActiveIncidentId(inc.incidentId);
+          }}
+        />
+      )}
+
+      <ConnectorIncidentDrawer
+        open={Boolean(activeIncidentId)}
+        onClose={() => setActiveIncidentId(null)}
+        stationId={selectedStationId || ''}
+        incidentId={activeIncidentId}
       />
     </>
   );

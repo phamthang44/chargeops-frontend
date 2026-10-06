@@ -1,0 +1,173 @@
+{
+  "guard": {
+    "no-role": {
+      "title": "Staff role not granted",
+      "body": "Account {{email}} does not have the Staff role. Contact the station owner to get operations access."
+    },
+    "no-assignment": {
+      "title": "No station assignment",
+      "body": "Account {{email}} has the Staff role but is not assigned to any station. Contact the station owner for an assignment."
+    },
+    "revoked": {
+      "title": "Staff assignment revoked",
+      "body": "Operations access for {{email}} has been revoked. Contact the station owner to reinstate it."
+    },
+    "activation-failed": {
+      "title": "Could not activate staff access",
+      "body": "The invitation for {{email}} is no longer valid (expired or cancelled). Ask the station owner to send a new one."
+    },
+    "load-error": {
+      "title": "Assignment check failed",
+      "body": "Could not load the assignment for {{email}}. Please try again."
+    },
+    "toNotice": "Back to notice",
+    "logout": "Sign out"
+  },
+  "console": {
+    "role": {
+      "staff": "Station staff"
+    },
+    "nav": {
+      "dashboard": {
+        "label": "Dashboard",
+        "title": "Operations overview",
+        "subtitle": "Today's station operations."
+      },
+      "chargers": {
+        "label": "Equipment",
+        "title": "Station equipment",
+        "subtitle": "Charge points, connectors, status changes and incidents."
+      },
+      "bookings": {
+        "label": "Schedule",
+        "title": "Charging schedule",
+        "subtitle": "Bookings at your station."
+      },
+      "tickets": {
+        "label": "Support",
+        "title": "Support & Incidents",
+        "subtitle": "Pick up and resolve station tickets."
+      }
+    }
+  },
+  "search": {
+    "groups": {
+      "tickets": "Tickets",
+      "chargers": "Equipment"
+    },
+    "zonePrefix": "Zone"
+  },
+  "stationStatus": {
+    "OPERATING": "Operating",
+    "PAUSED": "Paused",
+    "MAINTENANCE": "Maintenance"
+  },
+  "runtimeStatus": {
+    "AVAILABLE": "Available",
+    "IN_USE": "Charging",
+    "OFFLINE": "Offline"
+  },
+  "status": {
+    "AVAILABLE": "Available",
+    "OFFLINE": "Offline",
+    "MAINTENANCE": "Maintenance",
+    "IN_USE": "Charging",
+    "ACTIVE": "Active",
+    "PENDING_ACTIVATION": "Pending activation",
+    "SUSPENDED": "Suspended",
+    "OPERATING": "Operating",
+    "PAUSED": "Paused"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "subtitle": "{{station}} · {{status}}",
+    "subtitleFallback": "Today's station activity.",
+    "loadError": "Could not load the overview: {{message}}",
+    "kpi": {
+      "bookingsToday": "Bookings today",
+      "bookingsTodaySub": "Total bookings for the day",
+      "chargePoints": "Charge points",
+      "chargePointsSub": "Station {{status}}",
+      "connectors": "Connectors",
+      "connectorsSub": "{{available}} available",
+      "openIncidents": "Open incidents",
+      "openIncidentsSub": "Connectors offline",
+      "noIncidents": "No offline connectors"
+    },
+    "panel": {
+      "todayBookings": "Bookings today",
+      "allBookingsLink": "See all",
+      "noBookings": "No bookings today",
+      "offlineConnectors": "Connectors to check",
+      "allChargersLink": "Open equipment",
+      "noIncidents": "No open incidents"
+    }
+  },
+  "chargers": {
+    "title": "Station equipment",
+    "subtitle": "{{station}} · Charge points, connectors and incidents",
+    "subtitleFallback": "Charge points, connectors and incidents.",
+    "loadError": "Could not load equipment: {{message}}",
+    "emptyTitle": "No equipment yet",
+    "emptyBody": "This station has no charge points provisioned.",
+    "noConnectors": "This charge point has no connectors.",
+    "statusUpdated": "Equipment status updated",
+    "notProvisioned": "Charge point is {{status}} — operational status cannot change.",
+    "inUseLock": "Charging state is managed by the system",
+    "historyBtn": "History",
+    "reportBtn": "Report incident",
+    "setTo": "→ {{status}}",
+    "kpi": {
+      "chargePoints": "Charge points",
+      "chargePointsSub": "Total in this station",
+      "connectors": "Connectors",
+      "connectorsSub": "{{available}} available",
+      "offline": "Offline connectors",
+      "offlineSub": "Needs attention",
+      "allOnline": "All connectors operational"
+    }
+  },
+  "statusDialog": {
+    "title": "Change status · {{name}}",
+    "impactDevice": "Stops service across all {{count}} connectors of this charge point.",
+    "impactConnector": "Stops accepting charging at this connector.",
+    "impactHidden": "No new bookings while OFFLINE / maintenance.",
+    "impactRestore": "Switch back to Available to accept bookings.",
+    "incidentTitle": "Technical or emergency incident?",
+    "incidentBody": "If the equipment is faulty or unsafe and must be powered down now, activate incident reporting to take the connector OFFLINE and snapshot affected bookings.",
+    "incidentBtn": "Activate emergency incident report",
+    "reasonLabel": "Reason for the status change",
+    "reasonPlaceholder": "Enter the reason (required for any non-Available status, min 3 characters)...",
+    "versionNote": "Current version: v{{version}} — the request uses an optimistic lock; if the equipment changed you will be asked to retry.",
+    "cancel": "Cancel",
+    "applying": "Applying…",
+    "confirm": "Confirm change"
+  },
+  "bookings": {
+    "title": "Charging schedule",
+    "subtitle": "{{station}} · Bookings at this station",
+    "subtitleFallback": "Bookings at your station.",
+    "loadError": "Could not load bookings: {{message}}",
+    "emptyState": "No bookings match the filters.",
+    "filter": {
+      "connector": "Connector",
+      "allConnectors": "All connectors",
+      "from": "From",
+      "to": "To",
+      "reset": "Clear filters",
+      "resultCount": "{{count}} bookings"
+    },
+    "table": {
+      "cols": {
+        "id": "Booking",
+        "time": "Time",
+        "driver": "Driver",
+        "phone": "Phone",
+        "connector": "Connector",
+        "status": "Status"
+      },
+      "noData": "—",
+      "phoneHiddenHint": "Driver phone is not part of the operational booking response (BKG-048)."
+    }
+  }
+}

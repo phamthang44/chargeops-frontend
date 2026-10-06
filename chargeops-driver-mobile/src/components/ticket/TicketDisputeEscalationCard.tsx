@@ -117,8 +117,8 @@ export function TicketDisputeEscalationCard({
   const nonStationFaultFinding = ticket.findings?.find(
     (f) =>
       f.conclusion === 'USER_ERROR' ||
-      f.conclusion === 'NO_ISSUE' ||
-      f.conclusion === 'POWER_OUTAGE' ||
+      (f as any).conclusion === 'NO_ISSUE' ||
+      (f as any).conclusion === 'POWER_OUTAGE' ||
       (f as any).conclusion === 'NOT_STATION_FAILURE' ||
       (f as any).conclusion === 'NO_FAULT_FOUND',
   );

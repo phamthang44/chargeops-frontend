@@ -36,6 +36,9 @@ export function statusLabelKey(booking: Booking): string {
   if (booking.status === 'CANCELLED' && booking.cancelReason === 'PAYMENT_TIMEOUT') {
     return 'bookingStatus.PAYMENT_TIMEOUT';
   }
+  if (booking.status === 'CANCELLED' && booking.cancelReason === 'STATION_FAILURE') {
+    return 'bookingStatus.STATION_FAILURE';
+  }
   return `bookingStatus.${booking.status}`;
 }
 
@@ -298,6 +301,7 @@ export function useBookingDetail(bookingId: string) {
     if (isCancelled) {
       if (booking.cancelReason === 'NO_SHOW') return t('bookingDetail.reasonNoShow');
       if (booking.cancelReason === 'PAYMENT_TIMEOUT') return t('bookingDetail.reasonTimeout');
+      if (booking.cancelReason === 'STATION_FAILURE') return t('bookingDetail.reasonStationFailure', 'Đã hủy do sự cố kỹ thuật tại trạm sạc (Hoàn đủ 100%)');
       if ((booking.refundAmount ?? refundableAmount) > 0) {
         return t('bookingDetail.refundedNote', { amount: formatVnd(booking.refundAmount ?? refundableAmount) });
       }

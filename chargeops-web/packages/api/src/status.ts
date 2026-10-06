@@ -163,10 +163,14 @@ export const TICKET_EVENT_TYPE: Record<TicketEventType, { label: string; tone: T
 };
 
 /** Role badge colours (mono chips) — CSS var references so dark mode repaints them via inline style. */
-export const USER_ROLE_BADGE: Record<'DRIVER' | 'OWNER' | 'ADMIN', { bg: string; fg: string }> = {
+export const USER_ROLE_BADGE: Record<
+  'DRIVER' | 'OWNER' | 'ADMIN' | 'STAFF',
+  { bg: string; fg: string }
+> = {
   DRIVER: { bg: 'var(--color-chip)', fg: 'var(--color-body)' },
   OWNER: { bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' },
   ADMIN: { bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' },
+  STAFF: { bg: 'var(--color-warn-soft)', fg: 'var(--color-warn-deep)' },
 };
 
 /**

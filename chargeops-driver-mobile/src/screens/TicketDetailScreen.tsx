@@ -28,6 +28,7 @@ import {
   DriverEscalateModal,
   ResolvedResolutionCard,
   TicketDisputeEscalationCard,
+  TicketFindingCard,
   TicketMessageBubble,
   type ConfirmSheetTone,
 } from '@/components/ticket';
@@ -59,16 +60,6 @@ const STATUS_CONFIG: Record<
   IN_PROGRESS: { label: 'Đang xử lý', variant: 'warning' },
   RESOLVED: { label: 'Đã giải quyết', variant: 'success' },
   CLOSED: { label: 'Đã đóng', variant: 'neutral' },
-};
-
-const CONCLUSION_CONFIG: Record<string, string> = {
-  STATION_FAILURE: 'Lỗi phía trạm sạc',
-  NOT_STATION_FAILURE: 'Không phải lỗi trạm',
-  HARDWARE_FAULT: 'Lỗi phần cứng trụ sạc',
-  STATION_OFFLINE: 'Trạm mất kết nối mạng',
-  SOFTWARE_BUG: 'Sự cố phần mềm / firmware',
-  USER_ERROR: 'Thao tác phía người dùng',
-  OTHER: 'Nguyên nhân khác',
 };
 
 /** Nội dung hộp thoại thông báo (thay thế `Alert.alert` — no-op trên web). */
@@ -508,35 +499,9 @@ export function TicketDetailScreen() {
                 )}
               </View>
 
-              {/* Technical Finding Card — shows audit conclusion independently of any refund */}
+              {/* Technical Finding Card — Double-Bezel, tone-coded verdicts + provenance + audit note */}
               {hasFinding && (
-                <View
-                  style={[
-                    styles.resolutionCard,
-                    {
-                      backgroundColor: isDark ? '#0f1f2d' : '#EFF6FF',
-                      borderColor: isDark ? '#1e3a5f' : '#BFDBFE',
-                    },
-                  ]}
-                >
-                  <View style={styles.resolutionHeader}>
-                    <Ionicons name="document-text-outline" size={20} color="#3B82F6" />
-                    <Text style={[styles.resolutionTitle, { color: isDark ? '#60A5FA' : '#1D4ED8' }]}>
-                      {t('ticket.detail.findingsTitle', 'Kết luận kỹ thuật')}
-                    </Text>
-                  </View>
-                  {ticket.findings.map((f, i) => {
-                    const conclusionText = t(
-                      `ticket.conclusion.${f.conclusion}`,
-                      CONCLUSION_CONFIG[f.conclusion] || f.conclusion
-                    );
-                    return (
-                      <Text key={f.findingId || i} style={[styles.resolutionBody, { color: themeColors.textBody }]}>
-                        • {f.reason ? `${conclusionText} — ${f.reason}` : conclusionText}
-                      </Text>
-                    );
-                  })}
-                </View>
+                <TicketFindingCard findings={ticket.findings} showDisputeHint={!isClosed} />
               )}
 
               {/* Refund Note — booking-level, neutral wording: does NOT imply station fault */}

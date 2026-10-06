@@ -37,7 +37,7 @@ export type BookingStatus =
   | 'EXPIRED';
 
 /** Why a CANCELLED booking ended that way — drives the history badge + refund copy. */
-export type CancelReason = 'DRIVER' | 'NO_SHOW' | 'PAYMENT_TIMEOUT';
+export type CancelReason = 'DRIVER' | 'NO_SHOW' | 'PAYMENT_TIMEOUT' | 'STATION_FAILURE';
 
 /** Operating schedule status: open now vs closed by active schedule vs no schedule set vs owner paused. */
 export type StationOperatingState =
@@ -286,7 +286,9 @@ export interface BookingRefundSummary {
   reason?: 'VOLUNTARY_GRACE' | 'STATION_FAILURE' | 'EXCESS_PAYMENT' | 'LATE_PAYMENT' | 'UNAPPLIED_PAYMENT' | string;
   status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | string;
   executionPolicy?: 'AUTO_FIRST_ATTEMPT' | 'ADMIN_REQUIRED';
+  /** @deprecated Alias đồng giá trị với requiresOwnerAction; sẽ gỡ sau cutover. */
   requiresAdminAction?: boolean;
+  requiresOwnerAction?: boolean;
   needsReconciliation?: boolean;
   createdAt?: string;
 }

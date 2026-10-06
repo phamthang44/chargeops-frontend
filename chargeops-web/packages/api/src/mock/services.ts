@@ -5,6 +5,7 @@
  * live within a session.
  */
 import type { Services, LegalDocumentDetail } from '../services';
+import { ApiError } from '../http';
 import type {
   AdministrativeProvince,
   AdministrativeWard,
@@ -54,6 +55,26 @@ import type {
   OwnerBookingDetail,
   OwnerBookingSummary,
   OperationalBooking,
+  AdminRefundPolicyContext,
+  AdminReviewRefundPolicyPayload,
+  AdminReviewRefundPolicyResponse,
+  OwnerAcceptStationFailurePayload,
+  OwnerCancelBookingPayload,
+  OwnerStationFailureContext,
+  StationFailureCommandResponse,
+  ServiceFailureDecisionSummary,
+  ConnectorIncidentResponse,
+  ReportConnectorIncidentRequest,
+  RecoverConnectorIncidentRequest,
+  ResolveIncidentSessionRequest,
+  AffectedIncidentBooking,
+  StaffStationOverview,
+  StaffChargePointItem,
+  StaffConnectorItem,
+  StaffEquipmentHistoryItem,
+  StaffInvitationResponse,
+  StaffInvitationStatus,
+  StaffOperationalBooking,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
@@ -143,6 +164,123 @@ let seq = 3304;
 export function createMockServices(scope: { ownerView: boolean } = { ownerView: true }): Services {
   const db = buildMockDb();
   const reviewedEscalations = new Map<string, TicketEscalation>();
+  const mockIncidents = new Map<string, ConnectorIncidentResponse>();
+
+  /**
+   * STAFF Operations (Ops-03/04): optimistic-lock versions live beside the
+   * entity because the shared ChargePoint/Connector records carry no version.
+   */
+  const staffVersions = new Map<string, number>();
+  const staffHistory = new Map<string, StaffEquipmentHistoryItem[]>();
+  let staffInvitations: StaffInvitationResponse[] | null = null;
+
+  const mockVersion = (id: string) => staffVersions.get(id) ?? 1;
+  const bumpVersion = (id: string) => {
+    const next = mockVersion(id) + 1;
+    staffVersions.set(id, next);
+    return next;
+  };
+
+  const staffError = (status: number, code: string, message: string) =>
+    new ApiError(status, code, message);
+
+  const historyKey = (dimension: string, entityId: string) => `${dimension}:${entityId}`;
+
+  const pushStaffHistory = (
+    dimension: 'CHARGE_POINT' | 'CONNECTOR',
+    entityId: string,
+    fromStatus: string,
+    toStatus: string,
+    reason: string | null,
+  ) => {
+    const key = historyKey(dimension, entityId);
+    const list = staffHistory.get(key) ?? [];
+    list.unshift({
+      id: 'HIST-' + seq++,
+      dimension,
+      fromStatus,
+      toStatus,
+      reason,
+      actorType: 'STAFF',
+      performedByDisplayName: 'Nhân viên Trạm Hà Đông',
+      performedAt: new Date().toISOString(),
+    });
+    staffHistory.set(key, list);
+  };
+
+  const staffHistoryFor = (dimension: 'CHARGE_POINT' | 'CONNECTOR', entityId: string) => {
+    const key = historyKey(dimension, entityId);
+    if (!staffHistory.has(key)) {
+      staffHistory.set(key, [
+        {
+          id: 'HIST-SEED-' + entityId,
+          dimension,
+          fromStatus: dimension === 'CHARGE_POINT' ? 'PENDING_ACTIVATION' : 'AVAILABLE',
+          toStatus: dimension === 'CHARGE_POINT' ? 'AVAILABLE' : 'AVAILABLE',
+          reason: dimension === 'CHARGE_POINT' ? 'Nghiệm thu kích hoạt' : 'Kiểm tra định kỳ',
+          actorType: dimension === 'CHARGE_POINT' ? 'ADMIN' : 'OWNER',
+          performedByDisplayName: dimension === 'CHARGE_POINT' ? 'Admin Quản trị' : 'Chủ trạm',
+          performedAt: new Date(Date.now() - 6 * 86_400_000).toISOString(),
+        },
+      ]);
+    }
+    return staffHistory.get(key)!;
+  };
+
+  /** Owner stations may only be invited into when they are actually operating. */
+  const invitationStation = (stationId: string) => {
+    const station = db.ownerStations.find((s) => s.id === stationId);
+    if (!station || station.status !== 'active') {
+      throw staffError(409, 'STAFF_INVITE_007', 'Station is not active for staff activation');
+    }
+    return station;
+  };
+
+  const seedStaffInvitations = (): StaffInvitationResponse[] => {
+    if (!staffInvitations) {
+      const now = Date.now();
+      const day = 86_400_000;
+      staffInvitations = [
+        {
+          invitationId: 'INV-1001',
+          stationId: 'ST-1001',
+          email: 'ha.tran@gmail.com',
+          status: 'ACCEPTED',
+          expiresAt: new Date(now - 3 * day).toISOString(),
+          sentAt: new Date(now - 5 * day).toISOString(),
+          acceptedAt: new Date(now - 4 * day).toISOString(),
+        },
+        {
+          invitationId: 'INV-1002',
+          stationId: 'ST-1001',
+          email: 'long.do@evgo.vn',
+          status: 'SENT',
+          expiresAt: new Date(now + 5 * day).toISOString(),
+          sentAt: new Date(now - 2 * day).toISOString(),
+          acceptedAt: null,
+        },
+        {
+          invitationId: 'INV-1003',
+          stationId: 'ST-1018',
+          email: 'thu.trang@gmail.com',
+          status: 'SENT',
+          expiresAt: new Date(now - day).toISOString(),
+          sentAt: new Date(now - 8 * day).toISOString(),
+          acceptedAt: null,
+        },
+        {
+          invitationId: 'INV-1004',
+          stationId: 'ST-1018',
+          email: 'van.pham@gmail.com',
+          status: 'CANCELLED',
+          expiresAt: new Date(now + 6 * day).toISOString(),
+          sentAt: new Date(now - day).toISOString(),
+          acceptedAt: null,
+        },
+      ];
+    }
+    return staffInvitations;
+  };
 
   /** Owner console sees only its stations' bookings; admin sees the platform. */
   const scopedBookings = () =>
@@ -625,6 +763,108 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         }));
 
         return { items, total: rows.length, page, pageSize: size };
+      },
+
+      async getStationFailureContext(bookingId: string): Promise<OwnerStationFailureContext> {
+        await delay(100);
+        const b = db.bookings.find((x) => x.id === bookingId);
+        const totalAmount = b?.amountVnd ?? 100000;
+        const isPaid = b?.status !== 'pending';
+        return {
+          bookingId,
+          bookingCode: b?.id ?? bookingId,
+          bookingVersion: 1,
+          decisionVersion: 0,
+          status: (b?.status === 'checkedin' ? 'CHECKED_IN' : (b?.status || 'confirmed').toUpperCase()) as ApiBookingStatus,
+          persistedStatus: (b?.status === 'checkedin' ? 'CHECKED_IN' : (b?.status || 'confirmed').toUpperCase()) as ApiBookingStatus,
+          stateReconciliationPending: false,
+          evaluatedAt: new Date().toISOString(),
+          eligibleRefundAmountVnd: isPaid ? totalAmount : 0,
+          cancelEligibility: {
+            allowed: b?.status === 'pending' || b?.status === 'confirmed',
+          },
+          admissionEligibility: {
+            allowed: b?.status === 'completed' || b?.status === 'cancelled',
+          },
+          latestDecision: null,
+          refundSummary: null,
+          historyDecisions: [],
+        };
+      },
+
+      async cancelForStationFailure(bookingId: string, payload: OwnerCancelBookingPayload, _idempotencyKey: string): Promise<StationFailureCommandResponse> {
+        await delay(200);
+        const b = db.bookings.find((x) => x.id === bookingId);
+        if (b) {
+          b.status = 'cancelled';
+        }
+        const totalAmount = b?.amountVnd ?? 100000;
+        const isPending = b?.status === 'pending';
+        const decision: ServiceFailureDecisionSummary = {
+          decisionId: 'DEC-' + seq++,
+          sequenceNo: 1,
+          kind: 'OWNER_CANCEL_BOOKING',
+          result: isPending ? 'NO_APPLIED_PAYMENT' : 'FULL_REFUND',
+          reason: payload.reason,
+          decidedAt: new Date().toISOString(),
+          actorKind: 'OWNER',
+          actorDisplayName: 'Chủ trạm',
+          refundId: isPending ? null : 'REF-' + seq++,
+          amountVnd: isPending ? 0 : totalAmount,
+          currency: 'VND',
+        };
+        return {
+          bookingId,
+          bookingVersion: 2,
+          status: 'CANCELLED',
+          cancellationReason: 'STATION_FAILURE',
+          stateReconciliationPending: false,
+          decisionVersion: 1,
+          decision,
+          refund: isPending ? null : {
+            refundId: decision.refundId!,
+            amount: totalAmount,
+            currency: 'VND',
+            status: 'PENDING',
+            requiresOwnerAction: false,
+          },
+        };
+      },
+
+      async admitStationFailure(bookingId: string, payload: OwnerAcceptStationFailurePayload, _idempotencyKey: string): Promise<StationFailureCommandResponse> {
+        await delay(200);
+        const b = db.bookings.find((x) => x.id === bookingId);
+        const totalAmount = b?.amountVnd ?? 100000;
+        const decision: ServiceFailureDecisionSummary = {
+          decisionId: 'DEC-' + seq++,
+          sequenceNo: payload.expectedDecisionVersion + 1,
+          kind: 'OWNER_ACCEPT_STATION_FAILURE',
+          result: 'FULL_REFUND',
+          reason: payload.reason,
+          decidedAt: new Date().toISOString(),
+          affectedAt: payload.affectedAt,
+          actorKind: 'OWNER',
+          actorDisplayName: 'Chủ trạm',
+          refundId: 'REF-' + seq++,
+          amountVnd: totalAmount,
+          currency: 'VND',
+        };
+        return {
+          bookingId,
+          bookingVersion: payload.expectedVersion,
+          status: (b?.status === 'checkedin' ? 'CHECKED_IN' : (b?.status || 'completed').toUpperCase()) as ApiBookingStatus,
+          cancellationReason: 'STATION_FAILURE',
+          stateReconciliationPending: false,
+          decisionVersion: payload.expectedDecisionVersion + 1,
+          decision,
+          refund: {
+            refundId: decision.refundId!,
+            amount: totalAmount,
+            currency: 'VND',
+            status: 'PENDING',
+            requiresOwnerAction: false,
+          },
+        };
       },
     },
 
@@ -1251,7 +1491,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const page = params.page ?? 0;
         const pageSize = params.pageSize ?? 10;
         return {
-          items: rows.slice(page * pageSize, (page + 1) * pageSize),
+          items: rows
+            .slice(page * pageSize, (page + 1) * pageSize)
+            .map((r) => ({ ...r, requiresOwnerAction: Boolean(r.requiresAdminAction) })),
           total: rows.length,
           page,
           pageSize,
@@ -1262,7 +1504,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const r = db.refunds.find((x) => x.id === refundId || x.refundId === refundId);
         if (!r) throw new Error(`Không tìm thấy khoản hoàn tiền ${refundId}`);
-        return { ...r };
+        return { ...r, requiresOwnerAction: Boolean(r.requiresAdminAction) };
       },
 
       async summary() {
@@ -1343,7 +1585,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           r.requiresAdminAction = true;
         }
 
-        return { ...r };
+        return { ...r, requiresOwnerAction: Boolean(r.requiresAdminAction) };
       },
     },
 
@@ -2097,6 +2339,312 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
     },
 
+    staffOperations: {
+      async overview(stationId): Promise<StaffStationOverview> {
+        await delay(150);
+        const station =
+          db.ownerStations.find((s) => s.id === stationId) ||
+          db.allStations.find((s) => s.id === stationId);
+        if (!station) {
+          throw staffError(409, 'STAFF_OP_003', 'Station is not available for this staff assignment');
+        }
+        const cps = db.chargePoints.filter((cp) => cp.stationId === stationId);
+        const cpIds = new Set(cps.map((cp) => cp.id));
+        return {
+          stationId,
+          name: station.name,
+          address: station.address ?? '',
+          operationalStatus: station.operationalStatus ?? 'OPERATING',
+          chargePointCount: cps.length,
+          connectorCount: db.connectors.filter((c) => cpIds.has(c.chargePointId)).length,
+        };
+      },
+
+      async listChargePoints(stationId) {
+        await delay();
+        return db.chargePoints
+          .filter((cp) => cp.stationId === stationId)
+          .map<StaffChargePointItem>((cp) => ({
+            id: cp.id,
+            code: cp.chargePointCode ?? cp.id,
+            name: cp.name,
+            zoneLabel: cp.zoneLabel ?? null,
+            provisioningStatus: cp.provisioningStatus,
+            operationalStatus: cp.operationalStatus,
+            version: mockVersion(cp.id),
+          }));
+      },
+
+      async listConnectors(stationId, chargePointId) {
+        await delay();
+        const cp = db.chargePoints.find((x) => x.id === chargePointId && x.stationId === stationId);
+        if (!cp) {
+          throw staffError(409, 'STAFF_OP_003', 'Charge point is not part of this station');
+        }
+        return db.connectors
+          .filter((c) => c.chargePointId === chargePointId)
+          .map<StaffConnectorItem>((c) => ({
+            id: c.id,
+            code: c.connectorCode,
+            connectorType: c.connectorType,
+            runtimeStatus: c.runtimeStatus,
+            version: mockVersion(c.id),
+          }));
+      },
+
+      async changeChargePointStatus(stationId, chargePointId, input) {
+        await delay(220);
+        const cp = db.chargePoints.find((x) => x.id === chargePointId && x.stationId === stationId);
+        if (!cp) {
+          throw staffError(404, 'STAFF_OP_001', 'Equipment version has changed');
+        }
+        if (mockVersion(chargePointId) !== input.expectedVersion) {
+          throw staffError(409, 'STAFF_OP_001', 'Equipment version has changed');
+        }
+        if (input.operationalStatus !== 'AVAILABLE' && !input.reason?.trim()) {
+          throw staffError(400, 'STAFF_OP_005', 'A reason is required for this operation');
+        }
+        if (input.operationalStatus === cp.operationalStatus) {
+          return {
+            id: cp.id,
+            code: cp.chargePointCode ?? cp.id,
+            name: cp.name,
+            zoneLabel: cp.zoneLabel ?? null,
+            provisioningStatus: cp.provisioningStatus,
+            operationalStatus: cp.operationalStatus,
+            version: mockVersion(chargePointId),
+          };
+        }
+
+        const connectorIds = new Set(
+          db.connectors.filter((c) => c.chargePointId === chargePointId).map((c) => c.id),
+        );
+        const activeBooking = db.bookings.some(
+          (b) =>
+            connectorIds.has(b.connectorId) &&
+            (b.status === 'confirmed' || b.status === 'checkedin' || b.status === 'charging'),
+        );
+        if (activeBooking) {
+          throw staffError(
+            409,
+            'STAFF_OP_002',
+            'Equipment has an active booking or charging session',
+          );
+        }
+
+        pushStaffHistory('CHARGE_POINT', chargePointId, cp.operationalStatus, input.operationalStatus, input.reason ?? null);
+        cp.operationalStatus = input.operationalStatus;
+        return {
+          id: cp.id,
+          code: cp.chargePointCode ?? cp.id,
+          name: cp.name,
+          zoneLabel: cp.zoneLabel ?? null,
+          provisioningStatus: cp.provisioningStatus,
+          operationalStatus: cp.operationalStatus,
+          version: bumpVersion(chargePointId),
+        };
+      },
+
+      async changeConnectorStatus(stationId, chargePointId, connectorId, input) {
+        await delay(220);
+        const cp = db.chargePoints.find((x) => x.id === chargePointId && x.stationId === stationId);
+        const connector = db.connectors.find(
+          (x) => x.id === connectorId && x.chargePointId === chargePointId,
+        );
+        if (!cp || !connector) {
+          throw staffError(409, 'STAFF_OP_003', 'Station or equipment is not available');
+        }
+        if (mockVersion(connectorId) !== input.expectedVersion) {
+          throw staffError(409, 'STAFF_OP_001', 'Equipment version has changed');
+        }
+        if (input.runtimeStatus === 'IN_USE') {
+          throw staffError(409, 'STAFF_OP_004', 'Equipment status transition is unavailable');
+        }
+        if (input.runtimeStatus !== 'AVAILABLE' && !input.reason?.trim()) {
+          throw staffError(400, 'STAFF_OP_005', 'A reason is required for this operation');
+        }
+        if (input.runtimeStatus === connector.runtimeStatus) {
+          return {
+            id: connector.id,
+            code: connector.connectorCode,
+            connectorType: connector.connectorType,
+            runtimeStatus: connector.runtimeStatus,
+            version: mockVersion(connectorId),
+          };
+        }
+
+        const activeBooking = db.bookings.some(
+          (b) =>
+            b.connectorId === connectorId &&
+            (b.status === 'confirmed' || b.status === 'checkedin' || b.status === 'charging'),
+        );
+        if (activeBooking) {
+          throw staffError(
+            409,
+            'STAFF_OP_002',
+            'Equipment has an active booking or charging session',
+          );
+        }
+
+        pushStaffHistory('CONNECTOR', connectorId, connector.runtimeStatus, input.runtimeStatus, input.reason ?? null);
+        connector.runtimeStatus = input.runtimeStatus;
+        return {
+          id: connector.id,
+          code: connector.connectorCode,
+          connectorType: connector.connectorType,
+          runtimeStatus: connector.runtimeStatus,
+          version: bumpVersion(connectorId),
+        };
+      },
+
+      async chargePointHistory(stationId, chargePointId, params = {}) {
+        await delay(160);
+        const rows = staffHistoryFor('CHARGE_POINT', chargePointId);
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        return { items: rows.slice(page * size, (page + 1) * size), total: rows.length, page, pageSize: size };
+      },
+
+      async connectorHistory(stationId, chargePointId, connectorId, params = {}) {
+        await delay(160);
+        const rows = staffHistoryFor('CONNECTOR', connectorId);
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        return { items: rows.slice(page * size, (page + 1) * size), total: rows.length, page, pageSize: size };
+      },
+
+      async listBookings(stationId, params = {}) {
+        await delay(200);
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        let rows = db.bookings.filter((b) => b.stationId === stationId);
+        if (params.connectorId) rows = rows.filter((b) => b.connectorId === params.connectorId);
+        if (params.from) {
+          const fromMs = new Date(params.from).getTime();
+          if (!Number.isNaN(fromMs)) rows = rows.filter((b) => new Date(b.startAt).getTime() >= fromMs);
+        }
+        if (params.to) {
+          const toMs = new Date(params.to).getTime();
+          if (!Number.isNaN(toMs)) rows = rows.filter((b) => new Date(b.startAt).getTime() <= toMs);
+        }
+        rows = rows.sort((a, b) => (a.startAt < b.startAt ? 1 : -1));
+
+        const items = rows.slice(page * size, (page + 1) * size).map<StaffOperationalBooking>((b) => ({
+          bookingId: b.id,
+          bookingCode: b.id,
+          status: (b.status === 'checkedin' ? 'CHECKED_IN' : b.status.toUpperCase()) as ApiBookingStatus,
+          cancellationReason: b.status === 'cancelled' ? 'DRIVER_CANCELLED' : null,
+          stationId: b.stationId,
+          connectorId: b.connectorId,
+          connectorCode: b.connectorId,
+          driverDisplayName: b.driverName,
+          startAt: b.startAt,
+          endAt: b.endAt,
+          checkInDeadline: b.endAt,
+          checkedInAt: b.paymentConfirmedAt ?? null,
+        }));
+        return { items, total: rows.length, page, pageSize: size };
+      },
+    },
+
+    staffInvitations: {
+      async invite(stationId, input) {
+        await delay(220);
+        invitationStation(stationId);
+        const email = input.email.trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          throw staffError(400, 'STAFF_INVITE_002', 'Email is already linked to an account or invitation');
+        }
+        const list = seedStaffInvitations();
+        const open = list.find(
+          (i) => i.stationId === stationId && i.email.toLowerCase() === email && i.status !== 'CANCELLED',
+        );
+        if (open) {
+          throw staffError(409, 'STAFF_INVITE_002', 'Email is already linked to an account or invitation');
+        }
+        if (db.stationStaff.some((s) => s.email.toLowerCase() === email && s.status === 'ACTIVE')) {
+          throw staffError(409, 'STAFF_INVITE_002', 'Email is already linked to an account or invitation');
+        }
+
+        const now = Date.now();
+        const invitation: StaffInvitationResponse = {
+          invitationId: 'INV-' + seq++,
+          stationId,
+          email,
+          status: 'SENT',
+          expiresAt: new Date(now + 7 * 86_400_000).toISOString(),
+          sentAt: new Date(now).toISOString(),
+          acceptedAt: null,
+        };
+        list.unshift(invitation);
+        return { ...invitation };
+      },
+
+      async list(stationId, params = {}) {
+        await delay(160);
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        const rows = seedStaffInvitations()
+          .filter((i) => i.stationId === stationId)
+          .sort(
+            (a, b) => String(b.sentAt ?? '').localeCompare(String(a.sentAt ?? '')),
+          );
+        return {
+          items: rows.slice(page * size, (page + 1) * size).map((i) => ({ ...i })),
+          total: rows.length,
+          page,
+          pageSize: size,
+        };
+      },
+
+      async resend(stationId, invitationId) {
+        await delay(200);
+        const invitation = seedStaffInvitations().find(
+          (i) => i.invitationId === invitationId && i.stationId === stationId,
+        );
+        if (!invitation) {
+          throw staffError(404, 'STAFF_INVITE_001', 'Staff invitation was not found');
+        }
+        if (invitation.status === 'ACCEPTED' || invitation.status === 'CANCELLED') {
+          throw staffError(409, 'STAFF_INVITE_003', 'Staff invitation is not available for this action');
+        }
+        const now = Date.now();
+        invitation.status = 'SENT';
+        invitation.sentAt = new Date(now).toISOString();
+        invitation.expiresAt = new Date(now + 7 * 86_400_000).toISOString();
+        return { ...invitation };
+      },
+
+      async cancel(stationId, invitationId) {
+        await delay(200);
+        const invitation = seedStaffInvitations().find(
+          (i) => i.invitationId === invitationId && i.stationId === stationId,
+        );
+        if (!invitation) {
+          throw staffError(404, 'STAFF_INVITE_001', 'Staff invitation was not found');
+        }
+        if (invitation.status === 'ACCEPTED' || invitation.status === 'CANCELLED') {
+          throw staffError(409, 'STAFF_INVITE_003', 'Staff invitation is not available for this action');
+        }
+        invitation.status = 'CANCELLED';
+        return { ...invitation };
+      },
+
+      async activate() {
+        await delay(220);
+        const invitation = seedStaffInvitations().find(
+          (i) => i.status === 'SENT' || i.status === 'PENDING',
+        );
+        if (!invitation) {
+          throw staffError(404, 'STAFF_INVITE_001', 'Staff invitation was not found');
+        }
+        invitationStation(invitation.stationId);
+        invitation.status = 'ACCEPTED';
+        invitation.acceptedAt = new Date().toISOString();
+        return { ...invitation };
+      },
+    },
+
     pricing: {
       async get(stationId) {
         await delay();
@@ -2602,6 +3150,68 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
           pageSize,
         };
       },
+
+      async getRefundPolicyContext(ticketId: string, escalationId: string): Promise<AdminRefundPolicyContext> {
+        await delay(100);
+        const ticket = db.tickets.find((t) => t.id === ticketId);
+        const bookingId = ticket?.bookingId || 'BKG-01';
+        const b = db.bookings.find((x) => x.id === bookingId);
+        return {
+          ticketId,
+          ticketVersion: ticket?.version ?? 1,
+          escalationId,
+          bookingId,
+          bookingVersion: 1,
+          decisionVersion: 0,
+          bookingStatus: (b?.status === 'checkedin' ? 'CHECKED_IN' : (b?.status || 'confirmed').toUpperCase()) as ApiBookingStatus,
+          evaluatedAt: new Date().toISOString(),
+          eligibleRefundAmountVnd: b?.amountVnd ?? 100000,
+          reviewEligibility: {
+            allowed: true,
+          },
+          latestDecision: null,
+          refundSummary: null,
+          historyDecisions: [],
+        };
+      },
+
+      async reviewRefundPolicy(ticketId: string, escalationId: string, payload: AdminReviewRefundPolicyPayload, _idempotencyKey: string): Promise<AdminReviewRefundPolicyResponse> {
+        await delay(200);
+        const ticket = db.tickets.find((t) => t.id === ticketId);
+        const bookingId = ticket?.bookingId || 'BKG-01';
+        const b = db.bookings.find((x) => x.id === bookingId);
+        const isGrant = payload.outcome === 'GRANT_FULL_REFUND';
+        const totalAmount = b?.amountVnd ?? 100000;
+        const decision: ServiceFailureDecisionSummary = {
+          decisionId: 'DEC-' + seq++,
+          sequenceNo: payload.expectedDecisionVersion + 1,
+          kind: 'ADMIN_REVIEW_STATION_FAILURE',
+          result: isGrant ? 'FULL_REFUND' : 'INSUFFICIENT_EVIDENCE',
+          reason: payload.reason,
+          decidedAt: new Date().toISOString(),
+          affectedAt: payload.affectedAt,
+          actorKind: 'ADMIN',
+          actorDisplayName: 'Quản trị viên ChargeOps',
+          refundId: isGrant ? 'REF-' + seq++ : null,
+          amountVnd: isGrant ? totalAmount : 0,
+          currency: 'VND',
+        };
+        return {
+          ticketId,
+          ticketVersion: payload.expectedVersion + 1,
+          escalationId,
+          bookingId,
+          bookingVersion: payload.expectedBookingVersion,
+          decisionVersion: payload.expectedDecisionVersion + 1,
+          decision,
+          refund: isGrant ? {
+            refundId: decision.refundId!,
+            amount: totalAmount,
+            currency: 'VND',
+            status: 'PENDING',
+          } : null,
+        };
+      },
     },
 
     challenge: {
@@ -2741,6 +3351,137 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async delete(_id: string) {
         await delay(40);
+      },
+    },
+
+    incidents: {
+      async report(stationId, connectorId, req) {
+        await delay();
+        const connector = db.connectors.find((c) => c.id === connectorId);
+        if (connector) {
+          connector.runtimeStatus = 'OFFLINE';
+          (connector as any).version = ((connector as any).version || req.expectedConnectorVersion || 1) + 1;
+        }
+
+        const toApiStatus = (st: string): ApiBookingStatus => {
+          if (st === 'checkedin') return 'CHECKED_IN';
+          return st.toUpperCase() as ApiBookingStatus;
+        };
+
+        const affectedBookingsList: AffectedIncidentBooking[] = db.bookings
+          .filter((b) => {
+            if (b.connectorId !== connectorId) return false;
+            const apiSt = toApiStatus(b.status);
+            return (
+              apiSt === 'CHECKED_IN' ||
+              apiSt === 'CHARGING' ||
+              apiSt === 'CONFIRMED' ||
+              apiSt === 'PENDING' ||
+              new Date(b.endAt).getTime() >= new Date(req.occurredAt).getTime()
+            );
+          })
+          .map((b) => {
+            const apiSt = toApiStatus(b.status);
+            const bVer = (b as any).version || 1;
+            return {
+              bookingId: b.id,
+              snapshotStatus: apiSt,
+              snapshotVersion: bVer,
+              currentStatus: apiSt,
+              currentVersion: bVer,
+              safetyState:
+                apiSt === 'CHECKED_IN' || apiSt === 'CHARGING'
+                  ? 'AWAITING_SESSION_STOP'
+                  : 'NO_ACTIVE_SESSION',
+              resolvedAt: null,
+              resolutionReason: null,
+            };
+          });
+
+        const incidentId = 'inc-' + Date.now();
+        const connVer = (connector as any)?.version || 1;
+        const incident: ConnectorIncidentResponse = {
+          incidentId,
+          stationId,
+          connectorId,
+          status: 'OPEN',
+          version: 1,
+          connectorVersion: connVer,
+          runtimeStatus: 'OFFLINE',
+          reason: req.reason,
+          occurredAt: req.occurredAt,
+          reportedAt: new Date().toISOString(),
+          recoveredAt: null,
+          recoveryReason: null,
+          affectedBookingIds: affectedBookingsList.map((x) => x.bookingId),
+          handlingState: affectedBookingsList.some(
+            (x) => x.safetyState === 'AWAITING_SESSION_STOP',
+          )
+            ? 'PENDING'
+            : 'COMPLETED',
+          affectedBookings: affectedBookingsList,
+        };
+        mockIncidents.set(incidentId, incident);
+        return incident;
+      },
+
+      async get(_stationId, incidentId) {
+        await delay();
+        const inc = mockIncidents.get(incidentId);
+        if (!inc) {
+          throw new Error(`Không tìm thấy sự cố ${incidentId}`);
+        }
+        return inc;
+      },
+
+      async recover(_stationId, incidentId, req) {
+        await delay();
+        const inc = mockIncidents.get(incidentId);
+        if (!inc) throw new Error(`Không tìm thấy sự cố ${incidentId}`);
+        inc.status = 'RECOVERED';
+        inc.recoveredAt = new Date().toISOString();
+        inc.recoveryReason = req.reason;
+        inc.version = (req.expectedVersion || inc.version) + 1;
+
+        const hasOtherOpen = Array.from(mockIncidents.values()).some(
+          (other) =>
+            other.connectorId === inc.connectorId &&
+            other.incidentId !== incidentId &&
+            other.status === 'OPEN',
+        );
+        const connector = db.connectors.find((c) => c.id === inc.connectorId);
+        if (connector && !hasOtherOpen) {
+          connector.runtimeStatus = 'AVAILABLE';
+          (connector as any).version = ((connector as any).version || 1) + 1;
+          inc.connectorVersion = (connector as any).version;
+          inc.runtimeStatus = 'AVAILABLE';
+        }
+        return inc;
+      },
+
+      async resolveSession(_stationId, incidentId, bookingId, req) {
+        await delay();
+        const inc = mockIncidents.get(incidentId);
+        if (!inc) throw new Error(`Không tìm thấy sự cố ${incidentId}`);
+        const aff = inc.affectedBookings.find((b) => b.bookingId === bookingId);
+        if (!aff) throw new Error(`Booking ${bookingId} không thuộc snapshot sự cố ${incidentId}`);
+        aff.safetyState = 'SESSION_RESOLVED';
+        aff.resolvedAt = new Date().toISOString();
+        aff.resolutionReason = req.reason;
+        aff.currentStatus = 'COMPLETED';
+        aff.currentVersion = (aff.currentVersion || 1) + 1;
+
+        const targetBooking = db.bookings.find((b) => b.id === bookingId);
+        if (targetBooking) {
+          targetBooking.status = 'completed';
+          (targetBooking as any).version = ((targetBooking as any).version || 1) + 1;
+        }
+
+        const stillPending = inc.affectedBookings.some(
+          (b) => b.safetyState === 'AWAITING_SESSION_STOP',
+        );
+        inc.handlingState = stillPending ? 'PENDING' : 'COMPLETED';
+        return inc;
       },
     },
   };

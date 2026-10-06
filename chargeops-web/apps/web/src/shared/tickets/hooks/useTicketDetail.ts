@@ -19,11 +19,15 @@ import {
 import { useToast } from '@chargeops/ui';
 import { getTicketErrorMeta } from '../utils/ticketErrors';
 
+export type TicketRoleOption = 'owner' | 'admin' | 'staff';
+
 export interface UseTicketDetailOptions {
   admin?: boolean;
+  /** Caller's console role — defaults from `admin` (admin ⇄ owner). */
+  role?: TicketRoleOption;
 }
 
-export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) {
+export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions = {}) {
   const { id = '' } = useParams();
   const { t } = useTranslation('tickets');
   const navigate = useNavigate();
@@ -32,7 +36,9 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const toast = useToast();
 
   const accent: 'brand' | 'owner' = admin ? 'brand' : 'owner';
-  const roleOption: 'owner' | 'admin' = admin ? 'admin' : 'owner';
+  const roleOption: TicketRoleOption = role ?? (admin ? 'admin' : 'owner');
+  /** Station staff: self-claim only — no manual handler assignment UI (Ops-06). */
+  const isStaffRole = roleOption === 'staff';
 
   const [draft, setDraft] = useState('');
   const [activeTab, setActiveTab] = useState<'thread' | 'events'>('thread');
@@ -67,7 +73,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
   const staffQuery = useQuery({
     queryKey: ['staff', 'station', ticketQuery.data?.stationId],
     queryFn: () => (ticketQuery.data?.stationId ? api.staff.list(ticketQuery.data.stationId) : Promise.resolve([])),
-    enabled: !admin && Boolean(ticketQuery.data?.stationId),
+    enabled: !admin && !isStaffRole && Boolean(ticketQuery.data?.stationId),
   });
 
   const escalationQuery = useQuery({
@@ -254,6 +260,7 @@ export function useTicketDetail({ admin = false }: UseTicketDetailOptions = {}) 
     id,
     admin,
     roleOption,
+    isStaffRole,
     accent,
     t,
     navigate,

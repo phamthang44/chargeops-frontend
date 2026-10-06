@@ -17,7 +17,7 @@ import { ThemeProvider } from './theme';
 const MOCK_USERS: Record<string, { name: string; email: string; roles: Role[] }> = {
   admin: { name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', roles: ['platform_admin'] },
   owner: { name: 'Vũ Anh (EVGo Co.)', email: 'ops@evgo.vn', roles: ['station_owner'] },
-  staff: { name: 'Nhân viên Trạm Hà Đông', email: 'staff@evgo.vn', roles: ['driver'] },
+  staff: { name: 'Nhân viên Trạm Hà Đông', email: 'staff@evgo.vn', roles: ['staff'] },
   driver: { name: 'Tài xế', email: 'driver@chargeops.vn', roles: ['driver'] },
 };
 

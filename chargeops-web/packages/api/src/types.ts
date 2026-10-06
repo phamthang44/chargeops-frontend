@@ -210,11 +210,14 @@ export interface RefundSummary {
   reason: RefundReason;
   status: RefundStatus;
   executionPolicy?: string;
+  /** @deprecated Alias đồng giá trị với requiresOwnerAction; sẽ gỡ sau cutover. */
   requiresAdminAction?: boolean;
+  requiresOwnerAction?: boolean;
 }
 
 export interface OwnerActions {
   canCancelForStationFailure: boolean;
+  canAdmitStationFailure?: boolean;
   canViewFinancials: boolean;
   canReportIncident: boolean;
 }
@@ -296,6 +299,7 @@ export interface OwnerBookingDetail {
   checkout: Checkout;
   refunds: RefundSummary[];
   actions: OwnerActions;
+  serviceFailureDecisions?: ServiceFailureDecisionSummary[];
 }
 
 export interface OwnerBookingFilter {
@@ -863,7 +867,7 @@ export interface RenewLicenseRequest {
 
 /* ---------- users ---------- */
 
-export type UserRole = 'DRIVER' | 'OWNER' | 'ADMIN';
+export type UserRole = 'DRIVER' | 'OWNER' | 'ADMIN' | 'STAFF';
 export type UserStatus = 'active' | 'suspended';
 
 export interface UserAccount {
@@ -1019,7 +1023,9 @@ export interface RefundDetail {
   basisId: string;
   status: RefundStatus;
   executionPolicy?: RefundExecutionPolicy;
+  /** @deprecated Alias đồng giá trị với requiresOwnerAction; sẽ gỡ sau cutover. */
   requiresAdminAction?: boolean;
+  requiresOwnerAction?: boolean;
   version: number;
   decisionAt: string;
   decidedBy: string;
@@ -1431,6 +1437,8 @@ export interface Ticket {
   messages?: TicketMessage[];
   findings?: TicketFinding[];
   refundIds?: string[];
+  serviceFailureDecisions?: ServiceFailureDecisionSummary[];
+  financialResolution?: ServiceFailureDecisionSummary | null;
 }
 
 export interface TicketListParams {
@@ -1569,3 +1577,283 @@ export interface UserProfileUpdateRequest {
   avatarUrl?: string | null;
   avatarStorageKey?: string | null;
 }
+
+/* ---------- BKG-056 / BKG-057 Station Failure & Dispute Policy Decisions ---------- */
+
+export type ServiceFailureDecisionKind =
+  | 'OWNER_CANCEL_BOOKING'
+  | 'OWNER_ACCEPT_STATION_FAILURE'
+  | 'ADMIN_REVIEW_STATION_FAILURE';
+
+export type ServiceFailureDecisionResult =
+  | 'FULL_REFUND'
+  | 'NO_APPLIED_PAYMENT'
+  | 'INSUFFICIENT_EVIDENCE';
+
+export interface ServiceFailureDecisionSummary {
+  decisionId: string;
+  sequenceNo: number;
+  kind: ServiceFailureDecisionKind;
+  result: ServiceFailureDecisionResult;
+  reason: string;
+  decidedAt: string;
+  affectedAt?: string | null;
+  actorKind: 'OWNER' | 'ADMIN';
+  actorDisplayName: string;
+  refundId?: string | null;
+  amountVnd?: number;
+  currency?: 'VND';
+}
+
+export interface ServiceFailureRefundSummary {
+  refundId: string;
+  amount: number;
+  currency: 'VND';
+  status: 'PENDING' | 'SUCCEEDED';
+  requiresOwnerAction?: boolean;
+}
+
+export interface StationFailureEligibility {
+  allowed: boolean;
+  reason?:
+    | 'HOLD_EXPIRED'
+    | 'CHECK_IN_WINDOW_CLOSED'
+    | 'OPERATIONAL_RESOLUTION_REQUIRED'
+    | 'NO_APPLIED_PAYMENT'
+    | 'OUT_OF_DEMO_SCOPE'
+    | 'RECONCILIATION_REQUIRED'
+    | 'RESPONSIBILITY_ALREADY_ACCEPTED'
+    | 'ESCALATION_NOT_ACTIVE'
+    | 'REFUND_ALREADY_GRANTED'
+    | string;
+}
+
+export interface OwnerStationFailureContext {
+  bookingId: string;
+  bookingCode: string;
+  bookingVersion: number;
+  decisionVersion: number;
+  status: ApiBookingStatus;
+  persistedStatus: ApiBookingStatus;
+  stateReconciliationPending: boolean;
+  evaluatedAt: string;
+  eligibleRefundAmountVnd: number;
+  cancelEligibility: StationFailureEligibility;
+  admissionEligibility: StationFailureEligibility;
+  latestDecision?: ServiceFailureDecisionSummary | null;
+  refundSummary?: ServiceFailureRefundSummary | null;
+  historyDecisions: ServiceFailureDecisionSummary[];
+}
+
+export interface AdminRefundPolicyContext {
+  ticketId: string;
+  ticketVersion: number;
+  escalationId: string;
+  bookingId: string;
+  bookingVersion: number;
+  decisionVersion: number;
+  bookingStatus: ApiBookingStatus;
+  evaluatedAt: string;
+  eligibleRefundAmountVnd: number;
+  reviewEligibility: StationFailureEligibility;
+  latestDecision?: ServiceFailureDecisionSummary | null;
+  refundSummary?: ServiceFailureRefundSummary | null;
+  historyDecisions: ServiceFailureDecisionSummary[];
+}
+
+export interface OwnerCancelBookingPayload {
+  expectedVersion: number;
+  reason: string;
+}
+
+export interface OwnerAcceptStationFailurePayload {
+  expectedVersion: number;
+  expectedDecisionVersion: number;
+  affectedAt: string;
+  reason: string;
+}
+
+export interface StationFailureCommandResponse {
+  bookingId: string;
+  bookingVersion: number;
+  status: ApiBookingStatus;
+  cancellationReason: CancellationReason;
+  stateReconciliationPending: boolean;
+  decisionVersion: number;
+  decision: ServiceFailureDecisionSummary;
+  refund?: ServiceFailureRefundSummary | null;
+}
+
+export interface AdminReviewRefundPolicyPayload {
+  expectedVersion: number;
+  expectedBookingVersion: number;
+  expectedDecisionVersion: number;
+  outcome: 'GRANT_FULL_REFUND' | 'INSUFFICIENT_EVIDENCE';
+  affectedAt?: string | null;
+  reason: string;
+}
+
+export interface AdminReviewRefundPolicyResponse {
+  ticketId: string;
+  ticketVersion: number;
+  escalationId: string;
+  bookingId: string;
+  bookingVersion: number;
+  decisionVersion: number;
+  decision: ServiceFailureDecisionSummary;
+  refund?: ServiceFailureRefundSummary | null;
+}
+
+/** BKG-054 / BKG-055: Operational emergency incident and recovery types */
+export type ConnectorIncidentStatus = 'OPEN' | 'RECOVERED';
+export type IncidentBookingSafetyState = 'AWAITING_SESSION_STOP' | 'NO_ACTIVE_SESSION' | 'SESSION_RESOLVED';
+export type IncidentHandlingState = 'PENDING' | 'COMPLETED';
+
+export interface AffectedIncidentBooking {
+  bookingId: string;
+  snapshotStatus: ApiBookingStatus;
+  snapshotVersion: number;
+  currentStatus: ApiBookingStatus;
+  currentVersion: number;
+  safetyState: IncidentBookingSafetyState;
+  resolvedAt: string | null;
+  resolutionReason: string | null;
+}
+
+export interface ConnectorIncidentResponse {
+  incidentId: string;
+  stationId: string;
+  connectorId: string;
+  status: ConnectorIncidentStatus;
+  version: number;
+  connectorVersion: number;
+  runtimeStatus: ConnectorRuntimeStatus;
+  reason: string;
+  occurredAt: string;
+  reportedAt: string;
+  recoveredAt: string | null;
+  recoveryReason: string | null;
+  affectedBookingIds: string[];
+  handlingState: IncidentHandlingState;
+  affectedBookings: AffectedIncidentBooking[];
+}
+
+export interface ReportConnectorIncidentRequest {
+  expectedConnectorVersion: number;
+  reason: string;
+  occurredAt: string;
+}
+
+export interface RecoverConnectorIncidentRequest {
+  expectedVersion: number;
+  reason: string;
+}
+
+export interface ResolveIncidentSessionRequest {
+  expectedBookingVersion: number;
+  reason: string;
+  safetyConfirmed: boolean;
+}
+
+/* ---------- STAFF Operations (Ops-01..Ops-05) ---------- */
+
+export interface StaffStationOverview {
+  stationId: string;
+  name: string;
+  address: string;
+  operationalStatus: StationOperationalStatus;
+  chargePointCount: number;
+  connectorCount: number;
+}
+
+export interface StaffChargePointItem {
+  id: string;
+  code: string;
+  name: string;
+  zoneLabel: string | null;
+  provisioningStatus: ProvisioningStatus;
+  operationalStatus: OperationalChargePointStatus;
+  version: number;
+}
+
+export interface StaffConnectorItem {
+  id: string;
+  code: string;
+  connectorType: ConnectorType;
+  runtimeStatus: ConnectorRuntimeStatus;
+  version: number;
+}
+
+export type StaffHistoryActorType = 'ADMIN' | 'OWNER' | 'STAFF' | 'SYSTEM';
+
+export interface StaffEquipmentHistoryItem {
+  id: string;
+  /** 'CHARGE_POINT' | 'CONNECTOR' (server string, not an enum on the FE). */
+  dimension: string;
+  fromStatus: string;
+  toStatus: string;
+  reason: string | null;
+  actorType: StaffHistoryActorType;
+  performedByDisplayName: string | null;
+  performedAt: string;
+}
+
+export interface StaffChangeChargePointStatusRequest {
+  operationalStatus: OperationalChargePointStatus;
+  expectedVersion: number;
+  reason?: string;
+}
+
+export interface StaffChangeConnectorStatusRequest {
+  runtimeStatus: ConnectorRuntimeStatus;
+  expectedVersion: number;
+  reason?: string;
+}
+
+export interface StaffBookingListParams {
+  connectorId?: string;
+  from?: string;
+  to?: string;
+  /** Backend is 1-based. */
+  page?: number;
+  size?: number;
+}
+
+/**
+ * Same shape as the owner operational booking, and deliberately no wider:
+ * BKG-048 returns `OperationalBookingResponse` with `driverDisplayName` only —
+ * its zero-leakage test asserts the payload carries neither money fields nor
+ * `driverPhone`. Vehicle plate has no collection/storage flow yet, so neither
+ * field is added here until the contract grows them.
+ */
+export type StaffOperationalBooking = OperationalBooking;
+
+export interface StaffEquipmentHistoryParams {
+  page?: number;
+  size?: number;
+}
+
+/* ---------- Staff invitations (owner) ---------- */
+
+export type StaffInvitationStatus = 'PENDING' | 'SENT' | 'ACCEPTED' | 'CANCELLED';
+
+export interface StaffInvitationResponse {
+  invitationId: string;
+  stationId: string;
+  email: string;
+  status: StaffInvitationStatus;
+  expiresAt: string;
+  sentAt?: string | null;
+  acceptedAt?: string | null;
+}
+
+export interface StaffInvitationRequest {
+  email: string;
+}
+
+export interface StaffInvitationListParams {
+  /** Backend is 1-based. */
+  page?: number;
+  size?: number;
+}
+

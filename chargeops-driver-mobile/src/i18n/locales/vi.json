@@ -713,7 +713,8 @@
     "UPCOMING": "Sắp tới",
     "CHARGING": "Đang sạc",
     "EXPIRED": "Hết hạn giữ chỗ",
-    "PAYMENT_TIMEOUT": "Quá hạn thanh toán"
+    "PAYMENT_TIMEOUT": "Quá hạn thanh toán",
+    "STATION_FAILURE": "Hủy do sự cố trạm"
   },
   "payment": {
     "title": "Phương thức thanh toán",
@@ -818,7 +819,21 @@
       "SYS_003": "Dữ liệu đặt chỗ không hợp lệ ({{fields}}). Vui lòng chọn lại.",
       "PRICE_PREVIEW_FAILED": "Không thể lấy báo giá cho khung giờ này. Vui lòng thử lại.",
       "BKG_NOT_ACCESS": "Bạn không có quyền truy cập lượt đặt chỗ của tài xế khác.",
-      "error.booking.notAccess": "Bạn không có quyền truy cập lượt đặt chỗ này."
+      "error.booking.notAccess": "Bạn không có quyền truy cập lượt đặt chỗ này.",
+      "BKG_PENDING_LIMIT_EXCEEDED": "Bạn đang có lượt đặt chỗ chưa thanh toán hoặc chưa hoàn tất. Vui lòng thanh toán hoặc hủy lượt đặt trước đó trước khi đặt thêm.",
+      "PENDING_LIMIT_EXCEEDED": "Bạn đang có lượt đặt chỗ chưa thanh toán hoặc chưa hoàn tất. Vui lòng thanh toán hoặc hủy lượt đặt trước đó trước khi đặt thêm.",
+      "BKG_SLOT_UNAVAILABLE": "Khung giờ bạn chọn hiện không còn khả dụng hoặc vừa có người khác đặt. Vui lòng chọn khung giờ khác.",
+      "BKG_TIME_INVALID": "Khung giờ đặt chỗ không hợp lệ hoặc nằm ngoài giờ hoạt động.",
+      "BKG_PRICE_CHANGED": "Giá hoặc chính sách đã thay đổi trong lúc bạn thao tác. Vui lòng xác nhận giá mới.",
+      "BKG_PRICING_NOT_CONFIGURED": "Trạm sạc chưa được cấu hình bảng giá. Vui lòng thử lại sau.",
+      "BKG_CANCELLATION_CHANGED": "Chính sách hủy đặt chỗ đã thay đổi. Vui lòng kiểm tra lại điều khoản.",
+      "BKG_STATE_CONFLICT": "Trạng thái đặt chỗ đã thay đổi hoặc không hợp lệ để thao tác.",
+      "BKG_HOLD_EXPIRED": "Thời gian giữ chỗ thanh toán đã hết hạn. Vui lòng chọn lại khung giờ.",
+      "BKG_CHECK_IN_TOO_EARLY": "Chưa đến thời gian check-in. Vui lòng có mặt trước giờ bắt đầu 5 phút.",
+      "BKG_CHECK_IN_CLOSED": "Đã quá thời gian cho phép check-in.",
+      "BKG_QR_INVALID": "Mã QR trụ sạc không hợp lệ hoặc đã hết hạn.",
+      "BKG_CONNECTOR_MISMATCH": "Mã QR không khớp với cổng sạc của lượt đặt này.",
+      "BKG_STATION_UNAVAILABLE": "Trạm sạc hiện đang tạm ngưng phục vụ."
     }
   },
   "bookingConfirmation": {
@@ -908,35 +923,6 @@
       "pendingLimitExceeded": "Bạn đang có lượt đặt chỗ chưa thanh toán hoặc chưa hoàn tất. Vui lòng thanh toán hoặc hủy lượt đặt trước đó trước khi đặt thêm."
     }
   },
-  "booking": {
-    "errors": {
-      "NETWORK_ERROR": "Không có kết nối mạng. Vui lòng kiểm tra và thử lại.",
-      "GENERIC": "Không thể tạo lượt đặt chỗ. Vui lòng thử lại.",
-      "RANGE_TAKEN": "Rất tiếc, khung giờ này vừa được người khác đặt. Vui lòng chọn khung giờ khác.",
-      "PRICE_CHANGED": "Giá hoặc chính sách đã thay đổi trong lúc bạn thao tác. Vui lòng xác nhận giá mới.",
-      "CONNECTOR_BUSY": "Cổng sạc hiện đang có phiên sạc hoặc đang bận. Vui lòng thử cổng khác.",
-      "CONNECTOR_LOCKED": "Cổng sạc đang tạm khóa để bảo trì hoặc chuẩn bị phiên sạc khác.",
-      "SLOT_UNAVAILABLE": "Khung giờ bạn chọn hiện không còn khả dụng hoặc đã có người đặt.",
-      "DRIVER_ACTIVE_BOOKING_LIMIT_EXCEEDED": "Bạn đang có phiên đặt chỗ khác chưa hoàn thành. Không thể đặt thêm.",
-      "UNAUTHORIZED": "Phiên đăng nhập đã hết hạn hoặc bạn không có quyền đặt chỗ.",
-      "BKG_PENDING_LIMIT_EXCEEDED": "Bạn đang có lượt đặt chỗ chưa thanh toán hoặc chưa hoàn tất. Vui lòng thanh toán hoặc hủy lượt đặt trước đó trước khi đặt thêm.",
-      "PENDING_LIMIT_EXCEEDED": "Bạn đang có lượt đặt chỗ chưa thanh toán hoặc chưa hoàn tất. Vui lòng thanh toán hoặc hủy lượt đặt trước đó trước khi đặt thêm.",
-      "BKG_SLOT_UNAVAILABLE": "Khung giờ bạn chọn hiện không còn khả dụng hoặc vừa có người khác đặt. Vui lòng chọn khung giờ khác.",
-      "BKG_TIME_INVALID": "Khung giờ đặt chỗ không hợp lệ hoặc nằm ngoài giờ hoạt động.",
-      "TIME_INVALID": "Khung giờ đặt chỗ không hợp lệ hoặc nằm ngoài giờ hoạt động.",
-      "BKG_PRICE_CHANGED": "Giá hoặc chính sách đã thay đổi trong lúc bạn thao tác. Vui lòng xác nhận giá mới.",
-      "BKG_PRICING_NOT_CONFIGURED": "Trạm sạc chưa được cấu hình bảng giá. Vui lòng thử lại sau.",
-      "BKG_CANCELLATION_CHANGED": "Chính sách hủy đặt chỗ đã thay đổi. Vui lòng kiểm tra lại điều khoản.",
-      "BKG_STATE_CONFLICT": "Trạng thái đặt chỗ đã thay đổi hoặc không hợp lệ để thao tác.",
-      "BKG_HOLD_EXPIRED": "Thời gian giữ chỗ thanh toán đã hết hạn. Vui lòng chọn lại khung giờ.",
-      "BKG_CHECK_IN_TOO_EARLY": "Chưa đến thời gian check-in. Vui lòng có mặt trước giờ bắt đầu 5 phút.",
-      "BKG_CHECK_IN_CLOSED": "Đã quá thời gian cho phép check-in.",
-      "BKG_QR_INVALID": "Mã QR trụ sạc không hợp lệ hoặc đã hết hạn.",
-      "BKG_CONNECTOR_MISMATCH": "Mã QR không khớp với cổng sạc của lượt đặt này.",
-      "BKG_STATION_UNAVAILABLE": "Trạm sạc hiện đang tạm ngưng phục vụ.",
-      "SYS_003": "Dữ liệu đặt chỗ không hợp lệ. Vui lòng chọn lại khung giờ."
-    }
-  },
   "bookingSuccess": {
     "title": "Đặt chỗ thành công!",
     "subtitle": "Chỗ sạc của bạn đã được giữ và thanh toán thành công",
@@ -1015,6 +1001,7 @@
     "reasonNoShow": "Đã hủy do không đến check-in trước hạn chót",
     "reasonTimeout": "Đã hủy do quá hạn thanh toán giữ chỗ",
     "reasonUserCancelled": "Đã hủy theo yêu cầu của bạn",
+    "reasonStationFailure": "Đã hủy do sự cố kỹ thuật tại trạm sạc (Hoàn đủ 100%)",
     "stationUnavailable": "Trạm sạc đang gặp sự cố gián đoạn",
     "stepCreated": "Đặt chỗ",
     "stepPaid": "Thanh toán",
@@ -1259,6 +1246,25 @@
       "contextBooking": "Bối cảnh đơn sạc:",
       "contextStation": "Trạm: {{name}}",
       "findingsTitle": "Kết luận kỹ thuật",
+      "findingsEyebrow": "Biên bản kỹ thuật",
+      "findingsSubtitle": "Đánh giá nguyên nhân do trạm hoặc Admin ghi nhận, lưu vào hồ sơ đối soát.",
+      "findingsReasonLabel": "Căn cứ ghi nhận",
+      "findingsMetaBy": "Người ghi nhận: {{role}}",
+      "findingsMetaRecordedAt": "Ghi nhận lúc: {{time}}",
+      "findingsMetaAffectedAt": "Thời điểm sự cố: {{time}}",
+      "findingsBadgeStation": "Biên bản từ trạm",
+      "findingsBadgeStationMore": "Biên bản trạm · lần #{{cycle}}",
+      "findingsBadgeAdmin": "Phân xử của Admin",
+      "findingsBadgeDriver": "Bạn tự ghi nhận",
+      "findingsAuditNote": "Đây là biên bản kỹ thuật — không tự quyết định và không tự thực hiện hoàn tiền.",
+      "findingsDisputeHint": "Bạn không đồng thuận? Chọn “Yêu cầu Admin xem xét” ở cuối trang.",
+      "findingRole": {
+        "OWNER": "Chủ trạm",
+        "STAFF": "Kỹ thuật viên",
+        "ADMIN": "Quản trị viên",
+        "DRIVER": "Bạn",
+        "UNKNOWN": "Hệ thống"
+      },
       "refundAppliedTitle": "Hoàn tiền đơn sạc",
       "refundAppliedBody": "Khoản hoàn tiền liên quan đến phiếu này đã được ghi nhận theo chính sách đặt chỗ. Vui lòng kiểm tra mục Lịch sử đặt chỗ để biết chi tiết.",
       "refundLabel": "Bồi hoàn cho tài xế:",
@@ -1323,6 +1329,15 @@
       "SOFTWARE_BUG": "Sự cố phần mềm / firmware",
       "USER_ERROR": "Thao tác phía người dùng",
       "OTHER": "Nguyên nhân khác"
+    },
+    "conclusionDesc": {
+      "STATION_FAILURE": "Nguyên nhân được xác định từ phía trạm sạc.",
+      "NOT_STATION_FAILURE": "Không tìm thấy lỗi từ thiết bị trạm.",
+      "HARDWARE_FAULT": "Lỗi phần cứng trên trụ sạc hoặc súng sạc.",
+      "STATION_OFFLINE": "Trạm mất kết nối mạng, gián đoạn phiên sạc.",
+      "SOFTWARE_BUG": "Lỗi phần mềm / firmware trên trạm sạc.",
+      "USER_ERROR": "Thao tác chưa đúng trong quá trình sử dụng.",
+      "OTHER": "Nguyên nhân khác được kỹ thuật viên ghi nhận."
     },
     "priority": {
       "LOW": "Thấp",

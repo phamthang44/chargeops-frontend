@@ -36,6 +36,9 @@ function statusLabelKey(booking: Booking): string {
   if (booking.status === 'CANCELLED' && booking.cancelReason === 'PAYMENT_TIMEOUT') {
     return 'bookingStatus.PAYMENT_TIMEOUT';
   }
+  if (booking.status === 'CANCELLED' && booking.cancelReason === 'STATION_FAILURE') {
+    return 'bookingStatus.STATION_FAILURE';
+  }
   return `bookingStatus.${booking.status}`;
 }
 

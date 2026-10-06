@@ -42,12 +42,12 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           </div>
         </div>
       ) : (
-        <p className="text-[12px] leading-relaxed text-muted">
+        <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 text-[11.5px] leading-relaxed text-muted">
           {t(
             'detail.refund.policyNotice',
-            'Khi xác nhận lỗi thuộc phía trạm (STATION_FAILURE), hệ thống tự động ghi nhận nghĩa vụ hoàn 100% trên Sổ đối chiếu tài chính của trạm sạc.'
+            'Biên bản kỹ thuật ghi nhận sự cố không tự động chuyển tiền. Nghĩa vụ hoàn tiền 100% được xác lập khi Chủ trạm nhận trách nhiệm (BKG-056) hoặc Admin ra phán quyết chính sách tranh chấp (BKG-057).'
           )}
-        </p>
+        </div>
       )}
     </Card>
   );

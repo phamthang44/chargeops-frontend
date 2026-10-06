@@ -122,13 +122,13 @@ export function RefundQueueTab() {
     }
 
     // Exception Queue Priority:
-    // 1. Items needing admin intervention (requiresAdminAction or failed attempt)
-    // 2. Other pending items (auto-processing or admin-required)
+    // 1. Items needing owner intervention (requiresOwnerAction or failed attempt)
+    // 2. Other pending items (auto-processing or owner-required)
     // 3. Completed (SUCCEEDED) items
     // Within same priority, newest decisionAt first
     return [...items].sort((a, b) => {
-      const aNeedsAction = a.status === 'PENDING' && (a.requiresAdminAction || (a.attempts && a.attempts.some((att) => att.status === 'FAILED')));
-      const bNeedsAction = b.status === 'PENDING' && (b.requiresAdminAction || (b.attempts && b.attempts.some((att) => att.status === 'FAILED')));
+      const aNeedsAction = a.status === 'PENDING' && ((a.requiresOwnerAction ?? a.requiresAdminAction) || (a.attempts && a.attempts.some((att) => att.status === 'FAILED')));
+      const bNeedsAction = b.status === 'PENDING' && ((b.requiresOwnerAction ?? b.requiresAdminAction) || (b.attempts && b.attempts.some((att) => att.status === 'FAILED')));
       if (aNeedsAction && !bNeedsAction) return -1;
       if (!aNeedsAction && bNeedsAction) return 1;
 
@@ -181,7 +181,7 @@ export function RefundQueueTab() {
   const failedAttemptsCount = useMemo(() => {
     if (!data?.items) return 0;
     return data.items.filter(
-      (r) => r.status === 'PENDING' && (r.requiresAdminAction || r.attempts?.some((a) => a.status === 'FAILED'))
+      (r) => r.status === 'PENDING' && ((r.requiresOwnerAction ?? r.requiresAdminAction) || r.attempts?.some((a) => a.status === 'FAILED'))
     ).length;
   }, [data?.items]);
 
@@ -431,8 +431,8 @@ export function RefundQueueTab() {
                     const refundKey = r.refundId || r.id;
                     const isGrace = r.reason === 'VOLUNTARY_GRACE';
                     const hasFailedAttempt = Boolean(r.attempts && r.attempts.some((a) => a.status === 'FAILED'));
-                    const needsAdminAction = Boolean(r.requiresAdminAction || hasFailedAttempt);
-                    const isAutoProcessing = isPending && isGrace && !needsAdminAction && (r.executionPolicy === 'AUTO_FIRST_ATTEMPT' || !r.executionPolicy);
+                    const needsOwnerAction = Boolean((r.requiresOwnerAction ?? r.requiresAdminAction) || hasFailedAttempt);
+                    const isAutoProcessing = isPending && isGrace && !needsOwnerAction && (r.executionPolicy === 'AUTO_FIRST_ATTEMPT' || !r.executionPolicy);
 
                     return (
                       <div
@@ -506,7 +506,7 @@ export function RefundQueueTab() {
                         {/* Status */}
                         <div className="text-center flex flex-col items-center gap-0.5">
                           {isPending ? (
-                            needsAdminAction ? (
+                            needsOwnerAction ? (
                               <>
                                 <StatusPill tone="bad" label={t('refunds.status.actionRequired', 'CẦN CAN THIỆP')} />
                                 <span className="text-[10px] font-semibold text-bad">
@@ -550,7 +550,7 @@ export function RefundQueueTab() {
                         {/* Actions */}
                         <div className="flex justify-end">
                           {isPending ? (
-                            needsAdminAction ? (
+                            needsOwnerAction ? (
                               <Button
                                 size="sm"
                                 variant="secondary"

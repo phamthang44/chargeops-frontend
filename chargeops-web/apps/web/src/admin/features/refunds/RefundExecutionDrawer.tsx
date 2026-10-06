@@ -79,7 +79,7 @@ export function RefundExecutionDrawer({
   // Reset form when drawer opens or refund changes
   useEffect(() => {
     if (open && activeRefund) {
-      const isAuto = activeRefund.status === 'PENDING' && activeRefund.reason === 'VOLUNTARY_GRACE' && !activeRefund.requiresAdminAction && !activeRefund.attempts?.some((a) => a.status === 'FAILED');
+      const isAuto = activeRefund.status === 'PENDING' && activeRefund.reason === 'VOLUNTARY_GRACE' && !(activeRefund.requiresOwnerAction ?? activeRefund.requiresAdminAction) && !activeRefund.attempts?.some((a) => a.status === 'FAILED');
       setActiveTab(activeRefund.status === 'SUCCEEDED' ? 'history' : 'execute');
       setExecutionMode('SIMULATOR');
       setOutcome('SUCCEEDED');
@@ -103,8 +103,8 @@ export function RefundExecutionDrawer({
     activeRefund.attempts && activeRefund.attempts.some((a) => a.status === 'FAILED')
   );
   const isGrace = activeRefund.reason === 'VOLUNTARY_GRACE';
-  const needsAdminAction = Boolean(activeRefund.requiresAdminAction || hasFailedAttempt);
-  const isAutoProcessing = !isTerminalSuccess && isGrace && !needsAdminAction && (activeRefund.executionPolicy === 'AUTO_FIRST_ATTEMPT' || !activeRefund.executionPolicy);
+  const needsOwnerAction = Boolean((activeRefund.requiresOwnerAction ?? activeRefund.requiresAdminAction) || hasFailedAttempt);
+  const isAutoProcessing = !isTerminalSuccess && isGrace && !needsOwnerAction && (activeRefund.executionPolicy === 'AUTO_FIRST_ATTEMPT' || !activeRefund.executionPolicy);
 
   const copyId = () => {
     navigator.clipboard?.writeText(activeRefund.refundId || activeRefund.id);
@@ -308,7 +308,7 @@ export function RefundExecutionDrawer({
               tone={
                 isTerminalSuccess
                   ? 'good'
-                  : needsAdminAction
+                  : needsOwnerAction
                   ? 'bad'
                   : isAutoProcessing
                   ? 'brand'
@@ -317,7 +317,7 @@ export function RefundExecutionDrawer({
               label={
                 isTerminalSuccess
                   ? t('refunds.drawer.statusSucceeded', 'ĐÃ HOÀN TẤT (SUCCEEDED)')
-                  : needsAdminAction
+                  : needsOwnerAction
                   ? t('refunds.drawer.statusFailedAttempt', 'CẦN CAN THIỆP (LẦN THỬ LỖI)')
                   : isAutoProcessing
                   ? t('refunds.drawer.statusAutoProcessing', 'TỰ ĐỘNG XỬ LÝ (AUTO_FIRST_ATTEMPT)')

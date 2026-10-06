@@ -11,7 +11,7 @@ import {
   type OperationalBooking,
   type OperationalChargePointStatus,
 } from '@chargeops/api';
-import { Button, IconAlertTriangle, IconBolt, IconClock, IconLock, Modal, Skeleton, StatusPill } from '@chargeops/ui';
+import { Button, IconAlertTriangle, IconBolt, IconClock, IconLock, IconShieldAlert, Modal, Skeleton, StatusPill } from '@chargeops/ui';
 import { effectiveConnectorStatus } from './chargerStatus';
 
 /** What the owner is about to do. `target` carries the affected connectors either way. */
@@ -24,6 +24,7 @@ export interface StatusChangeDialogProps {
   saving: boolean;
   onClose: () => void;
   onConfirm: (intent: StatusIntent) => void;
+  onReportIncident?: (chargePoint: ChargePoint, connector: Connector) => void;
 }
 
 function affectedConnectors(intent: StatusIntent): Connector[] {
@@ -53,7 +54,13 @@ const REASON_PRESETS: Record<string, string[]> = {
  * Confirmation gate for every operational status change on this screen.
  * Requires mandatory reason when switching to OFFLINE or MAINTENANCE.
  */
-export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: StatusChangeDialogProps) {
+export function StatusChangeDialog({
+  intent,
+  saving,
+  onClose,
+  onConfirm,
+  onReportIncident,
+}: StatusChangeDialogProps) {
   const { t } = useTranslation('owner');
   const api = useApi();
   const [reason, setReason] = useState(intent?.reason ?? '');
@@ -95,7 +102,11 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
   const requiresReason = goingDown;
   const isReasonValid = !requiresReason || reason.trim().length >= 3;
 
-  const presets = isMaint ? REASON_PRESETS.MAINTENANCE : REASON_PRESETS.OFFLINE;
+  const fallbackPresets = isMaint ? REASON_PRESETS.MAINTENANCE : REASON_PRESETS.OFFLINE;
+  const i18nPresets = t(isMaint ? 'statusDialog.presets.maintenance' : 'statusDialog.presets.offline', {
+    returnObjects: true,
+  }) as string[];
+  const presets = Array.isArray(i18nPresets) && i18nPresets.length > 0 ? i18nPresets : fallbackPresets;
 
   return (
     <Modal open onClose={onClose} maxWidth={blocked ? 520 : 480}>
@@ -127,7 +138,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
             {blocked
               ? t('statusDialog.blockedTitle', { name })
               : isMaint
-                ? `Chuyển Bảo trì · ${name}`
+                ? t('statusDialog.maintTitle', { name })
                 : goingDown
                   ? t('statusDialog.offlineTitle', { name })
                   : t('statusDialog.onlineTitle', { name })}
@@ -141,7 +152,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
           <Skeleton className="h-4 w-1/2" />
         </div>
       ) : blocked ? (
-        <BlockedBody intent={intent} blockers={blockers} />
+        <BlockedBody intent={intent} blockers={blockers} onReportIncident={onReportIncident} />
       ) : goingDown ? (
         <OfflineBody intent={intent} connectors={connectors} isMaintenance={isMaint} />
       ) : (
@@ -152,7 +163,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
       {!blocked && !checking && requiresReason && (
         <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] border border-line-2 bg-surface-2 p-3">
           <label className="text-[11.5px] font-bold text-ink">
-            Lý do thay đổi trạng thái <span className="text-bad">*</span>
+            {t('statusDialog.reasonLabel', 'Lý do thay đổi trạng thái')} <span className="text-bad">*</span>
           </label>
           <div className="flex flex-wrap gap-1.5 mb-1">
             {presets.map((p) => (
@@ -174,7 +185,10 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Nhập chi tiết lý do (bắt buộc, tối thiểu 3 ký tự)..."
+            placeholder={t(
+              'statusDialog.reasonPlaceholder',
+              'Nhập chi tiết lý do (bắt buộc, tối thiểu 3 ký tự)...'
+            )}
             className="w-full rounded-[8px] border border-line bg-surface px-3 py-2 text-[12px] font-medium text-ink focus:border-owner focus:outline-none"
           />
         </div>
@@ -195,7 +209,7 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
             {saving
               ? t('statusDialog.applying')
               : isMaint
-                ? 'Xác nhận Bảo trì'
+                ? t('statusDialog.confirmMaint', 'Xác nhận Bảo trì')
                 : goingDown
                   ? t('statusDialog.confirmOffline')
                   : t('statusDialog.confirmOnline')}
@@ -207,7 +221,15 @@ export function StatusChangeDialog({ intent, saving, onClose, onConfirm }: Statu
 }
 
 /** BR-CHG-05 refusal — name the bookings standing in the way. */
-function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: OperationalBooking[] }) {
+function BlockedBody({
+  intent,
+  blockers,
+  onReportIncident,
+}: {
+  intent: StatusIntent;
+  blockers: OperationalBooking[];
+  onReportIncident?: (chargePoint: ChargePoint, connector: Connector) => void;
+}) {
   const { t } = useTranslation('owner');
   return (
     <>
@@ -248,6 +270,37 @@ function BlockedBody({ intent, blockers }: { intent: StatusIntent; blockers: Ope
       <p className="mt-3 rounded-[9px] bg-chip px-3 py-2.5 text-[11.5px] leading-[1.5] text-muted">
         {t('statusDialog.blockedHint')}
       </p>
+
+      {onReportIncident && (
+        <div className="mt-3 rounded-xl border border-bad-border bg-bad-soft p-3 text-[12px] text-bad-deep">
+          <div className="flex items-center gap-1.5 font-bold text-bad mb-1">
+            <IconShieldAlert size={15} />
+            <span>
+              {t(
+                'statusDialog.incidentBannerTitle',
+                'Xảy ra sự cố kỹ thuật hoặc khẩn cấp (Emergency Incident)?'
+              )}
+            </span>
+          </div>
+          <p className="mb-2 text-[11.5px] leading-relaxed">
+            {t(
+              'statusDialog.incidentBannerDesc',
+              'Nếu thiết bị hỏng hóc hoặc nguy hiểm cần ngắt điện ngay, bạn có thể kích hoạt báo cáo sự cố khẩn cấp để lập tức chuyển cổng sạc sang OFFLINE và chốt snapshot các đơn đặt chỗ để xử lý an toàn.'
+            )}
+          </p>
+          <Button
+            size="sm"
+            variant="danger"
+            className="w-full justify-center"
+            onClick={() => {
+              const targetConn = intent.kind === 'connector' ? intent.connector : intent.connectors[0];
+              if (targetConn) onReportIncident(intent.chargePoint, targetConn);
+            }}
+          >
+            {t('statusDialog.incidentBannerBtn', 'Kích hoạt Báo sự cố khẩn cấp (BKG-054)')}
+          </Button>
+        </div>
+      )}
     </>
   );
 }
@@ -260,8 +313,8 @@ function OfflineBody({ intent, connectors, isMaintenance }: { intent: StatusInte
       <p className="text-[12.5px] leading-[1.55] text-body">
         {isMaintenance
           ? intent.kind === 'chargePoint'
-            ? `Chuyển trụ sạc sang chế độ Bảo trì sẽ tạm dừng phục vụ trên tất cả ${connectors.length} cổng sạc con.`
-            : 'Chuyển cổng sạc sang chế độ Bảo trì kỹ thuật.'
+            ? t('statusDialog.maintBodyDevice', { count: connectors.length })
+            : t('statusDialog.maintBodyConnector')
           : intent.kind === 'chargePoint'
             ? t('statusDialog.offlineBodyDevice', { count: connectors.length })
             : t('statusDialog.offlineBodyConnector')}

@@ -73,6 +73,20 @@
     "STATION_STAFF_009": "The identity provider is temporarily unavailable.",
     "STATION_STAFF_010": "The identity provider rejected the role operation.",
 
+    "STAFF_OP_001": "The equipment was changed by someone else. Please refresh and retry.",
+    "STAFF_OP_002": "The equipment has an active booking or charging session and cannot change status.",
+    "STAFF_OP_003": "The station or equipment is not available for your assignment.",
+    "STAFF_OP_004": "That equipment status transition is not allowed.",
+    "STAFF_OP_005": "Please provide a reason for the status change.",
+
+    "STAFF_INVITE_001": "Staff invitation not found.",
+    "STAFF_INVITE_002": "This email is already linked to another account.",
+    "STAFF_INVITE_003": "The invitation is not in a state that allows this action.",
+    "STAFF_INVITE_004": "The invitation identity does not match the account.",
+    "STAFF_INVITE_005": "The identity provider is temporarily unavailable. Please retry later.",
+    "STAFF_INVITE_006": "Could not provision staff access for this invitation.",
+    "STAFF_INVITE_007": "The station cannot send staff invitations in its current state.",
+
     "COMMON_001": "An unknown error occurred.",
     "COMMON_002": "An unexpected server error occurred. Please try again later.",
     "COMMON_003": "A database error occurred.",
@@ -155,6 +169,17 @@
     "error.stationStaff.assignmentAlreadyRevoked": "Station staff assignment has already been revoked",
     "error.stationStaff.identityProviderUnavailable": "The identity provider is temporarily unavailable",
     "error.stationStaff.identityRoleOperationFailed": "The identity provider rejected the role operation",
+
+    "error.staffOperation.version_conflict": "The equipment was changed by someone else. Please refresh and retry.",
+    "error.staffOperation.active_service": "The equipment has an active booking or charging session and cannot change status.",
+    "error.staffOperation.station_unavailable": "The station or equipment is not available for your assignment.",
+    "error.staffOperation.invalid_transition": "That equipment status transition is not allowed.",
+    "error.staffOperation.reason_required": "Please provide a reason for the status change.",
+
+    "error.staffInvite.notFound": "Staff invitation not found.",
+    "error.staffInvite.emailInUse": "This email is already linked to another account.",
+    "error.staffInvite.stateConflict": "The invitation is not in a state that allows this action.",
+    "error.staffInvite.identityConflict": "The invitation identity does not match the account.",
 
     "error.common.unknown": "Unknown error",
     "error.common.internal": "An unexpected error occurred",

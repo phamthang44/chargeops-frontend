@@ -13,8 +13,11 @@ import {
   Skeleton,
 } from '@chargeops/ui';
 import {
+  AdminRefundPolicyModal,
+  AdminRefundPolicyReviewCard,
   AssignTicketDrawer,
   EscalateTicketModal,
+  OwnerDisputeAdmissionCard,
   PlatformDirectGuideCard,
   ResolveTicketModal,
   TicketContextCard,
@@ -29,15 +32,23 @@ import {
   TicketThreadTab,
   TicketEventTimeline,
 } from './components';
-import { useTicketDetail } from './hooks/useTicketDetail';
+import { useTicketDetail, type TicketRoleOption } from './hooks/useTicketDetail';
 import { ReviewEscalationModal } from './components/ReviewEscalationModal';
-import type { ReviewTicketEscalationPayload } from '@chargeops/api';
+import { OwnerAdmitFailureModal } from '../../owner/features/bookings/OwnerAdmitFailureModal';
+import type { ReviewTicketEscalationPayload, OwnerBookingDetail } from '@chargeops/api';
 
-export function TicketDetail({ admin = false }: { admin?: boolean }) {
+export function TicketDetail({
+  admin = false,
+  role,
+}: {
+  admin?: boolean;
+  role?: TicketRoleOption;
+}) {
   const {
     id,
     accent,
     roleOption,
+    isStaffRole,
     t,
     navigate,
     ticketQuery,
@@ -84,10 +95,12 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
     isAssigned,
     escalation,
     isEscalated,
-  } = useTicketDetail({ admin });
+  } = useTicketDetail({ admin, role });
 
   const [mobileTab, setMobileTab] = useState<'conversation' | 'records'>('conversation');
   const [reviewAction, setReviewAction] = useState<ReviewTicketEscalationPayload['action'] | null>(null);
+  const [isRefundPolicyModalOpen, setIsRefundPolicyModalOpen] = useState(false);
+  const [admitBooking, setAdmitBooking] = useState<OwnerBookingDetail | null>(null);
 
   if (ticketQuery.error) {
     return (
@@ -350,6 +363,7 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
           <TicketHandlerCard
             ticket={tk}
             admin={admin}
+            canAssign={!isStaffRole}
             isAdminStationSupervisory={isAdminStationSupervisory}
             isAdminPlatformDirect={isAdminPlatformDirect}
             isAssigned={isAssigned}
@@ -395,6 +409,24 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
               escalatedAt={escalation?.requestedAt || (tk as any)?.escalatedAt}
               admin={admin}
               accent={accent}
+            />
+          )}
+
+          {/* Admin Refund Policy Review Card (BKG-057): For arbitrating dispute refund policy */}
+          {Boolean(admin && isEscalated && tk.bookingId) && (
+            <AdminRefundPolicyReviewCard
+              ticket={tk}
+              escalation={escalation}
+              admin={admin}
+              onOpenReviewModal={() => setIsRefundPolicyModalOpen(true)}
+            />
+          )}
+
+          {/* Owner Proactive Dispute Admission Card (BKG-056): Proactive failure admission in escalation */}
+          {Boolean(!admin && !isStaffRole && isEscalated && tk.bookingId) && (
+            <OwnerDisputeAdmissionCard
+              ticket={tk}
+              onOpenAdmitModal={(booking) => setAdmitBooking(booking)}
             />
           )}
 
@@ -458,6 +490,32 @@ export function TicketDetail({ admin = false }: { admin?: boolean }) {
               note,
             });
             setReviewAction(null);
+          }}
+        />
+      )}
+
+      {/* Admin Refund Policy Review Modal (BKG-057) */}
+      {isRefundPolicyModalOpen && Boolean(admin && isEscalated && tk.bookingId) && (
+        <AdminRefundPolicyModal
+          open={isRefundPolicyModalOpen}
+          onClose={() => setIsRefundPolicyModalOpen(false)}
+          ticket={tk}
+          escalation={escalation}
+          onSuccess={() => {
+            void ticketQuery.refetch();
+          }}
+        />
+      )}
+
+      {/* Owner Admit Station Failure Modal (BKG-056) */}
+      {admitBooking && (
+        <OwnerAdmitFailureModal
+          open={Boolean(admitBooking)}
+          onClose={() => setAdmitBooking(null)}
+          booking={admitBooking}
+          onSuccess={() => {
+            setAdmitBooking(null);
+            void ticketQuery.refetch();
           }}
         />
       )}

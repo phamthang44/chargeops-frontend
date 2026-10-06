@@ -4,11 +4,13 @@ import { initReactI18next } from 'react-i18next';
 import viCommon from './locales/vi/common.json';
 import viOwnerDashboard from './locales/vi/ownerDashboard.json';
 import viStaffDashboard from './locales/vi/staffDashboard.json';
+import viStaff from './locales/vi/staff.json';
 import viTickets from './locales/vi/tickets.json';
 import viSettings from './locales/vi/settings.json';
 import enCommon from './locales/en/common.json';
 import enOwnerDashboard from './locales/en/ownerDashboard.json';
 import enStaffDashboard from './locales/en/staffDashboard.json';
+import enStaff from './locales/en/staff.json';
 import enTickets from './locales/en/tickets.json';
 import enSettings from './locales/en/settings.json';
 
@@ -49,6 +51,7 @@ i18n.use(initReactI18next).init({
       common: viCommon,
       ownerDashboard: viOwnerDashboard,
       staffDashboard: viStaffDashboard,
+      staff: viStaff,
       tickets: viTickets,
       settings: viSettings,
       ui: viUi,
@@ -61,6 +64,7 @@ i18n.use(initReactI18next).init({
       common: enCommon,
       ownerDashboard: enOwnerDashboard,
       staffDashboard: enStaffDashboard,
+      staff: enStaff,
       tickets: enTickets,
       settings: enSettings,
       ui: enUi,

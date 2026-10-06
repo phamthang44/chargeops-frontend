@@ -12,6 +12,17 @@ import type {
   OwnerBookingDetail,
   OwnerBookingListItem,
   OwnerBookingSummary,
+  AdminRefundPolicyContext,
+  AdminReviewRefundPolicyPayload,
+  AdminReviewRefundPolicyResponse,
+  OwnerAcceptStationFailurePayload,
+  OwnerCancelBookingPayload,
+  OwnerStationFailureContext,
+  StationFailureCommandResponse,
+  ConnectorIncidentResponse,
+  ReportConnectorIncidentRequest,
+  RecoverConnectorIncidentRequest,
+  ResolveIncidentSessionRequest,
   AdminOperationsSummary,
   ChargePoint,
   ChargePointStatusEvent,
@@ -50,6 +61,15 @@ import type {
   TicketHandlerCandidate,
   RecordTicketFindingRequest,
   ResolveTicketRequest,
+  StaffBookingListParams,
+  StaffChargePointItem,
+  StaffConnectorItem,
+  StaffEquipmentHistoryItem,
+  StaffEquipmentHistoryParams,
+  StaffInvitationResponse,
+  StaffOperationalBooking,
+  StaffStationOverview,
+  StaffInvitationStatus,
   Page,
 } from '../types';
 
@@ -62,6 +82,67 @@ function generateUuidV4(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+/**
+ * Staff operations read endpoints are streamed (`Cache-Control: no-store`);
+ * they bypass the browser/HTTP cache so the console never shows stale state.
+ */
+const NO_STORE = { 'Cache-Control': 'no-store' };
+
+/** Wrap a `Page`-shaped response (or plain array) into the FE `Page<T>` (0-based page). */
+function toPage<T>(res: any, fallbackPage: number, fallbackSize: number): Page<T> {
+  const items: T[] = Array.isArray(res) ? res : Array.isArray(res?.items) ? res.items : [];
+  const total = typeof res?.total === 'number' ? res.total : items.length;
+  const oneBased = typeof res?.page === 'number' ? res.page : fallbackPage + 1;
+  return {
+    items,
+    total,
+    page: Math.max(0, oneBased - 1),
+    pageSize: typeof res?.pageSize === 'number' ? res.pageSize : fallbackSize,
+  };
+}
+
+function normalizeHistoryItem(raw: any): StaffEquipmentHistoryItem {
+  const item = raw?.data ?? raw ?? {};
+  return {
+    id: String(item.id ?? ''),
+    dimension: String(item.dimension ?? ''),
+    fromStatus: String(item.fromStatus ?? ''),
+    toStatus: String(item.toStatus ?? ''),
+    reason: item.reason ?? null,
+    actorType: (item.actorType ?? 'SYSTEM') as StaffEquipmentHistoryItem['actorType'],
+    performedByDisplayName: item.performedByDisplayName ?? null,
+    performedAt: String(item.performedAt ?? ''),
+  };
+}
+
+function normalizeInvitation(raw: any): StaffInvitationResponse {
+  const item = raw?.data ?? raw ?? {};
+  return {
+    invitationId: String(item.invitationId ?? item.id ?? ''),
+    stationId: String(item.stationId ?? ''),
+    email: String(item.email ?? ''),
+    status: String(item.status ?? 'SENT') as StaffInvitationStatus,
+    expiresAt: String(item.expiresAt ?? ''),
+    sentAt: item.sentAt ?? null,
+    acceptedAt: item.acceptedAt ?? null,
+  };
+}
+
+function staffHistoryRequest(
+  http: HttpClient,
+  path: string,
+  params: StaffEquipmentHistoryParams = {},
+): Promise<Page<StaffEquipmentHistoryItem>> {
+  const page = params.page ?? 0;
+  const size = params.size ?? 20;
+  return http
+    .request<any>('GET', path, { params: { page: page + 1, size }, headers: NO_STORE })
+    .then((res) => {
+      const result = toPage<any>(res, page, size);
+      return { ...result, items: result.items.map(normalizeHistoryItem) };
+    });
 }
 
 function normalizeTicketMessage(m: any, defaultTicketId = ''): TicketMessage {
@@ -211,6 +292,12 @@ function normalizeRefundDetail(r: any): RefundDetail {
   const refundId = r?.refundId || r?.id || '';
   const rawAttempts = Array.isArray(r?.attempts) ? r.attempts : [];
   const normalizedAttempts = rawAttempts.map(normalizeRefundAttempt);
+  const requiresOwnerAction =
+    typeof r?.requiresOwnerAction === 'boolean'
+      ? r.requiresOwnerAction
+      : typeof r?.requiresAdminAction === 'boolean'
+        ? r.requiresAdminAction
+        : r?.reason !== 'VOLUNTARY_GRACE' || normalizedAttempts.some((att: any) => att.status === 'FAILED');
   return {
     ...r,
     id: refundId,
@@ -228,9 +315,8 @@ function normalizeRefundDetail(r: any): RefundDetail {
     basisId: r?.basisId || '',
     status: (r?.status as RefundStatus) ?? 'PENDING',
     executionPolicy: r?.executionPolicy ?? (r?.reason === 'VOLUNTARY_GRACE' ? 'AUTO_FIRST_ATTEMPT' : 'ADMIN_REQUIRED'),
-    requiresAdminAction: typeof r?.requiresAdminAction === 'boolean'
-      ? r.requiresAdminAction
-      : (r?.reason !== 'VOLUNTARY_GRACE' || normalizedAttempts.some((att: any) => att.status === 'FAILED')),
+    requiresAdminAction: requiresOwnerAction,
+    requiresOwnerAction,
     version: Number(r?.version ?? 0),
     decisionAt: r?.decisionAt || new Date().toISOString(),
     decidedBy: r?.decidedBy || '',
@@ -561,6 +647,25 @@ export function createRestServices(http: HttpClient): Services {
           page: params.page ?? 0,
           pageSize: params.size ?? 20,
         };
+      },
+
+      getStationFailureContext: async (bookingId: string) => {
+        const res: any = await http.get(`/owner/bookings/${bookingId}/station-failure-context`);
+        return (res?.data ?? res) as OwnerStationFailureContext;
+      },
+
+      cancelForStationFailure: async (bookingId: string, payload: OwnerCancelBookingPayload, idempotencyKey: string) => {
+        const res: any = await http.post(`/owner/bookings/${bookingId}/cancel`, payload, {
+          headers: { 'Idempotency-Key': idempotencyKey },
+        });
+        return (res?.data ?? res) as StationFailureCommandResponse;
+      },
+
+      admitStationFailure: async (bookingId: string, payload: OwnerAcceptStationFailurePayload, idempotencyKey: string) => {
+        const res: any = await http.post(`/owner/bookings/${bookingId}/station-failure-refund`, payload, {
+          headers: { 'Idempotency-Key': idempotencyKey },
+        });
+        return (res?.data ?? res) as StationFailureCommandResponse;
       },
     },
 
@@ -987,6 +1092,157 @@ export function createRestServices(http: HttpClient): Services {
         http.delete(`/owner/stations/${stationId}/staffs/${assignmentId}`),
     },
 
+    staffOperations: {
+      overview: async (stationId) => {
+        const res: any = await http.request('GET', `/staff/stations/${stationId}`, { headers: NO_STORE });
+        const data = res?.data ?? res ?? {};
+        return {
+          stationId: String(data.stationId ?? stationId),
+          name: String(data.name ?? ''),
+          address: String(data.address ?? ''),
+          operationalStatus: data.operationalStatus ?? 'OPERATING',
+          chargePointCount: Number(data.chargePointCount ?? 0),
+          connectorCount: Number(data.connectorCount ?? 0),
+        } as StaffStationOverview;
+      },
+
+      listChargePoints: async (stationId) => {
+        const res: any = await http.request('GET', `/staff/stations/${stationId}/charge-points`, { headers: NO_STORE });
+        const list: any[] = Array.isArray(res) ? res : res?.items ?? [];
+        return list.map((cp: any) => ({
+          id: String(cp.id),
+          code: String(cp.code ?? cp.chargePointCode ?? ''),
+          name: String(cp.name ?? ''),
+          zoneLabel: cp.zoneLabel ?? null,
+          provisioningStatus: cp.provisioningStatus ?? 'ACTIVE',
+          operationalStatus: cp.operationalStatus ?? 'AVAILABLE',
+          version: Number(cp.version ?? 0),
+        })) as StaffChargePointItem[];
+      },
+
+      listConnectors: async (stationId, chargePointId) => {
+        const res: any = await http.request(
+          'GET',
+          `/staff/stations/${stationId}/charge-points/${chargePointId}/connectors`,
+          { headers: NO_STORE },
+        );
+        const list: any[] = Array.isArray(res) ? res : res?.items ?? [];
+        return list.map((c: any) => ({
+          id: String(c.id),
+          code: String(c.code ?? ''),
+          connectorType: c.connectorType ?? 'TYPE2',
+          runtimeStatus: c.runtimeStatus ?? 'AVAILABLE',
+          version: Number(c.version ?? 0),
+        })) as StaffConnectorItem[];
+      },
+
+      changeChargePointStatus: async (stationId, chargePointId, input) => {
+        const res: any = await http.request(
+          'PATCH',
+          `/staff/stations/${stationId}/charge-points/${chargePointId}/operational-status`,
+          { body: input, headers: NO_STORE },
+        );
+        const cp = res?.data ?? res ?? {};
+        return {
+          id: String(cp.id ?? chargePointId),
+          code: String(cp.code ?? cp.chargePointCode ?? ''),
+          name: String(cp.name ?? ''),
+          zoneLabel: cp.zoneLabel ?? null,
+          provisioningStatus: cp.provisioningStatus ?? 'ACTIVE',
+          operationalStatus: cp.operationalStatus ?? input.operationalStatus,
+          version: Number(cp.version ?? input.expectedVersion + 1),
+        } as StaffChargePointItem;
+      },
+
+      changeConnectorStatus: async (stationId, chargePointId, connectorId, input) => {
+        const res: any = await http.request(
+          'PATCH',
+          `/staff/stations/${stationId}/charge-points/${chargePointId}/connectors/${connectorId}/runtime-status`,
+          { body: input, headers: NO_STORE },
+        );
+        const c = res?.data ?? res ?? {};
+        return {
+          id: String(c.id ?? connectorId),
+          code: String(c.code ?? ''),
+          connectorType: c.connectorType ?? 'TYPE2',
+          runtimeStatus: c.runtimeStatus ?? input.runtimeStatus,
+          version: Number(c.version ?? input.expectedVersion + 1),
+        } as StaffConnectorItem;
+      },
+
+      chargePointHistory: (stationId, chargePointId, params) =>
+        staffHistoryRequest(
+          http,
+          `/staff/stations/${stationId}/charge-points/${chargePointId}/status-history`,
+          params,
+        ),
+
+      connectorHistory: (stationId, chargePointId, connectorId, params) =>
+        staffHistoryRequest(
+          http,
+          `/staff/stations/${stationId}/charge-points/${chargePointId}/connectors/${connectorId}/status-history`,
+          params,
+        ),
+
+      listBookings: async (stationId, params = {}) => {
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        const query: Record<string, unknown> = { page: page + 1, size };
+        if (params.connectorId) query.connectorId = params.connectorId;
+        if (params.from) query.from = params.from;
+        if (params.to) query.to = params.to;
+        const res: any = await http.request('GET', `/staff/stations/${stationId}/bookings`, {
+          params: query,
+          headers: NO_STORE,
+        });
+        const result = toPage<StaffOperationalBooking>(res, page, size);
+        return {
+          ...result,
+          items: result.items.map((b) => ({ ...b, driverDisplayName: b.driverDisplayName || 'Tài xế' })),
+        };
+      },
+    },
+
+    staffInvitations: {
+      invite: async (stationId, input) =>
+        normalizeInvitation(
+          await http.request('POST', `/owner/stations/${stationId}/staff-invitations`, {
+            body: input,
+            headers: NO_STORE,
+          }),
+        ),
+
+      list: async (stationId, params = {}) => {
+        const page = params.page ?? 0;
+        const size = params.size ?? 20;
+        const res: any = await http.request('GET', `/owner/stations/${stationId}/staff-invitations`, {
+          params: { page: page + 1, size },
+          headers: NO_STORE,
+        });
+        const result = toPage<any>(res, page, size);
+        return { ...result, items: result.items.map(normalizeInvitation) };
+      },
+
+      resend: async (stationId, invitationId) =>
+        normalizeInvitation(
+          await http.request('POST', `/owner/stations/${stationId}/staff-invitations/${invitationId}/resend`, {
+            headers: NO_STORE,
+          }),
+        ),
+
+      cancel: async (stationId, invitationId) =>
+        normalizeInvitation(
+          await http.request('DELETE', `/owner/stations/${stationId}/staff-invitations/${invitationId}`, {
+            headers: NO_STORE,
+          }),
+        ),
+
+      activate: async () =>
+        normalizeInvitation(
+          await http.request('POST', '/me/staff-invitation/activate', { headers: NO_STORE }),
+        ),
+    },
+
     pricing: {
       get: async (stationId) =>
         normalizePricing(await http.get(`/owner/stations/${stationId}/pricing`)),
@@ -1328,6 +1584,18 @@ export function createRestServices(http: HttpClient): Services {
           pageSize: params.pageSize ?? 20,
         };
       },
+
+      getRefundPolicyContext: async (ticketId: string, escalationId: string) => {
+        const res: any = await http.get(`/admin/tickets/${ticketId}/escalations/${escalationId}/refund-policy-context`);
+        return (res?.data ?? res) as AdminRefundPolicyContext;
+      },
+
+      reviewRefundPolicy: async (ticketId: string, escalationId: string, payload: AdminReviewRefundPolicyPayload, idempotencyKey: string) => {
+        const res: any = await http.post(`/admin/tickets/${ticketId}/escalations/${escalationId}/refund-policy-decisions`, payload, {
+          headers: { 'Idempotency-Key': idempotencyKey },
+        });
+        return (res?.data ?? res) as AdminReviewRefundPolicyResponse;
+      },
     },
 
     challenge: {
@@ -1402,6 +1670,48 @@ export function createRestServices(http: HttpClient): Services {
             // Ignore if already deleted/read
           }
         }
+      },
+    },
+
+    incidents: {
+      report: (stationId, connectorId, request, idempotencyKey) => {
+        const key =
+          idempotencyKey ||
+          (typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : 'idemp-' + Date.now());
+        return http.post<ConnectorIncidentResponse>(
+          `/stations/${stationId}/connectors/${connectorId}/incidents`,
+          request,
+          { headers: { 'Idempotency-Key': key } },
+        );
+      },
+      get: (stationId, incidentId) => {
+        return http.get<ConnectorIncidentResponse>(`/stations/${stationId}/incidents/${incidentId}`);
+      },
+      recover: (stationId, incidentId, request, idempotencyKey) => {
+        const key =
+          idempotencyKey ||
+          (typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : 'idemp-' + Date.now());
+        return http.post<ConnectorIncidentResponse>(
+          `/stations/${stationId}/incidents/${incidentId}/recover`,
+          request,
+          { headers: { 'Idempotency-Key': key } },
+        );
+      },
+      resolveSession: (stationId, incidentId, bookingId, request, idempotencyKey) => {
+        const key =
+          idempotencyKey ||
+          (typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : 'idemp-' + Date.now());
+        return http.post<ConnectorIncidentResponse>(
+          `/stations/${stationId}/incidents/${incidentId}/bookings/${bookingId}/resolve-session`,
+          request,
+          { headers: { 'Idempotency-Key': key } },
+        );
       },
     },
   };

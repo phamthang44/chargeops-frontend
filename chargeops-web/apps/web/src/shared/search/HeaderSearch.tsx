@@ -184,6 +184,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
   const model = useMemo(() => {
     const flat: SearchResult[] = [];
     const shaped = groups.map((g) => ({
+      type: g.type,
       label: g.label,
       icon: g.icon,
       rows: g.results.map((item) => {

@@ -243,7 +243,6 @@ export function NotificationsShowcase() {
           onMarkAllRead={handleMarkAllRead}
           onDismiss={handleDismiss}
           onClearRead={handleClearRead}
-          onSimulateNotification={triggerSimulation}
         />
       )}
 

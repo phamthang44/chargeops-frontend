@@ -52,45 +52,28 @@ type TabType = 'all' | 'unread';
 /*  Look-up tables & Action Labels                                     */
 /* ------------------------------------------------------------------ */
 
+/** i18n key for the CTA label shown per notification type. */
+const TYPE_ACTION_KEY: Record<AppNotification['type'], string> = {
+  charging: 'notifications.actions.viewSession',
+  booking:  'notifications.actions.viewBooking',
+  wallet:   'notifications.actions.viewWallet',
+  promo:    'notifications.actions.viewPromo',
+  ticket:   'notifications.actions.viewTicket',
+  finance:  'notifications.actions.viewRefund',
+  system:   'notifications.actions.viewDetail',
+};
+
 const TYPE_CONFIG: Record<
   AppNotification['type'],
-  { icon: keyof typeof Ionicons.glyphMap; color: string; actionLabel: string }
+  { icon: keyof typeof Ionicons.glyphMap; color: string }
 > = {
-  charging: {
-    icon: 'flash',
-    color: '#10B981',
-    actionLabel: 'Xem phiên sạc',
-  },
-  booking: {
-    icon: 'calendar',
-    color: '#3B82F6',
-    actionLabel: 'Chi tiết đặt chỗ',
-  },
-  wallet: {
-    icon: 'wallet',
-    color: '#F59E0B',
-    actionLabel: 'Ví & Nạp tiền',
-  },
-  promo: {
-    icon: 'gift',
-    color: '#8B5CF6',
-    actionLabel: 'Xem ưu đãi',
-  },
-  ticket: {
-    icon: 'chatbubbles',
-    color: '#8B5CF6',
-    actionLabel: 'Chi tiết hỗ trợ',
-  },
-  finance: {
-    icon: 'card',
-    color: '#10B981',
-    actionLabel: 'Chi tiết hoàn tiền',
-  },
-  system: {
-    icon: 'information-circle',
-    color: '#6B7280',
-    actionLabel: 'Xem chi tiết',
-  },
+  charging: { icon: 'flash',             color: '#10B981' },
+  booking:  { icon: 'calendar',          color: '#3B82F6' },
+  wallet:   { icon: 'wallet',            color: '#F59E0B' },
+  promo:    { icon: 'gift',              color: '#8B5CF6' },
+  ticket:   { icon: 'chatbubbles',       color: '#8B5CF6' },
+  finance:  { icon: 'card',             color: '#10B981' },
+  system:   { icon: 'information-circle', color: '#6B7280' },
 };
 
 /* ------------------------------------------------------------------ */
@@ -107,6 +90,7 @@ interface NotificationItemProps {
 function NotificationItem({ notification, themeColors, onPress, onDelete }: NotificationItemProps) {
   const { t } = useTranslation();
   const cfg = TYPE_CONFIG[notification.type];
+  const actionLabel = t(TYPE_ACTION_KEY[notification.type], { defaultValue: 'View details' });
   const hasLink = !!notification.referenceId;
   const title = resolveNotificationI18n(notification.title, t);
   const body = resolveNotificationI18n(notification.body, t);
@@ -184,7 +168,7 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
                     },
                   ]}
                 >
-                  {cfg.actionLabel}
+                  {actionLabel}
                 </Text>
                 <Ionicons
                   name="chevron-forward"
@@ -320,7 +304,7 @@ export function NotificationSheet({
                 },
               ]}
             >
-              Tất cả ({items.length})
+              {t('notifications.tabs.all', { count: items.length, defaultValue: 'All ({{count}})' })}
             </Text>
           </Pressable>
 
@@ -346,7 +330,7 @@ export function NotificationSheet({
                 },
               ]}
             >
-              Chưa đọc ({unreadCount})
+              {t('notifications.tabs.unread', { count: unreadCount, defaultValue: 'Unread ({{count}})' })}
             </Text>
           </Pressable>
         </View>
@@ -379,13 +363,13 @@ export function NotificationSheet({
           <EmptyState variant="notifications" />
           <Text style={[styles.emptyText, { color: themeColors.textStrong }]}>
             {activeTab === 'unread'
-              ? 'Tuyệt vời! Bạn đã đọc hết mọi thông báo.'
-              : t('stationList.notificationsEmpty', 'Không có thông báo nào')}
+              ? t('notifications.empty.allReadTitle', { defaultValue: 'All caught up!' })
+              : t('stationList.notificationsEmpty', 'No notifications')}
           </Text>
           <Text style={[styles.emptySubText, { color: themeColors.textMuted }]}>
             {activeTab === 'unread'
-              ? 'Tất cả cảnh báo và hoạt động sạc đã được xem.'
-              : 'Các thông báo mới về phiên sạc và giao dịch sẽ xuất hiện tại đây.'}
+              ? t('notifications.empty.allReadBody', { defaultValue: 'All alerts and session activity have been viewed.' })
+              : t('notifications.empty.noNotifBody', { defaultValue: 'New notifications about sessions and transactions will appear here.' })}
           </Text>
         </View>
       ) : (
@@ -409,7 +393,7 @@ export function NotificationSheet({
             <Pressable onPress={handleClearAll} style={styles.clearAllFooter}>
               <Ionicons name="trash-outline" size={13} color={themeColors.textMuted} />
               <Text style={[styles.clearAllFooterText, { color: themeColors.textMuted }]}>
-                {t('notifications.clearAll', 'Xóa tất cả thông báo')}
+                {t('notifications.clearAll', 'Clear all notifications')}
               </Text>
             </Pressable>
           )}

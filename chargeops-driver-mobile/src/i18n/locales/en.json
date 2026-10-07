@@ -1432,6 +1432,28 @@
         "body": "Escalation review requested for ticket {{code}} requires Admin evaluation."
       }
     }
+  },
+  "notifications": {
+    "tabs": {
+      "all": "All ({{count}})",
+      "unread": "Unread ({{count}})"
+    },
+    "actions": {
+      "viewSession": "View charging session",
+      "viewBooking": "View booking details",
+      "viewWallet": "Wallet & Top-up",
+      "viewPromo": "View promotion",
+      "viewTicket": "View support ticket",
+      "viewRefund": "View refund details",
+      "viewDetail": "View details"
+    },
+    "empty": {
+      "allReadTitle": "All caught up!",
+      "allReadBody": "All alerts and session activity have been viewed.",
+      "noNotifBody": "New notifications about sessions and transactions will appear here."
+    },
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all notifications"
   }
 }
 

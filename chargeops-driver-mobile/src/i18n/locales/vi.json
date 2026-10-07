@@ -1432,6 +1432,28 @@
         "body": "Ca khiếu nại cho Ticket {{code}} cần Admin xem xét."
       }
     }
+  },
+  "notifications": {
+    "tabs": {
+      "all": "Tất cả ({{count}})",
+      "unread": "Chưa đọc ({{count}})"
+    },
+    "actions": {
+      "viewSession": "Xem phiên sạc",
+      "viewBooking": "Chi tiết đặt chỗ",
+      "viewWallet": "Ví & Nạp tiền",
+      "viewPromo": "Xem ưu đãi",
+      "viewTicket": "Chi tiết hỗ trợ",
+      "viewRefund": "Chi tiết hoàn tiền",
+      "viewDetail": "Xem chi tiết"
+    },
+    "empty": {
+      "allReadTitle": "Tuyệt vời! Bạn đã đọc hết.",
+      "allReadBody": "Tất cả cảnh báo và hoạt động sạc đã được xem.",
+      "noNotifBody": "Các thông báo mới về phiên sạc và giao dịch sẽ xuất hiện tại đây."
+    },
+    "markAllRead": "Đã đọc hết",
+    "clearAll": "Xóa tất cả thông báo"
   }
 }
 

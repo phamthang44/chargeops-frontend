@@ -110,9 +110,10 @@ const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
     body: 'notification.refund.succeeded.body|{"code":"BKG-HN-8821"}',
     createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
     read: true,
-    referenceId: null,
+    referenceId: '00000000-0000-4000-8000-000000000201', // same booking as the confirmed/reminder seeds
     category: 'finance',
     eventType: 'REFUND_SUCCEEDED',
+    target: { type: 'OPEN_BOOKING', bookingId: '00000000-0000-4000-8000-000000000201' },
   },
   {
     id: 'notif-drv-4',

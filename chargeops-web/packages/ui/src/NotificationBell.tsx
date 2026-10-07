@@ -9,6 +9,7 @@ import {
   IconSearch,
   IconArrowRight,
   IconCheck,
+  IconClock,
 } from './icons';
 
 export interface NotificationItem {
@@ -360,7 +361,7 @@ export function NotificationBell({
           </div>
 
           {/* Body Feed List */}
-          <div className="max-h-[400px] overflow-y-auto divide-y divide-line-2/40 bg-surface">
+          <div className="max-h-[440px] overscroll-contain overflow-y-auto divide-y divide-line-2/40 bg-surface [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line hover:[&::-webkit-scrollbar-thumb]:bg-line-2">
             {filteredItems.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-chip text-faint">
@@ -373,7 +374,7 @@ export function NotificationBell({
               </div>
             ) : (
               <div className="p-2 space-y-1.5">
-                {filteredItems.map((n) => {
+                {filteredItems.map((n, idx) => {
                   const tone = n.tone ?? 'neutral';
                   const cfg = TONE_CONFIG[tone];
 
@@ -387,14 +388,16 @@ export function NotificationBell({
                           n.onSelect();
                         }
                       }}
+                      style={{ animation: 'riseIn 520ms cubic-bezier(0.32,0.72,0,1) backwards', animationDelay: `${idx * 45}ms` }}
                       className={[
-                        'group relative flex flex-col gap-2 rounded-xl p-3 text-left transition-all duration-150 cursor-pointer border',
+                        'group relative flex flex-col gap-2 rounded-xl p-3 text-left cursor-pointer border',
+                        'transition-[background-color,border-color,transform,translate,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px',
                         n.read
                           ? 'bg-surface hover:bg-chip/50 border-line/30 opacity-75 hover:opacity-100'
-                          : `${cfg.bg} ${cfg.border} shadow-2xs`,
+                          : `${cfg.bg} ${cfg.border} shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.06)]`,
                       ].join(' ')}
                     >
-                      {/* Top Bar: Icon + Title + Time + Actions */}
+                      {/* Top Bar: Icon + Content (title & body use full width — no ellipsis, no clamping) */}
                       <div className="flex items-start gap-2.5 min-w-0">
                         {/* Icon badge */}
                         <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${cfg.badgeBg} shadow-2xs`}>
@@ -402,60 +405,64 @@ export function NotificationBell({
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1.5">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              {!n.read && (
-                                <span className="h-1.5 w-1.5 rounded-full bg-brand shrink-0" />
-                              )}
-                              <span className={`text-[12.5px] font-bold leading-snug truncate ${n.read ? 'text-body' : 'text-ink'}`}>
-                                {n.title}
-                              </span>
-                            </div>
-                            {n.time && (
-                              <span className="shrink-0 font-mono text-[10px] font-medium text-ghost">
-                                {n.time}
-                              </span>
+                          {/* Title — hiển thị đầy đủ, tự xuống dòng khi dài */}
+                          <div className="flex items-start gap-1.5">
+                            {!n.read && (
+                              <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand animate-pulse" />
                             )}
+                            <span className={`text-[12.5px] font-bold leading-snug break-words ${n.read ? 'text-body' : 'text-ink'}`}>
+                              {n.title}
+                            </span>
                           </div>
 
+                          {/* Body — hiện toàn bộ nội dung, không cắt xén */}
                           {(n.subtitle || n.body) && (
-                            <p className="mt-0.5 text-[11.5px] font-medium text-muted leading-relaxed line-clamp-2">
+                            <p className="mt-1 text-[11.5px] font-medium text-muted leading-relaxed break-words">
                               {n.subtitle || n.body}
                             </p>
                           )}
-                        </div>
 
-                        {/* Hover Quick Actions: Mark Read & Dismiss */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {!n.read && (
-                            <button
-                              type="button"
-                              aria-label="Đánh dấu đã đọc"
-                              title="Đánh dấu đã đọc"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkRead(n.id);
-                              }}
-                              className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-owner-soft hover:text-owner-deep transition-colors"
-                            >
-                              <IconCheck size={12} strokeWidth={2.5} />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            aria-label="Xóa thông báo"
-                            title="Xóa thông báo"
-                            onClick={(e) => handleDismiss(n.id, e)}
-                            className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-bad-soft hover:text-bad-deep transition-colors"
-                          >
-                            <IconX size={11} strokeWidth={2.2} />
-                          </button>
+                          {/* Meta Row: Timestamp trái + Hover Quick Actions phải */}
+                          <div className="mt-1.5 flex items-center justify-between gap-2">
+                            {n.time && (
+                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium text-ghost">
+                                <IconClock size={11} strokeWidth={2} />
+                                {n.time}
+                              </span>
+                            )}
+
+                            <div className="flex items-center gap-1 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 focus-within:opacity-100 focus-within:translate-x-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                              {!n.read && (
+                                <button
+                                  type="button"
+                                  aria-label="Đánh dấu đã đọc"
+                                  title="Đánh dấu đã đọc"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMarkRead(n.id);
+                                  }}
+                                  className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-owner-soft hover:text-owner-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
+                                >
+                                  <IconCheck size={12} strokeWidth={2.5} />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                aria-label="Xóa thông báo"
+                                title="Xóa thông báo"
+                                onClick={(e) => handleDismiss(n.id, e)}
+                                className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-bad-soft hover:text-bad-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
+                              >
+                                <IconX size={11} strokeWidth={2.2} />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       {/* Context Info Pills (Station, Charger, Metrics) */}
                       {(n.stationName || n.chargerId || n.metrics) && (
-                        <div className="flex flex-wrap items-center gap-1.5 pl-[34px]">
+                        <div className="flex flex-wrap items-center gap-1.5 pl-[38px]">
                           {n.stationName && (
                             <span className="rounded-md bg-surface border border-line-2 px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
                               📍 {n.stationName}
@@ -486,14 +493,14 @@ export function NotificationBell({
 
                       {/* Dynamic Progress Bar (Charging progress) */}
                       {n.metrics?.progressPct !== undefined && (
-                        <div className="mt-0.5 pl-[34px] space-y-1">
+                        <div className="mt-0.5 pl-[38px] space-y-1">
                           <div className="flex items-center justify-between text-[10px] font-bold text-muted">
                             <span>Tiến độ nạp điện</span>
                             <span className="font-mono text-owner-deep">{n.metrics.progressPct}%</span>
                           </div>
                           <div className="h-1.5 w-full rounded-full bg-line-3 overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-owner transition-all duration-500"
+                              className="h-full rounded-full bg-owner transition-[width] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
                               style={{ width: `${n.metrics.progressPct}%` }}
                             />
                           </div>
@@ -502,7 +509,7 @@ export function NotificationBell({
 
                       {/* Primary Action Button (Novu pattern: inline actionable card) */}
                       {(n.actionLabel || n.primaryAction) && (
-                        <div className="mt-1 flex items-center justify-end pl-[34px]">
+                        <div className="mt-1 flex items-center justify-end pl-[38px]">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -512,10 +519,10 @@ export function NotificationBell({
                               if (n.onAction) n.onAction();
                               else if (n.onSelect) n.onSelect();
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line-2 hover:border-brand/40 px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-all shadow-2xs group/btn"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line-2 hover:border-brand/40 px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-[background-color,border-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] shadow-2xs group/btn"
                           >
                             <span>{n.primaryAction?.label || n.actionLabel}</span>
-                            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-chip group-hover/btn:bg-brand group-hover/btn:text-white transition-colors">
+                            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-chip group-hover/btn:bg-brand group-hover/btn:text-white group-hover/btn:translate-x-0.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
                               <IconArrowRight size={9} strokeWidth={2.5} />
                             </span>
                           </button>

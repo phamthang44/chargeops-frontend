@@ -25,6 +25,7 @@ import {
   updateCurrentProfile,
 } from '@/services/profileService';
 import { setStationApiTokenProvider } from '@/services/stationService';
+import { resetNotificationStore } from '@/services/notificationService';
 
 export type ProfileStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -232,6 +233,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: async () => {
         const current = session;
+        // Clear in-memory notification cache immediately — prevents stale data leaking to next session.
+        resetNotificationStore();
         setProfile(null);
         setProfileStatus('idle');
         setProfileError(null);

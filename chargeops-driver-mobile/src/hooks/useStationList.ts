@@ -222,10 +222,26 @@ export function useStationList() {
 
   const onNotificationNavigate = useCallback(
     (n: AppNotification, navigation: Nav) => {
-      if (!n.referenceId) return;
-      if (n.type === 'charging') navigation.navigate('ChargingSession', { bookingId: n.referenceId });
-      else if (n.type === 'booking') navigation.navigate('BookingDetail', { bookingId: n.referenceId });
-      else if (n.type === 'wallet') navigation.navigate('Tabs', { screen: 'Profile' });
+      if (!n.referenceId && !n.target) return;
+      // Prefer typed target from backend (#57)
+      const targetType = n.target?.type;
+      if (targetType === 'OPEN_BOOKING' || n.type === 'charging' || n.type === 'booking') {
+        const bookingId = n.target?.bookingId ?? n.referenceId;
+        if (bookingId) {
+          if (n.type === 'charging') navigation.navigate('ChargingSession', { bookingId });
+          else navigation.navigate('BookingDetail', { bookingId });
+        }
+      } else if (targetType === 'OPEN_TICKET' || targetType === 'OPEN_CASE' || n.type === 'ticket') {
+        const ticketId = n.target?.ticketId ?? n.referenceId;
+        if (ticketId) navigation.navigate('TicketDetail', { ticketId });
+        else navigation.navigate('MyTickets');
+      } else if (targetType === 'OPEN_REFUND' || n.type === 'finance') {
+        const bookingId = n.target?.bookingId ?? n.referenceId;
+        if (bookingId) navigation.navigate('BookingDetail', { bookingId });
+        else navigation.navigate('Tabs', { screen: 'BookingHistory' });
+      } else if (n.type === 'wallet') {
+        navigation.navigate('Tabs', { screen: 'Profile' });
+      }
     },
     [],
   );

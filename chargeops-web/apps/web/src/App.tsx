@@ -14,11 +14,11 @@ import { ThemeProvider } from './theme';
  * is purely a demo affordance — in real mode the roles come from the decoded
  * access token via rolesFromRealm(realm_access.roles) and nothing is picked.
  */
-const MOCK_USERS: Record<string, { name: string; email: string; roles: Role[] }> = {
-  admin: { name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', roles: ['platform_admin'] },
-  owner: { name: 'Vũ Anh (EVGo Co.)', email: 'ops@evgo.vn', roles: ['station_owner'] },
-  staff: { name: 'Nhân viên Trạm Hà Đông', email: 'staff@evgo.vn', roles: ['staff'] },
-  driver: { name: 'Tài xế', email: 'driver@chargeops.vn', roles: ['driver'] },
+const MOCK_USERS: Record<string, { id: string; name: string; email: string; roles: Role[] }> = {
+  admin: { id: '00000000-0000-4000-8000-000000000001', name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', roles: ['platform_admin'] },
+  owner: { id: '00000000-0000-4000-8000-000000000002', name: 'Vũ Anh (EVGo Co.)', email: 'ops@evgo.vn', roles: ['station_owner'] },
+  staff: { id: '00000000-0000-4000-8000-000000000003', name: 'Nhân viên Trạm Hà Đông', email: 'staff@evgo.vn', roles: ['staff'] },
+  driver: { id: '00000000-0000-4000-8000-000000000004', name: 'Tài xế', email: 'driver@chargeops.vn', roles: ['driver'] },
 };
 
 function pickMockUser() {

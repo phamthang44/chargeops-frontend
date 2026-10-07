@@ -16,7 +16,55 @@
     "minChars": "Type at least 2 characters to start searching.",
     "hintNav": "navigate",
     "hintOpen": "open",
-    "hintClose": "close"
+    "hintClose": "close",
+    "types": {
+      "TICKET": "Support",
+      "STATION": "Stations",
+      "CHARGER": "Chargers",
+      "BOOKING": "Bookings",
+      "LICENSE": "Licenses",
+      "APPROVAL": "Approvals",
+      "LEGAL_DOCUMENT": "Legal",
+      "USER": "Users"
+    }
+  },
+  "legal": {
+    "title": "Platform Legal & Policies",
+    "subtitle": "Official legal documents and operational standards for Station Owners: B2B licensing, charger management, staff permissions, and revenue payouts.",
+    "staffSubtitle": "Legal documents, operating policies and internal guides for station staff.",
+    "search": {
+      "placeholder": "Search by title, keyword...",
+      "btn": "Search",
+      "btnTitle": "Search documents",
+      "filtering": "Filtering: ",
+      "hint": "Press Search to query",
+      "clear": "Clear filter"
+    },
+    "groups": {
+      "all": "All ({{count}})",
+      "license": "B2B License",
+      "operation": "Operations",
+      "general": "General"
+    },
+    "empty": "No matching documents found",
+    "docTypes": {
+      "TERMS_OF_SERVICE": "Terms of Service",
+      "PRIVACY_POLICY": "Privacy Policy",
+      "LICENSE_AGREEMENT": "B2B License Agreement",
+      "OPERATIONAL_REGULATION": "Operational Regulations"
+    },
+    "audience": {
+      "ownerBadge": "Station Owner",
+      "forOwner": "Applies to Station Owners",
+      "systemWide": "System-wide"
+    },
+    "viewer": {
+      "effective": "Effective",
+      "updatedAt": "Updated: {{date}}",
+      "inDocSearchPlaceholder": "Search keywords in this document (In-document search)...",
+      "clearInDocSearch": "Clear",
+      "copiedToast": "Markdown source copied to clipboard"
+    }
   },
   "brand": {
     "switchPortal": "Switch portal"

@@ -47,15 +47,13 @@
         "label": "Hỗ trợ sự cố",
         "title": "Hỗ trợ & Xử lý Sự cố",
         "subtitle": "Tiếp nhận và xử lý phiếu hỗ trợ của trạm."
+      },
+      "legal": {
+        "label": "Pháp lý",
+        "title": "Chính sách & Pháp lý",
+        "subtitle": "Văn bản pháp lý và chính sách vận hành áp dụng cho trạm."
       }
     }
-  },
-  "search": {
-    "groups": {
-      "tickets": "Phiếu hỗ trợ",
-      "chargers": "Thiết bị"
-    },
-    "zonePrefix": "Khu vực"
   },
   "stationStatus": {
     "OPERATING": "Đang vận hành",

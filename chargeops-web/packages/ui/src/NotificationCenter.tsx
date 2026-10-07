@@ -26,6 +26,9 @@ interface NotificationCenterProps {
   onDismiss?: (id: string) => void;
   onClearRead?: () => void;
   onSimulateNotification?: (type: 'overheat' | 'session' | 'ticket' | 'offline') => void;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
 export function NotificationCenter({
@@ -35,6 +38,9 @@ export function NotificationCenter({
   onDismiss,
   onClearRead,
   onSimulateNotification,
+  hasMore,
+  onLoadMore,
+  isLoadingMore,
 }: NotificationCenterProps) {
   const [activeTab, setActiveTab] = useState<CategoryFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -426,7 +432,7 @@ export function NotificationCenter({
                       )}
 
                       <div className="flex items-center gap-1.5">
-                        {onMarkRead && !item.read && (
+                        {onMarkRead && !item.read && item.source !== 'derived' && (
                           <button
                             type="button"
                             onClick={() => onMarkRead(item.id)}
@@ -437,7 +443,7 @@ export function NotificationCenter({
                           </button>
                         )}
 
-                        {onDismiss && (
+                        {onDismiss && item.source !== 'derived' && (
                           <button
                             type="button"
                             onClick={() => onDismiss(item.id)}
@@ -454,7 +460,7 @@ export function NotificationCenter({
                         <button
                           type="button"
                           onClick={() => {
-                            if (onMarkRead && !item.read) onMarkRead(item.id);
+                            if (onMarkRead && !item.read && item.source !== 'derived') onMarkRead(item.id);
                             if (item.onAction) item.onAction();
                             else if (item.onSelect) item.onSelect();
                           }}
@@ -472,6 +478,26 @@ export function NotificationCenter({
               </div>
             );
           })}
+
+          {hasMore && onLoadMore && (
+            <div className="pt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={onLoadMore}
+                disabled={isLoadingMore}
+                className="inline-flex items-center gap-2 rounded-xl border border-line-2 bg-surface px-5 py-2.5 text-sm font-semibold text-ink shadow-xs hover:bg-chip disabled:opacity-50 transition-colors"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <IconRefreshCw size={14} className="animate-spin" />
+                    <span>Đang tải thêm...</span>
+                  </>
+                ) : (
+                  <span>Tải thêm thông báo</span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1394,6 +1394,44 @@
       "codeConflict": "Mã phiếu hỗ trợ đã tồn tại.",
       "generic": "Đã xảy ra lỗi khi xử lý phiếu hỗ trợ."
     }
+  },
+  "notification": {
+    "booking": {
+      "confirmed": { "title": "Đặt chỗ đã được xác nhận" },
+      "cancelled": { "title": "Đặt chỗ đã bị hủy" },
+      "no_show": { "title": "Đặt chỗ đã kết thúc do không check-in" },
+      "completed": { "title": "Đặt chỗ đã hoàn thành" },
+      "reminder": { "title": "Sắp đến giờ đặt chỗ" },
+      "state_message": "Booking {{code}}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành."
+    },
+    "refund": {
+      "pending": {
+        "title": "Nghĩa vụ hoàn tiền đang chờ xử lý",
+        "body": "Booking {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
+      },
+      "attempt_failed": {
+        "title": "Lần thực hiện hoàn tiền chưa thành công",
+        "body": "Booking {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
+      },
+      "succeeded": {
+        "title": "Hoàn tiền đã thành công trong Simulator",
+        "body": "Booking {{code}}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật."
+      }
+    },
+    "ticket": {
+      "resolved": {
+        "title": "Ticket {{code}} đã giải quyết",
+        "body": "Ticket {{code}} đã được đánh dấu giải quyết: {{result}}. Vui lòng xác nhận hoặc báo vấn đề vẫn còn trước {{autoCloseAt}}. Nếu không phản hồi trong 10 ngày, ticket tự đóng theo chính sách; đây không phải xác nhận lỗi trạm hay hoàn tiền."
+      },
+      "assigned": {
+        "title": "Ticket {{code}} đã được phân công",
+        "body": "Ticket {{code}} tại trạm {{station}} đã được phân công xử lý."
+      },
+      "escalated": {
+        "title": "Yêu cầu khiếu nại ca {{code}}",
+        "body": "Ca khiếu nại cho Ticket {{code}} cần Admin xem xét."
+      }
+    }
   }
 }
 

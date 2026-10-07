@@ -76,13 +76,6 @@
     "openInNewTab": "Mở toàn màn hình",
     "iframeTitle": "Bảng điều khiển giám sát ChargeOps"
   },
-  "search": {
-    "groups": {
-      "tickets": "Hỗ trợ",
-      "bookings": "Đặt chỗ",
-      "users": "Người dùng"
-    }
-  },
   "notifications": {
     "empty": "Không có thông báo mới.",
     "pendingStations": "{{count}} hồ sơ trạm chờ duyệt",

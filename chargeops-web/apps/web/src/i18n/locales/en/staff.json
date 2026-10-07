@@ -47,15 +47,13 @@
         "label": "Support",
         "title": "Support & Incidents",
         "subtitle": "Pick up and resolve station tickets."
+      },
+      "legal": {
+        "label": "Legal",
+        "title": "Legal & Policies",
+        "subtitle": "Legal documents and operating policies that apply to your station."
       }
     }
-  },
-  "search": {
-    "groups": {
-      "tickets": "Tickets",
-      "chargers": "Equipment"
-    },
-    "zonePrefix": "Zone"
   },
   "stationStatus": {
     "OPERATING": "Operating",

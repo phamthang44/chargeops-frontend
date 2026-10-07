@@ -6,6 +6,7 @@ import {
   ApiProvider,
   createServices,
   useApi,
+  resolveNotificationI18n,
   type OwnerDashboard as OwnerDashboardData,
   type StaffDashboard as StaffDashboardData,
   type Station,
@@ -45,15 +46,17 @@ import {
 import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
-import { LegalPolicies } from './pages/LegalPolicies';
+import { LegalPolicies } from '../shared/legal/LegalPolicies';
 import { Revenue } from './pages/Revenue';
 import { Staff } from './pages/Staff';
 import { NotificationsShowcase } from './pages/NotificationsShowcase';
+import { OwnerNotifications } from './pages/OwnerNotifications';
 import { Dashboard as StaffDashboard } from '../staff/pages/Dashboard';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { useUserProfile } from '../shared/profile/useUserProfile';
-import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
+import { HeaderSearch } from '../shared/search/HeaderSearch';
+import { makeGlobalLoad, type GlobalSearchRoutes } from '../shared/search/makeGlobalLoad';
 import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
@@ -66,9 +69,12 @@ const PAGES: Record<string, ComponentType> = {
   revenue: Revenue,
   license: License,
   assistant: Assistant,
-  legal: LegalPolicies,
+  legal: () => (
+    <LegalPolicies audience="OWNER" defaultSlug="station-owner-license-agreement" queryKeyPrefix="owner" />
+  ),
   staff: Staff,
-  notifications: NotificationsShowcase,
+  notifications: OwnerNotifications,
+  'notifications-showcase': NotificationsShowcase,
   tickets: () => <TicketsRoute admin={false} />,
 };
 
@@ -122,79 +128,23 @@ function OwnerConsoleContent({
   const { avatarUrl } = useUserProfile();
   const { stations, selectedStationId, setSelectedStationId, currentStation } = useOwnerStation();
 
-  const searchers = useMemo<Searcher[]>(() => {
-    const list: Searcher[] = [
-      {
-        label: t('search.groups.tickets'),
-        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          const res = await api.tickets.list({ search: q, pageSize: 5, role: 'owner' });
-          return res.items.map((tk) => ({
-            id: tk.id,
-            title: tk.subject,
-            badge: tk.id.slice(0, 8),
-            subtitle: tk.stationName ?? undefined,
-            onSelect: () => navigate(`${base}/tickets/${tk.id}`),
-          }));
-        },
-      },
-      {
-        label: t('search.groups.chargers'),
-        icon: <IconBolt size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          if (!selectedStationId) return [];
-          const cps = await api.chargePoints.list(selectedStationId);
-          const ql = q.toLowerCase();
-          return cps
-            .filter(
-              (c) =>
-                c.name.toLowerCase().includes(ql) ||
-                (c.chargePointCode && c.chargePointCode.toLowerCase().includes(ql)) ||
-                c.id.toLowerCase().includes(ql),
-            )
-            .slice(0, 5)
-            .map((c) => ({
-              id: c.id,
-              title: c.name,
-              badge: c.chargePointCode || c.id.slice(0, 8),
-              subtitle: c.zoneLabel ? `Khu vực: ${c.zoneLabel}` : undefined,
-              onSelect: () => navigate(`${base}/chargers`),
-            }));
-        },
-      },
-    ];
+  const searchLoad = useMemo(() => {
+    const routes: GlobalSearchRoutes = {
+      TICKET: (tk) => navigate(`${base}/tickets/${tk.id}`),
+      CHARGER: () => navigate(`${base}/chargers`),
+      BOOKING: () => navigate(`${base}/bookings`),
+      LICENSE: () => navigate(`${base}/license`),
+      LEGAL_DOCUMENT: () => navigate(`${base}/legal`),
+    };
+    // Staff subset has no stations route — drop the group instead of a dead row.
     if (!reduced) {
-      list.push({
-        label: t('search.groups.stations'),
-        icon: <IconPin size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          const ql = q.toLowerCase();
-          return stations
-            .filter(
-              (s) =>
-                s.name.toLowerCase().includes(ql) ||
-                (s.stationCode && s.stationCode.toLowerCase().includes(ql)) ||
-                s.id.toLowerCase().includes(ql),
-            )
-            .slice(0, 5)
-            .map((s) => ({
-              id: s.id,
-              title: s.name,
-              badge: s.stationCode || s.id.slice(0, 8),
-              subtitle:
-                s.address ||
-                [s.addressLine, s.wardName, s.provinceName].filter(Boolean).join(', ') ||
-                undefined,
-              onSelect: () => {
-                setSelectedStationId(s.id);
-                navigate(`${base}/stations?stationId=${s.id}`);
-              },
-            }));
-        },
-      });
+      routes.STATION = (s) => {
+        setSelectedStationId(s.id);
+        navigate(`${base}/stations?stationId=${s.id}`);
+      };
     }
-    return list;
-  }, [api, base, navigate, reduced, selectedStationId, setSelectedStationId, stations, t]);
+    return makeGlobalLoad(api.search, routes);
+  }, [api, base, navigate, reduced, setSelectedStationId]);
 
   // Same queryKey/queryFn the Dashboard page itself uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery<OwnerDashboardData | StaffDashboardData>({
@@ -202,11 +152,27 @@ function OwnerConsoleContent({
     queryFn: () => (reduced ? api.dashboard.staff() : api.dashboard.owner()),
   });
 
-  const { data: serverNotifications = [] } = useNotifications();
-  const { data: serverUnreadCount } = useUnreadCount();
-  const markAsRead = useMarkAsRead();
-  const markAllAsRead = useMarkAllAsRead();
-  const deleteNotif = useDeleteNotification();
+  const notifContext = reduced ? 'staff' : 'owner';
+  const notifParams = useMemo(
+    () => ({
+      context: notifContext,
+      stationId: selectedStationId ?? undefined,
+      size: 5,
+    }),
+    [notifContext, selectedStationId],
+  );
+  const { items: serverNotifications = [] } = useNotifications(notifParams);
+  const { data: serverUnreadCount } = useUnreadCount({
+    context: notifContext,
+    stationId: selectedStationId ?? undefined,
+  });
+  const mutationScope = useMemo(
+    () => ({ context: notifContext, stationId: selectedStationId ?? undefined }),
+    [notifContext, selectedStationId],
+  );
+  const markAsRead = useMarkAsRead(mutationScope);
+  const markAllAsRead = useMarkAllAsRead(mutationScope);
+  const deleteNotif = useDeleteNotification(mutationScope);
 
   const notificationItems = useMemo<NotificationItem[]>(() => {
     // 1. Defensively extract notifications array regardless of envelope shape
@@ -236,11 +202,30 @@ function OwnerConsoleContent({
         }
       }
 
+      const navigateToTarget = () => {
+        if (n.primaryAction?.actionUrl) {
+          navigate(`${base}${n.primaryAction.actionUrl}`);
+        } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
+          navigate(`${base}/bookings?bookingId=${n.target.bookingId}`);
+        } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
+          navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_REFUND') {
+          navigate(`${base}/revenue`);
+        } else if (n.category === 'alert' || n.category === 'session') {
+          navigate(`${base}/chargers`);
+        } else if (n.category === 'ticket') {
+          navigate(`${base}/tickets`);
+        } else {
+          navigate(`${base}/notifications`);
+        }
+      };
+
       return {
         id: n.id,
-        title: n.title,
-        subtitle: n.subtitle,
-        body: n.body,
+        source: 'persisted',
+        title: resolveNotificationI18n(n.title, t),
+        subtitle: resolveNotificationI18n(n.subtitle, t),
+        body: resolveNotificationI18n(n.body, t),
         time: displayTime,
         tone: n.tone ?? n.severity,
         read: n.read,
@@ -250,22 +235,8 @@ function OwnerConsoleContent({
         metrics: n.metrics,
         badge: n.badge,
         actionLabel: n.actionLabel || n.primaryAction?.label,
-        onSelect: () => {
-          if (n.primaryAction?.actionUrl) {
-            navigate(`${base}${n.primaryAction.actionUrl}`);
-          } else if (n.category === 'alert' || n.category === 'session') {
-            navigate(`${base}/chargers`);
-          } else if (n.category === 'ticket') {
-            navigate(`${base}/tickets`);
-          } else {
-            navigate(`${base}/notifications`);
-          }
-        },
-        onAction: () => {
-          if (n.primaryAction?.actionUrl) {
-            navigate(`${base}${n.primaryAction.actionUrl}`);
-          }
-        },
+        onSelect: navigateToTarget,
+        onAction: navigateToTarget,
       };
     });
 
@@ -276,6 +247,7 @@ function OwnerConsoleContent({
         if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
           items.unshift({
             id: 'offline',
+            source: 'derived',
             title: d.kpis.offlineChargerNote,
             tone: 'bad',
             category: 'alert',
@@ -293,6 +265,7 @@ function OwnerConsoleContent({
         if (isExpired && !items.some((i) => i.id === 'license')) {
           items.unshift({
             id: 'license',
+            source: 'derived',
             title: t('notifications.license.expired', { defaultValue: 'Giấy phép vận hành đã hết hạn' }),
             tone: 'bad',
             category: 'system',
@@ -302,6 +275,7 @@ function OwnerConsoleContent({
         } else if (isExpiring && !items.some((i) => i.id === 'license')) {
           items.unshift({
             id: 'license',
+            source: 'derived',
             title: t('notifications.license.expiring', { days, defaultValue: `Giấy phép sắp hết hạn · còn ${days} ngày` }),
             tone: 'warn',
             category: 'system',
@@ -313,6 +287,7 @@ function OwnerConsoleContent({
         if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
           items.unshift({
             id: 'offline',
+            source: 'derived',
             title: d.kpis.offlineChargerNote,
             tone: 'bad',
             category: 'alert',
@@ -354,7 +329,7 @@ function OwnerConsoleContent({
       userName={user?.name ?? '···'}
       userEmail={user?.email}
       userAvatarUrl={avatarUrl}
-      search={<HeaderSearch searchers={searchers} accent="owner" />}
+      search={<HeaderSearch load={searchLoad} accent="owner" />}
       platformSwitcher={<PlatformSwitcher />}
       notifications={
         <NotificationBell
@@ -362,9 +337,15 @@ function OwnerConsoleContent({
           unreadCount={serverUnreadCount}
           emptyLabel={t('notifications.empty')}
           onOpenCenter={() => navigate(`${base}/notifications`)}
-          onMarkRead={(id) => markAsRead.mutate(id)}
+          onMarkRead={(id) => {
+            if (id === 'offline' || id === 'license') return;
+            markAsRead.mutate(id);
+          }}
           onMarkAllRead={() => markAllAsRead.mutate()}
-          onDismiss={(id) => deleteNotif.mutate(id)}
+          onDismiss={(id) => {
+            if (id === 'offline' || id === 'license') return;
+            deleteNotif.mutate(id);
+          }}
         />
       }
       onSettings={() => navigate(`${base}/settings`)}

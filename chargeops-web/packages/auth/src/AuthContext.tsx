@@ -34,7 +34,8 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
   useEffect(() => {
     if (!realMode || !keycloak) {
       const timer = window.setTimeout(() => {
-        setUser({ ...mockUser, initials: initialsOf(mockUser.name) });
+        const userId = mockUser.id || `mock-${mockUser.email || 'user'}`;
+        setUser({ id: userId, ...mockUser, initials: initialsOf(mockUser.name) });
         setAuthenticated(true);
         setInitializing(false);
       }, redirectMs);

@@ -5,30 +5,21 @@ import {
   formatDateVn,
   useApi,
   type LegalDocType,
-  type LegalDocumentDetail,
-  type LegalDocumentSummary,
+  type TargetAudience,
 } from '@chargeops/api';
 import {
   Button,
   Card,
-  EmptyState,
   IconArrowRight,
-  IconBook,
-  IconCheck,
-  IconClock,
-  IconCopy,
-  IconHome,
   IconInfoCircle,
   IconSearch,
-  IconShieldCheck,
   IconTag,
-  IconUsers,
   PageHeader,
   SearchInput,
   Skeleton,
   useToast,
 } from '@chargeops/ui';
-import { PolicyMarkdownViewer } from '../../shared/components/PolicyMarkdownViewer';
+import { PolicyMarkdownViewer } from '../components/PolicyMarkdownViewer';
 
 const DOC_TYPE_LABELS: Record<LegalDocType, string> = {
   TERMS_OF_SERVICE: 'Điều khoản dịch vụ',
@@ -37,25 +28,47 @@ const DOC_TYPE_LABELS: Record<LegalDocType, string> = {
   OPERATIONAL_REGULATION: 'Quy chế vận hành',
 };
 
-export function LegalPolicies() {
-  const { t } = useTranslation('owner');
+export interface LegalPoliciesProps {
+  /** Narrow the list to one audience (owner console); omit for every active doc (staff). */
+  audience?: TargetAudience;
+  /** Slug selected on first render; falls back to the first doc of the filtered list. */
+  defaultSlug?: string;
+  /** react-query list key prefix so owner/staff caches never collide. */
+  queryKeyPrefix?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+/**
+ * Shared legal document browser (list + in-doc search + markdown viewer).
+ * Extracted from the owner console so the staff console can reuse it — i18n
+ * lives in the `ui` namespace, data scope comes from the props.
+ */
+export function LegalPolicies({
+  audience,
+  defaultSlug,
+  queryKeyPrefix = 'shared',
+  title,
+  subtitle,
+}: LegalPoliciesProps) {
+  const { t } = useTranslation('ui');
   const api = useApi();
   const toast = useToast();
   const [searchInput, setSearchInput] = useState('');
   const [committedSearch, setCommittedSearch] = useState('');
-  const [selectedSlug, setSelectedSlug] = useState<string>('station-owner-license-agreement');
+  const [selectedSlug, setSelectedSlug] = useState<string | undefined>(defaultSlug);
   const [inDocSearch, setInDocSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'all' | 'license' | 'operation' | 'general'>('all');
 
   const getDocTypeLabel = (docType: LegalDocType) =>
     t(`legal.docTypes.${docType}`, { defaultValue: DOC_TYPE_LABELS[docType] || docType });
 
-  // Fetch list of documents for Owner - only queries when committedSearch changes on Submit/Enter
+  // Fetch list of documents — only queries when committedSearch changes on Submit/Enter
   const { data: listData, isLoading: listLoading, isFetching: listFetching } = useQuery({
-    queryKey: ['owner-legal-documents', committedSearch],
+    queryKey: [`${queryKeyPrefix}-legal-documents`, committedSearch],
     queryFn: () =>
       api.legalDocuments.list({
-        audience: 'OWNER',
+        audience,
         search: committedSearch.trim() || undefined,
       }),
   });
@@ -97,9 +110,9 @@ export function LegalPolicies() {
 
   // Default select first doc if selectedSlug not in filtered list
   const activeSlug = useMemo(() => {
-    if (filteredDocs.some((d) => d.slug === selectedSlug)) return selectedSlug;
-    return filteredDocs[0]?.slug ?? 'station-owner-license-agreement';
-  }, [filteredDocs, selectedSlug]);
+    if (selectedSlug && filteredDocs.some((d) => d.slug === selectedSlug)) return selectedSlug;
+    return filteredDocs[0]?.slug ?? defaultSlug ?? 'terms-of-service';
+  }, [defaultSlug, filteredDocs, selectedSlug]);
 
   // Fetch full detail of active document
   const { data: activeDoc, isLoading: docLoading } = useQuery({
@@ -111,11 +124,17 @@ export function LegalPolicies() {
   return (
     <>
       <PageHeader
-        title={t('legal.title', { defaultValue: 'Chính sách & Quy định Nền tảng' })}
-        subtitle={t('legal.subtitle', {
-          defaultValue:
-            'Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.',
-        })}
+        title={
+          title ??
+          t('legal.title', { defaultValue: 'Chính sách & Quy định Nền tảng' })
+        }
+        subtitle={
+          subtitle ??
+          t('legal.subtitle', {
+            defaultValue:
+              'Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.',
+          })
+        }
       />
 
       <div className="grid items-start gap-5 lg:grid-cols-[330px_1fr]">

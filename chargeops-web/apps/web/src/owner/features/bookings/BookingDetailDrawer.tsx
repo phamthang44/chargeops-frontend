@@ -219,12 +219,13 @@ export function BookingDetailDrawer({
               <div className="flex flex-col gap-[7px] text-[12.5px] font-medium text-body">
                 {booking.priceLines && booking.priceLines.length > 0 ? (
                   booking.priceLines.map((line) => {
+                    const l: any = line;
                     const lineLabel =
-                      line.rateKind === 'peak' || line.label === 'Giờ cao điểm' || (line as any).periodCode === 'PEAK'
+                      l.rateKind === 'peak' || line.label === 'Giờ cao điểm' || l.periodCode === 'PEAK'
                         ? t('bookings.rateKind.peak')
-                        : line.rateKind === 'offpeak' || line.label === 'Giờ thấp điểm' || (line as any).periodCode === 'OFF_PEAK'
+                        : l.rateKind === 'offpeak' || line.label === 'Giờ thấp điểm' || l.periodCode === 'OFF_PEAK'
                         ? t('bookings.rateKind.offpeak')
-                        : line.rateKind === 'normal' || line.rateKind === 'standard' || line.label === 'Giờ thường' || (line as any).periodCode === 'NORMAL'
+                        : l.rateKind === 'normal' || l.rateKind === 'standard' || line.label === 'Giờ thường' || l.periodCode === 'NORMAL'
                         ? t('bookings.rateKind.normal')
                         : line.label;
                     return (

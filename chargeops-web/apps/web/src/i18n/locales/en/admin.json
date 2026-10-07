@@ -76,13 +76,6 @@
     "openInNewTab": "Open fullscreen",
     "iframeTitle": "ChargeOps observability dashboard"
   },
-  "search": {
-    "groups": {
-      "tickets": "Support",
-      "bookings": "Bookings",
-      "users": "Users"
-    }
-  },
   "notifications": {
     "empty": "No new notifications.",
     "pendingStations": "{{count}} station registrations pending",

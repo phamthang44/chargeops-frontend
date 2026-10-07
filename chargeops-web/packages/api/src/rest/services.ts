@@ -7,7 +7,7 @@
  */
 import type { HttpClient } from '../http';
 import { normalizeRefundPolicyContext } from './refundPolicyContext';
-import type { Services, TicketRoleOptions } from '../services';
+import type { Services, TicketRoleOptions, GlobalSearchGroup } from '../services';
 import type {
   OperationalBooking,
   OwnerBookingDetail,
@@ -1619,10 +1619,24 @@ export function createRestServices(http: HttpClient): Services {
 
     notifications: {
       list: async (params) => {
-        const res = await http.get<any>('/notifications', {
-          unread: params?.unreadOnly ? 'true' : undefined,
-          category: params?.category && params.category !== 'all' ? params.category : undefined,
-        });
+        const queryParams: Record<string, any> = {
+          page: params?.page ?? 1,
+          size: params?.size ?? 20,
+        };
+        if (params?.unread || params?.unreadOnly) {
+          queryParams.unread = 'true';
+        }
+        if (params?.category && params.category !== 'all') {
+          queryParams.category = params.category;
+        }
+        if (params?.context) {
+          queryParams.context = params.context;
+        }
+        if (params?.stationId) {
+          queryParams.stationId = params.stationId;
+        }
+
+        const res = await http.get<any>('/notifications', queryParams);
         const rawItems: any[] = Array.isArray(res)
           ? res
           : Array.isArray(res?.items)
@@ -1631,9 +1645,28 @@ export function createRestServices(http: HttpClient): Services {
               ? res.data
               : [];
 
-        return rawItems.map((raw: any) => {
+        const meta = res?.meta ?? {
+          page: params?.page ?? 1,
+          size: params?.size ?? rawItems.length,
+          totalElements: Number(res?.total ?? rawItems.length),
+          totalPages: Math.ceil(Number(res?.total ?? rawItems.length) / (params?.size ?? 20)) || 1,
+          hasNextPage: Boolean(res?.hasNextPage ?? false),
+        };
+
+        const normalizedItems = rawItems.map((raw: any) => {
           const createdAt = raw.createdAt ? String(raw.createdAt) : new Date().toISOString();
-          const actionUrl = raw.actionUrl || raw.primaryAction?.actionUrl;
+          let actionUrl = raw.actionUrl || raw.primaryAction?.actionUrl;
+          if (!actionUrl && raw.target) {
+            if (raw.target.type === 'OPEN_BOOKING' && raw.target.bookingId) {
+              actionUrl = `/bookings/${raw.target.bookingId}`;
+            } else if (raw.target.type === 'OPEN_TICKET' && raw.target.ticketId) {
+              actionUrl = `/tickets/${raw.target.ticketId}`;
+            } else if (raw.target.type === 'OPEN_REFUND') {
+              actionUrl = '/revenue';
+            } else if (raw.target.type === 'OPEN_CASE' && raw.target.escalationId) {
+              actionUrl = `/tickets?escalationId=${raw.target.escalationId}`;
+            }
+          }
           const actionLabel = raw.actionLabel || raw.primaryAction?.label || (actionUrl ? 'Xem chi tiết' : undefined);
 
           return {
@@ -1644,10 +1677,17 @@ export function createRestServices(http: HttpClient): Services {
             createdAt,
             time: raw.time,
             read: Boolean(raw.read || raw.readAt),
+            readAt: raw.readAt ? String(raw.readAt) : null,
             category: (raw.category as any) ?? 'system',
+            audience: raw.audience,
+            eventType: raw.eventType,
+            target: raw.target,
+            actionUrl,
+            dismissedAt: raw.dismissedAt,
+            expiresAt: raw.expiresAt,
             severity: raw.severity ?? (raw.category === 'alert' ? 'bad' : raw.category === 'ticket' ? 'warn' : 'neutral'),
             tone: raw.tone ?? raw.severity ?? (raw.category === 'alert' ? 'bad' : raw.category === 'ticket' ? 'warn' : 'neutral'),
-            referenceId: raw.referenceId,
+            referenceId: raw.referenceId ?? raw.target?.bookingId ?? raw.target?.ticketId ?? raw.target?.escalationId,
             stationName: raw.stationName,
             chargerId: raw.chargerId,
             metrics: raw.metrics,
@@ -1663,23 +1703,47 @@ export function createRestServices(http: HttpClient): Services {
             secondaryAction: raw.secondaryAction,
           };
         });
+
+        return {
+          data: normalizedItems,
+          meta,
+        };
       },
-      unreadCount: async () => {
-        const res = await http.get<{ count: number }>('/notifications/unread-count');
-        return res?.count ?? 0;
+      unreadCount: async (params) => {
+        const query: Record<string, any> = {};
+        if (params?.context) query.context = params.context;
+        if (params?.category && params.category !== 'all') query.category = params.category;
+        if (params?.stationId) query.stationId = params.stationId;
+        const res = await http.get<any>('/notifications/unread-count', Object.keys(query).length ? query : undefined);
+        return Number(res?.count ?? res?.data?.count ?? 0);
       },
-      markAsRead: (id) => http.patch(`/notifications/${id}/read`),
-      markAllAsRead: () => http.patch('/notifications/read-all'),
-      delete: async (id) => {
-        try {
-          await http.delete(`/notifications/${id}`);
-        } catch {
-          try {
-            await http.patch(`/notifications/${id}/read`);
-          } catch {
-            // Ignore if already deleted/read
-          }
-        }
+      markAsRead: (id, params) => {
+        const query: Record<string, any> = {};
+        if (params?.context) query.context = params.context;
+        if (params?.category && params.category !== 'all') query.category = params.category;
+        if (params?.stationId) query.stationId = params.stationId;
+        return http.patch(`/notifications/${id}/read`, undefined, Object.keys(query).length ? { params: query } : undefined);
+      },
+      markAllAsRead: (params) => {
+        const query: Record<string, any> = {};
+        if (params?.context) query.context = params.context;
+        if (params?.category && params.category !== 'all') query.category = params.category;
+        if (params?.stationId) query.stationId = params.stationId;
+        return http.patch('/notifications/read-all', undefined, Object.keys(query).length ? { params: query } : undefined);
+      },
+      dismiss: (id, params) => {
+        const query: Record<string, any> = {};
+        if (params?.context) query.context = params.context;
+        if (params?.category && params.category !== 'all') query.category = params.category;
+        if (params?.stationId) query.stationId = params.stationId;
+        return http.patch(`/notifications/${id}/dismiss`, undefined, Object.keys(query).length ? { params: query } : undefined);
+      },
+      delete: (id, params) => {
+        const query: Record<string, any> = {};
+        if (params?.context) query.context = params.context;
+        if (params?.category && params.category !== 'all') query.category = params.category;
+        if (params?.stationId) query.stationId = params.stationId;
+        return http.patch(`/notifications/${id}/dismiss`, undefined, Object.keys(query).length ? { params: query } : undefined);
       },
     },
 
@@ -1722,6 +1786,17 @@ export function createRestServices(http: HttpClient): Services {
           request,
           { headers: { 'Idempotency-Key': key } },
         );
+      },
+    },
+
+    search: {
+      global: async (query, options) => {
+        const params: Record<string, unknown> = { q: query };
+        if (options?.type) params.type = options.type;
+        if (options?.limit) params.limit = options.limit;
+        // http unwraps the ApiResult envelope → { query, groups }.
+        const res = await http.get<{ query: string; groups: GlobalSearchGroup[] }>('/search', params);
+        return res?.groups ?? [];
       },
     },
   };

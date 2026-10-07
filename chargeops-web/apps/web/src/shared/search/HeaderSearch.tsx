@@ -1,6 +1,27 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconArrowRight, IconSearch, IconX } from '@chargeops/ui';
+import type { GlobalSearchType } from '@chargeops/api';
+import {
+  IconArrowRight,
+  IconBolt,
+  IconBook,
+  IconCalendar,
+  IconClipboardCheck,
+  IconLifebuoy,
+  IconPin,
+  IconSearch,
+  IconShieldCheck,
+  IconUsers,
+  IconX,
+} from '@chargeops/ui';
 
 export interface SearchResult {
   id: string;
@@ -11,12 +32,26 @@ export interface SearchResult {
   onSelect: () => void;
 }
 
-export interface Searcher {
-  label: string;
-  /** Glyph rendered inside the round leading wrapper of every row of this group. */
-  icon?: ReactNode;
-  run: (query: string) => Promise<SearchResult[]>;
+/** One authorized group returned by the console's `load` (see makeGlobalLoad). */
+export interface SearchGroupLoad {
+  type: GlobalSearchType;
+  results: SearchResult[];
 }
+
+/** Debounced contract: HeaderSearch calls this with a trimmed query (≥2 chars). */
+export type GlobalSearchLoad = (query: string) => Promise<SearchGroupLoad[]>;
+
+/** Fixed glyph per aggregate group — one place to retheme, never per console. */
+const GROUP_ICON: Record<GlobalSearchType, ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  TICKET: IconLifebuoy,
+  STATION: IconPin,
+  CHARGER: IconBolt,
+  BOOKING: IconCalendar,
+  LICENSE: IconShieldCheck,
+  APPROVAL: IconClipboardCheck,
+  LEGAL_DOCUMENT: IconBook,
+  USER: IconUsers,
+};
 
 /** Single source of motion truth — real spring-ish curves, never `ease-in-out`. */
 const EASE = 'cubic-bezier(0.32,0.72,0,1)';
@@ -50,22 +85,22 @@ const ACC = {
   },
 } as const;
 
-type GroupState = { label: string; icon?: ReactNode; results: SearchResult[] };
+type GroupState = { type: GlobalSearchType; label: string; icon?: ReactNode; results: SearchResult[] };
 
 /**
- * Real search — fans a debounced query out to each console's searchers
- * (thin wrappers over the same list({search}) calls the list pages already
- * use) and renders grouped results. No fabricated backend: anything without
- * server-side search (chargers, stations) filters client-side over data the
- * console already has, and anything without a per-item detail route just
- * jumps to the right list page instead of pretending to deep-link.
+ * Real search — one debounced call into the aggregate `/api/v1/search`
+ * endpoint through the console's `load` (makeGlobalLoad adapts the
+ * SearchService and attaches each console's navigation targets). Groups are
+ * scoped by role server-side and arrive labeled + iconed here; anything
+ * without a per-item route is dropped by the adapter instead of pretending
+ * to deep-link.
  *
  * Shell = "double bezel": a frosted outer tray (blur lives here, never on the
  * scrolling core) wrapping a solid inner surface. Rows stagger in on mount,
  * highlight the matched substring and support full keyboard navigation
  * (⌘K / Ctrl+K focuses the field from anywhere).
  */
-export function HeaderSearch({ searchers, placeholder, accent = 'brand' }: { searchers: Searcher[]; placeholder?: string; accent?: 'brand' | 'owner' }) {
+export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: GlobalSearchLoad; placeholder?: string; accent?: 'brand' | 'owner' }) {
   const { t } = useTranslation('ui');
   const acc = ACC[accent];
   const [query, setQuery] = useState('');
@@ -89,15 +124,33 @@ export function HeaderSearch({ searchers, placeholder, accent = 'brand' }: { sea
     const id = ++reqId.current;
     setLoading(true);
     const debounce = setTimeout(async () => {
-      const results = await Promise.all(
-        searchers.map(async (s) => ({ label: s.label, icon: s.icon, results: await s.run(q) })),
-      );
+      let loaded: SearchGroupLoad[];
+      try {
+        loaded = await load(q);
+      } catch {
+        if (id !== reqId.current) return;
+        setGroups([]);
+        setLoading(false);
+        return;
+      }
       if (id !== reqId.current) return; // a newer keystroke already superseded this request
-      setGroups(results.filter((g) => g.results.length > 0));
+      setGroups(
+        loaded
+          .filter((g) => g.results.length > 0)
+          .map((g) => {
+            const Icon = GROUP_ICON[g.type];
+            return {
+              type: g.type,
+              label: t(`search.types.${g.type}`),
+              icon: <Icon size={14} strokeWidth={1.7} />,
+              results: g.results,
+            };
+          }),
+      );
       setLoading(false);
     }, 250);
     return () => clearTimeout(debounce);
-  }, [query, searchers]);
+  }, [query, load, t]);
 
   // Outside click + Escape close the panel.
   useEffect(() => {
@@ -312,7 +365,7 @@ export function HeaderSearch({ searchers, placeholder, accent = 'brand' }: { sea
             ) : (
               <>
                 {model.groups.map((g, gi) => (
-                  <div key={g.label} className={gi > 0 ? 'mt-1 border-t border-line-3 pt-1' : ''}>
+                  <div key={g.type} className={gi > 0 ? 'mt-1 border-t border-line-3 pt-1' : ''}>
                     <div className="px-2.5 pb-1 pt-1.5">
                       <span
                         className={`inline-flex items-center rounded-full border px-2.5 py-[2px] text-[9.5px] font-bold uppercase tracking-[0.18em] ${acc.label}`}

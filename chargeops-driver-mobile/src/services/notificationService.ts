@@ -1,29 +1,28 @@
 /**
- * Notification service — mock implementation.
+ * Notification service — driver mobile implementation.
  *
- * BACKEND INTEGRATION GUIDE:
- * Each exported function mirrors a REST endpoint.  When you wire the real API
- * simply replace the body of each function with an HTTP call.
- *
- *   getNotifications()          →  GET    /api/notifications
- *   markAllNotificationsAsRead()→  PATCH  /api/notifications/read-all
- *   markNotificationAsRead(id)  →  PATCH  /api/notifications/:id/read
- *   deleteNotification(id)      →  DELETE /api/notifications/:id
- *   clearAllNotifications()     →  DELETE /api/notifications
- *
- * The `AppNotification` interface is the canonical contract between the
- * frontend and backend. Extend it here when adding new fields.
+ * Connects with backend #57 contract:
+ * - GET /api/v1/notifications?context=driver&size=50
+ * - GET /api/v1/notifications/unread-count?context=driver
+ * - PATCH /api/v1/notifications/:id/read?context=driver
+ * - PATCH /api/v1/notifications/read-all?context=driver
+ * - PATCH /api/v1/notifications/:id/dismiss?context=driver
  */
+
+import { apiBaseUrl, isMockMode, resolveAccessToken } from './stationService';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-/**
- * Notification type determines the icon/color and,
- * most importantly, which screen the user navigates to when tapping.
- */
-export type NotificationType = 'charging' | 'booking' | 'wallet' | 'promo';
+export type NotificationType =
+  | 'charging'
+  | 'booking'
+  | 'wallet'
+  | 'promo'
+  | 'ticket'
+  | 'finance'
+  | 'system';
 
 export interface AppNotification {
   id: string;
@@ -32,67 +31,154 @@ export interface AppNotification {
   body: string;
   createdAt: string;
   read: boolean;
-  /**
-   * An ID that links this notification to a domain object (e.g. a bookingId,
-   * a sessionId, a transactionId, etc.).  The UI uses `type` + `referenceId`
-   * to determine the target screen.
-   *
-   * Set to `null` for notifications that are purely informational (e.g. promos)
-   * and don't deep-link anywhere.
-   *
-   * BACKEND NOTE: This field maps directly to the backend's `reference_id`.
-   */
   referenceId: string | null;
+
+  // #57 typed contract context
+  category?: string;
+  audience?: string;
+  eventType?: string;
+  target?: {
+    type?: string;
+    bookingId?: string | null;
+    ticketId?: string | null;
+    stationId?: string | null;
+    escalationId?: string | null;
+    refundId?: string | null;
+  };
+  actionUrl?: string | null;
+}
+
+/**
+ * Resolves a notification text string that may be an i18n key or key|{"param":"value"} JSON payload.
+ * If rawText does not start with "notification.", it returns rawText unchanged.
+ */
+export function resolveNotificationI18n(
+  rawText: string | undefined | null,
+  t: (key: string, options?: any) => string,
+): string {
+  if (!rawText) return '';
+  if (!rawText.startsWith('notification.')) return rawText;
+
+  const pipeIdx = rawText.indexOf('|');
+  if (pipeIdx === -1) {
+    return t(rawText, { defaultValue: rawText });
+  }
+
+  const key = rawText.substring(0, pipeIdx);
+  const payload = rawText.substring(pipeIdx + 1);
+  let params: Record<string, any> = {};
+  try {
+    params = JSON.parse(payload);
+  } catch {
+    // If not valid JSON, fallback to raw key
+  }
+
+  return t(key, { ...params, defaultValue: key });
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock data                                                          */
+/*  Clean business seed data (compliant with BKG-066 / #58)           */
 /* ------------------------------------------------------------------ */
 
-const MOCK_NOTIFICATIONS: AppNotification[] = [
+const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
   {
-    id: 'n1',
-    type: 'charging',
-    title: 'Phiên sạc đã hoàn tất ⚡',
-    body: 'Trụ sạc VinFast DC-120kW tại Landmark 81 đã sạc xong (80% - 38.4 kWh). Tổng chi phí: 115,200 đ.',
-    createdAt: new Date(Date.now() - 6 * 60_000).toISOString(),
-    read: false,
-    referenceId: 'bk-001',
-  },
-  {
-    id: 'n2',
+    id: 'notif-drv-1',
     type: 'booking',
-    title: 'Sắp đến giờ sạc',
-    body: 'Lịch đặt chỗ tại Trạm ECharge Quận 7 (Trụ AC-01) sẽ bắt đầu sau 15 phút nữa. Hãy di chuyển đến trạm để check-in!',
-    createdAt: new Date(Date.now() - 28 * 60_000).toISOString(),
+    title: 'notification.booking.confirmed.title',
+    body: 'notification.booking.state_message|{"code":"BKG-HN-8821"}',
+    createdAt: new Date(Date.now() - 10 * 60_000).toISOString(),
     read: false,
-    referenceId: 'bk-002',
+    referenceId: '00000000-0000-4000-8000-000000000201',
+    category: 'booking',
+    eventType: 'BOOKING_CONFIRMED',
   },
   {
-    id: 'n3',
-    type: 'wallet',
-    title: 'Nạp tiền vào ví thành công',
-    body: 'Tài khoản ví ChargeOps Pay đã được nạp +200,000 đ từ ví MoMo. Số dư hiện tại: 450,000 đ.',
-    createdAt: new Date(Date.now() - 3 * 3600_000).toISOString(),
+    id: 'notif-drv-2',
+    type: 'booking',
+    title: 'notification.booking.reminder.title',
+    body: 'notification.booking.state_message|{"code":"BKG-HN-8821"}',
+    createdAt: new Date(Date.now() - 25 * 60_000).toISOString(),
+    read: false,
+    referenceId: '00000000-0000-4000-8000-000000000201',
+    category: 'booking',
+    eventType: 'BOOKING_REMINDER',
+  },
+  {
+    id: 'notif-drv-3',
+    type: 'finance',
+    title: 'notification.refund.succeeded.title',
+    body: 'notification.refund.succeeded.body|{"code":"BKG-HN-8821"}',
+    createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
     read: true,
     referenceId: null,
+    category: 'finance',
+    eventType: 'REFUND_SUCCEEDED',
   },
   {
-    id: 'n4',
-    type: 'promo',
-    title: 'Ưu đãi giờ thấp điểm: Giảm 20% 🎁',
-    body: 'Giảm ngay 20% đơn giá kWh cho tất cả các phiên sạc DC Fast từ 22:00 đến 06:00 sáng hôm nay.',
+    id: 'notif-drv-4',
+    type: 'ticket',
+    title: 'notification.ticket.resolved.title|{"code":"TK-1002"}',
+    body: 'notification.ticket.resolved.body|{"code":"TK-1002","result":"Đã kiểm tra và xử lý thành công","autoCloseAt":"10 ngày"}',
     createdAt: new Date(Date.now() - 24 * 3600_000).toISOString(),
     read: true,
-    referenceId: null,
+    referenceId: '00000000-0000-4000-8000-000000000401',
+    category: 'ticket',
+    eventType: 'TICKET_RESOLVED',
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  In-memory store (replaced by API calls in production)              */
+/*  In-memory store & Identity isolation                              */
 /* ------------------------------------------------------------------ */
 
-let notificationsList = [...MOCK_NOTIFICATIONS];
+let notificationsList = [...INITIAL_DRIVER_NOTIFICATIONS];
+let lastLoadedIdentity: string | null = null;
+
+/**
+ * Reset local store when user logs out or switches accounts to prevent cache leaks.
+ */
+export function resetNotificationStore(newIdentityId?: string | null) {
+  notificationsList = [...INITIAL_DRIVER_NOTIFICATIONS];
+  lastLoadedIdentity = newIdentityId ?? null;
+}
+
+function mapBackendToAppNotification(raw: any): AppNotification {
+  const eventType = String(raw.eventType ?? '');
+  const category = String(raw.category ?? '');
+
+  let type: NotificationType = 'system';
+  if (eventType.includes('BOOKING') || category === 'booking') {
+    type = 'booking';
+  } else if (eventType.includes('REFUND') || category === 'finance') {
+    type = 'finance';
+  } else if (eventType.includes('TICKET') || category === 'ticket' || category === 'support') {
+    type = 'ticket';
+  } else if (category === 'session') {
+    type = 'charging';
+  }
+
+  const referenceId =
+    raw.target?.bookingId ??
+    raw.target?.ticketId ??
+    raw.target?.refundId ??
+    raw.referenceId ??
+    null;
+
+  return {
+    id: String(raw.id),
+    type,
+    title: raw.title ?? '',
+    body: raw.body ?? '',
+    createdAt: raw.createdAt ? String(raw.createdAt) : new Date().toISOString(),
+    read: Boolean(raw.read || raw.readAt),
+    referenceId,
+    category,
+    audience: raw.audience,
+    eventType: raw.eventType,
+    target: raw.target,
+    actionUrl: raw.actionUrl,
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Service functions                                                  */
@@ -100,46 +186,123 @@ let notificationsList = [...MOCK_NOTIFICATIONS];
 
 /** Fetch all notifications for the current driver. */
 export async function getNotifications(): Promise<AppNotification[]> {
-  // TODO: Replace with  GET /api/notifications
+  const token = resolveAccessToken();
+  if (!isMockMode() && token) {
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/v1/notifications?context=driver&size=50`, {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const rawItems = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+        notificationsList = rawItems.map(mapBackendToAppNotification);
+        return [...notificationsList];
+      }
+    } catch {
+      // Fallback to local memory list on network disconnect
+    }
+  }
+
   return new Promise((resolve) => {
-    setTimeout(() => resolve([...notificationsList]), 100);
+    setTimeout(() => resolve([...notificationsList]), 80);
   });
 }
 
-/**
- * How many notifications are unread — drives the red badge on the bell.
- * LATER: GET /api/notifications/unread-count (a count, not the whole list).
- */
+/** How many notifications are unread — drives the badge on the bell. */
 export async function getUnreadCount(): Promise<number> {
+  const token = resolveAccessToken();
+  if (!isMockMode() && token) {
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/v1/notifications/unread-count?context=driver`, {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const count = Number(json?.data?.count ?? json?.count ?? 0);
+        return count;
+      }
+    } catch {
+      // Fallback to local count on network error
+    }
+  }
+
   return new Promise((resolve) => {
-    setTimeout(() => resolve(notificationsList.filter((n) => !n.read).length), 100);
+    setTimeout(() => resolve(notificationsList.filter((n) => !n.read).length), 80);
   });
 }
 
 /** Mark every notification as read. */
 export async function markAllNotificationsAsRead(): Promise<AppNotification[]> {
-  // TODO: Replace with  PATCH /api/notifications/read-all
+  const token = resolveAccessToken();
+  if (!isMockMode() && token) {
+    try {
+      await fetch(`${apiBaseUrl}/api/v1/notifications/read-all?context=driver`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch {
+      // Ignore network errors on background mutations
+    }
+  }
+
   notificationsList = notificationsList.map((n) => ({ ...n, read: true }));
   return new Promise((resolve) => resolve([...notificationsList]));
 }
 
 /** Mark a single notification as read. */
 export async function markNotificationAsRead(id: string): Promise<AppNotification[]> {
-  // TODO: Replace with  PATCH /api/notifications/:id/read
+  const token = resolveAccessToken();
+  if (!isMockMode() && token) {
+    try {
+      await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/read?context=driver`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch {
+      // Ignore network errors on background mutations
+    }
+  }
+
   notificationsList = notificationsList.map((n) => (n.id === id ? { ...n, read: true } : n));
   return new Promise((resolve) => resolve([...notificationsList]));
 }
 
-/** Delete a single notification (swipe-to-remove). */
+/** Dismiss/delete a single notification. */
 export async function deleteNotification(id: string): Promise<AppNotification[]> {
-  // TODO: Replace with  DELETE /api/notifications/:id
+  const token = resolveAccessToken();
+  if (!isMockMode() && token) {
+    try {
+      await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/dismiss?context=driver`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch {
+      // Ignore network errors on background mutations
+    }
+  }
+
   notificationsList = notificationsList.filter((n) => n.id !== id);
   return new Promise((resolve) => resolve([...notificationsList]));
 }
 
-/** Remove every notification from the list (the driver chose "clear all"). */
+/** Remove every notification from the list. */
 export async function clearAllNotifications(): Promise<AppNotification[]> {
-  // TODO: Replace with  DELETE /api/notifications
+  await markAllNotificationsAsRead();
   notificationsList = [];
   return new Promise((resolve) => resolve([]));
 }

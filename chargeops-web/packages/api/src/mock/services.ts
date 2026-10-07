@@ -4,7 +4,7 @@
  * real, and mutates the in-memory DB so flows (cancel, approve, rename…) feel
  * live within a session.
  */
-import type { Services, LegalDocumentDetail } from '../services';
+import type { Services, LegalDocumentDetail, GlobalSearchGroup, GlobalSearchHit, GlobalSearchType } from '../services';
 import { ApiError } from '../http';
 import type {
   AdministrativeProvince,
@@ -3443,25 +3443,37 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             primaryAction: { label: 'Gia hạn ngay', actionUrl: '/license', actionType: 'link' as const },
           },
         ];
-        if (params?.unreadOnly) {
+        if (params?.unread || params?.unreadOnly) {
           items = items.filter((n) => !n.read);
         }
         if (params?.category && params.category !== 'all') {
           items = items.filter((n) => n.category === params.category);
         }
-        return items;
+        return {
+          data: items,
+          meta: {
+            page: params?.page ?? 1,
+            size: params?.size ?? items.length,
+            totalElements: items.length,
+            totalPages: 1,
+            hasNextPage: false,
+          },
+        };
       },
-      async unreadCount() {
+      async unreadCount(_params) {
         await delay(30);
         return 3;
       },
-      async markAsRead(_id: string) {
+      async markAsRead(_id: string, _params) {
         await delay(40);
       },
-      async markAllAsRead() {
+      async markAllAsRead(_params) {
         await delay(50);
       },
-      async delete(_id: string) {
+      async dismiss(_id: string, _params) {
+        await delay(40);
+      },
+      async delete(_id: string, _params) {
         await delay(40);
       },
     },
@@ -3594,6 +3606,97 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         );
         inc.handlingState = stillPending ? 'PENDING' : 'COMPLETED';
         return inc;
+      },
+    },
+
+    search: {
+      async global(query, options) {
+        await delay(150 + Math.random() * 150);
+        const q = (query ?? '').trim().toLowerCase();
+        if (q.length < 2) return [];
+        const limit = Math.min(Math.max(options?.limit ?? 5, 1), 20);
+        const match = (...values: Array<string | null | undefined>) =>
+          values.some((v) => String(v ?? '').toLowerCase().includes(q));
+        const groups: GlobalSearchGroup[] = [];
+        const push = (type: GlobalSearchType, items: GlobalSearchHit[]) => {
+          if (options?.type && options.type !== type) return;
+          if (!items.length) return;
+          groups.push({ type, items: items.slice(0, limit) });
+        };
+        const stationName = (id: string | null | undefined) =>
+          db.allStations.find((s) => s.id === id)?.name ?? null;
+        const stationHit = (s: { id: string; name: string; stationCode?: string; address?: string; addressLine?: string }) => ({
+          id: s.id,
+          title: s.name,
+          subtitle: s.address ?? s.addressLine ?? null,
+          badge: s.stationCode ?? null,
+        });
+
+        push('TICKET', scopedTickets()
+          .filter((t) => match(t.subject, t.ticketCode, t.ticketNo, t.stationName, t.reporterName, t.id))
+          .map((t) => ({
+            id: t.id,
+            title: t.subject,
+            subtitle: t.stationName,
+            badge: t.ticketCode ?? t.ticketNo ?? t.id.slice(0, 8),
+          })));
+
+        push('STATION', (scope.ownerView ? db.ownerStations : db.allStations)
+          .filter((s) => match(s.name, s.stationCode, s.address, s.ownerName))
+          .map(stationHit));
+
+        // Mirror backend: APPROVAL/USER are admin-only; CHARGER is owner/staff-only.
+        push('APPROVAL', db.approvalQueue
+          .filter((s) => match(s.name, s.stationCode, s.address))
+          .map(stationHit));
+
+        if (scope.ownerView) {
+          push('CHARGER', db.chargePoints
+            .filter((cp) => db.ownerStationIds.includes(cp.stationId))
+            .filter((cp) => match(cp.name, cp.chargePointCode, stationName(cp.stationId)))
+            .map((cp) => ({
+              id: cp.id,
+              title: cp.name || cp.chargePointCode || cp.id,
+              subtitle: stationName(cp.stationId),
+              badge: cp.chargePointCode ?? null,
+            })));
+        }
+
+        push('BOOKING', scopedBookings()
+          .filter((b) => match((b as any).bookingCode, (b as any).code, b.stationName, b.driverName, b.id))
+          .map((b) => ({
+            id: b.id,
+            title: (b as any).bookingCode || (b as any).code || b.stationName,
+            subtitle: `${b.driverName} · ${b.startAt.slice(0, 10)}`,
+            badge: b.id.slice(0, 8),
+          })));
+
+        push('LICENSE', db.licenses
+          .filter((l) => !scope.ownerView || db.ownerStationIds.includes(l.stationId))
+          .filter((l) => match(l.licenseCode, l.stationName, l.ownerName, l.plan))
+          .map((l) => ({
+            id: l.id,
+            title: l.licenseCode ?? l.stationName ?? l.id,
+            subtitle: l.stationName ?? null,
+            badge: l.status,
+          })));
+
+        if (!scope.ownerView) {
+          push('USER', db.users
+            .filter((u) => match(u.name, u.email, u.role))
+            .map((u) => ({ id: u.id, title: u.name, subtitle: u.email, badge: u.role })));
+        }
+
+        push('LEGAL_DOCUMENT', (scope.ownerView ? mockLegalDocs.filter((d) => d.active) : mockLegalDocs)
+          .filter((d) => match(d.title, d.summary, d.slug))
+          .map((d) => ({
+            id: d.id,
+            title: d.title,
+            subtitle: d.summary ?? null,
+            badge: d.docType.toLowerCase(),
+          })));
+
+        return groups;
       },
     },
   };

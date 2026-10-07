@@ -22,6 +22,7 @@ import {
   getNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  resolveNotificationI18n,
   type AppNotification,
 } from '@/services/notificationService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -75,6 +76,21 @@ const TYPE_CONFIG: Record<
     color: '#8B5CF6',
     actionLabel: 'Xem ưu đãi',
   },
+  ticket: {
+    icon: 'chatbubbles',
+    color: '#8B5CF6',
+    actionLabel: 'Chi tiết hỗ trợ',
+  },
+  finance: {
+    icon: 'card',
+    color: '#10B981',
+    actionLabel: 'Chi tiết hoàn tiền',
+  },
+  system: {
+    icon: 'information-circle',
+    color: '#6B7280',
+    actionLabel: 'Xem chi tiết',
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -89,8 +105,11 @@ interface NotificationItemProps {
 }
 
 function NotificationItem({ notification, themeColors, onPress, onDelete }: NotificationItemProps) {
+  const { t } = useTranslation();
   const cfg = TYPE_CONFIG[notification.type];
   const hasLink = !!notification.referenceId;
+  const title = resolveNotificationI18n(notification.title, t);
+  const body = resolveNotificationI18n(notification.body, t);
 
   return (
     <View
@@ -129,7 +148,7 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
               ]}
               numberOfLines={1}
             >
-              {notification.title}
+              {title}
             </Text>
 
             <Text style={[styles.time, { color: themeColors.textMuted }]}>
@@ -139,7 +158,7 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
 
           {/* Description */}
           <Text style={[styles.desc, { color: themeColors.textBody }]} numberOfLines={2}>
-            {notification.body}
+            {body}
           </Text>
 
           {/* Bottom Row: Action Pill CTA (Novu pattern) */}

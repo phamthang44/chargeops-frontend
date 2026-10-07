@@ -67,14 +67,6 @@
       }
     }
   },
-  "search": {
-    "groups": {
-      "tickets": "Hỗ trợ",
-      "bookings": "Đặt chỗ",
-      "chargers": "Trụ sạc",
-      "stations": "Trạm"
-    }
-  },
   "notifications": {
     "empty": "Không có thông báo mới.",
     "openTickets": "{{count}} ticket đang chờ xử lý",
@@ -1494,43 +1486,6 @@
         "confirmBtn": "Xác nhận thử lại",
         "submitting": "Đang gửi..."
       }
-    }
-  },
-  "legal": {
-    "title": "Chính sách & Quy định Nền tảng",
-    "subtitle": "Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.",
-    "search": {
-      "placeholder": "Tìm theo tiêu đề, từ khóa...",
-      "btn": "Tìm",
-      "btnTitle": "Tìm kiếm tài liệu",
-      "filtering": "Đang lọc: ",
-      "hint": "Nhấn Tìm để tra cứu",
-      "clear": "Xóa lọc"
-    },
-    "groups": {
-      "all": "Tất cả ({{count}})",
-      "license": "License B2B",
-      "operation": "Vận hành",
-      "general": "Chung"
-    },
-    "empty": "Không tìm thấy tài liệu phù hợp",
-    "docTypes": {
-      "TERMS_OF_SERVICE": "Điều khoản dịch vụ",
-      "PRIVACY_POLICY": "Chính sách bảo mật",
-      "LICENSE_AGREEMENT": "Thỏa thuận License B2B",
-      "OPERATIONAL_REGULATION": "Quy chế vận hành"
-    },
-    "audience": {
-      "ownerBadge": "Chủ trạm",
-      "forOwner": "Áp dụng cho Chủ trạm",
-      "systemWide": "Toàn hệ thống"
-    },
-    "viewer": {
-      "effective": "Hiệu lực",
-      "updatedAt": "Cập nhật: {{date}}",
-      "inDocSearchPlaceholder": "Tra cứu từ khóa trong nội dung văn bản này (In-document search)...",
-      "clearInDocSearch": "Xóa",
-      "copiedToast": "Đã chép mã nguồn Markdown vào clipboard"
     }
   }
 }

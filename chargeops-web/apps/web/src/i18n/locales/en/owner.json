@@ -67,14 +67,6 @@
       }
     }
   },
-  "search": {
-    "groups": {
-      "tickets": "Support",
-      "bookings": "Bookings",
-      "chargers": "Chargers",
-      "stations": "Stations"
-    }
-  },
   "notifications": {
     "empty": "No new notifications.",
     "openTickets": "{{count}} tickets need attention",
@@ -1494,43 +1486,6 @@
         "confirmBtn": "Confirm Retry",
         "submitting": "Submitting..."
       }
-    }
-  },
-  "legal": {
-    "title": "Platform Legal & Policies",
-    "subtitle": "Official legal documents and operational standards for Station Owners: B2B licensing, charger management, staff permissions, and revenue payouts.",
-    "search": {
-      "placeholder": "Search by title, keyword...",
-      "btn": "Search",
-      "btnTitle": "Search documents",
-      "filtering": "Filtering: ",
-      "hint": "Press Search to query",
-      "clear": "Clear filter"
-    },
-    "groups": {
-      "all": "All ({{count}})",
-      "license": "B2B License",
-      "operation": "Operations",
-      "general": "General"
-    },
-    "empty": "No matching documents found",
-    "docTypes": {
-      "TERMS_OF_SERVICE": "Terms of Service",
-      "PRIVACY_POLICY": "Privacy Policy",
-      "LICENSE_AGREEMENT": "B2B License Agreement",
-      "OPERATIONAL_REGULATION": "Operational Regulations"
-    },
-    "audience": {
-      "ownerBadge": "Station Owner",
-      "forOwner": "Applies to Station Owners",
-      "systemWide": "System-wide"
-    },
-    "viewer": {
-      "effective": "Effective",
-      "updatedAt": "Updated: {{date}}",
-      "inDocSearchPlaceholder": "Search keywords in this document (In-document search)...",
-      "clearInDocSearch": "Clear",
-      "copiedToast": "Markdown source copied to clipboard"
     }
   }
 }

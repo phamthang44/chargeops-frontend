@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ApiProvider, createServices } from '@chargeops/api';
+import { ApiProvider, createServices, resolveNotificationI18n } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
   AppShell,
@@ -33,8 +33,16 @@ import { PolicyKB } from './pages/PolicyKB';
 import { Observability } from './pages/Observability';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
-import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
+import { HeaderSearch, type GlobalSearchLoad } from '../shared/search/HeaderSearch';
+import { makeGlobalLoad, type GlobalSearchRoutes } from '../shared/search/makeGlobalLoad';
 import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useDeleteNotification,
+} from '../shared/notifications/useNotifications';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -50,62 +58,23 @@ const PAGES: Record<string, ComponentType> = {
   tickets: () => <TicketsRoute admin />,
 };
 
-// Admin console exposes platform operations and escalated station cases.
-/** Platform admin console, mounted at `/admin`. */
-export function AdminConsole({ base }: { base: string }) {
+function AdminConsoleContent({
+  base,
+  activeKey,
+  NAV,
+  load,
+  services,
+}: {
+  base: string;
+  activeKey: string;
+  NAV: (ShellNavItem & { title: string })[];
+  load: GlobalSearchLoad;
+  services: any;
+}) {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, logout, getToken } = useAuth();
-  const services = useMemo(() => createServices({ ownerView: false, getToken }), [getToken]);
-  const activeKey = location.pathname.split('/')[2] || 'dashboard';
+  const { user, logout } = useAuth();
 
-  const NAV: (ShellNavItem & { title: string })[] = [
-    { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
-    { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
-    { key: 'stations', label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
-    { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
-    { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
-    { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
-    { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
-    { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
-    { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
-  ];
-
-  const searchers = useMemo<Searcher[]>(
-    () => [
-      {
-        label: t('search.groups.tickets'),
-        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          const res = await services.tickets.list({ search: q, pageSize: 5 });
-          return res.items.map((tk) => ({
-            id: tk.id,
-            title: tk.subject,
-            badge: tk.id.slice(0, 8),
-            subtitle: tk.stationName ?? undefined,
-            onSelect: () => navigate(`${base}/tickets/${tk.id}`),
-          }));
-        },
-      },
-      {
-        label: t('search.groups.users'),
-        icon: <IconUsers size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          const rows = await services.users.list({ search: q });
-          return rows.slice(0, 5).map((u) => ({
-            id: u.id,
-            title: u.name,
-            subtitle: u.email,
-            onSelect: () => navigate(`${base}/users`),
-          }));
-        },
-      },
-    ],
-    [base, navigate, services, t],
-  );
-
-  // Same queryKey/queryFn the admin Dashboard page uses — react-query dedupes, no extra network call after first mount.
   const dashboardQuery = useQuery({ queryKey: ['dashboard', 'admin'], queryFn: () => services.dashboard.admin() });
   const profileQuery = useQuery({
     queryKey: ['user-profile', 'me'],
@@ -113,79 +82,204 @@ export function AdminConsole({ base }: { base: string }) {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { items: serverNotifs = [] } = useNotifications({ context: 'admin', size: 5 });
+  const { data: serverUnreadCount } = useUnreadCount({ context: 'admin' });
+  const markAsRead = useMarkAsRead({ context: 'admin' });
+  const markAllAsRead = useMarkAllAsRead({ context: 'admin' });
+  const deleteNotif = useDeleteNotification({ context: 'admin' });
+
   const notificationItems = useMemo<NotificationItem[]>(() => {
+    // 1. Persisted notices from API
+    const items: NotificationItem[] = serverNotifs.map((n) => {
+      let displayTime = n.time;
+      if (!displayTime && n.createdAt) {
+        try {
+          const diffMs = Date.now() - new Date(n.createdAt).getTime();
+          const diffMins = Math.floor(diffMs / 60_000);
+          if (diffMins < 1) displayTime = 'Vừa xong';
+          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
+          else {
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
+            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
+          }
+        } catch {
+          displayTime = undefined;
+        }
+      }
+
+      const navigateToTarget = () => {
+        if (n.primaryAction?.actionUrl) {
+          navigate(`${base}${n.primaryAction.actionUrl}`);
+        } else if (n.target?.type === 'OPEN_CASE' && n.target.escalationId) {
+          navigate(`${base}/tickets?escalationId=${n.target.escalationId}`);
+        } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
+          navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
+          navigate(`${base}/stations`);
+        } else if (n.category === 'ticket') {
+          navigate(`${base}/tickets`);
+        } else {
+          navigate(`${base}/notifications`);
+        }
+      };
+
+      return {
+        id: n.id,
+        source: 'persisted',
+        title: resolveNotificationI18n(n.title, t),
+        subtitle: resolveNotificationI18n(n.subtitle, t),
+        body: resolveNotificationI18n(n.body, t),
+        time: displayTime,
+        tone: n.tone ?? n.severity,
+        read: n.read,
+        category: n.category,
+        stationName: n.stationName,
+        chargerId: n.chargerId,
+        metrics: n.metrics,
+        badge: n.badge,
+        actionLabel: n.actionLabel || n.primaryAction?.label,
+        onSelect: navigateToTarget,
+        onAction: navigateToTarget,
+      };
+    });
+
+    // 2. Derived operational dashboard warnings
     const q = dashboardQuery.data;
-    if (!q) return [];
-    const items: NotificationItem[] = [];
-    if (q.pendingApprovals > 0) {
-      items.push({
-        id: 'approvals',
-        title: t('notifications.pendingStations', { count: q.pendingApprovals }),
-        subtitle: t('notifications.items.pendingStations.subtitle', { defaultValue: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.' }),
-        tone: 'warn',
-        category: 'system',
-        badge: t('notifications.items.pendingStations.badge', { defaultValue: 'Chờ duyệt' }),
-        actionLabel: t('notifications.items.pendingStations.action', { defaultValue: 'Duyệt trạm' }),
-        onSelect: () => navigate(`${base}/approvals`),
-        onAction: () => navigate(`${base}/approvals`),
-      });
+    if (q) {
+      if (q.pendingApprovals > 0) {
+        items.unshift({
+          id: 'approvals',
+          source: 'derived',
+          title: t('notifications.pendingStations', { count: q.pendingApprovals }),
+          subtitle: t('notifications.items.pendingStations.subtitle', { defaultValue: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.' }),
+          tone: 'warn',
+          category: 'system',
+          badge: t('notifications.items.pendingStations.badge', { defaultValue: 'Chờ duyệt' }),
+          actionLabel: t('notifications.items.pendingStations.action', { defaultValue: 'Duyệt trạm' }),
+          onSelect: () => navigate(`${base}/approvals`),
+          onAction: () => navigate(`${base}/approvals`),
+        });
+      }
+      if (q.escalatedOpenCases > 0) {
+        items.unshift({
+          id: 'escalated-cases',
+          source: 'derived',
+          title: t('dashboard.ops.escalatedOpenCases', { defaultValue: 'Case trạm cần xem xét' }) + `: ${q.escalatedOpenCases}`,
+          subtitle: t('dashboard.ops.escalatedOpenCasesHint', { defaultValue: 'Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.' }),
+          tone: 'bad',
+          category: 'alert',
+          badge: t('dashboard.ops.escalatedBadge', { defaultValue: 'Cần xem xét' }),
+          actionLabel: t('dashboard.ops.openTickets', { defaultValue: 'Mở hỗ trợ' }),
+          onSelect: () => navigate(`${base}/tickets`),
+          onAction: () => navigate(`${base}/tickets`),
+        });
+      }
     }
-    if (q.escalatedOpenCases > 0) {
-      items.push({
-        id: 'escalated-cases',
-        title: t('dashboard.ops.escalatedOpenCases', { defaultValue: 'Case trạm cần xem xét' }) + `: ${q.escalatedOpenCases}`,
-        subtitle: t('dashboard.ops.escalatedOpenCasesHint', { defaultValue: 'Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.' }),
-        tone: 'bad',
-        category: 'alert',
-        badge: t('dashboard.ops.escalatedBadge', { defaultValue: 'Cần xem xét' }),
-        actionLabel: t('dashboard.ops.openTickets', { defaultValue: 'Mở hỗ trợ' }),
-        onSelect: () => navigate(`${base}/tickets`),
-        onAction: () => navigate(`${base}/tickets`),
-      });
-    }
+
     return items;
-  }, [dashboardQuery.data, base, navigate, t]);
+  }, [serverNotifs, dashboardQuery.data, base, navigate, t]);
+
+  return (
+    <AppShell
+      nav={NAV}
+      activeKey={activeKey}
+      onNavigate={(key) => navigate(`${base}/${key}`)}
+      accent="brand"
+      rolePill={{ label: t('console.role'), bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' }}
+      userName={user?.name ?? '···'}
+      userEmail={user?.email}
+      userAvatarUrl={profileQuery.data?.avatarUrl}
+      search={<HeaderSearch load={load} placeholder={t('console.searchPlaceholder')} />}
+      platformSwitcher={<PlatformSwitcher />}
+      notifications={
+        <NotificationBell
+          items={notificationItems}
+          unreadCount={serverUnreadCount}
+          emptyLabel={t('notifications.empty')}
+          onOpenCenter={() => navigate(`${base}/notifications`)}
+          onMarkRead={(id) => {
+            if (id === 'approvals' || id === 'escalated-cases') return;
+            markAsRead.mutate(id);
+          }}
+          onMarkAllRead={() => markAllAsRead.mutate()}
+          onDismiss={(id) => {
+            if (id === 'approvals' || id === 'escalated-cases') return;
+            deleteNotif.mutate(id);
+          }}
+        />
+      }
+      onSettings={() => navigate(`${base}/settings`)}
+      onLogout={logout}
+    >
+      <Routes>
+        <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
+        {NAV.map((n) => {
+          const Page = PAGES[n.key];
+          return (
+            <Route
+              key={n.key}
+              path={`${n.key}/*`}
+              element={Page ? <Page /> : <ComingSoon title={n.title} />}
+            />
+          );
+        })}
+        {/* Settings lives behind the header avatar menu, not the sidebar. */}
+        <Route path="settings" element={<SettingsPage accent="brand" />} />
+        <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
+      </Routes>
+    </AppShell>
+  );
+}
+
+// Admin console exposes platform operations and escalated station cases.
+/** Platform admin console, mounted at `/admin`. */
+export function AdminConsole({ base }: { base: string }) {
+  const { t } = useTranslation('admin');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { getToken } = useAuth();
+  const services = useMemo(() => createServices({ ownerView: false, getToken }), [getToken]);
+  const activeKey = location.pathname.split('/')[2] || 'dashboard';
+
+  const NAV: (ShellNavItem & { title: string })[] = useMemo(
+    () => [
+      { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
+      { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
+      { key: 'stations', label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
+      { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
+      { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
+      { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
+      { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
+      { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
+      { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
+    ],
+    [t],
+  );
+
+  const searchLoad = useMemo(() => {
+    // Admin screens without a per-item detail route (stations, approvals,
+    // licenses, legal docs) land on their list page instead of a dead row.
+    const routes: GlobalSearchRoutes = {
+      TICKET: (tk) => navigate(`${base}/tickets/${tk.id}`),
+      STATION: () => navigate(`${base}/stations`),
+      APPROVAL: () => navigate(`${base}/approvals`),
+      LICENSE: () => navigate(`${base}/licenses`),
+      USER: () => navigate(`${base}/users`),
+      LEGAL_DOCUMENT: () => navigate(`${base}/kb`),
+    };
+    return makeGlobalLoad(services.search, routes);
+  }, [base, navigate, services]);
 
   return (
     <ApiProvider services={services}>
-      <AppShell
-        nav={NAV}
+      <AdminConsoleContent
+        base={base}
         activeKey={activeKey}
-        onNavigate={(key) => navigate(`${base}/${key}`)}
-        accent="brand"
-        rolePill={{ label: t('console.role'), bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' }}
-        userName={user?.name ?? '···'}
-        userEmail={user?.email}
-        userAvatarUrl={profileQuery.data?.avatarUrl}
-        search={<HeaderSearch searchers={searchers} placeholder={t('console.searchPlaceholder')} />}
-        platformSwitcher={<PlatformSwitcher />}
-        notifications={
-          <NotificationBell
-            items={notificationItems}
-            emptyLabel={t('notifications.empty')}
-            onOpenCenter={() => navigate(`${base}/notifications`)}
-          />
-        }
-        onSettings={() => navigate(`${base}/settings`)}
-        onLogout={logout}
-      >
-        <Routes>
-          <Route index element={<Navigate to={`${base}/dashboard`} replace />} />
-          {NAV.map((n) => {
-            const Page = PAGES[n.key];
-            return (
-              <Route
-                key={n.key}
-                path={`${n.key}/*`}
-                element={Page ? <Page /> : <ComingSoon title={n.title} />}
-              />
-            );
-          })}
-          {/* Settings lives behind the header avatar menu, not the sidebar. */}
-          <Route path="settings" element={<SettingsPage accent="brand" />} />
-          <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
-        </Routes>
-      </AppShell>
+        NAV={NAV}
+        load={searchLoad}
+        services={services}
+      />
     </ApiProvider>
   );
 }

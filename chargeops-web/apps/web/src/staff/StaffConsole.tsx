@@ -6,6 +6,7 @@ import { useAuth } from '@chargeops/auth';
 import {
   AppShell,
   IconBolt,
+  IconBook,
   IconCalendar,
   IconGrid,
   IconLifebuoy,
@@ -19,13 +20,16 @@ import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { useUserProfile } from '../shared/profile/useUserProfile';
 import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
-import { HeaderSearch, type Searcher } from '../shared/search/HeaderSearch';
+import { HeaderSearch } from '../shared/search/HeaderSearch';
+import { makeGlobalLoad } from '../shared/search/makeGlobalLoad';
+import { LegalPolicies } from '../shared/legal/LegalPolicies';
 
 const NAV_ICONS: Record<string, React.ReactNode> = {
   dashboard: <IconGrid size={17} />,
   chargers: <IconBolt size={17} />,
   bookings: <IconCalendar size={17} />,
   tickets: <IconLifebuoy size={17} />,
+  legal: <IconBook size={17} />,
 };
 
 /**
@@ -41,7 +45,7 @@ export function StaffConsole({ base }: { base: string }) {
   const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
   const location = useLocation();
 
-  const nav: (ShellNavItem & { title: string; subtitle: string })[] = ['dashboard', 'chargers', 'bookings', 'tickets'].map(
+  const nav: (ShellNavItem & { title: string; subtitle: string })[] = ['dashboard', 'chargers', 'bookings', 'tickets', 'legal'].map(
     (key) => ({
       key,
       icon: NAV_ICONS[key],
@@ -74,53 +78,21 @@ function StaffConsoleContent({
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { t } = useTranslation('staff');
+  const { t: tUi } = useTranslation('ui');
   const api = useApi();
   const { avatarUrl } = useUserProfile();
   const { currentStation } = useStaffStation();
 
-  const searchers = useMemo<Searcher[]>(() => {
-    const stationId = currentStation?.id;
-    return [
-      {
-        label: t('search.groups.tickets'),
-        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          const res = await api.tickets.list({ search: q, pageSize: 5, role: 'staff' });
-          return res.items.map((tk) => ({
-            id: tk.id,
-            title: tk.subject,
-            badge: tk.id.slice(0, 8),
-            subtitle: tk.stationName ?? undefined,
-            onSelect: () => navigate(`${base}/tickets/${tk.id}`),
-          }));
-        },
-      },
-      {
-        label: t('search.groups.chargers'),
-        icon: <IconBolt size={14} strokeWidth={1.7} />,
-        run: async (q) => {
-          if (!stationId) return [];
-          const cps = await api.staffOperations.listChargePoints(stationId);
-          const ql = q.toLowerCase();
-          return cps
-            .filter(
-              (c) =>
-                c.name.toLowerCase().includes(ql) ||
-                c.code.toLowerCase().includes(ql) ||
-                c.id.toLowerCase().includes(ql),
-            )
-            .slice(0, 5)
-            .map((c) => ({
-              id: c.id,
-              title: c.name,
-              badge: c.code || c.id.slice(0, 8),
-              subtitle: c.zoneLabel ? `${t('search.zonePrefix')}: ${c.zoneLabel}` : undefined,
-              onSelect: () => navigate(`${base}/chargers`),
-            }));
-        },
-      },
-    ];
-  }, [api, base, currentStation?.id, navigate, t]);
+  const searchLoad = useMemo(
+    () =>
+      makeGlobalLoad(api.search, {
+        TICKET: (tk) => navigate(`${base}/tickets/${tk.id}`),
+        CHARGER: () => navigate(`${base}/chargers`),
+        BOOKING: () => navigate(`${base}/bookings`),
+        LEGAL_DOCUMENT: () => navigate(`${base}/legal`),
+      }),
+    [api, base, navigate],
+  );
 
   return (
     <AppShell
@@ -135,7 +107,7 @@ function StaffConsoleContent({
       userName={user?.name ?? '···'}
       userEmail={user?.email}
       userAvatarUrl={avatarUrl}
-      search={<HeaderSearch searchers={searchers} accent="owner" />}
+      search={<HeaderSearch load={searchLoad} accent="owner" />}
       platformSwitcher={<PlatformSwitcher />}
       notifications={null}
       onSettings={() => navigate(`${base}/settings`)}
@@ -147,6 +119,10 @@ function StaffConsoleContent({
         <Route path="chargers/*" element={<StaffChargers />} />
         <Route path="bookings/*" element={<StaffBookings />} />
         <Route path="tickets/*" element={<TicketsRoute role="staff" />} />
+        <Route
+          path="legal"
+          element={<LegalPolicies queryKeyPrefix="staff" subtitle={tUi('legal.staffSubtitle')} />}
+        />
         <Route path="settings" element={<SettingsPage accent="owner" />} />
         <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
       </Routes>

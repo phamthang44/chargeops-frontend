@@ -118,13 +118,13 @@ export class HttpClient {
   post<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
     return this.request<T>('POST', path, { body, ...opts });
   }
-  put<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>('PUT', path, { body });
+  put<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
+    return this.request<T>('PUT', path, { body, ...opts });
   }
-  patch<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>('PATCH', path, { body });
+  patch<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
+    return this.request<T>('PATCH', path, { body, ...opts });
   }
-  delete<T>(path: string): Promise<T> {
-    return this.request<T>('DELETE', path);
+  delete<T>(path: string, opts?: RequestOptions): Promise<T> {
+    return this.request<T>('DELETE', path, opts);
   }
 }

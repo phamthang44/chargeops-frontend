@@ -562,11 +562,48 @@ export interface LegalDocumentsService {
 }
 
 export interface NotificationService {
-  list(params?: import('./notificationTypes').NotificationListParams): Promise<import('./notificationTypes').AppNotification[]>;
-  unreadCount(): Promise<number>;
-  markAsRead(id: string): Promise<void>;
-  markAllAsRead(): Promise<void>;
-  delete(id: string): Promise<void>;
+  list(params?: import('./notificationTypes').NotificationListParams): Promise<import('./notificationTypes').NotificationPageResponse>;
+  unreadCount(params?: import('./notificationTypes').NotificationUnreadCountParams): Promise<number>;
+  markAsRead(id: string, params?: import('./notificationTypes').NotificationMutationParams): Promise<void>;
+  markAllAsRead(params?: import('./notificationTypes').NotificationMutationParams): Promise<void>;
+  dismiss(id: string, params?: import('./notificationTypes').NotificationMutationParams): Promise<void>;
+  delete(id: string, params?: import('./notificationTypes').NotificationMutationParams): Promise<void>;
+}
+
+/** Group keys of aggregate GET /api/v1/search — mirrors backend GlobalSearchType. */
+export type GlobalSearchType =
+  | 'TICKET'
+  | 'STATION'
+  | 'CHARGER'
+  | 'BOOKING'
+  | 'LICENSE'
+  | 'APPROVAL'
+  | 'LEGAL_DOCUMENT'
+  | 'USER';
+
+export interface GlobalSearchHit {
+  id: string;
+  title: string;
+  subtitle?: string | null;
+  badge?: string | null;
+}
+
+export interface GlobalSearchGroup {
+  type: GlobalSearchType;
+  items: GlobalSearchHit[];
+}
+
+export interface SearchService {
+  /**
+   * Aggregate global search for the console header. Keyword-only input:
+   * `options.type` merely narrows an already-authorized result set — scope is
+   * derived from the JWT server-side (ADMIN/OWNER/STAFF). Groups without
+   * permission or without hits are omitted, never 403.
+   */
+  global(
+    query: string,
+    options?: { type?: GlobalSearchType; limit?: number },
+  ): Promise<GlobalSearchGroup[]>;
 }
 
 /** BKG-054 / BKG-055: Operational emergency incident and recovery service */
@@ -621,4 +658,5 @@ export interface Services {
   media: MediaService;
   notifications: NotificationService;
   incidents: IncidentService;
+  search: SearchService;
 }

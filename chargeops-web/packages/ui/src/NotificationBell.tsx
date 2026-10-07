@@ -24,7 +24,9 @@ export interface NotificationItem {
   onSelect?: () => void;
 
   /** Category for tab filtering */
-  category?: 'alert' | 'session' | 'ticket' | 'system' | 'billing';
+  category?: 'alert' | 'session' | 'ticket' | 'system' | 'billing' | 'booking' | 'finance' | 'support' | 'account' | (string & {});
+  /** Source classification to separate persisted database notices from derived UI telemetry/kpi warnings */
+  source?: 'persisted' | 'derived';
   /** Station context */
   stationName?: string;
   /** Charger / Connector ID */
@@ -90,7 +92,7 @@ const TONE_CONFIG: Record<
   },
 };
 
-export type CategoryFilter = 'all' | 'alert' | 'session' | 'ticket' | 'system';
+export type CategoryFilter = 'all' | 'booking' | 'finance' | 'ticket' | 'alert' | 'session' | 'system' | (string & {});
 export type StatusFilter = 'all' | 'unread';
 
 export interface NotificationBellProps {
@@ -150,6 +152,11 @@ export function NotificationBell({
   const unreadCount = externalUnread !== undefined ? externalUnread : items.filter((i) => !i.read).length;
 
   const handleMarkRead = (id: string) => {
+    const target = items.find((i) => i.id === id);
+    if (target?.source === 'derived') {
+      setLocalItems((prev) => prev.map((i) => (i.id === id ? { ...i, read: true } : i)));
+      return;
+    }
     if (onMarkRead) {
       onMarkRead(id);
     } else {
@@ -160,13 +167,17 @@ export function NotificationBell({
   const handleMarkAllRead = () => {
     if (onMarkAllRead) {
       onMarkAllRead();
-    } else {
-      setLocalItems((prev) => prev.map((i) => ({ ...i, read: true })));
     }
+    setLocalItems((prev) => prev.map((i) => ({ ...i, read: true })));
   };
 
   const handleDismiss = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    const target = items.find((i) => i.id === id);
+    if (target?.source === 'derived') {
+      setLocalItems((prev) => prev.filter((i) => i.id !== id));
+      return;
+    }
     if (onDismiss) {
       onDismiss(id);
     } else {

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 export type Role = 'platform_admin' | 'station_owner' | 'driver' | 'staff';
 
 export interface AuthUser {
+  id: string;
   name: string;
   email: string;
   roles: Role[];
@@ -22,7 +23,7 @@ export interface AuthContextValue {
 
 export interface AuthProviderProps {
   /** Mock identity used only when VITE_KEYCLOAK_ENABLED is not true. */
-  mockUser: { name: string; email: string; roles: Role[] };
+  mockUser: { id?: string; name: string; email: string; roles: Role[] };
   /** Simulated redirect duration in mock mode. */
   redirectMs?: number;
   children: ReactNode;

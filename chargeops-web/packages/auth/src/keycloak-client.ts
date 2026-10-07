@@ -59,11 +59,13 @@ export function initialsOf(name: string): string {
 
 export function userFromKeycloak(client: KeycloakInstance): AuthUser {
   const parsed = client.tokenParsed ?? {};
+  const id = String(parsed.sub ?? parsed.userId ?? client.subject ?? parsed.email ?? 'anonymous-user');
   const name = String(parsed.name ?? parsed.preferred_username ?? parsed.email ?? 'ChargeOps user');
   const email = String(parsed.email ?? parsed.preferred_username ?? '');
   const realmRoles = Array.isArray(parsed.realm_access?.roles) ? parsed.realm_access.roles : [];
 
   return {
+    id,
     name,
     email,
     roles: rolesFromRealm(realmRoles),

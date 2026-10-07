@@ -1394,6 +1394,44 @@
       "codeConflict": "The support ticket code already exists.",
       "generic": "An error occurred while processing this support ticket."
     }
+  },
+  "notification": {
+    "booking": {
+      "confirmed": { "title": "Booking confirmed" },
+      "cancelled": { "title": "Booking cancelled" },
+      "no_show": { "title": "Booking ended due to no-show" },
+      "completed": { "title": "Booking completed" },
+      "reminder": { "title": "Upcoming booking reminder" },
+      "state_message": "Booking {{code}}. Please open booking to view current status."
+    },
+    "refund": {
+      "pending": {
+        "title": "Refund obligation pending",
+        "body": "Booking {{code}}. Refund obligation is held; funds are not yet considered refunded."
+      },
+      "attempt_failed": {
+        "title": "Refund attempt unsuccessful",
+        "body": "Booking {{code}}. Refund obligation is held; funds are not yet considered refunded."
+      },
+      "succeeded": {
+        "title": "Refund succeeded in Simulator",
+        "body": "Booking {{code}}. Simulator recorded refund success; this is not a real banking transaction."
+      }
+    },
+    "ticket": {
+      "resolved": {
+        "title": "Ticket {{code}} resolved",
+        "body": "Ticket {{code}} has been marked resolved: {{result}}. Please confirm or report unresolved issues before {{autoCloseAt}}. If no response within 10 days, ticket will auto-close per policy; this is not an admission of station defect or refund."
+      },
+      "assigned": {
+        "title": "Ticket {{code}} assigned",
+        "body": "Ticket {{code}} at station {{station}} has been assigned for resolution."
+      },
+      "escalated": {
+        "title": "Escalated case for ticket {{code}}",
+        "body": "Escalation review requested for ticket {{code}} requires Admin evaluation."
+      }
+    }
   }
 }
 

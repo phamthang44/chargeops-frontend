@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   IconBook,
   IconCheck,
@@ -63,6 +64,7 @@ export function PolicyMarkdownViewer({
   className = '',
   onCopySuccess,
 }: PolicyMarkdownViewerProps) {
+  const { t } = useTranslation('common');
   const [copied, setCopied] = useState(false);
   const [fontSizeOffset, setFontSizeOffset] = useState<number>(() => {
     try {
@@ -353,7 +355,7 @@ export function PolicyMarkdownViewer({
                   scrollToHeading(id);
                 }}
                 className="text-[11px] font-mono text-ghost hover:text-brand"
-                title="Neo liên kết mục này"
+                title={t('markdownViewer.anchorTitle', { defaultValue: 'Neo liên kết mục này' })}
               >
                 #{id.split('-').slice(0, 2).join('-')}
               </a>
@@ -425,20 +427,47 @@ export function PolicyMarkdownViewer({
         <div className="flex items-center gap-4 text-[12px] text-muted">
           <div className="flex items-center gap-1.5">
             <IconClock size={14} className="text-brand" />
-            <span>Ước tính: <strong className="text-ink font-semibold">{stats.minutes} phút đọc</strong></span>
+            <span>
+              {t('markdownViewer.readingStats.estimate', { defaultValue: 'Ước tính:' })}{' '}
+              <strong className="text-ink font-semibold">
+                {t('markdownViewer.readingStats.minutesRead', {
+                  count: stats.minutes,
+                  defaultValue: `${stats.minutes} phút đọc`,
+                })}
+              </strong>
+            </span>
           </div>
           <span className="text-line">•</span>
           <div className="flex items-center gap-1.5">
             <IconBook size={14} className="text-brand" />
-            <span><strong className="text-ink font-semibold">{stats.words.toLocaleString()}</strong> từ</span>
+            <span>
+              <strong className="text-ink font-semibold">{stats.words.toLocaleString()}</strong>{' '}
+              {t('markdownViewer.readingStats.words', {
+                count: stats.words,
+                defaultValue: `${stats.words.toLocaleString()} từ`,
+              })}
+            </span>
           </div>
           <span className="text-line">•</span>
-          <span><strong className="text-ink font-semibold">{headings.length}</strong> đề mục</span>
+          <span>
+            <strong className="text-ink font-semibold">{headings.length}</strong>{' '}
+            {t('markdownViewer.readingStats.headings', {
+              count: headings.length,
+              defaultValue: `${headings.length} đề mục`,
+            })}
+          </span>
 
           {searchQuery && (
             <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 border border-amber-300">
               <IconSearch size={12} />
-              {matchCount > 0 ? `${matchCount} kết quả khớp` : 'Không có kết quả khớp'}
+              {matchCount > 0
+                ? t('markdownViewer.readingStats.matches', {
+                    count: matchCount,
+                    defaultValue: `${matchCount} kết quả khớp`,
+                  })
+                : t('markdownViewer.readingStats.noMatches', {
+                    defaultValue: 'Không có kết quả khớp',
+                  })}
             </span>
           )}
         </div>
@@ -455,7 +484,7 @@ export function PolicyMarkdownViewer({
                   ? 'bg-surface text-ink font-bold shadow-xs'
                   : 'text-muted hover:bg-surface/60 hover:text-ink'
               }`}
-              title="Cỡ chữ nhỏ (13px)"
+              title={t('markdownViewer.actions.fontSmallTitle', { defaultValue: 'Cỡ chữ nhỏ (13px)' })}
             >
               A-
             </button>
@@ -467,7 +496,7 @@ export function PolicyMarkdownViewer({
                   ? 'bg-surface text-ink font-bold shadow-xs'
                   : 'text-muted hover:bg-surface/60 hover:text-ink'
               }`}
-              title="Cỡ chữ chuẩn (15px)"
+              title={t('markdownViewer.actions.fontStandardTitle', { defaultValue: 'Cỡ chữ chuẩn (15px)' })}
             >
               A
             </button>
@@ -479,7 +508,7 @@ export function PolicyMarkdownViewer({
                   ? 'bg-surface text-ink font-bold shadow-xs'
                   : 'text-muted hover:bg-surface/60 hover:text-ink'
               }`}
-              title="Cỡ chữ lớn (17.5px)"
+              title={t('markdownViewer.actions.fontLargeTitle', { defaultValue: 'Cỡ chữ lớn (17.5px)' })}
             >
               A+
             </button>
@@ -488,17 +517,21 @@ export function PolicyMarkdownViewer({
           <button
             onClick={handleCopyMarkdown}
             className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line-2 hover:bg-canvas active:scale-98"
-            title="Sao chép toàn bộ mã nguồn Markdown"
+            title={t('markdownViewer.actions.copyTitle', { defaultValue: 'Sao chép toàn bộ mã nguồn Markdown' })}
           >
             {copied ? (
               <>
                 <IconCheck size={13} className="text-good" />
-                <span className="text-good font-semibold">Đã chép!</span>
+                <span className="text-good font-semibold">
+                  {t('markdownViewer.actions.copied', { defaultValue: 'Đã chép!' })}
+                </span>
               </>
             ) : (
               <>
                 <IconCopy size={13} className="text-muted" />
-                <span>Sao chép Markdown</span>
+                <span>
+                  {t('markdownViewer.actions.copyBtn', { defaultValue: 'Sao chép Markdown' })}
+                </span>
               </>
             )}
           </button>
@@ -506,9 +539,9 @@ export function PolicyMarkdownViewer({
           <button
             onClick={handleDownloadMd}
             className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line-2 hover:bg-canvas active:scale-98"
-            title="Tải tệp .md về máy"
+            title={t('markdownViewer.actions.downloadTitle', { defaultValue: 'Tải tệp .md về máy' })}
           >
-            <span>Tải .md</span>
+            <span>{t('markdownViewer.actions.downloadBtn', { defaultValue: 'Tải .md' })}</span>
           </button>
         </div>
       </div>
@@ -527,7 +560,7 @@ export function PolicyMarkdownViewer({
               <div className="mb-2.5 flex items-center justify-between border-b border-line-3 pb-2 text-[12px]">
                 <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-muted">
                   <IconBook size={13} className="text-brand" />
-                  <span>Mục lục điều khoản</span>
+                  <span>{t('markdownViewer.toc', { defaultValue: 'Mục lục điều khoản' })}</span>
                 </div>
                 <span className="font-mono text-[11px] text-ghost">({headings.length})</span>
               </div>

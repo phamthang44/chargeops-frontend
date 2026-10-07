@@ -76,11 +76,13 @@ export function AdminConsole({ base }: { base: string }) {
     () => [
       {
         label: t('search.groups.tickets'),
+        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
         run: async (q) => {
           const res = await services.tickets.list({ search: q, pageSize: 5 });
           return res.items.map((tk) => ({
             id: tk.id,
-            title: `${tk.id} · ${tk.subject}`,
+            title: tk.subject,
+            badge: tk.id.slice(0, 8),
             subtitle: tk.stationName ?? undefined,
             onSelect: () => navigate(`${base}/tickets/${tk.id}`),
           }));
@@ -88,6 +90,7 @@ export function AdminConsole({ base }: { base: string }) {
       },
       {
         label: t('search.groups.users'),
+        icon: <IconUsers size={14} strokeWidth={1.7} />,
         run: async (q) => {
           const rows = await services.users.list({ search: q });
           return rows.slice(0, 5).map((u) => ({

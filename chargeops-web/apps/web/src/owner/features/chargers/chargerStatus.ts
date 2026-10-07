@@ -1,27 +1,51 @@
 import type { ConnectorRuntimeStatus, OperationalChargePointStatus, ProvisioningStatus } from '@chargeops/api';
 
-export const PROVISIONING_STATUS_PILL: Record<ProvisioningStatus, { bg: string; fg: string; label: string }> = {
-  PENDING_ACTIVATION: { bg: 'var(--color-chip)', fg: 'var(--color-muted)', label: 'Chờ kích hoạt' },
-  ACTIVE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', label: 'Đã kích hoạt' },
-  SUSPENDED: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Tạm ngưng vận hành' },
+/** `key` is an i18n key in the `owner` namespace — translate with `t(pill.key)` at render time. */
+export const PROVISIONING_STATUS_PILL: Record<ProvisioningStatus, { bg: string; fg: string; key: string }> = {
+  PENDING_ACTIVATION: {
+    bg: 'var(--color-chip)',
+    fg: 'var(--color-muted)',
+    key: 'chargePoints.status.PENDING_ACTIVATION',
+  },
+  ACTIVE: {
+    bg: 'var(--color-good-soft)',
+    fg: 'var(--color-good-deep)',
+    key: 'chargePoints.status.ACTIVE',
+  },
+  SUSPENDED: {
+    bg: 'var(--color-bad-soft)',
+    fg: 'var(--color-bad-deep)',
+    key: 'chargePoints.status.SUSPENDED',
+  },
 };
 
-export const OPERATIONAL_STATUS_PILL: Record<OperationalChargePointStatus, { bg: string; fg: string; label: string }> = {
-  AVAILABLE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', label: 'Hoạt động' },
-  OFFLINE: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Offline' },
-  MAINTENANCE: { bg: 'var(--color-warn-soft)', fg: 'var(--color-warn-deep)', label: 'Bảo trì' },
+export const OPERATIONAL_STATUS_PILL: Record<
+  OperationalChargePointStatus,
+  { bg: string; fg: string; key: string }
+> = {
+  AVAILABLE: {
+    bg: 'var(--color-good-soft)',
+    fg: 'var(--color-good-deep)',
+    key: 'chargePoints.operationalStatus.AVAILABLE',
+  },
+  OFFLINE: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', key: 'chargePoints.operationalStatus.OFFLINE' },
+  MAINTENANCE: {
+    bg: 'var(--color-warn-soft)',
+    fg: 'var(--color-warn-deep)',
+    key: 'chargePoints.operationalStatus.MAINTENANCE',
+  },
 };
 
-export const CONNECTOR_PILL: Record<ConnectorRuntimeStatus, { bg: string; fg: string; label: string }> = {
-  AVAILABLE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', label: 'Sẵn sàng' },
-  IN_USE: { bg: 'var(--color-brand-soft)', fg: 'var(--color-brand)', label: 'Đang sạc' },
-  OFFLINE: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', label: 'Offline' },
+export const CONNECTOR_PILL: Record<ConnectorRuntimeStatus, { bg: string; fg: string; key: string }> = {
+  AVAILABLE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', key: 'connectors.status.AVAILABLE' },
+  IN_USE: { bg: 'var(--color-brand-soft)', fg: 'var(--color-brand)', key: 'connectors.status.IN_USE' },
+  OFFLINE: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', key: 'connectors.status.OFFLINE' },
 };
 
 export function getChargePointPill(
   provisioningStatus?: ProvisioningStatus,
   operationalStatus?: OperationalChargePointStatus,
-): { bg: string; fg: string; label: string } {
+): { bg: string; fg: string; key: string } {
   if (provisioningStatus === 'PENDING_ACTIVATION') {
     return PROVISIONING_STATUS_PILL.PENDING_ACTIVATION;
   }
@@ -50,7 +74,7 @@ export function nextOperationalStatus(current?: OperationalChargePointStatus): O
   return 'AVAILABLE';
 }
 
-export function getConnectorPill(status?: ConnectorRuntimeStatus): { bg: string; fg: string; label: string } {
+export function getConnectorPill(status?: ConnectorRuntimeStatus): { bg: string; fg: string; key: string } {
   if (!status) return CONNECTOR_PILL.OFFLINE;
   return CONNECTOR_PILL[status] || CONNECTOR_PILL.OFFLINE;
 }

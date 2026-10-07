@@ -37,20 +37,25 @@ const DAY_NAME_MAP: Record<string, string> = {
   SUNDAY: 'Chủ Nhật',
 };
 
-function getActiveDuration(startIso: string, endIso: string): string {
+function getActiveDuration(startIso: string, endIso: string, t: (key: string, opts?: any) => string): string {
   const start = new Date(startIso).getTime();
   const end = new Date(endIso).getTime();
   const diffMs = end - start;
-  if (diffMs <= 0) return 'Dưới 1 giờ';
+  if (diffMs <= 0) return t('pricing.history.durationUnderOneHour', { defaultValue: 'Dưới 1 giờ' });
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const days = Math.floor(hours / 24);
   if (days > 0) {
     const remHours = hours % 24;
-    return remHours > 0 ? `${days} ngày ${remHours} giờ` : `${days} ngày`;
+    return remHours > 0
+      ? t('pricing.history.durationDaysHours', { days, hours: remHours, defaultValue: `${days} ngày ${remHours} giờ` })
+      : t('pricing.history.durationDays', { days, defaultValue: `${days} ngày` });
   }
-  if (hours > 0) return `${hours} giờ`;
+  if (hours > 0) return t('pricing.history.durationHours', { hours, defaultValue: `${hours} giờ` });
   const minutes = Math.floor(diffMs / (1000 * 60));
-  return `${Math.max(1, minutes)} phút`;
+  return t('pricing.history.durationMinutes', {
+    minutes: Math.max(1, minutes),
+    defaultValue: `${Math.max(1, minutes)} phút`,
+  });
 }
 
 export function ScheduleHistoryDrawer({
@@ -200,7 +205,7 @@ export function ScheduleHistoryDrawer({
                     {item.effectiveTo && (
                       <div className="text-[11px] text-muted">
                         ⏱️ {t('pricing.history.duration', { defaultValue: 'Thời gian đã vận hành: ' })}
-                        <span className="font-semibold text-ink">{getActiveDuration(item.effectiveFrom, item.effectiveTo)}</span>
+                        <span className="font-semibold text-ink">{getActiveDuration(item.effectiveFrom, item.effectiveTo, t)}</span>
                       </div>
                     )}
                     <div className="pt-1 border-t border-hairline flex items-center justify-between text-[11.5px]">
@@ -231,7 +236,7 @@ export function ScheduleHistoryDrawer({
                             className="flex items-center justify-between border-b border-hairline/60 py-0.5"
                           >
                             <span className="text-muted font-medium">
-                              {DAY_NAME_MAP[h.day] ?? h.day}:
+                              {t(`pricing.dayNames.${h.day}`, { defaultValue: DAY_NAME_MAP[h.day] ?? h.day })}:
                             </span>
                             <span
                               className={`font-mono ${

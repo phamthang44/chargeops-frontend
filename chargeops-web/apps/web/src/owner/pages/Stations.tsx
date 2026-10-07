@@ -200,7 +200,7 @@ export function Stations() {
                       setStatusFilter('all');
                     }}
                   >
-                    Xóa bộ lọc
+                    {t('stations.clearFilters', { defaultValue: 'Xóa bộ lọc' })}
                   </Button>
                 ) : (
                   <Button accent="owner" size="sm" onClick={() => setModalOpen(true)}>

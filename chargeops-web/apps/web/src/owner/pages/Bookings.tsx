@@ -114,7 +114,10 @@ export function Bookings() {
       }
       return {
         key: k,
-        label: k === 'all' ? t('bookings.tabs.all') : BOOKING_STATUS[k]?.label ?? k,
+        label:
+          k === 'all'
+            ? t('bookings.tabs.all')
+            : t(`bookings.status.${k}`, { defaultValue: BOOKING_STATUS[k]?.label ?? k }),
         count,
       };
     });

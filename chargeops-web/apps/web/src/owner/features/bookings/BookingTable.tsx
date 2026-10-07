@@ -48,6 +48,7 @@ export function BookingTable({
       ) : (
         rows.map((b) => {
           const meta = BOOKING_STATUS[b.status] ?? { label: b.status, tone: 'neutral' };
+          const statusLabel = t(`bookings.status.${b.status}`, { defaultValue: meta.label });
           const durationMin = Math.max(1, Math.round((new Date(b.endAt).getTime() - new Date(b.startAt).getTime()) / 60000));
           return (
             <div
@@ -66,7 +67,7 @@ export function BookingTable({
               <span className="font-mono text-[11.5px] text-muted">{formatDuration(durationMin)}</span>
               <span className="text-right font-semibold">{formatVnd(b.totalAmount)}</span>
               <span className="text-center">
-                <StatusPill tone={meta.tone} label={meta.label} />
+                <StatusPill tone={meta.tone} label={statusLabel} />
               </span>
             </div>
           );

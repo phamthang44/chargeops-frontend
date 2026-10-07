@@ -13,6 +13,7 @@ import {
   useToast,
 } from '@chargeops/ui';
 import {
+  BOOKING_STATUS,
   formatVnd,
   useApi,
   type OwnerBookingDetail,
@@ -172,7 +173,7 @@ export function OwnerAdmitFailureModal({
               <p className="mt-0.5 text-[11.5px] text-muted">
                 {t('bookings.ownerAdmitModal.codeStatusSub', 'Mã: #{{code}} · Trạng thái: {{status}}', {
                   code: booking.bookingCode || booking.bookingId,
-                  status: booking.status,
+                  status: t(`bookings.status.${booking.status}`, { defaultValue: BOOKING_STATUS[booking.status]?.label ?? booking.status }),
                 })}
               </p>
             </div>

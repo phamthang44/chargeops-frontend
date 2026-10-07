@@ -54,15 +54,15 @@ export function PricingConfirmModal({
     if (Boolean(initialConfig.open24Hours) !== Boolean(draftConfig.open24Hours)) {
       if (draftConfig.open24Hours) {
         hoursDiffs.push({
-          dayLabel: 'Toàn trạm',
-          fromText: 'Cấu hình theo ngày',
-          toText: 'Mở liên tục 24/7',
+          dayLabel: t('pricing.confirmModal.allStation', { defaultValue: 'Toàn trạm' }),
+          fromText: t('pricing.confirmModal.dailyConfig', { defaultValue: 'Cấu hình theo ngày' }),
+          toText: t('pricing.confirmModal.continuous247', { defaultValue: 'Mở liên tục 24/7' }),
         });
       } else {
         hoursDiffs.push({
-          dayLabel: 'Toàn trạm',
-          fromText: 'Mở 24/7',
-          toText: 'Chuyển sang cấu hình theo ngày',
+          dayLabel: t('pricing.confirmModal.allStation', { defaultValue: 'Toàn trạm' }),
+          fromText: t('pricing.confirmModal.open247Short', { defaultValue: 'Mở 24/7' }),
+          toText: t('pricing.confirmModal.switchToDaily', { defaultValue: 'Chuyển sang cấu hình theo ngày' }),
         });
       }
     }
@@ -77,10 +77,12 @@ export function PricingConfirmModal({
         const draftTime = `${draftH.open || '06:00'} – ${draftH.close || '23:00'}`;
 
         if (initOpen !== draftOpen || (draftOpen && initTime !== draftTime)) {
+          const dayName = t(`pricing.dayNames.${draftH.day}`, { defaultValue: DAY_NAMES[draftH.day] ?? draftH.day });
+          const closedText = t('pricing.steps.step2.closed', { defaultValue: 'Đóng cửa' });
           hoursDiffs.push({
-            dayLabel: DAY_NAMES[draftH.day] ?? draftH.day,
-            fromText: initOpen ? initTime : 'Đóng cửa',
-            toText: draftOpen ? draftTime : 'Đóng cửa',
+            dayLabel: dayName,
+            fromText: initOpen ? initTime : closedText,
+            toText: draftOpen ? draftTime : closedText,
           });
         }
       });
@@ -116,20 +118,24 @@ export function PricingConfirmModal({
         <div className="mb-3 flex items-center justify-between rounded-[9px] border border-owner-border/70 bg-owner-soft/70 px-3.5 py-2 text-[12.5px] font-medium text-owner-deep">
           <div className="flex items-center gap-2">
             <IconClock size={16} className="text-owner-deep shrink-0" />
-            <span>Thời điểm áp dụng:</span>
+            <span>{t('pricing.confirmModal.effectiveTimeLabel', { defaultValue: 'Thời điểm áp dụng:' })}</span>
           </div>
-          <span className="font-bold text-ink">Ngay sau khi xác nhận lưu</span>
+          <span className="font-bold text-ink">
+            {t('pricing.confirmModal.effectiveTimeValue', { defaultValue: 'Ngay sau khi xác nhận lưu' })}
+          </span>
         </div>
 
         {/* Change Comparison Summary */}
         <div className="mb-4 flex flex-col gap-2 rounded-[11px] border border-line-2 bg-surface-2 p-3.5 text-[12.5px]">
           <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-faint mb-1">
-            Tóm tắt các thông số điều chỉnh
+            {t('pricing.confirmModal.summaryTitle', { defaultValue: 'Tóm tắt các thông số điều chỉnh' })}
           </div>
 
           {/* Base Price */}
           <div className="flex items-center justify-between py-1 border-b border-hairline">
-            <span className="text-muted">Giá sạc gốc / kWh:</span>
+            <span className="text-muted">
+              {t('pricing.confirmModal.basePriceRow', { defaultValue: 'Giá sạc gốc / kWh:' })}
+            </span>
             <div className="flex items-center gap-1.5 font-mono">
               {initialConfig && basePriceChanged && (
                 <>
@@ -145,16 +151,20 @@ export function PricingConfirmModal({
 
           {/* Min Duration */}
           <div className="flex items-center justify-between py-1 border-b border-hairline">
-            <span className="text-muted">Thời lượng đặt tối thiểu (Thương mại):</span>
+            <span className="text-muted">
+              {t('pricing.confirmModal.minDurationRow', { defaultValue: 'Thời lượng đặt tối thiểu (Thương mại):' })}
+            </span>
             <div className="flex items-center gap-1.5 font-mono">
               {initialConfig && minDurationChanged && (
                 <>
-                  <span className="text-faint line-through">{initialConfig.minBookingDurationMin} phút</span>
+                  <span className="text-faint line-through">
+                    {initialConfig.minBookingDurationMin} {t('pricing.confirmModal.minutesUnit', { defaultValue: 'phút' })}
+                  </span>
                   <span className="text-faint">→</span>
                 </>
               )}
               <span className={`font-bold ${minDurationChanged ? 'text-owner-deep font-extrabold' : 'text-ink'}`}>
-                {draftConfig.minBookingDurationMin} phút
+                {draftConfig.minBookingDurationMin} {t('pricing.confirmModal.minutesUnit', { defaultValue: 'phút' })}
               </span>
             </div>
           </div>
@@ -162,13 +172,18 @@ export function PricingConfirmModal({
           {/* Operating Hours & Day-by-Day Diffs */}
           <div className="flex flex-col py-1 border-b border-hairline gap-1">
             <div className="flex items-center justify-between">
-              <span className="text-muted">Giờ hoạt động hàng tuần:</span>
+              <span className="text-muted">
+                {t('pricing.confirmModal.operatingHoursRow', { defaultValue: 'Giờ hoạt động hàng tuần:' })}
+              </span>
               <span className={`font-semibold ${operatingHoursChanged ? 'text-owner-deep font-bold' : 'text-ink'}`}>
                 {draftConfig.open24Hours
-                  ? 'Mở cửa 24/7'
+                  ? t('pricing.confirmModal.open247', { defaultValue: 'Mở cửa 24/7' })
                   : operatingHoursChanged
-                    ? `Đã điều chỉnh (${hoursDiffs.length} ngày thay đổi)`
-                    : 'Không thay đổi'}
+                    ? t('pricing.confirmModal.adjustedDays', {
+                        count: hoursDiffs.length,
+                        defaultValue: `Đã điều chỉnh (${hoursDiffs.length} ngày thay đổi)`,
+                      })
+                    : t('pricing.confirmModal.unchanged', { defaultValue: 'Không thay đổi' })}
               </span>
             </div>
             {hoursDiffs.length > 0 && (
@@ -189,25 +204,39 @@ export function PricingConfirmModal({
 
           {/* TOU Rules count */}
           <div className="flex items-center justify-between py-1 border-b border-hairline">
-            <span className="text-muted">Số khung giá theo giờ (TOU):</span>
+            <span className="text-muted">
+              {t('pricing.confirmModal.touCountRow', { defaultValue: 'Số khung giá theo giờ (TOU):' })}
+            </span>
             <div className="flex items-center gap-1.5 font-mono">
               {initialConfig && touCountChanged && (
                 <>
-                  <span className="text-faint line-through">{initialConfig.touRules.length} khung</span>
+                  <span className="text-faint line-through">
+                    {t('pricing.confirmModal.windowsCount', {
+                      count: initialConfig.touRules.length,
+                      defaultValue: `${initialConfig.touRules.length} khung`,
+                    })}
+                  </span>
                   <span className="text-faint">→</span>
                 </>
               )}
               <span className={`font-bold ${touRulesChanged ? 'text-owner-deep font-extrabold' : 'text-ink'}`}>
-                {draftConfig.touRules.length} khung giá
-                {touRulesChanged && !touCountChanged ? ' · nội dung đã đổi' : ''}
+                {t('pricing.confirmModal.windowsCountLabel', {
+                  count: draftConfig.touRules.length,
+                  defaultValue: `${draftConfig.touRules.length} khung giá`,
+                })}
+                {touRulesChanged && !touCountChanged
+                  ? t('pricing.confirmModal.touContentChanged', { defaultValue: ' · nội dung đã đổi' })
+                  : ''}
               </span>
             </div>
           </div>
 
           {/* System Safety Buffer */}
           <div className="flex items-center justify-between py-1 text-faint text-[11.5px]">
-            <span>Thời gian giãn ca giữa 2 lượt:</span>
-            <span className="font-mono font-medium">{SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định</span>
+            <span>{t('pricing.confirmModal.bufferRow', { defaultValue: 'Thời gian giãn ca giữa 2 lượt:' })}</span>
+            <span className="font-mono font-medium">
+              {SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} {t('pricing.steps.step4.bufferBadge', { defaultValue: 'phút cố định' })}
+            </span>
           </div>
         </div>
 
@@ -215,10 +244,17 @@ export function PricingConfirmModal({
         <div className="mb-5 rounded-[10px] border border-warn-border bg-warn-soft/60 p-3 text-[12px] leading-relaxed text-warn-deep">
           <div className="flex items-center gap-1.5 font-bold text-ink">
             <IconAlertTriangle size={16} className="text-warn shrink-0" />
-            <span>Quy định bảo toàn lịch hẹn đã xác nhận</span>
+            <span>
+              {t('pricing.confirmModal.policyNoticeTitle', {
+                defaultValue: 'Quy định bảo toàn lịch hẹn đã xác nhận',
+              })}
+            </span>
           </div>
           <div className="mt-1 text-muted">
-            Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ <b>phát sinh sau thời điểm lưu</b>. Các lịch đặt đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và khung giờ cam kết ban đầu.
+            {t('pricing.confirmModal.policyNoticeDesc', {
+              defaultValue:
+                'Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu. Các lịch đặt đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và khung giờ cam kết ban đầu.',
+            })}
           </div>
         </div>
 

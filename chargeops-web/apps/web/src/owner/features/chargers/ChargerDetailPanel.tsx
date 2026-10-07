@@ -135,7 +135,7 @@ export function ChargerDetailPanel({
             className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold"
             style={{ background: provPill.bg, color: provPill.fg }}
           >
-            {provPill.label}
+            {t(provPill.key)}
           </span>
           {!isProvActive && (
             <span className="text-[11px] text-faint">
@@ -239,7 +239,7 @@ function ConnectorCard({
           style={{ background: pill.bg, color: pill.fg }}
         >
           <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`connectors.status.${effective}`, { defaultValue: pill.label })}
+          {t(`connectors.status.${effective}`, { defaultValue: t(pill.key) })}
         </button>
       </div>
 

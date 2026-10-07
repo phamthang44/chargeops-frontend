@@ -129,6 +129,8 @@ summary {
 @keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes spin360 { to { transform: rotate(360deg) } }
 @keyframes popIn { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: none } }
+/* Command-bar / search popover — settles down from above with a spring curve. */
+@keyframes dropIn { from { opacity: 0; transform: translateY(-8px) scale(.975) } to { opacity: 1; transform: none } }
 @keyframes drawerIn { from { transform: translateX(100%) } to { transform: none } }
 @keyframes slideIn { from { transform: translateX(-100%) } to { transform: none } }
 @keyframes toastSlideInRight { from { opacity: 0; transform: translateX(100%) scale(.95) } to { opacity: 1; transform: translateX(0) scale(1) } }

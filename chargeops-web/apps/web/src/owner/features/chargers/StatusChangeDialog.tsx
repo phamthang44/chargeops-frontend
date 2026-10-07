@@ -260,7 +260,10 @@ function BlockedBody({
                 <span className="font-mono text-[11px] text-muted">
                   {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
                 </span>
-                <StatusPill tone={meta?.tone ?? 'neutral'} label={meta?.label ?? b.status} />
+                <StatusPill
+                  tone={meta?.tone ?? 'neutral'}
+                  label={t(`bookings.status.${b.status}`, { defaultValue: meta?.label ?? b.status })}
+                />
               </div>
             </div>
           );

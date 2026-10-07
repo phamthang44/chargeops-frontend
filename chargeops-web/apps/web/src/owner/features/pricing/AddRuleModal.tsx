@@ -170,9 +170,11 @@ export function AddRuleModal({
         {showErrors && invalid && (
           <div className="text-[11.5px] font-medium text-bad">
             {invalidTimeRange
-              ? 'Giờ bắt đầu và kết thúc không được trùng nhau.'
+              ? t('pricing.addRule.sameTimeError', { defaultValue: 'Giờ bắt đầu và kết thúc không được trùng nhau.' })
               : overlaps
-                ? 'Khung giá này chồng lên một quy tắc đã có trên cùng ngày áp dụng.'
+                ? t('pricing.addRule.overlapError', {
+                    defaultValue: 'Khung giá này chồng lên một quy tắc đã có trên cùng ngày áp dụng.',
+                  })
                 : t('pricing.addRule.validationError', {
                     defaultValue: 'Vui lòng nhập đầy đủ tên, giá và định dạng giờ hợp lệ (HH:mm).',
                   })}

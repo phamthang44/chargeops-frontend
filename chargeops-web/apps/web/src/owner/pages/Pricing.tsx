@@ -218,8 +218,11 @@ export function Pricing() {
         <ResourceStateCard
           tone="brand"
           eyebrow={t('pricing.error.eyebrow', { defaultValue: 'Giá & giờ hoạt động' })}
-          title="Chưa có trạm sạc nào"
-          description="Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động."
+          title={t('pricing.emptyStations.title', { defaultValue: 'Chưa có trạm sạc nào' })}
+          description={t('pricing.emptyStations.description', {
+            defaultValue:
+              'Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động.',
+          })}
         />
       ) : isLoading || !draft ? (
         <PricingSkeleton />

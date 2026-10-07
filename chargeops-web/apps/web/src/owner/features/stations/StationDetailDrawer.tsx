@@ -254,7 +254,7 @@ export function StationDetailDrawer({
             {isActiveInContext ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-owner-soft px-3 py-1 text-[12px] font-semibold text-owner-deep">
                 <IconCheck size={14} strokeWidth={2.4} />
-                <span>Trạm đang quản lý trong ngữ cảnh</span>
+                <span>{t('stations.drawer.activeContextBadge', { defaultValue: 'Trạm đang quản lý trong ngữ cảnh' })}</span>
               </span>
             ) : (
               onSelectActive && (
@@ -263,16 +263,22 @@ export function StationDetailDrawer({
                   size="sm"
                   onClick={() => {
                     onSelectActive(station.id);
-                    toast(`Đã chọn ${station.name} làm trạm quản lý hiện tại.`, 'success');
+                    toast(
+                      t('stations.drawer.selectedToast', {
+                        name: station.name,
+                        defaultValue: `Đã chọn ${station.name} làm trạm quản lý hiện tại.`,
+                      }),
+                      'success',
+                    );
                   }}
                 >
-                  Chọn làm trạm hiện tại
+                  {t('stations.drawer.selectCurrentBtn', { defaultValue: 'Chọn làm trạm hiện tại' })}
                 </Button>
               )
             )}
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Đóng
+            {t('common:close', { defaultValue: 'Đóng' })}
           </Button>
         </div>
       }
@@ -328,17 +334,17 @@ export function StationDetailDrawer({
                     {station.operationalStatus === 'PAUSED' ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-bold text-rose-600 border border-rose-500/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                        Tạm dừng đón khách
+                        {t('stations.operatingBadge.PAUSED_BY_OWNER', { defaultValue: 'Tạm dừng đón khách' })}
                       </span>
                     ) : station.operationalStatus === 'MAINTENANCE' ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 border border-amber-500/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                        Đang bảo trì
+                        {t('stations.operatingBadge.MAINTENANCE', { defaultValue: 'Đang bảo trì' })}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Đang vận hành bình thường
+                        {t('stations.drawer.operatingNormal', { defaultValue: 'Đang vận hành bình thường' })}
                       </span>
                     )}
                   </div>
@@ -357,7 +363,7 @@ export function StationDetailDrawer({
                     <span className="font-semibold text-ink">
                       {t('stations.operationalModal.reason', { defaultValue: 'Lý do:' })}{' '}
                     </span>
-                    <span>{station.operationalStatusReason || 'Chủ trạm tạm thời dừng tiếp nhận đặt chỗ mới.'}</span>
+                    <span>{station.operationalStatusReason || t('stations.operationalModal.pausedDesc', { defaultValue: 'Chủ trạm tạm thời dừng tiếp nhận đặt chỗ mới.' })}</span>
                   </div>
                 )}
               </Card>
@@ -368,11 +374,13 @@ export function StationDetailDrawer({
               <div className="rounded-[10px] border border-warn-border bg-warn-soft/60 p-3 text-[12px] leading-relaxed text-warn-deep">
                 <div className="flex items-center gap-2 font-bold text-ink">
                   <IconShieldAlert size={16} className="text-warn shrink-0" />
-                  <span>Trạm đang tạm ẩn khỏi tìm kiếm của tài xế</span>
+                  <span>{t('stations.drawer.hiddenAlertTitle', { defaultValue: 'Trạm đang tạm ẩn khỏi tìm kiếm của tài xế' })}</span>
                 </div>
                 <div className="mt-1 text-muted">
-                  {eligibility.details || 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.'}{' '}
-                  <span className="font-semibold text-ink">Các phiên sạc đang chạy vẫn được bảo đảm.</span>
+                  {eligibility.reason
+                    ? t(`stations.eligibility.${eligibility.reason}`, { defaultValue: eligibility.details })
+                    : eligibility.details || t('stations.card.hiddenCalloutDesc', { defaultValue: 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.' })}{' '}
+                  <span className="font-semibold text-ink">{t('stations.drawer.hiddenAlertNotice', { defaultValue: 'Các phiên sạc đang chạy vẫn được bảo đảm.' })}</span>
                 </div>
                 <button
                   type="button"
@@ -441,7 +449,7 @@ export function StationDetailDrawer({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand hover:underline"
                     >
-                      <span>Xem trên Google Maps</span>
+                      <span>{t('stations.drawer.viewOnMaps', { defaultValue: 'Xem trên Google Maps' })}</span>
                       <span>↗</span>
                     </a>
                   </div>
@@ -449,7 +457,7 @@ export function StationDetailDrawer({
 
                 {(station as any).description && (
                   <div className="col-span-full flex flex-col gap-0.5 border-t border-hairline pt-2.5">
-                    <span className="text-faint font-medium">Mô tả & Chỉ dẫn tiếp cận</span>
+                    <span className="text-faint font-medium">{t('stations.drawer.descriptionTitle', { defaultValue: 'Mô tả & Chỉ dẫn tiếp cận' })}</span>
                     <span className="text-body leading-relaxed">{(station as any).description}</span>
                   </div>
                 )}
@@ -459,28 +467,36 @@ export function StationDetailDrawer({
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
               <div className="rounded-[9px] border border-line-3 bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">Số trụ dự kiến</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                  {t('stations.drawer.metrics.plannedChargers', { defaultValue: 'Số trụ dự kiến' })}
+                </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
                   {station.plannedChargePointCount ?? '—'}
                 </div>
               </div>
 
               <div className="rounded-[9px] border border-line-3 bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">Trụ đang Online</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                  {t('stations.drawer.metrics.onlineChargers', { defaultValue: 'Trụ đang Online' })}
+                </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
                   {onlineChargers}/{actualChargers}
                 </div>
               </div>
 
               <div className="rounded-[9px] border border-line-3 bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">Lượt đặt hôm nay</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                  {t('stations.drawer.metrics.bookingsToday', { defaultValue: 'Lượt đặt hôm nay' })}
+                </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
                   {station.bookingsToday ?? 0}
                 </div>
               </div>
 
               <div className="rounded-[9px] border border-line-3 bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">Tỷ lệ sử dụng</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                  {t('stations.drawer.metrics.utilization', { defaultValue: 'Tỷ lệ sử dụng' })}
+                </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
                   {station.utilizationPct ?? 0}%
                 </div>
@@ -507,19 +523,19 @@ export function StationDetailDrawer({
                 });
                 qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
                 qc.invalidateQueries({ queryKey: ['stations'] });
-                toast('Tải ảnh trạm sạc lên thành công!', 'success');
+                toast(t('stations.gallery.uploadSuccess', { defaultValue: 'Tải ảnh trạm sạc lên thành công!' }), 'success');
               }}
               onDeleteAsset={async (assetId) => {
                 await api.stations.deleteAsset(station.id, assetId);
                 qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
                 qc.invalidateQueries({ queryKey: ['stations'] });
-                toast('Đã xóa ảnh khỏi trạm sạc.', 'success');
+                toast(t('stations.gallery.deleteSuccess', { defaultValue: 'Đã xóa ảnh khỏi trạm sạc.' }), 'success');
               }}
               onSetPrimaryAsset={async (assetId) => {
                 await api.stations.setPrimaryAsset(station.id, assetId);
                 qc.invalidateQueries({ queryKey: ['stations', 'assets', station.id] });
                 qc.invalidateQueries({ queryKey: ['stations'] });
-                toast('Đã cập nhật ảnh chính cho trạm sạc!', 'success');
+                toast(t('stations.gallery.setPrimarySuccess', { defaultValue: 'Đã cập nhật ảnh chính cho trạm sạc!' }), 'success');
               }}
             />
           </Card>
@@ -530,9 +546,11 @@ export function StationDetailDrawer({
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[14px] font-bold text-ink">Trụ sạc & Cổng sạc (Connectors)</div>
+                <div className="text-[14px] font-bold text-ink">
+                  {t('stations.drawer.hardware.title', { defaultValue: 'Trụ sạc & Cổng sạc (Connectors)' })}
+                </div>
                 <div className="text-[12px] text-muted">
-                  Danh sách trụ sạc được quản trị viên cấp phát cho trạm này.
+                  {t('stations.drawer.hardware.subtitle', { defaultValue: 'Danh sách trụ sạc được quản trị viên cấp phát cho trạm này.' })}
                 </div>
               </div>
               <Button
@@ -545,7 +563,7 @@ export function StationDetailDrawer({
                   navigate('/owner/chargers');
                 }}
               >
-                Quản lý chi tiết Trụ sạc →
+                {t('stations.drawer.hardware.manageBtn', { defaultValue: 'Quản lý chi tiết Trụ sạc →' })}
               </Button>
             </div>
 
@@ -556,8 +574,8 @@ export function StationDetailDrawer({
               </div>
             ) : (chargePointsQ.data ?? []).length === 0 ? (
               <EmptyState
-                title="Chưa có trụ sạc nào"
-                description="Trạm chưa được quản trị viên cấp phát trụ sạc hoặc đang chờ kích hoạt phần cứng."
+                title={t('stations.drawer.hardware.emptyTitle', { defaultValue: 'Chưa có trụ sạc nào' })}
+                description={t('stations.drawer.hardware.emptyDesc', { defaultValue: 'Trạm chưa được quản trị viên cấp phát trụ sạc hoặc đang chờ kích hoạt phần cứng.' })}
               />
             ) : (
               <div className="flex flex-col gap-3">
@@ -612,7 +630,11 @@ export function StationDetailDrawer({
                                   </div>
                                 </div>
                                 <span className="text-[11px] font-medium text-body">
-                                  {isAvailable ? 'Sẵn sàng' : isInUse ? 'Đang sạc' : 'Ngoại tuyến'}
+                                  {isAvailable
+                                    ? t('stations.drawer.hardware.connectorAvailable', { defaultValue: 'Sẵn sàng' })
+                                    : isInUse
+                                      ? t('stations.drawer.hardware.connectorInUse', { defaultValue: 'Đang sạc' })
+                                      : t('stations.drawer.hardware.connectorOffline', { defaultValue: 'Ngoại tuyến' })}
                                 </span>
                               </div>
                             );
@@ -634,9 +656,11 @@ export function StationDetailDrawer({
             <Card className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[13.5px] font-bold text-ink">Giờ mở cửa hoạt động</div>
+                  <div className="text-[13.5px] font-bold text-ink">
+                    {t('stations.drawer.hours.title', { defaultValue: 'Giờ mở cửa hoạt động' })}
+                  </div>
                   <div className="text-[11.5px] text-muted">
-                    Khung giờ trạm mở cửa tiếp nhận tài xế đến sạc.
+                    {t('stations.drawer.hours.subtitle', { defaultValue: 'Khung giờ trạm mở cửa tiếp nhận tài xế đến sạc.' })}
                   </div>
                 </div>
                 <Button
@@ -648,14 +672,16 @@ export function StationDetailDrawer({
                     navigate('/owner/pricing');
                   }}
                 >
-                  Cấu hình giờ & giá →
+                  {t('stations.drawer.hours.configBtn', { defaultValue: 'Cấu hình giờ & giá →' })}
                 </Button>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day) => (
                   <div key={day} className="rounded-[8px] border border-line-3 bg-surface-2 p-2 text-center text-[12px]">
-                    <div className="font-semibold text-ink">{DAY_LABELS[day] || day}</div>
+                    <div className="font-semibold text-ink">
+                      {t(`pricing.dayNames.${day}`, { defaultValue: DAY_LABELS[day] || day })}
+                    </div>
                     <div className="mt-0.5 text-[11px] font-mono text-good font-medium">00:00 – 24:00 (24/7)</div>
                   </div>
                 ))}
@@ -666,9 +692,11 @@ export function StationDetailDrawer({
             <Card className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[13.5px] font-bold text-ink">Tiện ích xung quanh trạm</div>
+                  <div className="text-[13.5px] font-bold text-ink">
+                    {t('stations.drawer.amenities.title', { defaultValue: 'Tiện ích xung quanh trạm' })}
+                  </div>
                   <div className="text-[11.5px] text-muted">
-                    Chủ trạm có thể tự chọn tiện ích để hiển thị cho tài xế trên ứng dụng di động.
+                    {t('stations.drawer.amenities.subtitle', { defaultValue: 'Chủ trạm có thể tự chọn tiện ích để hiển thị cho tài xế trên ứng dụng di động.' })}
                   </div>
                 </div>
                 {amenitiesDirty && (
@@ -678,7 +706,7 @@ export function StationDetailDrawer({
                     disabled={updateAmenitiesMutation.isPending}
                     onClick={() => updateAmenitiesMutation.mutate(selectedAmenities)}
                   >
-                    {updateAmenitiesMutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+                    {updateAmenitiesMutation.isPending ? t('common:saving', { defaultValue: 'Đang lưu…' }) : t('common:save', { defaultValue: 'Lưu thay đổi' })}
                   </Button>
                 )}
               </div>
@@ -713,9 +741,11 @@ export function StationDetailDrawer({
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[14px] font-bold text-ink">Giấy phép Vận hành (License)</div>
+                <div className="text-[14px] font-bold text-ink">
+                  {t('stations.drawer.license.title', { defaultValue: 'Giấy phép Vận hành (License)' })}
+                </div>
                 <div className="text-[12px] text-muted">
-                  Gói dịch vụ nền tảng duy trì kết nối & khả năng hiển thị trạm cho tài xế.
+                  {t('stations.drawer.license.subtitle', { defaultValue: 'Gói dịch vụ nền tảng duy trì kết nối & khả năng hiển thị trạm cho tài xế.' })}
                 </div>
               </div>
               <Button
@@ -728,7 +758,7 @@ export function StationDetailDrawer({
                   navigate('/owner/license');
                 }}
               >
-                Quản lý Giấy phép →
+                {t('stations.drawer.license.manageBtn', { defaultValue: 'Quản lý Giấy phép →' })}
               </Button>
             </div>
 
@@ -741,56 +771,71 @@ export function StationDetailDrawer({
                   <div className="flex items-center gap-2">
                     <IconShieldCheck size={18} className="text-owner" />
                     <span className="font-bold text-[14px] text-ink">
-                      Gói {licenseQ.data.plan === 'YEARLY' ? 'Năm' : 'Tháng'}
+                      {t('stations.drawer.license.plan', {
+                        plan: licenseQ.data.plan === 'YEARLY'
+                          ? t('stations.card.planYearly', { defaultValue: 'Gói Năm' })
+                          : licenseQ.data.plan === 'MONTHLY'
+                            ? t('stations.card.planMonthly', { defaultValue: 'Gói Tháng' })
+                            : licenseQ.data.plan,
+                        defaultValue: `Gói ${licenseQ.data.plan === 'YEARLY' ? 'Năm' : 'Tháng'}`,
+                      })}
                     </span>
                     <StatusPill tone="good" label={licenseQ.data.status} />
                   </div>
                   {licenseQ.data.daysLeft !== undefined && (
                     <span className="rounded-full bg-owner-soft px-2.5 py-0.5 text-[11px] font-bold text-owner-deep">
-                      Còn {licenseQ.data.daysLeft} ngày
+                      {t('stations.card.daysLeft', { count: licenseQ.data.daysLeft, defaultValue: `Còn ${licenseQ.data.daysLeft} ngày` })}
                     </span>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-[12.5px] border-t border-hairline pt-3">
                   <div>
-                    <span className="text-faint">Ngày bắt đầu hiệu lực:</span>
+                    <span className="text-faint">{t('stations.drawer.license.startDate', { defaultValue: 'Ngày bắt đầu hiệu lực:' })}</span>
                     <div className="font-medium text-ink">{formatDateVn(licenseQ.data.startAt)}</div>
                   </div>
                   <div>
-                    <span className="text-faint">Ngày hết hạn:</span>
+                    <span className="text-faint">{t('stations.drawer.license.expiryDate', { defaultValue: 'Ngày hết hạn:' })}</span>
                     <div className="font-medium text-ink">{formatDateVn(licenseQ.data.expiresAt)}</div>
                   </div>
                 </div>
               </Card>
             ) : (
               <div className="rounded-[10px] border border-warn-border bg-warn-soft p-3.5 text-[12px] text-warn-deep">
-                <div className="font-bold">Trạm chưa kích hoạt gói License nào</div>
+                <div className="font-bold">{t('stations.drawer.license.missingTitle', { defaultValue: 'Trạm chưa kích hoạt gói License nào' })}</div>
                 <div className="mt-1">
-                  Vui lòng liên hệ Quản trị viên để cấp phát và kích hoạt License cho trạm này nhằm mở khả năng nhận khách.
+                  {t('stations.drawer.license.missingDesc', { defaultValue: 'Vui lòng liên hệ Quản trị viên để cấp phát và kích hoạt License cho trạm này nhằm mở khả năng nhận khách.' })}
                 </div>
               </div>
             )}
 
             {/* Driver Search Eligibility Explanation */}
             <Card className="p-4 flex flex-col gap-2.5">
-              <div className="text-[13px] font-bold text-ink">Điều kiện Hiển thị Tìm kiếm Tài xế</div>
+              <div className="text-[13px] font-bold text-ink">
+                {t('stations.drawer.eligibility.title', { defaultValue: 'Điều kiện Hiển thị Tìm kiếm Tài xế' })}
+              </div>
               <div className="flex items-center justify-between text-[12.5px] py-1 border-b border-hairline">
-                <span>1. Trạng thái Trạm được Duyệt (ACTIVE)</span>
+                <span>{t('stations.drawer.eligibility.rule1', { defaultValue: '1. Trạng thái Trạm được Duyệt (ACTIVE)' })}</span>
                 <span className="font-semibold text-good">
-                  {station.status === 'ACTIVE' || station.status === 'active' ? '✓ Đạt' : '✗ Chưa đạt'}
+                  {station.status === 'ACTIVE' || station.status === 'active'
+                    ? t('stations.drawer.eligibility.pass', { defaultValue: '✓ Đạt' })
+                    : t('stations.drawer.eligibility.fail', { defaultValue: '✗ Chưa đạt' })}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[12.5px] py-1 border-b border-hairline">
-                <span>2. Gói License còn hiệu lực</span>
+                <span>{t('stations.drawer.eligibility.rule2', { defaultValue: '2. Gói License còn hiệu lực' })}</span>
                 <span className="font-semibold text-good">
-                  {station.licenseSummary ? '✓ Đạt' : '✗ Chưa có'}
+                  {station.licenseSummary
+                    ? t('stations.drawer.eligibility.pass', { defaultValue: '✓ Đạt' })
+                    : t('stations.drawer.eligibility.missing', { defaultValue: '✗ Chưa có' })}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[12.5px] py-1">
-                <span>3. Trụ sạc sẵn sàng tiếp nhận đặt chỗ</span>
+                <span>{t('stations.drawer.eligibility.rule3', { defaultValue: '3. Trụ sạc sẵn sàng tiếp nhận đặt chỗ' })}</span>
                 <span className="font-semibold text-good">
-                  {actualChargers > 0 ? `✓ Có ${actualChargers} trụ` : '✗ Chưa có trụ'}
+                  {actualChargers > 0
+                    ? t('stations.drawer.eligibility.hasChargers', { count: actualChargers, defaultValue: `✓ Có ${actualChargers} trụ` })
+                    : t('stations.drawer.eligibility.noChargers', { defaultValue: '✗ Chưa có trụ' })}
                 </span>
               </div>
             </Card>
@@ -802,9 +847,11 @@ export function StationDetailDrawer({
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[14px] font-bold text-ink">Nhân viên Phụ trách Trạm</div>
+                <div className="text-[14px] font-bold text-ink">
+                  {t('stations.drawer.staff.title', { defaultValue: 'Nhân viên Phụ trách Trạm' })}
+                </div>
                 <div className="text-[12px] text-muted">
-                  Danh sách nhân viên được phân quyền vận hành và hỗ trợ tài xế tại trạm.
+                  {t('stations.drawer.staff.subtitle', { defaultValue: 'Danh sách nhân viên được phân quyền vận hành và hỗ trợ tài xế tại trạm.' })}
                 </div>
               </div>
               <Button
@@ -817,7 +864,7 @@ export function StationDetailDrawer({
                   navigate('/owner/staff');
                 }}
               >
-                Mời nhân viên mới →
+                {t('stations.drawer.staff.inviteBtn', { defaultValue: 'Mời nhân viên mới →' })}
               </Button>
             </div>
 
@@ -825,8 +872,8 @@ export function StationDetailDrawer({
               <Skeleton className="h-[100px] rounded-card" />
             ) : stationStaff.length === 0 ? (
               <EmptyState
-                title="Chưa có nhân viên phụ trách"
-                description="Trạm chưa được gán nhân viên vận hành nào. Bạn có thể phân công nhân viên từ trang Quản lý nhân viên."
+                title={t('stations.drawer.staff.emptyTitle', { defaultValue: 'Chưa có nhân viên phụ trách' })}
+                description={t('stations.drawer.staff.emptyDesc', { defaultValue: 'Trạm chưa được gán nhân viên vận hành nào. Bạn có thể phân công nhân viên từ trang Quản lý nhân viên.' })}
               />
             ) : (
               <div className="flex flex-col gap-2.5">
@@ -844,7 +891,9 @@ export function StationDetailDrawer({
                         </div>
                       </div>
                       <span className="rounded bg-good-soft px-2 py-0.5 text-[11px] font-semibold text-good">
-                        {m.status === 'ACTIVE' ? 'Đang trực' : 'Đã thu hồi'}
+                        {m.status === 'ACTIVE'
+                          ? t('staff.list.activeBadge', { defaultValue: 'Đang trực' })
+                          : t('stations.drawer.staff.revokedBadge', { defaultValue: 'Đã thu hồi' })}
                       </span>
                     </Card>
                   );
@@ -858,9 +907,11 @@ export function StationDetailDrawer({
         {activeTab === 'timeline' && (
           <div className="flex flex-col gap-4">
             <div>
-              <div className="text-[14px] font-bold text-ink">Tiến trình Phê duyệt & Lịch sử Trạng thái</div>
+              <div className="text-[14px] font-bold text-ink">
+                {t('stations.drawer.timeline.title', { defaultValue: 'Tiến trình Phê duyệt & Lịch sử Trạng thái' })}
+              </div>
               <div className="text-[12px] text-muted">
-                Toàn bộ các mốc thay đổi trạng thái của hồ sơ trạm từ lúc nộp đến khi vận hành.
+                {t('stations.drawer.timeline.subtitle', { defaultValue: 'Toàn bộ các mốc thay đổi trạng thái của hồ sơ trạm từ lúc nộp đến khi vận hành.' })}
               </div>
             </div>
 
@@ -868,7 +919,7 @@ export function StationDetailDrawer({
               <Skeleton className="h-[140px] rounded-card" />
             ) : (statusHistoryQ.data ?? []).length === 0 ? (
               <Card className="p-4 text-center text-[12.5px] text-muted">
-                Chưa có dữ liệu lịch sử trạng thái được ghi nhận cho trạm này.
+                {t('stations.drawer.timeline.empty', { defaultValue: 'Chưa có dữ liệu lịch sử trạng thái được ghi nhận cho trạm này.' })}
               </Card>
             ) : (
               <div className="relative flex flex-col gap-4 pl-6 before:absolute before:bottom-2 before:left-[11px] before:top-2 before:w-0.5 before:bg-line-2">
@@ -892,7 +943,10 @@ export function StationDetailDrawer({
                         </span>
                       </div>
                       <div className="text-[12px] text-body">
-                        Thực hiện bởi: <span className="font-medium text-ink">{event.performedByName || 'Hệ thống'}</span>
+                        {t('stations.drawer.timeline.performedBy', { defaultValue: 'Thực hiện bởi:' })}{' '}
+                        <span className="font-medium text-ink">
+                          {event.performedByName || t('stations.drawer.timeline.system', { defaultValue: 'Hệ thống' })}
+                        </span>
                         {event.performedByRole && (
                           <span className="ml-1 text-[11px] text-faint">({event.performedByRole})</span>
                         )}

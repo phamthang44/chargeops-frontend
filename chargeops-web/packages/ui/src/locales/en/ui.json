@@ -12,7 +12,11 @@
     "placeholder": "Search bookings, chargers, stations…",
     "clear": "Clear search",
     "loading": "Searching…",
-    "empty": "No results found."
+    "empty": "No results found.",
+    "minChars": "Type at least 2 characters to start searching.",
+    "hintNav": "navigate",
+    "hintOpen": "open",
+    "hintClose": "close"
   },
   "brand": {
     "switchPortal": "Switch portal"
@@ -31,5 +35,58 @@
     "prevPage": "Previous page",
     "nextPage": "Next page",
     "jumpToPage": "Go to page"
+  },
+  "stationStatus": {
+    "pending": "Pending Approval",
+    "rejected": "Rejected",
+    "suspended": "Suspended",
+    "withdrawn": "Withdrawn",
+    "unapproved": "Unapproved",
+    "licenseMissing": "Missing License",
+    "licenseExpired": "License Expired",
+    "licenseSuspended": "License Suspended",
+    "licenseCancelled": "License Cancelled",
+    "licenseNotStarted": "License Pending",
+    "noActiveChargers": "No Active Chargers",
+    "allChargersOffline": "All Chargers Offline",
+    "hiddenFromSearch": "Hidden from Search",
+    "pausedByOwner": "Paused by Owner",
+    "maintenance": "Under Maintenance",
+    "unavailableByPlatform": "Unavailable",
+    "open": "Open · Accepting Drivers",
+    "openCompact": "Open",
+    "closedBySchedule": "Outside Operating Hours",
+    "scheduleNotConfigured": "No Schedule Configured",
+    "active": "Active"
+  },
+  "stationStatusTooltips": {
+    "pending": "Station registration is pending ChargeOps admin review.",
+    "rejected": "Station registration has been rejected.",
+    "suspended": "Station is suspended by system administration.",
+    "withdrawn": "Station registration has been withdrawn by owner.",
+    "unapproved": "Station status: {{status}}",
+    "licenseMissing": "Station has no valid license and is temporarily hidden from driver search.",
+    "licenseExpired": "Station license has expired. Please renew to accept drivers again.",
+    "licenseSuspended": "Station license is currently suspended.",
+    "licenseCancelled": "Station license has been cancelled.",
+    "licenseNotStarted": "Station license has not reached its effective start date yet.",
+    "noActiveChargers": "Station does not have any active chargers or connectors provisioned.",
+    "allChargersOffline": "All station chargers are offline, paused, or awaiting activation.",
+    "hiddenFromSearch": "Station is temporarily not eligible to accept drivers.",
+    "pausedByOwner": "Station owner has temporarily paused accepting new bookings.",
+    "maintenance": "Station is undergoing technical maintenance.",
+    "unavailableByPlatform": "Station is not eligible to be displayed on the platform.",
+    "open": "Station is within operating hours and visible to drivers on mobile apps.",
+    "closedBySchedule": "Station is outside scheduled operating hours (still visible on mobile apps).",
+    "scheduleNotConfigured": "Station has not configured specific operating hours yet.",
+    "active": "Station is operating normally on the system."
+  },
+  "stationOperatingBadge": {
+    "OPEN": "Open",
+    "CLOSED_BY_SCHEDULE": "Outside Operating Hours",
+    "PAUSED_BY_OWNER": "Paused by Owner",
+    "MAINTENANCE": "Under Maintenance",
+    "SCHEDULE_NOT_CONFIGURED": "No Schedule Configured",
+    "UNAVAILABLE_BY_PLATFORM": "Ineligible"
   }
 }

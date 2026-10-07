@@ -268,6 +268,36 @@
     },
     "tabs": {
       "all": "Tất cả"
+    },
+    "status": {
+      "all": "Tất cả",
+      "pending": "Chờ thanh toán",
+      "confirmed": "Đã xác nhận",
+      "checkedin": "Đã check-in",
+      "charging": "Đang sạc",
+      "completed": "Hoàn tất",
+      "cancelled": "Đã hủy",
+      "expired": "Đã hết hạn",
+      "PENDING": "Chờ thanh toán",
+      "CONFIRMED": "Đã xác nhận",
+      "CHECKED_IN": "Đã check-in",
+      "CHARGING": "Đang sạc",
+      "COMPLETED": "Hoàn tất",
+      "CANCELLED": "Đã hủy",
+      "EXPIRED": "Đã hết hạn"
+    },
+    "cancellationReason": {
+      "DRIVER_CANCELLED": "Tài xế tự hủy",
+      "NO_SHOW": "Quá hạn check-in (No-show)",
+      "STATION_FAILURE": "Sự cố kỹ thuật trạm"
+    },
+    "paymentStatus": {
+      "PENDING": "Chờ thanh toán",
+      "HELD": "Tạm giữ",
+      "PAID": "Đã thanh toán",
+      "REFUNDED": "Đã hoàn tiền",
+      "FAILED": "Thất bại",
+      "EXPIRED": "Đã hết hạn"
     }
   },
   "chargers": {
@@ -300,6 +330,12 @@
       "MAINTENANCE": "Bảo trì"
     },
     "connectorCount": "{{count}} connector",
+    "pendingTooltip": "Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng",
+    "history": {
+      "shortLabel": "Lịch sử",
+      "cpTooltip": "Xem lịch sử thay đổi trạng thái trụ sạc",
+      "connectorTooltip": "Xem lịch sử trạng thái súng sạc"
+    },
     "panel": {
       "editTitle": "CHỈNH SỬA TRỤ SẠC",
       "close": "Đóng",
@@ -478,6 +514,11 @@
     "maintBodyConnector": "Chuyển cổng sạc sang chế độ Bảo trì kỹ thuật.",
     "reasonLabel": "Lý do thay đổi trạng thái",
     "reasonPlaceholder": "Nhập chi tiết lý do (bắt buộc, tối thiểu 3 ký tự)...",
+    "defaultReason": {
+      "maintenance": "Bảo trì thiết bị",
+      "offline": "Tạm ngắt vận hành",
+      "online": "Mở hoạt động thiết bị"
+    },
     "incidentBannerTitle": "Xảy ra sự cố kỹ thuật hoặc khẩn cấp (Emergency Incident)?",
     "incidentBannerDesc": "Nếu thiết bị hỏng hóc hoặc nguy hiểm cần ngắt điện ngay, bạn có thể kích hoạt báo cáo sự cố khẩn cấp để lập tức chuyển cổng sạc sang OFFLINE và chốt snapshot các đơn đặt chỗ để xử lý an toàn.",
     "incidentBannerBtn": "Kích hoạt Báo sự cố khẩn cấp (BKG-054)",
@@ -515,6 +556,7 @@
       "total": "TỔNG CONNECTOR",
       "available": "SẴN SÀNG",
       "inuse": "ĐANG SẠC",
+      "offline": "OFFLINE",
       "sessions": "PHIÊN HÔM NAY",
       "sessionsSub": "SD trung bình {{util}}%"
     },
@@ -565,6 +607,24 @@
         "groupHelp": "Tài xế chọn thời điểm bắt đầu bất kỳ (VD: 09:51). Thời lượng sạc sẽ được đề xuất theo các bội số tối thiểu (VD: 30p → kết thúc 10:21).",
         "durationLabel": "THỜI LƯỢNG ĐẶT TỐI THIỂU (DURATION)",
         "durationVal": "{{minutes}} phút",
+        "lockedNotice": "(Tạm khóa)",
+        "lockedTooltip": "Mốc 90 phút chưa được xác thực trong vận hành thực tế nên tạm thời bị khóa",
+        "lockedWarning": "Mốc 90 phút chưa được kiểm chứng vận hành thực tế nên tạm thời bị khóa.",
+        "flexiblePolicyTitle": "Quy cách tính giờ linh hoạt:",
+        "flexiblePolicyPrefix": "Tài xế chọn giờ bắt đầu bất kỳ (ví dụ",
+        "flexiblePolicyWithMin": "Với mức tối thiểu",
+        "flexiblePolicyAndStep": "và bước nhảy",
+        "flexiblePolicySuggests": "ứng dụng đề xuất các gói sạc:",
+        "flexiblePolicyUntil": "đến",
+        "flexiblePolicyMax": "tối đa",
+        "systemPolicyTitle": "QUY TẮC LÊN LỊCH CỐ ĐỊNH TOÀN HỆ THỐNG (SYSTEM POLICY)",
+        "operationalStandard": "Tiêu chuẩn vận hành",
+        "turnaroundBufferTitle": "THỜI GIAN GIÃN CA (ĐỔI XE)",
+        "turnaroundBufferDesc": "Khoảng nghỉ sau mỗi lượt sạc để xe trước rút sạc & rời vị trí an toàn.",
+        "stepIncrementTitle": "BƯỚC TĂNG THỜI GIAN",
+        "stepIncrementDesc": "Khoảng thời gian tăng dần khi tài xế chọn thời lượng sạc.",
+        "maxDurationTitle": "THỜI LƯỢNG SẠC TỐI ĐA",
+        "maxDurationDesc": "Giới hạn tối đa cho một lượt sạc để tránh chiếm dụng trụ quá lâu.",
         "basePriceGroupTitle": "Giá sạc cơ bản",
         "basePriceLabel": "GIÁ SẠC CƠ BẢN",
         "basePriceSub": "Giá gốc",
@@ -585,8 +645,24 @@
         "activeSchedule": "Đang áp dụng",
         "effectiveFrom": "Có hiệu lực từ:",
         "defaultSchedule": "Đang áp dụng lịch mặc định hệ thống",
+        "unconfigured": "Chưa cấu hình",
+        "unconfiguredHint": "Trạm chưa lưu cấu hình giá & lịch. Vui lòng thiết lập và lưu để bắt đầu nhận lịch sạc.",
         "effectiveImmediately": "Các thay đổi sẽ có hiệu lực ngay sau khi bạn xác nhận lưu.",
         "keepExistingBookings": "Các lịch đặt đã được xác nhận trước đó vẫn giữ nguyên vẹn khung giờ và mức giá cam kết.",
+        "colDay": "Ngày trong tuần",
+        "colOpen": "Giờ mở cửa",
+        "colClose": "Giờ đóng cửa",
+        "colStatus": "Mở cửa",
+        "open247Row": "Mở liên tục 24/7 (00:00 – 24:00)",
+        "closedRow": "Đóng cửa (Nghỉ phục vụ)",
+        "openAria": "Giờ mở cửa {{day}}",
+        "closeAria": "Giờ đóng cửa {{day}}",
+        "footerTitle": "Quy cách giờ đóng mở:",
+        "footerDescPart1": "Trạm đang mở",
+        "footerDescPart2": ". Nếu giờ đóng cửa nhỏ hơn giờ mở cửa (ví dụ",
+        "footerDescPart3": "), hệ thống tự động hiểu là trạm mở xuyên qua nửa đêm sang sáng hôm sau.",
+        "daysCountAll": "7/7 ngày (24/7)",
+        "daysCount": "{{count}}/7 ngày",
         "closed": "Đóng cửa",
         "openAllDay": "Mở 24/24"
       },
@@ -608,8 +684,14 @@
         "weekendsBadge": "Thứ 7 – Chủ Nhật",
         "dailyTrack": "📅 Cả tuần",
         "dailyBadge": "Thứ 2 – Chủ Nhật",
+        "editRuleTooltip": "Chỉnh sửa khung giá này",
+        "deleteRuleTooltip": "Xóa khung giá",
         "deleteConfirmTitle": "Xác nhận xóa khung giá",
-        "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa khung giá này? Sau khi xóa, các lượt đặt trong khung giờ này sẽ được tính theo giá cơ bản."
+        "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa khung giá này? Sau khi xóa, các lượt đặt trong khung giờ này sẽ được tính theo giá cơ bản.",
+        "deleteConfirmModalTitle": "Xóa khung giá này?",
+        "deleteConfirmModalDesc": "Bạn có chắc chắn muốn xóa khung giá \"{{name}}\" ({{from}}–{{to}}) không? Các khung giờ này sẽ tự động quay về áp dụng mức giá gốc.",
+        "deleteConfirmBtn": "Xác nhận xóa",
+        "basePriceLabel": "Giá cơ bản"
       },
       "step4": {
         "title": "Quy chuẩn Khả dụng & Vận hành",
@@ -621,16 +703,49 @@
         "validConfigHelp": "Toàn bộ quy chuẩn vận hành được đồng bộ nhất quán theo tiêu chuẩn SLA của nền tảng ChargeOps.",
         "bufferTitle": "Thời gian giãn ca giữa 2 lượt sạc",
         "bufferDesc": "Khoảng nghỉ cố định bắt buộc sau mỗi lượt sạc để xe trước rút sạc, di chuyển ra khỏi vị trí an toàn trước khi lượt kế tiếp bắt đầu.",
+        "noShowBadge": "{{minutes}} phút (Bắt buộc)",
+        "advanceBadge": "{{days}} ngày (Hôm nay & Ngày mai)",
+        "bufferBadge": "{{minutes}} phút cố định",
         "philosophyTitle": "Nguyên tắc vận hành cốt lõi: Lịch đặt chỗ & Lượt sạc thực tế",
         "philosophyBooking": "Lịch đặt chỗ là cam kết: Quyền sử dụng theo khung giờ đã chốt với tài xế. Xe trước sạc xong sớm không tự ý đẩy lịch của người sau lên sớm hơn mà tạo thêm khoảng nghỉ an toàn.",
         "philosophyBuffer": "10 phút giãn ca là thời gian đổi xe: Đảm bảo xe trước rút sạc và lái ra khỏi vị trí an toàn trước khi xe sau tiến vào.",
         "philosophyOverstay": "Tài xế đỗ xe quá giờ hẹn: Hệ thống tính phí phạt đỗ quá giờ riêng, tuyệt đối không tự ý dời hay đè lịch của lượt đặt chỗ tiếp theo.",
-        "philosophySchedule": "Lịch hoạt động áp dụng cho lượt đặt mới: Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu."
+        "philosophySchedule": "Lịch hoạt động áp dụng cho lượt đặt mới: Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu.",
+        "philosophyBookingBold": "Lịch đặt chỗ là cam kết:",
+        "philosophyBookingText": "Quyền sử dụng theo khung giờ đã chốt với tài xế. Xe trước sạc xong sớm không tự ý đẩy lịch của người sau lên sớm hơn mà tạo thêm khoảng nghỉ an toàn.",
+        "philosophyBufferBold": "10 phút giãn ca là thời gian đổi xe:",
+        "philosophyBufferText": "Đảm bảo xe trước rút sạc và lái ra khỏi vị trí an toàn trước khi xe sau tiến vào.",
+        "philosophyOverstayBold": "Tài xế đỗ xe quá giờ hẹn:",
+        "philosophyOverstayText": "Hệ thống tính phí phạt đỗ quá giờ riêng, tuyệt đối không tự ý dời hay đè lịch của lượt đặt chỗ tiếp theo.",
+        "philosophyScheduleBold": "Lịch hoạt động áp dụng cho lượt đặt mới:",
+        "philosophyScheduleText": "Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu."
       }
     },
     "confirmModal": {
       "title": "Xác nhận thay đổi Giá & Giờ hoạt động",
       "subtitle": "Vui lòng kiểm tra lại các thông số cấu hình trước khi áp dụng cho trạm sạc.",
+      "effectiveTimeLabel": "Thời điểm áp dụng:",
+      "effectiveTimeValue": "Ngay sau khi xác nhận lưu",
+      "summaryTitle": "Tóm tắt các thông số điều chỉnh",
+      "basePriceRow": "Giá sạc gốc / kWh:",
+      "minDurationRow": "Thời lượng đặt tối thiểu (Thương mại):",
+      "minutesUnit": "phút",
+      "operatingHoursRow": "Giờ hoạt động hàng tuần:",
+      "open247": "Mở cửa 24/7",
+      "adjustedDays": "Đã điều chỉnh ({{count}} ngày thay đổi)",
+      "unchanged": "Không thay đổi",
+      "allStation": "Toàn trạm",
+      "dailyConfig": "Cấu hình theo ngày",
+      "continuous247": "Mở liên tục 24/7",
+      "open247Short": "Mở 24/7",
+      "switchToDaily": "Chuyển sang cấu hình theo ngày",
+      "touCountRow": "Số khung giá theo giờ (TOU):",
+      "windowsCount": "{{count}} khung",
+      "windowsCountLabel": "{{count}} khung giá",
+      "touContentChanged": " · nội dung đã đổi",
+      "bufferRow": "Thời gian giãn ca giữa 2 lượt:",
+      "policyNoticeTitle": "Quy định bảo toàn lịch hẹn đã xác nhận",
+      "policyNoticeDesc": "Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu. Các lịch đặt đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và khung giờ cam kết ban đầu.",
       "cancelBtn": "Tiếp tục chỉnh sửa",
       "confirmBtn": "Xác nhận & Áp dụng"
     },
@@ -645,9 +760,31 @@
       "from": "TỪ",
       "to": "ĐẾN",
       "validationError": "Vui lòng nhập tên quy tắc, mức giá và khung giờ hợp lệ (HH:mm).",
+      "sameTimeError": "Giờ bắt đầu và kết thúc không được trùng nhau.",
+      "overlapError": "Khung giá này chồng lên một quy tắc đã có trên cùng ngày áp dụng.",
       "cancelBtn": "Hủy bỏ",
       "saveBtn": "Lưu khung giá",
       "updateBtn": "Cập nhật khung giá"
+    },
+    "emptyStations": {
+      "title": "Chưa có trạm sạc nào",
+      "description": "Tài khoản hiện chưa sở hữu trạm sạc nào. Vui lòng đăng ký trạm mới tại trang Danh sách trạm trước khi cấu hình giá và giờ hoạt động."
+    },
+    "dayNames": {
+      "T2": "Thứ Hai",
+      "T3": "Thứ Ba",
+      "T4": "Thứ Tư",
+      "T5": "Thứ Năm",
+      "T6": "Thứ Sáu",
+      "T7": "Thứ Bảy",
+      "CN": "Chủ Nhật",
+      "MONDAY": "Thứ Hai",
+      "TUESDAY": "Thứ Ba",
+      "WEDNESDAY": "Thứ Tư",
+      "THURSDAY": "Thứ Năm",
+      "FRIDAY": "Thứ Sáu",
+      "SATURDAY": "Thứ Bảy",
+      "SUNDAY": "Chủ Nhật"
     },
     "days": {
       "daily": "Mỗi ngày",
@@ -778,6 +915,7 @@
     "emptyFilter": "Không có trạm nào ở trạng thái đã chọn.",
     "amenitiesUpdateSuccess": "Cập nhật tiện ích thành công!",
     "amenitiesUpdateError": "Không thể cập nhật tiện ích",
+    "clearFilters": "Xóa bộ lọc",
     "filters": {
       "all": "Tất cả",
       "active": "Đang hoạt động",
@@ -799,8 +937,17 @@
       "utilization": "SỬ DỤNG",
       "addressLabel": "Địa chỉ",
       "licenseLabel": "Giấy phép",
+      "noLicense": "Chưa có License",
+      "planYearly": "Gói Năm",
+      "planMonthly": "Gói Tháng",
+      "expiresOn": "{{plan}} · hết hạn {{date}}",
+      "daysLeft": "Còn {{count}} ngày",
       "rejectionReason": "Lý do từ chối: {{reason}}",
       "pendingHelp": "Hồ sơ đang chờ quản trị viên xét duyệt. Trạm chưa hiển thị cho tài xế.",
+      "hiddenCalloutTitle": "Trạm đang tạm ẩn khỏi tìm kiếm tài xế",
+      "hiddenCalloutDesc": "Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.",
+      "changeStatusTooltip": "Đổi trạng thái vận hành trạm (Operating / Paused / Maintenance)",
+      "selectStationTooltip": "Chọn trạm này làm ngữ cảnh hoạt động hiện tại",
       "amenitiesLabel": "Tiện ích",
       "editAmenities": "Chỉnh sửa",
       "addAmenities": "Thêm tiện ích",
@@ -808,6 +955,16 @@
       "viewDetailBtn": "Xem chi tiết trạm",
       "selectBtn": "Chọn quản lý",
       "selectedBadge": "Đang chọn"
+    },
+    "eligibility": {
+      "LICENSE_MISSING": "Trạm chưa được ghi nhận gói License hợp lệ.",
+      "LICENSE_EXPIRED": "Gói License của trạm đã hết hạn hiệu lực.",
+      "LICENSE_SUSPENDED": "Gói License đang bị tạm ngưng. Trạm tạm thời không hiển thị cho tài xế tìm kiếm.",
+      "LICENSE_CANCELLED": "Gói License đã bị hủy bỏ.",
+      "LICENSE_NOT_STARTED": "Gói License chưa tới thời điểm bắt đầu hiệu lực.",
+      "NO_ACTIVE_CHARGERS": "Trạm đã duyệt nhưng chưa có trụ sạc hoặc súng sạc nào được kích hoạt.",
+      "ALL_CHARGERS_OFFLINE": "Tất cả trụ sạc của trạm đang tạm dừng, chờ kích hoạt hoặc ngoại tuyến.",
+      "STATION_NOT_ACTIVE": "Trạm chưa được duyệt hoặc đang ở trạng thái không hoạt động."
     },
     "register": {
       "title": "Đăng ký trạm mới",
@@ -862,7 +1019,82 @@
         "license": "Giấy phép",
         "staff": "Nhân viên",
         "timeline": "Tiến trình"
+      },
+      "activeContextBadge": "Trạm đang quản lý trong ngữ cảnh",
+      "selectedToast": "Đã chọn {{name}} làm trạm quản lý hiện tại.",
+      "selectCurrentBtn": "Chọn làm trạm hiện tại",
+      "closeBtn": "Đóng",
+      "operatingNormal": "Đang vận hành bình thường",
+      "hiddenAlertTitle": "Trạm đang tạm ẩn khỏi tìm kiếm của tài xế",
+      "hiddenAlertNotice": "Các phiên sạc đang chạy vẫn được bảo đảm.",
+      "viewOnMaps": "Xem trên Google Maps",
+      "descriptionTitle": "Mô tả & Chỉ dẫn tiếp cận",
+      "metrics": {
+        "plannedChargers": "SỐ TRỤ DỰ KIẾN",
+        "onlineChargers": "TRỤ ONLINE",
+        "bookingsToday": "ĐẶT HÔM NAY",
+        "utilization": "TỶ LỆ SỬ DỤNG"
+      },
+      "hardware": {
+        "title": "Trụ sạc & Cổng sạc (Connectors)",
+        "subtitle": "Danh sách trụ sạc được quản trị viên cấp phát cho trạm này.",
+        "manageBtn": "Quản lý chi tiết Trụ sạc →",
+        "emptyTitle": "Chưa có trụ sạc nào",
+        "emptyDesc": "Trạm chưa được quản trị viên cấp phát trụ sạc hoặc đang chờ kích hoạt phần cứng.",
+        "connectorAvailable": "Sẵn sàng",
+        "connectorInUse": "Đang sạc",
+        "connectorOffline": "Ngoại tuyến"
+      },
+      "hours": {
+        "title": "Giờ mở cửa hoạt động",
+        "subtitle": "Khung giờ trạm mở cửa tiếp nhận tài xế đến sạc.",
+        "configBtn": "Cấu hình giờ & giá →"
+      },
+      "amenities": {
+        "title": "Tiện ích xung quanh trạm",
+        "subtitle": "Chủ trạm có thể tự chọn tiện ích để hiển thị cho tài xế trên ứng dụng di động."
+      },
+      "license": {
+        "title": "Giấy phép Vận hành (License)",
+        "subtitle": "Gói dịch vụ nền tảng duy trì kết nối & khả năng hiển thị trạm cho tài xế.",
+        "manageBtn": "Quản lý Giấy phép →",
+        "plan": "Gói {{plan}}",
+        "startDate": "Ngày bắt đầu hiệu lực:",
+        "expiryDate": "Ngày hết hạn:",
+        "missingTitle": "Trạm chưa kích hoạt gói License nào",
+        "missingDesc": "Vui lòng liên hệ Quản trị viên để cấp phát và kích hoạt License cho trạm này nhằm mở khả năng nhận khách."
+      },
+      "eligibility": {
+        "title": "Điều kiện Hiển thị Tìm kiếm Tài xế",
+        "rule1": "1. Trạng thái Trạm được Duyệt (ACTIVE)",
+        "rule2": "2. Gói License còn hiệu lực",
+        "rule3": "3. Trụ sạc sẵn sàng tiếp nhận đặt chỗ",
+        "pass": "✓ Đạt",
+        "fail": "✗ Chưa đạt",
+        "missing": "✗ Chưa có",
+        "hasChargers": "✓ Có {{count}} trụ",
+        "noChargers": "✗ Chưa có trụ"
+      },
+      "staff": {
+        "title": "Nhân viên Phụ trách Trạm",
+        "subtitle": "Danh sách nhân viên được phân quyền vận hành và hỗ trợ tài xế tại trạm.",
+        "inviteBtn": "Mời nhân viên mới →",
+        "emptyTitle": "Chưa có nhân viên phụ trách",
+        "emptyDesc": "Trạm chưa được gán nhân viên vận hành nào. Bạn có thể phân công nhân viên từ trang Quản lý nhân viên.",
+        "revokedBadge": "Đã thu hồi"
+      },
+      "timeline": {
+        "title": "Tiến trình Phê duyệt & Lịch sử Trạng thái",
+        "subtitle": "Toàn bộ các mốc thay đổi trạng thái của hồ sơ trạm từ lúc nộp đến khi vận hành.",
+        "empty": "Chưa có dữ liệu lịch sử trạng thái được ghi nhận cho trạm này.",
+        "performedBy": "Thực hiện bởi:",
+        "system": "Hệ thống"
       }
+    },
+    "gallery": {
+      "uploadSuccess": "Tải ảnh trạm sạc lên thành công!",
+      "deleteSuccess": "Đã xóa ảnh khỏi trạm sạc.",
+      "setPrimarySuccess": "Đã cập nhật ảnh chính cho trạm sạc!"
     },
     "detail": {
       "identityAndContact": "Thông tin Định danh & Liên hệ",
@@ -929,6 +1161,7 @@
     },
     "operationalModal": {
       "title": "Điều khiển trạng thái vận hành trạm",
+      "stationNotFound": "Không tìm thấy thông tin trạm.",
       "successToast": "Cập nhật trạng thái vận hành trạm thành công.",
       "reasonRequired": "Vui lòng nhập lý do tạm dừng hoặc bảo trì (tối thiểu 3 ký tự).",
       "operatingDesc": "Trạm mở cửa đón tài xế và nhận booking theo đúng khung giờ hoạt động đã cấu hình.",
@@ -937,17 +1170,102 @@
       "reasonLabel": "Lý do thay đổi trạng thái (Bắt buộc):",
       "reasonPlaceholder": "Nhập rõ nguyên nhân để hệ thống hiển thị thông báo chính xác cho tài xế…",
       "quickSuggestions": "Gợi ý lý do nhanh:",
+      "quickReasons": {
+        "powerGridOutage": "Sự cố mất điện lưới khu vực",
+        "transformerMaintenance": "Bảo trì định kỳ tủ trạm biến áp",
+        "parkingUpgrade": "Sửa chữa nâng cấp mặt bằng bãi xe",
+        "electricalSafetyInspection": "Kiểm định kỹ thuật an toàn điện",
+        "buildingManagementRequest": "Tạm dừng theo yêu cầu ban quản lý tòa nhà"
+      },
       "operatingNotice": "Khi chuyển sang \"Đang vận hành\", trạm sẽ lập tức sẵn sàng nhận lịch đặt của tài xế (yêu cầu trạm đã được duyệt, license còn hạn và đã lưu giờ mở cửa).",
       "pausedNotice": "Tài xế sẽ nhìn thấy lý do tạm dừng trên ứng dụng di động. Trạm sẽ tạm thời không nhận thêm lượt sạc mới cho đến khi bạn mở lại.",
       "changeStatusBtn": "Đổi trạng thái vận hành",
       "currentOperationalStatus": "Trạng thái vận hành trạm",
-      "reason": "Lý do:"
+      "reason": "Lý do:",
+      "standardBadge": "Chuẩn",
+      "ownerPausedBadge": "Chủ động ngưng",
+      "technicalBadge": "Kỹ thuật"
     }
   },
   "license": {
     "title": "Giấy phép Vận hành (License)",
     "subtitle": "Theo dõi hiệu lực các gói subscription License cho các trạm sạc của bạn.",
     "loadError": "Không tải được giấy phép: {{message}}",
+    "defaultStationName": "Trạm sạc",
+    "selectedStationSubtitle": "Đang hiển thị gói giấy phép và lịch sử subscription của trạm đã chọn.",
+    "searchStationPlaceholder": "Tìm trạm sạc...",
+    "planYearlyShort": "Gói Năm",
+    "planMonthlyShort": "Gói Tháng",
+    "licenseCodeLabel": "Mã License:",
+    "status": {
+      "ACTIVE": "Đang hoạt động",
+      "PENDING": "Chờ hiệu lực",
+      "SUSPENDED": "Tạm ngưng",
+      "CANCELLED": "Đã hủy",
+      "EXPIRED": "Đã hết hạn",
+      "active": "Đang hoạt động",
+      "expiring": "Sắp hết hạn",
+      "expired": "Đã hết hạn"
+    },
+    "statusTooltips": {
+      "ACTIVE": "Gói License đang có hiệu lực. Trạm sạc đủ điều kiện hiển thị trên ứng dụng của tài xế.",
+      "PENDING": "Gói License đang trong hàng đợi kích hoạt hoặc chờ phê duyệt.",
+      "SUSPENDED": "Gói License đang bị tạm ngưng. Trạm tạm ẩn khỏi tìm kiếm tài xế.",
+      "CANCELLED": "Gói License đã bị hủy bỏ.",
+      "EXPIRED": "Gói License đã hết hạn. Vui lòng liên hệ Quản trị viên để gia hạn.",
+      "active": "Gói License đang có hiệu lực.",
+      "expiring": "Gói License sắp hết hạn trong vòng 30 ngày tới.",
+      "expired": "Gói License đã hết hạn."
+    },
+    "metrics": {
+      "validityStatus": "Trạng thái hiệu lực",
+      "subscriptionPlan": "Gói Subscription",
+      "remainingTime": "Thời hạn còn lại",
+      "subscriptionFee": "Phí subscription",
+      "daysLeft": "{{count}} ngày",
+      "expired": "Đã hết hạn"
+    },
+    "banners": {
+      "pendingApprovalTitle": "Giấy phép đã được ghi nhận và kích hoạt thành công",
+      "pendingApprovalDesc": "Gói License của trạm đã có hiệu lực trên hệ thống. Hồ sơ trạm đang trong hàng đợi phê duyệt hành chính lần cuối của Quản trị viên trước khi hiển thị cho tài xế tìm kiếm.",
+      "overdueTitle": "Giấy phép đã quá hạn {{count}} ngày",
+      "expiringTitle": "Gói License sắp hết hạn sau {{count}} ngày",
+      "expiringDesc": "Vui lòng hoàn tất thanh toán gia hạn ngoài nền tảng với Quản trị viên để duy trì trạng thái hoạt động liên tục cho trạm sạc của bạn.",
+      "suspendedTitle": "Gói Giấy phép đang bị tạm ngưng (Suspended)",
+      "suspendedDesc": "Trạm đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế và tạm dừng nhận đặt chỗ mới.",
+      "suspendedNotice": "Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường mà không bị ảnh hưởng.",
+      "expiredTitle": "Giấy phép vận hành đã hết hạn",
+      "expiredDesc": "Trạm sạc đang tạm thời bị ẩn khỏi ứng dụng tìm kiếm của tài xế (quy tắc {{policy}}). Các phiên sạc đang chạy vẫn được bảo đảm hoàn thành. Vui lòng liên hệ Quản trị viên để ghi nhận kỳ hạn mới."
+    },
+    "details": {
+      "appliedStation": "Trạm sạc áp dụng",
+      "stationCode": "Mã trạm",
+      "startDate": "Ngày bắt đầu hiệu lực",
+      "expiryDate": "Ngày kết thúc / Hết hạn",
+      "recordedFee": "Phí subscription đã ghi nhận",
+      "currentTerm": "Kỳ hạn hiện tại:"
+    },
+    "guidelines": {
+      "title": "Bảng giá & Quy định gia hạn",
+      "monthlyTitle": "Gói Tháng (1 tháng)",
+      "monthlyPrice": "500.000 đ",
+      "monthlyFlex": "Linh hoạt theo tháng",
+      "yearlyTitle": "Gói Năm (1 năm)",
+      "yearlyPrice": "5.000.000 đ",
+      "yearlySave": "Tiết kiệm 1.000.000 đ",
+      "discountBadge": "-16.7%",
+      "offPlatformPaymentTitle": "Thanh toán ngoài nền tảng:",
+      "offPlatformPaymentDesc": "Việc mua mới và gia hạn giấy phép được thực hiện trực tiếp giữa chủ trạm và đơn vị điều hành.",
+      "systemRecordTitle": "Ghi nhận hệ thống:",
+      "systemRecordDesc": "Sau khi xác nhận giao dịch, Quản trị viên sẽ tạo kỳ hạn mới trên hệ thống để trạm vận hành liên tục.",
+      "searchVisibilityTitle": "Quyền hiển thị tìm kiếm:",
+      "searchVisibilityDesc": "Khi License hết hạn, trạm sẽ tạm thời ngưng nhận đặt chỗ mới cho tới khi gia hạn thành công ({{policy}}).",
+      "contactAdmin": "Cần gia hạn hoặc nâng cấp gói? Vui lòng liên hệ Quản trị viên hệ thống ChargeOps."
+    },
+    "history": {
+      "title": "Lịch sử các kỳ hạn License của trạm ({{count}})",
+      "subtitle": "Bao gồm các kỳ hạn trước và kỳ hạn chờ"
+    },
     "error": {
       "eyebrow": "Giấy phép",
       "title": "Không thể tải thông tin giấy phép",
@@ -1069,6 +1387,150 @@
         "submitting": "Đang phục hồi...",
         "submitBtn": "Xác nhận phục hồi cổng"
       }
+    }
+  },
+  "finance": {
+    "kpis": {
+      "gross": "TỔNG THU GHI NHẬN",
+      "refunded": "ĐÃ HOÀN TRẢ",
+      "pending": "NGHĨA VỤ HOÀN CHỜ",
+      "net": "THU RÒNG GHI NHẬN",
+      "paidBookingsSuffix": "đơn sạc",
+      "pendingNotice": "Đang xử lý",
+      "netNotice": "Thu ròng đối soát"
+    },
+    "searchPlaceholder": "Tìm theo mã đơn đặt chỗ, trạm sạc...",
+    "totalRecords": "Tổng cộng {{count}} đơn đối soát",
+    "table": {
+      "cols": {
+        "booking": "ĐƠN ĐẶT CHỖ",
+        "station": "TRẠM SẠC",
+        "date": "THỜI ĐIỂM",
+        "collected": "TIỀN GÓI",
+        "refunded": "ĐÃ HOÀN",
+        "net": "THU RÒNG",
+        "refundStatus": "REFUND",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Không có đơn đặt chỗ nào khớp bộ lọc.",
+      "receiptsBtn": "Chứng từ",
+      "copyCodeTitle": "Sao chép mã đơn",
+      "bookingsUnit": "đơn"
+    },
+    "receiptsDrawer": {
+      "title": "Chứng từ thanh toán",
+      "simulatorNotice": "Chứng từ thanh toán điện tử (Payment Evidence)",
+      "simulatorNoticeDesc": "Chứng từ được sinh tự động khi tài xế hoàn tất thanh toán cho phiên sạc. Gắn liền vĩnh viễn với đơn đặt chỗ để đối soát.",
+      "collected": "Thu ghi nhận",
+      "refunded": "Đã hoàn trả",
+      "net": "Thu ròng ghi nhận",
+      "listTitle": "Danh sách biên lai",
+      "empty": "Chưa có chứng từ giao dịch được ghi nhận.",
+      "copyTxTitle": "Sao chép mã giao dịch"
+    },
+    "attemptsDrawer": {
+      "title": "Lịch sử lần thử hoàn tiền",
+      "actionRequiredNotice": "Lần thử tự động qua cổng thanh toán đã thất bại. Vui lòng kiểm tra lý do lỗi và bấm \"Thử lại hoàn tiền\" để gửi yêu cầu mới.",
+      "timelineTitle": "Tiến trình các lần thử",
+      "empty": "Chưa có thông tin lần thử nào.",
+      "attemptNo": "Lần #{{seq}}",
+      "autoMode": "Tự động",
+      "manualMode": "Thủ công",
+      "started": "Bắt đầu",
+      "completed": "Hoàn tất",
+      "failureReason": "Lý do lỗi"
+    },
+    "refunds": {
+      "tabs": {
+        "all": "Tất cả hồ sơ",
+        "pending": "Đang chờ xử lý (PENDING)",
+        "succeeded": "Đã hoàn tất (SUCCEEDED)",
+        "actionRequired": "Cần Owner thử lại"
+      },
+      "kpi": {
+        "pending": "ĐANG CHỜ XỬ LÝ",
+        "pendingNotice": "Nghĩa vụ mở",
+        "succeeded": "ĐÃ HOÀN TẤT",
+        "succeededNotice": "Thành công",
+        "actionRequired": "CẦN OWNER RETRY",
+        "needsIntervention": "Cần can thiệp",
+        "noErrors": "Không có lỗi",
+        "failedAttemptsSuffix": "lần thử lỗi",
+        "totalAmount": "TỔNG TIỀN HOÀN",
+        "allStationsNotice": "Toàn bộ trạm"
+      },
+      "searchPlaceholder": "Tìm mã refund, booking, trạm...",
+      "table": {
+        "cols": {
+          "id": "MÃ REFUND",
+          "booking": "ĐƠN ĐẶT CHỖ",
+          "station": "TRẠM SẠC",
+          "reason": "LÝ DO HOÀN",
+          "amount": "SỐ TIỀN",
+          "status": "TRẠNG THÁI",
+          "attempts": "LẦN THỬ",
+          "actions": "THAO TÁC"
+        },
+        "empty": "Không có khoản hoàn tiền nào khớp bộ lọc.",
+        "retryBtn": "Thử lại",
+        "historyBtn": "Lịch sử",
+        "copyIdTitle": "Sao chép mã",
+        "recordsUnit": "hồ sơ"
+      },
+      "reasons": {
+        "voluntaryGrace": "Ân hạn 10 phút",
+        "stationUnavailable": "Trạm không phục vụ"
+      },
+      "statusPill": {
+        "actionRequired": "CẦN RETRY"
+      },
+      "retrySuccess": "Yêu cầu hoàn tiền đã được gửi lại thành công!",
+      "retryError": "Không thể thử lại hoàn tiền. Vui lòng kiểm tra kết nối và thử lại.",
+      "retryModal": {
+        "title": "Xác nhận thử lại hoàn tiền",
+        "warningTitle": "Cơ chế Idempotency & Bảo toàn sổ sách",
+        "warningDesc": "Hệ thống sẽ thử lại lệnh hoàn tiền cho tài xế với mã khóa chống trùng lặp. Số tiền được tính toán tự động 100% theo chính sách, không thể thay đổi.",
+        "recordVersion": "Version hồ sơ",
+        "confirmBtn": "Xác nhận thử lại",
+        "submitting": "Đang gửi..."
+      }
+    }
+  },
+  "legal": {
+    "title": "Chính sách & Quy định Nền tảng",
+    "subtitle": "Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.",
+    "search": {
+      "placeholder": "Tìm theo tiêu đề, từ khóa...",
+      "btn": "Tìm",
+      "btnTitle": "Tìm kiếm tài liệu",
+      "filtering": "Đang lọc: ",
+      "hint": "Nhấn Tìm để tra cứu",
+      "clear": "Xóa lọc"
+    },
+    "groups": {
+      "all": "Tất cả ({{count}})",
+      "license": "License B2B",
+      "operation": "Vận hành",
+      "general": "Chung"
+    },
+    "empty": "Không tìm thấy tài liệu phù hợp",
+    "docTypes": {
+      "TERMS_OF_SERVICE": "Điều khoản dịch vụ",
+      "PRIVACY_POLICY": "Chính sách bảo mật",
+      "LICENSE_AGREEMENT": "Thỏa thuận License B2B",
+      "OPERATIONAL_REGULATION": "Quy chế vận hành"
+    },
+    "audience": {
+      "ownerBadge": "Chủ trạm",
+      "forOwner": "Áp dụng cho Chủ trạm",
+      "systemWide": "Toàn hệ thống"
+    },
+    "viewer": {
+      "effective": "Hiệu lực",
+      "updatedAt": "Cập nhật: {{date}}",
+      "inDocSearchPlaceholder": "Tra cứu từ khóa trong nội dung văn bản này (In-document search)...",
+      "clearInDocSearch": "Xóa",
+      "copiedToast": "Đã chép mã nguồn Markdown vào clipboard"
     }
   }
 }

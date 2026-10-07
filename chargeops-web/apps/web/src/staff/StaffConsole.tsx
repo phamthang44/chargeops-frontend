@@ -83,11 +83,13 @@ function StaffConsoleContent({
     return [
       {
         label: t('search.groups.tickets'),
+        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
         run: async (q) => {
           const res = await api.tickets.list({ search: q, pageSize: 5, role: 'staff' });
           return res.items.map((tk) => ({
             id: tk.id,
-            title: `${tk.id} · ${tk.subject}`,
+            title: tk.subject,
+            badge: tk.id.slice(0, 8),
             subtitle: tk.stationName ?? undefined,
             onSelect: () => navigate(`${base}/tickets/${tk.id}`),
           }));
@@ -95,6 +97,7 @@ function StaffConsoleContent({
       },
       {
         label: t('search.groups.chargers'),
+        icon: <IconBolt size={14} strokeWidth={1.7} />,
         run: async (q) => {
           if (!stationId) return [];
           const cps = await api.staffOperations.listChargePoints(stationId);
@@ -109,7 +112,8 @@ function StaffConsoleContent({
             .slice(0, 5)
             .map((c) => ({
               id: c.id,
-              title: `${c.code || c.id} · ${c.name}`,
+              title: c.name,
+              badge: c.code || c.id.slice(0, 8),
               subtitle: c.zoneLabel ? `${t('search.zonePrefix')}: ${c.zoneLabel}` : undefined,
               onSelect: () => navigate(`${base}/chargers`),
             }));

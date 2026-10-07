@@ -59,7 +59,9 @@ export function BaseConfigStep({
                   onClick={() => !isLocked && onMinDuration(m)}
                   title={
                     isLocked
-                      ? 'Mốc 90 phút chưa được xác thực trong vận hành thực tế nên tạm thời bị khóa'
+                      ? t('pricing.steps.step1.lockedTooltip', {
+                          defaultValue: 'Mốc 90 phút chưa được xác thực trong vận hành thực tế nên tạm thời bị khóa',
+                        })
                       : undefined
                   }
                   className={`flex-1 rounded-lg py-[10px] text-center text-[13.5px] font-semibold transition ${
@@ -73,7 +75,7 @@ export function BaseConfigStep({
                   <span>{t('pricing.steps.step1.durationVal', { minutes: m, defaultValue: `${m} phút` })}</span>
                   {isLocked && (
                     <span className="block text-[10px] font-medium text-amber-500 mt-0.5 tracking-tight">
-                      (Tạm khóa)
+                      {t('pricing.steps.step1.lockedNotice', { defaultValue: '(Tạm khóa)' })}
                     </span>
                   )}
                 </button>
@@ -84,18 +86,44 @@ export function BaseConfigStep({
           {/* Warning for unverified 90m duration */}
           <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
             <span>⚠️</span>
-            <span>Mốc 90 phút chưa được kiểm chứng vận hành thực tế nên tạm thời bị khóa.</span>
+            <span>
+              {t('pricing.steps.step1.lockedWarning', {
+                defaultValue: 'Mốc 90 phút chưa được kiểm chứng vận hành thực tế nên tạm thời bị khóa.',
+              })}
+            </span>
           </div>
 
           {/* Dynamic Example Hint */}
           <div className="mt-2.5 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted border border-hairline">
-            💡 <b>Quy cách tính giờ linh hoạt:</b> Tài xế chọn giờ bắt đầu bất kỳ (ví dụ <span className="font-mono text-ink">09:51</span>). Với mức tối thiểu <span className="font-semibold text-ink">{minBookingDurationMin} phút</span> và bước nhảy <span className="font-semibold text-ink">{SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} phút</span>, ứng dụng đề xuất các gói sạc:{' '}
+            💡 <b>{t('pricing.steps.step1.flexiblePolicyTitle', { defaultValue: 'Quy cách tính giờ linh hoạt:' })}</b>{' '}
+            {t('pricing.steps.step1.flexiblePolicyPrefix', { defaultValue: 'Tài xế chọn giờ bắt đầu bất kỳ (ví dụ' })}{' '}
+            <span className="font-mono text-ink">09:51</span>).{' '}
+            {t('pricing.steps.step1.flexiblePolicyWithMin', { defaultValue: 'Với mức tối thiểu' })}{' '}
+            <span className="font-semibold text-ink">
+              {minBookingDurationMin} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
+            </span>{' '}
+            {t('pricing.steps.step1.flexiblePolicyAndStep', { defaultValue: 'và bước nhảy' })}{' '}
+            <span className="font-semibold text-ink">
+              {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
+            </span>
+            , {t('pricing.steps.step1.flexiblePolicySuggests', { defaultValue: 'ứng dụng đề xuất các gói sạc:' })}{' '}
             <span className="font-mono text-owner-deep font-semibold">
-              {minBookingDurationMin}p (đến {minBookingDurationMin === 30 ? '10:21' : minBookingDurationMin === 60 ? '10:51' : '11:21'})
+              {minBookingDurationMin}
+              {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'} (
+              {t('pricing.steps.step1.flexiblePolicyUntil', { defaultValue: 'đến' })}{' '}
+              {minBookingDurationMin === 30 ? '10:21' : minBookingDurationMin === 60 ? '10:51' : '11:21'})
             </span>
             {minBookingDurationMin < 180 && (
-              <span className="font-mono text-muted">, {minBookingDurationMin + 30}p, {minBookingDurationMin + 60}p... (tối đa {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES}p)</span>
-            )}.
+              <span className="font-mono text-muted">
+                , {minBookingDurationMin + 30}
+                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}, {minBookingDurationMin + 60}
+                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}... (
+                {t('pricing.steps.step1.flexiblePolicyMax', { defaultValue: 'tối đa' })}{' '}
+                {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES}
+                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'})
+              </span>
+            )}
+            .
           </div>
         </div>
 
@@ -103,36 +131,56 @@ export function BaseConfigStep({
         <div className="border-t border-hairline pt-4">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
-              QUY TẮC LÊN LỊCH CỐ ĐỊNH TOÀN HỆ THỐNG (SYSTEM POLICY)
+              {t('pricing.steps.step1.systemPolicyTitle', {
+                defaultValue: 'QUY TẮC LÊN LỊCH CỐ ĐỊNH TOÀN HỆ THỐNG (SYSTEM POLICY)',
+              })}
             </span>
             <span className="flex items-center gap-1 text-[11px] font-medium text-owner-deep">
               <IconShieldCheck size={13} />
-              <span>Tiêu chuẩn vận hành</span>
+              <span>{t('pricing.steps.step1.operationalStandard', { defaultValue: 'Tiêu chuẩn vận hành' })}</span>
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Thời gian giãn ca (đổi xe)</div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+                {t('pricing.steps.step1.turnaroundBufferTitle', { defaultValue: 'Thời gian giãn ca (đổi xe)' })}
+              </div>
+              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+                {SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
+              </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Khoảng nghỉ sau mỗi lượt sạc để xe trước rút sạc & rời vị trí an toàn.
+                {t('pricing.steps.step1.turnaroundBufferDesc', {
+                  defaultValue: 'Khoảng nghỉ sau mỗi lượt sạc để xe trước rút sạc & rời vị trí an toàn.',
+                })}
               </div>
             </div>
 
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Bước tăng thời gian</div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} phút</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+                {t('pricing.steps.step1.stepIncrementTitle', { defaultValue: 'Bước tăng thời gian' })}
+              </div>
+              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+                {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
+              </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Khoảng thời gian tăng dần khi tài xế chọn thời lượng sạc.
+                {t('pricing.steps.step1.stepIncrementDesc', {
+                  defaultValue: 'Khoảng thời gian tăng dần khi tài xế chọn thời lượng sạc.',
+                })}
               </div>
             </div>
 
             <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">Thời lượng sạc tối đa</div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">{SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES} phút (3h)</div>
+              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+                {t('pricing.steps.step1.maxDurationTitle', { defaultValue: 'Thời lượng sạc tối đa' })}
+              </div>
+              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+                {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })} (3h)
+              </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
-                Giới hạn tối đa cho một lượt sạc để tránh chiếm dụng trụ quá lâu.
+                {t('pricing.steps.step1.maxDurationDesc', {
+                  defaultValue: 'Giới hạn tối đa cho một lượt sạc để tránh chiếm dụng trụ quá lâu.',
+                })}
               </div>
             </div>
           </div>

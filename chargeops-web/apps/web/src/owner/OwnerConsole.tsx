@@ -126,11 +126,13 @@ function OwnerConsoleContent({
     const list: Searcher[] = [
       {
         label: t('search.groups.tickets'),
+        icon: <IconLifebuoy size={14} strokeWidth={1.7} />,
         run: async (q) => {
           const res = await api.tickets.list({ search: q, pageSize: 5, role: 'owner' });
           return res.items.map((tk) => ({
             id: tk.id,
-            title: `${tk.id} · ${tk.subject}`,
+            title: tk.subject,
+            badge: tk.id.slice(0, 8),
             subtitle: tk.stationName ?? undefined,
             onSelect: () => navigate(`${base}/tickets/${tk.id}`),
           }));
@@ -138,6 +140,7 @@ function OwnerConsoleContent({
       },
       {
         label: t('search.groups.chargers'),
+        icon: <IconBolt size={14} strokeWidth={1.7} />,
         run: async (q) => {
           if (!selectedStationId) return [];
           const cps = await api.chargePoints.list(selectedStationId);
@@ -152,7 +155,8 @@ function OwnerConsoleContent({
             .slice(0, 5)
             .map((c) => ({
               id: c.id,
-              title: `${c.chargePointCode || c.id} · ${c.name}`,
+              title: c.name,
+              badge: c.chargePointCode || c.id.slice(0, 8),
               subtitle: c.zoneLabel ? `Khu vực: ${c.zoneLabel}` : undefined,
               onSelect: () => navigate(`${base}/chargers`),
             }));
@@ -162,6 +166,7 @@ function OwnerConsoleContent({
     if (!reduced) {
       list.push({
         label: t('search.groups.stations'),
+        icon: <IconPin size={14} strokeWidth={1.7} />,
         run: async (q) => {
           const ql = q.toLowerCase();
           return stations
@@ -174,7 +179,8 @@ function OwnerConsoleContent({
             .slice(0, 5)
             .map((s) => ({
               id: s.id,
-              title: `${s.name} (${s.stationCode || s.id})`,
+              title: s.name,
+              badge: s.stationCode || s.id.slice(0, 8),
               subtitle:
                 s.address ||
                 [s.addressLine, s.wardName, s.provinceName].filter(Boolean).join(', ') ||

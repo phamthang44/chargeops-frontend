@@ -11,6 +11,7 @@ import {
   useToast,
 } from '@chargeops/ui';
 import {
+  BOOKING_STATUS,
   formatVnd,
   useApi,
   type OwnerBookingDetail,
@@ -204,7 +205,9 @@ export function OwnerCancelBookingModal({
           </div>
           <div className="flex justify-between">
             <span className="text-muted">{t('bookings.ownerCancelModal.statusLabel', 'Trạng thái đặt chỗ:')}</span>
-            <span className="font-semibold text-ink">{booking.status}</span>
+            <span className="font-semibold text-ink">
+              {t(`bookings.status.${booking.status}`, { defaultValue: BOOKING_STATUS[booking.status]?.label ?? booking.status })}
+            </span>
           </div>
           <div className="flex justify-between border-t border-hairline pt-2">
             <span className="text-muted">{t('bookings.ownerCancelModal.totalAmountLabel', 'Tổng tiền gói sạc:')}</span>

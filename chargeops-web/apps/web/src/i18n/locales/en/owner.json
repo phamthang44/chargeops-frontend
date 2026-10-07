@@ -268,6 +268,36 @@
     },
     "tabs": {
       "all": "All"
+    },
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "checkedin": "Checked In",
+      "charging": "Charging",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "CHECKED_IN": "Checked In",
+      "CHARGING": "Charging",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "cancellationReason": {
+      "DRIVER_CANCELLED": "Driver Cancelled",
+      "NO_SHOW": "No-show Check-in Lapsed",
+      "STATION_FAILURE": "Station Technical Failure"
+    },
+    "paymentStatus": {
+      "PENDING": "Pending Payment",
+      "HELD": "Payment Held",
+      "PAID": "Paid",
+      "REFUNDED": "Refunded",
+      "FAILED": "Failed",
+      "EXPIRED": "Expired"
     }
   },
   "chargers": {
@@ -300,6 +330,12 @@
       "MAINTENANCE": "Maintenance"
     },
     "connectorCount": "{{count}} connectors",
+    "pendingTooltip": "Charge point is awaiting Admin approval & infrastructure activation",
+    "history": {
+      "shortLabel": "History",
+      "cpTooltip": "View charge point status change history",
+      "connectorTooltip": "View connector status change history"
+    },
     "panel": {
       "editTitle": "EDIT CHARGE POINT",
       "close": "Close",
@@ -478,6 +514,11 @@
     "maintBodyConnector": "Switching connector to technical Maintenance mode.",
     "reasonLabel": "Status change reason",
     "reasonPlaceholder": "Enter reason details (required, at least 3 characters)...",
+    "defaultReason": {
+      "maintenance": "Routine equipment maintenance",
+      "offline": "Temporarily taken offline",
+      "online": "Equipment brought back online"
+    },
     "incidentBannerTitle": "Technical malfunction or emergency incident?",
     "incidentBannerDesc": "If equipment is damaged or dangerous requiring immediate de-energization, you can activate an emergency incident report to immediately set the connector OFFLINE and capture snapshot bookings for safe resolution.",
     "incidentBannerBtn": "Activate Emergency Incident (BKG-054)",
@@ -515,6 +556,7 @@
       "total": "TOTAL CONNECTORS",
       "available": "AVAILABLE",
       "inuse": "IN USE",
+      "offline": "OFFLINE",
       "sessions": "SESSIONS TODAY",
       "sessionsSub": "Avg util {{util}}%"
     },
@@ -565,6 +607,24 @@
         "groupHelp": "Drivers can choose any start time (e.g. 09:51). Duration options step by the minimum amount (e.g. 30m → ends at 10:21).",
         "durationLabel": "MINIMUM BOOKING DURATION (DURATION)",
         "durationVal": "{{minutes}} mins",
+        "lockedNotice": "(Temporarily locked)",
+        "lockedTooltip": "90-minute duration has not been verified in real operations and is temporarily locked",
+        "lockedWarning": "90-minute duration is not yet verified in operational practice and is temporarily locked.",
+        "flexiblePolicyTitle": "Flexible scheduling policy:",
+        "flexiblePolicyPrefix": "Drivers choose any start time (e.g.",
+        "flexiblePolicyWithMin": "With a minimum duration of",
+        "flexiblePolicyAndStep": "and step increment of",
+        "flexiblePolicySuggests": "the app suggests packages:",
+        "flexiblePolicyUntil": "until",
+        "flexiblePolicyMax": "max",
+        "systemPolicyTitle": "GLOBAL SYSTEM SCHEDULING RULES (SYSTEM POLICY)",
+        "operationalStandard": "Operational standard",
+        "turnaroundBufferTitle": "TURNAROUND BUFFER (VEHICLE SWAP)",
+        "turnaroundBufferDesc": "Rest interval after each session for departing car to unplug & exit safely.",
+        "stepIncrementTitle": "DURATION STEP INCREMENT",
+        "stepIncrementDesc": "Incremental interval when drivers select their desired charging duration.",
+        "maxDurationTitle": "MAX CHARGING DURATION",
+        "maxDurationDesc": "Maximum limit per session to avoid long connector idle occupancy.",
         "basePriceGroupTitle": "Base Charging Price",
         "basePriceLabel": "BASE CHARGING PRICE",
         "basePriceSub": "Base price",
@@ -585,8 +645,24 @@
         "activeSchedule": "Active Now",
         "effectiveFrom": "Effective since:",
         "defaultSchedule": "Using system default schedule",
+        "unconfigured": "Unconfigured",
+        "unconfiguredHint": "Station has not saved pricing & schedule configuration. Please configure and save to begin receiving bookings.",
         "effectiveImmediately": "Changes will take effect immediately upon saving.",
         "keepExistingBookings": "Previously confirmed bookings retain their original schedule and rates.",
+        "colDay": "Day of week",
+        "colOpen": "Opening time",
+        "colClose": "Closing time",
+        "colStatus": "Open",
+        "open247Row": "Open continuously 24/7 (00:00 – 24:00)",
+        "closedRow": "Closed (Off service)",
+        "openAria": "Opening time for {{day}}",
+        "closeAria": "Closing time for {{day}}",
+        "footerTitle": "Opening hours specification:",
+        "footerDescPart1": "Station is currently open",
+        "footerDescPart2": ". If the closing time is earlier than the opening time (e.g.",
+        "footerDescPart3": "), the system automatically treats it as opening overnight into the following morning.",
+        "daysCountAll": "7/7 days (24/7)",
+        "daysCount": "{{count}}/7 days",
         "closed": "Closed",
         "openAllDay": "Open 24h"
       },
@@ -608,8 +684,14 @@
         "weekendsBadge": "Sat – Sun",
         "dailyTrack": "📅 All Week",
         "dailyBadge": "Mon – Sun",
+        "editRuleTooltip": "Edit this rate window",
+        "deleteRuleTooltip": "Delete rate window",
         "deleteConfirmTitle": "Delete Rate Window",
-        "deleteConfirmDesc": "Are you sure you want to delete this rate window? Bookings falling into this window will revert to the base price."
+        "deleteConfirmDesc": "Are you sure you want to delete this rate window? Bookings falling into this window will revert to the base price.",
+        "deleteConfirmModalTitle": "Delete this rate window?",
+        "deleteConfirmModalDesc": "Are you sure you want to delete rate window \"{{name}}\" ({{from}}–{{to}})? Bookings falling into these hours will revert to the base price.",
+        "deleteConfirmBtn": "Confirm Delete",
+        "basePriceLabel": "Base Rate"
       },
       "step4": {
         "title": "Availability & Operational Standards",
@@ -621,16 +703,49 @@
         "validConfigHelp": "All operational policies are standardized across the platform according to ChargeOps SLA.",
         "bufferTitle": "Turnaround Safety Buffer",
         "bufferDesc": "Mandatory safety interval after each session for departure before the next booking arrives.",
+        "noShowBadge": "{{minutes}} mins (Mandatory)",
+        "advanceBadge": "{{days}} days (Today & Tomorrow)",
+        "bufferBadge": "{{minutes}} mins fixed",
         "philosophyTitle": "Core Operational Principles: Reservations & Real Charging Sessions",
         "philosophyBooking": "Reservations are commitments: Guaranteed time slots with drivers. Early completions create safe buffers without advancing downstream schedules.",
         "philosophyBuffer": "10-minute buffer is vehicle exchange time: Ensures departing car unplugs and clears space before arriving car enters.",
         "philosophyOverstay": "Drivers overstaying: Subject to separate idle fees, never unilaterally pushing back downstream reservations.",
-        "philosophySchedule": "Schedule applies to new bookings: Configuration changes apply only to bookings created after saving; confirmed bookings retain original commitments."
+        "philosophySchedule": "Schedule applies to new bookings: Configuration changes apply only to bookings created after saving; confirmed bookings retain original commitments.",
+        "philosophyBookingBold": "Reservations are commitments:",
+        "philosophyBookingText": "Guaranteed time slots with drivers. Early completions create safe buffers without advancing downstream schedules.",
+        "philosophyBufferBold": "10-minute buffer is vehicle exchange time:",
+        "philosophyBufferText": "Ensures departing car unplugs and clears space before arriving car enters.",
+        "philosophyOverstayBold": "Drivers overstaying:",
+        "philosophyOverstayText": "Subject to separate idle fees, never unilaterally pushing back downstream reservations.",
+        "philosophyScheduleBold": "Schedule applies to new bookings:",
+        "philosophyScheduleText": "Configuration changes apply only to bookings created after saving; confirmed bookings retain original commitments."
       }
     },
     "confirmModal": {
       "title": "Confirm Pricing & Hours Configuration",
       "subtitle": "Please review the updated configuration parameters before applying them to your station.",
+      "effectiveTimeLabel": "Effective time:",
+      "effectiveTimeValue": "Immediately upon confirmation",
+      "summaryTitle": "Configuration Change Summary",
+      "basePriceRow": "Base charging price / kWh:",
+      "minDurationRow": "Min booking duration (Commercial):",
+      "minutesUnit": "mins",
+      "operatingHoursRow": "Weekly operating hours:",
+      "open247": "Open 24/7",
+      "adjustedDays": "Adjusted ({{count}} days changed)",
+      "unchanged": "Unchanged",
+      "allStation": "Entire station",
+      "dailyConfig": "Daily custom schedule",
+      "continuous247": "Open continuously 24/7",
+      "open247Short": "Open 24/7",
+      "switchToDaily": "Switch to daily schedule",
+      "touCountRow": "TOU rate windows:",
+      "windowsCount": "{{count}} windows",
+      "windowsCountLabel": "{{count}} rate windows",
+      "touContentChanged": " · details modified",
+      "bufferRow": "Turnaround buffer:",
+      "policyNoticeTitle": "Confirmed Booking Protection Policy",
+      "policyNoticeDesc": "New configuration applies only to bookings created after saving. Bookings already confirmed by drivers retain their original guaranteed rate and time slot.",
       "cancelBtn": "Keep Editing",
       "confirmBtn": "Confirm & Apply"
     },
@@ -645,9 +760,31 @@
       "from": "FROM",
       "to": "TO",
       "validationError": "Please input a valid rule name, price, and time window (HH:mm).",
+      "sameTimeError": "Start and end times cannot be the same.",
+      "overlapError": "This rate window overlaps with an existing window on the same days.",
       "cancelBtn": "Cancel",
       "saveBtn": "Save rate window",
       "updateBtn": "Update rate window"
+    },
+    "emptyStations": {
+      "title": "No Charging Stations",
+      "description": "Your account does not own any charging stations yet. Please register a new station in My Stations before configuring pricing and operating hours."
+    },
+    "dayNames": {
+      "T2": "Monday",
+      "T3": "Tuesday",
+      "T4": "Wednesday",
+      "T5": "Thursday",
+      "T6": "Friday",
+      "T7": "Saturday",
+      "CN": "Sunday",
+      "MONDAY": "Monday",
+      "TUESDAY": "Tuesday",
+      "WEDNESDAY": "Wednesday",
+      "THURSDAY": "Thursday",
+      "FRIDAY": "Friday",
+      "SATURDAY": "Saturday",
+      "SUNDAY": "Sunday"
     },
     "days": {
       "daily": "Daily",
@@ -778,6 +915,7 @@
     "emptyFilter": "No stations found with the selected status.",
     "amenitiesUpdateSuccess": "Station amenities updated successfully!",
     "amenitiesUpdateError": "Could not update amenities",
+    "clearFilters": "Clear filters",
     "filters": {
       "all": "All",
       "active": "Active",
@@ -799,15 +937,34 @@
       "utilization": "UTILIZATION",
       "addressLabel": "Address",
       "licenseLabel": "License",
+      "noLicense": "No License",
+      "planYearly": "Yearly Plan",
+      "planMonthly": "Monthly Plan",
+      "expiresOn": "{{plan}} · expires {{date}}",
+      "daysLeft": "{{count}} days left",
       "rejectionReason": "Rejection reason: {{reason}}",
       "pendingHelp": "Submission is pending admin review. Station is not visible to drivers yet.",
+      "hiddenCalloutTitle": "Station temporarily hidden from driver search",
+      "hiddenCalloutDesc": "Station license is not ready to accept new bookings.",
+      "changeStatusTooltip": "Change station operational status (Operating / Paused / Maintenance)",
+      "selectStationTooltip": "Select this station as the current active context",
       "amenitiesLabel": "Amenities",
       "editAmenities": "Edit",
       "addAmenities": "Add amenities",
       "noAmenities": "No amenities yet",
       "viewDetailBtn": "View Station Details",
       "selectBtn": "Select Station",
-      "selectedBadge": "Active"
+      "selectedBadge": "Selected"
+    },
+    "eligibility": {
+      "LICENSE_MISSING": "Station has no registered valid License.",
+      "LICENSE_EXPIRED": "Station License has expired.",
+      "LICENSE_SUSPENDED": "License is suspended. Station is temporarily hidden from driver searches.",
+      "LICENSE_CANCELLED": "Station License has been cancelled.",
+      "LICENSE_NOT_STARTED": "License has not reached its start date yet.",
+      "NO_ACTIVE_CHARGERS": "Station approved but has no activated chargers or connectors.",
+      "ALL_CHARGERS_OFFLINE": "All chargers at this station are offline, paused, or pending.",
+      "STATION_NOT_ACTIVE": "Station is not approved or is inactive."
     },
     "register": {
       "title": "Register New Station",
@@ -862,7 +1019,82 @@
         "license": "License",
         "staff": "Staff",
         "timeline": "Timeline"
+      },
+      "activeContextBadge": "Station active in current context",
+      "selectedToast": "Selected {{name}} as the active station.",
+      "selectCurrentBtn": "Set as Active Station",
+      "closeBtn": "Close",
+      "operatingNormal": "Operating Normally",
+      "hiddenAlertTitle": "Station temporarily hidden from driver search",
+      "hiddenAlertNotice": "Ongoing charging sessions remain protected.",
+      "viewOnMaps": "View on Google Maps",
+      "descriptionTitle": "Description & Access Directions",
+      "metrics": {
+        "plannedChargers": "PLANNED CHARGERS",
+        "onlineChargers": "ONLINE CHARGERS",
+        "bookingsToday": "BOOKINGS TODAY",
+        "utilization": "UTILIZATION"
+      },
+      "hardware": {
+        "title": "Hardware & Connectors",
+        "subtitle": "List of charge points provisioned by administrators for this station.",
+        "manageBtn": "Manage Chargers →",
+        "emptyTitle": "No charge points provisioned",
+        "emptyDesc": "Station has not been provisioned charge points yet or is awaiting activation.",
+        "connectorAvailable": "Available",
+        "connectorInUse": "In Use",
+        "connectorOffline": "Offline"
+      },
+      "hours": {
+        "title": "Operating Hours",
+        "subtitle": "Station opening hours accepting drivers for charging.",
+        "configBtn": "Configure Hours & Pricing →"
+      },
+      "amenities": {
+        "title": "Station Amenities",
+        "subtitle": "Owners can customize amenities displayed to drivers on mobile apps."
+      },
+      "license": {
+        "title": "Operating License",
+        "subtitle": "Platform service plan maintaining station connectivity & driver visibility.",
+        "manageBtn": "Manage License →",
+        "plan": "{{plan}}",
+        "startDate": "Effective Date:",
+        "expiryDate": "Expiration Date:",
+        "missingTitle": "No Active License",
+        "missingDesc": "Please contact administrators to provision and activate a License for this station."
+      },
+      "eligibility": {
+        "title": "Driver Search Visibility Criteria",
+        "rule1": "1. Station Approval Status (ACTIVE)",
+        "rule2": "2. Active License Subscription",
+        "rule3": "3. Chargers Ready for Booking",
+        "pass": "✓ Passed",
+        "fail": "✗ Not Passed",
+        "missing": "✗ Missing",
+        "hasChargers": "✓ {{count}} chargers",
+        "noChargers": "✗ No chargers"
+      },
+      "staff": {
+        "title": "Station Staff Members",
+        "subtitle": "Staff assigned to operate station and assist drivers.",
+        "inviteBtn": "Invite New Staff →",
+        "emptyTitle": "No staff assigned",
+        "emptyDesc": "No staff assigned yet. You can assign staff from the Staff Management page.",
+        "revokedBadge": "Revoked"
+      },
+      "timeline": {
+        "title": "Approval Timeline & Status History",
+        "subtitle": "All status milestone transitions from submission to operation.",
+        "empty": "No status history recorded for this station yet.",
+        "performedBy": "Performed by:",
+        "system": "System"
       }
+    },
+    "gallery": {
+      "uploadSuccess": "Station photo uploaded successfully!",
+      "deleteSuccess": "Photo removed from station.",
+      "setPrimarySuccess": "Primary station photo updated!"
     },
     "detail": {
       "identityAndContact": "Identity & Contact Information",
@@ -929,6 +1161,7 @@
     },
     "operationalModal": {
       "title": "Manage Station Operational Status",
+      "stationNotFound": "Station information not found.",
       "successToast": "Updated station operational status successfully.",
       "reasonRequired": "Please provide a reason for pausing or maintenance (min 3 chars).",
       "operatingDesc": "Station opens for drivers and accepts bookings according to configured schedule.",
@@ -937,17 +1170,102 @@
       "reasonLabel": "Reason for status change (Required):",
       "reasonPlaceholder": "Provide a clear explanation so drivers are properly informed…",
       "quickSuggestions": "Quick suggestions:",
+      "quickReasons": {
+        "powerGridOutage": "Regional power grid outage",
+        "transformerMaintenance": "Scheduled transformer maintenance",
+        "parkingUpgrade": "Parking lot renovation / upgrade",
+        "electricalSafetyInspection": "Electrical safety inspection",
+        "buildingManagementRequest": "Paused at building management request"
+      },
       "operatingNotice": "When switching to 'Operating', the station immediately becomes ready for bookings (requires ACTIVE approval, valid license, and configured schedule).",
       "pausedNotice": "Drivers will see your pause explanation on mobile apps. New charging bookings are blocked until you reopen.",
       "changeStatusBtn": "Change Operational Status",
       "currentOperationalStatus": "Operational Status",
-      "reason": "Reason:"
+      "reason": "Reason:",
+      "standardBadge": "Standard",
+      "ownerPausedBadge": "Owner-initiated",
+      "technicalBadge": "Technical"
     }
   },
   "license": {
     "title": "Operating License",
     "subtitle": "Track the validity and subscription status of your charging stations.",
     "loadError": "Could not load license: {{message}}",
+    "defaultStationName": "Charging Station",
+    "selectedStationSubtitle": "Showing license package and subscription history for selected station.",
+    "searchStationPlaceholder": "Search charging station...",
+    "planYearlyShort": "Yearly Plan",
+    "planMonthlyShort": "Monthly Plan",
+    "licenseCodeLabel": "License Code:",
+    "status": {
+      "ACTIVE": "Active",
+      "PENDING": "Pending",
+      "SUSPENDED": "Suspended",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "active": "Active",
+      "expiring": "Expiring Soon",
+      "expired": "Expired"
+    },
+    "statusTooltips": {
+      "ACTIVE": "License is currently active. Station is eligible to be displayed on driver apps.",
+      "PENDING": "License is queued for activation or pending approval.",
+      "SUSPENDED": "License is temporarily suspended. Station is hidden from driver search.",
+      "CANCELLED": "License has been cancelled.",
+      "EXPIRED": "License has expired. Please contact an administrator to renew.",
+      "active": "License is active.",
+      "expiring": "License is expiring within the next 30 days.",
+      "expired": "License has expired."
+    },
+    "metrics": {
+      "validityStatus": "Validity Status",
+      "subscriptionPlan": "Subscription Plan",
+      "remainingTime": "Remaining Time",
+      "subscriptionFee": "Subscription Fee",
+      "daysLeft": "{{count}} days",
+      "expired": "Expired"
+    },
+    "banners": {
+      "pendingApprovalTitle": "License successfully recorded and activated",
+      "pendingApprovalDesc": "Station's license package is active on the system. Station registration is in final administrative review queue before becoming visible to drivers.",
+      "overdueTitle": "License is overdue by {{count}} days",
+      "expiringTitle": "License expiring in {{count}} days",
+      "expiringDesc": "Please complete off-platform renewal payment with an administrator to maintain uninterrupted operation for your station.",
+      "suspendedTitle": "License package is currently suspended",
+      "suspendedDesc": "Station is temporarily hidden from driver search and new booking requests are paused.",
+      "suspendedNotice": "Ongoing charging sessions and previously paid bookings will continue without disruption.",
+      "expiredTitle": "Operating license has expired",
+      "expiredDesc": "Station is temporarily hidden from driver search (rule {{policy}}). Ongoing charging sessions are protected. Please contact an administrator to record a new subscription term."
+    },
+    "details": {
+      "appliedStation": "Applicable Station",
+      "stationCode": "Station Code",
+      "startDate": "Effective Start Date",
+      "expiryDate": "Expiration Date",
+      "recordedFee": "Recorded Subscription Fee",
+      "currentTerm": "Current Term:"
+    },
+    "guidelines": {
+      "title": "Pricing & Renewal Regulations",
+      "monthlyTitle": "Monthly Plan (1 month)",
+      "monthlyPrice": "500,000 VND",
+      "monthlyFlex": "Flexible monthly billing",
+      "yearlyTitle": "Yearly Plan (1 year)",
+      "yearlyPrice": "5,000,000 VND",
+      "yearlySave": "Save 1,000,000 VND",
+      "discountBadge": "-16.7%",
+      "offPlatformPaymentTitle": "Off-platform payment:",
+      "offPlatformPaymentDesc": "New license purchases and renewals are handled directly between station owners and operating company.",
+      "systemRecordTitle": "System recording:",
+      "systemRecordDesc": "Upon transaction confirmation, administrators record a new term on the platform for uninterrupted service.",
+      "searchVisibilityTitle": "Driver search visibility:",
+      "searchVisibilityDesc": "When a license expires, the station temporarily pauses accepting new bookings until successfully renewed ({{policy}}).",
+      "contactAdmin": "Need to renew or upgrade your plan? Please contact ChargeOps system administrators."
+    },
+    "history": {
+      "title": "Station License Term History ({{count}})",
+      "subtitle": "Includes prior terms and upcoming pending terms"
+    },
     "error": {
       "eyebrow": "License",
       "title": "Could not load license details",
@@ -1069,6 +1387,150 @@
         "submitting": "Recovering...",
         "submitBtn": "Confirm Connector Recovery"
       }
+    }
+  },
+  "finance": {
+    "kpis": {
+      "gross": "GROSS RECORDED REVENUE",
+      "refunded": "TOTAL REFUNDED",
+      "pending": "PENDING OBLIGATIONS",
+      "net": "NET RECORDED REVENUE",
+      "paidBookingsSuffix": "paid bookings",
+      "pendingNotice": "Processing",
+      "netNotice": "Net settled"
+    },
+    "searchPlaceholder": "Search by booking code, station...",
+    "totalRecords": "Total {{count}} reconciliation records",
+    "table": {
+      "cols": {
+        "booking": "BOOKING",
+        "station": "STATION",
+        "date": "DATE & TIME",
+        "collected": "COLLECTED",
+        "refunded": "REFUNDED",
+        "net": "NET RECORDED",
+        "refundStatus": "REFUND",
+        "actions": "ACTIONS"
+      },
+      "empty": "No booking matches the filter.",
+      "receiptsBtn": "Receipts",
+      "copyCodeTitle": "Copy booking code",
+      "bookingsUnit": "bookings"
+    },
+    "receiptsDrawer": {
+      "title": "Payment Receipts",
+      "simulatorNotice": "Electronic Payment Evidence",
+      "simulatorNoticeDesc": "Receipts are automatically generated upon successful payment. Permanently attached to the booking for reconciliation.",
+      "collected": "Gross Collected",
+      "refunded": "Refunded",
+      "net": "Net Recorded",
+      "listTitle": "Receipt List",
+      "empty": "No transaction receipts recorded yet.",
+      "copyTxTitle": "Copy transaction reference"
+    },
+    "attemptsDrawer": {
+      "title": "Refund Attempt History",
+      "actionRequiredNotice": "Automatic payment gateway attempt failed. Please review the failure reason and click \"Retry Refund\" to dispatch a new attempt.",
+      "timelineTitle": "Attempt Timeline",
+      "empty": "No attempt records available.",
+      "attemptNo": "Attempt #{{seq}}",
+      "autoMode": "Automatic",
+      "manualMode": "Manual",
+      "started": "Started",
+      "completed": "Completed",
+      "failureReason": "Failure reason"
+    },
+    "refunds": {
+      "tabs": {
+        "all": "All Records",
+        "pending": "Pending (PENDING)",
+        "succeeded": "Succeeded (SUCCEEDED)",
+        "actionRequired": "Action Required"
+      },
+      "kpi": {
+        "pending": "PENDING OBLIGATIONS",
+        "pendingNotice": "Open obligations",
+        "succeeded": "SUCCEEDED REFUNDS",
+        "succeededNotice": "Completed",
+        "actionRequired": "REQUIRES RETRY",
+        "needsIntervention": "Action required",
+        "noErrors": "No errors",
+        "failedAttemptsSuffix": "failed attempts",
+        "totalAmount": "TOTAL REFUNDED AMOUNT",
+        "allStationsNotice": "Across all stations"
+      },
+      "searchPlaceholder": "Search by refund ID, booking, station...",
+      "table": {
+        "cols": {
+          "id": "REFUND ID",
+          "booking": "BOOKING",
+          "station": "STATION",
+          "reason": "REASON",
+          "amount": "AMOUNT",
+          "status": "STATUS",
+          "attempts": "ATTEMPTS",
+          "actions": "ACTIONS"
+        },
+        "empty": "No refund record matches the filter.",
+        "retryBtn": "Retry",
+        "historyBtn": "History",
+        "copyIdTitle": "Copy ID",
+        "recordsUnit": "records"
+      },
+      "reasons": {
+        "voluntaryGrace": "10-minute grace period",
+        "stationUnavailable": "Station unavailable"
+      },
+      "statusPill": {
+        "actionRequired": "ACTION REQUIRED"
+      },
+      "retrySuccess": "Refund retry request submitted successfully!",
+      "retryError": "Could not retry refund. Please check connection and try again.",
+      "retryModal": {
+        "title": "Confirm Refund Retry",
+        "warningTitle": "Idempotency & Ledger Preservation",
+        "warningDesc": "The system will retry the refund dispatch with an idempotency key. The amount is 100% policy-derived and immutable.",
+        "recordVersion": "Record version",
+        "confirmBtn": "Confirm Retry",
+        "submitting": "Submitting..."
+      }
+    }
+  },
+  "legal": {
+    "title": "Platform Legal & Policies",
+    "subtitle": "Official legal documents and operational standards for Station Owners: B2B licensing, charger management, staff permissions, and revenue payouts.",
+    "search": {
+      "placeholder": "Search by title, keyword...",
+      "btn": "Search",
+      "btnTitle": "Search documents",
+      "filtering": "Filtering: ",
+      "hint": "Press Search to query",
+      "clear": "Clear filter"
+    },
+    "groups": {
+      "all": "All ({{count}})",
+      "license": "B2B License",
+      "operation": "Operations",
+      "general": "General"
+    },
+    "empty": "No matching documents found",
+    "docTypes": {
+      "TERMS_OF_SERVICE": "Terms of Service",
+      "PRIVACY_POLICY": "Privacy Policy",
+      "LICENSE_AGREEMENT": "B2B License Agreement",
+      "OPERATIONAL_REGULATION": "Operational Regulations"
+    },
+    "audience": {
+      "ownerBadge": "Station Owner",
+      "forOwner": "Applies to Station Owners",
+      "systemWide": "System-wide"
+    },
+    "viewer": {
+      "effective": "Effective",
+      "updatedAt": "Updated: {{date}}",
+      "inDocSearchPlaceholder": "Search keywords in this document (In-document search)...",
+      "clearInDocSearch": "Clear",
+      "copiedToast": "Markdown source copied to clipboard"
     }
   }
 }

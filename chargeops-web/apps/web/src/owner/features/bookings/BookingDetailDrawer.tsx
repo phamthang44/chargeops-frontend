@@ -46,6 +46,9 @@ export function BookingDetailDrawer({
   const context = contextQuery.data;
   const isLoading = detailQuery.isLoading || !booking;
   const meta = booking ? BOOKING_STATUS[booking.status] ?? { label: booking.status, tone: 'neutral' } : null;
+  const statusLabel = booking
+    ? t(`bookings.status.${booking.status}`, { defaultValue: meta?.label ?? booking.status })
+    : '';
 
   // Eligibility evaluation
   const isOperational = booking?.status === 'CHECKED_IN' || booking?.status === 'CHARGING';
@@ -78,7 +81,7 @@ export function BookingDetailDrawer({
           ) : (
             <>
               <span className="font-mono text-[16px] font-bold">{booking.bookingCode || booking.bookingId}</span>
-              <StatusPill tone={meta.tone} label={meta.label} />
+              <StatusPill tone={meta.tone} label={statusLabel} />
             </>
           )
         }
@@ -150,7 +153,9 @@ export function BookingDetailDrawer({
             {booking.cancellationReason && (
               <div className="rounded-card border border-line-3 bg-surface-2 px-3.5 py-2 text-[12px] font-medium text-body">
                 <span className="font-semibold text-bad">{t('bookings.drawer.cancellationReasonLabel', 'Lý do hủy:')} </span>
-                {CANCELLATION_REASON[booking.cancellationReason]?.label ?? booking.cancellationReason}
+                {t(`bookings.cancellationReason.${booking.cancellationReason}`, {
+                  defaultValue: CANCELLATION_REASON[booking.cancellationReason]?.label ?? booking.cancellationReason,
+                })}
               </div>
             )}
 
@@ -213,17 +218,27 @@ export function BookingDetailDrawer({
               </div>
               <div className="flex flex-col gap-[7px] text-[12.5px] font-medium text-body">
                 {booking.priceLines && booking.priceLines.length > 0 ? (
-                  booking.priceLines.map((line) => (
-                    <div key={line.sequence} className="flex justify-between">
-                      <span>
-                        {formatTimeVn(line.startAt)}–{formatTimeVn(line.endAt)} ·{' '}
-                        <span className="text-muted">{line.label}</span>
-                      </span>
-                      <span className="font-mono">
-                        {formatVnd(line.rateVndPerKwh)}/kWh · {formatVnd(line.amount)}
-                      </span>
-                    </div>
-                  ))
+                  booking.priceLines.map((line) => {
+                    const lineLabel =
+                      line.rateKind === 'peak' || line.label === 'Giờ cao điểm' || (line as any).periodCode === 'PEAK'
+                        ? t('bookings.rateKind.peak')
+                        : line.rateKind === 'offpeak' || line.label === 'Giờ thấp điểm' || (line as any).periodCode === 'OFF_PEAK'
+                        ? t('bookings.rateKind.offpeak')
+                        : line.rateKind === 'normal' || line.rateKind === 'standard' || line.label === 'Giờ thường' || (line as any).periodCode === 'NORMAL'
+                        ? t('bookings.rateKind.normal')
+                        : line.label;
+                    return (
+                      <div key={line.sequence} className="flex justify-between">
+                        <span>
+                          {formatTimeVn(line.startAt)}–{formatTimeVn(line.endAt)} ·{' '}
+                          <span className="text-muted">{lineLabel}</span>
+                        </span>
+                        <span className="font-mono">
+                          {formatVnd(line.rateVndPerKwh)}/kWh · {formatVnd(line.amount)}
+                        </span>
+                      </div>
+                    );
+                  })
                 ) : (
                   <div className="flex justify-between">
                     <span>{t('bookings.drawer.fixedRate', 'Giá gói cố định')}</span>
@@ -245,7 +260,9 @@ export function BookingDetailDrawer({
                 </div>
                 <div className="flex justify-between text-[12.5px] font-medium">
                   <span className="text-muted">{t('bookings.drawer.paymentStatus', 'Trạng thái thanh toán:')}</span>
-                  <span className="font-semibold">{booking.payment.status}</span>
+                  <span className="font-semibold">
+                    {t(`bookings.paymentStatus.${booking.payment.status}`, { defaultValue: booking.payment.status })}
+                  </span>
                 </div>
                 <div className="mt-1 flex justify-between text-[12.5px] font-medium">
                   <span className="text-muted">{t('bookings.drawer.collectedAmount', 'Đã thu:')}</span>

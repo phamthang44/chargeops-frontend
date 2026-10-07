@@ -162,10 +162,10 @@ function ChargePointCard({
               onViewCpHistory(cp);
             }}
             className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
-            title="Xem lịch sử thay đổi trạng thái trụ sạc"
+            title={t('chargePoints.history.cpTooltip')}
           >
             <IconHistory size={12} strokeWidth={2} />
-            <span>Lịch sử</span>
+            <span>{t('chargePoints.history.shortLabel')}</span>
           </button>
 
           <button
@@ -176,12 +176,12 @@ function ChargePointCard({
               }
             }}
             disabled={!canToggle}
-            title={!canToggle ? 'Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng' : undefined}
+            title={!canToggle ? t('chargePoints.pendingTooltip') : undefined}
             className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:opacity-80"
             style={{ background: pill.bg, color: pill.fg }}
           >
             <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-            {pill.label}
+            {t(pill.key)}
           </button>
         </div>
       </div>
@@ -195,7 +195,7 @@ function ChargePointCard({
             <span>
               {cp.provisioningStatus === 'PENDING_ACTIVATION'
                 ? t('connectors.card.pendingActivation')
-                : t('connectors.card.deviceDown', { status: pill.label })}
+                : t('connectors.card.deviceDown', { status: t(pill.key) })}
             </span>
           </div>
         )}
@@ -248,7 +248,9 @@ function ConnectorRow({
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="font-mono text-[11.5px] font-semibold text-brand">{c.connectorCode || c.id}</span>
-          <span className="truncate text-[12.5px] font-semibold">{c.name || `Cổng sạc ${c.connectorType}`}</span>
+          <span className="truncate text-[12.5px] font-semibold">
+            {c.name || t('connectors.panel.defaultName', { type: c.connectorType })}
+          </span>
         </div>
         <button
           onClick={() => onCycleStatus(c)}
@@ -258,7 +260,7 @@ function ConnectorRow({
           style={{ background: pill.bg, color: pill.fg }}
         >
           <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`connectors.status.${effective}`, { defaultValue: pill.label })}
+          {t(`connectors.status.${effective}`, { defaultValue: t(pill.key) })}
         </button>
       </div>
 
@@ -292,10 +294,10 @@ function ConnectorRow({
             type="button"
             onClick={() => onViewConnectorHistory(c)}
             className="inline-flex shrink-0 items-center gap-1 rounded-[8px] border border-line-2 bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
-            title="Xem lịch sử trạng thái súng sạc"
+            title={t('chargePoints.history.connectorTooltip')}
           >
             <IconHistory size={12} strokeWidth={2} />
-            <span>Lịch sử</span>
+            <span>{t('chargePoints.history.shortLabel')}</span>
           </button>
         </div>
       </div>

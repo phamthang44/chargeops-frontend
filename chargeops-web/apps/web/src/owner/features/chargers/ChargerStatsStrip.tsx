@@ -32,7 +32,7 @@ export function ChargerStatsStrip({ groups }: { groups: ChargePointGroup[] }) {
       <MetricCard label={t('connectors.stats.total')} value={String(connectors.length)} accent="#5b54e8" />
       <MetricCard label={t('connectors.stats.available')} value={String(available.length)} accent="#12a150" />
       <MetricCard label={t('connectors.stats.inuse')} value={String(inuse)} accent="#5b54e8" />
-      <MetricCard label="OFFLINE" value={String(offline)} accent="#c0392b" />
+      <MetricCard label={t('connectors.stats.offline')} value={String(offline)} accent="#c0392b" />
       <MetricCard label={t('connectors.stats.sessions')} value={String(sessions)} sub={t('connectors.stats.sessionsSub', { util: avgUtil })} accent="var(--color-ink)" />
     </div>
   );

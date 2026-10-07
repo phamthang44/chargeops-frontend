@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   formatDateVn,
@@ -37,6 +38,7 @@ const DOC_TYPE_LABELS: Record<LegalDocType, string> = {
 };
 
 export function LegalPolicies() {
+  const { t } = useTranslation('owner');
   const api = useApi();
   const toast = useToast();
   const [searchInput, setSearchInput] = useState('');
@@ -44,6 +46,9 @@ export function LegalPolicies() {
   const [selectedSlug, setSelectedSlug] = useState<string>('station-owner-license-agreement');
   const [inDocSearch, setInDocSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'all' | 'license' | 'operation' | 'general'>('all');
+
+  const getDocTypeLabel = (docType: LegalDocType) =>
+    t(`legal.docTypes.${docType}`, { defaultValue: DOC_TYPE_LABELS[docType] || docType });
 
   // Fetch list of documents for Owner - only queries when committedSearch changes on Submit/Enter
   const { data: listData, isLoading: listLoading, isFetching: listFetching } = useQuery({
@@ -106,8 +111,11 @@ export function LegalPolicies() {
   return (
     <>
       <PageHeader
-        title="Chính sách & Quy định Nền tảng"
-        subtitle="Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu."
+        title={t('legal.title', { defaultValue: 'Chính sách & Quy định Nền tảng' })}
+        subtitle={t('legal.subtitle', {
+          defaultValue:
+            'Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.',
+        })}
       />
 
       <div className="grid items-start gap-5 lg:grid-cols-[330px_1fr]">
@@ -120,7 +128,9 @@ export function LegalPolicies() {
                 <SearchInput
                   value={searchInput}
                   onChange={setSearchInput}
-                  placeholder="Tìm theo tiêu đề, từ khóa..."
+                  placeholder={t('legal.search.placeholder', {
+                    defaultValue: 'Tìm theo tiêu đề, từ khóa...',
+                  })}
                   accent="owner"
                   className="w-full"
                 />
@@ -131,27 +141,30 @@ export function LegalPolicies() {
                 size="sm"
                 className="shrink-0 gap-1 px-3 py-2 font-medium"
                 disabled={listFetching}
-                title="Tìm kiếm tài liệu"
+                title={t('legal.search.btnTitle', { defaultValue: 'Tìm kiếm tài liệu' })}
               >
                 <IconSearch size={14} />
-                <span>Tìm</span>
+                <span>{t('legal.search.btn', { defaultValue: 'Tìm' })}</span>
               </Button>
             </div>
             {(searchInput || committedSearch) && (
               <div className="flex items-center justify-between px-1 text-[11.5px]">
                 <span className="truncate text-muted">
                   {committedSearch ? (
-                    <>Đang lọc: <strong className="font-semibold text-ink">{committedSearch}</strong></>
+                    <>
+                      {t('legal.search.filtering', { defaultValue: 'Đang lọc: ' })}{' '}
+                      <strong className="font-semibold text-ink">{committedSearch}</strong>
+                    </>
                   ) : (
-                    <span>Nhấn Tìm để tra cứu</span>
+                    <span>{t('legal.search.hint', { defaultValue: 'Nhấn Tìm để tra cứu' })}</span>
                   )}
                 </span>
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="shrink-0 font-semibold text-owner hover:underline"
+                  className="shrink-0 font-semibold text-owner hover:underline cursor-pointer"
                 >
-                  Xóa lọc
+                  {t('legal.search.clear', { defaultValue: 'Xóa lọc' })}
                 </button>
               </div>
             )}
@@ -167,7 +180,10 @@ export function LegalPolicies() {
                   : 'text-muted hover:bg-canvas hover:text-ink'
               }`}
             >
-              Tất cả ({allDocs.length})
+              {t('legal.groups.all', {
+                count: allDocs.length,
+                defaultValue: `Tất cả (${allDocs.length})`,
+              })}
             </button>
             <button
               onClick={() => setSelectedGroup('license')}
@@ -177,7 +193,7 @@ export function LegalPolicies() {
                   : 'text-muted hover:bg-canvas hover:text-ink'
               }`}
             >
-              License B2B
+              {t('legal.groups.license', { defaultValue: 'License B2B' })}
             </button>
             <button
               onClick={() => setSelectedGroup('operation')}
@@ -187,7 +203,7 @@ export function LegalPolicies() {
                   : 'text-muted hover:bg-canvas hover:text-ink'
               }`}
             >
-              Vận hành
+              {t('legal.groups.operation', { defaultValue: 'Vận hành' })}
             </button>
             <button
               onClick={() => setSelectedGroup('general')}
@@ -197,7 +213,7 @@ export function LegalPolicies() {
                   : 'text-muted hover:bg-canvas hover:text-ink'
               }`}
             >
-              Chung
+              {t('legal.groups.general', { defaultValue: 'Chung' })}
             </button>
           </div>
 
@@ -212,7 +228,7 @@ export function LegalPolicies() {
               </div>
             ) : filteredDocs.length === 0 ? (
               <Card className="p-4 text-center text-[12.5px] text-muted">
-                Không tìm thấy tài liệu phù hợp
+                {t('legal.empty', { defaultValue: 'Không tìm thấy tài liệu phù hợp' })}
               </Card>
             ) : (
               filteredDocs.map((d) => {
@@ -239,11 +255,11 @@ export function LegalPolicies() {
                             isSelected ? 'bg-owner/20 text-owner-deep' : 'bg-chip text-muted'
                           }`}
                         >
-                          {DOC_TYPE_LABELS[d.docType]}
+                          {getDocTypeLabel(d.docType)}
                         </span>
                         {isOwnerDoc && (
                           <span className="rounded bg-emerald-100 px-1 py-0.2 text-[9px] font-bold text-emerald-800">
-                            Chủ trạm
+                            {t('legal.audience.ownerBadge', { defaultValue: 'Chủ trạm' })}
                           </span>
                         )}
                         <span className="font-mono text-[9.5px] text-ghost">v{d.version}</span>
@@ -286,20 +302,25 @@ export function LegalPolicies() {
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-md bg-owner-soft px-2.5 py-0.5 font-mono text-[11px] font-bold text-owner-deep">
                     <IconTag size={12} />
-                    {DOC_TYPE_LABELS[activeDoc.docType]}
+                    {getDocTypeLabel(activeDoc.docType)}
                   </span>
                   <span className="rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-body">
-                    {activeDoc.targetAudience === 'OWNER' ? 'Áp dụng cho Chủ trạm' : 'Toàn hệ thống'}
+                    {activeDoc.targetAudience === 'OWNER'
+                      ? t('legal.audience.forOwner', { defaultValue: 'Áp dụng cho Chủ trạm' })
+                      : t('legal.audience.systemWide', { defaultValue: 'Toàn hệ thống' })}
                   </span>
                   <span className="rounded-md border border-line bg-canvas px-2 py-0.5 font-mono text-[10.5px] text-muted">
                     v{activeDoc.version}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-good-soft px-2 py-0.5 text-[10px] font-bold text-good-deep">
                     <span className="h-1.5 w-1.5 rounded-full bg-good" />
-                    Hiệu lực
+                    {t('legal.viewer.effective', { defaultValue: 'Hiệu lực' })}
                   </span>
                   <span className="text-[11.5px] text-ghost">
-                    Cập nhật: {formatDateVn(activeDoc.updatedAt)}
+                    {t('legal.viewer.updatedAt', {
+                      date: formatDateVn(activeDoc.updatedAt),
+                      defaultValue: `Cập nhật: ${formatDateVn(activeDoc.updatedAt)}`,
+                    })}
                   </span>
                 </div>
 
@@ -325,15 +346,17 @@ export function LegalPolicies() {
                   type="text"
                   value={inDocSearch}
                   onChange={(e) => setInDocSearch(e.target.value)}
-                  placeholder="Tra cứu từ khóa trong nội dung văn bản này (In-document search)..."
+                  placeholder={t('legal.viewer.inDocSearchPlaceholder', {
+                    defaultValue: 'Tra cứu từ khóa trong nội dung văn bản này (In-document search)...',
+                  })}
                   className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-muted"
                 />
                 {inDocSearch && (
                   <button
                     onClick={() => setInDocSearch('')}
-                    className="rounded-md px-2 py-0.5 text-[11px] font-medium text-muted hover:bg-canvas"
+                    className="rounded-md px-2 py-0.5 text-[11px] font-medium text-muted hover:bg-canvas cursor-pointer"
                   >
-                    Xóa
+                    {t('legal.viewer.clearInDocSearch', { defaultValue: 'Xóa' })}
                   </button>
                 )}
               </div>
@@ -343,7 +366,14 @@ export function LegalPolicies() {
                 content={activeDoc.content}
                 searchQuery={inDocSearch}
                 showToc={true}
-                onCopySuccess={() => toast('Đã chép mã nguồn Markdown vào clipboard', 'success')}
+                onCopySuccess={() =>
+                  toast(
+                    t('legal.viewer.copiedToast', {
+                      defaultValue: 'Đã chép mã nguồn Markdown vào clipboard',
+                    }),
+                    'success',
+                  )
+                }
               />
             </div>
           )}

@@ -33,7 +33,7 @@ export interface FinanceLedgerTabProps {
 }
 
 export function FinanceLedgerTab() {
-  const { t } = useTranslation('owner');
+  const { t } = useTranslation(['owner', 'common']);
   const api = useApi();
   const toast = useToast();
 
@@ -64,7 +64,7 @@ export function FinanceLedgerTab() {
     e.stopPropagation();
     navigator.clipboard?.writeText(val);
     setCopiedId(val);
-    toast(t('common.copied', 'Đã sao chép!'), 'success');
+    toast(t('common:copied', 'Đã sao chép!'), 'success');
     setTimeout(() => setCopiedId(null), 1500);
   };
 
@@ -110,7 +110,7 @@ export function FinanceLedgerTab() {
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
                 <span className="text-body font-semibold text-good flex items-center gap-1">
                   <span>↑</span>
-                  <span>{s.paidBookings} đơn sạc</span>
+                  <span>{s.paidBookings} {t('finance.kpis.paidBookingsSuffix', 'đơn sạc')}</span>
                 </span>
                 <span className="text-faint">{formatVnd(s.grossVnd)}</span>
               </div>
@@ -157,7 +157,7 @@ export function FinanceLedgerTab() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-warn font-semibold">Đang xử lý</span>
+                <span className="text-warn font-semibold">{t('finance.kpis.pendingNotice', 'Đang xử lý')}</span>
                 <span className="text-faint">{formatVnd(s.pendingRefundVnd)}</span>
               </div>
             </div>
@@ -179,7 +179,7 @@ export function FinanceLedgerTab() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-good font-semibold">Thu ròng đối soát</span>
+                <span className="text-good font-semibold">{t('finance.kpis.netNotice', 'Thu ròng đối soát')}</span>
                 <span className="text-faint">{formatVnd(s.netVnd)}</span>
               </div>
             </div>
@@ -264,7 +264,7 @@ export function FinanceLedgerTab() {
                             type="button"
                             onClick={(e) => handleCopy(bookingCode, e)}
                             className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-faint hover:text-ink rounded"
-                            title="Sao chép mã đơn"
+                            title={t('finance.table.copyCodeTitle', 'Sao chép mã đơn')}
                           >
                             {copiedId === bookingCode ? (
                               <IconCheck size={11} className="text-good" />
@@ -326,7 +326,7 @@ export function FinanceLedgerTab() {
                             className="h-7 px-2.5 text-[11px] font-semibold text-brand hover:bg-brand/10 rounded-lg"
                           >
                             <IconCard size={12} className="mr-1" />
-                            <span>Chứng từ</span>
+                            <span>{t('finance.table.receiptsBtn', 'Chứng từ')}</span>
                           </Button>
                         </div>
                       </div>
@@ -338,7 +338,7 @@ export function FinanceLedgerTab() {
 
             <div className="border-t border-hairline px-4 py-2.5 flex items-center justify-between">
               <span className="text-[11.5px] text-faint">
-                {t('common.total', 'Tổng số')}: <strong className="text-ink font-semibold">{total}</strong> đơn
+                {t('common:total', 'Tổng số')}: <strong className="text-ink font-semibold">{total}</strong> {t('finance.table.bookingsUnit', 'đơn')}
               </span>
               <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
             </div>

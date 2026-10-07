@@ -13,10 +13,45 @@
   "all": "Tất cả",
   "status": "Trạng thái",
   "action": "Hành động",
+  "total": "Tổng số",
   "notes": "Ghi chú",
   "system": "Hệ thống",
   "copied": "Đã sao chép vào bộ nhớ tạm",
   "copiedCode": "Đã sao chép mã {{code}}",
+  "equipmentHistory": {
+    "titleConnector": "Lịch sử trạng thái Súng sạc",
+    "titleChargePoint": "Lịch sử trạng thái Trụ sạc",
+    "fallbackChargePoint": "Trụ sạc",
+    "banner": "Nhật ký ghi nhận mọi thay đổi trạng thái từ Quản trị viên (Admin), Chủ trạm (Owner) và Hệ thống (System).",
+    "error": {
+      "eyebrow": "Lịch sử trạng thái",
+      "title": "Không thể tải lịch sử trạng thái"
+    },
+    "empty": {
+      "title": "Chưa có lịch sử trạng thái",
+      "description": "Thiết bị này chưa ghi nhận bất kỳ sự kiện thay đổi trạng thái nào trong hệ thống."
+    },
+    "actor": {
+      "admin": "Quản trị viên (Admin)",
+      "owner": "Chủ trạm (Owner)",
+      "system": "Hệ thống (System)"
+    },
+    "dimension": {
+      "provisioning": "Vòng đời cấp hạ tầng",
+      "operational": "Trạng thái vận hành trạm"
+    },
+    "reasonLabel": "Lý do:",
+    "performedBy": "Thực hiện bởi:",
+    "status": {
+      "PENDING_ACTIVATION": "Chờ kích hoạt",
+      "ACTIVE": "Hoạt động",
+      "SUSPENDED": "Tạm ngưng",
+      "AVAILABLE": "Sẵn sàng",
+      "OFFLINE": "Ngoại tuyến",
+      "MAINTENANCE": "Bảo trì",
+      "IN_USE": "Đang sạc"
+    }
+  },
   "error": {
     "generic": "Đã có lỗi xảy ra"
   },
@@ -41,5 +76,27 @@
       "auth": "Phiên đăng nhập đã hết hạn hoặc bạn chưa được cấp quyền. Vui lòng đăng nhập lại.",
       "default": "Hệ thống chưa thể hoàn tất yêu cầu. Vui lòng thử lại — nếu lỗi kéo dài, hãy liên hệ quản trị viên."
     }
+  },
+  "markdownViewer": {
+    "readingStats": {
+      "estimate": "Ước tính:",
+      "minutesRead": "{{count}} phút đọc",
+      "words": "{{count}} từ",
+      "headings": "{{count}} đề mục",
+      "matches": "{{count}} kết quả khớp",
+      "noMatches": "Không có kết quả khớp"
+    },
+    "actions": {
+      "fontSmallTitle": "Cỡ chữ nhỏ (13px)",
+      "fontStandardTitle": "Cỡ chữ chuẩn (15px)",
+      "fontLargeTitle": "Cỡ chữ lớn (17.5px)",
+      "copyTitle": "Sao chép toàn bộ mã nguồn Markdown",
+      "copyBtn": "Sao chép Markdown",
+      "copied": "Đã chép!",
+      "downloadTitle": "Tải tệp .md về máy",
+      "downloadBtn": "Tải .md"
+    },
+    "anchorTitle": "Neo liên kết mục này",
+    "toc": "Mục lục điều khoản"
   }
 }

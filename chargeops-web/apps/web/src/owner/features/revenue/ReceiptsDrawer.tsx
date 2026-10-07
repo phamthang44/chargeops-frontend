@@ -22,7 +22,7 @@ export interface ReceiptsDrawerProps {
 }
 
 export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) {
-  const { t } = useTranslation('owner');
+  const { t } = useTranslation(['owner', 'common']);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   if (!booking) return null;
@@ -107,7 +107,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
                       type="button"
                       onClick={() => handleCopy(r.transactionRef || r.receiptId)}
                       className="p-1 text-faint hover:text-ink rounded transition"
-                      title="Sao chép mã giao dịch"
+                      title={t('finance.receiptsDrawer.copyTxTitle', 'Sao chép mã giao dịch')}
                     >
                       {copiedId === (r.transactionRef || r.receiptId) ? (
                         <IconCheck size={12} className="text-good" />
@@ -135,7 +135,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
         {/* Close button */}
         <div className="pt-2">
           <Button variant="secondary" onClick={onClose} className="w-full">
-            {t('common.close', 'Đóng')}
+            {t('common:close', 'Đóng')}
           </Button>
         </div>
       </div>

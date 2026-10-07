@@ -12,7 +12,11 @@
     "placeholder": "Tìm đặt chỗ, trụ, trạm…",
     "clear": "Xóa tìm kiếm",
     "loading": "Đang tìm…",
-    "empty": "Không tìm thấy kết quả."
+    "empty": "Không tìm thấy kết quả.",
+    "minChars": "Nhập ít nhất 2 ký tự để bắt đầu tìm kiếm.",
+    "hintNav": "di chuyển",
+    "hintOpen": "mở",
+    "hintClose": "đóng"
   },
   "brand": {
     "switchPortal": "Đổi cổng"
@@ -31,5 +35,58 @@
     "prevPage": "Trang trước",
     "nextPage": "Trang sau",
     "jumpToPage": "Đến trang"
+  },
+  "stationStatus": {
+    "pending": "Chờ duyệt",
+    "rejected": "Bị từ chối",
+    "suspended": "Tạm ngưng",
+    "withdrawn": "Đã rút hồ sơ",
+    "unapproved": "Chưa duyệt",
+    "licenseMissing": "Thiếu Giấy phép",
+    "licenseExpired": "License hết hạn",
+    "licenseSuspended": "License tạm ngưng",
+    "licenseCancelled": "License đã hủy",
+    "licenseNotStarted": "License chờ hiệu lực",
+    "noActiveChargers": "Chưa cấp trụ sạc",
+    "allChargersOffline": "Tất cả trụ Offline",
+    "hiddenFromSearch": "Tạm ẩn tìm kiếm",
+    "pausedByOwner": "Tạm ngừng đón khách",
+    "maintenance": "Đang bảo trì",
+    "unavailableByPlatform": "Không khả dụng",
+    "open": "Đang mở · Đón khách",
+    "openCompact": "Đang mở",
+    "closedBySchedule": "Ngoài giờ hoạt động",
+    "scheduleNotConfigured": "Chưa cấu hình lịch",
+    "active": "Đang hoạt động"
+  },
+  "stationStatusTooltips": {
+    "pending": "Hồ sơ trạm đang chờ Quản trị viên ChargeOps kiểm duyệt.",
+    "rejected": "Hồ sơ đăng ký trạm đã bị từ chối duyệt.",
+    "suspended": "Trạm đang bị đình chỉ hoạt động bởi quản trị hệ thống.",
+    "withdrawn": "Hồ sơ trạm sạc đã được chủ trạm rút lại.",
+    "unapproved": "Trạng thái trạm: {{status}}",
+    "licenseMissing": "Trạm chưa có gói License hợp lệ nên đang tạm ẩn khỏi tìm kiếm của tài xế.",
+    "licenseExpired": "Gói License của trạm đã hết hạn hiệu lực. Vui lòng gia hạn để đón khách trở lại.",
+    "licenseSuspended": "Gói License của trạm đang bị tạm ngưng.",
+    "licenseCancelled": "Gói License của trạm đã bị hủy bỏ.",
+    "licenseNotStarted": "Gói License của trạm chưa tới ngày bắt đầu hiệu lực.",
+    "noActiveChargers": "Trạm chưa có trụ sạc hoặc súng sạc nào được kích hoạt.",
+    "allChargersOffline": "Tất cả trụ sạc của trạm đang tạm dừng, chờ kích hoạt hoặc mất kết nối.",
+    "hiddenFromSearch": "Trạm tạm thời chưa đủ điều kiện nhận đón tài xế.",
+    "pausedByOwner": "Chủ trạm đang chủ động tạm dừng tiếp nhận đặt chỗ mới.",
+    "maintenance": "Trạm đang trong quá trình bảo trì kỹ thuật.",
+    "unavailableByPlatform": "Trạm chưa đủ điều kiện hiển thị trên nền tảng.",
+    "open": "Trạm đang trong giờ hoạt động và hiển thị sẵn sàng đón tài xế trên ứng dụng di động.",
+    "closedBySchedule": "Trạm đang ngoài khung giờ hoạt động theo lịch đã cài đặt (vẫn đủ điều kiện hiển thị trên app).",
+    "scheduleNotConfigured": "Trạm chưa thiết lập khung giờ hoạt động cụ thể.",
+    "active": "Trạm đang hoạt động bình thường trên hệ thống."
+  },
+  "stationOperatingBadge": {
+    "OPEN": "Đang mở cửa",
+    "CLOSED_BY_SCHEDULE": "Ngoài giờ hoạt động",
+    "PAUSED_BY_OWNER": "Tạm ngừng đón khách",
+    "MAINTENANCE": "Đang bảo trì",
+    "SCHEDULE_NOT_CONFIGURED": "Chưa cấu hình lịch",
+    "UNAVAILABLE_BY_PLATFORM": "Không đủ điều kiện"
   }
 }

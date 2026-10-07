@@ -18,21 +18,21 @@ export interface OperatingHoursStepProps {
   onOpenHistory?: () => void;
 }
 
-const DAY_LABELS: Record<string, { full: string; short: string; isWeekend?: boolean }> = {
-  T2: { full: 'Thứ Hai', short: 'T2' },
-  T3: { full: 'Thứ Ba', short: 'T3' },
-  T4: { full: 'Thứ Tư', short: 'T4' },
-  T5: { full: 'Thứ Năm', short: 'T5' },
-  T6: { full: 'Thứ Sáu', short: 'T6' },
-  T7: { full: 'Thứ Bảy', short: 'T7', isWeekend: true },
-  CN: { full: 'Chủ Nhật', short: 'CN', isWeekend: true },
-  MONDAY: { full: 'Thứ Hai', short: 'T2' },
-  TUESDAY: { full: 'Thứ Ba', short: 'T3' },
-  WEDNESDAY: { full: 'Thứ Tư', short: 'T4' },
-  THURSDAY: { full: 'Thứ Năm', short: 'T5' },
-  FRIDAY: { full: 'Thứ Sáu', short: 'T6' },
-  SATURDAY: { full: 'Thứ Bảy', short: 'T7', isWeekend: true },
-  SUNDAY: { full: 'Chủ Nhật', short: 'CN', isWeekend: true },
+const DAY_CONFIG: Record<string, { key: string; fullVi: string; isWeekend?: boolean }> = {
+  T2: { key: 'T2', fullVi: 'Thứ Hai' },
+  T3: { key: 'T3', fullVi: 'Thứ Ba' },
+  T4: { key: 'T4', fullVi: 'Thứ Tư' },
+  T5: { key: 'T5', fullVi: 'Thứ Năm' },
+  T6: { key: 'T6', fullVi: 'Thứ Sáu' },
+  T7: { key: 'T7', fullVi: 'Thứ Bảy', isWeekend: true },
+  CN: { key: 'CN', fullVi: 'Chủ Nhật', isWeekend: true },
+  MONDAY: { key: 'T2', fullVi: 'Thứ Hai' },
+  TUESDAY: { key: 'T3', fullVi: 'Thứ Ba' },
+  WEDNESDAY: { key: 'T4', fullVi: 'Thứ Tư' },
+  THURSDAY: { key: 'T5', fullVi: 'Thứ Năm' },
+  FRIDAY: { key: 'T6', fullVi: 'Thứ Sáu' },
+  SATURDAY: { key: 'T7', fullVi: 'Thứ Bảy', isWeekend: true },
+  SUNDAY: { key: 'CN', fullVi: 'Chủ Nhật', isWeekend: true },
 };
 
 /**
@@ -54,6 +54,15 @@ export function OperatingHoursStep({
   const [warningModalOpen, setWarningModalOpen] = useState(false);
 
   const openDaysCount = hours.filter((h) => h.open24).length;
+
+  const getDayInfo = (day: string) => {
+    const cfg = DAY_CONFIG[day] ?? { key: day, fullVi: day, isWeekend: false };
+    const full = t(`pricing.dayNames.${day}`, {
+      defaultValue: t(`pricing.dayNames.${cfg.key}`, { defaultValue: cfg.fullVi }),
+    });
+    const short = t(`pricing.days.${cfg.key}`, { defaultValue: cfg.key });
+    return { full, short, isWeekend: cfg.isWeekend };
+  };
 
   const handleToggle247 = () => {
     if (isOpen247) {
@@ -164,18 +173,18 @@ export function OperatingHoursStep({
 
         {/* Subheader info bar */}
         <div className="flex items-center justify-between border-b border-hairline pb-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">
-          <div className="w-[110px]">Ngày trong tuần</div>
+          <div className="w-[110px]">{t('pricing.steps.step2.colDay', { defaultValue: 'Ngày trong tuần' })}</div>
           <div className="flex-1 grid grid-cols-2 gap-3 text-center">
-            <span>Giờ mở cửa</span>
-            <span>Giờ đóng cửa</span>
+            <span>{t('pricing.steps.step2.colOpen', { defaultValue: 'Giờ mở cửa' })}</span>
+            <span>{t('pricing.steps.step2.colClose', { defaultValue: 'Giờ đóng cửa' })}</span>
           </div>
-          <div className="w-[50px] text-right">Mở cửa</div>
+          <div className="w-[50px] text-right">{t('pricing.steps.step2.colStatus', { defaultValue: 'Mở cửa' })}</div>
         </div>
 
         {/* List of 7 days */}
         <div className="flex flex-col divide-y divide-hairline">
           {hours.map((h) => {
-            const dayInfo = DAY_LABELS[h.day] ?? { full: h.day, short: h.day };
+            const dayInfo = getDayInfo(h.day);
             const isClosed = !h.open24;
 
             return (
@@ -204,11 +213,11 @@ export function OperatingHoursStep({
                   {isOpen247 ? (
                     <div className="flex h-[36px] items-center justify-center gap-2 rounded-[9px] border border-owner-border bg-owner-soft/80 px-3 text-center font-mono text-[12.5px] font-bold text-owner-deep shadow-2xs">
                       <IconClock size={14} className="text-owner-deep" />
-                      <span>Mở liên tục 24/7 (00:00 – 24:00)</span>
+                      <span>{t('pricing.steps.step2.open247Row', { defaultValue: 'Mở liên tục 24/7 (00:00 – 24:00)' })}</span>
                     </div>
                   ) : isClosed ? (
                     <div className="flex h-[36px] items-center justify-center gap-1.5 rounded-[9px] border border-line-2 bg-chip/80 px-3 text-center text-[12px] font-medium text-faint">
-                      <span>Đóng cửa (Nghỉ phục vụ)</span>
+                      <span>{t('pricing.steps.step2.closedRow', { defaultValue: 'Đóng cửa (Nghỉ phục vụ)' })}</span>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 items-center gap-3">
@@ -217,14 +226,14 @@ export function OperatingHoursStep({
                         onChange={(val) => onChangeTime(h.day, 'open', val)}
                         stepMinutes={30}
                         accent="owner"
-                        aria-label={`Giờ mở cửa ${dayInfo.full}`}
+                        aria-label={t('pricing.steps.step2.openAria', { day: dayInfo.full, defaultValue: `Giờ mở cửa ${dayInfo.full}` })}
                       />
                       <TimeSelect
                         value={h.close || '23:00'}
                         onChange={(val) => onChangeTime(h.day, 'close', val)}
                         stepMinutes={30}
                         accent="owner"
-                        aria-label={`Giờ đóng cửa ${dayInfo.full}`}
+                        aria-label={t('pricing.steps.step2.closeAria', { day: dayInfo.full, defaultValue: `Giờ đóng cửa ${dayInfo.full}` })}
                       />
                     </div>
                   )}
@@ -248,13 +257,20 @@ export function OperatingHoursStep({
         <div className="mt-1 flex items-start gap-2 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted border border-hairline">
           <span className="shrink-0 text-base leading-none">💡</span>
           <div>
-            <b>Quy cách giờ đóng mở:</b> Trạm đang mở{' '}
+            <b>{t('pricing.steps.step2.footerTitle', { defaultValue: 'Quy cách giờ đóng mở:' })}</b>{' '}
+            {t('pricing.steps.step2.footerDescPart1', { defaultValue: 'Trạm đang mở' })}{' '}
             <span className="font-semibold text-ink">
-              {isOpen247 ? '7/7 ngày (24/7)' : `${openDaysCount}/7 ngày`}
+              {isOpen247
+                ? t('pricing.steps.step2.daysCountAll', { defaultValue: '7/7 ngày (24/7)' })
+                : t('pricing.steps.step2.daysCount', { count: openDaysCount, defaultValue: `${openDaysCount}/7 ngày` })}
             </span>
-            . Nếu giờ đóng cửa nhỏ hơn giờ mở cửa (ví dụ{' '}
+            {t('pricing.steps.step2.footerDescPart2', {
+              defaultValue: '. Nếu giờ đóng cửa nhỏ hơn giờ mở cửa (ví dụ',
+            })}{' '}
             <span className="font-mono text-ink font-semibold">22:00 – 02:00</span>
-            ), hệ thống tự động hiểu là trạm mở xuyên qua nửa đêm sang sáng hôm sau.
+            {t('pricing.steps.step2.footerDescPart3', {
+              defaultValue: '), hệ thống tự động hiểu là trạm mở xuyên qua nửa đêm sang sáng hôm sau.',
+            })}
           </div>
         </div>
       </div>

@@ -27,6 +27,7 @@ function TimelineTrack({
   basePriceVnd: number;
   targetDayType: 'weekdays' | 'weekends' | 'daily';
 }) {
+  const { t } = useTranslation('owner');
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const getHourRate = (hour: number) => {
@@ -70,7 +71,7 @@ function TimelineTrack({
         {hours.map((h) => {
           const match = getHourRate(h);
           let bg = 'bg-surface-3';
-          let title = `${h}:00 – ${h + 1}:00: ${formatVnd(basePriceVnd)}/kWh (Giá cơ bản)`;
+          let title = `${h}:00 – ${h + 1}:00: ${formatVnd(basePriceVnd)}/kWh (${t('pricing.steps.step3.basePriceLabel', { defaultValue: 'Giá cơ bản' })})`;
           if (match) {
             const pct = pricePctVsBase(match.rateVnd, basePriceVnd);
             if (pct > 0) {
@@ -105,6 +106,7 @@ function TimelineTrack({
 
 /** Helper to render 24h visual timeline bars based on TOU rules (supporting separate Weekdays & Weekends). */
 function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVnd: number }) {
+  const { t } = useTranslation('owner');
   const hasWeekdaySpecific = rules.some((r) => r.days === 'weekdays');
   const hasWeekendSpecific = rules.some((r) => r.days === 'weekends');
   const hasDaySplit = hasWeekdaySpecific || hasWeekendSpecific;
@@ -114,20 +116,20 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
       {/* Header & Legend */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2.5">
         <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-faint">
-          Biểu đồ phân bổ giá theo khung giờ (24h)
+          {t('pricing.steps.step3.timelineTitle', { defaultValue: 'Biểu đồ phân bổ giá theo khung giờ (24h)' })}
         </span>
         <div className="flex items-center gap-3 text-[11px]">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-owner-deep" />
-            <span className="text-muted">Thấp điểm</span>
+            <span className="text-muted">{t('pricing.steps.step3.legendLow', { defaultValue: 'Thấp điểm' })}</span>
           </span>
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-surface-3 border border-line-2" />
-            <span className="text-muted">Giá cơ bản</span>
+            <span className="text-muted">{t('pricing.steps.step3.legendBase', { defaultValue: 'Giá cơ bản' })}</span>
           </span>
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-warn" />
-            <span className="text-muted">Cao điểm</span>
+            <span className="text-muted">{t('pricing.steps.step3.legendPeak', { defaultValue: 'Cao điểm' })}</span>
           </span>
         </div>
       </div>
@@ -136,8 +138,8 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         <div className="flex flex-col gap-3.5 divide-y divide-hairline">
           {/* Weekday track */}
           <TimelineTrack
-            title="🏢 Ngày trong tuần"
-            badge="Thứ 2 – Thứ 6"
+            title={t('pricing.steps.step3.weekdaysTrack', { defaultValue: '🏢 Ngày trong tuần' })}
+            badge={t('pricing.steps.step3.weekdaysBadge', { defaultValue: 'Thứ 2 – Thứ 6' })}
             rules={rules}
             basePriceVnd={basePriceVnd}
             targetDayType="weekdays"
@@ -146,8 +148,8 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
           {/* Weekend track */}
           <div className="pt-3">
             <TimelineTrack
-              title="🏖️ Cuối tuần"
-              badge="Thứ 7 – Chủ Nhật"
+              title={t('pricing.steps.step3.weekendsTrack', { defaultValue: '🏖️ Cuối tuần' })}
+              badge={t('pricing.steps.step3.weekendsBadge', { defaultValue: 'Thứ 7 – Chủ Nhật' })}
               rules={rules}
               basePriceVnd={basePriceVnd}
               targetDayType="weekends"
@@ -156,8 +158,8 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         </div>
       ) : (
         <TimelineTrack
-          title="📅 Cả tuần"
-          badge="Thứ 2 – Chủ Nhật"
+          title={t('pricing.steps.step3.dailyTrack', { defaultValue: '📅 Cả tuần' })}
+          badge={t('pricing.steps.step3.dailyBadge', { defaultValue: 'Thứ 2 – Chủ Nhật' })}
           rules={rules}
           basePriceVnd={basePriceVnd}
           targetDayType="daily"
@@ -224,7 +226,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                             type="button"
                             onClick={() => onEdit(r)}
                             className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-muted hover:bg-chip transition-colors cursor-pointer"
-                            title="Chỉnh sửa khung giá này"
+                            title={t('pricing.steps.step3.editRuleTooltip', { defaultValue: 'Chỉnh sửa khung giá này' })}
                           >
                             <IconEdit size={14} />
                           </button>
@@ -234,7 +236,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                           onClick={() => setDeleteId(r.id)}
                           className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-bad hover:bg-bad-soft transition-colors cursor-pointer"
                           aria-label={t('pricing.steps.step3.deleteBtn')}
-                          title="Xóa khung giá"
+                          title={t('pricing.steps.step3.deleteRuleTooltip', { defaultValue: 'Xóa khung giá' })}
                         >
                           <IconTrash size={14} />
                         </button>
@@ -284,13 +286,20 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
       {/* Delete Rule Confirmation Modal */}
       <Modal open={Boolean(deleteId)} onClose={() => setDeleteId(null)} maxWidth={400}>
         <div>
-          <div className="text-[16px] font-bold text-ink">Xóa khung giá này?</div>
+          <div className="text-[16px] font-bold text-ink">
+            {t('pricing.steps.step3.deleteConfirmModalTitle', { defaultValue: 'Xóa khung giá này?' })}
+          </div>
           <div className="mt-1.5 text-[12.5px] text-muted">
-            Bạn có chắc chắn muốn xóa khung giá <b>"{ruleToDelete?.name}"</b> ({ruleToDelete?.from}–{ruleToDelete?.to}) không? Các khung giờ này sẽ tự động quay về áp dụng mức giá gốc.
+            {t('pricing.steps.step3.deleteConfirmModalDesc', {
+              name: ruleToDelete?.name,
+              from: ruleToDelete?.from,
+              to: ruleToDelete?.to,
+              defaultValue: `Bạn có chắc chắn muốn xóa khung giá "${ruleToDelete?.name}" (${ruleToDelete?.from}–${ruleToDelete?.to}) không? Các khung giờ này sẽ tự động quay về áp dụng mức giá gốc.`,
+            })}
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setDeleteId(null)}>
-              Hủy bỏ
+              {t('pricing.cancelBtn', { defaultValue: 'Hủy bỏ' })}
             </Button>
             <Button
               variant="danger"
@@ -300,7 +309,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                 setDeleteId(null);
               }}
             >
-              Xác nhận xóa
+              {t('pricing.steps.step3.deleteConfirmBtn', { defaultValue: 'Xác nhận xóa' })}
             </Button>
           </div>
         </div>

@@ -26,7 +26,12 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
           control={
             <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-owner-deep bg-owner-soft font-mono">
               <IconShieldCheck size={14} className="text-owner-deep" />
-              <span>{SYSTEM_BOOKING_RULES.NO_SHOW_AUTO_LOCK_MINUTES} phút (Bắt buộc)</span>
+              <span>
+                {t('pricing.steps.step4.noShowBadge', {
+                  minutes: SYSTEM_BOOKING_RULES.NO_SHOW_AUTO_LOCK_MINUTES,
+                  defaultValue: `${SYSTEM_BOOKING_RULES.NO_SHOW_AUTO_LOCK_MINUTES} phút (Bắt buộc)`,
+                })}
+              </span>
             </span>
           }
         />
@@ -40,19 +45,32 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
           control={
             <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 font-mono">
               <IconCalendar size={14} className="text-faint" />
-              <span>{SYSTEM_BOOKING_RULES.MAX_ADVANCE_BOOKING_DAYS} ngày (Hôm nay & Ngày mai)</span>
+              <span>
+                {t('pricing.steps.step4.advanceBadge', {
+                  days: SYSTEM_BOOKING_RULES.MAX_ADVANCE_BOOKING_DAYS,
+                  defaultValue: `${SYSTEM_BOOKING_RULES.MAX_ADVANCE_BOOKING_DAYS} ngày (Hôm nay & Ngày mai)`,
+                })}
+              </span>
             </span>
           }
         />
 
         {/* Row 3: Turnaround Buffer */}
         <Row
-          title="Thời gian giãn ca giữa 2 lượt sạc"
-          desc="Khoảng nghỉ cố định bắt buộc sau mỗi lượt sạc để xe trước rút sạc, di chuyển ra khỏi vị trí an toàn trước khi lượt kế tiếp bắt đầu."
+          title={t('pricing.steps.step4.bufferTitle', { defaultValue: 'Thời gian giãn ca giữa 2 lượt sạc' })}
+          desc={t('pricing.steps.step4.bufferDesc', {
+            defaultValue:
+              'Khoảng nghỉ cố định bắt buộc sau mỗi lượt sạc để xe trước rút sạc, di chuyển ra khỏi vị trí an toàn trước khi lượt kế tiếp bắt đầu.',
+          })}
           control={
             <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 font-mono">
               <IconClock size={14} className="text-faint" />
-              <span>{SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định</span>
+              <span>
+                {t('pricing.steps.step4.bufferBadge', {
+                  minutes: SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES,
+                  defaultValue: `${SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định`,
+                })}
+              </span>
             </span>
           }
           last
@@ -62,20 +80,39 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
         <div className="mt-3.5 rounded-[10px] border border-brand/20 bg-brand-soft/25 p-3.5 text-[12px] leading-relaxed text-body">
           <div className="flex items-center gap-1.5 font-bold text-brand-strong mb-1">
             <IconAlertTriangle size={15} className="text-brand shrink-0" />
-            <span>Nguyên tắc vận hành cốt lõi: Lịch đặt chỗ & Lượt sạc thực tế</span>
+            <span>
+              {t('pricing.steps.step4.philosophyTitle', {
+                defaultValue: 'Nguyên tắc vận hành cốt lõi: Lịch đặt chỗ & Lượt sạc thực tế',
+              })}
+            </span>
           </div>
           <div className="text-muted flex flex-col gap-1.5 mt-1.5">
             <div>
-              • <b>Lịch đặt chỗ là cam kết:</b> Quyền sử dụng theo khung giờ đã chốt với tài xế. Xe trước sạc xong sớm không tự ý đẩy lịch của người sau lên sớm hơn mà tạo thêm khoảng nghỉ an toàn.
+              • <b>{t('pricing.steps.step4.philosophyBookingBold', { defaultValue: 'Lịch đặt chỗ là cam kết:' })}</b>{' '}
+              {t('pricing.steps.step4.philosophyBookingText', {
+                defaultValue:
+                  'Quyền sử dụng theo khung giờ đã chốt với tài xế. Xe trước sạc xong sớm không tự ý đẩy lịch của người sau lên sớm hơn mà tạo thêm khoảng nghỉ an toàn.',
+              })}
             </div>
             <div>
-              • <b>10 phút giãn ca là thời gian đổi xe:</b> Đảm bảo xe trước rút sạc và lái ra khỏi vị trí an toàn trước khi xe sau tiến vào.
+              • <b>{t('pricing.steps.step4.philosophyBufferBold', { defaultValue: '10 phút giãn ca là thời gian đổi xe:' })}</b>{' '}
+              {t('pricing.steps.step4.philosophyBufferText', {
+                defaultValue: 'Đảm bảo xe trước rút sạc và lái ra khỏi vị trí an toàn trước khi xe sau tiến vào.',
+              })}
             </div>
             <div>
-              • <b>Tài xế đỗ xe quá giờ hẹn:</b> Hệ thống tính phí phạt đỗ quá giờ riêng, <b>tuyệt đối không tự ý dời hay đè lịch</b> của lượt đặt chỗ tiếp theo.
+              • <b>{t('pricing.steps.step4.philosophyOverstayBold', { defaultValue: 'Tài xế đỗ xe quá giờ hẹn:' })}</b>{' '}
+              {t('pricing.steps.step4.philosophyOverstayText', {
+                defaultValue:
+                  'Hệ thống tính phí phạt đỗ quá giờ riêng, tuyệt đối không tự ý dời hay đè lịch của lượt đặt chỗ tiếp theo.',
+              })}
             </div>
             <div>
-              • <b>Lịch hoạt động áp dụng cho lượt đặt mới:</b> Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu.
+              • <b>{t('pricing.steps.step4.philosophyScheduleBold', { defaultValue: 'Lịch hoạt động áp dụng cho lượt đặt mới:' })}</b>{' '}
+              {t('pricing.steps.step4.philosophyScheduleText', {
+                defaultValue:
+                  'Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu.',
+              })}
             </div>
           </div>
         </div>

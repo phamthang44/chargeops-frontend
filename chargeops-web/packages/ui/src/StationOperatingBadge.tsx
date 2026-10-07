@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 export type StationOperatingState =
   | 'OPEN'
   | 'CLOSED_BY_SCHEDULE'
@@ -54,25 +56,38 @@ const STATE_CONFIG: Record<
   },
 };
 
+const TOOLTIP_KEYS: Record<StationOperatingState, string> = {
+  OPEN: 'stationStatusTooltips.open',
+  CLOSED_BY_SCHEDULE: 'stationStatusTooltips.closedBySchedule',
+  PAUSED_BY_OWNER: 'stationStatusTooltips.pausedByOwner',
+  MAINTENANCE: 'stationStatusTooltips.maintenance',
+  SCHEDULE_NOT_CONFIGURED: 'stationStatusTooltips.scheduleNotConfigured',
+  UNAVAILABLE_BY_PLATFORM: 'stationStatusTooltips.unavailableByPlatform',
+};
+
 export function StationOperatingBadge({
   state = 'SCHEDULE_NOT_CONFIGURED',
   className = '',
 }: StationOperatingBadgeProps) {
+  const { t } = useTranslation('ui');
   const normState: StationOperatingState =
     state && state in STATE_CONFIG
       ? (state as StationOperatingState)
       : 'SCHEDULE_NOT_CONFIGURED';
 
   const cfg = STATE_CONFIG[normState];
+  const label = t(`stationOperatingBadge.${normState}`, { defaultValue: cfg.label });
+  const tooltip = t(TOOLTIP_KEYS[normState], { defaultValue: cfg.label });
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${cfg.bg} ${cfg.text} ${className}`}
+      title={tooltip}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold cursor-default select-none ${cfg.bg} ${cfg.text} ${className}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${cfg.dot} ${cfg.pulse ? 'animate-pulse' : ''}`}
       />
-      <span>{cfg.label}</span>
+      <span>{label}</span>
     </span>
   );
 }

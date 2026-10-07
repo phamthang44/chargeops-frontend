@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   formatDateTimeVn,
   useApi,
@@ -34,24 +35,24 @@ export interface EquipmentStatusHistoryDrawerProps {
   target: EquipmentStatusTarget | null;
 }
 
-const STATUS_LABELS: Record<string, { label: string; tone: 'good' | 'warn' | 'bad' | 'brand' | 'neutral' }> = {
+/** Status code → tone; the visible label comes from `common:equipmentHistory.status.*`. */
+const STATUS_TONES: Record<string, 'good' | 'warn' | 'bad' | 'brand' | 'neutral'> = {
   // Provisioning
-  PENDING_ACTIVATION: { label: 'Chờ kích hoạt', tone: 'neutral' },
-  ACTIVE: { label: 'Hoạt động', tone: 'good' },
-  SUSPENDED: { label: 'Tạm ngưng', tone: 'warn' },
+  PENDING_ACTIVATION: 'neutral',
+  ACTIVE: 'good',
+  SUSPENDED: 'warn',
   // Operational
-  AVAILABLE: { label: 'Sẵn sàng', tone: 'good' },
-  OFFLINE: { label: 'Ngoại tuyến', tone: 'bad' },
-  MAINTENANCE: { label: 'Bảo trì', tone: 'warn' },
+  AVAILABLE: 'good',
+  OFFLINE: 'bad',
+  MAINTENANCE: 'warn',
   // Connector runtime
-  IN_USE: { label: 'Đang sạc', tone: 'brand' },
-  INUSE: { label: 'Đang sạc', tone: 'brand' },
+  IN_USE: 'brand',
+  INUSE: 'brand',
 };
 
-function formatStatus(status?: string | null): { label: string; tone: 'good' | 'warn' | 'bad' | 'brand' | 'neutral' } {
-  if (!status) return { label: '—', tone: 'neutral' };
-  const upper = String(status).toUpperCase();
-  return STATUS_LABELS[upper] || { label: status, tone: 'neutral' };
+function toneOf(status?: string | null): 'good' | 'warn' | 'bad' | 'brand' | 'neutral' {
+  if (!status) return 'neutral';
+  return STATUS_TONES[String(status).toUpperCase()] || 'neutral';
 }
 
 export function EquipmentStatusHistoryDrawer({
@@ -60,8 +61,18 @@ export function EquipmentStatusHistoryDrawer({
   stationId,
   target,
 }: EquipmentStatusHistoryDrawerProps) {
+  const { t } = useTranslation('common');
   const api = useApi();
   const isConnector = target?.type === 'connector';
+
+  const statusMeta = (status?: string | null): { label: string; tone: 'good' | 'warn' | 'bad' | 'brand' | 'neutral' } => {
+    if (!status) return { label: '—', tone: 'neutral' };
+    const upper = String(status).toUpperCase();
+    return {
+      label: t(`equipmentHistory.status.${upper}`, { defaultValue: status }),
+      tone: toneOf(status),
+    };
+  };
 
   const { data: history, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: [
@@ -84,9 +95,11 @@ export function EquipmentStatusHistoryDrawer({
     enabled: Boolean(open && target && stationId),
   });
 
-  const title = isConnector ? 'Lịch sử trạng thái Súng sạc' : 'Lịch sử trạng thái Trụ sạc';
+  const title = isConnector
+    ? t('equipmentHistory.titleConnector')
+    : t('equipmentHistory.titleChargePoint');
   const itemName = isConnector
-    ? `${target?.connectorCode || target?.connectorId} (${target?.chargePointName || 'Trụ sạc'})`
+    ? `${target?.connectorCode || target?.connectorId} (${target?.chargePointName || t('equipmentHistory.fallbackChargePoint')})`
     : `${target?.chargePointName || target?.chargePointCode || target?.chargePointId}`;
 
   const events = (history ?? []) as Array<ChargePointStatusEvent | ConnectorStatusEvent>;
@@ -114,7 +127,7 @@ export function EquipmentStatusHistoryDrawer({
           <div className="flex items-center gap-2">
             <IconBolt size={14} className="text-brand shrink-0" />
             <span>
-              Nhật ký ghi nhận mọi thay đổi trạng thái từ Quản trị viên (Admin), Chủ trạm (Owner) và Hệ thống (System).
+              {t('equipmentHistory.banner')}
             </span>
           </div>
         </div>
@@ -133,8 +146,8 @@ export function EquipmentStatusHistoryDrawer({
           <ApiErrorState
             error={error}
             compact
-            eyebrow="Lịch sử trạng thái"
-            title="Không thể tải lịch sử trạng thái"
+            eyebrow={t('equipmentHistory.error.eyebrow')}
+            title={t('equipmentHistory.error.title')}
             onRetry={() => refetch()}
             isRetrying={isFetching}
           />
@@ -144,8 +157,8 @@ export function EquipmentStatusHistoryDrawer({
         {!isLoading && !error && events.length === 0 && (
           <div className="py-8">
             <EmptyState
-              title="Chưa có lịch sử trạng thái"
-              description="Thiết bị này chưa ghi nhận bất kỳ sự kiện thay đổi trạng thái nào trong hệ thống."
+              title={t('equipmentHistory.empty.title')}
+              description={t('equipmentHistory.empty.description')}
             />
           </div>
         )}
@@ -155,17 +168,17 @@ export function EquipmentStatusHistoryDrawer({
           <div className="flex flex-col">
             {events.map((evt, idx) => {
               const isLast = idx === events.length - 1;
-              const fromMeta = formatStatus(evt.fromStatus);
-              const toMeta = formatStatus(evt.toStatus);
+              const fromMeta = statusMeta(evt.fromStatus);
+              const toMeta = statusMeta(evt.toStatus);
               const isCpEvt = 'statusDimension' in evt;
               const dimension = isCpEvt ? (evt as ChargePointStatusEvent).statusDimension : null;
 
               const actorLabel =
                 evt.actorType === 'ADMIN'
-                  ? 'Quản trị viên (Admin)'
+                  ? t('equipmentHistory.actor.admin')
                   : evt.actorType === 'OWNER'
-                  ? 'Chủ trạm (Owner)'
-                  : 'Hệ thống (System)';
+                  ? t('equipmentHistory.actor.owner')
+                  : t('equipmentHistory.actor.system');
 
               const actorBadgeClass =
                 evt.actorType === 'ADMIN'
@@ -207,7 +220,9 @@ export function EquipmentStatusHistoryDrawer({
                       {/* Dimension chip if ChargePoint */}
                       {dimension && (
                         <div className="text-[10.5px] font-semibold uppercase tracking-wider text-faint">
-                          {dimension === 'PROVISIONING' ? 'Vòng đời cấp hạ tầng' : 'Trạng thái vận hành trạm'}
+                          {dimension === 'PROVISIONING'
+                            ? t('equipmentHistory.dimension.provisioning')
+                            : t('equipmentHistory.dimension.operational')}
                         </div>
                       )}
 
@@ -221,7 +236,7 @@ export function EquipmentStatusHistoryDrawer({
                       {/* Reason / Note if available */}
                       {evt.reason && (
                         <div className="rounded-[8px] bg-surface-2 px-2.5 py-1.5 text-[11.5px] text-body border border-line-2/50 leading-relaxed">
-                          <span className="font-semibold text-faint">Lý do: </span>
+                          <span className="font-semibold text-faint">{t('equipmentHistory.reasonLabel')} </span>
                           <span className="text-ink font-medium">"{evt.reason}"</span>
                         </div>
                       )}
@@ -229,7 +244,7 @@ export function EquipmentStatusHistoryDrawer({
                       {/* Performed by user info */}
                       {evt.performedByDisplayName && (
                         <div className="text-[11px] text-faint">
-                          Thực hiện bởi: <span className="font-semibold text-muted">{evt.performedByDisplayName}</span>
+                          {t('equipmentHistory.performedBy')} <span className="font-semibold text-muted">{evt.performedByDisplayName}</span>
                         </div>
                       )}
                     </div>

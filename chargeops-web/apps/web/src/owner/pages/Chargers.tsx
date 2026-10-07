@@ -131,10 +131,10 @@ export function Chargers() {
     const reasonText =
       i.reason?.trim() ||
       (i.next === 'MAINTENANCE'
-        ? 'Bảo trì thiết bị'
+        ? t('statusDialog.defaultReason.maintenance')
         : i.next === 'OFFLINE'
-          ? 'Tạm ngắt vận hành'
-          : 'Mở hoạt động thiết bị');
+          ? t('statusDialog.defaultReason.offline')
+          : t('statusDialog.defaultReason.online'));
 
     if (i.kind === 'chargePoint') {
       changeOperationalStatus.mutate(

@@ -16,7 +16,7 @@ export function OwnerRefundRetryModal({
   refund,
   onSuccess,
 }: OwnerRefundRetryModalProps) {
-  const { t } = useTranslation('owner');
+  const { t } = useTranslation(['owner', 'common']);
   const api = useApi();
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,21 +106,21 @@ export function OwnerRefundRetryModal({
             <span className="text-muted">{t('finance.refunds.table.cols.reason', 'Lý do phát sinh')}:</span>
             <span className="font-medium text-body">
               {refund.reason === 'VOLUNTARY_GRACE'
-                ? 'Ân hạn 10 phút'
+                ? t('finance.refunds.reasons.voluntaryGrace', 'Ân hạn 10 phút')
                 : refund.reason === 'STATION_UNAVAILABLE'
-                ? 'Trạm không phục vụ'
+                ? t('finance.refunds.reasons.stationUnavailable', 'Trạm không phục vụ')
                 : refund.reason}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Version hồ sơ:</span>
+            <span className="text-muted">{t('finance.refunds.retryModal.recordVersion', 'Version hồ sơ')}:</span>
             <span className="font-mono text-faint">v{refund.version}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-2.5 pt-2">
           <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
-            {t('common.cancel', 'Hủy')}
+            {t('common:cancel', 'Hủy')}
           </Button>
           <Button
             variant="primary"
@@ -129,7 +129,7 @@ export function OwnerRefundRetryModal({
             className="flex items-center gap-1.5"
           >
             {isSubmitting && <IconRefreshCw size={13} className="animate-spin" />}
-            <span>{isSubmitting ? 'Đang gửi...' : t('finance.refunds.retryModal.confirmBtn', 'Xác nhận thử lại')}</span>
+            <span>{isSubmitting ? t('finance.refunds.retryModal.submitting', 'Đang gửi...') : t('finance.refunds.retryModal.confirmBtn', 'Xác nhận thử lại')}</span>
           </Button>
         </div>
       </div>

@@ -35,7 +35,7 @@ type FilterKey = RefundStatus | 'all' | 'ACTION_REQUIRED';
 const GRID = '1.1fr 1.2fr 1.2fr 1.1fr 1fr 1.1fr 0.9fr 1.2fr';
 
 export function OwnerRefundsTab() {
-  const { t } = useTranslation('owner');
+  const { t } = useTranslation(['owner', 'common']);
   const api = useApi();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -79,7 +79,7 @@ export function OwnerRefundsTab() {
     e.stopPropagation();
     navigator.clipboard?.writeText(text);
     setCopiedId(text);
-    toast(t('common.copied', 'Đã sao chép!'), 'success');
+    toast(t('common:copied', 'Đã sao chép!'), 'success');
     setTimeout(() => setCopiedId(null), 1500);
   };
 
@@ -152,7 +152,7 @@ export function OwnerRefundsTab() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-warn font-semibold">Nghĩa vụ mở</span>
+                <span className="text-warn font-semibold">{t('finance.refunds.kpi.pendingNotice', 'Nghĩa vụ mở')}</span>
                 <span className="text-faint">{formatVndCompact(s.pendingRefundAmountVnd)}</span>
               </div>
             </div>
@@ -174,7 +174,7 @@ export function OwnerRefundsTab() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-good font-semibold">Thành công</span>
+                <span className="text-good font-semibold">{t('finance.refunds.kpi.succeededNotice', 'Thành công')}</span>
                 <span className="text-faint">{formatVndCompact(s.totalRefundAmountVnd)}</span>
               </div>
             </div>
@@ -197,9 +197,9 @@ export function OwnerRefundsTab() {
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
                 <span className={s.requiresOwnerActionCount > 0 ? 'text-bad font-semibold' : 'text-muted'}>
-                  {s.requiresOwnerActionCount > 0 ? 'Cần can thiệp' : 'Không có lỗi'}
+                  {s.requiresOwnerActionCount > 0 ? t('finance.refunds.kpi.needsIntervention', 'Cần can thiệp') : t('finance.refunds.kpi.noErrors', 'Không có lỗi')}
                 </span>
-                <span className="text-faint">{s.totalFailedAttemptsCount} lần thử lỗi</span>
+                <span className="text-faint">{s.totalFailedAttemptsCount} {t('finance.refunds.kpi.failedAttemptsSuffix', 'lần thử lỗi')}</span>
               </div>
             </div>
           </div>
@@ -220,7 +220,7 @@ export function OwnerRefundsTab() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-body font-semibold">Toàn bộ trạm</span>
+                <span className="text-body font-semibold">{t('finance.refunds.kpi.allStationsNotice', 'Toàn bộ trạm')}</span>
                 <span className="text-faint">{formatVnd(s.totalRefundAmountVnd)}</span>
               </div>
             </div>
@@ -332,9 +332,9 @@ export function OwnerRefundsTab() {
                         <div>
                           <span className="inline-flex items-center rounded-full bg-line-3 px-2 py-0.5 text-[10.5px] font-semibold text-body">
                             {r.reason === 'VOLUNTARY_GRACE'
-                              ? 'Ân hạn 10 phút'
+                              ? t('finance.refunds.reasons.voluntaryGrace', 'Ân hạn 10 phút')
                               : r.reason === 'STATION_UNAVAILABLE'
-                              ? 'Trạm không phục vụ'
+                              ? t('finance.refunds.reasons.stationUnavailable', 'Trạm không phục vụ')
                               : r.reason}
                           </span>
                         </div>
@@ -348,7 +348,7 @@ export function OwnerRefundsTab() {
                         <div className="text-center">
                           {isPending ? (
                             r.requiresOwnerAction ? (
-                              <StatusPill tone="bad" label="CẦN RETRY" />
+                              <StatusPill tone="bad" label={t('finance.refunds.statusPill.actionRequired', 'CẦN RETRY')} />
                             ) : (
                               <StatusPill tone="warn" label="PENDING" />
                             )
@@ -379,7 +379,7 @@ export function OwnerRefundsTab() {
                               onClick={() => handleOpenRetry(r)}
                               className="h-7 px-2 text-[11px] font-bold border-bad/30 text-bad hover:bg-bad-soft/30 rounded-lg shadow-2xs"
                             >
-                              Thử lại
+                              {t('finance.refunds.table.retryBtn', 'Thử lại')}
                             </Button>
                           )}
                           <Button
@@ -388,7 +388,7 @@ export function OwnerRefundsTab() {
                             onClick={() => handleOpenAttempts(r)}
                             className="h-7 px-2 text-[11px] font-semibold text-muted hover:text-ink rounded-lg"
                           >
-                            Lịch sử
+                            {t('finance.refunds.table.historyBtn', 'Lịch sử')}
                           </Button>
                         </div>
                       </div>
@@ -400,7 +400,7 @@ export function OwnerRefundsTab() {
 
             <div className="border-t border-hairline px-4 py-2.5 flex items-center justify-between">
               <span className="text-[11.5px] text-faint">
-                {t('common.total', 'Tổng số')}: <strong className="text-ink font-semibold">{total}</strong> hồ sơ
+                {t('common:total', 'Tổng số')}: <strong className="text-ink font-semibold">{total}</strong> {t('finance.refunds.table.recordsUnit', 'hồ sơ')}
               </span>
               <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
             </div>

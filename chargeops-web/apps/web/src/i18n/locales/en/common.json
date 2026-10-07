@@ -13,10 +13,45 @@
   "all": "All",
   "status": "Status",
   "action": "Action",
+  "total": "Total",
   "notes": "Notes",
   "system": "System",
   "copied": "Copied to clipboard",
   "copiedCode": "Copied code {{code}}",
+  "equipmentHistory": {
+    "titleConnector": "Connector status history",
+    "titleChargePoint": "Charge point status history",
+    "fallbackChargePoint": "Charge Point",
+    "banner": "Log of every status change recorded by Administrator (Admin), Station Owner (Owner) and the System.",
+    "error": {
+      "eyebrow": "Status history",
+      "title": "Could not load status history"
+    },
+    "empty": {
+      "title": "No status history yet",
+      "description": "This device has not recorded any status change events in the system yet."
+    },
+    "actor": {
+      "admin": "Administrator (Admin)",
+      "owner": "Station Owner (Owner)",
+      "system": "System"
+    },
+    "dimension": {
+      "provisioning": "Infrastructure provisioning lifecycle",
+      "operational": "Station operational status"
+    },
+    "reasonLabel": "Reason:",
+    "performedBy": "Performed by:",
+    "status": {
+      "PENDING_ACTIVATION": "Pending Activation",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "AVAILABLE": "Available",
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance",
+      "IN_USE": "In use"
+    }
+  },
   "error": {
     "generic": "Something went wrong"
   },
@@ -41,5 +76,27 @@
       "auth": "Your session has expired or you lack permission. Please sign in again.",
       "default": "The system could not complete this request. Please retry — if the issue persists, contact your administrator."
     }
+  },
+  "markdownViewer": {
+    "readingStats": {
+      "estimate": "Estimated:",
+      "minutesRead": "{{count}} min read",
+      "words": "{{count}} words",
+      "headings": "{{count}} sections",
+      "matches": "{{count}} matches",
+      "noMatches": "No matches found"
+    },
+    "actions": {
+      "fontSmallTitle": "Small font (13px)",
+      "fontStandardTitle": "Standard font (15px)",
+      "fontLargeTitle": "Large font (17.5px)",
+      "copyTitle": "Copy entire Markdown source",
+      "copyBtn": "Copy Markdown",
+      "copied": "Copied!",
+      "downloadTitle": "Download .md file",
+      "downloadBtn": "Download .md"
+    },
+    "anchorTitle": "Anchor link for this section",
+    "toc": "Table of Contents"
   }
 }

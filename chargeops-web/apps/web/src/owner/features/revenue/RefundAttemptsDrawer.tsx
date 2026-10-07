@@ -29,7 +29,7 @@ export function RefundAttemptsDrawer({
   refund,
   onOpenRetry,
 }: RefundAttemptsDrawerProps) {
-  const { t } = useTranslation('owner');
+  const { t } = useTranslation(['owner', 'common']);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   if (!refund) return null;
@@ -70,7 +70,7 @@ export function RefundAttemptsDrawer({
             <span className="text-[12px] text-muted">{t('finance.refunds.table.cols.status', 'Trạng thái nghĩa vụ')}:</span>
             <StatusPill
               tone={refund.status === 'SUCCEEDED' ? 'good' : refund.requiresOwnerAction ? 'bad' : 'warn'}
-              label={refund.status === 'SUCCEEDED' ? 'SUCCEEDED' : refund.requiresOwnerAction ? 'CẦN RETRY' : 'PENDING'}
+              label={refund.status === 'SUCCEEDED' ? 'SUCCEEDED' : refund.requiresOwnerAction ? t('finance.refunds.statusPill.actionRequired', 'CẦN RETRY') : 'PENDING'}
             />
           </div>
 
@@ -78,9 +78,9 @@ export function RefundAttemptsDrawer({
             <span className="text-[12px] text-muted">{t('finance.refunds.table.cols.reason', 'Lý do phát sinh')}:</span>
             <span className="text-[12px] font-semibold text-ink">
               {refund.reason === 'VOLUNTARY_GRACE'
-                ? 'Ân hạn 10 phút'
+                ? t('finance.refunds.reasons.voluntaryGrace', 'Ân hạn 10 phút')
                 : refund.reason === 'STATION_UNAVAILABLE'
-                ? 'Trạm không phục vụ'
+                ? t('finance.refunds.reasons.stationUnavailable', 'Trạm không phục vụ')
                 : refund.reason}
             </span>
           </div>
@@ -140,7 +140,7 @@ export function RefundAttemptsDrawer({
                     <div className="rounded-xl border border-hairline bg-surface p-3.5 shadow-2xs space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-[12.5px] text-ink">
-                          Lần #{att.sequenceNo || idx + 1} · {att.executionMode === 'SIMULATOR' ? 'Tự động' : 'Thủ công'}
+                          {t('finance.attemptsDrawer.attemptNo', { seq: att.sequenceNo || idx + 1, defaultValue: `Lần #${att.sequenceNo || idx + 1}` })} · {att.executionMode === 'SIMULATOR' ? t('finance.attemptsDrawer.autoMode', 'Tự động') : t('finance.attemptsDrawer.manualMode', 'Thủ công')}
                         </span>
                         <StatusPill
                           tone={isSuccess ? 'good' : isFailed ? 'bad' : 'warn'}
@@ -150,19 +150,19 @@ export function RefundAttemptsDrawer({
 
                       <div className="text-[11px] text-muted flex items-center gap-1 font-mono">
                         <IconClock size={11} className="text-faint" />
-                        <span>Bắt đầu: {att.startedAt ? formatDateTimeVn(att.startedAt) : '—'}</span>
+                        <span>{t('finance.attemptsDrawer.started', 'Bắt đầu')}: {att.startedAt ? formatDateTimeVn(att.startedAt) : '—'}</span>
                       </div>
 
                       {att.completedAt && (
                         <div className="text-[11px] text-muted flex items-center gap-1 font-mono">
                           <IconCheckCircle size={11} className="text-good" />
-                          <span>Hoàn tất: {formatDateTimeVn(att.completedAt)}</span>
+                          <span>{t('finance.attemptsDrawer.completed', 'Hoàn tất')}: {formatDateTimeVn(att.completedAt)}</span>
                         </div>
                       )}
 
                       {att.failureReason && (
                         <div className="rounded-lg bg-bad-soft/40 p-2 text-[11px] text-bad font-mono">
-                          Lý do lỗi: {att.failureReason}
+                          {t('finance.attemptsDrawer.failureReason', 'Lý do lỗi')}: {att.failureReason}
                         </div>
                       )}
                     </div>
@@ -188,7 +188,7 @@ export function RefundAttemptsDrawer({
             </Button>
           )}
           <Button variant="secondary" onClick={onClose} className={refund.requiresOwnerAction ? '' : 'w-full'}>
-            {t('common.close', 'Đóng')}
+            {t('common:close', 'Đóng')}
           </Button>
         </div>
       </div>

@@ -23,13 +23,13 @@ export interface ChangeOperationalStatusModalProps {
   onSuccess?: () => void;
 }
 
-const QUICK_REASONS = [
-  'Sự cố mất điện lưới khu vực',
-  'Bảo trì định kỳ tủ trạm biến áp',
-  'Sửa chữa nâng cấp mặt bằng bãi xe',
-  'Kiểm định kỹ thuật an toàn điện',
-  'Tạm dừng theo yêu cầu ban quản lý tòa nhà',
-];
+const QUICK_REASON_KEYS = [
+  'powerGridOutage',
+  'transformerMaintenance',
+  'parkingUpgrade',
+  'electricalSafetyInspection',
+  'buildingManagementRequest',
+] as const;
 
 export function ChangeOperationalStatusModal({
   open,
@@ -59,7 +59,7 @@ export function ChangeOperationalStatusModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!station?.id) throw new Error('Không tìm thấy thông tin trạm');
+      if (!station?.id) throw new Error(t('stations.operationalModal.stationNotFound', { defaultValue: 'Không tìm thấy thông tin trạm.' }));
       return api.stations.changeOperationalStatus(station.id, {
         operationalStatus: selectedStatus,
         reason: selectedStatus === 'OPERATING' ? undefined : reason.trim(),
@@ -143,7 +143,7 @@ export function ChangeOperationalStatusModal({
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.2 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-300 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Chuẩn
+                  {t('stations.operationalModal.standardBadge', { defaultValue: 'Chuẩn' })}
                 </span>
               </div>
               <div className="mt-0.5 text-[11.5px] leading-relaxed text-muted">
@@ -175,7 +175,7 @@ export function ChangeOperationalStatusModal({
                   {t('stations.operationalStatus.PAUSED', { defaultValue: 'Tạm dừng đón khách (Paused)' })}
                 </span>
                 <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.2 text-[10.5px] font-bold text-rose-600 dark:text-rose-300 border border-rose-500/20">
-                  Chủ động ngưng
+                  {t('stations.operationalModal.ownerPausedBadge', { defaultValue: 'Chủ động ngưng' })}
                 </span>
               </div>
               <div className="mt-0.5 text-[11.5px] leading-relaxed text-muted">
@@ -207,7 +207,7 @@ export function ChangeOperationalStatusModal({
                   {t('stations.operationalStatus.MAINTENANCE', { defaultValue: 'Đang bảo trì trạm (Maintenance)' })}
                 </span>
                 <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.2 text-[10.5px] font-bold text-amber-600 dark:text-amber-300 border border-amber-500/20">
-                  Kỹ thuật
+                  {t('stations.operationalModal.technicalBadge', { defaultValue: 'Kỹ thuật' })}
                 </span>
               </div>
               <div className="mt-0.5 text-[11.5px] leading-relaxed text-muted">
@@ -248,19 +248,22 @@ export function ChangeOperationalStatusModal({
                 {t('stations.operationalModal.quickSuggestions', { defaultValue: 'Gợi ý lý do nhanh:' })}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {QUICK_REASONS.map((qr) => (
-                  <button
-                    key={qr}
-                    type="button"
-                    onClick={() => {
-                      setReason(qr);
-                      if (validationError) setValidationError(null);
-                    }}
-                    className="rounded-full border border-line bg-surface px-2 py-0.5 text-[11px] text-body transition hover:border-line-hover hover:bg-surface-2 cursor-pointer"
-                  >
-                    + {qr}
-                  </button>
-                ))}
+                {QUICK_REASON_KEYS.map((key) => {
+                  const label = t(`stations.operationalModal.quickReasons.${key}`);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setReason(label);
+                        if (validationError) setValidationError(null);
+                      }}
+                      className="rounded-full border border-line bg-surface px-2 py-0.5 text-[11px] text-body transition hover:border-line-hover hover:bg-surface-2 cursor-pointer"
+                    >
+                      + {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

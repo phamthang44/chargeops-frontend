@@ -16,22 +16,33 @@ import {
   StationStatusBadge,
 } from '@chargeops/ui';
 
-function formatLicense(license: string | LicenseSummary | null | undefined): {
+function formatLicense(
+  license: string | LicenseSummary | null | undefined,
+  t: (key: string, options?: any) => string,
+): {
   text: string;
   isExpired?: boolean;
   daysLeft?: number;
 } {
-  if (!license) return { text: 'Chưa có License' };
+  if (!license) return { text: t('stations.card.noLicense', { defaultValue: 'Chưa có License' }) };
   if (typeof license === 'string') return { text: license };
   if (typeof license === 'object') {
     const planText =
-      license.plan === 'YEARLY' ? 'Gói Năm' : license.plan === 'MONTHLY' ? 'Gói Tháng' : license.plan || '—';
+      license.plan === 'YEARLY'
+        ? t('stations.card.planYearly', { defaultValue: 'Gói Năm' })
+        : license.plan === 'MONTHLY'
+          ? t('stations.card.planMonthly', { defaultValue: 'Gói Tháng' })
+          : license.plan || '—';
     if (license.expiresAt) {
       const expDate = new Date(license.expiresAt);
       const isExpired = expDate.getTime() <= Date.now();
       const daysLeft = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
       return {
-        text: `${planText} · hết hạn ${formatDateVn(license.expiresAt)}`,
+        text: t('stations.card.expiresOn', {
+          plan: planText,
+          date: formatDateVn(license.expiresAt),
+          defaultValue: `${planText} · hết hạn ${formatDateVn(license.expiresAt)}`,
+        }),
         isExpired,
         daysLeft,
       };
@@ -83,7 +94,7 @@ export function StationCard({
   const isPending = rawStatus === 'pending' || rawStatus === 'PENDING_APPROVAL';
   const isRejected = rawStatus === 'rejected' || rawStatus === 'REJECTED';
 
-  const licenseInfo = formatLicense(station.licenseSummary);
+  const licenseInfo = formatLicense(station.licenseSummary, t);
   const actualChargers =
     station.actualChargePointCount ??
     station.chargerCount;
@@ -118,7 +129,7 @@ export function StationCard({
               {isActiveContext && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10px] font-bold text-owner-deep shrink-0 border border-owner-border/40">
                   <IconCheck size={11} strokeWidth={2.4} />
-                  <span>Đang chọn</span>
+                  <span>{t('stations.card.selectedBadge', { defaultValue: 'Đang chọn' })}</span>
                 </span>
               )}
             </div>
@@ -150,10 +161,12 @@ export function StationCard({
           <div className="mb-3 rounded-[9px] border border-warn-border bg-warn-soft/50 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
             <div className="flex items-center gap-1.5 font-bold text-ink">
               <IconShieldAlert size={15} className="shrink-0 text-warn" />
-              <span>Trạm đang tạm ẩn khỏi tìm kiếm tài xế</span>
+              <span>{t('stations.card.hiddenCalloutTitle', { defaultValue: 'Trạm đang tạm ẩn khỏi tìm kiếm tài xế' })}</span>
             </div>
             <div className="mt-1 text-muted">
-              {eligibility.details || 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.'}
+              {eligibility.reason
+                ? t(`stations.eligibility.${eligibility.reason}`, { defaultValue: eligibility.details })
+                : eligibility.details || t('stations.card.hiddenCalloutDesc', { defaultValue: 'Gói License của trạm chưa sẵn sàng để tiếp nhận đặt chỗ mới.' })}
             </div>
           </div>
         )}
@@ -222,7 +235,7 @@ export function StationCard({
               <span className="font-normal">{licenseInfo.text}</span>
               {licenseInfo.daysLeft !== undefined && licenseInfo.daysLeft <= 30 && licenseInfo.daysLeft > 0 && (
                 <span className="rounded-full bg-warn-soft px-2 py-0.2 text-[10px] font-bold text-warn-deep">
-                  Còn {licenseInfo.daysLeft} ngày
+                  {t('stations.card.daysLeft', { count: licenseInfo.daysLeft, defaultValue: `Còn ${licenseInfo.daysLeft} ngày` })}
                 </span>
               )}
             </div>
@@ -258,7 +271,7 @@ export function StationCard({
             variant="secondary"
             size="sm"
             onClick={() => onChangeOperationalStatus(station)}
-            title="Đổi trạng thái vận hành trạm (Operating / Paused / Maintenance)"
+            title={t('stations.card.changeStatusTooltip', { defaultValue: 'Đổi trạng thái vận hành trạm (Operating / Paused / Maintenance)' })}
           >
             {t('stations.operationalModal.changeStatusBtn', { defaultValue: 'Vận hành' })}
           </Button>
@@ -269,7 +282,7 @@ export function StationCard({
             variant="ghost"
             size="sm"
             onClick={() => onSelectStation(station.id)}
-            title="Chọn trạm này làm ngữ cảnh hoạt động hiện tại"
+            title={t('stations.card.selectStationTooltip', { defaultValue: 'Chọn trạm này làm ngữ cảnh hoạt động hiện tại' })}
           >
             {t('stations.card.selectBtn', { defaultValue: 'Chọn quản lý' })}
           </Button>

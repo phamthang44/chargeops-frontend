@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { NotificationCenter, type NotificationItem, type CategoryFilter } from '@chargeops/ui';
+import {
+  NotificationCenter,
+  IconBolt,
+  IconUsers,
+  IconShieldAlert,
+  type NotificationItem,
+  type CategoryFilter,
+} from '@chargeops/ui';
 import {
   useInfiniteNotifications,
   useUnreadCount,
@@ -107,15 +113,90 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2" aria-label="Phạm vi thông báo">
-        {(['owner', 'personal'] as const).map((view) => <button type="button" key={view} aria-pressed={context === view}
-          className="rounded-xl border border-line px-4 py-2"
-          onClick={() => { setContext(view); setCategory('all'); setUnread(false); markAsRead.reset(); markAllAsRead.reset(); dismiss.reset(); }}>
-          {view === 'owner' ? 'Vận hành trạm' : 'Cá nhân'}
-        </button>)}
+      {/* Scope Mode Switcher: Vận hành trạm vs Cá nhân */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-2xl bg-surface border border-line shadow-xs">
+        <div>
+          <h2 className="text-sm font-semibold text-heading flex items-center gap-2">
+            {context === 'owner' ? (
+              <>
+                <IconBolt size={16} className="text-owner-deep" />
+                Vận hành trạm
+              </>
+            ) : (
+              <>
+                <IconUsers size={16} className="text-brand" />
+                Cá nhân & Khiếu nại
+              </>
+            )}
+          </h2>
+          <p className="text-xs text-muted mt-0.5">
+            {context === 'owner'
+              ? 'Thông báo nghiệp vụ trạm: gán vé hỗ trợ, hoàn tiền và sự cố trụ sạc của trạm bạn sở hữu.'
+              : 'Thông báo cá nhân: phản hồi các ticket bạn đã gửi khiếu nại và thông báo tài khoản.'}
+          </p>
+        </div>
+
+        <div className="inline-flex p-1 bg-chip rounded-xl border border-line/60 self-start sm:self-auto shrink-0" role="tablist" aria-label="Phạm vi thông báo">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={context === 'owner'}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+              context === 'owner'
+                ? 'bg-card text-heading shadow-xs font-semibold'
+                : 'text-muted hover:text-body'
+            }`}
+            onClick={() => {
+              setContext('owner');
+              setCategory('all');
+              setUnread(false);
+              markAsRead.reset();
+              markAllAsRead.reset();
+              dismiss.reset();
+            }}
+          >
+            <IconBolt size={14} className={context === 'owner' ? 'text-owner-deep' : 'text-muted'} />
+            Vận hành trạm
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={context === 'personal'}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+              context === 'personal'
+                ? 'bg-card text-heading shadow-xs font-semibold'
+                : 'text-muted hover:text-body'
+            }`}
+            onClick={() => {
+              setContext('personal');
+              setCategory('all');
+              setUnread(false);
+              markAsRead.reset();
+              markAllAsRead.reset();
+              dismiss.reset();
+            }}
+          >
+            <IconUsers size={14} className={context === 'personal' ? 'text-brand' : 'text-muted'} />
+            Cá nhân
+          </button>
+        </div>
       </div>
-      {(markAsRead.isError || markAllAsRead.isError || dismiss.isError) && <p role="alert">Không thể cập nhật thông báo. Vui lòng thử lại.</p>}
-      {isFetchNextPageError && <p role="alert">Không tải được trang tiếp theo. Bấm tải thêm để thử lại.</p>}
+
+      {(markAsRead.isError || markAllAsRead.isError || dismiss.isError) && (
+        <div className="rounded-xl border border-bad/30 bg-bad-soft/30 px-4 py-2.5 text-xs text-bad-deep flex items-center gap-2" role="alert">
+          <IconShieldAlert size={15} />
+          <span>Không thể cập nhật thông báo. Vui lòng thử lại.</span>
+        </div>
+      )}
+      {isFetchNextPageError && (
+        <div className="rounded-xl border border-warn/30 bg-warn-soft/30 px-4 py-2.5 text-xs text-warn-deep flex items-center justify-between gap-2" role="alert">
+          <span>Không tải được trang tiếp theo. Bấm tải thêm để thử lại.</span>
+          <button type="button" onClick={() => void loadMore()} className="underline font-semibold hover:opacity-80">
+            Thử lại
+          </button>
+        </div>
+      )}
       <NotificationCenter
         key={context}
         serverFilters

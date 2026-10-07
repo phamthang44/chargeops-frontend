@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ApiProvider, createServices, useApi } from '@chargeops/api';
+import { ApiProvider, createServices, useApi, resolveNotificationI18n } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
   AppShell,
@@ -10,12 +10,15 @@ import {
   IconCalendar,
   IconGrid,
   IconLifebuoy,
+  NotificationBell,
+  type NotificationItem,
   type ShellNavItem,
 } from '@chargeops/ui';
 import { StaffStationProvider, useStaffStation } from './context/StaffStationContext';
 import { Dashboard } from './pages/Dashboard';
 import { StaffChargers } from './pages/StaffChargers';
 import { StaffBookings } from './pages/StaffBookings';
+import { StaffNotifications } from './pages/StaffNotifications';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { useUserProfile } from '../shared/profile/useUserProfile';
@@ -23,6 +26,13 @@ import { PlatformSwitcher } from '../shared/nav/PlatformSwitcher';
 import { HeaderSearch } from '../shared/search/HeaderSearch';
 import { makeGlobalLoad } from '../shared/search/makeGlobalLoad';
 import { LegalPolicies } from '../shared/legal/LegalPolicies';
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useDismissNotification,
+} from '../shared/notifications/useNotifications';
 
 const NAV_ICONS: Record<string, React.ReactNode> = {
   dashboard: <IconGrid size={17} />,
@@ -33,11 +43,7 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
 };
 
 /**
- * Staff operations console (FR17 / Ops-05): exactly four screens — dashboard,
- * equipment, charging schedule and support tickets. Nothing owner-only exists
- * here, so a hand-typed URL falls back to the dashboard. This is UX
- * convenience, not the security boundary: BR-ACC-05 requires the server to
- * enforce the assignment independently (`@PreAuthorize("hasRole('STAFF')")`).
+ * Staff operations console (FR17 / Ops-05): four operational screens + notifications + legal.
  */
 export function StaffConsole({ base }: { base: string }) {
   const { getToken } = useAuth();
@@ -83,6 +89,82 @@ function StaffConsoleContent({
   const { avatarUrl } = useUserProfile();
   const { currentStation } = useStaffStation();
 
+  const notifParams = useMemo(
+    () => ({
+      context: 'staff',
+      stationId: currentStation?.id,
+      size: 5,
+    }),
+    [currentStation?.id],
+  );
+  const { items: serverNotifications = [] } = useNotifications(notifParams);
+  const { data: serverUnreadCount } = useUnreadCount({
+    context: 'staff',
+    stationId: currentStation?.id,
+  });
+  const mutationScope = useMemo(
+    () => ({ context: 'staff', stationId: currentStation?.id }),
+    [currentStation?.id],
+  );
+  const markAsRead = useMarkAsRead(mutationScope);
+  const markAllAsRead = useMarkAllAsRead(mutationScope);
+  const deleteNotif = useDismissNotification(mutationScope);
+
+  const notificationItems = useMemo<NotificationItem[]>(() => {
+    return serverNotifications.map((n) => {
+      let displayTime = n.time;
+      if (!displayTime && n.createdAt) {
+        try {
+          const diffMs = Date.now() - new Date(n.createdAt).getTime();
+          const diffMins = Math.floor(diffMs / 60_000);
+          if (diffMins < 1) displayTime = 'Vừa xong';
+          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
+          else {
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
+            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
+          }
+        } catch {
+          displayTime = undefined;
+        }
+      }
+
+      const navigateToTarget = () => {
+        if (n.primaryAction?.actionUrl) {
+          navigate(`${base}${n.primaryAction.actionUrl}`);
+        } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
+          navigate(`${base}/bookings`);
+        } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
+          navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.category === 'booking') {
+          navigate(`${base}/bookings`);
+        } else if (n.category === 'ticket') {
+          navigate(`${base}/tickets`);
+        } else {
+          navigate(`${base}/notifications`);
+        }
+      };
+
+      return {
+        id: n.id,
+        source: 'persisted',
+        title: resolveNotificationI18n(n.title, t),
+        subtitle: resolveNotificationI18n(n.subtitle, t),
+        body: resolveNotificationI18n(n.body, t),
+        time: displayTime,
+        tone: n.tone ?? n.severity,
+        read: n.read,
+        category: n.category,
+        stationName: n.stationName,
+        chargerId: n.chargerId,
+        badge: n.badge,
+        actionLabel: n.actionLabel || n.primaryAction?.label,
+        onSelect: navigateToTarget,
+        onAction: navigateToTarget,
+      };
+    });
+  }, [serverNotifications, base, navigate, t]);
+
   const searchLoad = useMemo(
     () =>
       makeGlobalLoad(api.search, {
@@ -109,7 +191,17 @@ function StaffConsoleContent({
       userAvatarUrl={avatarUrl}
       search={<HeaderSearch load={searchLoad} accent="owner" />}
       platformSwitcher={<PlatformSwitcher />}
-      notifications={null}
+      notifications={
+        <NotificationBell
+          items={notificationItems}
+          unreadCount={serverUnreadCount}
+          emptyLabel={t('notifications.empty', { defaultValue: 'Không có thông báo mới' })}
+          onOpenCenter={() => navigate(`${base}/notifications`)}
+          onMarkRead={(id) => markAsRead.mutate(id)}
+          onMarkAllRead={() => markAllAsRead.mutate()}
+          onDismiss={(id) => deleteNotif.mutate(id)}
+        />
+      }
       onSettings={() => navigate(`${base}/settings`)}
       onLogout={logout}
     >
@@ -119,6 +211,7 @@ function StaffConsoleContent({
         <Route path="chargers/*" element={<StaffChargers />} />
         <Route path="bookings/*" element={<StaffBookings />} />
         <Route path="tickets/*" element={<TicketsRoute role="staff" />} />
+        <Route path="notifications" element={<StaffNotifications base={base} />} />
         <Route
           path="legal"
           element={<LegalPolicies queryKeyPrefix="staff" subtitle={tUi('legal.staffSubtitle')} />}

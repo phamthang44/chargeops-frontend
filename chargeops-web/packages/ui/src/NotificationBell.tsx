@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import {
   IconBell,
   IconX,
-  IconBolt,
-  IconAlertTriangle,
+  IconCalendar,
+  IconCard,
   IconLifebuoy,
   IconShield,
   IconSearch,
@@ -24,22 +24,14 @@ export interface NotificationItem {
   read?: boolean;
   onSelect?: () => void;
 
-  /** Category for tab filtering */
-  category?: 'alert' | 'session' | 'ticket' | 'system' | 'billing' | 'booking' | 'finance' | 'support' | 'account' | (string & {});
-  /** Source classification to separate persisted database notices from derived UI telemetry/kpi warnings */
+  /** Category for tab filtering: booking, ticket, finance, account */
+  category?: 'booking' | 'ticket' | 'finance' | 'account' | 'support' | 'system' | 'alert' | 'session' | (string & {});
+  /** Source classification */
   source?: 'persisted' | 'derived';
   /** Station context */
   stationName?: string;
   /** Charger / Connector ID */
   chargerId?: string;
-  /** Rich live telemetry metrics */
-  metrics?: {
-    powerKw?: number;
-    progressPct?: number;
-    amount?: string;
-    temperature?: string;
-    voltage?: string;
-  };
   /** Direct action label */
   actionLabel?: string;
   /** Callback when direct action is clicked */
@@ -57,11 +49,30 @@ export interface NotificationItem {
   };
   /** Status badge label */
   badge?: string;
+  /** Optional telemetry/metric chips */
+  metrics?: {
+    powerKw?: number;
+    progressPct?: number;
+    amount?: string;
+    temperature?: string;
+    voltage?: string;
+  };
 }
 
 const TONE_CONFIG: Record<
   NonNullable<NotificationItem['tone']>,
-  { dot: string; bg: string; border: string; badgeBg: string; badgeFg: string }
+  {
+    dot: string;
+    bg: string;
+    border: string;
+    badgeBg: string;
+    badgeFg: string;
+    /** Dark-theme repaints: alpha-diluted light-mode tints turn muddy over #17181d,
+     * so dark uses the solid soft/border tokens designed for the dark palette. */
+    darkBg: string;
+    darkBorder: string;
+    darkBadgeBg: string;
+  }
 > = {
   bad: {
     dot: 'bg-bad',
@@ -69,6 +80,9 @@ const TONE_CONFIG: Record<
     border: 'border-bad/20',
     badgeBg: 'bg-bad/10',
     badgeFg: 'text-bad-deep',
+    darkBg: 'dark:bg-bad-soft dark:hover:bg-bad-soft-hover',
+    darkBorder: 'dark:border-bad-border',
+    darkBadgeBg: 'dark:bg-bad/20',
   },
   warn: {
     dot: 'bg-warn',
@@ -76,6 +90,9 @@ const TONE_CONFIG: Record<
     border: 'border-warn/25',
     badgeBg: 'bg-warn/10',
     badgeFg: 'text-warn-deep',
+    darkBg: 'dark:bg-warn-soft dark:hover:bg-warn-pill',
+    darkBorder: 'dark:border-warn-border',
+    darkBadgeBg: 'dark:bg-warn/20',
   },
   good: {
     dot: 'bg-owner',
@@ -83,6 +100,9 @@ const TONE_CONFIG: Record<
     border: 'border-owner/20',
     badgeBg: 'bg-owner/10',
     badgeFg: 'text-owner-deep',
+    darkBg: 'dark:bg-owner-soft dark:hover:bg-owner-tint',
+    darkBorder: 'dark:border-owner-border',
+    darkBadgeBg: 'dark:bg-owner/20',
   },
   neutral: {
     dot: 'bg-faint',
@@ -90,10 +110,13 @@ const TONE_CONFIG: Record<
     border: 'border-line/60',
     badgeBg: 'bg-line-2',
     badgeFg: 'text-body',
+    darkBg: 'dark:bg-chip dark:hover:bg-line',
+    darkBorder: 'dark:border-line',
+    darkBadgeBg: 'dark:bg-line',
   },
 };
 
-export type CategoryFilter = 'all' | 'booking' | 'finance' | 'ticket' | 'alert' | 'session' | 'system' | (string & {});
+export type CategoryFilter = 'all' | 'booking' | 'ticket' | 'finance' | 'account' | (string & {});
 export type StatusFilter = 'all' | 'unread';
 
 export interface NotificationBellProps {
@@ -193,7 +216,7 @@ export function NotificationBell({
 
       // 2. Category filter
       if (activeCategory !== 'all') {
-        const cat = item.category || (item.tone === 'bad' || item.tone === 'warn' ? 'alert' : 'system');
+        const cat = item.category === 'support' ? 'ticket' : item.category === 'system' ? 'account' : item.category;
         if (cat !== activeCategory) return false;
       }
 
@@ -212,15 +235,15 @@ export function NotificationBell({
   }, [items, statusTab, activeCategory, searchQuery]);
 
   const getCategoryIcon = (item: NotificationItem) => {
-    const cat = item.category || (item.tone === 'bad' || item.tone === 'warn' ? 'alert' : 'system');
+    const cat = item.category === 'support' ? 'ticket' : item.category === 'system' ? 'account' : item.category;
     switch (cat) {
-      case 'session':
-        return <IconBolt size={14} className="text-owner-deep" />;
-      case 'alert':
-        return <IconAlertTriangle size={14} className="text-bad-deep" />;
+      case 'booking':
+        return <IconCalendar size={14} className="text-brand" />;
+      case 'finance':
+        return <IconCard size={14} className="text-owner-deep" />;
       case 'ticket':
-        return <IconLifebuoy size={14} className="text-brand" />;
-      case 'system':
+        return <IconLifebuoy size={14} className="text-bad-deep" />;
+      case 'account':
       default:
         return <IconShield size={14} className="text-muted" />;
     }
@@ -249,7 +272,7 @@ export function NotificationBell({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:ring-1 dark:ring-white/[0.06]"
           style={{ animation: 'popIn .18s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Header Bar */}
@@ -335,10 +358,11 @@ export function NotificationBell({
             <div className="mt-2 flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
               {(
                 [
-                  { id: 'all', label: 'Tất cả chủ đề' },
-                  { id: 'alert', label: 'Cảnh báo' },
-                  { id: 'session', label: 'Phiên sạc' },
+                  { id: 'all', label: 'Tất cả' },
+                  { id: 'booking', label: 'Đặt chỗ' },
                   { id: 'ticket', label: 'Vé hỗ trợ' },
+                  { id: 'finance', label: 'Tài chính' },
+                  { id: 'account', label: 'Hệ thống' },
                 ] as const
               ).map((tab) => {
                 const active = activeCategory === tab.id;
@@ -361,7 +385,7 @@ export function NotificationBell({
           </div>
 
           {/* Body Feed List */}
-          <div className="max-h-[440px] overscroll-contain overflow-y-auto divide-y divide-line-2/40 bg-surface [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line hover:[&::-webkit-scrollbar-thumb]:bg-line-2">
+          <div className="max-h-[440px] overscroll-contain overflow-y-auto divide-y divide-line-2/40 dark:divide-line bg-surface [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line hover:[&::-webkit-scrollbar-thumb]:bg-line-2">
             {filteredItems.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-chip text-faint">
@@ -384,7 +408,7 @@ export function NotificationBell({
                       onClick={() => {
                         handleMarkRead(n.id);
                         if (n.onSelect) {
-                          setOpen(false);
+                           setOpen(false);
                           n.onSelect();
                         }
                       }}
@@ -393,19 +417,19 @@ export function NotificationBell({
                         'group relative flex flex-col gap-2 rounded-xl p-3 text-left cursor-pointer border',
                         'transition-[background-color,border-color,transform,translate,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px',
                         n.read
-                          ? 'bg-surface hover:bg-chip/50 border-line/30 opacity-75 hover:opacity-100'
-                          : `${cfg.bg} ${cfg.border} shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.06)]`,
+                          ? 'bg-surface hover:bg-chip/50 border-line/30 opacity-75 hover:opacity-100 dark:bg-surface-2 dark:hover:bg-chip dark:border-line-2 dark:opacity-90'
+                          : `${cfg.bg} ${cfg.border} ${cfg.darkBg} ${cfg.darkBorder} shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.06)]`,
                       ].join(' ')}
                     >
-                      {/* Top Bar: Icon + Content (title & body use full width — no ellipsis, no clamping) */}
+                      {/* Top Bar: Icon + Content */}
                       <div className="flex items-start gap-2.5 min-w-0">
                         {/* Icon badge */}
-                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${cfg.badgeBg} shadow-2xs`}>
+                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${cfg.badgeBg} ${cfg.darkBadgeBg} shadow-2xs`}>
                           {getCategoryIcon(n)}
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          {/* Title — hiển thị đầy đủ, tự xuống dòng khi dài */}
+                          {/* Title */}
                           <div className="flex items-start gap-1.5">
                             {!n.read && (
                               <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand animate-pulse" />
@@ -415,7 +439,7 @@ export function NotificationBell({
                             </span>
                           </div>
 
-                          {/* Body — hiện toàn bộ nội dung, không cắt xén */}
+                          {/* Body */}
                           {(n.subtitle || n.body) && (
                             <p className="mt-1 text-[11.5px] font-medium text-muted leading-relaxed break-words">
                               {n.subtitle || n.body}
@@ -425,7 +449,7 @@ export function NotificationBell({
                           {/* Meta Row: Timestamp trái + Hover Quick Actions phải */}
                           <div className="mt-1.5 flex items-center gap-2">
                             {n.time && (
-                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium text-ghost">
+                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium text-ghost dark:text-faint">
                                 <IconClock size={11} strokeWidth={2} />
                                 {n.time}
                               </span>
@@ -441,7 +465,7 @@ export function NotificationBell({
                                     e.stopPropagation();
                                     handleMarkRead(n.id);
                                   }}
-                                  className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-owner-soft hover:text-owner-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
+                                  className="flex h-5 w-5 items-center justify-center rounded-md text-ghost dark:text-faint hover:bg-owner-soft hover:text-owner-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
                                 >
                                   <IconCheck size={12} strokeWidth={2.5} />
                                 </button>
@@ -451,7 +475,7 @@ export function NotificationBell({
                                 aria-label="Xóa thông báo"
                                 title="Xóa thông báo"
                                 onClick={(e) => handleDismiss(n.id, e)}
-                                className="flex h-5 w-5 items-center justify-center rounded-md text-ghost hover:bg-bad-soft hover:text-bad-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
+                                className="flex h-5 w-5 items-center justify-center rounded-md text-ghost dark:text-faint hover:bg-bad-soft hover:text-bad-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
                               >
                                 <IconX size={11} strokeWidth={2.2} />
                               </button>
@@ -460,50 +484,24 @@ export function NotificationBell({
                         </div>
                       </div>
 
-                      {/* Context Info Pills (Station, Charger, Metrics) */}
-                      {(n.stationName || n.chargerId || n.metrics) && (
+                      {/* Context Info Pills (Station, Charger, Badge) */}
+                      {(n.stationName || n.chargerId || n.badge) && (
                         <div className="flex flex-wrap items-center gap-1.5 pl-[38px]">
                           {n.stationName && (
-                            <span className="rounded-md bg-surface border border-line-2 px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
+                            <span className="rounded-md bg-surface border border-line-2 dark:bg-chip dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
                               📍 {n.stationName}
                             </span>
                           )}
                           {n.chargerId && (
-                            <span className="rounded-md bg-surface border border-line-2 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted shadow-2xs">
+                            <span className="rounded-md bg-surface border border-line-2 dark:bg-chip dark:border-line px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted shadow-2xs">
                               ⚡ {n.chargerId}
                             </span>
                           )}
-                          {n.metrics?.powerKw && (
-                            <span className="rounded-md bg-owner-soft text-owner-deep px-1.5 py-0.5 font-mono text-[10px] font-bold">
-                              {n.metrics.powerKw} kW
+                          {n.badge && (
+                            <span className="rounded-md bg-surface-2 border border-line-2 dark:bg-line dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-muted">
+                              {n.badge}
                             </span>
                           )}
-                          {n.metrics?.temperature && (
-                            <span className="rounded-md bg-bad-soft text-bad-deep px-1.5 py-0.5 font-mono text-[10px] font-bold">
-                              🔥 {n.metrics.temperature}
-                            </span>
-                          )}
-                          {n.metrics?.amount && (
-                            <span className="rounded-md bg-owner-soft text-owner-deep px-1.5 py-0.5 font-mono text-[10px] font-black">
-                              {n.metrics.amount}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Dynamic Progress Bar (Charging progress) */}
-                      {n.metrics?.progressPct !== undefined && (
-                        <div className="mt-0.5 pl-[38px] space-y-1">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-muted">
-                            <span>Tiến độ nạp điện</span>
-                            <span className="font-mono text-owner-deep">{n.metrics.progressPct}%</span>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-line-3 overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-owner transition-[width] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                              style={{ width: `${n.metrics.progressPct}%` }}
-                            />
-                          </div>
                         </div>
                       )}
 
@@ -519,7 +517,7 @@ export function NotificationBell({
                               if (n.onAction) n.onAction();
                               else if (n.onSelect) n.onSelect();
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line-2 hover:border-brand/40 px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-[background-color,border-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] shadow-2xs group/btn"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line-2 hover:border-brand/40 dark:bg-chip dark:border-line dark:hover:border-brand/50 dark:hover:bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-[background-color,border-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] shadow-2xs group/btn"
                           >
                             <span>{n.primaryAction?.label || n.actionLabel}</span>
                             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-chip group-hover/btn:bg-brand group-hover/btn:text-white group-hover/btn:translate-x-0.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">

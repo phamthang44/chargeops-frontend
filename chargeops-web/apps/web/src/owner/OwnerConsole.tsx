@@ -156,19 +156,17 @@ function OwnerConsoleContent({
   const notifParams = useMemo(
     () => ({
       context: notifContext,
-      stationId: selectedStationId ?? undefined,
       size: 5,
     }),
-    [notifContext, selectedStationId],
+    [notifContext],
   );
   const { items: serverNotifications = [] } = useNotifications(notifParams);
   const { data: serverUnreadCount } = useUnreadCount({
     context: notifContext,
-    stationId: selectedStationId ?? undefined,
   });
   const mutationScope = useMemo(
-    () => ({ context: notifContext, stationId: selectedStationId ?? undefined }),
-    [notifContext, selectedStationId],
+    () => ({ context: notifContext }),
+    [notifContext],
   );
   const markAsRead = useMarkAsRead(mutationScope);
   const markAllAsRead = useMarkAllAsRead(mutationScope);
@@ -211,8 +209,8 @@ function OwnerConsoleContent({
           navigate(`${base}/tickets/${n.target.ticketId}`);
         } else if (n.target?.type === 'OPEN_REFUND') {
           navigate(`${base}/revenue`);
-        } else if (n.category === 'alert' || n.category === 'session') {
-          navigate(`${base}/chargers`);
+        } else if (n.category === 'booking') {
+          navigate(`${base}/bookings`);
         } else if (n.category === 'ticket') {
           navigate(`${base}/tickets`);
         } else {
@@ -232,7 +230,6 @@ function OwnerConsoleContent({
         category: n.category,
         stationName: n.stationName,
         chargerId: n.chargerId,
-        metrics: n.metrics,
         badge: n.badge,
         actionLabel: n.actionLabel || n.primaryAction?.label,
         onSelect: navigateToTarget,
@@ -240,66 +237,8 @@ function OwnerConsoleContent({
       };
     });
 
-    // 2. Add dynamic dashboard warnings if any and not already present
-    if (dashboardQuery.data) {
-      if (reduced) {
-        const d = dashboardQuery.data as StaffDashboardData;
-        if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
-          items.unshift({
-            id: 'offline',
-            source: 'derived',
-            title: d.kpis.offlineChargerNote,
-            tone: 'bad',
-            category: 'alert',
-            actionLabel: 'Kiểm tra',
-            onSelect: () => navigate(`${base}/chargers`),
-          });
-        }
-      } else {
-        const d = dashboardQuery.data as OwnerDashboardData;
-        const licStatus = String(d.license.status).toUpperCase();
-        const days = d.license.daysLeft ?? 0;
-        const isExpiring = d.license.expiringSoon || (licStatus === 'ACTIVE' && days <= 30);
-        const isExpired = licStatus === 'EXPIRED';
-
-        if (isExpired && !items.some((i) => i.id === 'license')) {
-          items.unshift({
-            id: 'license',
-            source: 'derived',
-            title: t('notifications.license.expired', { defaultValue: 'Giấy phép vận hành đã hết hạn' }),
-            tone: 'bad',
-            category: 'system',
-            actionLabel: 'Gia hạn',
-            onSelect: () => navigate(`${base}/license`),
-          });
-        } else if (isExpiring && !items.some((i) => i.id === 'license')) {
-          items.unshift({
-            id: 'license',
-            source: 'derived',
-            title: t('notifications.license.expiring', { days, defaultValue: `Giấy phép sắp hết hạn · còn ${days} ngày` }),
-            tone: 'warn',
-            category: 'system',
-            actionLabel: 'Gia hạn',
-            onSelect: () => navigate(`${base}/license`),
-          });
-        }
-
-        if (d.kpis.offlineChargerNote && !items.some((i) => i.id === 'offline')) {
-          items.unshift({
-            id: 'offline',
-            source: 'derived',
-            title: d.kpis.offlineChargerNote,
-            tone: 'bad',
-            category: 'alert',
-            actionLabel: 'Kiểm tra',
-            onSelect: () => navigate(`${base}/chargers`),
-          });
-        }
-      }
-    }
-
     return items;
-  }, [serverNotifications, dashboardQuery.data, reduced, base, navigate, t]);
+  }, [serverNotifications, base, navigate, t]);
 
   return (
     <AppShell

@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   LayoutAnimation,
   Platform,
   Pressable,
@@ -34,6 +36,9 @@ import { formatRelativeTime } from '@/utils/format';
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+/** Mass-carrying curve — never `linear` / `ease-in-out` (skill Section 5). */
+const EASE = Easing.bezier(0.32, 0.72, 0, 1);
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -79,15 +84,16 @@ const TYPE_CONFIG: Record<
 /* ------------------------------------------------------------------ */
 /*  Action-Driven Notification Item (Novu / Knock Pattern)             */
 /* ------------------------------------------------------------------ */
-
 interface NotificationItemProps {
   notification: AppNotification;
   themeColors: ReturnType<typeof usePreferences>['themeColors'];
+  /** Position in the visible list — drives the staggered entrance delay. */
+  index: number;
   onPress: () => void;
   onDelete: () => void;
 }
 
-function NotificationItem({ notification, themeColors, onPress, onDelete }: NotificationItemProps) {
+function NotificationItem({ notification, themeColors, index, onPress, onDelete }: NotificationItemProps) {
   const { t } = useTranslation();
   const cfg = TYPE_CONFIG[notification.type];
   const actionLabel = t(TYPE_ACTION_KEY[notification.type], { defaultValue: 'View details' });
@@ -95,19 +101,56 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
   const title = resolveNotificationI18n(notification.title, t);
   const body = resolveNotificationI18n(notification.body, t);
 
+  /* Entrance — staggered fade-up (transform + opacity only, Section 6). */
+  const reveal = useRef(new Animated.Value(0)).current;
+  /* Press physics — interpolated scale/opacity, never an instant state swap (Section 5). */
+  const press = useRef(new Animated.Value(0)).current;
+  const useNative = Platform.OS !== 'web';
+
+  /* Entrance runs once per mount — later index shifts (delete, tab filter) must not re-trigger it. */
+  useEffect(() => {
+    Animated.timing(reveal, {
+      toValue: 1,
+      duration: 480,
+      delay: index * 50,
+      easing: EASE,
+      useNativeDriver: useNative,
+    }).start();
+    return () => reveal.stopAnimation();
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.timing(press, { toValue: 1, duration: 120, easing: EASE, useNativeDriver: useNative }).start();
+  };
+  const handlePressOut = () => {
+    Animated.timing(press, { toValue: 0, duration: 180, easing: EASE, useNativeDriver: useNative }).start();
+  };
+
   return (
-    <View
+    <Animated.View
       style={[
         styles.item,
         {
-          backgroundColor: notification.read ? themeColors.surface : `${themeColors.primary}0D`,
-          borderColor: notification.read ? themeColors.border : `${themeColors.primary}33`,
+          backgroundColor: notification.read ? themeColors.surface : `${themeColors.primary}12`,
+          borderColor: notification.read ? themeColors.border : `${themeColors.primary}40`,
+        },
+        {
+          opacity: Animated.multiply(
+            reveal,
+            press.interpolate({ inputRange: [0, 1], outputRange: [1, 0.94] }),
+          ),
+          transform: [
+            { translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },
+            { scale: press.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] }) },
+          ],
         },
       ]}
     >
       <Pressable
-        style={({ pressed }) => [styles.itemMain, pressed && styles.pressedRow]}
+        style={styles.itemMain}
         onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         accessibilityRole="button"
       >
         {/* Category Icon Badge with soft tinted background */}
@@ -117,7 +160,7 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
 
         {/* Content Body */}
         <View style={styles.body}>
-          {/* Header Row: Dot + Title + Timestamp */}
+          {/* Header Row: Dot + Title — full width, wraps freely; paddingRight reserves the ✕ hit zone */}
           <View style={styles.itemHeader}>
             {!notification.read && (
               <View style={[styles.unreadDot, { backgroundColor: themeColors.primary }]} />
@@ -130,24 +173,24 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
                   fontWeight: notification.read ? fontWeights.semibold : fontWeights.bold,
                 },
               ]}
-              numberOfLines={1}
             >
               {title}
             </Text>
-
-            <Text style={[styles.time, { color: themeColors.textMuted }]}>
-              {formatRelativeTime(notification.createdAt)}
-            </Text>
           </View>
 
-          {/* Description */}
-          <Text style={[styles.desc, { color: themeColors.textBody }]} numberOfLines={2}>
-            {body}
-          </Text>
+          {/* Description — hiện toàn bộ nội dung, không cắt xén */}
+          <Text style={[styles.desc, { color: themeColors.textBody }]}>{body}</Text>
 
-          {/* Bottom Row: Action Pill CTA (Novu pattern) */}
-          {hasLink && (
-            <View style={styles.actionRow}>
+          {/* Meta Row: Timestamp trái + Island CTA pill phải */}
+          <View style={styles.metaRow}>
+            <View style={styles.timeWrap}>
+              <Ionicons name="time-outline" size={11} color={themeColors.textMuted} />
+              <Text style={[styles.time, { color: themeColors.textMuted }]}>
+                {formatRelativeTime(notification.createdAt)}
+              </Text>
+            </View>
+
+            {hasLink && (
               <View
                 style={[
                   styles.actionPill,
@@ -162,22 +205,31 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
                   style={[
                     styles.actionPillText,
                     {
-                      color: notification.read
-                        ? themeColors.primary
-                        : themeColors.surface,
+                      color: notification.read ? themeColors.primary : themeColors.surface,
                     },
                   ]}
                 >
                   {actionLabel}
                 </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={12}
-                  color={notification.read ? themeColors.primary : themeColors.surface}
-                />
+                <View
+                  style={[
+                    styles.chevronCircle,
+                    {
+                      backgroundColor: notification.read
+                        ? `${themeColors.primary}1F`
+                        : `${themeColors.surface}33`,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="chevron-forward"
+                    size={9}
+                    color={notification.read ? themeColors.primary : themeColors.surface}
+                  />
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </View>
         </View>
       </Pressable>
 
@@ -194,7 +246,7 @@ function NotificationItem({ notification, themeColors, onPress, onDelete }: Noti
       >
         <Ionicons name="close" size={14} color={themeColors.textMuted} />
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -291,7 +343,10 @@ export function NotificationSheet({
               styles.segmentBtn,
               activeTab === 'all' && [
                 styles.segmentBtnActive,
-                { backgroundColor: themeColors.surface },
+                {
+                  backgroundColor: themeColors.surface,
+                  borderColor: themeColors.border,
+                },
               ],
             ]}
           >
@@ -317,7 +372,10 @@ export function NotificationSheet({
               styles.segmentBtn,
               activeTab === 'unread' && [
                 styles.segmentBtnActive,
-                { backgroundColor: themeColors.surface },
+                {
+                  backgroundColor: themeColors.surface,
+                  borderColor: themeColors.border,
+                },
               ],
             ]}
           >
@@ -378,11 +436,12 @@ export function NotificationSheet({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}
         >
-          {filteredItems.map((n) => (
+          {filteredItems.map((n, idx) => (
             <NotificationItem
               key={n.id}
               notification={n}
               themeColors={themeColors}
+              index={idx}
               onPress={() => handlePress(n)}
               onDelete={() => handleDelete(n.id)}
             />
@@ -429,7 +488,6 @@ const styles = StyleSheet.create({
   segmentBtnActive: {
     elevation: 1,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
   },
   segmentText: {
     fontSize: fontSizes.caption,
@@ -461,14 +519,17 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     overflow: 'hidden',
+    /* Depth for light mode — invisible on dark surfaces, where the hairline border does the job. */
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   itemMain: {
     flexDirection: 'row',
     gap: spacing.sm,
     padding: spacing.md,
-  },
-  pressedRow: {
-    opacity: 0.7,
   },
   iconWrap: {
     width: 38,
@@ -486,6 +547,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    /* Reserve the top-right ✕ hit zone so the first title line never runs under it. */
+    paddingRight: 24,
   },
   unreadDot: {
     width: 7,
@@ -515,16 +578,22 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.caption,
     lineHeight: lineHeights.caption,
   },
-  actionRow: {
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginTop: 4,
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginTop: 2,
+  },
+  timeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   actionPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: 4,
     borderRadius: radius.full,
@@ -532,6 +601,14 @@ const styles = StyleSheet.create({
   actionPillText: {
     fontSize: fontSizes.caption - 1,
     fontWeight: fontWeights.bold,
+  },
+  /* Island button-in-button: chevron lives in its own circular wrapper. */
+  chevronCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /* Empty state */

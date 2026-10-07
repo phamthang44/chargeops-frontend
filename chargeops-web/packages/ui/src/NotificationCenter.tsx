@@ -2,11 +2,12 @@ import { useState, useMemo } from 'react';
 import {
   NotificationItem,
   CategoryFilter,
+  StatusFilter,
 } from './NotificationBell';
 import {
   IconBell,
-  IconBolt,
-  IconAlertTriangle,
+  IconCalendar,
+  IconCard,
   IconLifebuoy,
   IconShield,
   IconSearch,
@@ -14,482 +15,401 @@ import {
   IconX,
   IconArrowRight,
   IconClock,
-  IconWrench,
-  IconCheckCircle,
   IconRefreshCw,
 } from './icons';
 
-interface NotificationCenterProps {
+export interface NotificationCenterProps {
   items: NotificationItem[];
+  serverFilters?: boolean;
+  onFilterChange?: (category: CategoryFilter, unread: boolean) => void;
+  categories?: CategoryFilter[];
+  description?: string;
+  loading?: boolean;
+  error?: string;
+  onRetry?: () => void;
+  countUnavailable?: boolean;
+  unreadCount?: number;
   onMarkRead?: (id: string) => void;
-  onMarkAllRead?: () => void;
+  onMarkAllRead?: (category?: CategoryFilter) => void;
   onDismiss?: (id: string) => void;
   onClearRead?: () => void;
-  onSimulateNotification?: (type: 'overheat' | 'session' | 'ticket' | 'offline') => void;
   hasMore?: boolean;
-  onLoadMore?: () => void;
+  onLoadMore?: () => void | Promise<any>;
   isLoadingMore?: boolean;
 }
 
+const CATEGORY_TABS: { id: CategoryFilter; label: string }[] = [
+  { id: 'all', label: 'Tất cả' },
+  { id: 'booking', label: 'Đặt chỗ' },
+  { id: 'ticket', label: 'Vé hỗ trợ' },
+  { id: 'finance', label: 'Tài chính & Hoàn tiền' },
+  { id: 'account', label: 'Hệ thống & tài khoản' },
+];
+
 export function NotificationCenter({
   items,
+  unreadCount: externalUnread,
   onMarkRead,
   onMarkAllRead,
   onDismiss,
-  onClearRead,
-  onSimulateNotification,
   hasMore,
   onLoadMore,
   isLoadingMore,
+  serverFilters, onFilterChange, categories, description, loading, error, onRetry, countUnavailable,
 }: NotificationCenterProps) {
   const [activeTab, setActiveTab] = useState<CategoryFilter>('all');
+  const [statusTab, setStatusTab] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSeverity, setSelectedSeverity] = useState<'all' | 'bad' | 'warn' | 'good' | 'neutral'>('all');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
 
-  // Statistics counters
-  const stats = useMemo(() => {
-    const total = safeItems.length;
-    const unread = safeItems.filter((i) => !i.read).length;
-    const critical = safeItems.filter((i) => i.tone === 'bad').length;
-    const warning = safeItems.filter((i) => i.tone === 'warn').length;
-    const sessions = safeItems.filter((i) => i.category === 'session').length;
-    const tickets = safeItems.filter((i) => i.category === 'ticket').length;
-    return { total, unread, critical, warning, sessions, tickets };
-  }, [safeItems]);
+  // Total unread: external count from API or fallback to item list
+  const unreadCount =
+    externalUnread !== undefined
+      ? externalUnread
+      : safeItems.filter((i) => !i.read).length;
 
-  // Filtering logic
+  // Filter items based on Category, Status, and Search query
   const filteredItems = useMemo(() => {
+    if (serverFilters) return safeItems;
     return safeItems.filter((item) => {
-      // Category filter
+      // 1. Status Filter
+      if (statusTab === 'unread' && item.read) return false;
+
+      // 2. Category Filter (normalize support->ticket, system->account)
       if (activeTab !== 'all') {
-        const cat = item.category || (item.tone === 'bad' || item.tone === 'warn' ? 'alert' : 'system');
+        const cat = item.category === 'support' ? 'ticket' : item.category === 'system' ? 'account' : item.category;
         if (cat !== activeTab) return false;
       }
-      // Severity filter
-      if (selectedSeverity !== 'all') {
-        const tone = item.tone || 'neutral';
-        if (tone !== selectedSeverity) return false;
-      }
-      // Search filter
+
+      // 3. Search Filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchTitle = item.title.toLowerCase().includes(q);
         const matchSub = item.subtitle?.toLowerCase().includes(q) ?? false;
+        const matchBody = item.body?.toLowerCase().includes(q) ?? false;
         const matchStation = item.stationName?.toLowerCase().includes(q) ?? false;
-        const matchCharger = item.chargerId?.toLowerCase().includes(q) ?? false;
-        return matchTitle || matchSub || matchStation || matchCharger;
+        const matchBadge = item.badge?.toLowerCase().includes(q) ?? false;
+        return matchTitle || matchSub || matchBody || matchStation || matchBadge;
       }
+
       return true;
     });
-  }, [items, activeTab, selectedSeverity, searchQuery]);
+  }, [safeItems, activeTab, statusTab, searchQuery, serverFilters]);
+
+  const getCategoryConfig = (item: NotificationItem) => {
+    const cat = item.category === 'support' ? 'ticket' : item.category === 'system' ? 'account' : item.category;
+    switch (cat) {
+      case 'booking':
+        return {
+          icon: <IconCalendar size={17} className="text-brand" />,
+          bg: 'bg-brand/10',
+          border: 'border-brand/20',
+          label: 'Đặt chỗ',
+        };
+      case 'ticket':
+        return {
+          icon: <IconLifebuoy size={17} className="text-warn-deep" />,
+          bg: 'bg-warn/15',
+          border: 'border-warn/25',
+          label: 'Vé hỗ trợ',
+        };
+      case 'finance':
+        return {
+          icon: <IconCard size={17} className="text-owner-deep" />,
+          bg: 'bg-owner/15',
+          border: 'border-owner/25',
+          label: 'Tài chính',
+        };
+      case 'account':
+      default:
+        return {
+          icon: <IconShield size={17} className="text-muted" />,
+          bg: 'bg-line-2',
+          border: 'border-line',
+          label: 'Hệ thống',
+        };
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* ===== HERO ANALYTICS BAR (Double-Bezel Architecture) ===== */}
-      <div className="rounded-[24px] border border-line-2 bg-surface p-1.5 shadow-sm">
-        <div className="rounded-[20px] bg-surface-2 p-5 border border-line/40">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* ===== HEADER BANNER (Clean & Modern) ===== */}
+      <div className="rounded-2xl border border-line-2 bg-surface p-5 shadow-xs">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-2xs">
+              <IconBell size={22} strokeWidth={2.2} />
+            </span>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/10 text-brand">
-                  <IconBell size={18} strokeWidth={2} />
-                </span>
-                <h1 className="text-xl font-extrabold tracking-tight text-ink">Trung tâm Thông báo ChargeOps</h1>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-xl font-extrabold tracking-tight text-ink">Trung tâm Thông báo</h1>
+                {loading || countUnavailable ? <span className="text-xs text-muted">Đang cập nhật số chưa đọc</span> : unreadCount > 0 ? (
+                  <span className="rounded-full bg-brand/10 border border-brand/20 px-2.5 py-0.5 font-mono text-[11px] font-bold text-brand">
+                    {unreadCount} chưa đọc
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-owner/10 border border-owner/20 px-2.5 py-0.5 text-[11px] font-semibold text-owner-deep">
+                    Đã đọc hết
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-[13px] font-medium text-muted">
-                Hệ thống giám sát sự kiện thời gian thực, quản lý cảnh báo trạm sạc & phiên sạc tự động.
+                {description ?? 'Hòm thư sự kiện nghiệp vụ, cập nhật lịch đặt chỗ, vé hỗ trợ và tài chính.'}
               </p>
             </div>
-
-            {/* Simulation Controls for testing interactive modern notifications */}
-            {onSimulateNotification && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-bold text-faint uppercase tracking-wider">Thử nghiệm phát sự kiện:</span>
-                <button
-                  type="button"
-                  onClick={() => onSimulateNotification('overheat')}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-bad-soft border border-bad/20 px-2.5 py-1 text-[11.5px] font-bold text-bad-deep hover:brightness-95 transition-all"
-                >
-                  <IconAlertTriangle size={13} />
-                  <span>🔥 Quá nhiệt</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSimulateNotification('session')}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-owner-soft border border-owner/20 px-2.5 py-1 text-[11.5px] font-bold text-owner-deep hover:brightness-95 transition-all"
-                >
-                  <IconBolt size={13} />
-                  <span>⚡ Sạc xong</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSimulateNotification('ticket')}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-brand-soft border border-brand/20 px-2.5 py-1 text-[11.5px] font-bold text-brand hover:brightness-95 transition-all"
-                >
-                  <IconLifebuoy size={13} />
-                  <span>🎟️ Vé hỗ trợ</span>
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Stats Cards Row */}
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="flex items-center gap-3.5 rounded-xl border border-line-2 bg-surface p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-alert/10 text-alert">
-                <IconBell size={18} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-faint uppercase tracking-wider">Chưa đọc</span>
-                <div className="text-lg font-black text-ink">{stats.unread} <span className="text-xs font-normal text-faint">/ {stats.total}</span></div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 rounded-xl border border-bad/20 bg-bad-soft/30 p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-bad/10 text-bad-deep">
-                <IconAlertTriangle size={18} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-bad-deep uppercase tracking-wider">Cảnh báo nghiêm trọng</span>
-                <div className="text-lg font-black text-bad-deep">{stats.critical}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 rounded-xl border border-owner/20 bg-owner-soft/30 p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-owner/10 text-owner-deep">
-                <IconBolt size={18} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-owner-deep uppercase tracking-wider">Phiên sạc trực tuyến</span>
-                <div className="text-lg font-black text-owner-deep">{stats.sessions}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 rounded-xl border border-brand/20 bg-brand-soft/30 p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-                <IconLifebuoy size={18} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-brand uppercase tracking-wider">Yêu cầu cần xử lý</span>
-                <div className="text-lg font-black text-brand">{stats.tickets}</div>
-              </div>
-            </div>
-          </div>
+          {onMarkAllRead && unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={() => onMarkAllRead(activeTab !== 'all' ? activeTab : undefined)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-line-2 bg-surface hover:bg-chip px-3.5 py-2 text-[12px] font-bold text-ink shadow-2xs transition-colors self-start sm:self-auto"
+            >
+              <IconCheck size={14} strokeWidth={2.5} className="text-brand" />
+              <span>{activeTab !== 'all' ? 'Đọc tất cả trong mục này' : 'Đánh dấu tất cả đã đọc'}</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ===== CONTROLS TOOLBAR & TAB FILTERS ===== */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-line-2 bg-surface p-1.5 shadow-2xs">
-          {[
-            { id: 'all', label: 'Tất cả thông báo', count: stats.total },
-            { id: 'alert', label: 'Cảnh báo sự cố', count: stats.critical + stats.warning },
-            { id: 'session', label: 'Phiên sạc EV', count: stats.sessions },
-            { id: 'ticket', label: 'Vé & Hỗ trợ', count: stats.tickets },
-          ].map((tab) => {
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as CategoryFilter)}
-                className={[
-                  'flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-[12.5px] font-extrabold transition-all',
-                  active
-                    ? 'bg-ink text-surface shadow-xs'
-                    : 'text-body hover:bg-chip hover:text-ink',
-                ].join(' ')}
-              >
-                <span>{tab.label}</span>
-                <span
+      {/* ===== FILTER TOOLBAR ===== */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        {/* Status & Category Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Status Segmented Tabs */}
+          <div className="flex items-center rounded-xl border border-line-2 bg-surface p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => { setStatusTab('all'); onFilterChange?.(activeTab, false); }}
+              className={[
+                'rounded-lg px-3 py-1.5 text-[12px] font-bold transition-all',
+                statusTab === 'all'
+                  ? 'bg-ink text-surface shadow-xs'
+                  : 'text-body hover:text-ink hover:bg-chip',
+              ].join(' ')}
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStatusTab('unread'); onFilterChange?.(activeTab, true); }}
+              className={[
+                'rounded-lg px-3 py-1.5 text-[12px] font-bold transition-all',
+                statusTab === 'unread'
+                  ? 'bg-ink text-surface shadow-xs'
+                  : 'text-body hover:text-ink hover:bg-chip',
+              ].join(' ')}
+            >
+              Chưa đọc
+            </button>
+          </div>
+
+          <div className="h-4 w-px bg-line-2 mx-1 hidden sm:block" />
+
+          {/* Category Chips */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {CATEGORY_TABS.filter((tab) => !categories || categories.includes(tab.id)).map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => { setActiveTab(tab.id); onFilterChange?.(tab.id, statusTab === 'unread'); }}
                   className={[
-                    'rounded-full px-1.5 py-0.5 font-mono text-[10px] font-extrabold',
-                    active ? 'bg-surface/20 text-surface' : 'bg-line-3 text-ghost',
+                    'rounded-xl px-3 py-1.5 text-[12px] font-bold transition-all border',
+                    active
+                      ? 'bg-brand/10 text-brand border-brand/30 shadow-2xs'
+                      : 'border-line-2 bg-surface text-body hover:text-ink hover:bg-chip',
                   ].join(' ')}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right Toolbar: Search + Actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Search box */}
-          <div className="relative min-w-[220px]">
-            <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm nội dung thông báo..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-7 text-[12px] font-medium text-ink placeholder:text-ghost focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all shadow-2xs"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink"
-              >
-                <IconX size={13} />
-              </button>
-            )}
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
-
-          {/* Action dropdown or buttons */}
-          {onMarkAllRead && (
-            <button
-              type="button"
-              onClick={onMarkAllRead}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-line-2 bg-surface px-3 py-1.5 text-[12px] font-bold text-brand hover:bg-brand-soft/40 transition-colors shadow-2xs"
-            >
-              <IconCheck size={14} strokeWidth={2.5} />
-              <span>Đánh dấu tất cả đã đọc</span>
-            </button>
-          )}
-
-          {onClearRead && (
-            <button
-              type="button"
-              onClick={onClearRead}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-line-2 bg-surface px-3 py-1.5 text-[12px] font-bold text-faint hover:text-bad-deep hover:bg-bad-soft/40 transition-colors shadow-2xs"
-            >
-              <IconX size={14} strokeWidth={2} />
-              <span>Xóa đã đọc</span>
-            </button>
-          )}
         </div>
+
+        {/* Right Search Input */}
+        {!serverFilters && <div className="relative min-w-[240px]">
+          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm nội dung thông báo..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-7 text-[12px] font-medium text-ink placeholder:text-ghost focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all shadow-2xs"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink"
+            >
+              <IconX size={13} />
+            </button>
+          )}
+        </div>}
       </div>
 
-      {/* ===== NOTIFICATIONS LIST (Modern Cards Double-Bezel) ===== */}
-      {filteredItems.length === 0 ? (
+      {/* ===== NOTIFICATIONS LIST (Clean Flat Cards) ===== */}
+      {loading ? <p role="status">Đang tải thông báo...</p> : error ? <div role="alert"><p>{error}</p><button type="button" onClick={onRetry}>Thử lại</button></div> : filteredItems.length === 0 ? (
         <div className="rounded-2xl border border-line-2 bg-surface p-12 text-center shadow-xs">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-chip text-faint">
-            <IconBell size={32} strokeWidth={1.4} />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-chip text-faint">
+            <IconBell size={26} strokeWidth={1.6} />
           </div>
-          <h3 className="mt-4 text-base font-bold text-ink">Không tìm thấy thông báo nào</h3>
+          <h3 className="mt-4 text-base font-bold text-ink">
+            {statusTab === 'unread' ? 'Không có thông báo chưa đọc trong bộ lọc này' : 'Không tìm thấy thông báo nào'}
+          </h3>
           <p className="mt-1 text-[13px] text-muted">
-            Không có kết quả tương ứng với bộ lọc danh mục hoặc từ khóa tìm kiếm của bạn.
+            {statusTab === 'unread'
+              ? 'Không còn thông báo chưa đọc nào trong danh mục này.'
+              : 'Không có thông báo phù hợp với bộ lọc hoặc từ khóa tìm kiếm.'}
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {filteredItems.map((item) => {
-            const tone = item.tone ?? 'neutral';
-            const isExpanded = expandedId === item.id;
+            const cfg = getCategoryConfig(item);
+            const actionLabel = item.actionLabel || item.primaryAction?.label;
 
             return (
               <div
                 key={item.id}
                 className={[
-                  'group relative overflow-hidden rounded-2xl border transition-all duration-200 shadow-2xs',
+                  'group relative overflow-hidden rounded-2xl border transition-all duration-200 shadow-2xs p-4 sm:p-5',
                   item.read
-                    ? 'border-line-2/70 bg-surface/70 hover:bg-surface hover:border-line-3'
-                    : tone === 'bad'
-                      ? 'border-bad/30 bg-bad-soft/20 hover:bg-bad-soft/40'
-                      : tone === 'warn'
-                        ? 'border-warn/30 bg-warn-soft/20 hover:bg-warn-soft/40'
-                        : tone === 'good'
-                          ? 'border-owner/30 bg-owner-soft/20 hover:bg-owner-soft/40'
-                          : 'border-line-2 bg-surface hover:border-line-3',
+                    ? 'border-line-2/70 bg-surface/70 hover:bg-surface hover:border-line-3 opacity-80 hover:opacity-100'
+                    : 'border-brand/25 bg-surface hover:border-brand/40 shadow-xs',
                 ].join(' ')}
               >
-                {/* Left accent highlight bar */}
-                {!item.read && (
-                  <div
-                    className={[
-                      'absolute left-0 top-0 bottom-0 w-1.5',
-                      tone === 'bad'
-                        ? 'bg-bad animate-pulse'
-                        : tone === 'warn'
-                          ? 'bg-warn'
-                          : tone === 'good'
-                            ? 'bg-owner'
-                            : 'bg-brand',
-                    ].join(' ')}
-                  />
-                )}
-
-                <div className="p-4 sm:p-5 pl-5 sm:pl-6">
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Main content block */}
-                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                      {/* Icon Container */}
-                      <div
-                        className={[
-                          'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold shadow-2xs',
-                          tone === 'bad'
-                            ? 'bg-bad/15 text-bad-deep'
-                            : tone === 'warn'
-                              ? 'bg-warn/15 text-warn-deep'
-                              : tone === 'good'
-                                ? 'bg-owner/15 text-owner-deep'
-                                : 'bg-brand/10 text-brand',
-                        ].join(' ')}
-                      >
-                        {item.category === 'session' ? (
-                          <IconBolt size={20} />
-                        ) : item.category === 'ticket' ? (
-                          <IconLifebuoy size={20} />
-                        ) : item.category === 'alert' || tone === 'bad' ? (
-                          <IconAlertTriangle size={20} />
-                        ) : (
-                          <IconShield size={20} />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        {/* Header: Title + Badges + Time */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4
-                            className={[
-                              'text-[14px] font-extrabold tracking-tight',
-                              item.read ? 'text-body' : 'text-ink',
-                            ].join(' ')}
-                          >
-                            {item.title}
-                          </h4>
-
-                          {item.badge && (
-                            <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[10px] font-bold text-muted border border-line-2">
-                              {item.badge}
-                            </span>
-                          )}
-
-                          {!item.read && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-alert/10 px-2 py-0.5 font-mono text-[9.5px] font-extrabold text-alert border border-alert/20">
-                              <span className="h-1.5 w-1.5 rounded-full bg-alert animate-ping" />
-                              MỚI
-                            </span>
-                          )}
-                        </div>
-
-                        {item.subtitle && (
-                          <p className="mt-1 text-[12.5px] font-medium text-muted leading-relaxed">
-                            {item.subtitle}
-                          </p>
-                        )}
-
-                        {/* Telemetry Chips & Details */}
-                        {(item.stationName || item.chargerId || item.metrics) && (
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
-                            {item.stationName && (
-                              <span className="inline-flex items-center gap-1 rounded-lg bg-surface border border-line-2 px-2.5 py-1 text-[11px] font-bold text-body shadow-2xs">
-                                📍 {item.stationName}
-                              </span>
-                            )}
-                            {item.chargerId && (
-                              <span className="inline-flex items-center gap-1 rounded-lg bg-surface border border-line-2 px-2.5 py-1 font-mono text-[11px] font-bold text-muted shadow-2xs">
-                                ⚡ {item.chargerId}
-                              </span>
-                            )}
-                            {item.metrics?.powerKw && (
-                              <span className="rounded-lg bg-owner-soft border border-owner/20 text-owner-deep px-2.5 py-1 font-mono text-[11px] font-extrabold shadow-2xs">
-                                Công suất: {item.metrics.powerKw} kW
-                              </span>
-                            )}
-                            {item.metrics?.temperature && (
-                              <span className="rounded-lg bg-bad-soft border border-bad/20 text-bad-deep px-2.5 py-1 font-mono text-[11px] font-extrabold shadow-2xs">
-                                Nhiệt độ: {item.metrics.temperature}
-                              </span>
-                            )}
-                            {item.metrics?.amount && (
-                              <span className="rounded-lg bg-owner-soft border border-owner/20 text-owner-deep px-2.5 py-1 font-mono text-[11px] font-black shadow-2xs">
-                                Doanh thu: {item.metrics.amount}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Live Charging Progress Bar */}
-                        {item.metrics?.progressPct !== undefined && (
-                          <div className="mt-3.5 max-w-md rounded-xl border border-owner/20 bg-owner-soft/40 p-3">
-                            <div className="flex items-center justify-between text-[11px] font-bold text-owner-deep">
-                              <span>Tiến độ sạc xe điện</span>
-                              <span className="font-mono">{item.metrics.progressPct}%</span>
-                            </div>
-                            <div className="mt-1.5 h-2 w-full rounded-full bg-owner/20 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-owner transition-all duration-700 shadow-xs"
-                                style={{ width: `${item.metrics.progressPct}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                <div className="flex items-start justify-between gap-4">
+                  {/* Left: Icon + Main Text */}
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                    {/* Category Icon Badge */}
+                    <div
+                      className={[
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-2xs',
+                        cfg.bg,
+                        cfg.border,
+                      ].join(' ')}
+                    >
+                      {cfg.icon}
                     </div>
 
-                    {/* Right Meta & Controls */}
-                    <div className="flex flex-col items-end gap-3 shrink-0">
-                      {item.time && (
-                        <span className="flex items-center gap-1 font-mono text-[11px] font-medium text-ghost">
-                          <IconClock size={12} />
-                          {item.time}
-                        </span>
-                      )}
-
-                      <div className="flex items-center gap-1.5">
-                        {onMarkRead && !item.read && item.source !== 'derived' && (
-                          <button
-                            type="button"
-                            onClick={() => onMarkRead(item.id)}
-                            title="Đánh dấu đã đọc"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-owner-deep hover:bg-owner-soft transition-colors"
-                          >
-                            <IconCheck size={14} strokeWidth={2.5} />
-                          </button>
+                    <div className="flex-1 min-w-0">
+                      {/* Header Row: Title + Badges */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {!item.read && (
+                          <span
+                            className="h-2 w-2 rounded-full bg-brand shrink-0 animate-pulse"
+                            title="Chưa đọc"
+                          />
                         )}
+                        <h4
+                          className={[
+                            'text-[13.5px] font-bold tracking-tight break-words',
+                            item.read ? 'text-body font-semibold' : 'text-ink font-bold',
+                          ].join(' ')}
+                        >
+                          {item.title}
+                        </h4>
 
-                        {onDismiss && item.source !== 'derived' && (
-                          <button
-                            type="button"
-                            onClick={() => onDismiss(item.id)}
-                            title="Xóa thông báo"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-bad-deep hover:bg-bad-soft transition-colors"
-                          >
-                            <IconX size={14} strokeWidth={2} />
-                          </button>
+                        {item.badge && (
+                          <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[10px] font-bold text-muted border border-line-2">
+                            {item.badge}
+                          </span>
                         )}
                       </div>
 
-                      {/* Quick Action Button */}
-                      {item.actionLabel && (
+                      {/* Subtitle / Body text */}
+                      {(item.subtitle || item.body) && (
+                        <p className="mt-1 text-[12.5px] font-medium text-muted leading-relaxed break-words">
+                          {item.subtitle || item.body}
+                        </p>
+                      )}
+
+                      {/* Station reference (if present) */}
+                      {item.stationName && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-muted border border-line-2">
+                            📍 {item.stationName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Timestamp & Actions */}
+                  <div className="flex flex-col items-end gap-2.5 shrink-0">
+                    {item.time && (
+                      <span className="flex items-center gap-1 font-mono text-[11px] font-medium text-ghost">
+                        <IconClock size={11} />
+                        {item.time}
+                      </span>
+                    )}
+
+                    <div className="flex items-center gap-1.5">
+                      {/* Mark as read button */}
+                      {onMarkRead && !item.read && (
                         <button
                           type="button"
-                          onClick={() => {
-                            if (onMarkRead && !item.read && item.source !== 'derived') onMarkRead(item.id);
-                            if (item.onAction) item.onAction();
-                            else if (item.onSelect) item.onSelect();
-                          }}
-                          className="mt-1 inline-flex items-center gap-2 rounded-xl bg-ink text-surface hover:bg-ink/90 px-3.5 py-1.5 text-[12px] font-extrabold transition-all shadow-xs group/btn active:scale-95"
+                          onClick={() => onMarkRead(item.id)}
+                          title="Đánh dấu đã đọc"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-owner-deep hover:bg-owner-soft transition-colors"
                         >
-                          <span>{item.actionLabel}</span>
-                          <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-surface/20 text-surface group-hover/btn:translate-x-0.5 transition-transform">
-                            <IconArrowRight size={11} strokeWidth={2.5} />
-                          </span>
+                          <IconCheck size={13} strokeWidth={2.5} />
+                        </button>
+                      )}
+
+                      {/* Dismiss button */}
+                      {onDismiss && (
+                        <button
+                          type="button"
+                          onClick={() => onDismiss(item.id)}
+                          title="Ẩn thông báo"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-bad-deep hover:bg-bad-soft transition-colors"
+                        >
+                          <IconX size={13} strokeWidth={2.2} />
                         </button>
                       )}
                     </div>
+
+                    {/* Quick CTA Navigate Button */}
+                    {(actionLabel || item.onAction || item.onSelect) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onMarkRead && !item.read) onMarkRead(item.id);
+                          if (item.onAction) item.onAction();
+                          else if (item.onSelect) item.onSelect();
+                        }}
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface hover:bg-chip px-2.5 py-1 text-[11.5px] font-bold text-ink hover:text-brand transition-all shadow-2xs group/btn active:scale-95"
+                      >
+                        <span>{actionLabel || 'Xem chi tiết'}</span>
+                        <IconArrowRight size={11} strokeWidth={2.5} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             );
           })}
 
+
+        </div>
+      )}
+      {!loading && !error && <div>          {/* Load More Button */}
           {hasMore && onLoadMore && (
             <div className="pt-4 flex justify-center">
               <button
                 type="button"
                 onClick={onLoadMore}
                 disabled={isLoadingMore}
-                className="inline-flex items-center gap-2 rounded-xl border border-line-2 bg-surface px-5 py-2.5 text-sm font-semibold text-ink shadow-xs hover:bg-chip disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl border border-line-2 bg-surface px-5 py-2 text-[13px] font-bold text-ink shadow-2xs hover:bg-chip disabled:opacity-50 transition-colors"
               >
                 {isLoadingMore ? (
                   <>
-                    <IconRefreshCw size={14} className="animate-spin" />
+                    <IconRefreshCw size={13} className="animate-spin" />
                     <span>Đang tải thêm...</span>
                   </>
                 ) : (
@@ -497,9 +417,7 @@ export function NotificationCenter({
                 )}
               </button>
             </div>
-          )}
-        </div>
-      )}
+          )}</div>}
     </div>
   );
 }

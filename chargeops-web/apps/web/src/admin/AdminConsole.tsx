@@ -136,7 +136,6 @@ function AdminConsoleContent({
         category: n.category,
         stationName: n.stationName,
         chargerId: n.chargerId,
-        metrics: n.metrics,
         badge: n.badge,
         actionLabel: n.actionLabel || n.primaryAction?.label,
         onSelect: navigateToTarget,
@@ -144,41 +143,8 @@ function AdminConsoleContent({
       };
     });
 
-    // 2. Derived operational dashboard warnings
-    const q = dashboardQuery.data;
-    if (q) {
-      if (q.pendingApprovals > 0) {
-        items.unshift({
-          id: 'approvals',
-          source: 'derived',
-          title: t('notifications.pendingStations', { count: q.pendingApprovals }),
-          subtitle: t('notifications.items.pendingStations.subtitle', { defaultValue: 'Có hồ sơ đăng ký trạm mới gửi lên cần xét duyệt.' }),
-          tone: 'warn',
-          category: 'system',
-          badge: t('notifications.items.pendingStations.badge', { defaultValue: 'Chờ duyệt' }),
-          actionLabel: t('notifications.items.pendingStations.action', { defaultValue: 'Duyệt trạm' }),
-          onSelect: () => navigate(`${base}/approvals`),
-          onAction: () => navigate(`${base}/approvals`),
-        });
-      }
-      if (q.escalatedOpenCases > 0) {
-        items.unshift({
-          id: 'escalated-cases',
-          source: 'derived',
-          title: t('dashboard.ops.escalatedOpenCases', { defaultValue: 'Case trạm cần xem xét' }) + `: ${q.escalatedOpenCases}`,
-          subtitle: t('dashboard.ops.escalatedOpenCasesHint', { defaultValue: 'Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.' }),
-          tone: 'bad',
-          category: 'alert',
-          badge: t('dashboard.ops.escalatedBadge', { defaultValue: 'Cần xem xét' }),
-          actionLabel: t('dashboard.ops.openTickets', { defaultValue: 'Mở hỗ trợ' }),
-          onSelect: () => navigate(`${base}/tickets`),
-          onAction: () => navigate(`${base}/tickets`),
-        });
-      }
-    }
-
     return items;
-  }, [serverNotifs, dashboardQuery.data, base, navigate, t]);
+  }, [serverNotifs, base, navigate, t]);
 
   return (
     <AppShell

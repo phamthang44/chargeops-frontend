@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  NotificationCenter,
-  type NotificationItem,
-  type CategoryFilter,
-} from '@chargeops/ui';
+import { NotificationCenter, type NotificationItem, type CategoryFilter } from '@chargeops/ui';
 import {
   useInfiniteNotifications,
   useUnreadCount,
@@ -14,27 +10,35 @@ import {
   useDismissNotification,
 } from '../../shared/notifications/useNotifications';
 import { resolveNotificationI18n } from '@chargeops/api';
+import { useStaffStation } from '../context/StaffStationContext';
 
-export function Notifications() {
-  const { t } = useTranslation('admin');
+export function StaffNotifications({ base = '/staff' }: { base?: string }) {
+  const { t } = useTranslation('staff');
   const navigate = useNavigate();
+  const { currentStation } = useStaffStation();
 
   const params = useMemo(
     () => ({
-      context: 'admin',
+      context: 'staff',
+      stationId: currentStation?.id,
       size: 20,
     }),
-    [],
+    [currentStation?.id],
   );
 
-  const { items: serverNotifs = [], hasMore, loadMore, isLoadingMore } = useInfiniteNotifications(params);
-  const { data: unreadCount } = useUnreadCount({ context: 'admin' });
-  const markAsRead = useMarkAsRead({ context: 'admin' });
-  const markAllAsRead = useMarkAllAsRead({ context: 'admin' });
-  const dismiss = useDismissNotification({ context: 'admin' });
+  const { items: serverItems = [], hasMore, loadMore, isLoadingMore } = useInfiniteNotifications(params);
+  const { data: unreadCount } = useUnreadCount({ context: 'staff', stationId: currentStation?.id });
+
+  const mutationScope = useMemo(
+    () => ({ context: 'staff', stationId: currentStation?.id }),
+    [currentStation?.id],
+  );
+  const markAsRead = useMarkAsRead(mutationScope);
+  const markAllAsRead = useMarkAllAsRead(mutationScope);
+  const dismiss = useDismissNotification(mutationScope);
 
   const displayItems = useMemo<NotificationItem[]>(() => {
-    return serverNotifs.map((n) => {
+    return serverItems.map((n) => {
       let displayTime = n.time;
       if (!displayTime && n.createdAt) {
         try {
@@ -54,19 +58,17 @@ export function Notifications() {
 
       const navigateToTarget = () => {
         if (n.primaryAction?.actionUrl) {
-          navigate(`/admin${n.primaryAction.actionUrl}`);
-        } else if (n.target?.type === 'OPEN_CASE' && n.target.escalationId) {
-          navigate(`/admin/tickets?escalationId=${n.target.escalationId}`);
-        } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
-          navigate(`/admin/tickets/${n.target.ticketId}`);
+          navigate(`${base}${n.primaryAction.actionUrl}`);
         } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
-          navigate(`/admin/stations`);
-        } else if (n.target?.type === 'OPEN_REFUND') {
-          navigate(`/admin/tickets`);
+          navigate(`${base}/bookings`);
+        } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
+          navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.category === 'booking') {
+          navigate(`${base}/bookings`);
         } else if (n.category === 'ticket') {
-          navigate('/admin/tickets');
+          navigate(`${base}/tickets`);
         } else {
-          navigate('/admin/dashboard');
+          navigate(`${base}/dashboard`);
         }
       };
 
@@ -88,9 +90,9 @@ export function Notifications() {
         onAction: navigateToTarget,
       };
     });
-  }, [serverNotifs, navigate, t]);
+  }, [serverItems, base, navigate, t]);
 
-  const handleMarkAsRead = (id: string) => {
+  const handleMarkRead = (id: string) => {
     markAsRead.mutate(id);
   };
 
@@ -103,11 +105,11 @@ export function Notifications() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-12">
+    <div className="space-y-6">
       <NotificationCenter
         items={displayItems}
         unreadCount={unreadCount}
-        onMarkRead={handleMarkAsRead}
+        onMarkRead={handleMarkRead}
         onMarkAllRead={handleMarkAllRead}
         onDismiss={handleDismiss}
         hasMore={hasMore}

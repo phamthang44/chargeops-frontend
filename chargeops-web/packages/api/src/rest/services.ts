@@ -1662,7 +1662,7 @@ export function createRestServices(http: HttpClient): Services {
             } else if (raw.target.type === 'OPEN_TICKET' && raw.target.ticketId) {
               actionUrl = `/tickets/${raw.target.ticketId}`;
             } else if (raw.target.type === 'OPEN_REFUND') {
-              actionUrl = '/revenue';
+              actionUrl = params?.context === 'admin' ? '/tickets' : '/revenue';
             } else if (raw.target.type === 'OPEN_CASE' && raw.target.escalationId) {
               actionUrl = `/tickets?escalationId=${raw.target.escalationId}`;
             }

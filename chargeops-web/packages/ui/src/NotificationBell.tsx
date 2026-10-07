@@ -423,7 +423,7 @@ export function NotificationBell({
                           )}
 
                           {/* Meta Row: Timestamp trái + Hover Quick Actions phải */}
-                          <div className="mt-1.5 flex items-center justify-between gap-2">
+                          <div className="mt-1.5 flex items-center gap-2">
                             {n.time && (
                               <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium text-ghost">
                                 <IconClock size={11} strokeWidth={2} />
@@ -431,7 +431,7 @@ export function NotificationBell({
                               </span>
                             )}
 
-                            <div className="flex items-center gap-1 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 focus-within:opacity-100 focus-within:translate-x-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                            <div className="ml-auto flex items-center gap-1 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 focus-within:opacity-100 focus-within:translate-x-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
                               {!n.read && (
                                 <button
                                   type="button"

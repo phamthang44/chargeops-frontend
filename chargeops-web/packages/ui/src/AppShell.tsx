@@ -258,25 +258,27 @@ export function AppShell({
             </>
           )}
         </div>
-        <div className="flex items-center gap-2.5">
-          {search}
+        <div className="flex min-w-0 items-center justify-end gap-2.5">
+          <div className="hidden min-w-0 md:block">{search}</div>
           {platformSwitcher}
           <span
-            className="rounded-full px-[11px] py-[5px] text-[10.5px] font-bold tracking-[0.04em]"
+            className="hidden max-w-[160px] shrink-0 truncate rounded-full px-[11px] py-[5px] text-[10.5px] font-bold tracking-[0.04em] sm:block"
             style={{ background: rolePill.bg, color: rolePill.fg }}
           >
             {rolePill.label}
           </span>
-          {notifications}
-          <AvatarDropdown
-            userName={userName}
-            userEmail={userEmail}
-            userAvatarUrl={userAvatarUrl}
-            rolePill={rolePill}
-            accent={accent}
-            onSettings={onSettings}
-            onLogout={onLogout}
-          />
+          <div className="shrink-0">{notifications}</div>
+          <div className="shrink-0">
+            <AvatarDropdown
+              userName={userName}
+              userEmail={userEmail}
+              userAvatarUrl={userAvatarUrl}
+              rolePill={rolePill}
+              accent={accent}
+              onSettings={onSettings}
+              onLogout={onLogout}
+            />
+          </div>
         </div>
       </div>
 

@@ -75,6 +75,7 @@ export function ConnectorPortCard({
             size={5}
           />
           <Text
+            numberOfLines={1}
             style={[
               styles.portStatusText,
               { color: isAvail ? '#059669' : themeColors.textMuted },
@@ -139,6 +140,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 4,
+    flexWrap: 'wrap',
+    rowGap: 3,
   },
   portTypeBadge: {
     flexDirection: 'row',
@@ -147,6 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2.5,
     borderRadius: 6,
+    flexShrink: 0,
   },
   portTypeBadgeText: {
     fontSize: 10.5,
@@ -159,10 +163,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: radius.full,
+    flexShrink: 1,
+    minWidth: 0,
+    maxWidth: '100%',
   },
   portStatusText: {
     fontSize: 10,
     fontWeight: fontWeights.bold,
+    flexShrink: 1,
   },
   portCardBody: {
     gap: 5,

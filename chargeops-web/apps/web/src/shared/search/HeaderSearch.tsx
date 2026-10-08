@@ -270,7 +270,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
       {/* ---- Trigger: outer tray + inner field (double bezel) ---- */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className={`group flex h-9 w-[264px] cursor-text items-center gap-2.5 rounded-full border border-line bg-surface px-3.5 shadow-[inset_0_1px_2px_rgba(16,17,26,.05)] transition-[border-color,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:ring-2 ${acc.field}`}
+        className={`group flex h-9 w-[264px] max-w-full cursor-text items-center gap-2.5 rounded-full border border-line bg-surface px-3.5 shadow-[inset_0_1px_2px_rgba(16,17,26,.05)] transition-[border-color,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:ring-2 ${acc.field}`}
       >
         {loading ? (
           <span className={`h-[14px] w-[14px] shrink-0 animate-[spin360_.7s_linear_infinite] rounded-full border-[1.5px] border-line ${acc.spinner}`} />

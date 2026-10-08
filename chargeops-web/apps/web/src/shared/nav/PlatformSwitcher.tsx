@@ -129,22 +129,23 @@ export function PlatformSwitcher() {
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative hidden min-w-0 lg:block">
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all duration-150 hover:shadow-xs cursor-pointer ${currentBadgeTone}`}
+        className={`group flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all duration-150 hover:shadow-xs cursor-pointer ${currentBadgeTone}`}
         title="Bấm để chuyển đổi góc nhìn nền tảng"
+        aria-label={`Góc nhìn: ${currentLabel}`}
         aria-expanded={open}
       >
-        <span className="text-[13px] leading-none">{currentIcon}</span>
-        <span className="font-medium text-ink hidden lg:inline">Góc nhìn:</span>
-        <span className="font-bold">{currentLabel}</span>
+        <span className="shrink-0 text-[13px] leading-none">{currentIcon}</span>
+        <span className="hidden shrink-0 font-medium text-ink xl:inline">Góc nhìn:</span>
+        <span className="min-w-0 max-w-[112px] truncate font-bold">{currentLabel}</span>
         <IconChevronDown
           size={12}
           strokeWidth={2.4}
-          className={`text-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 text-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 

@@ -190,6 +190,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     flex: 1,
+    minWidth: 0,
   },
   cpIconWrap: {
     width: 38,
@@ -200,6 +201,7 @@ const styles = StyleSheet.create({
   },
   cpHeaderInfo: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   cpTitleRow: {
@@ -237,6 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3.5,
     borderRadius: radius.full,
     borderWidth: 1,
+    flexShrink: 0,
   },
   cpAvailText: {
     fontSize: 11,

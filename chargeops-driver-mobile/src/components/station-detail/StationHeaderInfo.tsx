@@ -62,7 +62,10 @@ export function StationHeaderInfo({
           ]}
         >
           <LiveDot color={statusMeta.color} size={7} />
-          <Text style={[styles.statusPillText, { color: statusMeta.color }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.statusPillText, { color: statusMeta.color }]}
+          >
             {statusMeta.label}
           </Text>
         </View>
@@ -204,8 +207,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    flexWrap: 'wrap',
+    rowGap: spacing.xs,
   },
   stationCodeBadge: {
+    flexShrink: 0,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: 6,
@@ -224,10 +230,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.full,
     borderWidth: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    maxWidth: '100%',
   },
   statusPillText: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
+    flexShrink: 1,
   },
   name: {
     fontSize: 22,

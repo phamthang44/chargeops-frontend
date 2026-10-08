@@ -26,6 +26,7 @@ export function ConnectorPortCard({
   const { themeColors, isDark } = usePreferences();
 
   const isAvail = connector.runtimeStatus === 'AVAILABLE';
+  const isMaintenance = connector.runtimeStatus === 'MAINTENANCE';
   const isDc = (connector.powerKw ?? 0) >= 60;
   const typeColor = isDc ? '#0284C7' : '#059669';
   const typeBg = isDc
@@ -66,19 +67,35 @@ export function ConnectorPortCard({
             {
               backgroundColor: isAvail
                 ? (isDark ? 'rgba(16, 185, 129, 0.16)' : '#ECFDF5')
-                : (isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEF2F2'),
+                : isMaintenance
+                  ? (isDark ? 'rgba(245, 158, 11, 0.16)' : '#FFFBEB')
+                  : (isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEF2F2'),
             },
           ]}
         >
           <LiveDot
-            color={isAvail ? '#10B981' : connector.runtimeStatus === 'IN_USE' ? '#F59E0B' : '#EF4444'}
+            color={
+              isAvail
+                ? '#10B981'
+                : connector.runtimeStatus === 'IN_USE'
+                  ? '#F59E0B'
+                  : isMaintenance
+                    ? '#F59E0B'
+                    : '#EF4444'
+            }
             size={5}
           />
           <Text
             numberOfLines={1}
             style={[
               styles.portStatusText,
-              { color: isAvail ? '#059669' : themeColors.textMuted },
+              {
+                color: isAvail
+                  ? '#059669'
+                  : isMaintenance
+                    ? '#D97706'
+                    : themeColors.textMuted,
+              },
             ]}
           >
             {t(`stationDetail.status.${connector.runtimeStatus}`)}

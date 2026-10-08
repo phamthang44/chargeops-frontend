@@ -111,6 +111,8 @@ export type ProvisioningStatus = 'UNCLAIMED' | 'ACTIVE' | 'OFFLINE' | 'SUSPENDED
  * Connectors (SRS Section 7). Its only driver-facing job is to say where in the
  * car park the ports are (`zoneLabel`) and group them (FR04).
  */
+export type ChargePointOperationalStatus = 'AVAILABLE' | 'OFFLINE' | 'MAINTENANCE';
+
 export interface ChargePoint {
   id: string;
   stationId: string;
@@ -118,10 +120,11 @@ export interface ChargePoint {
   zoneLabel: string | null; // free-text location hint, e.g. "gần lối vào, dãy B"
   maxPowerKw: number; // display-only descriptor (BR-CHG-06)
   status: ProvisioningStatus;
+  operationalStatus?: ChargePointOperationalStatus;
 }
 
 /** Runtime status of one bookable port (FR07/FR10). */
-export type ConnectorRuntimeStatus = 'AVAILABLE' | 'IN_USE' | 'OFFLINE';
+export type ConnectorRuntimeStatus = 'AVAILABLE' | 'IN_USE' | 'OFFLINE' | 'MAINTENANCE';
 
 /**
  * A Connector is the bookable port and the unit of contention: availability,

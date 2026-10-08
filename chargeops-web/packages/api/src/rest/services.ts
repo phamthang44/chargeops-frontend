@@ -113,6 +113,9 @@ function normalizeHistoryItem(raw: any): StaffEquipmentHistoryItem {
     fromStatus: String(item.fromStatus ?? ''),
     toStatus: String(item.toStatus ?? ''),
     reason: item.reason ?? null,
+    incidentAction: item.incidentAction ?? null,
+    incidentId: item.incidentId ?? null,
+    incidentDetail: item.incidentDetail ?? null,
     actorType: (item.actorType ?? 'SYSTEM') as StaffEquipmentHistoryItem['actorType'],
     performedByDisplayName: item.performedByDisplayName ?? null,
     performedAt: String(item.performedAt ?? ''),
@@ -474,6 +477,7 @@ function normalizeConnector(c: any): Connector {
     kwhToday: Number(c.kwhToday) || 0,
     faultCount: Number(c.faultCount) || 0,
     lastSeen: c.lastSeen || new Date().toISOString(),
+    activeIncidentId: c.activeIncidentId ?? null,
   };
 }
 
@@ -1139,6 +1143,7 @@ export function createRestServices(http: HttpClient): Services {
           connectorType: c.connectorType ?? 'TYPE2',
           runtimeStatus: c.runtimeStatus ?? 'AVAILABLE',
           version: Number(c.version ?? 0),
+          activeIncidentId: c.activeIncidentId ? String(c.activeIncidentId) : null,
         })) as StaffConnectorItem[];
       },
 
@@ -1173,6 +1178,7 @@ export function createRestServices(http: HttpClient): Services {
           connectorType: c.connectorType ?? 'TYPE2',
           runtimeStatus: c.runtimeStatus ?? input.runtimeStatus,
           version: Number(c.version ?? input.expectedVersion + 1),
+          activeIncidentId: c.activeIncidentId ? String(c.activeIncidentId) : null,
         } as StaffConnectorItem;
       },
 

@@ -77,6 +77,8 @@
     "iframeTitle": "ChargeOps observability dashboard"
   },
   "notifications": {
+    "title": "Notification & Alert Center",
+    "description": "System-wide alerts, station approvals, licenses, and escalated support cases.",
     "empty": "No new notifications.",
     "pendingStations": "{{count}} station registrations pending",
     "expiringLicenses": "{{count}} licenses expiring · {{days}} days left",

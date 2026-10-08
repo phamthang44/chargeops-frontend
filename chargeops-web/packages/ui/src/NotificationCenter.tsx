@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   NotificationItem,
   CategoryFilter,
@@ -23,6 +24,7 @@ export interface NotificationCenterProps {
   serverFilters?: boolean;
   onFilterChange?: (category: CategoryFilter, unread: boolean) => void;
   categories?: CategoryFilter[];
+  title?: string;
   description?: string;
   loading?: boolean;
   error?: string;
@@ -38,30 +40,42 @@ export interface NotificationCenterProps {
   isLoadingMore?: boolean;
 }
 
-const CATEGORY_TABS: { id: CategoryFilter; label: string }[] = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'booking', label: 'Đặt chỗ' },
-  { id: 'ticket', label: 'Vé hỗ trợ' },
-  { id: 'finance', label: 'Tài chính & Hoàn tiền' },
-  { id: 'account', label: 'Hệ thống & tài khoản' },
-];
-
 export function NotificationCenter({
   items,
   unreadCount: externalUnread,
+  title,
+  description,
   onMarkRead,
   onMarkAllRead,
   onDismiss,
   hasMore,
   onLoadMore,
   isLoadingMore,
-  serverFilters, onFilterChange, categories, description, loading, error, onRetry, countUnavailable,
+  serverFilters,
+  onFilterChange,
+  categories,
+  loading,
+  error,
+  onRetry,
+  countUnavailable,
 }: NotificationCenterProps) {
+  const { t } = useTranslation('ui');
   const [activeTab, setActiveTab] = useState<CategoryFilter>('all');
   const [statusTab, setStatusTab] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+
+  const categoryTabs = useMemo<{ id: CategoryFilter; label: string }[]>(
+    () => [
+      { id: 'all', label: t('notificationCenter.categories.all', 'Tất cả') },
+      { id: 'booking', label: t('notificationCenter.categories.booking', 'Đặt chỗ') },
+      { id: 'ticket', label: t('notificationCenter.categories.ticket', 'Vé hỗ trợ') },
+      { id: 'finance', label: t('notificationCenter.categories.finance', 'Tài chính & Hoàn tiền') },
+      { id: 'account', label: t('notificationCenter.categories.account', 'Hệ thống & tài khoản') },
+    ],
+    [t],
+  );
 
   // Total unread: external count from API or fallback to item list
   const unreadCount =
@@ -105,21 +119,21 @@ export function NotificationCenter({
           icon: <IconCalendar size={17} className="text-brand" />,
           bg: 'bg-brand/10',
           border: 'border-brand/20',
-          label: 'Đặt chỗ',
+          label: t('notificationCenter.categoryBadge.booking', 'Đặt chỗ'),
         };
       case 'ticket':
         return {
           icon: <IconLifebuoy size={17} className="text-warn-deep" />,
           bg: 'bg-warn/15',
           border: 'border-warn/25',
-          label: 'Vé hỗ trợ',
+          label: t('notificationCenter.categoryBadge.ticket', 'Vé hỗ trợ'),
         };
       case 'finance':
         return {
           icon: <IconCard size={17} className="text-owner-deep" />,
           bg: 'bg-owner/15',
           border: 'border-owner/25',
-          label: 'Tài chính',
+          label: t('notificationCenter.categoryBadge.finance', 'Tài chính'),
         };
       case 'account':
       default:
@@ -127,7 +141,7 @@ export function NotificationCenter({
           icon: <IconShield size={17} className="text-muted" />,
           bg: 'bg-line-2',
           border: 'border-line',
-          label: 'Hệ thống',
+          label: t('notificationCenter.categoryBadge.account', 'Hệ thống'),
         };
     }
   };
@@ -143,19 +157,25 @@ export function NotificationCenter({
             </span>
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-xl font-extrabold tracking-tight text-ink">Trung tâm Thông báo</h1>
-                {loading || countUnavailable ? <span className="text-xs text-muted">Đang cập nhật số chưa đọc</span> : unreadCount > 0 ? (
+                <h1 className="text-xl font-extrabold tracking-tight text-ink">
+                  {title ?? t('notificationCenter.title', 'Trung tâm Thông báo')}
+                </h1>
+                {loading || countUnavailable ? (
+                  <span className="text-xs text-muted">
+                    {t('notificationCenter.updatingCount', 'Đang cập nhật số chưa đọc')}
+                  </span>
+                ) : unreadCount > 0 ? (
                   <span className="rounded-full bg-brand/10 border border-brand/20 px-2.5 py-0.5 font-mono text-[11px] font-bold text-brand">
-                    {unreadCount} chưa đọc
+                    {t('notificationCenter.unreadCount', { count: unreadCount, defaultValue: `${unreadCount} chưa đọc` })}
                   </span>
                 ) : (
                   <span className="rounded-full bg-owner/10 border border-owner/20 px-2.5 py-0.5 text-[11px] font-semibold text-owner-deep">
-                    Đã đọc hết
+                    {t('notificationCenter.allRead', 'Đã đọc hết')}
                   </span>
                 )}
               </div>
               <p className="mt-1 text-[13px] font-medium text-muted">
-                {description ?? 'Hòm thư sự kiện nghiệp vụ, cập nhật lịch đặt chỗ, vé hỗ trợ và tài chính.'}
+                {description ?? t('notificationCenter.defaultDescription', 'Hòm thư sự kiện nghiệp vụ, cập nhật lịch đặt chỗ, vé hỗ trợ và tài chính.')}
               </p>
             </div>
           </div>
@@ -167,7 +187,11 @@ export function NotificationCenter({
               className="inline-flex items-center gap-1.5 rounded-xl border border-line-2 bg-surface hover:bg-chip px-3.5 py-2 text-[12px] font-bold text-ink shadow-2xs transition-colors self-start sm:self-auto"
             >
               <IconCheck size={14} strokeWidth={2.5} className="text-brand" />
-              <span>{activeTab !== 'all' ? 'Đọc tất cả trong mục này' : 'Đánh dấu tất cả đã đọc'}</span>
+              <span>
+                {activeTab !== 'all'
+                  ? t('notificationCenter.markCategoryRead', 'Đọc tất cả trong mục này')
+                  : t('notificationCenter.markAllRead', 'Đánh dấu tất cả đã đọc')}
+              </span>
             </button>
           )}
         </div>
@@ -189,7 +213,7 @@ export function NotificationCenter({
                   : 'text-body hover:text-ink hover:bg-chip',
               ].join(' ')}
             >
-              Tất cả
+              {t('notificationCenter.statusAll', 'Tất cả')}
             </button>
             <button
               type="button"
@@ -201,7 +225,7 @@ export function NotificationCenter({
                   : 'text-body hover:text-ink hover:bg-chip',
               ].join(' ')}
             >
-              Chưa đọc
+              {t('notificationCenter.statusUnread', 'Chưa đọc')}
             </button>
           </div>
 
@@ -209,7 +233,7 @@ export function NotificationCenter({
 
           {/* Category Chips */}
           <div className="flex flex-wrap items-center gap-1.5">
-            {CATEGORY_TABS.filter((tab) => !categories || categories.includes(tab.id)).map((tab) => {
+            {categoryTabs.filter((tab) => !categories || categories.includes(tab.id)).map((tab) => {
               const active = activeTab === tab.id;
               return (
                 <button
@@ -231,39 +255,53 @@ export function NotificationCenter({
         </div>
 
         {/* Right Search Input */}
-        {!serverFilters && <div className="relative min-w-[240px]">
-          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm nội dung thông báo..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-7 text-[12px] font-medium text-ink placeholder:text-ghost focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all shadow-2xs"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink"
-            >
-              <IconX size={13} />
-            </button>
-          )}
-        </div>}
+        {!serverFilters && (
+          <div className="relative min-w-[240px]">
+            <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+            <input
+              type="text"
+              placeholder={t('notificationCenter.searchPlaceholder', 'Tìm kiếm nội dung thông báo...')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-7 text-[12px] font-medium text-ink placeholder:text-ghost focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all shadow-2xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink"
+              >
+                <IconX size={13} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ===== NOTIFICATIONS LIST (Clean Flat Cards) ===== */}
-      {loading ? <p role="status">Đang tải thông báo...</p> : error ? <div role="alert"><p>{error}</p><button type="button" onClick={onRetry}>Thử lại</button></div> : filteredItems.length === 0 ? (
+      {loading ? (
+        <p role="status">{t('notificationCenter.loading', 'Đang tải thông báo...')}</p>
+      ) : error ? (
+        <div role="alert">
+          <p>{error}</p>
+          <button type="button" onClick={onRetry}>
+            {t('notificationCenter.retry', 'Thử lại')}
+          </button>
+        </div>
+      ) : filteredItems.length === 0 ? (
         <div className="rounded-2xl border border-line-2 bg-surface p-12 text-center shadow-xs">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-chip text-faint">
             <IconBell size={26} strokeWidth={1.6} />
           </div>
           <h3 className="mt-4 text-base font-bold text-ink">
-            {statusTab === 'unread' ? 'Không có thông báo chưa đọc trong bộ lọc này' : 'Không tìm thấy thông báo nào'}
+            {statusTab === 'unread'
+              ? t('notificationCenter.emptyUnreadTitle', 'Không có thông báo chưa đọc trong bộ lọc này')
+              : t('notificationCenter.emptyTitle', 'Không tìm thấy thông báo nào')}
           </h3>
           <p className="mt-1 text-[13px] text-muted">
             {statusTab === 'unread'
-              ? 'Không còn thông báo chưa đọc nào trong danh mục này.'
-              : 'Không có thông báo phù hợp với bộ lọc hoặc từ khóa tìm kiếm.'}
+              ? t('notificationCenter.emptyUnreadDesc', 'Không còn thông báo chưa đọc nào trong danh mục này.')
+              : t('notificationCenter.emptyDesc', 'Không có thông báo phù hợp với bộ lọc hoặc từ khóa tìm kiếm.')}
           </p>
         </div>
       ) : (
@@ -302,7 +340,7 @@ export function NotificationCenter({
                         {!item.read && (
                           <span
                             className="h-2 w-2 rounded-full bg-brand shrink-0 animate-pulse"
-                            title="Chưa đọc"
+                            title={t('notificationCenter.unreadDot', 'Chưa đọc')}
                           />
                         )}
                         <h4
@@ -354,7 +392,8 @@ export function NotificationCenter({
                         <button
                           type="button"
                           onClick={() => onMarkRead(item.id)}
-                          title="Đánh dấu đã đọc"
+                          title={t('notificationCenter.markAsRead', 'Đánh dấu đã đọc')}
+                          aria-label={t('notificationCenter.markAsRead', 'Đánh dấu đã đọc')}
                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-owner-deep hover:bg-owner-soft transition-colors"
                         >
                           <IconCheck size={13} strokeWidth={2.5} />
@@ -366,7 +405,8 @@ export function NotificationCenter({
                         <button
                           type="button"
                           onClick={() => onDismiss(item.id)}
-                          title="Ẩn thông báo"
+                          title={t('notificationCenter.dismiss', 'Ẩn thông báo')}
+                          aria-label={t('notificationCenter.dismiss', 'Ẩn thông báo')}
                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-bad-deep hover:bg-bad-soft transition-colors"
                         >
                           <IconX size={13} strokeWidth={2.2} />
@@ -385,7 +425,7 @@ export function NotificationCenter({
                         }}
                         className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface hover:bg-chip px-2.5 py-1 text-[11.5px] font-bold text-ink hover:text-brand transition-all shadow-2xs group/btn active:scale-95"
                       >
-                        <span>{actionLabel || 'Xem chi tiết'}</span>
+                        <span>{actionLabel || t('notificationCenter.viewDetail', 'Xem chi tiết')}</span>
                         <IconArrowRight size={11} strokeWidth={2.5} className="group-hover/btn:translate-x-0.5 transition-transform" />
                       </button>
                     )}
@@ -394,11 +434,11 @@ export function NotificationCenter({
               </div>
             );
           })}
-
-
         </div>
       )}
-      {!loading && !error && <div>          {/* Load More Button */}
+      {!loading && !error && (
+        <div>
+          {/* Load More Button */}
           {hasMore && onLoadMore && (
             <div className="pt-4 flex justify-center">
               <button
@@ -410,14 +450,17 @@ export function NotificationCenter({
                 {isLoadingMore ? (
                   <>
                     <IconRefreshCw size={13} className="animate-spin" />
-                    <span>Đang tải thêm...</span>
+                    <span>{t('notificationCenter.loadingMore', 'Đang tải thêm...')}</span>
                   </>
                 ) : (
-                  <span>Tải thêm thông báo</span>
+                  <span>{t('notificationCenter.loadMore', 'Tải thêm thông báo')}</span>
                 )}
               </button>
             </div>
-          )}</div>}
+          )}
+        </div>
+      )}
     </div>
   );
 }
+

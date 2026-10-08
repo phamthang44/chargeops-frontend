@@ -55,6 +55,10 @@
       }
     }
   },
+  "notifications": {
+    "title": "Thông báo trạm",
+    "description": "Thông báo nghiệp vụ trạm: vé hỗ trợ, sự cố trụ sạc và thông tin tài khoản."
+  },
   "stationStatus": {
     "OPERATING": "Đang vận hành",
     "PAUSED": "Tạm ngưng",
@@ -122,6 +126,10 @@
     "inUseLock": "Hệ thống tự quản lý trạng thái đang sạc",
     "historyBtn": "Lịch sử",
     "reportBtn": "Báo sự cố",
+    "incidentStatus": "CÓ SỰ CỐ",
+    "handlingIncident": "Đang xử lý sự cố",
+    "incidentBlockedTooltip": "Cổng đang có sự cố chưa được khắc phục. Vui lòng khắc phục sự cố trước khi bật lại.",
+    "resolveBtn": "Khắc phục sự cố",
     "setTo": "→ {{status}}",
     "kpi": {
       "chargePoints": "Trụ sạc",
@@ -142,9 +150,25 @@
     "incidentTitle": "Xảy ra sự cố kỹ thuật hoặc khẩn cấp?",
     "incidentBody": "Nếu thiết bị hỏng hoặc nguy hiểm cần ngắt điện ngay, kích hoạt báo cáo sự cố để chuyển cổng OFFLINE và chốt snapshot các đơn đặt chỗ.",
     "incidentBtn": "Kích hoạt Báo sự cố khẩn cấp",
+    "incidentBlockedTitle": "Cổng đang có sự cố khẩn cấp chưa khắc phục",
+    "incidentBlockedBody": "Hệ thống không cho phép bật lại cổng khi còn sự cố mở (lỗi STAFF_OP_004). Vui lòng sử dụng tính năng \"Khắc phục sự cố\" để hoàn tất quy trình phục hồi trước.",
     "reasonLabel": "Lý do thay đổi trạng thái",
     "reasonPlaceholder": "Nhập chi tiết lý do (bắt buộc cho trạng thái không phải Sẵn sàng, tối thiểu 3 ký tự)...",
     "versionNote": "Phiên bản hiện tại: v{{version}} — thao tác dùng khóa lạc quan, nếu thiết bị vừa thay đổi bạn sẽ được yêu cầu thử lại.",
+    "presets": {
+      "maintenance": [
+        "Bảo trì định kỳ phần hardware",
+        "Kiểm tra an toàn đường dây & trạm biến áp",
+        "Bảo dưỡng và vệ sinh đầu súng sạc",
+        "Nâng cấp firmware / phần mềm điều khiển"
+      ],
+      "offline": [
+        "Tạm ngắt nguồn điện",
+        "Sự cố thiết bị phần cứng",
+        "Tạm đóng cửa khu vực trạm sạc",
+        "Khu vực thi công / sửa chữa hạ tầng"
+      ]
+    },
     "cancel": "Hủy bỏ",
     "applying": "Đang áp dụng…",
     "confirm": "Xác nhận thay đổi"
@@ -165,6 +189,8 @@
       "from": "Từ thời điểm",
       "to": "Đến thời điểm",
       "reset": "Xóa bộ lọc",
+      "eyebrow": "Bộ lọc",
+      "countNoun": "lịch sạc",
       "resultCount": "{{count}} lịch sạc"
     },
     "table": {

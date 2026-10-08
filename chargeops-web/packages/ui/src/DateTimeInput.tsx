@@ -19,10 +19,21 @@ export interface DateTimeInputProps {
   error?: string | null;
   accent?: 'brand' | 'warn' | 'owner';
   showQuickPresets?: boolean;
+  /** Show the "Vui lòng chọn ngày và giờ" helper line while the field is empty. */
+  showEmptyHint?: boolean;
   className?: string;
   id?: string;
   placeholder?: string;
 }
+
+const QUICK_PRESETS = [
+  { offset: 0, label: 'Bây giờ' },
+  { offset: 15, label: '-15 phút' },
+  { offset: 60, label: '-1 giờ' },
+];
+
+/** Shared spring curve for every interactive transition in this component. */
+const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 const MONTH_NAMES = [
   'Tháng 1',
@@ -120,6 +131,7 @@ export function DateTimeInput({
   error,
   accent = 'brand',
   showQuickPresets = true,
+  showEmptyHint = true,
   className = '',
   id,
   placeholder = 'Chọn ngày và giờ...',
@@ -320,41 +332,11 @@ export function DateTimeInput({
 
   return (
     <div ref={containerRef} className={`relative space-y-1.5 ${className}`}>
-      {/* Label & Quick Presets Header */}
+      {/* Label — own row so it never wraps around the quick presets */}
       {label && (
-        <div className="flex items-center justify-between">
-          <label htmlFor={id} className="block text-[12px] font-semibold text-body">
-            {label} {required && <span className="text-bad font-bold">*</span>}
-          </label>
-          {showQuickPresets && !disabled && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-faint tracking-wider">
-                Chọn nhanh:
-              </span>
-              <button
-                type="button"
-                onClick={() => setPreset(0)}
-                className="rounded-md border border-line-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-all active:scale-95 cursor-pointer"
-              >
-                Bây giờ
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreset(15)}
-                className="rounded-md border border-line-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-all active:scale-95 cursor-pointer"
-              >
-                -15 phút
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreset(60)}
-                className="rounded-md border border-line-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-all active:scale-95 cursor-pointer"
-              >
-                -1 giờ
-              </button>
-            </div>
-          )}
-        </div>
+        <label htmlFor={id} className="block text-[12px] font-semibold text-body">
+          {label} {required && <span className="text-bad font-bold">*</span>}
+        </label>
       )}
 
       {/* Custom Trigger Input */}
@@ -372,7 +354,7 @@ export function DateTimeInput({
             setIsOpen((prev) => !prev);
           }
         }}
-        className={`group flex items-center justify-between gap-2 rounded-xl border bg-surface px-3 py-2.5 text-left transition-all cursor-pointer shadow-2xs select-none ${
+        className={`group flex items-center justify-between gap-2 rounded-xl border bg-surface px-3 py-[9px] text-left cursor-pointer shadow-2xs select-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.995] ${
           error
             ? 'border-bad ring-1 ring-bad/20'
             : isOpen
@@ -413,19 +395,46 @@ export function DateTimeInput({
           <IconChevronDown
             size={14}
             strokeWidth={2.2}
-            className={`text-faint transition-transform duration-200 ${
+            className={`text-faint transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
               isOpen ? 'rotate-180 text-ink' : 'group-hover:text-muted'
             }`}
           />
         </div>
       </div>
 
+      {/* Quick presets — own row below the trigger so the label never gets crushed */}
+      {label && showQuickPresets && !disabled && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-0.5 text-[9.5px] font-bold uppercase tracking-[0.16em] text-faint">
+            Chọn nhanh
+          </span>
+          {QUICK_PRESETS.map((preset, i) => (
+            <span
+              key={preset.offset}
+              className="inline-block"
+              style={{
+                animation: `riseIn .45s ${EASE} both`,
+                animationDelay: `${90 + i * 50}ms`,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setPreset(preset.offset)}
+                className={`cursor-pointer rounded-full border border-line-2 bg-surface-2 px-2.5 py-[3px] text-[10.5px] font-semibold text-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px active:scale-95 ${accentClasses.chipHover}`}
+              >
+                {preset.label}
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Astryx / ChargeOps Custom DateTime Popover */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Bộ chọn ngày giờ"
-          className="absolute left-0 top-[calc(100%+6px)] z-50 w-full max-w-[340px] rounded-2xl border border-line-2 bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md ring-1 ring-black/5"
+          className="absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-[300px] max-w-[calc(100vw-1.5rem)] origin-top-left rounded-2xl border border-line-2 bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md ring-1 ring-black/5"
           style={{ animation: 'popIn .12s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Popover Header: Month & Year Navigator */}
@@ -599,19 +608,21 @@ export function DateTimeInput({
       )}
 
       {/* Human-friendly preview & hints */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-        {value ? (
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
-            <IconClock size={11} className="text-amber-500 shrink-0" />
-            <span>{previewVn}</span>
-          </div>
-        ) : (
-          <span className="text-[11px] text-faint">Vui lòng chọn ngày và giờ</span>
-        )}
+      {(value || showEmptyHint || hint || error) && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {value ? (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
+              <IconClock size={11} className="text-amber-500 shrink-0" />
+              <span>{previewVn}</span>
+            </div>
+          ) : (
+            showEmptyHint && <span className="text-[11px] text-faint">Vui lòng chọn ngày và giờ</span>
+          )}
 
-        {hint && <span className="text-[11px] text-faint">{hint}</span>}
-        {error && <span className="text-[11px] font-medium text-bad">{error}</span>}
-      </div>
+          {hint && <span className="text-[11px] text-faint">{hint}</span>}
+          {error && <span className="text-[11px] font-medium text-bad">{error}</span>}
+        </div>
+      )}
     </div>
   );
 }

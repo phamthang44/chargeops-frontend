@@ -43,6 +43,7 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
 } from '../shared/notifications/useNotifications';
+import { formatRelativeTime } from '../shared/notifications/formatRelativeTime';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
 const PAGES: Record<string, ComponentType> = {
@@ -91,22 +92,7 @@ function AdminConsoleContent({
   const notificationItems = useMemo<NotificationItem[]>(() => {
     // 1. Persisted notices from API
     const items: NotificationItem[] = serverNotifs.map((n) => {
-      let displayTime = n.time;
-      if (!displayTime && n.createdAt) {
-        try {
-          const diffMs = Date.now() - new Date(n.createdAt).getTime();
-          const diffMins = Math.floor(diffMs / 60_000);
-          if (diffMins < 1) displayTime = 'Vừa xong';
-          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
-          else {
-            const diffHours = Math.floor(diffMins / 60);
-            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
-            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
-          }
-        } catch {
-          displayTime = undefined;
-        }
-      }
+      const displayTime = n.time || formatRelativeTime(n.createdAt, t);
 
       const navigateToTarget = () => {
         if (n.primaryAction?.actionUrl) {
@@ -162,6 +148,7 @@ function AdminConsoleContent({
         <NotificationBell
           items={notificationItems}
           unreadCount={serverUnreadCount}
+          categories={['all', 'ticket', 'account']}
           emptyLabel={t('notifications.empty')}
           onOpenCenter={() => navigate(`${base}/notifications`)}
           onMarkRead={(id) => {

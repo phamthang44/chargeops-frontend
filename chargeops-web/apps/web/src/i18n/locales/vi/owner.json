@@ -80,6 +80,21 @@
       "SUSPENDED": "Giấy phép đang tạm ngưng",
       "EXPIRED": "Giấy phép đã hết hạn",
       "CANCELLED": "Giấy phép đã bị hủy"
+    },
+    "center": {
+      "scopeLabel": "Phạm vi thông báo",
+      "scopeOwnerTitle": "Vận hành trạm",
+      "scopeOwnerSubtitle": "Thông báo nghiệp vụ trạm: gán vé hỗ trợ, hoàn tiền và sự cố trụ sạc của trạm bạn sở hữu.",
+      "scopePersonalTitle": "Cá nhân & Khiếu nại",
+      "scopePersonalSubtitle": "Thông báo cá nhân: phản hồi các ticket bạn đã gửi khiếu nại và thông báo tài khoản.",
+      "tabOwner": "Vận hành trạm",
+      "tabPersonal": "Cá nhân",
+      "ownerDescription": "Thông báo vận hành các trạm của bạn. Kết quả ticket do bạn báo nằm trong mục Cá nhân.",
+      "personalDescription": "Thông báo về ticket do bạn báo và tài khoản của bạn.",
+      "mutationError": "Không thể cập nhật thông báo. Vui lòng thử lại.",
+      "fetchNextError": "Không tải được trang tiếp theo. Bấm tải thêm để thử lại.",
+      "fetchError": "Không tải được thông báo. Vui lòng thử lại.",
+      "retry": "Thử lại"
     }
   },
   "assistant": {
@@ -322,6 +337,7 @@
       "MAINTENANCE": "Bảo trì"
     },
     "connectorCount": "{{count}} connector",
+    "hasIncidentBlocked": "Trụ sạc có cổng đang dính sự cố. Vui lòng khắc phục sự cố trước khi đưa trụ sạc hoạt động trở lại.",
     "pendingTooltip": "Trụ sạc đang chờ Admin phê duyệt & kích hoạt cấp hạ tầng",
     "history": {
       "shortLabel": "Lịch sử",
@@ -539,24 +555,28 @@
       "available": "Sẵn sàng",
       "inuse": "Đang sạc",
       "offline": "Ngoại tuyến",
+      "incident": "Có sự cố",
       "AVAILABLE": "Sẵn sàng",
       "IN_USE": "Đang sạc",
       "OFFLINE": "Ngoại tuyến",
       "MAINTENANCE": "Bảo trì"
     },
     "stats": {
-      "total": "TỔNG CONNECTOR",
+      "chargePoints": "TỔNG TRỤ SẠC",
+      "total": "TỔNG CỔNG SẠC",
       "available": "SẴN SÀNG",
       "inuse": "ĐANG SẠC",
-      "offline": "OFFLINE",
-      "sessions": "PHIÊN HÔM NAY",
-      "sessionsSub": "SD trung bình {{util}}%"
+      "offline": "NGOẠI TUYẾN",
+      "incidents": "CÓ SỰ CỐ",
+      "needAction": "Cần khắc phục",
+      "allNormal": "Bình thường"
     },
     "table": {
       "downloadQr": "QR"
     },
     "card": {
       "none": "Trụ sạc này chưa có connector nào được cấp.",
+      "incidentWarning": "Đang có sự cố",
       "util": "Sử dụng",
       "sessions": "{{count}} phiên",
       "deviceDown": "Trụ sạc đang {{status}} — mọi connector của trụ đều không nhận đặt chỗ cho đến khi trụ hoạt động trở lại.",
@@ -568,14 +588,15 @@
       "adminProvided": "Do QTV cấp",
       "defaultName": "Cổng sạc {{type}}",
       "reportIncidentTooltip": "Báo cáo sự cố khẩn cấp trên cổng sạc này (BKG-054)",
-      "incidentBtn": "Sự cố",
+      "resolveIncidentBtn": "Khắc phục",
+      "resolveIncidentTooltip": "Cổng sạc đang có sự cố cần xử lý. Bấm để xem chi tiết và khắc phục.",
+      "incidentBlockedTooltip": "Cổng sạc đang có sự cố cần khắc phục trước khi bật lại",
+      "incidentBtn": "Báo sự cố",
       "historyBtn": "Lịch sử",
-      "uptime30d": "UPTIME 30N",
       "connector": "LOẠI ĐẦU CẮM",
       "power": "CÔNG SUẤT",
-      "utilization": "SỬ DỤNG",
-      "sessions": "PHIÊN HÔM NAY",
-      "kwh": "kWh HÔM NAY",
+      "chargerType": "LOẠI SẠC",
+      "runtimeStatus": "TRẠNG THÁI",
       "qrHelp": "Dán tại connector này để tài xế quét khi đến.",
       "downloadQrBtn": "Tải QR"
     }

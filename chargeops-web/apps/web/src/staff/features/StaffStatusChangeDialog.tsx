@@ -88,7 +88,10 @@ export function StaffStatusChangeDialog({
       ? target.chargePoint.name || target.chargePoint.code
       : target.connector.code || target.connector.id;
   const version = target.kind === 'chargePoint' ? target.chargePoint.version : target.connector.version;
-  const presets = REASON_PRESETS[target.next] ?? [];
+  const fallbackPresets = REASON_PRESETS[target.next] ?? [];
+  const i18nKey = isMaint ? 'statusDialog.presets.maintenance' : 'statusDialog.presets.offline';
+  const i18nPresets = t(i18nKey, { returnObjects: true }) as string[];
+  const presets = Array.isArray(i18nPresets) && i18nPresets.length > 0 ? i18nPresets : fallbackPresets;
 
   return (
     <Modal open onClose={onClose} maxWidth={480}>
@@ -181,6 +184,23 @@ export function StaffStatusChangeDialog({
         <span className="text-[10.5px] text-faint">{t('statusDialog.versionNote', { version })}</span>
       </div>
 
+      {target.kind === 'connector' && target.next === 'AVAILABLE' && target.connector.activeIncidentId && (
+        <div className="mt-3 rounded-xl border border-bad-border bg-bad-soft p-3 text-[12px] text-bad-deep">
+          <div className="mb-1 flex items-center gap-1.5 font-bold text-bad">
+            <IconAlertTriangle size={15} />
+            <span>
+              {t('statusDialog.incidentBlockedTitle', 'Cổng đang có sự cố khẩn cấp chưa khắc phục')}
+            </span>
+          </div>
+          <p className="text-[11.5px] leading-relaxed">
+            {t(
+              'statusDialog.incidentBlockedBody',
+              'Hệ thống không cho phép bật lại cổng khi còn sự cố mở (lỗi STAFF_OP_004). Vui lòng sử dụng tính năng "Khắc phục sự cố" để hoàn tất quy trình phục hồi trước.',
+            )}
+          </p>
+        </div>
+      )}
+
       <div className="mt-[18px] flex justify-end gap-2.5">
         <Button variant="secondary" onClick={onClose}>
           {t('statusDialog.cancel')}
@@ -188,7 +208,7 @@ export function StaffStatusChangeDialog({
         <Button
           variant={isMaint ? 'primary' : goingDown ? 'danger' : 'primary'}
           onClick={() => onConfirm(target, reason.trim())}
-          disabled={saving || !isReasonValid}
+          disabled={saving || !isReasonValid || (target.kind === 'connector' && target.next === 'AVAILABLE' && Boolean(target.connector.activeIncidentId))}
         >
           {saving ? t('statusDialog.applying') : t('statusDialog.confirm')}
         </Button>

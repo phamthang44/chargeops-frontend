@@ -13,6 +13,7 @@ import {
   useMarkAllAsRead,
   useDismissNotification,
 } from '../../shared/notifications/useNotifications';
+import { formatRelativeTime } from '../../shared/notifications/formatRelativeTime';
 import { resolveNotificationI18n } from '@chargeops/api';
 
 export function Notifications() {
@@ -35,22 +36,7 @@ export function Notifications() {
 
   const displayItems = useMemo<NotificationItem[]>(() => {
     return serverNotifs.map((n) => {
-      let displayTime = n.time;
-      if (!displayTime && n.createdAt) {
-        try {
-          const diffMs = Date.now() - new Date(n.createdAt).getTime();
-          const diffMins = Math.floor(diffMs / 60_000);
-          if (diffMins < 1) displayTime = 'Vừa xong';
-          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
-          else {
-            const diffHours = Math.floor(diffMins / 60);
-            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
-            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
-          }
-        } catch {
-          displayTime = undefined;
-        }
-      }
+      const displayTime = n.time || formatRelativeTime(n.createdAt, t);
 
       const navigateToTarget = () => {
         if (n.primaryAction?.actionUrl) {
@@ -107,6 +93,9 @@ export function Notifications() {
       <NotificationCenter
         items={displayItems}
         unreadCount={unreadCount}
+        title={t('notifications.title', 'Trung tâm Thông báo & Cảnh báo')}
+        description={t('notifications.description', 'Cảnh báo toàn hệ thống, phê duyệt trạm, giấy phép và các ca khiếu nại chuyển cấp.')}
+        categories={['all', 'ticket', 'account']}
         onMarkRead={handleMarkAsRead}
         onMarkAllRead={handleMarkAllRead}
         onDismiss={handleDismiss}
@@ -117,3 +106,4 @@ export function Notifications() {
     </div>
   );
 }
+

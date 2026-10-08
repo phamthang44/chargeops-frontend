@@ -2,6 +2,7 @@ import type {
   Amenity,
   CancellationPolicy,
   ChargePoint,
+  ChargePointOperationalStatus,
   Connector,
   ConnectorRuntimeStatus,
   ConnectorType,
@@ -53,7 +54,7 @@ export interface BackendChargePointResponse {
   name: string;
   zoneLabel?: string | null;
   maxPowerKw?: number;
-  operationalStatus?: string; // 'ACTIVE' | 'OFFLINE' | 'SUSPENDED'
+  operationalStatus?: ChargePointOperationalStatus | string; // 'AVAILABLE' | 'OFFLINE' | 'MAINTENANCE'
   connectors?: BackendConnectorResponse[];
 }
 
@@ -346,9 +347,17 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
     for (const cp of dto.chargePoints) {
       if (cp.connectors && cp.connectors.length > 0) {
         calculatedTotal += cp.connectors.length;
-        calculatedAvailable += cp.connectors.filter(
-          (c) => c.availableNow === true || c.runtimeStatus?.toUpperCase() === 'AVAILABLE',
-        ).length;
+        calculatedAvailable += cp.connectors.filter((c) => {
+          const isCpUnavailable =
+            cp.operationalStatus === 'MAINTENANCE' ||
+            cp.operationalStatus === 'OFFLINE' ||
+            (cp.operationalStatus as string) === 'SUSPENDED';
+          if (isCpUnavailable) return false;
+          if (c.availableNow !== undefined) {
+            return c.availableNow === true;
+          }
+          return c.runtimeStatus?.toUpperCase() === 'AVAILABLE';
+        }).length;
       }
     }
   }
@@ -448,6 +457,7 @@ export function adaptChargePointsFromDetail(dto: BackendStationDiscoveryDetail):
     zoneLabel: cp.zoneLabel ?? null,
     maxPowerKw: Number(cp.maxPowerKw || 0),
     status: (cp.operationalStatus as ProvisioningStatus) || 'ACTIVE',
+    operationalStatus: (cp.operationalStatus as ChargePointOperationalStatus) || 'AVAILABLE',
   }));
 }
 
@@ -469,7 +479,27 @@ export function adaptConnectorsFromDetail(
 
   for (const cp of dto.chargePoints) {
     if (!cp.connectors) continue;
+    const isCpMaintenance = cp.operationalStatus === 'MAINTENANCE';
+    const isCpOffline = cp.operationalStatus === 'OFFLINE';
+
     for (const c of cp.connectors) {
+      let resolvedStatus: ConnectorRuntimeStatus = 'OFFLINE';
+      const rawRuntime = c.runtimeStatus?.toUpperCase();
+
+      if (rawRuntime === 'IN_USE') {
+        resolvedStatus = 'IN_USE';
+      } else if (isCpMaintenance) {
+        resolvedStatus = 'MAINTENANCE';
+      } else if (isCpOffline) {
+        resolvedStatus = 'OFFLINE';
+      } else if (c.availableNow === false) {
+        resolvedStatus = 'OFFLINE';
+      } else if (c.availableNow === true || rawRuntime === 'AVAILABLE') {
+        resolvedStatus = 'AVAILABLE';
+      } else {
+        resolvedStatus = (rawRuntime as ConnectorRuntimeStatus) || 'OFFLINE';
+      }
+
       result.push({
         id: String(c.id),
         chargePointId: String(cp.id),
@@ -478,7 +508,7 @@ export function adaptConnectorsFromDetail(
         connectorType: (c.connectorType as ConnectorType) || 'CCS2',
         powerKw: Number(c.powerKw || cp.maxPowerKw || 0),
         currentType: (c.chargerType?.toUpperCase() === 'DC' ? 'DC' : 'AC') as 'AC' | 'DC',
-        runtimeStatus: (c.runtimeStatus?.toUpperCase() as ConnectorRuntimeStatus) || (c.availableNow ? 'AVAILABLE' : 'IN_USE'),
+        runtimeStatus: resolvedStatus,
         qrToken: String(c.id),
         ratePerKwh: rate,
       });

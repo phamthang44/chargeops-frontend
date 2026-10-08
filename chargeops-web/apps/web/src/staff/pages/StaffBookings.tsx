@@ -12,6 +12,8 @@ import {
   Card,
   DateTimeInput,
   EmptyState,
+  IconArrowRight,
+  IconCalendar,
   IconRefreshCw,
   PageHeader,
   Pagination,
@@ -82,6 +84,14 @@ export function StaffBookings() {
   );
 
   const rows = bookingsQ.data?.items ?? [];
+  const total = bookingsQ.data?.total ?? 0;
+  const isFiltered = connectorId !== 'all' || Boolean(from || to);
+
+  const resetFilters = () => {
+    setConnectorId('all');
+    setFrom('');
+    setTo('');
+  };
 
   return (
     <>
@@ -94,41 +104,92 @@ export function StaffBookings() {
         }
       />
 
-      <Card className="mb-3 flex flex-wrap items-end gap-3 p-4">
-        <div className="w-56">
-          <Select
-            value={connectorId}
-            onChange={setConnectorId}
-            options={connectorOptions}
-            accent="owner"
-            aria-label={t('bookings.filter.connector')}
-          />
+      <section
+        aria-label={t('bookings.filter.eyebrow')}
+        className="mb-4 rounded-panel border border-line-2 bg-surface-2/70 p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+        style={{ animation: 'riseIn .6s cubic-bezier(0.32,0.72,0,1) both' }}
+      >
+        <div className="relative rounded-[8px] border border-hairline bg-surface px-4 pb-4 pt-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          {/* Clipped ambient glow — glass plate resting in a machined tray */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]" aria-hidden="true">
+            <div className="absolute -top-24 right-[-5rem] h-56 w-56 rounded-full bg-owner/[0.08] blur-3xl" />
+            <div className="absolute bottom-[-7rem] left-[-6rem] h-48 w-48 rounded-full bg-brand/[0.05] blur-3xl" />
+          </div>
+
+          {/* Header band — eyebrow · live count · reset island */}
+          <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-owner-border bg-owner-soft px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.18em] text-owner-deep">
+              <IconCalendar size={10} strokeWidth={2.6} />
+              {t('bookings.filter.eyebrow')}
+            </span>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-baseline gap-1.5" role="status">
+                <span className="sr-only">{t('bookings.filter.resultCount', { count: total })}</span>
+                <span className="font-mono text-[16px] font-semibold tabular-nums text-ink" aria-hidden="true">
+                  {total}
+                </span>
+                <span className="text-[11px] font-medium text-faint" aria-hidden="true">
+                  {t('bookings.filter.countNoun')}
+                </span>
+              </div>
+              <span className="h-4 w-px bg-line-2" aria-hidden="true" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                disabled={!isFiltered}
+                className="group -mr-1.5"
+              >
+                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-line-2 bg-surface-2 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:rotate-180">
+                  <IconRefreshCw size={11} strokeWidth={2.2} />
+                </span>
+                {t('bookings.filter.reset')}
+              </Button>
+            </div>
+          </div>
+
+          {/* Controls — connector · range with directional cue */}
+          <div className="relative mt-3.5 flex flex-wrap items-start gap-3">
+            <div className="w-full sm:w-52">
+              <div className="mb-1.5 text-[12px] font-semibold text-body">
+                {t('bookings.filter.connector')}
+              </div>
+              <Select
+                value={connectorId}
+                onChange={setConnectorId}
+                options={connectorOptions}
+                accent="owner"
+                aria-label={t('bookings.filter.connector')}
+              />
+            </div>
+
+            <div className="flex w-full flex-wrap items-start gap-x-3 gap-y-3 sm:flex-1">
+              <div className="w-full min-w-0 sm:w-auto sm:min-w-[176px] sm:flex-1">
+                <DateTimeInput
+                  label={t('bookings.filter.from')}
+                  value={from}
+                  onChange={setFrom}
+                  accent="owner"
+                  showEmptyHint={false}
+                />
+              </div>
+              <div className="mt-[37px] hidden shrink-0 sm:block" aria-hidden="true">
+                <IconArrowRight size={14} className="text-faint" />
+              </div>
+              <div className="w-full min-w-0 sm:w-auto sm:min-w-[176px] sm:flex-1">
+                <DateTimeInput
+                  label={t('bookings.filter.to')}
+                  value={to}
+                  onChange={setTo}
+                  accent="owner"
+                  showEmptyHint={false}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="w-48">
-          <DateTimeInput
-            label={t('bookings.filter.from')}
-            value={from}
-            onChange={setFrom}
-            accent="owner"
-          />
-        </div>
-        <div className="w-48">
-          <DateTimeInput label={t('bookings.filter.to')} value={to} onChange={setTo} accent="owner" />
-        </div>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setConnectorId('all');
-            setFrom('');
-            setTo('');
-          }}
-        >
-          <IconRefreshCw size={13} /> {t('bookings.filter.reset')}
-        </Button>
-        <span className="ml-auto text-[12px] font-medium text-muted">
-          {t('bookings.filter.resultCount', { count: bookingsQ.data?.total ?? 0 })}
-        </span>
-      </Card>
+      </section>
 
       {bookingsQ.error ? (
         <ApiErrorState
@@ -186,12 +247,7 @@ export function StaffBookings() {
             )}
           </div>
 
-          <Pagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            total={bookingsQ.data?.total ?? 0}
-            onPage={setPage}
-          />
+          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
         </Card>
       )}
     </>

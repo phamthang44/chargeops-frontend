@@ -1,14 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
-import { IconAlertTriangle, IconBolt, IconCard, IconHistory, IconLock, IconPin, ProgressBar } from '@chargeops/ui';
+import { IconAlertTriangle, IconBolt, IconCard, IconHistory, IconLock, IconPin, IconShieldAlert, IconWrench } from '@chargeops/ui';
 import {
   getChargePointPill,
   getConnectorPill,
   canToggleChargePoint,
   canToggleConnector,
   effectiveConnectorStatus,
-  utilColor,
 } from './chargerStatus';
 
 export interface ChargePointGroup {
@@ -29,6 +28,7 @@ export interface ChargerTableProps {
   onDownloadQr: (c: Connector) => void;
   onViewCpHistory: (cp: ChargePoint) => void;
   onViewConnectorHistory: (c: Connector) => void;
+  onOpenIncident?: (incidentId: string) => void;
 }
 
 /**
@@ -48,6 +48,7 @@ export function ChargerTable({
   onDownloadQr,
   onViewCpHistory,
   onViewConnectorHistory,
+  onOpenIncident,
 }: ChargerTableProps) {
   return (
     <div className="flex flex-col gap-[11px]">
@@ -63,6 +64,7 @@ export function ChargerTable({
           onDownloadQr={onDownloadQr}
           onViewCpHistory={onViewCpHistory}
           onViewConnectorHistory={onViewConnectorHistory}
+          onOpenIncident={onOpenIncident}
         />
       ))}
     </div>
@@ -79,6 +81,7 @@ function ChargePointCard({
   onDownloadQr,
   onViewCpHistory,
   onViewConnectorHistory,
+  onOpenIncident,
 }: {
   group: ChargePointGroup;
   selected: boolean;
@@ -214,6 +217,7 @@ function ChargePointCard({
                 onCycleStatus={onCycleConnectorStatus}
                 onDownloadQr={onDownloadQr}
                 onViewConnectorHistory={onViewConnectorHistory}
+                onOpenIncident={onOpenIncident}
               />
             ))}
           </div>
@@ -229,14 +233,17 @@ function ConnectorRow({
   onCycleStatus,
   onDownloadQr,
   onViewConnectorHistory,
+  onOpenIncident,
 }: {
   connector: Connector;
   chargePoint: ChargePoint;
   onCycleStatus: (c: Connector) => void;
   onDownloadQr: (c: Connector) => void;
   onViewConnectorHistory: (c: Connector) => void;
+  onOpenIncident?: (incidentId: string) => void;
 }) {
   const { t } = useTranslation('owner');
+  const hasActiveIncident = Boolean(c.activeIncidentId);
   const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
   const canToggle = canToggleConnector(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
   const pill = getConnectorPill(effective);
@@ -254,46 +261,63 @@ function ConnectorRow({
         </div>
         <button
           onClick={() => onCycleStatus(c)}
-          disabled={!canToggle}
-          title={inheritedDown ? t('connectors.card.lockedByDevice') : undefined}
-          className="inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
-          style={{ background: pill.bg, color: pill.fg }}
+          disabled={!canToggle || hasActiveIncident}
+          title={
+            hasActiveIncident
+              ? t('connectors.panel.incidentBlockedTooltip', 'Cổng sạc đang có sự cố cần khắc phục trước khi bật lại')
+              : inheritedDown
+                ? t('connectors.card.lockedByDevice')
+                : undefined
+          }
+          className="inline-flex shrink-0 whitespace-nowrap items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
+          style={{
+            background: hasActiveIncident ? 'rgba(239, 68, 68, 0.15)' : pill.bg,
+            color: hasActiveIncident ? '#ef4444' : pill.fg,
+          }}
         >
-          <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
-          {t(`connectors.status.${effective}`, { defaultValue: t(pill.key) })}
+          <span
+            className="h-[6px] w-[6px] rounded-full"
+            style={{ background: hasActiveIncident ? '#ef4444' : pill.fg }}
+          />
+          {hasActiveIncident
+            ? t('connectors.status.incident', 'Có sự cố')
+            : t(`connectors.status.${effective}`, { defaultValue: t(pill.key) })}
         </button>
       </div>
 
-      {/* locked hardware spec + today's metrics + QR */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-chip px-2.5 py-1 text-[11px] font-semibold text-body">
-          {c.connectorType} · {c.powerKw} kW
-          <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
-        </span>
-
-        <span className="flex min-w-[112px] flex-1 items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
-            {t('connectors.card.util')}
+      {/* locked hardware spec + incident badge & actions */}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-chip px-2.5 py-1 text-[11px] font-semibold text-body">
+            {c.connectorType} · {c.powerKw} kW{c.chargerType ? ` · ${c.chargerType}` : ''}
+            <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
           </span>
-          <ProgressBar
-            value={c.utilizationPct ?? 0}
-            color={utilColor({ runtimeStatus: effective, utilizationPct: c.utilizationPct ?? 0 })}
-            className="min-w-[40px] flex-1"
-          />
-          <span className="w-8 shrink-0 text-right font-mono text-[11px] text-muted">
-            {c.utilizationPct ?? 0}%
-          </span>
-        </span>
 
-        <span className="text-[11.5px] font-medium text-muted">
-          {t('connectors.card.sessions', { count: c.sessionsToday ?? 0 })}
-        </span>
+          {hasActiveIncident && (
+            <span className="inline-flex items-center gap-1 rounded-md bg-bad-soft px-2 py-0.5 text-[11px] font-semibold text-bad">
+              <IconShieldAlert size={12} strokeWidth={2} />
+              <span>{t('connectors.card.incidentWarning', 'Đang có sự cố')}</span>
+            </span>
+          )}
+        </div>
 
         <div className="ml-auto flex items-center gap-1.5">
+          {hasActiveIncident && (
+            <button
+              type="button"
+              onClick={() => onOpenIncident?.(c.activeIncidentId!)}
+              className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-bad bg-bad px-2.5 py-[5px] text-[11px] font-semibold text-white shadow-xs hover:bg-bad/90 transition cursor-pointer"
+              title={t('connectors.panel.resolveIncidentTooltip', 'Xem chi tiết sự cố và khắc phục')}
+            >
+              <IconWrench size={12} strokeWidth={2} />
+              <span>{t('connectors.panel.resolveIncidentBtn', 'Khắc phục')}</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => onViewConnectorHistory(c)}
-            className="inline-flex shrink-0 items-center gap-1 rounded-[8px] border border-line-2 bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line-2 bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
             title={t('chargePoints.history.connectorTooltip')}
           >
             <IconHistory size={12} strokeWidth={2} />

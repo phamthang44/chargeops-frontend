@@ -12,8 +12,12 @@ import type { ChargePoint, Connector, ConnectorRuntimeStatus } from '@/types';
 export function effectiveConnectorStatus(
   chargePointStatus: ChargePoint['status'],
   connectorStatus: ConnectorRuntimeStatus,
+  operationalStatus?: ChargePoint['operationalStatus'],
 ): ConnectorRuntimeStatus {
-  return chargePointStatus === 'ACTIVE' ? connectorStatus : 'OFFLINE';
+  if (operationalStatus === 'MAINTENANCE') return 'MAINTENANCE';
+  if (operationalStatus === 'OFFLINE') return 'OFFLINE';
+  if (chargePointStatus !== 'ACTIVE' && chargePointStatus !== ('AVAILABLE' as any)) return 'OFFLINE';
+  return connectorStatus;
 }
 
 /** A Charge Point with its ports resolved — the shape FR04 asks the detail page to show. */
@@ -33,12 +37,22 @@ export function groupByChargePoint(
       .filter((c) => c.chargePointId === chargePoint.id)
       .map((c) => ({
         ...c,
-        effectiveStatus: effectiveConnectorStatus(chargePoint.status, c.runtimeStatus),
+        effectiveStatus: effectiveConnectorStatus(
+          chargePoint.status,
+          c.runtimeStatus,
+          chargePoint.operationalStatus,
+        ),
       })),
   }));
 }
 
-/** Only an AVAILABLE port on an ACTIVE device can take a booking. */
+/** Only an AVAILABLE port on an ACTIVE/AVAILABLE device can take a booking. */
 export function isBookable(chargePoint: ChargePoint, connector: Connector): boolean {
-  return effectiveConnectorStatus(chargePoint.status, connector.runtimeStatus) === 'AVAILABLE';
+  return (
+    effectiveConnectorStatus(
+      chargePoint.status,
+      connector.runtimeStatus,
+      chargePoint.operationalStatus,
+    ) === 'AVAILABLE'
+  );
 }

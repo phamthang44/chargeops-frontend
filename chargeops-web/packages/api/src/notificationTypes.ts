@@ -152,5 +152,44 @@ export function resolveNotificationI18n(
     // If not valid JSON, fallback to raw key
   }
 
+  if (params.autoCloseAt && typeof params.autoCloseAt === 'string') {
+    const d = new Date(params.autoCloseAt);
+    if (!isNaN(d.getTime())) {
+      const isEn =
+        (typeof t === 'function' && ((t as any)?.lng?.startsWith('en') || (t as any)?.language?.startsWith('en'))) ||
+        (typeof window !== 'undefined' && localStorage.getItem('chargeops.lang') === 'en');
+
+      if (isEn) {
+        const time = d.toLocaleTimeString('en-US', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+        const date = d.toLocaleDateString('en-GB', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+        params.autoCloseAt = `${time} on ${date}`;
+      } else {
+        const time = d.toLocaleTimeString('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+        const date = d.toLocaleDateString('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+        params.autoCloseAt = `${time} ngày ${date}`;
+      }
+    }
+  }
+
   return t(key, { ns: 'common', ...params, defaultValue: key });
 }

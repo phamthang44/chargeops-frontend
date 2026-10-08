@@ -50,7 +50,7 @@ export function StationAmenitiesList({ amenities }: StationAmenitiesListProps) {
             <Ionicons name={AMENITY_ICON[a] ?? 'ellipse-outline'} size={20} color={themeColors.primary} />
           </View>
           <Text style={[styles.amenityLabel, { color: themeColors.textStrong }]}>
-            {t(`stationDetail.amenities.${a}`)}
+            {t(`stationDetail.amenities.${a.toLowerCase()}`)}
           </Text>
         </View>
       ))}

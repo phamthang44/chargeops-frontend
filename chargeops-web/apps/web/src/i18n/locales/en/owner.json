@@ -80,6 +80,21 @@
       "SUSPENDED": "License suspended",
       "EXPIRED": "License expired",
       "CANCELLED": "License cancelled"
+    },
+    "center": {
+      "scopeLabel": "Notification scope",
+      "scopeOwnerTitle": "Station Operations",
+      "scopeOwnerSubtitle": "Station operational notices: assigned tickets, refunds, and charger incidents for stations you own.",
+      "scopePersonalTitle": "Personal & Inquiries",
+      "scopePersonalSubtitle": "Personal notifications: updates on support tickets you submitted and account notices.",
+      "tabOwner": "Station Operations",
+      "tabPersonal": "Personal",
+      "ownerDescription": "Operational notifications for your stations. Resolution results for tickets you reported are in the Personal tab.",
+      "personalDescription": "Notifications regarding tickets you reported and your account.",
+      "mutationError": "Could not update notification. Please try again.",
+      "fetchNextError": "Could not load next page. Click load more to retry.",
+      "fetchError": "Could not load notifications. Please try again.",
+      "retry": "Retry"
     }
   },
   "assistant": {
@@ -322,6 +337,7 @@
       "MAINTENANCE": "Maintenance"
     },
     "connectorCount": "{{count}} connectors",
+    "hasIncidentBlocked": "This charge point has a connector with an open incident. Please resolve the incident before bringing the charge point back online.",
     "pendingTooltip": "Charge point is awaiting Admin approval & infrastructure activation",
     "history": {
       "shortLabel": "History",
@@ -539,24 +555,28 @@
       "available": "Available",
       "inuse": "In use",
       "offline": "Offline",
+      "incident": "Incident",
       "AVAILABLE": "Available",
       "IN_USE": "In use",
       "OFFLINE": "Offline",
       "MAINTENANCE": "Maintenance"
     },
     "stats": {
+      "chargePoints": "TOTAL CHARGERS",
       "total": "TOTAL CONNECTORS",
       "available": "AVAILABLE",
       "inuse": "IN USE",
       "offline": "OFFLINE",
-      "sessions": "SESSIONS TODAY",
-      "sessionsSub": "Avg util {{util}}%"
+      "incidents": "ACTIVE INCIDENTS",
+      "needAction": "Action needed",
+      "allNormal": "Normal"
     },
     "table": {
       "downloadQr": "QR"
     },
     "card": {
       "none": "No connectors provisioned on this charge point yet.",
+      "incidentWarning": "Incident reported",
       "util": "Util",
       "sessions": "{{count}} sessions",
       "deviceDown": "Charge point is {{status}} — none of its connectors can accept bookings until it is back online.",
@@ -568,14 +588,15 @@
       "adminProvided": "Admin-assigned",
       "defaultName": "Connector {{type}}",
       "reportIncidentTooltip": "Report emergency incident on this connector (BKG-054)",
-      "incidentBtn": "Incident",
+      "resolveIncidentBtn": "Resolve",
+      "resolveIncidentTooltip": "Connector has an active incident. Click to view details and recover.",
+      "incidentBlockedTooltip": "Connector has an active incident that must be resolved before turning online",
+      "incidentBtn": "Report Incident",
       "historyBtn": "History",
-      "uptime30d": "30D UPTIME",
       "connector": "CONNECTOR TYPE",
       "power": "POWER CAPACITY",
-      "utilization": "UTILIZATION",
-      "sessions": "SESSIONS TODAY",
-      "kwh": "kWh TODAY",
+      "chargerType": "CHARGER TYPE",
+      "runtimeStatus": "STATUS",
       "qrHelp": "Affix onto this connector for drivers to scan on arrival.",
       "downloadQrBtn": "Download QR"
     }

@@ -169,7 +169,11 @@ function visibleConnectors(stationId: string): (Connector & { effectiveStatus: C
     .filter((c) => byId.has(c.chargePointId))
     .map((c) => ({
       ...c,
-      effectiveStatus: effectiveConnectorStatus(byId.get(c.chargePointId)!.status, c.runtimeStatus),
+      effectiveStatus: effectiveConnectorStatus(
+        byId.get(c.chargePointId)!.status,
+        c.runtimeStatus,
+        byId.get(c.chargePointId)?.operationalStatus,
+      ),
     }));
 }
 

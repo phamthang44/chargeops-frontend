@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   IconBell,
   IconX,
@@ -123,6 +124,8 @@ export interface NotificationBellProps {
   items: NotificationItem[];
   emptyLabel?: string;
   unreadCount?: number;
+  /** Category pills to render; omit for the full default set. Role scopes follow #59 §4.1. */
+  categories?: CategoryFilter[];
   onOpenCenter?: () => void;
   onMarkRead?: (id: string) => void;
   onMarkAllRead?: () => void;
@@ -139,19 +142,39 @@ export interface NotificationBellProps {
  */
 export function NotificationBell({
   items: initialItems,
-  emptyLabel = 'Không có thông báo mới',
+  emptyLabel: externalEmptyLabel,
   unreadCount: externalUnread,
+  categories,
   onOpenCenter,
   onMarkRead,
   onMarkAllRead,
   onDismiss,
 }: NotificationBellProps) {
+  const { t } = useTranslation('ui');
+  const emptyLabel = externalEmptyLabel ?? t('notificationBell.emptyDefault', 'Không có thông báo mới');
   const [open, setOpen] = useState(false);
   const [localItems, setLocalItems] = useState<NotificationItem[]>([]);
   const [statusTab, setStatusTab] = useState<StatusFilter>('all');
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+
+  const categoryPills = useMemo<{ id: CategoryFilter; label: string }[]>(
+    () => [
+      { id: 'all', label: t('notificationBell.categories.all', 'Tất cả') },
+      { id: 'booking', label: t('notificationBell.categories.booking', 'Đặt chỗ') },
+      { id: 'ticket', label: t('notificationBell.categories.ticket', 'Vé hỗ trợ') },
+      { id: 'finance', label: t('notificationBell.categories.finance', 'Tài chính') },
+      { id: 'account', label: t('notificationBell.categories.account', 'Hệ thống') },
+    ],
+    [t],
+  );
+
+
+  // Clamp the active pill when the allowed category set shrinks (e.g. role scope).
+  useEffect(() => {
+    if (categories && !categories.includes(activeCategory)) setActiveCategory('all');
+  }, [categories, activeCategory]);
 
   // Sync external items into local state while tracking read status
   useEffect(() => {
@@ -258,7 +281,7 @@ export function NotificationBell({
         aria-haspopup="menu"
         aria-expanded={open}
         className="group relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface hover:bg-surface-2 hover:border-line-3 transition-all duration-150 active:scale-95 shadow-2xs"
-        title="Thông báo"
+        title={t('notificationBell.title', 'Thông báo')}
       >
         <IconBell size={17} strokeWidth={1.9} className="text-body group-hover:text-ink transition-colors" />
         {unreadCount > 0 && (
@@ -279,14 +302,14 @@ export function NotificationBell({
           <div className="border-b border-line-2 bg-surface-2/90 px-4 py-3 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-black text-ink tracking-tight">Hộp Thông Báo</span>
+                <span className="text-[14px] font-black text-ink tracking-tight">{t('notificationBell.headerTitle', 'Hộp Thông Báo')}</span>
                 {unreadCount > 0 ? (
                   <span className="flex h-5 items-center rounded-full bg-brand/10 border border-brand/20 px-2 font-mono text-[10px] font-bold text-brand">
-                    {unreadCount} chưa đọc
+                    {t('notificationBell.unreadCount', { count: unreadCount, defaultValue: `${unreadCount} chưa đọc` })}
                   </span>
                 ) : (
                   <span className="flex h-5 items-center rounded-full bg-owner/10 border border-owner/20 px-2 text-[10px] font-semibold text-owner-deep">
-                    Đã đọc hết
+                    {t('notificationBell.allRead', 'Đã đọc hết')}
                   </span>
                 )}
               </div>
@@ -296,10 +319,10 @@ export function NotificationBell({
                   type="button"
                   onClick={handleMarkAllRead}
                   className="flex items-center gap-1 text-[11px] font-bold text-brand hover:text-brand-strong transition-colors px-2 py-1 rounded-lg hover:bg-brand-soft/50"
-                  title="Đánh dấu tất cả thông báo là đã đọc"
+                  title={t('notificationBell.markAllReadTitle', 'Đánh dấu tất cả thông báo là đã đọc')}
                 >
                   <IconCheck size={13} strokeWidth={2.5} />
-                  <span>Đọc tất cả</span>
+                  <span>{t('notificationBell.markAllRead', 'Đọc tất cả')}</span>
                 </button>
               )}
             </div>
@@ -317,7 +340,7 @@ export function NotificationBell({
                       : 'text-muted hover:text-ink',
                   ].join(' ')}
                 >
-                  Tất cả ({items.length})
+                  {t('notificationBell.statusAll', { count: items.length, defaultValue: `Tất cả (${items.length})` })}
                 </button>
                 <button
                   type="button"
@@ -329,7 +352,7 @@ export function NotificationBell({
                       : 'text-muted hover:text-ink',
                   ].join(' ')}
                 >
-                  Chưa đọc ({unreadCount})
+                  {t('notificationBell.statusUnread', { count: unreadCount, defaultValue: `Chưa đọc (${unreadCount})` })}
                 </button>
               </div>
 
@@ -338,13 +361,14 @@ export function NotificationBell({
                 <IconSearch size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-faint" />
                 <input
                   type="text"
-                  placeholder="Lọc..."
+                  placeholder={t('notificationBell.filterPlaceholder', 'Lọc...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-line bg-surface py-1 pl-7 pr-6 text-[11px] text-ink placeholder:text-ghost focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20 transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <button
+                    type="button"
                     onClick={() => setSearchQuery('')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-faint hover:text-ink"
                   >
@@ -356,19 +380,12 @@ export function NotificationBell({
 
             {/* Category Pills */}
             <div className="mt-2 flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
-              {(
-                [
-                  { id: 'all', label: 'Tất cả' },
-                  { id: 'booking', label: 'Đặt chỗ' },
-                  { id: 'ticket', label: 'Vé hỗ trợ' },
-                  { id: 'finance', label: 'Tài chính' },
-                  { id: 'account', label: 'Hệ thống' },
-                ] as const
-              ).map((tab) => {
+              {categoryPills.filter((tab) => !categories || categories.includes(tab.id)).map((tab) => {
                 const active = activeCategory === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    type="button"
                     onClick={() => setActiveCategory(tab.id)}
                     className={[
                       'whitespace-nowrap rounded-md px-2 py-0.5 text-[10.5px] font-bold transition-all',
@@ -392,7 +409,7 @@ export function NotificationBell({
                   <IconBell size={20} strokeWidth={1.6} />
                 </span>
                 <span className="text-[13px] font-bold text-ink">
-                  {statusTab === 'unread' ? 'Bạn đã đọc hết mọi thông báo! 🎉' : 'Không có thông báo phù hợp'}
+                  {statusTab === 'unread' ? t('notificationBell.emptyUnread', 'Bạn đã đọc hết mọi thông báo! 🎉') : t('notificationBell.emptyFilter', 'Không có thông báo phù hợp')}
                 </span>
                 <span className="text-[11.5px] text-muted max-w-[240px] leading-relaxed">{emptyLabel}</span>
               </div>
@@ -459,8 +476,8 @@ export function NotificationBell({
                               {!n.read && (
                                 <button
                                   type="button"
-                                  aria-label="Đánh dấu đã đọc"
-                                  title="Đánh dấu đã đọc"
+                                  aria-label={t('notificationBell.markAsRead', 'Đánh dấu đã đọc')}
+                                  title={t('notificationBell.markAsRead', 'Đánh dấu đã đọc')}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleMarkRead(n.id);
@@ -472,8 +489,8 @@ export function NotificationBell({
                               )}
                               <button
                                 type="button"
-                                aria-label="Xóa thông báo"
-                                title="Xóa thông báo"
+                                aria-label={t('notificationBell.dismiss', 'Xóa thông báo')}
+                                title={t('notificationBell.dismiss', 'Xóa thông báo')}
                                 onClick={(e) => handleDismiss(n.id, e)}
                                 className="flex h-5 w-5 items-center justify-center rounded-md text-ghost dark:text-faint hover:bg-bad-soft hover:text-bad-deep transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90"
                               >
@@ -536,7 +553,7 @@ export function NotificationBell({
           {/* Footer Bar */}
           <div className="flex items-center justify-between border-t border-line-2 bg-surface-2/70 px-4 py-2.5 text-[11.5px]">
             <span className="font-medium text-faint">
-              {unreadCount === 0 ? 'Tất cả đã đọc' : `${unreadCount} chưa đọc trong tổng số ${items.length}`}
+              {unreadCount === 0 ? t('notificationBell.footerAllRead', 'Tất cả đã đọc') : t('notificationBell.footerUnread', { unreadCount, total: items.length, defaultValue: `${unreadCount} chưa đọc trong tổng số ${items.length}` })}
             </span>
             {onOpenCenter && (
               <button
@@ -547,7 +564,7 @@ export function NotificationBell({
                 }}
                 className="flex items-center gap-1 font-bold text-brand hover:text-brand-strong transition-colors"
               >
-                <span>Trung tâm thông báo</span>
+                <span>{t('notificationBell.openCenter', 'Trung tâm thông báo')}</span>
                 <IconArrowRight size={13} strokeWidth={2.2} />
               </button>
             )}
@@ -556,4 +573,5 @@ export function NotificationBell({
       )}
     </div>
   );
+
 }

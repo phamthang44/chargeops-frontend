@@ -77,6 +77,8 @@
     "iframeTitle": "Bảng điều khiển giám sát ChargeOps"
   },
   "notifications": {
+    "title": "Trung tâm Thông báo & Cảnh báo",
+    "description": "Cảnh báo toàn hệ thống, phê duyệt trạm, giấy phép và các ca khiếu nại chuyển cấp.",
     "empty": "Không có thông báo mới.",
     "pendingStations": "{{count}} hồ sơ trạm chờ duyệt",
     "expiringLicenses": "{{count}} giấy phép sắp hết hạn · còn {{days}} ngày",

@@ -19,21 +19,24 @@ export function ChargerStatsStrip({ groups }: { groups: ChargePointGroup[] }) {
     })),
   );
 
-  const available = connectors.filter((c) => c.runtimeStatus === 'AVAILABLE');
+  const totalChargePoints = groups.length;
+  const available = connectors.filter((c) => c.runtimeStatus === 'AVAILABLE').length;
   const inuse = connectors.filter((c) => c.runtimeStatus === 'IN_USE').length;
   const offline = connectors.filter((c) => c.runtimeStatus === 'OFFLINE').length;
-  const avgUtil = available.length
-    ? Math.round(available.reduce((s, c) => s + (c.utilizationPct ?? 0), 0) / available.length)
-    : 0;
-  const sessions = connectors.reduce((s, c) => s + (c.sessionsToday ?? 0), 0);
+  const incidentCount = connectors.filter((c) => Boolean(c.activeIncidentId)).length;
 
   return (
     <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">
-      <MetricCard label={t('connectors.stats.total')} value={String(connectors.length)} accent="#5b54e8" />
-      <MetricCard label={t('connectors.stats.available')} value={String(available.length)} accent="#12a150" />
-      <MetricCard label={t('connectors.stats.inuse')} value={String(inuse)} accent="#5b54e8" />
-      <MetricCard label={t('connectors.stats.offline')} value={String(offline)} accent="#c0392b" />
-      <MetricCard label={t('connectors.stats.sessions')} value={String(sessions)} sub={t('connectors.stats.sessionsSub', { util: avgUtil })} accent="var(--color-ink)" />
+      <MetricCard label={t('connectors.stats.chargePoints', 'TỔNG TRỤ SẠC')} value={String(totalChargePoints)} accent="#5b54e8" />
+      <MetricCard label={t('connectors.stats.available', 'SẴN SÀNG')} value={String(available)} accent="#12a150" />
+      <MetricCard label={t('connectors.stats.inuse', 'ĐANG SẠC')} value={String(inuse)} accent="#3b82f6" />
+      <MetricCard label={t('connectors.stats.offline', 'NGOẠI TUYẾN')} value={String(offline)} accent="#f59e0b" />
+      <MetricCard
+        label={t('connectors.stats.incidents', 'CÓ SỰ CỐ')}
+        value={String(incidentCount)}
+        sub={incidentCount > 0 ? t('connectors.stats.needAction', 'Cần khắc phục') : t('connectors.stats.allNormal', 'Bình thường')}
+        accent={incidentCount > 0 ? '#ef4444' : '#64748b'}
+      />
     </div>
   );
 }

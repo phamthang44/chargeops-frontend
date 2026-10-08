@@ -32,6 +32,7 @@
       "description": "Thiết bị này chưa ghi nhận bất kỳ sự kiện thay đổi trạng thái nào trong hệ thống."
     },
     "actor": {
+      "staff": "Nhân viên vận hành (Staff)",
       "admin": "Quản trị viên (Admin)",
       "owner": "Chủ trạm (Owner)",
       "system": "Hệ thống (System)"
@@ -40,7 +41,15 @@
       "provisioning": "Vòng đời cấp hạ tầng",
       "operational": "Trạng thái vận hành trạm"
     },
+    "chargePointLabel": "Trụ sạc",
+    "connectorLabel": "Súng sạc",
     "reasonLabel": "Lý do:",
+    "reasonIncidentReport": "Báo cáo sự cố khẩn cấp (#{{id}}): {{detail}}",
+    "reasonIncidentReportShort": "Báo cáo sự cố khẩn cấp (#{{id}})",
+    "reasonIncidentRecover": "Khắc phục sự cố (#{{id}}): {{detail}}",
+    "reasonIncidentRecoverShort": "Khắc phục sự cố (#{{id}})",
+    "reasonSessionStop": "Xác nhận dừng phiên sạc an toàn (sự cố #{{id}}): {{detail}}",
+    "reasonSessionStopShort": "Xác nhận dừng phiên sạc an toàn (sự cố #{{id}})",
     "performedBy": "Thực hiện bởi:",
     "status": {
       "PENDING_ACTIVATION": "Chờ kích hoạt",
@@ -124,8 +133,8 @@
     },
     "ticket": {
       "resolved": {
-        "title": "Ticket {{code}} đã giải quyết",
-        "body": "Ticket {{code}} đã được đánh dấu giải quyết: {{result}}. Vui lòng xác nhận hoặc báo vấn đề vẫn còn trước {{autoCloseAt}}. Nếu không phản hồi trong 10 ngày, ticket tự đóng theo chính sách; đây không phải xác nhận lỗi trạm hay hoàn tiền."
+        "title": "Phiếu hỗ trợ {{code}} đã được giải quyết",
+        "body": "Kết quả xử lý: \"{{result}}\". Vui lòng xác nhận hoặc báo lại trước {{autoCloseAt}} (hết hạn sau 10 ngày). Sau thời hạn này phiếu sẽ tự động đóng; đây không phải xác nhận lỗi trạm hay hoàn tiền."
       },
       "assigned": {
         "title": "Ticket {{code}} đã được phân công",
@@ -136,5 +145,12 @@
         "body": "Ca khiếu nại cho Ticket {{code}} cần Admin xem xét."
       }
     }
+  },
+  "relativeTime": {
+    "justNow": "Vừa xong",
+    "minutesAgo": "{{count}} phút trước",
+    "hoursAgo": "{{count}} giờ trước",
+    "daysAgo": "{{count}} ngày trước"
   }
 }
+

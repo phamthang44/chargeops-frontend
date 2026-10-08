@@ -141,7 +141,7 @@ export function TicketActionDock({
       )}
 
       {/* Case C: Station Owner & Station Staff (!admin) */}
-      {!admin && !isClosed && !isResolved && (
+      {!admin && Boolean(ticket.stationId) && !isClosed && !isResolved && (
         <div className="flex w-full sm:w-auto flex-col sm:flex-row flex-wrap gap-2">
           {/* If under Admin arbitration, station cannot resolve or re-escalate */}
           {isEscalated ? (

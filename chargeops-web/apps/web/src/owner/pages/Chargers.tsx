@@ -114,15 +114,34 @@ export function Chargers() {
   const askChargePoint = (cp: ChargePoint, target?: OperationalChargePointStatus) => {
     if (cp.provisioningStatus !== 'ACTIVE') return;
     const next = target && target !== cp.operationalStatus ? target : nextOperationalStatus(cp.operationalStatus);
+    const childConnectors = groups.find((g) => g.chargePoint.id === cp.id)?.connectors ?? [];
+    if (next === 'AVAILABLE') {
+      const incidentConn = childConnectors.find((c) => Boolean(c.activeIncidentId));
+      if (incidentConn?.activeIncidentId) {
+        toast(
+          t(
+            'chargePoints.hasIncidentBlocked',
+            'Trụ sạc có cổng đang dính sự cố. Vui lòng khắc phục sự cố trước khi đưa trụ sạc hoạt động trở lại.',
+          ),
+          'error',
+        );
+        setActiveIncidentId(incidentConn.activeIncidentId);
+        return;
+      }
+    }
     setIntent({
       kind: 'chargePoint',
       chargePoint: cp,
-      connectors: groups.find((g) => g.chargePoint.id === cp.id)?.connectors ?? [],
+      connectors: childConnectors,
       next,
     });
   };
 
   const askConnector = (cp: ChargePoint, c: Connector) => {
+    if (c.activeIncidentId) {
+      setActiveIncidentId(c.activeIncidentId);
+      return;
+    }
     const next = nextConnectorStatus(c.runtimeStatus);
     setIntent({ kind: 'connector', chargePoint: cp, connector: c, next });
   };
@@ -241,6 +260,7 @@ export function Chargers() {
                   connectorCode: c.connectorCode,
                 });
               }}
+              onOpenIncident={(incId) => setActiveIncidentId(incId)}
             />
 
             {selected && (
@@ -279,6 +299,7 @@ export function Chargers() {
                   })
                 }
                 onReportIncident={(c) => setIncidentTarget({ chargePoint: selected.chargePoint, connector: c })}
+                onOpenIncident={(incId) => setActiveIncidentId(incId)}
               />
             )}
           </div>

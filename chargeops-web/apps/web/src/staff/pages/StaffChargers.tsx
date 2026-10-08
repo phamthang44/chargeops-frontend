@@ -179,7 +179,14 @@ export function StaffChargers() {
                   setTarget({ kind: 'connector', chargePoint: group.chargePoint, connector, next })
                 }
                 onHistory={(next) => setHistoryTarget(next)}
-                onReportIncident={(next) => setIncidentTarget(next)}
+                onReportIncident={(next) => {
+                  if (next.connector.activeIncidentId) {
+                    setActiveIncidentId(next.connector.activeIncidentId);
+                    return;
+                  }
+                  setIncidentTarget(next);
+                }}
+                onOpenIncident={(incidentId) => setActiveIncidentId(incidentId)}
               />
             ))}
           </div>
@@ -236,6 +243,9 @@ export function StaffChargers() {
         onClose={() => setActiveIncidentId(null)}
         stationId={stationId}
         incidentId={activeIncidentId}
+        onIncidentUpdated={() => {
+          void invalidate();
+        }}
       />
     </>
   );
@@ -247,6 +257,7 @@ function ChargePointCard({
   onConnectorStatus,
   onHistory,
   onReportIncident,
+  onOpenIncident,
 }: {
   group: StaffEquipmentGroup;
   onStatus: (next: OperationalChargePointStatus) => void;
@@ -258,6 +269,7 @@ function ChargePointCard({
   onReportIncident: (
     target: Extract<StaffStatusTarget, { kind: 'connector' }>,
   ) => void;
+  onOpenIncident: (incidentId: string) => void;
 }) {
   const { t } = useTranslation('staff');
   const { chargePoint, connectors } = group;
@@ -328,10 +340,13 @@ function ChargePointCard({
         <div className="divide-y divide-hairline">
           {connectors.map((connector) => {
             const locked = connector.runtimeStatus === 'IN_USE';
+            const hasOpenIncident = Boolean(connector.activeIncidentId);
             return (
               <div
                 key={connector.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-surface-2/40"
+                className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-surface-2/40 ${
+                  hasOpenIncident ? 'border-l-2 border-bad bg-bad-soft/20' : ''
+                }`}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="font-mono text-[12px] font-semibold text-brand">
@@ -339,9 +354,14 @@ function ChargePointCard({
                   </span>
                   <span className="text-[12px] text-muted">{connector.connectorType}</span>
                   <StatusPill
-                    tone={toneFor(connector.runtimeStatus)}
-                    label={t(`status.${connector.runtimeStatus}`)}
+                    tone={hasOpenIncident ? 'bad' : toneFor(connector.runtimeStatus)}
+                    label={hasOpenIncident ? t('chargers.incidentStatus', 'CÓ SỰ CỐ') : t(`status.${connector.runtimeStatus}`)}
                   />
+                  {hasOpenIncident && (
+                    <span className="flex items-center gap-1 rounded bg-bad-soft px-1.5 py-0.5 text-[11px] font-medium text-bad">
+                      <IconAlertTriangle size={11} /> {t('chargers.handlingIncident', 'Đang xử lý sự cố')}
+                    </span>
+                  )}
                   {locked && (
                     <span className="flex items-center gap-1 text-[11px] text-faint">
                       <IconAlertTriangle size={11} /> {t('chargers.inUseLock')}
@@ -351,16 +371,28 @@ function ChargePointCard({
 
                 <div className="flex flex-wrap items-center gap-2">
                   {!locked &&
-                    CONNECTOR_TARGETS.filter((s) => s !== connector.runtimeStatus).map((s) => (
-                      <Button
-                        key={s}
-                        size="sm"
-                        variant={s === 'OFFLINE' ? 'danger-soft' : 'secondary'}
-                        onClick={() => onConnectorStatus(connector, s)}
-                      >
-                        {t('chargers.setTo', { status: t(`status.${s}`) })}
-                      </Button>
-                    ))}
+                    CONNECTOR_TARGETS.filter((s) => s !== connector.runtimeStatus).map((s) => {
+                      const isBlocked = hasOpenIncident && s === 'AVAILABLE';
+                      return (
+                        <Button
+                          key={s}
+                          size="sm"
+                          variant={s === 'OFFLINE' ? 'danger-soft' : 'secondary'}
+                          disabled={isBlocked}
+                          title={
+                            isBlocked
+                              ? t(
+                                  'chargers.incidentBlockedTooltip',
+                                  'Cổng đang có sự cố chưa được khắc phục. Vui lòng khắc phục sự cố trước khi bật lại.',
+                                )
+                              : undefined
+                          }
+                          onClick={() => onConnectorStatus(connector, s)}
+                        >
+                          {t('chargers.setTo', { status: t(`status.${s}`) })}
+                        </Button>
+                      );
+                    })}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -377,20 +409,31 @@ function ChargePointCard({
                   >
                     <IconHistory size={13} /> {t('chargers.historyBtn')}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="danger-soft"
-                    onClick={() =>
-                      onReportIncident({
-                        kind: 'connector',
-                        chargePoint,
-                        connector,
-                        next: 'OFFLINE',
-                      })
-                    }
-                  >
-                    <IconAlertTriangle size={13} /> {t('chargers.reportBtn')}
-                  </Button>
+
+                  {hasOpenIncident ? (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => onOpenIncident(connector.activeIncidentId!)}
+                    >
+                      <IconWrench size={13} /> {t('chargers.resolveBtn', 'Khắc phục sự cố')}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="danger-soft"
+                      onClick={() =>
+                        onReportIncident({
+                          kind: 'connector',
+                          chargePoint,
+                          connector,
+                          next: 'OFFLINE',
+                        })
+                      }
+                    >
+                      <IconAlertTriangle size={13} /> {t('chargers.reportBtn')}
+                    </Button>
+                  )}
                 </div>
               </div>
             );

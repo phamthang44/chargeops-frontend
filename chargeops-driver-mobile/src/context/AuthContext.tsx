@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -38,6 +39,12 @@ interface AuthContextValue {
   signIn: (session: AuthSession) => void;
   signOut: () => Promise<void>;
   getAccessToken: () => string | null;
+  /**
+   * Returns a non-expired access token for long-lived connections (STOMP),
+   * refreshing the session (single-flight) when it expires within 30 seconds.
+   * Resolves null for anonymous, mock or expired-beyond-repair sessions.
+   */
+  ensureFreshAccessToken: () => Promise<string | null>;
   retryProfile: () => Promise<void>;
   completeProfile: (request: UpdateUserProfileRequest) => Promise<UserProfile>;
   updateAvatar: (avatarUrl: string | null, avatarStorageKey?: string | null) => Promise<UserProfile>;
@@ -57,6 +64,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>('idle');
   const [profileError, setProfileError] = useState<Error | null>(null);
+
+  // Synchronous mirror of `session` for consumers that must read the freshest
+  // token outside of a render cycle (e.g. the STOMP beforeConnect hook).
+  const sessionRef = useRef<AuthSession | null>(null);
+  // Single-flight guard so Keycloak refresh-token rotation is never raced.
+  const refreshPromiseRef = useRef<Promise<AuthSession | null> | null>(null);
+  // Bumped on sign-in/out so an in-flight refresh can never resurrect a stale session.
+  const refreshGenerationRef = useRef(0);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  /**
+   * Rotates the refresh token against Keycloak. Concurrent callers share one
+   * in-flight request; a failed refresh signs the user out (matching the
+   * pre-existing timer behaviour) unless the session changed underneath us.
+   */
+  const performRefresh = useCallback((): Promise<AuthSession | null> => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+
+    const base = sessionRef.current;
+    if (!base || base.tokens.accessToken.startsWith('mock-')) {
+      return Promise.resolve(null);
+    }
+
+    const generation = refreshGenerationRef.current;
+    const promise: Promise<AuthSession | null> = (async () => {
+      try {
+        const next = await refreshKeycloakSession(base);
+        if (generation !== refreshGenerationRef.current) return null;
+        if (
+          sessionRef.current &&
+          sessionRef.current.tokens.refreshToken !== base.tokens.refreshToken
+        ) {
+          // Another rotation already landed; keep the newer session.
+          return sessionRef.current;
+        }
+        sessionRef.current = next;
+        setSession(next);
+        return next;
+      } catch {
+        if (
+          generation === refreshGenerationRef.current &&
+          sessionRef.current?.tokens.refreshToken === base.tokens.refreshToken
+        ) {
+          sessionRef.current = null;
+          setSession(null);
+        }
+        return null;
+      } finally {
+        if (generation === refreshGenerationRef.current) {
+          refreshPromiseRef.current = null;
+        }
+      }
+    })();
+
+    refreshPromiseRef.current = promise;
+    return promise;
+  }, []);
+
+  const ensureFreshAccessToken = useCallback(async (): Promise<string | null> => {
+    const current = sessionRef.current;
+    if (!current || current.tokens.accessToken.startsWith('mock-')) return null;
+    const expiresAt = current.tokens.expiresAt;
+    if (expiresAt && expiresAt - Date.now() > 30_000) {
+      return current.tokens.accessToken;
+    }
+    const refreshed = await performRefresh();
+    return refreshed?.tokens.accessToken ?? null;
+  }, [performRefresh]);
 
   useEffect(() => {
     setStationApiTokenProvider(() => session?.tokens.accessToken ?? null);
@@ -98,12 +176,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const refreshInMs = Math.max(1_000, session.tokens.expiresAt - Date.now() - 30_000);
     const timer = setTimeout(() => {
-      void refreshKeycloakSession(session)
-        .then(setSession)
-        .catch(() => setSession(null));
+      void performRefresh();
     }, refreshInMs);
     return () => clearTimeout(timer);
-  }, [session]);
+  }, [session, performRefresh]);
 
   useEffect(() => {
     let active = true;
@@ -226,6 +302,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileStatus,
       profileError,
       signIn: (nextSession) => {
+        refreshGenerationRef.current += 1;
+        refreshPromiseRef.current = null;
+        sessionRef.current = nextSession;
         setProfile(null);
         setProfileStatus('idle');
         setProfileError(null);
@@ -233,6 +312,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: async () => {
         const current = session;
+        refreshGenerationRef.current += 1;
+        refreshPromiseRef.current = null;
+        sessionRef.current = null;
         // Clear in-memory notification cache immediately — prevents stale data leaking to next session.
         resetNotificationStore();
         setProfile(null);
@@ -248,12 +330,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       getAccessToken: () => session?.tokens.accessToken ?? null,
+      ensureFreshAccessToken,
       retryProfile,
       completeProfile,
       updateAvatar,
     }),
     [
       completeProfile,
+      ensureFreshAccessToken,
       initializing,
       profile,
       profileError,

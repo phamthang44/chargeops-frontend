@@ -113,9 +113,17 @@
     "SYS_005": "OAuth processing error.",
     "SYS_006": "Data integrity violation.",
     "SYS_404": "Requested resource not found.",
-    "SYS_409": "The data has been modified or the registration is no longer pending approval. Please reload and try again."
+    "SYS_409": "The data has been modified or the registration is no longer pending approval. Please reload and try again.",
+    "INC_VERSION_CONFLICT": "Incident or connector version has changed. Please refresh and try again.",
+    "INC_STATE_CONFLICT": "The incident operation is not allowed in the current state.",
+    "INC_OPEN_INCIDENT": "Recover all open incidents before making this connector available.",
+    "INC_ALREADY_OPEN": "Connector already has an active incident. Please resolve the existing incident before reporting a new one."
   },
   "messages": {
+    "error.incident.versionConflict": "Incident or connector version has changed. Please refresh and try again.",
+    "error.incident.stateConflict": "The incident operation is not allowed in the current state.",
+    "error.incident.openIncident": "Recover all open incidents before making this connector available.",
+    "error.incident.alreadyOpen": "Connector already has an active incident. Please resolve the existing incident before reporting a new one.",
     "error.notification.notFound": "Notification was not found.",
     "error.notification.unknownRecipient": "Notification recipient profile was not found.",
     "error.notification.unknownTicketSource": "Source ticket for notification was not found.",

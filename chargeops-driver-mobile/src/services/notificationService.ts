@@ -73,6 +73,17 @@ export function resolveNotificationI18n(
     // If not valid JSON, fallback to raw key
   }
 
+  if (params.autoCloseAt && typeof params.autoCloseAt === 'string') {
+    const d = new Date(params.autoCloseAt);
+    if (!isNaN(d.getTime())) {
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      params.autoCloseAt = `${hours}:${minutes} ngày ${dd}/${mm}/${d.getFullYear()}`;
+    }
+  }
+
   return t(key, { ...params, defaultValue: key });
 }
 

@@ -136,5 +136,69 @@
     "MAINTENANCE": "Under Maintenance",
     "SCHEDULE_NOT_CONFIGURED": "No Schedule Configured",
     "UNAVAILABLE_BY_PLATFORM": "Ineligible"
+  },
+  "notificationCenter": {
+    "title": "Notification Center",
+    "defaultDescription": "Operational inbox for bookings, support tickets, system notices, and finance.",
+    "updatingCount": "Updating unread count...",
+    "unreadCount": "{{count}} unread",
+    "allRead": "All caught up",
+    "markAllRead": "Mark all as read",
+    "markCategoryRead": "Mark category as read",
+    "statusAll": "All",
+    "statusUnread": "Unread",
+    "searchPlaceholder": "Search notification content...",
+    "loading": "Loading notifications...",
+    "retry": "Retry",
+    "emptyUnreadTitle": "No unread notifications in this filter",
+    "emptyTitle": "No notifications found",
+    "emptyUnreadDesc": "There are no unread notifications remaining in this category.",
+    "emptyDesc": "No notifications match the active filter or search keywords.",
+    "unreadDot": "Unread",
+    "markAsRead": "Mark as read",
+    "dismiss": "Dismiss notification",
+    "viewDetail": "View details",
+    "loadingMore": "Loading more...",
+    "loadMore": "Load more notifications",
+    "categories": {
+      "all": "All",
+      "booking": "Bookings",
+      "ticket": "Support Tickets",
+      "finance": "Finance & Refunds",
+      "account": "System & Account"
+    },
+    "categoryBadge": {
+      "booking": "Bookings",
+      "ticket": "Support Tickets",
+      "finance": "Finance",
+      "account": "System"
+    }
+  },
+  "notificationBell": {
+    "title": "Notifications",
+    "headerTitle": "Notification Inbox",
+    "unreadCount": "{{count}} unread",
+    "allRead": "All caught up",
+    "markAllRead": "Mark all read",
+    "markAllReadTitle": "Mark all notifications as read",
+    "statusAll": "All ({{count}})",
+    "statusUnread": "Unread ({{count}})",
+    "filterPlaceholder": "Filter...",
+    "emptyUnread": "You are all caught up! 🎉",
+    "emptyFilter": "No matching notifications",
+    "emptyDefault": "No new notifications",
+    "markAsRead": "Mark as read",
+    "dismiss": "Dismiss notification",
+    "footerAllRead": "All caught up",
+    "footerUnread": "{{unreadCount}} unread out of {{total}}",
+    "openCenter": "Notification Center",
+    "categories": {
+      "all": "All",
+      "booking": "Bookings",
+      "ticket": "Support Tickets",
+      "finance": "Finance",
+      "account": "System"
+    }
   }
 }
+

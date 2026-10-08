@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useApi, formatDateTimeVn, type StaffEquipmentHistoryItem } from '@chargeops/api';
 import {
   Drawer,
@@ -12,6 +13,7 @@ import {
   StatusPill,
 } from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { formatStatusReason } from '../../shared/equipment/formatStatusReason';
 
 export interface StaffHistoryTarget {
   type: 'chargePoint' | 'connector';
@@ -40,6 +42,7 @@ export function StaffStatusHistoryDrawer({
   stationId,
   target,
 }: StaffStatusHistoryDrawerProps) {
+  const { t } = useTranslation('common');
   const api = useApi();
   const isConnector = target?.type === 'connector';
 
@@ -91,7 +94,9 @@ export function StaffStatusHistoryDrawer({
           </span>
           <div>
             <div className="text-[15px] font-bold text-ink">
-              {isConnector ? 'Lịch sử trạng thái Súng sạc' : 'Lịch sử trạng thái Trụ sạc'}
+              {isConnector
+                ? t('equipmentHistory.titleConnector', 'Lịch sử trạng thái Súng sạc')
+                : t('equipmentHistory.titleChargePoint', 'Lịch sử trạng thái Trụ sạc')}
             </div>
             <div className="text-[12px] font-mono text-muted">{itemName}</div>
           </div>
@@ -111,8 +116,8 @@ export function StaffStatusHistoryDrawer({
           <ApiErrorState
             error={error}
             compact
-            eyebrow="Lịch sử trạng thái"
-            title="Không thể tải lịch sử trạng thái"
+            eyebrow={t('equipmentHistory.error.eyebrow', 'Lịch sử trạng thái')}
+            title={t('equipmentHistory.error.title', 'Không thể tải lịch sử trạng thái')}
             onRetry={() => refetch()}
             isRetrying={isFetching}
           />
@@ -121,8 +126,11 @@ export function StaffStatusHistoryDrawer({
         {!isLoading && !error && events.length === 0 && (
           <div className="py-8">
             <EmptyState
-              title="Chưa có lịch sử trạng thái"
-              description="Thiết bị này chưa ghi nhận bất kỳ sự kiện thay đổi trạng thái nào."
+              title={t('equipmentHistory.empty.title', 'Chưa có lịch sử trạng thái')}
+              description={t(
+                'equipmentHistory.empty.description',
+                'Thiết bị này chưa ghi nhận bất kỳ sự kiện thay đổi trạng thái nào.',
+              )}
             />
           </div>
         )}
@@ -131,14 +139,10 @@ export function StaffStatusHistoryDrawer({
           <div className="flex flex-col">
             {events.map((evt, idx) => {
               const isLast = idx === events.length - 1;
-              const actorLabel =
-                evt.actorType === 'STAFF'
-                  ? 'Nhân viên vận hành (Staff)'
-                  : evt.actorType === 'ADMIN'
-                    ? 'Quản trị viên (Admin)'
-                    : evt.actorType === 'OWNER'
-                      ? 'Chủ trạm (Owner)'
-                      : 'Hệ thống (System)';
+              const actorKey = evt.actorType ? evt.actorType.toLowerCase() : '';
+              const actorLabel = t(`equipmentHistory.actor.${actorKey}`, {
+                defaultValue: evt.actorType || '',
+              });
 
               const actorBadgeClass =
                 evt.actorType === 'STAFF'
@@ -178,25 +182,39 @@ export function StaffStatusHistoryDrawer({
                       </div>
 
                       <div className="text-[10.5px] font-semibold uppercase tracking-wider text-faint">
-                        {evt.dimension === 'CHARGE_POINT' ? 'Trụ sạc' : 'Súng sạc'}
+                        {evt.dimension === 'CHARGE_POINT'
+                          ? t('equipmentHistory.chargePointLabel', 'Trụ sạc')
+                          : t('equipmentHistory.connectorLabel', 'Súng sạc')}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                        <StatusPill tone={toneFor(evt.fromStatus)} label={labelFor(evt.fromStatus)} />
+                        <StatusPill
+                          tone={toneFor(evt.fromStatus)}
+                          label={t(`equipmentHistory.status.${evt.fromStatus}`, {
+                            defaultValue: evt.fromStatus,
+                          })}
+                        />
                         <span className="font-mono font-bold text-faint">→</span>
-                        <StatusPill tone={toneFor(evt.toStatus)} label={labelFor(evt.toStatus)} />
+                        <StatusPill
+                          tone={toneFor(evt.toStatus)}
+                          label={t(`equipmentHistory.status.${evt.toStatus}`, {
+                            defaultValue: evt.toStatus,
+                          })}
+                        />
                       </div>
 
                       {evt.reason && (
                         <div className="rounded-[8px] border border-line-2/50 bg-surface-2 px-2.5 py-1.5 text-[11.5px] leading-relaxed text-body">
-                          <span className="font-semibold text-faint">Lý do: </span>
-                          <span className="font-medium text-ink">"{evt.reason}"</span>
+                          <span className="font-semibold text-faint">
+                            {t('equipmentHistory.reasonLabel', 'Lý do:')}{' '}
+                          </span>
+                          <span className="font-medium text-ink">{formatStatusReason(evt.reason, t, evt)}</span>
                         </div>
                       )}
 
                       {evt.performedByDisplayName && (
                         <div className="text-[11px] text-faint">
-                          Thực hiện bởi:{' '}
+                          {t('equipmentHistory.performedBy', 'Thực hiện bởi:')}{' '}
                           <span className="font-semibold text-muted">{evt.performedByDisplayName}</span>
                         </div>
                       )}
@@ -212,20 +230,16 @@ export function StaffStatusHistoryDrawer({
   );
 }
 
-const STATUS_LABELS: Record<string, { label: string; tone: 'good' | 'warn' | 'bad' | 'brand' | 'neutral' }> = {
-  PENDING_ACTIVATION: { label: 'Chờ kích hoạt', tone: 'neutral' },
-  ACTIVE: { label: 'Hoạt động', tone: 'good' },
-  SUSPENDED: { label: 'Tạm ngưng', tone: 'warn' },
-  AVAILABLE: { label: 'Sẵn sàng', tone: 'good' },
-  OFFLINE: { label: 'Ngoại tuyến', tone: 'bad' },
-  MAINTENANCE: { label: 'Bảo trì', tone: 'warn' },
-  IN_USE: { label: 'Đang sạc', tone: 'brand' },
+const STATUS_TONES: Record<string, 'good' | 'warn' | 'bad' | 'brand' | 'neutral'> = {
+  PENDING_ACTIVATION: 'neutral',
+  ACTIVE: 'good',
+  SUSPENDED: 'warn',
+  AVAILABLE: 'good',
+  OFFLINE: 'bad',
+  MAINTENANCE: 'warn',
+  IN_USE: 'brand',
 };
 
-function labelFor(status: string): string {
-  return STATUS_LABELS[String(status).toUpperCase()]?.label ?? status;
-}
-
 function toneFor(status: string): 'good' | 'warn' | 'bad' | 'brand' | 'neutral' {
-  return STATUS_LABELS[String(status).toUpperCase()]?.tone ?? 'neutral';
+  return STATUS_TONES[String(status).toUpperCase()] ?? 'neutral';
 }

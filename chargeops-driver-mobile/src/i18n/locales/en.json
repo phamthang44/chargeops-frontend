@@ -292,13 +292,6 @@
     "checkInAt": "Check-in from: {{time}}",
     "checkInNotOpenYet": "Check-in not open yet"
   },
-  "notifications": {
-    "unreadCount": "{{total}} unread",
-    "markAllRead": "Mark all read",
-    "clearAll": "Clear all",
-    "delete": "Delete",
-    "viewDetail": "View detail"
-  },
   "history": {
     "title": "Booking history",
     "role": "DRIVER",
@@ -511,12 +504,9 @@
       "parking": "Spacious parking",
       "security": "24/7 security",
       "restroom": "Clean restroom",
-      "RESTROOM": "Restroom",
-      "CAFE": "Cafe",
-      "WIFI": "Free Wifi",
-      "PARKING": "Parking lot",
-      "CONVENIENCE_STORE": "Convenience store",
-      "SHOPPING": "Shopping center"
+      "cafe": "Cafe",
+      "convenience_store": "Convenience store",
+      "shopping": "Shopping center"
     },
     "refundTitle": "Cancellation & refund policy",
     "descriptionTitle": "About this station",
@@ -534,7 +524,8 @@
     "status": {
       "AVAILABLE": "Available",
       "IN_USE": "Charging",
-      "OFFLINE": "Offline"
+      "OFFLINE": "Offline",
+      "MAINTENANCE": "Maintenance"
     },
     "operatingState": {
       "CLOSED_BY_SCHEDULE": "Outside opening hours",
@@ -1420,8 +1411,8 @@
     },
     "ticket": {
       "resolved": {
-        "title": "Ticket {{code}} resolved",
-        "body": "Ticket {{code}} has been marked resolved: {{result}}. Please confirm or report unresolved issues before {{autoCloseAt}}. If no response within 10 days, ticket will auto-close per policy; this is not an admission of station defect or refund."
+        "title": "Ticket {{code}} has been resolved",
+        "body": "Resolution outcome: \"{{result}}\". Please confirm or report back before {{autoCloseAt}} (expires in 10 days). After this period the ticket will auto-close; this is not an admission of station defect or refund."
       },
       "assigned": {
         "title": "Ticket {{code}} assigned",
@@ -1452,6 +1443,9 @@
       "allReadBody": "All alerts and session activity have been viewed.",
       "noNotifBody": "New notifications about sessions and transactions will appear here."
     },
+    "unreadCount": "{{total}} unread",
+    "delete": "Delete",
+    "viewDetail": "View detail",
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all notifications"
   }

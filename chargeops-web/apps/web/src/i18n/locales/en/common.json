@@ -32,6 +32,7 @@
       "description": "This device has not recorded any status change events in the system yet."
     },
     "actor": {
+      "staff": "Station Staff (Staff)",
       "admin": "Administrator (Admin)",
       "owner": "Station Owner (Owner)",
       "system": "System"
@@ -40,7 +41,15 @@
       "provisioning": "Infrastructure provisioning lifecycle",
       "operational": "Station operational status"
     },
+    "chargePointLabel": "Charge point",
+    "connectorLabel": "Connector",
     "reasonLabel": "Reason:",
+    "reasonIncidentReport": "Emergency incident report (#{{id}}): {{detail}}",
+    "reasonIncidentReportShort": "Emergency incident report (#{{id}})",
+    "reasonIncidentRecover": "Incident resolved (#{{id}}): {{detail}}",
+    "reasonIncidentRecoverShort": "Incident resolved (#{{id}})",
+    "reasonSessionStop": "Safe charging session termination confirmed (incident #{{id}}): {{detail}}",
+    "reasonSessionStopShort": "Safe charging session termination confirmed (incident #{{id}})",
     "performedBy": "Performed by:",
     "status": {
       "PENDING_ACTIVATION": "Pending Activation",
@@ -124,8 +133,8 @@
     },
     "ticket": {
       "resolved": {
-        "title": "Ticket {{code}} resolved",
-        "body": "Ticket {{code}} has been marked resolved: {{result}}. Please confirm or report unresolved issues before {{autoCloseAt}}. If no response within 10 days, ticket will auto-close per policy; this is not an admission of station defect or refund."
+        "title": "Ticket {{code}} has been resolved",
+        "body": "Resolution outcome: \"{{result}}\". Please confirm or report back before {{autoCloseAt}} (expires in 10 days). After this period the ticket will auto-close; this is not an admission of station defect or refund."
       },
       "assigned": {
         "title": "Ticket {{code}} assigned",
@@ -136,5 +145,12 @@
         "body": "Escalation review requested for ticket {{code}} requires Admin evaluation."
       }
     }
+  },
+  "relativeTime": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
   }
 }
+

@@ -47,7 +47,9 @@ export function ChargePointGroupList({
       {/* Charge Points List */}
       <View style={styles.cpList}>
         {groups.map(({ cp, connectors: cpConns }) => {
-          const availableCount = cpConns.filter((c) => c.runtimeStatus === 'AVAILABLE').length;
+          const isCpMaintenance = cp.operationalStatus === 'MAINTENANCE';
+          const isCpOffline = cp.operationalStatus === 'OFFLINE' || cp.status === 'OFFLINE' || cp.status === 'SUSPENDED';
+          const availableCount = isCpMaintenance || isCpOffline ? 0 : cpConns.filter((c) => c.runtimeStatus === 'AVAILABLE').length;
 
           return (
             <View
@@ -56,7 +58,11 @@ export function ChargePointGroupList({
                 styles.cpCard,
                 {
                   backgroundColor: isDark ? 'rgba(30, 41, 59, 0.7)' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(51, 65, 85, 0.8)' : '#E2E8F0',
+                  borderColor: isCpMaintenance
+                    ? (isDark ? 'rgba(245, 158, 11, 0.4)' : '#FCD34D')
+                    : isDark
+                      ? 'rgba(51, 65, 85, 0.8)'
+                      : '#E2E8F0',
                 },
               ]}
             >
@@ -66,10 +72,20 @@ export function ChargePointGroupList({
                   <View
                     style={[
                       styles.cpIconWrap,
-                      { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : '#EEF2FF' },
+                      {
+                        backgroundColor: isCpMaintenance
+                          ? (isDark ? 'rgba(245, 158, 11, 0.2)' : '#FEF3C7')
+                          : isDark
+                            ? 'rgba(99, 102, 241, 0.2)'
+                            : '#EEF2FF',
+                      },
                     ]}
                   >
-                    <Ionicons name="hardware-chip-outline" size={18} color="#6366F1" />
+                    <Ionicons
+                      name={isCpMaintenance ? 'construct-outline' : 'hardware-chip-outline'}
+                      size={18}
+                      color={isCpMaintenance ? '#D97706' : '#6366F1'}
+                    />
                   </View>
                   <View style={styles.cpHeaderInfo}>
                     <View style={styles.cpTitleRow}>
@@ -103,31 +119,63 @@ export function ChargePointGroupList({
                   </View>
                 </View>
 
-                <View
-                  style={[
-                    styles.cpAvailPill,
-                    {
-                      backgroundColor:
-                        availableCount > 0
-                          ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5')
-                          : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#FEF2F2'),
-                      borderColor:
-                        availableCount > 0
-                          ? (isDark ? 'rgba(16, 185, 129, 0.35)' : '#A7F3D0')
-                          : (isDark ? 'rgba(239, 68, 68, 0.35)' : '#FECACA'),
-                    },
-                  ]}
-                >
-                  <LiveDot color={availableCount > 0 ? '#10B981' : '#EF4444'} size={5} />
-                  <Text
+                {isCpMaintenance ? (
+                  <View
                     style={[
-                      styles.cpAvailText,
-                      { color: availableCount > 0 ? '#10B981' : '#EF4444' },
+                      styles.cpAvailPill,
+                      {
+                        backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FFFBEB',
+                        borderColor: isDark ? 'rgba(245, 158, 11, 0.35)' : '#FDE68A',
+                      },
                     ]}
                   >
-                    {availableCount}/{cpConns.length} {t('stationDetail.availableStatus')}
-                  </Text>
-                </View>
+                    <LiveDot color="#F59E0B" size={5} />
+                    <Text style={[styles.cpAvailText, { color: '#D97706' }]}>
+                      {t('stationDetail.operatingState.MAINTENANCE')}
+                    </Text>
+                  </View>
+                ) : isCpOffline ? (
+                  <View
+                    style={[
+                      styles.cpAvailPill,
+                      {
+                        backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : '#FEF2F2',
+                        borderColor: isDark ? 'rgba(239, 68, 68, 0.35)' : '#FECACA',
+                      },
+                    ]}
+                  >
+                    <LiveDot color="#EF4444" size={5} />
+                    <Text style={[styles.cpAvailText, { color: '#EF4444' }]}>
+                      {t('stationDetail.status.OFFLINE')}
+                    </Text>
+                  </View>
+                ) : (
+                  <View
+                    style={[
+                      styles.cpAvailPill,
+                      {
+                        backgroundColor:
+                          availableCount > 0
+                            ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5')
+                            : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#FEF2F2'),
+                        borderColor:
+                          availableCount > 0
+                            ? (isDark ? 'rgba(16, 185, 129, 0.35)' : '#A7F3D0')
+                            : (isDark ? 'rgba(239, 68, 68, 0.35)' : '#FECACA'),
+                      },
+                    ]}
+                  >
+                    <LiveDot color={availableCount > 0 ? '#10B981' : '#EF4444'} size={5} />
+                    <Text
+                      style={[
+                        styles.cpAvailText,
+                        { color: availableCount > 0 ? '#10B981' : '#EF4444' },
+                      ]}
+                    >
+                      {availableCount}/{cpConns.length} {t('stationDetail.availableStatus')}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               {/* 2-Column Connector Cards inside this Charge Point */}

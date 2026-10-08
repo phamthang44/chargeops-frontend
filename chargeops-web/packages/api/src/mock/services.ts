@@ -66,6 +66,7 @@ import type {
   StationFailureCommandResponse,
   ServiceFailureDecisionSummary,
   ConnectorIncidentResponse,
+  ConnectorStatusEvent,
   ReportConnectorIncidentRequest,
   RecoverConnectorIncidentRequest,
   ResolveIncidentSessionRequest,
@@ -227,6 +228,48 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       ]);
     }
     return staffHistory.get(key)!;
+  };
+
+  /**
+   * Status events derived from incidents reported in this session — mirrors the backend,
+   * which stores `INCIDENT_*:<id> - <detail>` on the event and resolves the full incident
+   * text into `incidentAction`/`incidentId`/`incidentDetail` for display.
+   */
+  const incidentHistoryEvents = (connectorId: string): ConnectorStatusEvent[] => {
+    const events: ConnectorStatusEvent[] = [];
+    for (const incident of mockIncidents.values()) {
+      if (incident.connectorId !== connectorId) continue;
+      events.push({
+        id: `CONN-EVT-REPORT-${incident.incidentId}`,
+        fromStatus: 'AVAILABLE',
+        toStatus: 'OFFLINE',
+        reason: `INCIDENT_REPORT:${incident.incidentId} - ${incident.reason}`,
+        incidentAction: 'INCIDENT_REPORT',
+        incidentId: incident.incidentId,
+        incidentDetail: incident.reason,
+        actorType: 'OWNER',
+        performedByDisplayName: 'Chủ trạm',
+        performedAt: incident.reportedAt,
+      });
+      if (incident.recoveredAt) {
+        const recovery = incident.recoveryReason;
+        events.push({
+          id: `CONN-EVT-RECOVER-${incident.incidentId}`,
+          fromStatus: 'OFFLINE',
+          toStatus: incident.runtimeStatus,
+          reason: recovery
+            ? `INCIDENT_RECOVER:${incident.incidentId} - ${recovery}`
+            : `INCIDENT_RECOVER:${incident.incidentId}`,
+          incidentAction: 'INCIDENT_RECOVER',
+          incidentId: incident.incidentId,
+          incidentDetail: recovery ?? incident.reason,
+          actorType: 'OWNER',
+          performedByDisplayName: 'Chủ trạm',
+          performedAt: incident.recoveredAt,
+        });
+      }
+    }
+    return events.sort((a, b) => a.performedAt.localeCompare(b.performedAt));
   };
 
   /** Owner stations may only be invited into when they are actually operating. */
@@ -1056,7 +1099,7 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         await delay();
         const c = db.connectors.find((x) => x.id === id);
         if (!c) return [];
-        return [
+        const events: ConnectorStatusEvent[] = [
           {
             id: 'CONN-EVT-1',
             fromStatus: 'AVAILABLE' as const,
@@ -1067,7 +1110,9 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
             performedByDisplayName: 'Chủ trạm',
             performedAt: new Date().toISOString(),
           },
+          ...incidentHistoryEvents(id),
         ];
+        return events.sort((a, b) => a.performedAt.localeCompare(b.performedAt));
       },
     },
 
@@ -2533,7 +2578,22 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
 
       async connectorHistory(stationId, chargePointId, connectorId, params = {}) {
         await delay(160);
-        const rows = staffHistoryFor('CONNECTOR', connectorId);
+        const incidentRows: StaffEquipmentHistoryItem[] = incidentHistoryEvents(connectorId).map((event) => ({
+          id: event.id,
+          dimension: 'CONNECTOR',
+          fromStatus: event.fromStatus,
+          toStatus: event.toStatus,
+          reason: event.reason ?? null,
+          incidentAction: event.incidentAction ?? null,
+          incidentId: event.incidentId ?? null,
+          incidentDetail: event.incidentDetail ?? null,
+          actorType: 'OWNER',
+          performedByDisplayName: event.performedByDisplayName ?? null,
+          performedAt: event.performedAt,
+        }));
+        const rows = [...incidentRows, ...staffHistoryFor('CONNECTOR', connectorId)].sort((a, b) =>
+          a.performedAt < b.performedAt ? 1 : -1,
+        );
         const page = params.page ?? 0;
         const size = params.size ?? 20;
         return { items: rows.slice(page * size, (page + 1) * size), total: rows.length, page, pageSize: size };

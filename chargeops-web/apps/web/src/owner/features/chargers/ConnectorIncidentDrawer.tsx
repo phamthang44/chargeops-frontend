@@ -111,6 +111,7 @@ export function ConnectorIncidentDrawer({
       queryClient.invalidateQueries({ queryKey: ['incidents', stationId, incidentId] });
       queryClient.invalidateQueries({ queryKey: ['ownerBookings'] });
       queryClient.invalidateQueries({ queryKey: ['connectors'] });
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
 
       onIncidentUpdated?.(updated);
       setResolveTargetBooking(null);
@@ -154,6 +155,7 @@ export function ConnectorIncidentDrawer({
       queryClient.invalidateQueries({ queryKey: ['incidents', stationId, incidentId] });
       queryClient.invalidateQueries({ queryKey: ['connectors'] });
       queryClient.invalidateQueries({ queryKey: ['chargePoints'] });
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
 
       onIncidentUpdated?.(updated);
       setShowRecoverModal(false);

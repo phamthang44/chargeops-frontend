@@ -292,13 +292,6 @@
     "checkInAt": "Mở check-in: {{time}}",
     "checkInNotOpenYet": "Chưa đến giờ check-in"
   },
-  "notifications": {
-    "unreadCount": "{{total}} chưa đọc",
-    "markAllRead": "Đã đọc tất cả",
-    "clearAll": "Xóa tất cả",
-    "delete": "Xóa",
-    "viewDetail": "Xem chi tiết"
-  },
   "history": {
     "title": "Lịch sử đặt chỗ",
     "role": "TÀI XẾ",
@@ -511,12 +504,9 @@
       "parking": "Đỗ xe rộng",
       "security": "An ninh 24/7",
       "restroom": "WC sạch sẽ",
-      "RESTROOM": "WC sạch sẽ",
-      "CAFE": "Quán Cafe",
-      "WIFI": "Wifi miễn phí",
-      "PARKING": "Bãi đỗ xe",
-      "CONVENIENCE_STORE": "Cửa hàng tiện lợi",
-      "SHOPPING": "Trung tâm mua sắm"
+      "cafe": "Quán Cafe",
+      "convenience_store": "Cửa hàng tiện lợi",
+      "shopping": "Trung tâm mua sắm"
     },
     "refundTitle": "Chính sách hủy & hoàn tiền",
     "descriptionTitle": "Giới thiệu trạm",
@@ -534,7 +524,8 @@
     "status": {
       "AVAILABLE": "Sẵn sàng",
       "IN_USE": "Đang sạc",
-      "OFFLINE": "Ngừng hoạt động"
+      "OFFLINE": "Ngừng hoạt động",
+      "MAINTENANCE": "Đang bảo trì"
     },
     "operatingState": {
       "CLOSED_BY_SCHEDULE": "Ngoài giờ hoạt động",
@@ -1420,8 +1411,8 @@
     },
     "ticket": {
       "resolved": {
-        "title": "Ticket {{code}} đã giải quyết",
-        "body": "Ticket {{code}} đã được đánh dấu giải quyết: {{result}}. Vui lòng xác nhận hoặc báo vấn đề vẫn còn trước {{autoCloseAt}}. Nếu không phản hồi trong 10 ngày, ticket tự đóng theo chính sách; đây không phải xác nhận lỗi trạm hay hoàn tiền."
+        "title": "Phiếu hỗ trợ {{code}} đã được giải quyết",
+        "body": "Kết quả xử lý: \"{{result}}\". Vui lòng xác nhận hoặc báo lại trước {{autoCloseAt}} (hết hạn sau 10 ngày). Sau thời hạn này phiếu sẽ tự động đóng; đây không phải xác nhận lỗi trạm hay hoàn tiền."
       },
       "assigned": {
         "title": "Ticket {{code}} đã được phân công",
@@ -1452,6 +1443,9 @@
       "allReadBody": "Tất cả cảnh báo và hoạt động sạc đã được xem.",
       "noNotifBody": "Các thông báo mới về phiên sạc và giao dịch sẽ xuất hiện tại đây."
     },
+    "unreadCount": "{{total}} chưa đọc",
+    "delete": "Xóa",
+    "viewDetail": "Xem chi tiết",
     "markAllRead": "Đã đọc hết",
     "clearAll": "Xóa tất cả thông báo"
   }

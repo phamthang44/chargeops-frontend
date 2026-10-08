@@ -9,7 +9,7 @@ import {
   mapFrontendSortToBackend,
   type BackendStationDiscoveryDetail,
   type BackendStationDiscoveryItem,
-} from '../src/services/stationAdapter';
+} from '../src/services/stationAdapter.ts';
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -168,7 +168,7 @@ assert(queryParams.get('chargerType') === 'DC', 'chargerType param present');
 assert(queryParams.get('page') === '2', 'one-based page param present');
 assert(queryParams.get('size') === '12', 'size param present');
 console.log('\n--- Testing BackendStationAvailabilityResponse structure ---');
-import type { BackendStationAvailabilityResponse } from '../src/services/stationAdapter';
+import type { BackendStationAvailabilityResponse } from '../src/services/stationAdapter.ts';
 
 const mockAvailabilityResponse: BackendStationAvailabilityResponse = {
   stationId: 'st-001',
@@ -256,5 +256,66 @@ const detailWithoutPolicy = adaptStationDiscoveryDetail({
   cancellationPolicy: null,
 });
 assert(detailWithoutPolicy.cancellationPolicy === undefined, 'adaptStationDiscoveryDetail sets cancellationPolicy undefined when null');
+
+console.log('\n--- Testing Charge Point in MAINTENANCE ---');
+const mockMaintenanceDetail: BackendStationDiscoveryDetail = {
+  ...mockBackendDetail,
+  chargePoints: [
+    {
+      id: 'cp-maintenance',
+      chargePointCode: 'CP-M1',
+      name: 'Trụ bảo trì',
+      maxPowerKw: 120,
+      operationalStatus: 'MAINTENANCE',
+      connectors: [
+        {
+          id: 'c-m1',
+          connectorCode: 'Cổng M1',
+          connectorType: 'CCS2',
+          powerKw: 120,
+          runtimeStatus: 'AVAILABLE', // raw DB status is AVAILABLE
+          availableNow: false,       // but availableNow is FALSE
+        },
+      ],
+    },
+    {
+      id: 'cp-active',
+      chargePointCode: 'CP-A1',
+      name: 'Trụ hoạt động',
+      maxPowerKw: 60,
+      operationalStatus: 'AVAILABLE',
+      connectors: [
+        {
+          id: 'c-a1',
+          connectorCode: 'Cổng A1',
+          connectorType: 'CCS2',
+          powerKw: 60,
+          runtimeStatus: 'AVAILABLE',
+          availableNow: true,
+        },
+      ],
+    },
+  ],
+};
+
+const adaptedMaintenanceDetail = adaptStationDiscoveryDetail(mockMaintenanceDetail);
+assert(
+  adaptedMaintenanceDetail.availableConnectors === 1,
+  'availableConnectors must only count availableNow: true (1 available, not 2)',
+);
+
+const maintenanceChargePoints = adaptChargePointsFromDetail(mockMaintenanceDetail);
+assert(maintenanceChargePoints[0].operationalStatus === 'MAINTENANCE', 'ChargePoint operationalStatus is MAINTENANCE');
+assert(maintenanceChargePoints[1].operationalStatus === 'AVAILABLE', 'ChargePoint operationalStatus is AVAILABLE');
+
+const maintenanceConnectors = adaptConnectorsFromDetail(mockMaintenanceDetail);
+assert(
+  maintenanceConnectors[0].runtimeStatus === 'MAINTENANCE',
+  'Connector under MAINTENANCE charge point resolves to MAINTENANCE',
+);
+assert(
+  maintenanceConnectors[1].runtimeStatus === 'AVAILABLE',
+  'Connector under AVAILABLE charge point remains AVAILABLE',
+);
 
 console.log('\n🎉 ALL UPDATED ADAPTER TESTS PASSED SUCCESSFULLY!');

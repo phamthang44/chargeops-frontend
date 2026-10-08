@@ -126,7 +126,11 @@ export function TicketDetail({
     );
   }
 
-  if (!admin && isPlatformTicket) {
+  const isReporter = Boolean(
+    currentUserId && (tk.reporterId === currentUserId || tk.driverId === currentUserId)
+  );
+
+  if (!admin && isPlatformTicket && !isReporter) {
     return <TicketScopeWarning onBack={() => navigate('..')} />;
   }
 

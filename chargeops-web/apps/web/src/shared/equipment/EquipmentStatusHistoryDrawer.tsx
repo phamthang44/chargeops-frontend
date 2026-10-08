@@ -18,6 +18,7 @@ import {
   StatusPill,
 } from '@chargeops/ui';
 import { ApiErrorState } from '../components/ApiErrorState';
+import { formatStatusReason } from './formatStatusReason';
 
 export interface EquipmentStatusTarget {
   type: 'chargePoint' | 'connector';
@@ -237,7 +238,9 @@ export function EquipmentStatusHistoryDrawer({
                       {evt.reason && (
                         <div className="rounded-[8px] bg-surface-2 px-2.5 py-1.5 text-[11.5px] text-body border border-line-2/50 leading-relaxed">
                           <span className="font-semibold text-faint">{t('equipmentHistory.reasonLabel')} </span>
-                          <span className="text-ink font-medium">"{evt.reason}"</span>
+                          <span className="text-ink font-medium">
+                            {formatStatusReason(evt.reason, t, 'incidentAction' in evt ? evt : undefined)}
+                          </span>
                         </div>
                       )}
 

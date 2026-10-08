@@ -136,5 +136,69 @@
     "MAINTENANCE": "Đang bảo trì",
     "SCHEDULE_NOT_CONFIGURED": "Chưa cấu hình lịch",
     "UNAVAILABLE_BY_PLATFORM": "Không đủ điều kiện"
+  },
+  "notificationCenter": {
+    "title": "Trung tâm Thông báo",
+    "defaultDescription": "Hòm thư sự kiện nghiệp vụ, cập nhật lịch đặt chỗ, vé hỗ trợ và tài chính.",
+    "updatingCount": "Đang cập nhật số chưa đọc",
+    "unreadCount": "{{count}} chưa đọc",
+    "allRead": "Đã đọc hết",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "markCategoryRead": "Đọc tất cả trong mục này",
+    "statusAll": "Tất cả",
+    "statusUnread": "Chưa đọc",
+    "searchPlaceholder": "Tìm kiếm nội dung thông báo...",
+    "loading": "Đang tải thông báo...",
+    "retry": "Thử lại",
+    "emptyUnreadTitle": "Không có thông báo chưa đọc trong bộ lọc này",
+    "emptyTitle": "Không tìm thấy thông báo nào",
+    "emptyUnreadDesc": "Không còn thông báo chưa đọc nào trong danh mục này.",
+    "emptyDesc": "Không có thông báo phù hợp với bộ lọc hoặc từ khóa tìm kiếm.",
+    "unreadDot": "Chưa đọc",
+    "markAsRead": "Đánh dấu đã đọc",
+    "dismiss": "Ẩn thông báo",
+    "viewDetail": "Xem chi tiết",
+    "loadingMore": "Đang tải thêm...",
+    "loadMore": "Tải thêm thông báo",
+    "categories": {
+      "all": "Tất cả",
+      "booking": "Đặt chỗ",
+      "ticket": "Vé hỗ trợ",
+      "finance": "Tài chính & Hoàn tiền",
+      "account": "Hệ thống & tài khoản"
+    },
+    "categoryBadge": {
+      "booking": "Đặt chỗ",
+      "ticket": "Vé hỗ trợ",
+      "finance": "Tài chính",
+      "account": "Hệ thống"
+    }
+  },
+  "notificationBell": {
+    "title": "Thông báo",
+    "headerTitle": "Hộp Thông Báo",
+    "unreadCount": "{{count}} chưa đọc",
+    "allRead": "Đã đọc hết",
+    "markAllRead": "Đọc tất cả",
+    "markAllReadTitle": "Đánh dấu tất cả thông báo là đã đọc",
+    "statusAll": "Tất cả ({{count}})",
+    "statusUnread": "Chưa đọc ({{count}})",
+    "filterPlaceholder": "Lọc...",
+    "emptyUnread": "Bạn đã đọc hết mọi thông báo! 🎉",
+    "emptyFilter": "Không có thông báo phù hợp",
+    "emptyDefault": "Không có thông báo mới",
+    "markAsRead": "Đánh dấu đã đọc",
+    "dismiss": "Xóa thông báo",
+    "footerAllRead": "Tất cả đã đọc",
+    "footerUnread": "{{unreadCount}} chưa đọc trong tổng số {{total}}",
+    "openCenter": "Trung tâm thông báo",
+    "categories": {
+      "all": "Tất cả",
+      "booking": "Đặt chỗ",
+      "ticket": "Vé hỗ trợ",
+      "finance": "Tài chính",
+      "account": "Hệ thống"
+    }
   }
 }
+

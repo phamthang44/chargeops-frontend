@@ -16,6 +16,7 @@ import {
   useMarkAllAsRead,
   useDismissNotification,
 } from '../../shared/notifications/useNotifications';
+import { formatRelativeTime } from '../../shared/notifications/formatRelativeTime';
 import { resolveNotificationI18n } from '@chargeops/api';
 
 export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
@@ -47,22 +48,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
 
   const displayItems = useMemo<NotificationItem[]>(() => {
     return serverItems.map((n) => {
-      let displayTime = n.time;
-      if (!displayTime && n.createdAt) {
-        try {
-          const diffMs = Date.now() - new Date(n.createdAt).getTime();
-          const diffMins = Math.floor(diffMs / 60_000);
-          if (diffMins < 1) displayTime = 'Vừa xong';
-          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
-          else {
-            const diffHours = Math.floor(diffMins / 60);
-            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
-            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
-          }
-        } catch {
-          displayTime = undefined;
-        }
-      }
+      const displayTime = n.time || formatRelativeTime(n.createdAt, t);
 
       const navigateToTarget = () => {
         if (n.primaryAction?.actionUrl) {
@@ -121,23 +107,23 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
             {context === 'owner' ? (
               <>
                 <IconBolt size={16} className="text-owner-deep" />
-                Vận hành trạm
+                {t('notifications.center.scopeOwnerTitle', 'Vận hành trạm')}
               </>
             ) : (
               <>
                 <IconUsers size={16} className="text-brand" />
-                Cá nhân & Khiếu nại
+                {t('notifications.center.scopePersonalTitle', 'Cá nhân & Khiếu nại')}
               </>
             )}
           </h2>
           <p className="text-xs text-muted mt-0.5">
             {context === 'owner'
-              ? 'Thông báo nghiệp vụ trạm: gán vé hỗ trợ, hoàn tiền và sự cố trụ sạc của trạm bạn sở hữu.'
-              : 'Thông báo cá nhân: phản hồi các ticket bạn đã gửi khiếu nại và thông báo tài khoản.'}
+              ? t('notifications.center.scopeOwnerSubtitle', 'Thông báo nghiệp vụ trạm: gán vé hỗ trợ, hoàn tiền và sự cố trụ sạc của trạm bạn sở hữu.')
+              : t('notifications.center.scopePersonalSubtitle', 'Thông báo cá nhân: phản hồi các ticket bạn đã gửi khiếu nại và thông báo tài khoản.')}
           </p>
         </div>
 
-        <div className="inline-flex p-1 bg-chip rounded-xl border border-line/60 self-start sm:self-auto shrink-0" role="tablist" aria-label="Phạm vi thông báo">
+        <div className="inline-flex p-1 bg-chip rounded-xl border border-line/60 self-start sm:self-auto shrink-0" role="tablist" aria-label={t('notifications.center.scopeLabel', 'Phạm vi thông báo')}>
           <button
             type="button"
             role="tab"
@@ -157,7 +143,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
             }}
           >
             <IconBolt size={14} className={context === 'owner' ? 'text-owner-deep' : 'text-muted'} />
-            Vận hành trạm
+            {t('notifications.center.tabOwner', 'Vận hành trạm')}
           </button>
 
           <button
@@ -179,7 +165,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
             }}
           >
             <IconUsers size={14} className={context === 'personal' ? 'text-brand' : 'text-muted'} />
-            Cá nhân
+            {t('notifications.center.tabPersonal', 'Cá nhân')}
           </button>
         </div>
       </div>
@@ -187,14 +173,14 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
       {(markAsRead.isError || markAllAsRead.isError || dismiss.isError) && (
         <div className="rounded-xl border border-bad/30 bg-bad-soft/30 px-4 py-2.5 text-xs text-bad-deep flex items-center gap-2" role="alert">
           <IconShieldAlert size={15} />
-          <span>Không thể cập nhật thông báo. Vui lòng thử lại.</span>
+          <span>{t('notifications.center.mutationError', 'Không thể cập nhật thông báo. Vui lòng thử lại.')}</span>
         </div>
       )}
       {isFetchNextPageError && (
         <div className="rounded-xl border border-warn/30 bg-warn-soft/30 px-4 py-2.5 text-xs text-warn-deep flex items-center justify-between gap-2" role="alert">
-          <span>Không tải được trang tiếp theo. Bấm tải thêm để thử lại.</span>
+          <span>{t('notifications.center.fetchNextError', 'Không tải được trang tiếp theo. Bấm tải thêm để thử lại.')}</span>
           <button type="button" onClick={() => void loadMore()} className="underline font-semibold hover:opacity-80">
-            Thử lại
+            {t('notifications.center.retry', 'Thử lại')}
           </button>
         </div>
       )}
@@ -203,9 +189,9 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
         serverFilters
         onFilterChange={(nextCategory, nextUnread) => { setCategory(nextCategory); setUnread(nextUnread); }}
         categories={context === 'owner' ? ['all', 'ticket', 'finance'] : ['all', 'ticket', 'account']}
-        description={context === 'owner' ? 'Thông báo vận hành các trạm của bạn. Kết quả ticket do bạn báo nằm trong mục Cá nhân.' : 'Thông báo về ticket do bạn báo và tài khoản của bạn.'}
+        description={context === 'owner' ? t('notifications.center.ownerDescription', 'Thông báo vận hành các trạm của bạn. Kết quả ticket do bạn báo nằm trong mục Cá nhân.') : t('notifications.center.personalDescription', 'Thông báo về ticket do bạn báo và tài khoản của bạn.')}
         loading={isPending}
-        error={isError && !isFetchNextPageError ? 'Không tải được thông báo. Vui lòng thử lại.' : undefined}
+        error={isError && !isFetchNextPageError ? t('notifications.center.fetchError', 'Không tải được thông báo. Vui lòng thử lại.') : undefined}
         onRetry={() => { void refetch(); }}
         countUnavailable={unreadCount === undefined || countError}
         items={displayItems}
@@ -220,3 +206,4 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
     </div>
   );
 }
+

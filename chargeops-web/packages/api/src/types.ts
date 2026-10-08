@@ -387,6 +387,7 @@ export interface Connector {
   faultCount?: number;
   lastSeen?: string;
   createdAt?: string;
+  activeIncidentId?: string | null;
 }
 
 export interface ConnectorProvisioningGroup {
@@ -397,6 +398,20 @@ export interface ConnectorProvisioningGroup {
 
 export type EquipmentStatusActorType = 'ADMIN' | 'OWNER' | 'SYSTEM';
 export type ChargePointStatusDimension = 'PROVISIONING' | 'OPERATIONAL';
+
+/**
+ * Which incident action produced a `connector_status_events.reason` audit string
+ * (`INCIDENT_REPORT:<id>`, `INCIDENT_RECOVER:<id>`, `INCIDENT_SESSION_STOP:<id>:<bookingId>`).
+ */
+export type IncidentAuditAction = 'INCIDENT_REPORT' | 'INCIDENT_RECOVER' | 'INCIDENT_SESSION_STOP';
+
+/** Structured incident reference carried by status-history items. */
+export interface IncidentReasonRef {
+  incidentAction?: IncidentAuditAction | null;
+  incidentId?: string | null;
+  /** Full text resolved server-side from `connector_incidents` (not the 500-char audit copy). */
+  incidentDetail?: string | null;
+}
 
 export interface ChargePointStatusEvent {
   id: string;
@@ -415,6 +430,9 @@ export interface ConnectorStatusEvent {
   fromStatus: ConnectorRuntimeStatus | string;
   toStatus: ConnectorRuntimeStatus | string;
   reason?: string | null;
+  incidentAction?: IncidentAuditAction | null;
+  incidentId?: string | null;
+  incidentDetail?: string | null;
   actorType: EquipmentStatusActorType;
   performedById?: string | null;
   performedByDisplayName?: string | null;
@@ -1879,6 +1897,7 @@ export interface StaffConnectorItem {
   connectorType: ConnectorType;
   runtimeStatus: ConnectorRuntimeStatus;
   version: number;
+  activeIncidentId?: string | null;
 }
 
 export type StaffHistoryActorType = 'ADMIN' | 'OWNER' | 'STAFF' | 'SYSTEM';
@@ -1890,6 +1909,9 @@ export interface StaffEquipmentHistoryItem {
   fromStatus: string;
   toStatus: string;
   reason: string | null;
+  incidentAction?: IncidentAuditAction | null;
+  incidentId?: string | null;
+  incidentDetail?: string | null;
   actorType: StaffHistoryActorType;
   performedByDisplayName: string | null;
   performedAt: string;

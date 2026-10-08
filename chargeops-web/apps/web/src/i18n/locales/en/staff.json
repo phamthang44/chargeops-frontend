@@ -55,6 +55,10 @@
       }
     }
   },
+  "notifications": {
+    "title": "Station Notifications",
+    "description": "Station operational notices: support tickets, charger incidents, and account updates."
+  },
   "stationStatus": {
     "OPERATING": "Operating",
     "PAUSED": "Paused",
@@ -122,6 +126,10 @@
     "inUseLock": "Charging state is managed by the system",
     "historyBtn": "History",
     "reportBtn": "Report incident",
+    "incidentStatus": "INCIDENT",
+    "handlingIncident": "Incident in progress",
+    "incidentBlockedTooltip": "Connector has an active incident. Please resolve the incident before bringing it back online.",
+    "resolveBtn": "Resolve incident",
     "setTo": "→ {{status}}",
     "kpi": {
       "chargePoints": "Charge points",
@@ -142,9 +150,25 @@
     "incidentTitle": "Technical or emergency incident?",
     "incidentBody": "If the equipment is faulty or unsafe and must be powered down now, activate incident reporting to take the connector OFFLINE and snapshot affected bookings.",
     "incidentBtn": "Activate emergency incident report",
+    "incidentBlockedTitle": "Connector has an active emergency incident",
+    "incidentBlockedBody": "The system does not allow bringing the connector back online while an incident is open. Please use the \"Resolve incident\" action to complete recovery first.",
     "reasonLabel": "Reason for the status change",
     "reasonPlaceholder": "Enter the reason (required for any non-Available status, min 3 characters)...",
     "versionNote": "Current version: v{{version}} — the request uses an optimistic lock; if the equipment changed you will be asked to retry.",
+    "presets": {
+      "maintenance": [
+        "Routine hardware maintenance",
+        "Power line and transformer inspection",
+        "Connector cable cleaning and servicing",
+        "Firmware / control software upgrade"
+      ],
+      "offline": [
+        "Temporary power cut",
+        "Hardware equipment failure",
+        "Station temporarily closed",
+        "Infrastructure construction / repairs"
+      ]
+    },
     "cancel": "Cancel",
     "applying": "Applying…",
     "confirm": "Confirm change"
@@ -165,6 +189,8 @@
       "from": "From",
       "to": "To",
       "reset": "Clear filters",
+      "eyebrow": "Filters",
+      "countNoun": "bookings",
       "resultCount": "{{count}} bookings"
     },
     "table": {

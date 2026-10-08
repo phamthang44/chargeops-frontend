@@ -1,12 +1,13 @@
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Dimensions,
   Linking,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -31,6 +32,7 @@ import {
 } from '@/components/station-detail';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useStationHardwareSocket } from '@/hooks/useStationHardwareSocket';
 import type { RootStackParamList } from '@/navigation/types';
 import { getReviewsByStation, getStationDetail } from '@/services/stationService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -58,50 +60,89 @@ export function StationDetailScreen() {
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const hasLoadedRef = useRef(false);
   const [slide, setSlide] = useState(0);
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
   const [callConfirmVisible, setCallConfirmVisible] = useState(false);
 
-  const loadData = useCallback(() => {
-    let active = true;
-    setLoading(true);
+  // Generation guard: bumped whenever the screen blurs/unmounts so a response
+  // started under a previous focus can never overwrite the current view.
+  const requestSeqRef = useRef(0);
 
+  const fetchAndApply = useCallback(async () => {
+    const seq = ++requestSeqRef.current;
     const token = getAccessToken();
 
-    Promise.all([
-      getStationDetail(params.stationId, { accessToken: token }),
-      getReviewsByStation(params.stationId),
-    ])
-      .then(([detail, revs]) => {
-        if (!active) return;
-        if (detail) {
-          setStation(detail.station);
-          setChargePoints(detail.chargePoints);
-          setConnectors(detail.connectors);
-          setReviews(revs);
+    try {
+      const [detail, revs] = await Promise.all([
+        getStationDetail(params.stationId, { accessToken: token }),
+        getReviewsByStation(params.stationId),
+      ]);
+      if (seq !== requestSeqRef.current) return;
+      if (detail) {
+        hasLoadedRef.current = true;
+        setStation(detail.station);
+        setChargePoints(detail.chargePoints);
+        setConnectors(detail.connectors);
+        setReviews(revs);
 
+        setSelectedConnectorId((prevSelectedId) => {
+          if (
+            prevSelectedId &&
+            detail.connectors.some((c) => c.id === prevSelectedId && c.runtimeStatus === 'AVAILABLE')
+          ) {
+            return prevSelectedId;
+          }
           const firstAvail = detail.connectors.find((c) => c.runtimeStatus === 'AVAILABLE');
-          if (firstAvail) setSelectedConnectorId(firstAvail.id);
-          else if (detail.connectors[0]) setSelectedConnectorId(detail.connectors[0].id);
-        } else {
-          setStation(null);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!active) return;
+          return firstAvail ? firstAvail.id : null;
+        });
+      } else if (!hasLoadedRef.current) {
         setStation(null);
-        setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
+      }
+    } catch {
+      if (seq !== requestSeqRef.current) return;
+      // Initial failure shows the error screen; later failures keep the data
+      // already on screen (socket/poll refetches must not blank the view).
+      if (!hasLoadedRef.current) {
+        setStation(null);
+      }
+    }
   }, [params.stationId, getAccessToken]);
 
-  useEffect(() => {
-    return loadData();
+  const { requestManualRefetch } = useStationHardwareSocket(params.stationId, fetchAndApply);
+
+  const loadData = useCallback(
+    async (mode: 'initial' | 'revalidate' | 'manual') => {
+      if (mode === 'manual') {
+        setRefreshing(true);
+      } else if (mode === 'initial' && !hasLoadedRef.current) {
+        setLoading(true);
+      }
+      try {
+        // All triggers (focus, pull-to-refresh, socket hint, poll) share one
+        // throttled pipeline; this resolves once a fresh refetch has completed.
+        await requestManualRefetch();
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [requestManualRefetch],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadData(hasLoadedRef.current ? 'revalidate' : 'initial');
+      return () => {
+        requestSeqRef.current += 1;
+      };
+    }, [loadData]),
+  );
+
+  const onRefresh = useCallback(() => {
+    void loadData('manual');
   }, [loadData]);
 
   useEffect(() => {
@@ -168,7 +209,13 @@ export function StationDetailScreen() {
   );
 
   const isOperatingAllowed = opState === 'OPEN' || isClosedBySchedule;
-  const canBook = isOperatingAllowed && (station?.totalConnectors ?? 0) > 0 && !!selectedConnectorId && hasValidPolicy;
+  const isSelectedConnAvailable = selectedConn?.runtimeStatus === 'AVAILABLE';
+  const canBook =
+    isOperatingAllowed &&
+    (station?.totalConnectors ?? 0) > 0 &&
+    !!selectedConnectorId &&
+    isSelectedConnAvailable &&
+    hasValidPolicy;
 
   const bookButtonLabel = isPaused
     ? t('stationDetail.action.paused')
@@ -198,9 +245,13 @@ export function StationDetailScreen() {
               ? t('stationDetail.fullHint')
               : !selectedConnectorId
                 ? t('stationDetail.selectConnectorHint')
-                : !hasValidPolicy
-                  ? t('stationDetail.policy.unavailable')
-                  : null;
+                : !isSelectedConnAvailable
+                  ? (selectedConn?.runtimeStatus === 'MAINTENANCE'
+                      ? t('stationDetail.operatingState.MAINTENANCE')
+                      : t('stationDetail.status.OFFLINE'))
+                  : !hasValidPolicy
+                    ? t('stationDetail.policy.unavailable')
+                    : null;
 
   const areaLabel = station
     ? [station.wardName, station.provinceName].filter(Boolean).join(', ')
@@ -274,7 +325,7 @@ export function StationDetailScreen() {
   };
 
   const handleBook = () => {
-    if (!canBook || !selectedConnectorId) return;
+    if (!canBook || !selectedConnectorId || !isSelectedConnAvailable) return;
     navigation.navigate('TimeRangePicker', {
       stationId: params.stationId,
       connectorId: selectedConnectorId,
@@ -306,7 +357,7 @@ export function StationDetailScreen() {
           {t('stationDetail.errorLoadDesc')}
         </Text>
         <Pressable
-          onPress={() => loadData()}
+          onPress={() => void loadData('initial')}
           style={[styles.retryBtn, { backgroundColor: themeColors.primary }]}
         >
           <Text style={styles.retryBtnText}>{t('common.retry', 'Thử lại')}</Text>
@@ -320,6 +371,14 @@ export function StationDetailScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={themeColors.primary}
+            colors={[themeColors.primary]}
+          />
+        }
       >
         {/* Hero Gallery with Floating Back, Title Pill & Favorite Buttons */}
         <StationHeroGallery

@@ -9,6 +9,7 @@ import {
   useMarkAllAsRead,
   useDismissNotification,
 } from '../../shared/notifications/useNotifications';
+import { formatRelativeTime } from '../../shared/notifications/formatRelativeTime';
 import { resolveNotificationI18n } from '@chargeops/api';
 import { useStaffStation } from '../context/StaffStationContext';
 
@@ -39,22 +40,7 @@ export function StaffNotifications({ base = '/staff' }: { base?: string }) {
 
   const displayItems = useMemo<NotificationItem[]>(() => {
     return serverItems.map((n) => {
-      let displayTime = n.time;
-      if (!displayTime && n.createdAt) {
-        try {
-          const diffMs = Date.now() - new Date(n.createdAt).getTime();
-          const diffMins = Math.floor(diffMs / 60_000);
-          if (diffMins < 1) displayTime = 'Vừa xong';
-          else if (diffMins < 60) displayTime = `${diffMins} phút trước`;
-          else {
-            const diffHours = Math.floor(diffMins / 60);
-            if (diffHours < 24) displayTime = `${diffHours} giờ trước`;
-            else displayTime = `${Math.floor(diffHours / 24)} ngày trước`;
-          }
-        } catch {
-          displayTime = undefined;
-        }
-      }
+      const displayTime = n.time || formatRelativeTime(n.createdAt, t);
 
       const navigateToTarget = () => {
         if (n.primaryAction?.actionUrl) {
@@ -109,6 +95,9 @@ export function StaffNotifications({ base = '/staff' }: { base?: string }) {
       <NotificationCenter
         items={displayItems}
         unreadCount={unreadCount}
+        title={t('notifications.title', 'Thông báo trạm')}
+        description={t('notifications.description', 'Thông báo nghiệp vụ trạm: vé hỗ trợ, sự cố trụ sạc và thông tin tài khoản.')}
+        categories={['all', 'ticket', 'account']}
         onMarkRead={handleMarkRead}
         onMarkAllRead={handleMarkAllRead}
         onDismiss={handleDismiss}
@@ -119,3 +108,4 @@ export function StaffNotifications({ base = '/staff' }: { base?: string }) {
     </div>
   );
 }
+

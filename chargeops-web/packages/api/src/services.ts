@@ -19,6 +19,10 @@ import type {
   AdministrativeWard,
   AnalyticsOverview,
   AssistantAnswer,
+  AssistantCitation,
+  AssistantQuotaDetails,
+  ConversationPage,
+  MessagePage,
   Booking,
   BookingListParams,
   BookingSummary,
@@ -434,8 +438,10 @@ export interface PolicyService {
   docs(): Promise<PolicyDoc[]>;
   save(doc: { id?: string; category: string; content: string }): Promise<PolicyDoc>;
   remove(id: string): Promise<void>;
-  /** Owner assistant (FR15, ask-only RAG). */
-  ask(question: string): Promise<AssistantAnswer>;
+  /** Owner assistant (FR15, BKG-067 RAG + history recovery). */
+  ask(question: string, locale?: 'vi' | 'en', conversationId?: string): Promise<AssistantAnswer>;
+  conversations(lastId?: string, limit?: number): Promise<ConversationPage>;
+  messages(conversationId: string, firstId?: string, limit?: number): Promise<MessagePage>;
 }
 
 export interface TicketRoleOptions {
@@ -533,8 +539,10 @@ export interface LegalDocumentSearchParams {
   docType?: LegalDocType;
   audience?: TargetAudience;
   active?: boolean;
+  locale?: string;
   page?: number;
   size?: number;
+  pageSize?: number;
   sort?: string;
 }
 

@@ -99,18 +99,42 @@
   },
   "assistant": {
     "title": "Policy Assistant",
-    "subtitle": "Look up cancellation, check-in, and payment regulations.",
+    "subtitle": "Look up cancellation, check-in, payment, and operation regulations.",
     "sub": "Lookup only · answers are based on the policy KB (RAG)",
-    "greeting": "Hello! I am the ChargeOps Policy Assistant. Ask me about cancellation/refund policies, check-in windows, payments, or system operations.",
-    "error": "Sorry, an error occurred: {{message}}",
-    "searching": "Searching...",
-    "placeholder": "Ask about cancellations, check-ins, payments...",
+    "greeting": "Hello! I am the ChargeOps Policy Assistant. You can ask me about cancellation/refund rules, check-in windows, payments, or station operations according to v4.9 standards.",
+    "disclaimerFooter": "Assistant answers are grounded on ChargeOps v4.9 policies. Financial actions (cancellations, refund approvals) must be performed via their dedicated management interfaces.",
+    "searching": "Searching policies…",
+    "placeholder": "Ask about cancellations, check-ins, payments (max 2000 chars)…",
     "send": "Send",
     "sources": "Sources: {{sources}}",
+    "citations": "Cited sources ({{count}})",
+    "noCitations": "No cited sources",
+    "relevance": "Relevance: {{score}}%",
+    "history": "Chat History",
+    "newChat": "New Chat",
+    "noHistory": "No chat history yet",
+    "loadMore": "Load more",
+    "loadingHistory": "Loading history…",
+    "loadOlderMessages": "Load older messages",
+    "conversationNotFound": "The conversation does not exist or has been deleted.",
+    "viewSegment": "View excerpt",
+    "hideSegment": "Collapse",
+    "errors": {
+      "badRequest": "Invalid question or exceeds 2000 characters. Please verify and try again.",
+      "forbidden": "Only Station Owner accounts have access to the Policy Assistant.",
+      "quotaExceeded": "Daily query quota reached ({{count}} queries/day). Please try again after {{time}}.",
+      "quotaCountdown": "Quota exhausted for today. Resets at: {{time}}",
+      "timeout": "The policy lookup system is busy or timed out. Please try again.",
+      "serviceUnavailable": "The assistant service is temporarily unavailable. Please try again later.",
+      "unknown": "Could not submit inquiry: {{message}}",
+      "retry": "Retry inquiry",
+      "dismiss": "Dismiss"
+    },
     "quickQs": {
       "cancelRefund": "Refund policy on cancellation?",
       "checkinWindow": "How long is the check-in window?",
-      "bookingConfirm": "When is a booking confirmed?"
+      "bookingConfirm": "When is a booking confirmed?",
+      "stationFailure": "Refund rules for station failures?"
     }
   },
   "bookings": {

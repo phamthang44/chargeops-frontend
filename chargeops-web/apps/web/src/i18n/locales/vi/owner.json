@@ -99,18 +99,42 @@
   },
   "assistant": {
     "title": "Trợ lý chính sách",
-    "subtitle": "Tra cứu quy định hủy, check-in, thanh toán.",
+    "subtitle": "Tra cứu quy định hủy, check-in, thanh toán và vận hành.",
     "sub": "Chỉ tra cứu · trả lời dựa trên kho chính sách (RAG)",
-    "greeting": "Xin chào! Mình là Trợ lý chính sách ChargeOps. Hỏi mình về quy định hủy/hoàn tiền, cửa sổ check-in, thanh toán, hay cách hoạt động của hệ thống nhé.",
-    "error": "Xin lỗi, đã có lỗi: {{message}}",
-    "searching": "Đang tra cứu…",
-    "placeholder": "Hỏi về quy định hủy, check-in, thanh toán…",
+    "greeting": "Xin chào! Tôi là Trợ lý chính sách ChargeOps. Bạn có thể hỏi tôi về quy định hủy/hoàn tiền, cửa sổ check-in, thanh toán hoặc vận hành trạm sạc theo chuẩn v4.9.",
+    "disclaimerFooter": "Trợ lý giải đáp dựa trên chính sách ChargeOps v4.9. Các hành động tài chính (hủy, duyệt hoàn tiền) cần thực hiện trên giao diện quản lý tương ứng.",
+    "searching": "Đang tra cứu chính sách…",
+    "placeholder": "Hỏi về quy định hủy, check-in, thanh toán (tối đa 2000 ký tự)…",
     "send": "Gửi",
     "sources": "Nguồn: {{sources}}",
+    "citations": "Nguồn trích dẫn ({{count}})",
+    "noCitations": "Chưa có nguồn trích dẫn",
+    "relevance": "Độ phù hợp: {{score}}%",
+    "history": "Lịch sử trò chuyện",
+    "newChat": "Đoạn chat mới",
+    "noHistory": "Chưa có cuộc trò chuyện nào",
+    "loadMore": "Tải thêm",
+    "loadingHistory": "Đang tải lịch sử…",
+    "loadOlderMessages": "Tải tin nhắn cũ hơn",
+    "conversationNotFound": "Cuộc trò chuyện không tồn tại hoặc đã bị xóa.",
+    "viewSegment": "Xem trích đoạn",
+    "hideSegment": "Thu gọn",
+    "errors": {
+      "badRequest": "Câu hỏi không hợp lệ hoặc vượt quá 2000 ký tự. Vui lòng kiểm tra lại.",
+      "forbidden": "Chỉ tài khoản Chủ trạm (Owner) mới có quyền sử dụng Trợ lý chính sách.",
+      "quotaExceeded": "Đã đạt giới hạn lượt hỏi trong ngày ({{count}} lượt/ngày). Vui lòng thử lại sau {{time}}.",
+      "quotaCountdown": "Hết hạn ngạch hôm nay. Mở lại lúc: {{time}}",
+      "timeout": "Hệ thống tra cứu đang bận hoặc phản hồi chậm. Vui lòng bấm thử lại.",
+      "serviceUnavailable": "Dịch vụ trợ lý tạm thời không khả dụng. Vui lòng thử lại sau.",
+      "unknown": "Không thể gửi câu hỏi: {{message}}",
+      "retry": "Thử lại câu hỏi",
+      "dismiss": "Đóng"
+    },
     "quickQs": {
       "cancelRefund": "Chính sách hoàn tiền khi hủy?",
       "checkinWindow": "Cửa sổ check-in kéo dài bao lâu?",
-      "bookingConfirm": "Khi nào đặt chỗ được xác nhận?"
+      "bookingConfirm": "Khi nào đặt chỗ được xác nhận?",
+      "stationFailure": "Quy định hoàn tiền khi trạm gặp sự cố?"
     }
   },
   "bookings": {

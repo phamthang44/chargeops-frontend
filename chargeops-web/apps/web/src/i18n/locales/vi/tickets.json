@@ -26,7 +26,7 @@
     "platform": "Sự cố Nền tảng & Hệ thống",
     "escalated": "Yêu cầu Admin xem xét từ trạm",
     "station": "Giám sát Sự cố Trạm",
-    "platformHelp": "Admin trực tiếp tiếp nhận và xử lý các sự cố liên quan đến tài khoản tài xế, app lỗi, nạp rút tiền cọc và thanh toán toàn nền tảng.",
+    "platformHelp": "Admin tiếp nhận sự cố nền tảng về tài khoản, ứng dụng và đối soát Simulator; không có tiền cọc, ví/nạp rút hoặc queue hoàn toàn nền tảng.",
     "escalatedHelp": "Admin xem xét các yêu cầu hỗ trợ được chuyển cấp, trả về trạm để tiếp tục xử lý hoặc kết thúc support case với lý do rõ ràng.",
     "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin chỉ xem xét ticket trạm khi có yêu cầu chuyển cấp đang mở."
   },
@@ -91,7 +91,7 @@
     "refundPolicy": {
       "cardTitle": "Rà soát chính sách hoàn tiền",
       "cardSubtitle": "Thẩm quyền trọng tài rà soát theo case tranh chấp",
-      "infoNote": "Quản trị viên rà soát việc áp dụng chính sách hoàn 100% của ChargeOps trong đúng case này. Quyết định có hiệu lực thi hành ngay trên môi trường Simulator.",
+      "infoNote": "Quản trị viên rà soát việc áp dụng chính sách hoàn 100% của ChargeOps trong đúng case này. Quyết định có hiệu lực xác lập nghĩa vụ; kết quả thực thi Simulator được theo dõi riêng.",
       "reviewBtn": "Ra phán quyết chính sách hoàn tiền",
       "reReviewBtn": "Rà soát lại phán quyết chính sách",
       "card": {
@@ -109,7 +109,7 @@
       "modal": {
         "title": "Rà soát chính sách hoàn tiền tranh chấp",
         "mandateTitle": "Thẩm quyền phán quyết chính sách",
-        "mandateDesc": "Quản trị viên rà soát dựa trên biên bản kỹ thuật và dữ liệu đo đạc của trạm. Quyết định áp dụng hoàn đủ gói có hiệu lực thi hành ngay lập tức dù Chủ trạm không đồng ý.",
+        "mandateDesc": "Quản trị viên rà soát dựa trên biên bản kỹ thuật và dữ liệu đo đạc của trạm. Quyết định đủ căn cứ xác lập nghĩa vụ hoàn đủ gói dù Chủ trạm không đồng ý; không chứng minh attempt đã thành công.",
         "outcomeLabel": "Kết quả rà soát chính sách",
         "grantTitle": "Hoàn đủ 100% gói",
         "insufficientTitle": "Chưa đủ căn cứ",
@@ -426,7 +426,7 @@
       "autoGrantedBadge": "Có hồ sơ hoàn tiền",
       "desc": "Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận ticket không phải bằng chứng đã chuyển tiền.",
       "viewDetail": "Chi tiết hoàn tiền →",
-      "policyNotice": "Nếu xác nhận lỗi phía trạm, Admin xem xét nghĩa vụ hoàn đủ giá gói theo chính sách. Ghi kết luận không tự chuyển tiền."
+      "policyNotice": "Lỗi trạm cần quyết định trách nhiệm đúng scope của Owner hoặc grant đúng case escalated của Admin; finding không tạo nghĩa vụ hay chuyển tiền."
     },
     "loadError": "Không tải được ticket: {{message}}",
     "thread": "Luồng trao đổi & giải quyết sự cố",

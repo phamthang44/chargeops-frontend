@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -51,7 +51,7 @@ export function LegalPolicies({
   title,
   subtitle,
 }: LegalPoliciesProps) {
-  const { t } = useTranslation('ui');
+  const { t, i18n } = useTranslation('ui');
   const api = useApi();
   const toast = useToast();
   const [searchInput, setSearchInput] = useState('');
@@ -60,15 +60,23 @@ export function LegalPolicies({
   const [inDocSearch, setInDocSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'all' | 'license' | 'operation' | 'general'>('all');
 
+  const currentLocale = i18n.language?.startsWith('en') ? 'en' : 'vi';
+
+  // Reset selected slug when language switch occurs so it picks the active language document
+  useEffect(() => {
+    setSelectedSlug(undefined);
+  }, [currentLocale]);
+
   const getDocTypeLabel = (docType: LegalDocType) =>
     t(`legal.docTypes.${docType}`, { defaultValue: DOC_TYPE_LABELS[docType] || docType });
 
-  // Fetch list of documents — only queries when committedSearch changes on Submit/Enter
+  // Fetch list of documents — scoped by currentLocale and committedSearch
   const { data: listData, isLoading: listLoading, isFetching: listFetching } = useQuery({
-    queryKey: [`${queryKeyPrefix}-legal-documents`, committedSearch],
+    queryKey: [`${queryKeyPrefix}-legal-documents`, currentLocale, committedSearch],
     queryFn: () =>
       api.legalDocuments.list({
         audience,
+        locale: currentLocale,
         search: committedSearch.trim() || undefined,
       }),
   });
@@ -102,17 +110,18 @@ export function LegalPolicies({
     }
     return allDocs.filter(
       (d) =>
-        d.slug === 'terms-of-service' ||
-        d.slug === 'privacy-policy' ||
-        d.slug === 'operational-regulations',
+        d.slug.startsWith('terms-of-service') ||
+        d.slug.startsWith('privacy-policy') ||
+        d.slug.startsWith('operational-regulations') ||
+        d.slug.startsWith('cancellation-and-refund'),
     );
   }, [allDocs, selectedGroup]);
 
   // Default select first doc if selectedSlug not in filtered list
   const activeSlug = useMemo(() => {
     if (selectedSlug && filteredDocs.some((d) => d.slug === selectedSlug)) return selectedSlug;
-    return filteredDocs[0]?.slug ?? defaultSlug ?? 'terms-of-service';
-  }, [defaultSlug, filteredDocs, selectedSlug]);
+    return filteredDocs[0]?.slug ?? defaultSlug ?? (currentLocale === 'en' ? 'terms-of-service-en' : 'terms-of-service');
+  }, [currentLocale, defaultSlug, filteredDocs, selectedSlug]);
 
   // Fetch full detail of active document
   const { data: activeDoc, isLoading: docLoading } = useQuery({

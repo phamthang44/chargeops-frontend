@@ -1290,13 +1290,34 @@ export function createRestServices(http: HttpClient): Services {
       docs: () => http.get('/policies'),
       save: (doc) => (doc.id ? http.patch(`/policies/${doc.id}`, doc) : http.post('/policies', doc)),
       remove: (id) => http.delete(`/policies/${id}`),
-      ask: (question) => http.post('/assistant/ask', { question }),
+      ask: (question, locale, conversationId) =>
+        http.post(
+          '/assistant/ask',
+          conversationId ? { question, locale, conversationId } : { question, locale },
+          { timeoutMs: 70_000 },
+        ),
+      conversations: (lastId, limit = 20) =>
+        http.get('/assistant/conversations', lastId ? { lastId, limit } : { limit }, { timeoutMs: 15_000 }),
+      messages: (conversationId, firstId, limit = 20) =>
+        http.get(
+          `/assistant/conversations/${encodeURIComponent(conversationId)}/messages`,
+          firstId ? { firstId, limit } : { limit },
+          { timeoutMs: 15_000 },
+        ),
     },
 
     legalDocuments: {
-      list: (params = {}) => http.get('/legal-documents', params),
+      list: (params: any = {}) => {
+        const query = { ...params };
+        if (query.pageSize && !query.size) query.size = query.pageSize;
+        return http.get('/legal-documents', query);
+      },
       get: (slug) => http.get(`/legal-documents/${slug}`),
-      adminList: (params = {}) => http.get('/admin/legal-documents', params),
+      adminList: (params: any = {}) => {
+        const query = { ...params };
+        if (query.pageSize && !query.size) query.size = query.pageSize;
+        return http.get('/admin/legal-documents', query);
+      },
       adminGet: (id) => http.get(`/admin/legal-documents/${id}`),
       adminCreate: (doc) => http.post('/admin/legal-documents', doc),
       adminUpdate: (id, doc) => http.put(`/admin/legal-documents/${id}`, doc),

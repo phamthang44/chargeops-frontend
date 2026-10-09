@@ -1276,10 +1276,60 @@ export interface PolicyDoc {
   updatedAt: string;
 }
 
+export interface AssistantCitation {
+  documentId?: string;
+  documentName?: string;
+  segmentId?: string;
+  content?: string;
+  score?: number;
+}
+
+export interface AssistantQuotaDetails {
+  resetAt?: string;
+  usedQueries?: number;
+  maxDailyQueries?: number;
+  scope?: string;
+}
+
 export interface AssistantAnswer {
-  text: string;
-  /** Policy doc ids the RAG answer was grounded on. */
-  sources: string[];
+  answer: string;
+  locale?: 'vi' | 'en';
+  messageId?: string;
+  conversationId?: string;
+  citations?: AssistantCitation[];
+  /** Backwards-compatible alias for answer */
+  text?: string;
+  /** Backwards-compatible alias for citation document ids/names */
+  sources?: string[];
+}
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationPage {
+  items: ConversationSummary[];
+  hasMore: boolean;
+  nextCursor?: string | null;
+}
+
+export interface ChatTurn {
+  id: string;
+  conversationId: string;
+  query: string;
+  answer: string;
+  status?: string;
+  createdAt: string;
+  citations?: AssistantCitation[];
+}
+
+export interface MessagePage {
+  items: ChatTurn[];
+  hasMore: boolean;
+  nextCursor?: string | null;
 }
 
 /* ---------- support tickets (FR-cross-cutting) ---------- */

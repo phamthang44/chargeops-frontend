@@ -92,6 +92,8 @@
       "minutesRead": "{{count}} min read",
       "words": "{{count}} words",
       "headings": "{{count}} sections",
+      "wordsUnit": "words",
+      "headingsUnit": "sections",
       "matches": "{{count}} matches",
       "noMatches": "No matches found"
     },

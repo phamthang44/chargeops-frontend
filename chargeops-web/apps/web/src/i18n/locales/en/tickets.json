@@ -26,7 +26,7 @@
     "platform": "Platform & System Issues",
     "escalated": "Station Support Reviews",
     "station": "Station Supervisory Queue",
-    "platformHelp": "Directly handled by Platform Admins for app errors, driver accounts, and platform-level wallet/deposit questions.",
+    "platformHelp": "Admin handles platform account/app issues and Simulator reconciliation; there are no deposits, wallet top-ups/withdrawals or platform-wide refund queue.",
     "escalatedHelp": "Admin reviews escalated support requests, returns them to the station or closes the support case with a documented reason.",
     "stationHelp": "Station Owners and Staff handle incidents directly. Refunds follow the Owner Finance Ledger."
   },
@@ -91,7 +91,7 @@
     "refundPolicy": {
       "cardTitle": "Refund policy review",
       "cardSubtitle": "Arbitration authority for escalated dispute cases",
-      "infoNote": "Admin reviews the application of ChargeOps 100% full package refund policy for this specific dispute case. Decisions take effect immediately on Simulator.",
+      "infoNote": "Admin reviews the application of ChargeOps 100% full package refund policy for this specific dispute case. Decisions establish obligations; Simulator execution outcomes are tracked separately.",
       "reviewBtn": "Adjudicate Refund Policy",
       "reReviewBtn": "Re-adjudicate Refund Policy",
       "card": {
@@ -109,7 +109,7 @@
       "modal": {
         "title": "Dispute Refund Policy Review",
         "mandateTitle": "Arbitration Review Authority",
-        "mandateDesc": "Admin adjudicates based on technical findings and telemetry. Decisions granting full package refund take effect immediately even if the Station Owner objects.",
+        "mandateDesc": "Admin adjudicates based on technical findings and telemetry. Substantiated grants establish a full-package obligation even if the Owner objects; they do not prove a successful attempt.",
         "outcomeLabel": "Policy Review Outcome",
         "grantTitle": "Grant 100% Full Refund",
         "insufficientTitle": "Insufficient Evidence",
@@ -426,7 +426,7 @@
       "autoGrantedBadge": "Refund record exists",
       "desc": "Check each refund record for its current status. A ticket finding does not prove money was transferred.",
       "viewDetail": "Refund Details →",
-      "policyNotice": "If a station failure is confirmed, Admin reviews the full package refund obligation. Recording a finding does not transfer money."
+      "policyNotice": "Station failure requires Owner responsibility within scope or an Admin grant in the exact escalated case; findings do not establish obligations or transfer money."
     },
     "loadError": "Could not load ticket: {{message}}",
     "thread": "Troubleshooting & Communication Thread",

@@ -21,6 +21,7 @@ interface RequestOptions {
   params?: Query;
   body?: unknown;
   headers?: Record<string, string>;
+  timeoutMs?: number;
 }
 
 const TIMEOUT_MS = 15_000;
@@ -50,7 +51,7 @@ export class HttpClient {
         method,
         headers,
         body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
       });
     } catch (e) {
       const timedOut = e instanceof DOMException && e.name === 'TimeoutError';
@@ -112,8 +113,8 @@ export class HttpClient {
     return body as unknown as T;
   }
 
-  get<T>(path: string, params?: Query): Promise<T> {
-    return this.request<T>('GET', path, { params });
+  get<T>(path: string, params?: Query, opts?: Omit<RequestOptions, 'params' | 'body'>): Promise<T> {
+    return this.request<T>('GET', path, { params, ...opts });
   }
   post<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
     return this.request<T>('POST', path, { body, ...opts });

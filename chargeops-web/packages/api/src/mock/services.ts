@@ -2811,23 +2811,90 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
         const i = db.policyDocs.findIndex((x) => x.id === id);
         if (i >= 0) db.policyDocs.splice(i, 1);
       },
-      async ask(question) {
+      async ask(question, locale = 'vi', conversationId) {
         await delay(650);
         // Toy retrieval: keyword match over the KB — the real thing is RAG server-side.
         const q = question.toLowerCase();
         const hit =
           db.policyDocs.find((d) => q.split(/\s+/).filter((w) => w.length > 3).some((w) => d.content.toLowerCase().includes(w))) ??
           db.policyDocs[0];
-        return { text: hit.content, sources: [hit.id] };
+        const answerText = hit ? hit.content : (locale === 'en' ? 'No policy documents match your inquiry.' : 'Không tìm thấy chính sách phù hợp với câu hỏi.');
+        const citations = hit ? [
+          {
+            documentId: hit.id,
+            documentName: hit.category,
+            segmentId: `seg-${hit.id}`,
+            content: hit.content.slice(0, 160) + '...',
+            score: 0.91,
+          }
+        ] : [];
+        const effectiveConvoId = conversationId || 'convo-mock-' + Date.now();
+        return {
+          answer: answerText,
+          text: answerText,
+          locale: locale as 'vi' | 'en',
+          messageId: 'mock-msg-' + Date.now(),
+          conversationId: effectiveConvoId,
+          citations,
+          sources: hit ? [hit.id] : [],
+        };
+      },
+      async conversations(lastId, limit = 20) {
+        await delay(200);
+        return {
+          items: [
+            {
+              id: 'mock-conv-1',
+              title: 'Hỏi về quy định hoàn tiền hủy đặt chỗ',
+              createdAt: new Date(Date.now() - 3600000).toISOString(),
+              updatedAt: new Date(Date.now() - 1800000).toISOString(),
+            },
+            {
+              id: 'mock-conv-2',
+              title: 'Quy trình giải quyết sự cố trụ sạc hỏng',
+              createdAt: new Date(Date.now() - 86400000).toISOString(),
+              updatedAt: new Date(Date.now() - 86400000).toISOString(),
+            },
+          ],
+          hasMore: false,
+          nextCursor: null,
+        };
+      },
+      async messages(conversationId, firstId, limit = 20) {
+        await delay(250);
+        return {
+          items: [
+            {
+              id: 'msg-mock-1',
+              conversationId,
+              query: 'Khách hủy đặt chỗ trong thời gian ân hạn thì xử lý thế nào?',
+              answer: 'Theo quy định BKG-067, nếu khách hủy trong thời gian ân hạn (10 phút từ khi thanh toán thành công), hệ thống sẽ hoàn 100% giá gói.',
+              status: 'normal',
+              createdAt: new Date(Date.now() - 1800000).toISOString(),
+              citations: [
+                {
+                  documentId: 'doc-cancel',
+                  documentName: 'cancellation-and-refunds.vi.md',
+                  segmentId: 'CR-01',
+                  content: 'Trong thời gian ân hạn 10 phút, hoàn 100% nếu phiên chưa bắt đầu.',
+                  score: 0.95,
+                },
+              ],
+            },
+          ],
+          hasMore: false,
+          nextCursor: null,
+        };
       },
     },
 
     legalDocuments: {
       async list(params = {}) {
         await delay();
-        const { search = '', docType, audience } = params;
+        const { search = '', docType, audience, locale } = params;
         const q = search.trim().toLowerCase();
         let rows = [...mockLegalDocs.filter((d) => d.active)];
+        if (locale) rows = rows.filter((d) => d.locale === locale);
         if (docType) rows = rows.filter((d) => d.docType === docType);
         if (audience && audience !== 'ALL') {
           rows = rows.filter((d) => d.targetAudience === audience || d.targetAudience === 'ALL');
@@ -2860,9 +2927,10 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async adminList(params = {}) {
         await delay();
-        const { search = '', docType, audience, active } = params;
+        const { search = '', docType, audience, active, locale } = params;
         const q = search.trim().toLowerCase();
         let rows = [...mockLegalDocs];
+        if (locale) rows = rows.filter((d) => d.locale === locale);
         if (docType) rows = rows.filter((d) => d.docType === docType);
         if (audience) rows = rows.filter((d) => d.targetAudience === audience);
         if (active !== undefined) rows = rows.filter((d) => d.active === active);

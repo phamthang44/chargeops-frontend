@@ -92,6 +92,8 @@
       "minutesRead": "{{count}} phút đọc",
       "words": "{{count}} từ",
       "headings": "{{count}} đề mục",
+      "wordsUnit": "từ",
+      "headingsUnit": "đề mục",
       "matches": "{{count}} kết quả khớp",
       "noMatches": "Không có kết quả khớp"
     },

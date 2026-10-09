@@ -442,18 +442,22 @@ export function PolicyMarkdownViewer({
             <IconBook size={14} className="text-brand" />
             <span>
               <strong className="text-ink font-semibold">{stats.words.toLocaleString()}</strong>{' '}
-              {t('markdownViewer.readingStats.words', {
-                count: stats.words,
-                defaultValue: `${stats.words.toLocaleString()} từ`,
+              {t('markdownViewer.readingStats.wordsUnit', {
+                defaultValue: t('markdownViewer.readingStats.words', {
+                  count: stats.words,
+                  defaultValue: 'từ',
+                }).replace(/^[0-9.,\s]+/, '') || 'từ',
               })}
             </span>
           </div>
           <span className="text-line">•</span>
           <span>
             <strong className="text-ink font-semibold">{headings.length}</strong>{' '}
-            {t('markdownViewer.readingStats.headings', {
-              count: headings.length,
-              defaultValue: `${headings.length} đề mục`,
+            {t('markdownViewer.readingStats.headingsUnit', {
+              defaultValue: t('markdownViewer.readingStats.headings', {
+                count: headings.length,
+                defaultValue: 'đề mục',
+              }).replace(/^[0-9.,\s]+/, '') || 'đề mục',
             })}
           </span>
 

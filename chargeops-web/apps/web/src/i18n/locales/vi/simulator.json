@@ -1,0 +1,181 @@
+{
+  "title": "ChargeOps Physical Charger Simulator",
+  "back": "Quay lại",
+  "modes": {
+    "split": "🛠️ Sandbox Mode",
+    "kiosk": "🖥️ Fullscreen Kiosk"
+  },
+  "logs": {
+    "connectingDiscovery": "Đang kết nối lấy danh sách trạm qua Discovery API...",
+    "unauthorized401": "API /stations trả về 401: Token chưa sẵn sàng hoặc phiên hết hạn.",
+    "loadedStations": "Đã tải {{count}} trạm sạc từ API hệ thống.",
+    "noStations": "Không tìm thấy trạm sạc nào trong hệ thống.",
+    "errorLoadingStations": "Không thể tải danh sách trạm: {{message}}",
+    "loadingConnectors": "Đang tải súng sạc qua API /stations/{{id}}...",
+    "unauthorizedStation401": "API /stations/{{id}} trả về 401 Unauthorized.",
+    "loadedConnectors": "Đã nạp {{count}} súng sạc. Đang chọn: {{name}}",
+    "noConnectors": "Trạm này chưa có cổng sạc nào được cấu hình.",
+    "errorLoadingConnectors": "Lỗi tải danh sách súng sạc: {{message}}",
+    "switchedConnector": "Đã chuyển súng sạc sang {{id}}",
+    "invalidUuidWarn": "[Bỏ qua] Mã \"{{id}}\" không phải UUID cổng sạc hợp lệ. Dùng token mô phỏng...",
+    "fetchingChallenge": "[API] POST /internal/connectors/{{id}}/check-in-challenge...",
+    "challengeReceived": "[Challenge] Nhận token thành công từ Backend Redis: {{token}}... (TTL {{ttl}}s)",
+    "challengeError": "[Lỗi Backend] {{message}}. Sử dụng token mô phỏng tạm thời.",
+    "tokenExpiredAutoRefresh": "[TTL] Mã QR đã hết hạn (0s). Đang tự động tạo mã mới...",
+    "driverScanned": "[Driver App] Tài xế quét mã QR token: {{token}}...",
+    "backendVerified": "[Backend] Xác thực Driver Booking thành công -> Booking status: CHECKED_IN",
+    "screenStateChanged": "Trạng thái màn hình chuyển sang: {{state}}",
+    "syncInputPrompt": "Vui lòng nhập mã hoặc UUID cần tìm",
+    "syncLocalSwitched": "[Đồng bộ] Đã chuyển sang: Trụ {{chargePoint}} · Cổng {{connector}}",
+    "syncStationSwitched": "[Đồng bộ] Đã chuyển sang trạm: {{stationName}} ({{code}})",
+    "syncScanning": "Đang quét tìm \"{{query}}\" qua các trạm trong hệ thống...",
+    "syncFound": "[Đồng bộ thành công] Tìm thấy Trụ \"{{chargePoint}}\" · Cổng \"{{connector}}\" thuộc trạm \"{{stationName}}\"!",
+    "syncNotFound": "Không tìm thấy súng sạc hoặc trạm nào khớp với \"{{query}}\""
+  },
+  "kiosk": {
+    "brandTerminal": "Terminal 4.0",
+    "stationPill": {
+      "charger": "Trụ:",
+      "connector": "Cổng:"
+    },
+    "clockDiagnostic": "4G LTE · 32°C",
+    "ready": {
+      "badge": "Sẵn sàng phục vụ · Dynamic QR Check-in",
+      "title": "Quét mã QR để Check-in & Bắt đầu Sạc",
+      "desc": "Mã QR bảo mật sinh động theo thời gian thực, tự động đổi sau mỗi 60 giây.",
+      "generating": "Đang tạo mã mới...",
+      "noQr": "Chưa có mã QR",
+      "chargerLabel": "Trụ:",
+      "connectorLabel": "Cổng:",
+      "copyId": "Chép ID",
+      "copiedId": "✓ Đã chép",
+      "copyIdTitle": "Sao chép UUID để dán vào tìm kiếm hoặc kiểm tra",
+      "validityTitle": "Thời gian hiệu lực",
+      "validityDesc": "Tự động làm mới khi hết hạn",
+      "refreshNow": "Làm mới mã ngay",
+      "countdownRefreshTooltip": "Nhấn để làm mới mã QR ngay",
+      "countdownExpired": "Hết hạn",
+      "countdownValid": "Hiệu lực",
+      "redisValid": "Mã hợp lệ từ Backend Redis",
+      "localFallback": "Mã cục bộ (Cần kết nối Backend)",
+      "challengeCode": "Mã Challenge:",
+      "copied": "Đã sao chép!",
+      "copy": "Copy",
+      "step1Title": "Quét mã QR",
+      "step1Desc": "Dùng app ChargeOps quét mã",
+      "step2Title": "Cắm súng sạc",
+      "step2Desc": "Rút súng và cắm chặt vào xe",
+      "step3Title": "Tự động sạc",
+      "step3Desc": "Theo dõi thông số trên màn hình"
+    },
+    "checkedIn": {
+      "badge": "Check-in hợp lệ · Driver Verified",
+      "welcome": "Xin chào, {{name}}!",
+      "bookingCodeLabel": "Mã đặt chỗ:",
+      "connectorLabel": "Súng:",
+      "plugPrompt": "Vui lòng cắm súng sạc vào cổng sạc của xe",
+      "plugDesc": "Sau khi cắm súng sạc, hệ thống sẽ tự động bắt đầu cấp nguồn sau 5 giây.",
+      "simulatePlugIn": "⚡ Giả lập: Đã cắm súng sạc (Bắt đầu sạc)",
+      "cancelReturn": "Hủy & Về màn hình chờ"
+    },
+    "charging": {
+      "badge": "Đang sạc nhanh DC · {{type}}",
+      "driverLabel": "Tài xế:",
+      "powerGauge": "Công suất tức thời (Power)",
+      "voltage": "Điện áp: 418 V",
+      "current": "Dòng điện: {{current}} A",
+      "batterySoc": "Mức pin xe (SoC)",
+      "targetSoc": "Mục tiêu: 80%",
+      "energyDelivered": "Điện năng tiêu thụ",
+      "chargingDuration": "Thời gian đã sạc",
+      "totalCost": "Tổng chi phí",
+      "stopSession": "Kết thúc phiên sạc"
+    },
+    "completed": {
+      "title": "Phiên Sạc Hoàn Tất",
+      "thankYou": "Cảm ơn bạn đã sử dụng dịch vụ sạc ChargeOps!",
+      "bookingCodeLabel": "Mã đặt chỗ:",
+      "totalEnergy": "Tổng điện năng:",
+      "chargingDuration": "Thời gian sạc:",
+      "totalCost": "Tổng thanh toán:",
+      "minutesUnit": "phút",
+      "unhookNotice": "⚠️ Vui lòng rút súng sạc và gác lại đúng vị trí trên trụ sạc.",
+      "finishBtn": "Hoàn tất & Về màn hình chờ"
+    },
+    "faulted": {
+      "faultedBadge": "Trụ sạc báo lỗi (Faulted)",
+      "offlineBadge": "Tạm ngưng hoạt động (Offline)",
+      "unavailableTitle": "Cổng sạc tạm thời không khả dụng",
+      "faultedDesc": "Phát hiện sự cố kỹ thuật tại đầu nối CCS2. Kỹ thuật viên đang xử lý.",
+      "offlineDesc": "Cổng sạc đang trong lịch bảo trì định kỳ của trạm.",
+      "hotline": "Hotline hỗ trợ 24/7:",
+      "restoreBtn": "Khôi phục trạng thái sẵn sàng"
+    },
+    "footer": {
+      "addressLabel": "Địa chỉ trạm:",
+      "fwVersion": "Phiên bản FW: 2.4.0-release",
+      "statusLabel": "Trạng thái:",
+      "online": "Trực tuyến"
+    }
+  },
+  "controlPanel": {
+    "title": "Bảng Điều Khiển Simulator",
+    "subtitle": "Mô phỏng phần cứng trụ sạc & kiểm thử API Check-in",
+    "section1Title": "1. Chọn Điểm Sạc & Súng Sạc",
+    "quickSync": {
+      "title": "Đồng bộ nhanh từ Mobile App / Mã trụ",
+      "placeholder": "Dán mã hoặc tìm kiếm (vd: ST-1201-CP-04 C-01, UUID...)",
+      "button": "Đồng bộ",
+      "pasteClipboard": "Dán từ Clipboard",
+      "pasteTooltip": "Dán nhanh nội dung từ Clipboard và đồng bộ ngay"
+    },
+    "stationPicker": {
+      "label": "1. Chọn Trạm Sạc",
+      "fieldLabel": "Trạm sạc:",
+      "loading": "Đang tải danh sách trạm...",
+      "placeholder": "Chọn trạm sạc...",
+      "searchPlaceholder": "Tìm theo tên, địa chỉ, mã trạm, UUID...",
+      "all": "Tất cả",
+      "activeOnly": "Đang hoạt động",
+      "foundCount": "Tìm thấy: {{count}} trạm",
+      "empty": "Không tìm thấy trạm sạc nào phù hợp"
+    },
+    "connectorPicker": {
+      "label": "2. Chọn Súng Sạc (Connector)",
+      "fieldLabel": "Súng sạc (Connector):",
+      "selectedConnector": "Cổng {{code}}",
+      "loading": "Đang tải súng...",
+      "placeholder": "Chọn súng sạc...",
+      "searchPlaceholder": "Tìm theo mã C-01, CCS2, công suất, UUID...",
+      "all": "Tất cả",
+      "availableOnly": "Khả dụng",
+      "foundCount": "Tìm thấy: {{count}} súng",
+      "empty": "Không tìm thấy súng sạc nào phù hợp"
+    },
+    "challenge": {
+      "label": "3. Mã Dynamic QR Challenge",
+      "autoRefresh": "Tự động làm mới",
+      "refreshBtn": "Làm mới mã",
+      "secondsLeft": "còn {{seconds}}s"
+    },
+    "screenState": {
+      "label": "4. Trạng thái màn hình Kiosk",
+      "available": "Sẵn sàng (Available)",
+      "checkedIn": "Đã Check-in",
+      "charging": "Đang sạc (Charging)",
+      "completed": "Hoàn tất (Completed)",
+      "faulted": "Báo lỗi (Faulted)",
+      "offline": "Ngoại tuyến (Offline)"
+    },
+    "actions": {
+      "label": "5. Tác vụ giả lập kiểm thử",
+      "simulateScan": "📱 Giả lập Tài xế quét QR thành công",
+      "simulateScanDesc": "Mô phỏng app di động gửi token lên API Check-in"
+    },
+    "logs": {
+      "title": "Nhật Ký Tác Vụ Simulator (Telemetry Logs)",
+      "clear": "Xóa nhật ký",
+      "empty": "Chưa có log sự kiện nào."
+    }
+  }
+}

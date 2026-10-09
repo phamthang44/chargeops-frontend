@@ -7,12 +7,17 @@ import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useStaffStation } from '../context/StaffStationContext';
 import { useStaffEquipment } from '../hooks/useStaffEquipment';
 
-/** Local-day boundaries (ISO) so "today" matches the operator's clock. */
-function todayRange(): { from: string; to: string } {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+/** Deterministic day boundaries (ISO) in Asia/Ho_Chi_Minh timezone */
+function getVietnamTodayRange(): { from: string; to: string } {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const dateStr = formatter.format(new Date()); // YYYY-MM-DD
+  const start = new Date(`${dateStr}T00:00:00+07:00`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
   return { from: start.toISOString(), to: end.toISOString() };
 }
 
@@ -27,7 +32,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const { selectedStationId, currentStation } = useStaffStation();
   const equipment = useStaffEquipment(selectedStationId || undefined);
-  const range = todayRange();
+  const range = getVietnamTodayRange();
 
   const overviewQ = useQuery<StaffStationOverview>({
     queryKey: ['staff', 'overview', selectedStationId],
@@ -84,13 +89,12 @@ export function Dashboard() {
           overview={overviewQ.data}
           todayTotal={bookingsQ.data?.total ?? 0}
           todayRows={bookingsQ.data?.items ?? []}
-          availableConnectors={
-            equipment.connectors.filter((c) => c.runtimeStatus === 'AVAILABLE').length
-          }
+          availableConnectors={equipment.availableConnectors.length}
           connectorCount={equipment.connectors.length}
           offlineConnectors={equipment.offlineConnectors}
-          onAllBookings={() => navigate('../bookings')}
+          onAllBookings={() => navigate('../bookings?date=today')}
           onAllChargers={() => navigate('../chargers')}
+          onOfflineChargers={() => navigate('../chargers?status=OFFLINE')}
         />
       )}
     </>
@@ -106,15 +110,17 @@ function DashboardBody({
   offlineConnectors,
   onAllBookings,
   onAllChargers,
+  onOfflineChargers,
 }: {
   overview?: StaffStationOverview;
   todayTotal: number;
   todayRows: { bookingId: string; bookingCode?: string; startAt: string; endAt: string; driverDisplayName: string; connectorCode?: string; status: string }[];
   availableConnectors: number;
   connectorCount: number;
-  offlineConnectors: { id: string; code: string; runtimeStatus: string }[];
+  offlineConnectors: { id: string; code?: string; runtimeStatus: string }[];
   onAllBookings: () => void;
   onAllChargers: () => void;
+  onOfflineChargers: () => void;
 }) {
   const { t } = useTranslation('staff');
 
@@ -139,40 +145,67 @@ function DashboardBody({
   return (
     <>
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
-        <KpiCard
-          label={t('dashboard.kpi.bookingsToday')}
-          value={String(todayTotal)}
-          delta={t('dashboard.kpi.bookingsTodaySub')}
-          deltaClass={todayTotal > 0 ? 'text-brand' : 'text-faint'}
-        />
-        <KpiCard
-          label={t('dashboard.kpi.chargePoints')}
-          value={String(overview?.chargePointCount ?? 0)}
-          delta={
-            overview
-              ? t('dashboard.kpi.chargePointsSub', {
-                  status: t(`stationStatus.${overview.operationalStatus}`),
-                })
-              : undefined
-          }
-          deltaClass="text-faint"
-        />
-        <KpiCard
-          label={t('dashboard.kpi.connectors')}
-          value={String(connectorCount)}
-          delta={t('dashboard.kpi.connectorsSub', { available: availableConnectors })}
-          deltaClass={availableConnectors === connectorCount ? 'text-good' : 'text-warn'}
-        />
-        <KpiCard
-          label={t('dashboard.kpi.openIncidents')}
-          value={String(offlineConnectors.length)}
-          delta={
-            offlineConnectors.length > 0
-              ? t('dashboard.kpi.openIncidentsSub')
-              : t('dashboard.kpi.noIncidents')
-          }
-          deltaClass={offlineConnectors.length > 0 ? 'text-bad' : 'text-good'}
-        />
+        <button
+          type="button"
+          onClick={onAllBookings}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('dashboard.kpi.bookingsToday')}
+            value={String(todayTotal)}
+            delta={t('dashboard.kpi.bookingsTodaySub')}
+            deltaClass={todayTotal > 0 ? 'text-brand' : 'text-faint'}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={onAllChargers}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('dashboard.kpi.chargePoints')}
+            value={String(overview?.chargePointCount ?? 0)}
+            delta={
+              overview
+                ? t('dashboard.kpi.chargePointsSub', {
+                    status: t(`stationStatus.${overview.operationalStatus}`),
+                  })
+                : undefined
+            }
+            deltaClass="text-faint"
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={onAllChargers}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('dashboard.kpi.connectors')}
+            value={String(connectorCount)}
+            delta={t('dashboard.kpi.connectorsSub', { available: availableConnectors })}
+            deltaClass={availableConnectors === connectorCount ? 'text-good' : 'text-warn'}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={onOfflineChargers}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('dashboard.kpi.openIncidents')}
+            value={String(offlineConnectors.length)}
+            delta={
+              offlineConnectors.length > 0
+                ? t('dashboard.kpi.openIncidentsSub')
+                : t('dashboard.kpi.noIncidents')
+            }
+            deltaClass={offlineConnectors.length > 0 ? 'text-bad' : 'text-good'}
+          />
+        </button>
       </div>
 
       <div className="grid gap-[13px] lg:grid-cols-2">

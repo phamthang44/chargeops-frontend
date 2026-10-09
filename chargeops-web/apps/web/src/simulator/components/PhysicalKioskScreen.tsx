@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QrCodeRenderer } from '@chargeops/ui';
 import type { Connector, Station } from '@chargeops/api';
 import { RadialCountdown } from './RadialCountdown';
@@ -45,9 +46,11 @@ export function PhysicalKioskScreen({
   driverName = 'Nguyễn Văn Tài',
   bookingCode = 'BK-2026-9812',
 }: PhysicalKioskScreenProps) {
+  const { t } = useTranslation('simulator');
   // Live clock
   const [timeStr, setTimeStr] = useState(() => new Date().toLocaleTimeString('vi-VN'));
   const [copied, setCopied] = useState(false);
+  const [copiedUuid, setCopiedUuid] = useState(false);
 
   // Live charging simulation telemetry
   const [chargingSeconds, setChargingSeconds] = useState(0);
@@ -97,9 +100,18 @@ export function PhysicalKioskScreen({
 
   const powerKw = connector?.powerKw || 120;
   const connectorType = connector?.connectorType || 'CCS2';
-  const connectorId = connector?.connectorCode || connector?.id || 'CCS2-01';
+  const connectorCode = connector?.connectorCode || 'C-01';
+  const chargePointCode = connector?.chargePointCode || 'CP-01';
+  const chargePointName = connector?.chargePointName || `Trụ ${chargePointCode}`;
+  const connectorName = connector?.name || `Trụ ${chargePointCode} · Cổng ${connectorCode}`;
+  const connectorUuid = connector?.id || '';
   const stationName = station?.name || 'Trạm Sạc ChargeOps Central';
+  const stationCode = station?.stationCode || '';
   const addressLine = station?.addressLine || station?.address || 'Hà Nội, Việt Nam';
+  const isRedisToken = Boolean(
+    challengeToken &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(challengeToken),
+  );
 
   return (
     <div className="relative mx-auto flex w-full max-w-[1020px] flex-col overflow-hidden rounded-[2.2rem] border border-white/15 bg-gradient-to-b from-[#0a0f14] via-[#05090c] to-[#020507] p-2.5 shadow-[0_25px_70px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.15)] text-white select-none antialiased">
@@ -122,21 +134,28 @@ export function PhysicalKioskScreen({
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold tracking-tight text-white">ChargeOps</span>
                 <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-semibold tracking-wider text-emerald-400 uppercase">
-                  Terminal 4.0
+                  {t('kiosk.brandTerminal', 'Terminal 4.0')}
                 </span>
+                {stationCode && (
+                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-700">
+                    {stationCode}
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-slate-400 font-medium">{stationName}</p>
+              <p className="text-xs text-slate-400 font-medium truncate max-w-xs sm:max-w-md">{stationName}</p>
             </div>
           </div>
 
-          {/* Center Hardware Pill */}
-          <div className="hidden md:flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+          {/* Center Hardware Pill - Displays Station / Charge Point / Connector clearly */}
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-200">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Súng sạc: <strong className="font-mono text-white">{connectorId}</strong></span>
+              <span>{t('kiosk.stationPill.charger', 'Trụ:')} <strong className="font-mono text-white text-xs bg-slate-800 px-1.5 py-0.5 rounded border border-white/10 font-bold">{chargePointCode}</strong></span>
+              <span className="text-emerald-500/40">·</span>
+              <span>{t('kiosk.stationPill.connector', 'Cổng:')} <strong className="font-mono text-emerald-400 text-sm font-bold">{connectorCode}</strong></span>
             </div>
-            <span className="text-white/20">|</span>
-            <span className="text-xs font-semibold text-emerald-400">{connectorType} · {powerKw} kW</span>
+            <span className="text-emerald-500/40">|</span>
+            <span className="text-xs font-semibold text-emerald-300">{connectorType} · {powerKw} kW</span>
           </div>
 
           {/* Right Clock & Diagnostic */}
@@ -145,7 +164,7 @@ export function PhysicalKioskScreen({
               <div className="font-mono text-base font-bold text-slate-200 tabular-nums">{timeStr}</div>
               <div className="flex items-center justify-end gap-1.5 text-[11px] text-slate-400 font-medium">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span>4G LTE · 32°C</span>
+                <span>{t('kiosk.clockDiagnostic', '4G LTE · 32°C')}</span>
               </div>
             </div>
           </div>
@@ -162,13 +181,13 @@ export function PhysicalKioskScreen({
               <div className="text-center max-w-xl mx-auto">
                 <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Sẵn sàng phục vụ · Dynamic QR Check-in
+                  {t('kiosk.ready.badge', 'Sẵn sàng phục vụ · Dynamic QR Check-in')}
                 </div>
                 <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-                  Quét mã QR để Check-in & Bắt đầu Sạc
+                  {t('kiosk.ready.title', 'Quét mã QR để Check-in & Bắt đầu Sạc')}
                 </h1>
                 <p className="mt-1.5 text-sm text-slate-400 leading-relaxed">
-                  Mã QR bảo mật sinh động theo thời gian thực, tự động đổi sau mỗi 60 giây.
+                  {t('kiosk.ready.desc', 'Mã QR bảo mật sinh động theo thời gian thực, tự động đổi sau mỗi 60 giây.')}
                 </p>
               </div>
 
@@ -194,7 +213,7 @@ export function PhysicalKioskScreen({
                       {loadingToken ? (
                         <div className="flex flex-col items-center gap-2 text-slate-700">
                           <div className="h-8 w-8 animate-spin rounded-full border-3 border-slate-300 border-t-emerald-500" />
-                          <span className="text-xs font-medium">Đang tạo mã mới...</span>
+                          <span className="text-xs font-medium">{t('kiosk.ready.generating', 'Đang tạo mã mới...')}</span>
                         </div>
                       ) : challengeToken ? (
                         <QrCodeRenderer
@@ -202,28 +221,53 @@ export function PhysicalKioskScreen({
                           size={186}
                           fgColor="#0A0F14"
                           bgColor="#FFFFFF"
-                          quietZone={1}
-                          centerBadge={
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="13 2 4 14 11 14 10 22 20 9 13 9 13 2" />
-                              </svg>
-                            </div>
-                          }
+                          quietZone={2}
                         />
                       ) : (
-                        <div className="text-center text-xs text-slate-500 font-medium">Chưa có mã QR</div>
+                        <div className="text-center text-xs text-slate-500 font-medium">{t('kiosk.ready.noQr', 'Chưa có mã QR')}</div>
                       )}
                     </div>
 
                     {/* Hardware Connector Label underneath QR */}
-                    <div className="mt-3 flex items-center justify-between w-full px-1">
-                      <span className="font-mono text-xs font-bold tracking-wider text-emerald-400">
-                        {connectorId}
-                      </span>
-                      <span className="text-[11.5px] font-medium text-slate-400">
-                        {connectorType} · {powerKw} kW
-                      </span>
+                    <div className="mt-3 flex flex-col gap-1.5 w-full px-1 border-t border-white/10 pt-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                          <span className="text-[11px] text-slate-400">{t('kiosk.ready.chargerLabel', 'Trụ:')}</span>
+                          <span className="font-mono font-bold text-white bg-slate-800 px-1.5 py-0.5 rounded text-xs border border-white/10">
+                            {chargePointCode}
+                          </span>
+                          <span className="text-[11px] text-slate-400 ml-1">{t('kiosk.ready.connectorLabel', 'Cổng:')}</span>
+                          <span className="font-mono font-bold text-emerald-400 text-sm">
+                            {connectorCode}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold text-slate-300">
+                          {connectorType} · {powerKw} kW
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-300 truncate font-medium">
+                        {connectorName}
+                      </div>
+                      {connectorUuid ? (
+                        <div className="flex items-center justify-between text-[10.5px] text-slate-400 font-mono bg-black/40 rounded-lg px-2 py-1 border border-white/5">
+                          <span className="truncate max-w-[130px]" title={connectorUuid}>
+                            UUID: {connectorUuid.slice(0, 8)}...{connectorUuid.slice(-4)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(connectorUuid);
+                              setCopiedUuid(true);
+                              setTimeout(() => setCopiedUuid(false), 2000);
+                            }}
+                            className="text-emerald-400 hover:text-emerald-300 cursor-pointer font-sans text-[10px] font-semibold px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 transition-all"
+                            title={t('kiosk.ready.copyIdTitle', 'Sao chép UUID để dán vào tìm kiếm hoặc kiểm tra')}
+                          >
+                            {copiedUuid ? t('kiosk.ready.copiedId', '✓ Đã chép') : t('kiosk.ready.copyId', 'Chép ID')}
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -239,8 +283,8 @@ export function PhysicalKioskScreen({
                       onRefresh={onRefreshChallenge}
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-white">Thời gian hiệu lực</span>
-                      <span className="text-xs text-slate-400 leading-snug">Tự động làm mới khi hết hạn</span>
+                      <span className="text-sm font-bold text-white">{t('kiosk.ready.validityTitle', 'Thời gian hiệu lực')}</span>
+                      <span className="text-xs text-slate-400 leading-snug">{t('kiosk.ready.validityDesc', 'Tự động làm mới khi hết hạn')}</span>
                       <button
                         type="button"
                         onClick={onRefreshChallenge}
@@ -250,20 +294,35 @@ export function PhysicalKioskScreen({
                           <polyline points="23 4 23 10 17 10" />
                           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                         </svg>
-                        Làm mới mã ngay
+                        {t('kiosk.ready.refreshNow', 'Làm mới mã ngay')}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Token Status Badge */}
+                  <div className="flex items-center gap-1.5 text-xs">
+                    {isRedisToken ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                        {t('kiosk.ready.redisValid', 'Mã hợp lệ từ Backend Redis')}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold" title="Token cục bộ chưa lưu vào Redis">
+                        <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        {t('kiosk.ready.localFallback', 'Mã cục bộ (Cần kết nối Backend)')}
+                      </span>
+                    )}
                   </div>
 
                   {/* Token Inspector & Copy Button (Helpful for test environment) */}
                   <div className="flex flex-col gap-1.5 w-full max-w-[280px]">
                     <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>Challenge Token (Mã bảo mật):</span>
-                      {copied && <span className="text-emerald-400 font-bold">Đã sao chép!</span>}
+                      <span>{t('kiosk.ready.challengeCode', 'Mã Challenge:')}</span>
+                      {copied && <span className="text-emerald-400 font-bold">{t('kiosk.ready.copied', 'Đã sao chép!')}</span>}
                     </div>
                     <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs font-mono text-slate-300">
                       <span className="truncate flex-1">
-                        {challengeToken || 'Đang tạo token...'}
+                        {challengeToken || t('kiosk.ready.generating', 'Đang tạo token...')}
                       </span>
                       <button
                         type="button"
@@ -271,7 +330,7 @@ export function PhysicalKioskScreen({
                         className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-sans font-medium text-white hover:bg-white/20 transition-all cursor-pointer"
                         title="Sao chép để dán vào driver test"
                       >
-                        Copy
+                        {t('kiosk.ready.copy', 'Copy')}
                       </button>
                     </div>
                   </div>
@@ -286,8 +345,8 @@ export function PhysicalKioskScreen({
                     1
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Quét mã QR</h4>
-                    <p className="text-[11px] text-slate-400">Dùng app ChargeOps quét mã</p>
+                    <h4 className="text-xs font-bold text-white">{t('kiosk.ready.step1Title', 'Quét mã QR')}</h4>
+                    <p className="text-[11px] text-slate-400">{t('kiosk.ready.step1Desc', 'Dùng app ChargeOps quét mã')}</p>
                   </div>
                 </div>
 
@@ -296,8 +355,8 @@ export function PhysicalKioskScreen({
                     2
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Cắm súng sạc</h4>
-                    <p className="text-[11px] text-slate-400">Rút súng và cắm chặt vào xe</p>
+                    <h4 className="text-xs font-bold text-white">{t('kiosk.ready.step2Title', 'Cắm súng sạc')}</h4>
+                    <p className="text-[11px] text-slate-400">{t('kiosk.ready.step2Desc', 'Rút súng và cắm chặt vào xe')}</p>
                   </div>
                 </div>
 
@@ -306,8 +365,8 @@ export function PhysicalKioskScreen({
                     3
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Tự động sạc</h4>
-                    <p className="text-[11px] text-slate-400">Theo dõi thông số trên màn hình</p>
+                    <h4 className="text-xs font-bold text-white">{t('kiosk.ready.step3Title', 'Tự động sạc')}</h4>
+                    <p className="text-[11px] text-slate-400">{t('kiosk.ready.step3Desc', 'Theo dõi thông số trên màn hình')}</p>
                   </div>
                 </div>
               </div>
@@ -326,13 +385,13 @@ export function PhysicalKioskScreen({
 
               <div>
                 <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                  Check-in hợp lệ · Driver Verified
+                  {t('kiosk.checkedIn.badge', 'Check-in hợp lệ · Driver Verified')}
                 </span>
                 <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  Xin chào, {driverName}!
+                  {t('kiosk.checkedIn.welcome', { name: driverName, defaultValue: `Xin chào, ${driverName}!` })}
                 </h2>
                 <p className="mt-1 font-mono text-xs text-slate-400">
-                  Mã đặt chỗ: <span className="text-white font-semibold">{bookingCode}</span> · Súng: <span className="text-emerald-400">{connectorId}</span>
+                  {t('kiosk.checkedIn.bookingCodeLabel', 'Mã đặt chỗ:')} <span className="text-white font-semibold">{bookingCode}</span> · {t('kiosk.checkedIn.connectorLabel', 'Súng:')} <span className="text-emerald-400">{connectorCode}</span>
                 </p>
               </div>
 
@@ -342,10 +401,10 @@ export function PhysicalKioskScreen({
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                   </svg>
-                  Vui lòng cắm súng sạc vào cổng sạc của xe
+                  {t('kiosk.checkedIn.plugPrompt', 'Vui lòng cắm súng sạc vào cổng sạc của xe')}
                 </div>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  Sau khi cắm súng sạc, hệ thống sẽ tự động bắt đầu cấp nguồn sau 5 giây.
+                  {t('kiosk.checkedIn.plugDesc', 'Sau khi cắm súng sạc, hệ thống sẽ tự động bắt đầu cấp nguồn sau 5 giây.')}
                 </p>
 
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -354,14 +413,14 @@ export function PhysicalKioskScreen({
                     onClick={() => onStateChange('CHARGING')}
                     className="rounded-full bg-emerald-500 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 transition-all active:scale-95 cursor-pointer"
                   >
-                    ⚡ Giả lập: Đã cắm súng sạc (Bắt đầu sạc)
+                    {t('kiosk.checkedIn.simulatePlugIn', '⚡ Giả lập: Đã cắm súng sạc (Bắt đầu sạc)')}
                   </button>
                   <button
                     type="button"
                     onClick={() => onStateChange('AVAILABLE')}
                     className="rounded-full bg-white/10 px-4 py-2.5 text-xs font-medium text-slate-300 hover:bg-white/20 transition-all cursor-pointer"
                   >
-                    Hủy & Về màn hình chờ
+                    {t('kiosk.checkedIn.cancelReturn', 'Hủy & Về màn hình chờ')}
                   </button>
                 </div>
               </div>
@@ -377,11 +436,11 @@ export function PhysicalKioskScreen({
                 <div className="flex items-center gap-3">
                   <div className="h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
                   <span className="text-xs font-bold tracking-wide text-emerald-400 uppercase">
-                    Đang sạc nhanh DC · {connectorType}
+                    {t('kiosk.charging.badge', { type: connectorType, defaultValue: `Đang sạc nhanh DC · ${connectorType}` })}
                   </span>
                 </div>
                 <div className="font-mono text-xs text-slate-300">
-                  Tài xế: <strong className="text-white font-sans">{driverName}</strong> ({bookingCode})
+                  {t('kiosk.charging.driverLabel', 'Tài xế:')} <strong className="text-white font-sans">{driverName}</strong> ({bookingCode})
                 </div>
               </div>
 
@@ -392,7 +451,7 @@ export function PhysicalKioskScreen({
                 <div className="md:col-span-2 flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/80 p-6 backdrop-blur-xl">
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      Công suất tức thời (Power)
+                      {t('kiosk.charging.powerGauge', 'Công suất tức thời (Power)')}
                     </span>
                     <div className="mt-2 flex items-baseline gap-2">
                       <span className="font-mono text-5xl font-bold tracking-tight text-emerald-400 tabular-nums">
@@ -416,15 +475,15 @@ export function PhysicalKioskScreen({
                     ))}
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs text-slate-400 font-mono">
-                    <span>Điện áp: 418 V</span>
-                    <span>Dòng điện: {Math.round((currentPower * 1000) / 418)} A</span>
+                    <span>{t('kiosk.charging.voltage', 'Điện áp: 418 V')}</span>
+                    <span>{t('kiosk.charging.current', { current: Math.round((currentPower * 1000) / 418), defaultValue: `Dòng điện: ${Math.round((currentPower * 1000) / 418)} A` })}</span>
                   </div>
                 </div>
 
                 {/* 2. Battery State of Charge (SoC) */}
                 <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-900/80 p-6 text-center backdrop-blur-xl">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Mức pin xe (SoC)
+                    {t('kiosk.charging.batterySoc', 'Mức pin xe (SoC)')}
                   </span>
                   <div className="relative my-3 flex h-28 w-28 items-center justify-center">
                     <svg width="110" height="110" className="transform -rotate-90">
@@ -446,14 +505,14 @@ export function PhysicalKioskScreen({
                       {Math.round(soc)}%
                     </span>
                   </div>
-                  <span className="text-xs text-slate-400">Mục tiêu: 80%</span>
+                  <span className="text-xs text-slate-400">{t('kiosk.charging.targetSoc', 'Mục tiêu: 80%')}</span>
                 </div>
 
                 {/* 3. Energy & Duration Stats */}
                 <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/80 p-6 backdrop-blur-xl">
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      Điện năng tiêu thụ
+                      {t('kiosk.charging.energyDelivered', 'Điện năng tiêu thụ')}
                     </span>
                     <div className="mt-1 font-mono text-2xl font-bold text-white tabular-nums">
                       {deliveredKwh} <span className="text-xs text-slate-400 font-sans font-normal">kWh</span>
@@ -462,20 +521,20 @@ export function PhysicalKioskScreen({
 
                   <div className="mt-3 border-t border-white/10 pt-3">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      Thời gian đã sạc
+                      {t('kiosk.charging.chargingDuration', 'Thời gian đã sạc')}
                     </span>
                     <div className="mt-1 font-mono text-xl font-bold text-cyan-400 tabular-nums">
                       {Math.floor(chargingSeconds / 60)
                         .toString()
                         .padStart(2, '0')}
-                      :
+                        :
                       {(chargingSeconds % 60).toString().padStart(2, '0')}
                     </div>
                   </div>
 
                   <div className="mt-3 border-t border-white/10 pt-3">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      Tạm tính
+                      {t('kiosk.charging.totalCost', 'Tổng chi phí')}
                     </span>
                     <div className="mt-1 font-mono text-base font-bold text-emerald-400 tabular-nums">
                       {estimatedCostVnd.toLocaleString('vi-VN')} đ
@@ -495,7 +554,7 @@ export function PhysicalKioskScreen({
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="4" y="4" width="16" height="16" rx="2" />
                   </svg>
-                  Kết thúc phiên sạc
+                  {t('kiosk.charging.stopSession', 'Kết thúc phiên sạc')}
                 </button>
               </div>
 
@@ -512,41 +571,41 @@ export function PhysicalKioskScreen({
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Phiên Sạc Hoàn Tất</h2>
-                <p className="text-xs text-slate-400 mt-1">Cảm ơn bạn đã sử dụng dịch vụ sạc ChargeOps!</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">{t('kiosk.completed.title', 'Phiên Sạc Hoàn Tất')}</h2>
+                <p className="text-xs text-slate-400 mt-1">{t('kiosk.completed.thankYou', 'Cảm ơn bạn đã sử dụng dịch vụ sạc ChargeOps!')}</p>
               </div>
 
               {/* Receipt Summary Card */}
               <div className="w-full max-w-[420px] rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-md text-left">
                 <div className="space-y-3 font-mono text-xs">
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-slate-400 font-sans">Mã đặt chỗ:</span>
+                    <span className="text-slate-400 font-sans">{t('kiosk.completed.bookingCodeLabel', 'Mã đặt chỗ:')}</span>
                     <span className="text-white font-bold">{bookingCode}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-slate-400 font-sans">Tổng điện năng:</span>
+                    <span className="text-slate-400 font-sans">{t('kiosk.completed.totalEnergy', 'Tổng điện năng:')}</span>
                     <span className="text-emerald-400 font-bold tabular-nums">{deliveredKwh || 18.5} kWh</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-slate-400 font-sans">Thời gian sạc:</span>
-                    <span className="text-white font-bold tabular-nums">{Math.max(1, Math.floor(chargingSeconds / 60))} phút</span>
+                    <span className="text-slate-400 font-sans">{t('kiosk.completed.chargingDuration', 'Thời gian sạc:')}</span>
+                    <span className="text-white font-bold tabular-nums">{Math.max(1, Math.floor(chargingSeconds / 60))} {t('kiosk.completed.minutesUnit', 'phút')}</span>
                   </div>
                   <div className="flex justify-between pt-1 text-sm">
-                    <span className="text-slate-300 font-sans font-bold">Tổng thanh toán:</span>
+                    <span className="text-slate-300 font-sans font-bold">{t('kiosk.completed.totalCost', 'Tổng thanh toán:')}</span>
                     <span className="text-emerald-400 font-bold tabular-nums">{(estimatedCostVnd || 71225).toLocaleString('vi-VN')} đ</span>
                   </div>
                 </div>
 
                 <div className="mt-6 flex flex-col gap-3">
                   <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-300 text-center font-medium">
-                    ⚠️ Vui lòng rút súng sạc và gác lại đúng vị trí trên trụ sạc.
+                    {t('kiosk.completed.unhookNotice', '⚠️ Vui lòng rút súng sạc và gác lại đúng vị trí trên trụ sạc.')}
                   </div>
                   <button
                     type="button"
                     onClick={() => onStateChange('AVAILABLE')}
                     className="w-full rounded-full bg-emerald-500 py-3 text-xs font-bold text-white hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/25 cursor-pointer"
                   >
-                    Hoàn tất & Về màn hình chờ
+                    {t('kiosk.completed.finishBtn', 'Hoàn tất & Về màn hình chờ')}
                   </button>
                 </div>
               </div>
@@ -566,20 +625,20 @@ export function PhysicalKioskScreen({
 
               <div>
                 <span className="rounded-full bg-rose-500/15 border border-rose-500/30 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-rose-400">
-                  {screenState === 'FAULTED' ? 'Trụ sạc báo lỗi (Faulted)' : 'Tạm ngưng hoạt động (Offline)'}
+                  {screenState === 'FAULTED' ? t('kiosk.faulted.faultedBadge', 'Trụ sạc báo lỗi (Faulted)') : t('kiosk.faulted.offlineBadge', 'Tạm ngưng hoạt động (Offline)')}
                 </span>
                 <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  Cổng sạc tạm thời không khả dụng
+                  {t('kiosk.faulted.unavailableTitle', 'Cổng sạc tạm thời không khả dụng')}
                 </h2>
                 <p className="mt-1.5 text-xs text-slate-400 max-w-[480px] leading-relaxed">
                   {screenState === 'FAULTED'
-                    ? 'Phát hiện sự cố kỹ thuật tại đầu nối CCS2. Kỹ thuật viên đang xử lý.'
-                    : 'Cổng sạc đang trong lịch bảo trì định kỳ của trạm.'}
+                    ? t('kiosk.faulted.faultedDesc', 'Phát hiện sự cố kỹ thuật tại đầu nối CCS2. Kỹ thuật viên đang xử lý.')
+                    : t('kiosk.faulted.offlineDesc', 'Cổng sạc đang trong lịch bảo trì định kỳ của trạm.')}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300 font-mono">
-                Hotline hỗ trợ 24/7: <strong className="text-white font-sans">1900 6868</strong>
+                {t('kiosk.faulted.hotline', 'Hotline hỗ trợ 24/7:')} <strong className="text-white font-sans">1900 6868</strong>
               </div>
 
               <button
@@ -587,7 +646,7 @@ export function PhysicalKioskScreen({
                 onClick={() => onStateChange('AVAILABLE')}
                 className="mt-2 rounded-full bg-white/10 hover:bg-white/20 px-6 py-2.5 text-xs font-medium text-white transition-all cursor-pointer"
               >
-                Khôi phục trạng thái sẵn sàng
+                {t('kiosk.faulted.restoreBtn', 'Khôi phục trạng thái sẵn sàng')}
               </button>
             </div>
           )}
@@ -597,13 +656,13 @@ export function PhysicalKioskScreen({
         {/* 3. Kiosk Bottom Footer */}
         <footer className="relative z-10 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-300">Địa chỉ trạm:</span>
+            <span className="font-semibold text-slate-300">{t('kiosk.footer.addressLabel', 'Địa chỉ trạm:')}</span>
             <span>{addressLine}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span>Phiên bản FW: 2.4.0-release</span>
+            <span>{t('kiosk.footer.fwVersion', 'Phiên bản FW: 2.4.0-release')}</span>
             <span className="text-white/20">·</span>
-            <span>Trạng thái: <strong className="text-emerald-400">Trực tuyến</strong></span>
+            <span>{t('kiosk.footer.statusLabel', 'Trạng thái:')} <strong className="text-emerald-400">{t('kiosk.footer.online', 'Trực tuyến')}</strong></span>
           </div>
         </footer>
 

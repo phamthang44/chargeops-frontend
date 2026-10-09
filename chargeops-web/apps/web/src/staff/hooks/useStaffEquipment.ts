@@ -37,11 +37,25 @@ export function useStaffEquipment(stationId: string | undefined) {
   const chargePoints = groups.map((g) => g.chargePoint);
   const connectors = groups.flatMap((g) => g.connectors);
 
+  // A connector is truly available only when both connector is AVAILABLE and parent CP is AVAILABLE
+  const availableConnectors = groups.flatMap((g) =>
+    g.chargePoint.operationalStatus === 'AVAILABLE'
+      ? g.connectors.filter((c) => c.runtimeStatus === 'AVAILABLE')
+      : [],
+  );
+
+  // Connectors offline or belonging to an offline/maintenance charge point
+  const offlineConnectors = groups.flatMap((g) => {
+    const cpNotAvailable = g.chargePoint.operationalStatus !== 'AVAILABLE';
+    return g.connectors.filter((c) => c.runtimeStatus === 'OFFLINE' || cpNotAvailable);
+  });
+
   return {
     groups,
     chargePoints,
     connectors,
-    offlineConnectors: connectors.filter((c) => c.runtimeStatus === 'OFFLINE'),
+    availableConnectors,
+    offlineConnectors,
     isLoading: equipmentQ.isLoading,
     error: equipmentQ.error,
     refetch: equipmentQ.refetch,

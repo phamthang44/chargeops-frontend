@@ -96,9 +96,9 @@
       "chargePointsSub": "Trạm {{status}}",
       "connectors": "Cổng sạc",
       "connectorsSub": "{{available}} cổng sẵn sàng",
-      "openIncidents": "Sự cố đang mở",
-      "openIncidentsSub": "Cổng đang ngoại tuyến",
-      "noIncidents": "Không có cổng ngoại tuyến"
+      "openIncidents": "Cổng cần kiểm tra",
+      "openIncidentsSub": "Cổng hoặc trụ đang ngoại tuyến",
+      "noIncidents": "Tất cả cổng sẵn sàng"
     },
     "panel": {
       "todayBookings": "Lịch sạc hôm nay",

@@ -134,13 +134,17 @@
       }
     },
     "ticket": {
+      "created": {
+        "title": "New support ticket {{code}}",
+        "body": "Support ticket {{code}} (category: {{category}}) has been created. Please review and process."
+      },
       "resolved": {
         "title": "Ticket {{code}} has been resolved",
         "body": "Resolution outcome: \"{{result}}\". Please confirm or report back before {{autoCloseAt}} (expires in 10 days). After this period the ticket will auto-close; this is not an admission of station defect or refund."
       },
       "assigned": {
         "title": "Ticket {{code}} assigned",
-        "body": "Ticket {{code}} at station {{station}} has been assigned for resolution."
+        "body": "Ticket {{code}} has been assigned for resolution."
       },
       "escalated": {
         "title": "Escalated case for ticket {{code}}",

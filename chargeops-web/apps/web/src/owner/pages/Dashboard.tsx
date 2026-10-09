@@ -1,33 +1,41 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { formatDateVn, formatVndCompact, useApi, type OwnerDashboard } from '@chargeops/api';
+import { formatTimeVn, useApi, type OwnerOperationsSummary } from '@chargeops/api';
 import {
-  Banner,
   KpiCard,
   PageHeader,
   SidePanel,
   Skeleton,
-  StatusPill,
-  TrendChart,
   type SidePanelRow,
 } from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { ResourceRetryButton, ResourceStateCard } from '../../shared/components/ResourceStateCard';
 
-/** Owner dashboard — data comes from the service layer (mock now, REST later). */
+/** Owner operations dashboard (V1) — connects to /owner/dashboard/summary. */
 export function Dashboard() {
-  const { t } = useTranslation('ownerDashboard');
+  const { t, i18n } = useTranslation('ownerDashboard');
   const api = useApi();
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['dashboard', 'owner'],
     queryFn: () => api.dashboard.owner(),
   });
 
+  const todayFormatted = new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date());
+
   return (
     <>
       <PageHeader
         title={t('title')}
-        subtitle={t('subtitle', { station: 'Trạm Hà Đông', date: 'Thứ Bảy, 28/06/2026' })}
+        subtitle={t('subtitleFormatted', {
+          date: todayFormatted,
+          defaultValue: `Tổng quan vận hành toàn bộ danh mục trạm · ${todayFormatted}`,
+        })}
       />
       {error ? (
         <ApiErrorState
@@ -38,7 +46,7 @@ export function Dashboard() {
           missingTitle={t('dashboard.error.missingTitle', { defaultValue: 'Dashboard chưa được kết nối dữ liệu' })}
           missingDescription={t('dashboard.error.missingDescription', {
             defaultValue:
-              'Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị.',
+              'Endpoint của bảng điều khiển (owner/dashboard/summary) chưa được kết nối dữ liệu.',
           })}
           onRetry={() => refetch()}
           isRetrying={isFetching}
@@ -52,7 +60,7 @@ export function Dashboard() {
           title={t('dashboard.error.missingTitle', { defaultValue: 'Dashboard chưa được kết nối dữ liệu' })}
           description={t('dashboard.error.missingDescription', {
             defaultValue:
-              'Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị.',
+              'Endpoint của bảng điều khiển (owner/dashboard/summary) chưa được kết nối dữ liệu.',
           })}
           action={<ResourceRetryButton onClick={() => refetch()} isRetrying={isFetching} />}
         />
@@ -63,93 +71,188 @@ export function Dashboard() {
   );
 }
 
-function DashboardBody({ data }: { data: OwnerDashboard }) {
+function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
   const { t } = useTranslation('ownerDashboard');
-  const { license, kpis, chargers, upcomingBookings } = data;
+  const api = useApi();
+  const navigate = useNavigate();
 
-  const chargerRow = (c: OwnerDashboard['chargers'][number]): SidePanelRow => {
-    const status = String(c.runtimeStatus || '').toUpperCase().replace(/[-_]/g, '');
-    return status === 'AVAILABLE'
-      ? { label: `${c.id} · ${c.name}`, value: `${c.utilizationPct}%`, dotClass: 'bg-good' }
-      : status === 'INUSE'
-        ? { label: `${c.id} · ${c.name}`, value: t('charger.inuse'), dotClass: 'bg-brand', valueClass: 'text-brand' }
-        : { label: `${c.id} · ${c.name}`, value: t('charger.offline'), dotClass: 'bg-bad', valueClass: 'text-bad' };
+  // Upcoming confirmed bookings (max 5)
+  const upcomingQ = useQuery({
+    queryKey: ['owner', 'bookings', 'upcoming'],
+    queryFn: () =>
+      api.ownerBookings.list({
+        status: 'confirmed' as any,
+        pageSize: 5,
+      }),
+  });
+
+  // Ticket status summary for owner action items
+  const ticketsQ = useQuery({
+    queryKey: ['owner', 'tickets', 'summary'],
+    queryFn: () => api.tickets.summary({ role: 'owner' }),
+  });
+
+  const stations = data.stations ?? {
+    totalStations: 0,
+    activeStations: 0,
+    visibleToDrivers: 0,
+    pendingApproval: 0,
+    onlineChargePoints: 0,
+    totalChargePoints: 0,
   };
 
-  const isLicActive = license.status === 'ACTIVE' || license.status === 'active';
-  const isLicExpired = license.status === 'EXPIRED' || license.status === 'expired';
-  const isLicExpiring = license.expiringSoon || license.status === 'expiring' || (license.daysLeft != null && license.daysLeft <= 30 && isLicActive);
+  const hardware = data.hardware ?? {
+    totalConnectors: 0,
+    availableConnectors: 0,
+    chargingConnectors: 0,
+    offlineConnectors: 0,
+    unavailableConnectors: 0,
+    sessionsToday: 0,
+    averageUtilizationPercent: 0,
+  };
 
-  const licenseStatusLabel = isLicExpiring
-    ? t('license.expiring', { defaultValue: 'Sắp hết hạn' })
-    : isLicActive
-      ? t('license.active', { defaultValue: 'Đang hoạt động' })
-      : isLicExpired
-        ? t('license.expired', { defaultValue: 'Đã hết hạn' })
-        : String(license.status);
+  const upcomingItems = upcomingQ.data?.items ?? [];
+  const upcomingRows: SidePanelRow[] =
+    upcomingItems.length === 0
+      ? [{ label: t('panel.noUpcoming', { defaultValue: 'Không có đặt chỗ sắp tới' }), value: '' }]
+      : upcomingItems.map((b) => ({
+          label: `${b.bookingCode || b.bookingId} · ${formatTimeVn(b.startAt)}`,
+          value: b.driverDisplayName,
+        }));
+
+  const offlineCps = Math.max(0, stations.totalChargePoints - stations.onlineChargePoints);
+  const openTickets = ticketsQ.data?.open ?? ticketsQ.data?.byStatus?.open ?? 0;
+
+  const actionRows: SidePanelRow[] = [];
+  if (stations.pendingApproval > 0) {
+    actionRows.push({
+      label: t('panel.pendingStations', { defaultValue: 'Hồ sơ trạm chờ duyệt' }),
+      value: String(stations.pendingApproval),
+      dotClass: 'bg-warn',
+      valueClass: 'text-warn-deep font-bold',
+    });
+  }
+  if (hardware.offlineConnectors > 0) {
+    actionRows.push({
+      label: t('panel.offlineConnectors', { defaultValue: 'Cổng sạc ngoại tuyến' }),
+      value: String(hardware.offlineConnectors),
+      dotClass: 'bg-bad',
+      valueClass: 'text-bad font-bold',
+    });
+  }
+  if (openTickets > 0) {
+    actionRows.push({
+      label: t('panel.openTickets', { defaultValue: 'Yêu cầu hỗ trợ đang mở' }),
+      value: String(openTickets),
+      dotClass: 'bg-brand',
+      valueClass: 'text-brand font-bold',
+    });
+  }
+  if (actionRows.length === 0) {
+    actionRows.push({
+      label: t('panel.noActionItems', { defaultValue: 'Không có việc tồn đọng' }),
+      value: '✓',
+      dotClass: 'bg-good',
+      valueClass: 'text-good',
+    });
+  }
 
   return (
     <>
-      {/* License banner (BR-STA-01: expiry hides the station from drivers) */}
-      <Banner
-        status="warning"
-        title={t('license.label', { status: licenseStatusLabel })}
-        description={t('license.detail', { date: formatDateVn(license.expiryDate), days: license.daysLeft })}
-        action={<StatusPill tone="warn" label={t('license.renewalSoon')} />}
-      />
-
       {/* KPI row */}
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
-        <KpiCard
-          label={t('kpi.bookingsToday')}
-          value={String(kpis.bookingsToday)}
-          delta={t('kpi.bookingsDelta', { count: kpis.bookingsDelta })}
-          deltaClass="text-good"
-        />
-        <KpiCard
-          label={t('kpi.revenueToday')}
-          value={formatVndCompact(kpis.revenueTodayVnd).replace('tr', '')}
-          suffix="tr"
-          delta={t('kpi.revenueDelta', { percent: kpis.revenueDeltaPct })}
-          deltaClass="text-good"
-        />
-        <KpiCard
-          label={t('kpi.chargersOnline')}
-          value={String(kpis.chargersOnline)}
-          suffix={`/${kpis.chargersTotal}`}
-          delta={kpis.offlineChargerNote ?? t('kpi.allOnline')}
-          deltaClass={kpis.offlineChargerNote ? 'text-bad' : 'text-good'}
-        />
-        <KpiCard
-          label={t('kpi.avgUtilization')}
-          value={String(kpis.avgUtilizationPct)}
-          suffix="%"
-          delta={t('kpi.utilizationDelta', { points: kpis.utilizationDeltaPts })}
-          deltaClass="text-good"
-        />
+        <button
+          type="button"
+          onClick={() => navigate('/owner/stations?status=ACTIVE')}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('kpi.activeStations', { defaultValue: 'Trạm đang mở' })}
+            value={`${stations.activeStations}/${stations.totalStations}`}
+            delta={
+              stations.pendingApproval > 0
+                ? t('kpi.pendingNote', {
+                    count: stations.pendingApproval,
+                    defaultValue: `${stations.pendingApproval} trạm chờ duyệt`,
+                  })
+                : t('kpi.allApproved', { defaultValue: 'Đã duyệt toàn bộ' })
+            }
+            deltaClass={stations.pendingApproval > 0 ? 'text-warn' : 'text-good'}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/owner/chargers')}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('kpi.chargersOnline', { defaultValue: 'Trụ sạc Online' })}
+            value={`${stations.onlineChargePoints}/${stations.totalChargePoints}`}
+            delta={
+              offlineCps > 0
+                ? t('kpi.chargersOffline', {
+                    count: offlineCps,
+                    defaultValue: `${offlineCps} trụ ngoại tuyến/bảo trì`,
+                  })
+                : t('kpi.allOnline', { defaultValue: 'Tất cả trụ đang hoạt động' })
+            }
+            deltaClass={offlineCps > 0 ? 'text-bad' : 'text-good'}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/owner/chargers')}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('kpi.connectorsAvailable', { defaultValue: 'Cổng khả dụng' })}
+            value={`${hardware.availableConnectors}/${hardware.totalConnectors}`}
+            delta={`${hardware.chargingConnectors} đang sạc · ${hardware.offlineConnectors} ngoại tuyến`}
+            deltaClass={hardware.offlineConnectors > 0 ? 'text-bad' : 'text-good'}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/owner/sessions?range=today')}
+          className="text-left w-full cursor-pointer transition hover:opacity-95"
+        >
+          <KpiCard
+            label={t('kpi.sessionsToday', { defaultValue: 'Phiên sạc hôm nay' })}
+            value={String(hardware.sessionsToday)}
+            delta={`${t('kpi.avgUtilization', { defaultValue: 'Hiệu suất' })}: ${Number(
+              hardware.averageUtilizationPercent ?? 0,
+            ).toFixed(1)}%`}
+            deltaClass="text-brand"
+          />
+        </button>
       </div>
 
-      {/* Chart + side panels */}
-      <div className="grid gap-[13px] lg:grid-cols-[1fr_340px]">
-        <TrendChart
-          title={t('chart.title')}
-          axis={['15/06', '28/06']}
-          legend={[
-            { label: t('chart.revenue'), colorClass: 'bg-brand' },
-            { label: t('chart.bookings'), colorClass: 'bg-brand-tint' },
-          ]}
+      {/* Action queues & upcoming side panels */}
+      <div className="grid gap-[13px] lg:grid-cols-2">
+        <SidePanel
+          title={t('panel.upcomingBookings', { defaultValue: 'Lịch đặt sắp tới' })}
+          link={t('panel.allLink', { defaultValue: 'Xem tất cả →' })}
+          onLink={() => navigate('/owner/bookings')}
+          rows={upcomingRows}
         />
-        <div className="flex flex-col gap-[13px]">
-          <SidePanel title={t('panel.chargers')} link={t('panel.manageLink')} rows={chargers.map(chargerRow)} />
-          <SidePanel
-            title={t('panel.upcomingBookings')}
-            link={t('panel.allLink')}
-            rows={upcomingBookings.map((b) => ({
-              label: `${b.id} · ${b.startTime}`,
-              value: b.driverName,
-            }))}
-          />
-        </div>
+        <SidePanel
+          title={t('panel.actionItems', { defaultValue: 'Việc cần xử lý' })}
+          link={t('panel.allLink', { defaultValue: 'Xem tất cả →' })}
+          onLink={() => {
+            if (stations.pendingApproval > 0) {
+              navigate('/owner/stations?status=PENDING_APPROVAL');
+            } else if (hardware.offlineConnectors > 0) {
+              navigate('/owner/chargers');
+            } else {
+              navigate('/owner/tickets?status=OPEN');
+            }
+          }}
+          rows={actionRows}
+          tone={actionRows.some((r) => r.dotClass === 'bg-bad' || r.dotClass === 'bg-warn') ? 'warn' : 'white'}
+        />
       </div>
     </>
   );
@@ -158,18 +261,14 @@ function DashboardBody({ data }: { data: OwnerDashboard }) {
 function DashboardSkeleton() {
   return (
     <>
-      <Skeleton className="mb-[18px] h-[52px] w-full rounded-[11px]" />
       <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <Skeleton key={i} className="h-[104px] rounded-card" />
         ))}
       </div>
-      <div className="grid gap-[13px] lg:grid-cols-[1fr_340px]">
-        <Skeleton className="h-[260px] rounded-card" />
-        <div className="flex flex-col gap-[13px]">
-          <Skeleton className="h-[170px] rounded-card" />
-          <Skeleton className="h-[150px] rounded-card" />
-        </div>
+      <div className="grid gap-[13px] lg:grid-cols-2">
+        <Skeleton className="h-[200px] rounded-card" />
+        <Skeleton className="h-[200px] rounded-card" />
       </div>
     </>
   );

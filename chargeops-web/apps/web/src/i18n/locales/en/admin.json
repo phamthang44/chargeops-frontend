@@ -371,6 +371,16 @@
       "expiringLicensesVal": "{{count}} · {{days}} days",
       "expiredLicenses": "Expired licenses",
       "reportedFaults": "Reported charger faults"
+    },
+    "queue": {
+      "pendingApprovals": "Pending station approvals",
+      "platformTickets": "Platform support tickets",
+      "escalatedCases": "Escalated case reviews",
+      "noPendingStations": "No pending station approvals",
+      "noPlatformTickets": "No open platform tickets",
+      "noEscalatedCases": "No escalated cases",
+      "seeAll": "See all →",
+      "actionNeeded": "Action needed"
     }
   },
   "licenses": {

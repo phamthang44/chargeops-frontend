@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Connector, Station } from '@chargeops/api';
 import type { SimulatorScreenState } from './PhysicalKioskScreen';
 import { IconBolt, IconCheck, IconChevronDown, IconSearch, IconX } from '@chargeops/ui';
@@ -27,6 +28,7 @@ export interface SimulatorControlPanelProps {
   logs: SimulatorLogItem[];
   onClearLogs: () => void;
   onSimulateDriverScan: () => void;
+  onQuickSync?: (query: string) => Promise<{ found: boolean; message: string }>;
 }
 
 function normalizeSearch(str: string): string {
@@ -50,6 +52,7 @@ function StationPickerDropdown({
   selectedStationId: string;
   onSelectStation: (id: string) => void;
 }) {
+  const { t } = useTranslation('simulator');
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [filterActiveOnly, setFilterActiveOnly] = useState(false);
@@ -107,7 +110,7 @@ function StationPickerDropdown({
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
-              {selected?.name || (stations.length === 0 ? 'Đang tải danh sách trạm...' : 'Chọn trạm sạc...')}
+              {selected?.name || (stations.length === 0 ? t('controlPanel.stationPicker.loading', 'Đang tải danh sách trạm...') : t('controlPanel.stationPicker.placeholder', 'Chọn trạm sạc...'))}
             </div>
             <div className="truncate text-[10.5px] text-slate-500 dark:text-slate-400">
               {selected?.address || (selected?.stationCode ? `Mã: ${selected.stationCode}` : 'Trạm sạc ChargeOps')}
@@ -141,7 +144,7 @@ function StationPickerDropdown({
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm theo tên, địa chỉ, mã trạm, UUID..."
+                placeholder={t('controlPanel.stationPicker.searchPlaceholder', 'Tìm theo tên, địa chỉ, mã trạm, UUID...')}
                 className="w-full border-none bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:text-white"
               />
               {query && (
@@ -166,7 +169,7 @@ function StationPickerDropdown({
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
                   }`}
                 >
-                  Tất cả ({stations.length})
+                  {t('controlPanel.stationPicker.all', 'Tất cả')} ({stations.length})
                 </button>
                 <button
                   type="button"
@@ -177,11 +180,11 @@ function StationPickerDropdown({
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
                   }`}
                 >
-                  Đang hoạt động
+                  {t('controlPanel.stationPicker.activeOnly', 'Đang hoạt động')}
                 </button>
               </div>
               <span className="text-[10px] text-slate-400">
-                Tìm thấy: {filtered.length} trạm
+                {t('controlPanel.stationPicker.foundCount', { count: filtered.length, defaultValue: `Tìm thấy: ${filtered.length} trạm` })}
               </span>
             </div>
           </div>
@@ -190,7 +193,7 @@ function StationPickerDropdown({
           <div className="max-h-64 overflow-y-auto p-1">
             {filtered.length === 0 ? (
               <div className="py-6 text-center text-xs text-slate-400">
-                Không tìm thấy trạm sạc nào phù hợp
+                {t('controlPanel.stationPicker.empty', 'Không tìm thấy trạm sạc nào phù hợp')}
               </div>
             ) : (
               filtered.map((s) => {
@@ -248,6 +251,7 @@ function ConnectorPickerDropdown({
   selectedConnectorId: string;
   onSelectConnector: (id: string) => void;
 }) {
+  const { t } = useTranslation('simulator');
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'AVAILABLE' | 'CCS2' | 'TYPE2'>('ALL');
@@ -314,7 +318,12 @@ function ConnectorPickerDropdown({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 truncate text-xs font-bold text-slate-900 dark:text-white">
-              <span>{selected?.name || (connectors.length === 0 ? 'Trạm chưa có cổng sạc' : 'Chọn súng sạc...')}</span>
+              {selected?.chargePointCode && (
+                <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[10px] font-mono text-emerald-400">
+                  {selected.chargePointCode}
+                </span>
+              )}
+              <span>{selected ? t('controlPanel.connectorPicker.selectedConnector', { code: selected.connectorCode, defaultValue: `Cổng ${selected.connectorCode}` }) : (connectors.length === 0 ? t('controlPanel.connectorPicker.loading', 'Trạm chưa có cổng sạc') : t('controlPanel.connectorPicker.placeholder', 'Chọn súng sạc...'))}</span>
             </div>
             <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500 dark:text-slate-400">
               {selected && (
@@ -322,6 +331,8 @@ function ConnectorPickerDropdown({
                   <span className="font-semibold text-slate-700 dark:text-slate-300">{selected.powerKw} kW</span>
                   <span>·</span>
                   <span>{selected.connectorType}</span>
+                  <span>·</span>
+                  <span className="truncate max-w-[150px]">{selected.name}</span>
                 </>
               )}
             </div>
@@ -361,7 +372,7 @@ function ConnectorPickerDropdown({
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm theo mã súng, chuẩn (CCS2), công suất, UUID..."
+                placeholder={t('controlPanel.connectorPicker.searchPlaceholder', 'Tìm theo mã C-01, CCS2, công suất, UUID...')}
                 className="w-full border-none bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:text-white"
               />
               {query && (
@@ -387,7 +398,7 @@ function ConnectorPickerDropdown({
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
                   }`}
                 >
-                  Tất cả ({connectors.length})
+                  {t('controlPanel.connectorPicker.all', 'Tất cả')} ({connectors.length})
                 </button>
                 <button
                   type="button"
@@ -398,7 +409,7 @@ function ConnectorPickerDropdown({
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
                   }`}
                 >
-                  ⚡ Sẵn sàng
+                  ⚡ {t('controlPanel.connectorPicker.availableOnly', 'Khả dụng')}
                 </button>
                 <button
                   type="button"
@@ -424,7 +435,7 @@ function ConnectorPickerDropdown({
                 </button>
               </div>
               <span className="text-[10px] text-slate-400">
-                {filtered.length} súng
+                {t('controlPanel.connectorPicker.foundCount', { count: filtered.length, defaultValue: `Tìm thấy: ${filtered.length} súng` })}
               </span>
             </div>
           </div>
@@ -433,7 +444,7 @@ function ConnectorPickerDropdown({
           <div className="max-h-64 overflow-y-auto p-1">
             {filtered.length === 0 ? (
               <div className="py-6 text-center text-xs text-slate-400">
-                Không tìm thấy súng sạc nào phù hợp
+                {t('controlPanel.connectorPicker.empty', 'Không tìm thấy súng sạc nào phù hợp')}
               </div>
             ) : (
               filtered.map((c) => {
@@ -456,9 +467,14 @@ function ConnectorPickerDropdown({
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="truncate text-xs font-semibold">
-                          {c.name || `Cổng ${c.connectorCode}`}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {c.chargePointCode && (
+                          <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9.5px] font-mono font-bold text-white dark:bg-slate-700">
+                            {c.chargePointCode}
+                          </span>
+                        )}
+                        <span className="truncate text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          Cổng {c.connectorCode}
                         </span>
                         <span className="rounded bg-sky-100 px-1 py-0.2 text-[9px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300">
                           {c.connectorType}
@@ -509,14 +525,42 @@ export function SimulatorControlPanel({
   logs,
   onClearLogs,
   onSimulateDriverScan,
+  onQuickSync,
 }: SimulatorControlPanelProps) {
+  const { t } = useTranslation('simulator');
   const [copied, setCopied] = useState(false);
+  const [syncInput, setSyncInput] = useState('');
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<{ type: 'success' | 'warn'; message: string } | null>(null);
 
   const copyToken = () => {
     if (!challengeToken) return;
     navigator.clipboard.writeText(challengeToken);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRunSync = async (rawText?: string) => {
+    const textToSearch = (rawText !== undefined ? rawText : syncInput).trim();
+    if (!textToSearch) {
+      setSyncFeedback({ type: 'warn', message: t('logs.syncInputPrompt', 'Vui lòng nhập hoặc dán mã/UUID cần tìm') });
+      return;
+    }
+    setSyncLoading(true);
+    setSyncFeedback(null);
+    try {
+      if (onQuickSync) {
+        const res = await onQuickSync(textToSearch);
+        setSyncFeedback({
+          type: res.found ? 'success' : 'warn',
+          message: res.message,
+        });
+      }
+    } catch (err) {
+      setSyncFeedback({ type: 'warn', message: (err as Error)?.message || 'Lỗi tìm kiếm' });
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   return (
@@ -529,12 +573,89 @@ export function SimulatorControlPanel({
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500 text-white text-xs">
               ⚙️
             </span>
-            Bảng Điều Khiển Simulator (Testing Sandbox)
+            {t('controlPanel.title', 'Bảng Điều Khiển Simulator (Testing Sandbox)')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Giả lập các hành vi phần cứng, kích hoạt sự kiện và kiểm thử quy trình Dynamic QR Check-in.
+            {t('controlPanel.subtitle', 'Giả lập các hành vi phần cứng, kích hoạt sự kiện và kiểm thử quy trình Dynamic QR Check-in.')}
           </p>
         </div>
+      </div>
+
+      {/* Quick Search & Auto-Sync by Connector ID / Code / Station */}
+      <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4 dark:border-emerald-500/30 dark:bg-emerald-950/25">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-emerald-500 font-bold text-sm">⚡</span>
+            <span className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">
+              {t('controlPanel.quickSync.title', 'Tìm Nhanh & Đồng Bộ Theo App Mobile')}
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+            {t('controlPanel.quickSync.placeholder', 'Dán UUID cổng, mã cổng (C-01, Cổng 1), hoặc mã trạm từ ứng dụng tài xế')}
+          </span>
+        </div>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+          <div className="relative flex-1 min-w-[240px]">
+            <input
+              type="text"
+              value={syncInput}
+              onChange={(e) => setSyncInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleRunSync()}
+              placeholder={t('controlPanel.quickSync.placeholder', 'Dán UUID cổng sạc (ví dụ: b8a7... hoặc Cổng 1, HN-01)...')}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white font-mono"
+            />
+            {syncInput ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSyncInput('');
+                  setSyncFeedback(null);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            disabled={syncLoading}
+            onClick={() => handleRunSync()}
+            className="rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+          >
+            {syncLoading ? t('logs.syncScanning', 'Đang tìm...') : t('controlPanel.quickSync.button', '🔍 Tìm & Đồng bộ')}
+          </button>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                  const cleaned = text.trim();
+                  setSyncInput(cleaned);
+                  void handleRunSync(cleaned);
+                }
+              } catch {
+                // ignore
+              }
+            }}
+            className="rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+            title={t('controlPanel.quickSync.pasteTooltip', 'Dán nhanh nội dung từ Clipboard và đồng bộ ngay')}
+          >
+            📋 {t('controlPanel.quickSync.pasteClipboard', 'Dán từ Clipboard')}
+          </button>
+        </div>
+        {syncFeedback && (
+          <p
+            className={`mt-2 text-xs font-semibold ${
+              syncFeedback.type === 'success'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-amber-600 dark:text-amber-400'
+            }`}
+          >
+            {syncFeedback.message}
+          </p>
+        )}
       </div>
 
       {/* Grid Controls */}
@@ -543,13 +664,13 @@ export function SimulatorControlPanel({
         {/* Column 1: Station & Connector Picker */}
         <div className="flex flex-col gap-3.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            1. Chọn Điểm Sạc & Súng Sạc
+            {t('controlPanel.section1Title', '1. Chọn Điểm Sạc & Súng Sạc')}
           </h3>
           
           {/* Station Selector */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Trạm sạc:
+              {t('controlPanel.stationPicker.fieldLabel', 'Trạm sạc:')}
             </label>
             <StationPickerDropdown
               stations={stations}
@@ -561,7 +682,7 @@ export function SimulatorControlPanel({
           {/* Connector Selector */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Súng sạc (Connector):
+              {t('controlPanel.connectorPicker.fieldLabel', 'Súng sạc (Connector):')}
             </label>
             <ConnectorPickerDropdown
               connectors={connectors}
@@ -574,19 +695,19 @@ export function SimulatorControlPanel({
         {/* Column 2: Challenge Token Management */}
         <div className="flex flex-col gap-3.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            2. Dynamic QR Challenge Token
+            {t('controlPanel.challenge.label', '2. Dynamic QR Challenge Token')}
           </h3>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 dark:text-slate-400">Mã Token:</span>
+              <span className="text-slate-500 dark:text-slate-400">{t('kiosk.ready.challengeCode', 'Mã Token:')}</span>
               <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                {remainingSeconds}s còn lại
+                {t('controlPanel.challenge.secondsLeft', { seconds: remainingSeconds, defaultValue: `${remainingSeconds}s còn lại` })}
               </span>
             </div>
             
             <div className="mt-1.5 break-all rounded-lg border border-slate-200 bg-white p-2.5 font-mono text-[11px] text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-              {challengeToken || 'Đang tạo...'}
+              {challengeToken || t('kiosk.ready.generating', 'Đang tạo...')}
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -595,19 +716,19 @@ export function SimulatorControlPanel({
                 onClick={copyToken}
                 className="flex-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-white transition-all active:scale-95 text-center cursor-pointer"
               >
-                {copied ? '✓ Đã sao chép' : '📋 Copy Token'}
+                {copied ? t('kiosk.ready.copied', '✓ Đã sao chép') : t('kiosk.ready.copy', '📋 Copy Token')}
               </button>
               <button
                 type="button"
                 onClick={onRefreshChallenge}
                 className="rounded-xl bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all active:scale-95 cursor-pointer"
               >
-                🔄 Đổi mã
+                🔄 {t('controlPanel.challenge.refreshBtn', 'Đổi mã')}
               </button>
             </div>
 
             <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2.5 dark:border-slate-700 text-xs">
-              <span className="text-slate-600 dark:text-slate-400">Tự động đổi sau 60s:</span>
+              <span className="text-slate-600 dark:text-slate-400">{t('controlPanel.challenge.autoRefresh', 'Tự động đổi sau 60s:')}</span>
               <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"
@@ -624,7 +745,7 @@ export function SimulatorControlPanel({
         {/* Column 3: Hardware State Overrides */}
         <div className="flex flex-col gap-3.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            3. Trạng Thái Trụ Sạc
+            {t('controlPanel.screenState.label', '3. Trạng Thái Trụ Sạc')}
           </h3>
 
           <div className="grid grid-cols-2 gap-2">
@@ -637,7 +758,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              🟢 Sẵn sàng (QR)
+              🟢 {t('controlPanel.screenState.available', 'Sẵn sàng (QR)')}
             </button>
 
             <button
@@ -649,7 +770,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              🔵 Đã Check-in
+              🔵 {t('controlPanel.screenState.checkedIn', 'Đã Check-in')}
             </button>
 
             <button
@@ -661,7 +782,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              ⚡ Đang sạc
+              ⚡ {t('controlPanel.screenState.charging', 'Đang sạc')}
             </button>
 
             <button
@@ -673,7 +794,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              🏁 Hoàn tất
+              🏁 {t('controlPanel.screenState.completed', 'Hoàn tất')}
             </button>
 
             <button
@@ -685,7 +806,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              🔴 Báo lỗi (Fault)
+              🔴 {t('controlPanel.screenState.faulted', 'Báo lỗi (Fault)')}
             </button>
 
             <button
@@ -697,7 +818,7 @@ export function SimulatorControlPanel({
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
-              ⚪ Ngoại tuyến
+              ⚪ {t('controlPanel.screenState.offline', 'Ngoại tuyến')}
             </button>
           </div>
 
@@ -711,7 +832,7 @@ export function SimulatorControlPanel({
               <path d="M5 12h14" />
               <path d="M12 5l7 7-7 7" />
             </svg>
-            Giả lập Tài xế Quét Mã Check-in
+            {t('controlPanel.actions.simulateScan', 'Giả lập Tài xế Quét Mã Check-in')}
           </button>
         </div>
 
@@ -721,20 +842,20 @@ export function SimulatorControlPanel({
       <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Nhật Ký Sự Kiện Simulator (Event Log)
+            {t('controlPanel.logs.title', 'Nhật Ký Sự Kiện Simulator (Event Log)')}
           </span>
           <button
             type="button"
             onClick={onClearLogs}
             className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
           >
-            Xóa nhật ký
+            {t('controlPanel.logs.clear', 'Xóa nhật ký')}
           </button>
         </div>
 
         <div className="h-32 overflow-y-auto rounded-xl border border-slate-200 bg-slate-950 p-3 font-mono text-[11px] text-slate-300 space-y-1.5">
           {logs.length === 0 ? (
-            <div className="text-slate-600 italic">Chưa có sự kiện nào được ghi nhận.</div>
+            <div className="text-slate-600 italic">{t('controlPanel.logs.empty', 'Chưa có sự kiện nào được ghi nhận.')}</div>
           ) : (
             logs.map((log) => {
               let textCol = 'text-slate-300';

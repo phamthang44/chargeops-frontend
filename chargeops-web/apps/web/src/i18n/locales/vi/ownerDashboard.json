@@ -1,6 +1,7 @@
 {
   "title": "Tổng quan",
-  "subtitle": "{{station}} · {{date}}",
+  "subtitle": "{{date}}",
+  "subtitleFormatted": "Tổng quan vận hành toàn bộ danh mục trạm · {{date}}",
   "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
   "dashboard": {
     "error": {
@@ -11,37 +12,26 @@
       "missingDescription": "Endpoint của bảng điều khiển (owner/dashboard) chưa được triển khai nên chưa có số liệu để hiển thị."
     }
   },
-  "license": {
-    "active": "ĐANG HOẠT ĐỘNG",
-    "expiring": "SẮP HẾT HẠN",
-    "expired": "ĐÃ HẾT HẠN",
-    "label": "Giấy phép: {{status}}",
-    "detail": "Hết hạn {{date}} · còn {{days}} ngày",
-    "renewalSoon": "Gia hạn sắp tới"
-  },
   "kpi": {
-    "bookingsToday": "ĐẶT CHỖ HÔM NAY",
-    "bookingsDelta": "+{{count}} so với hôm qua",
-    "revenueToday": "DOANH THU HÔM NAY",
-    "revenueDelta": "+{{percent}}% so với hôm qua",
-    "chargersOnline": "TRỤ ONLINE",
-    "allOnline": "Tất cả trụ đang online",
-    "avgUtilization": "SỬ DỤNG TRUNG BÌNH",
-    "utilizationDelta": "+{{points}} điểm so với tuần trước"
-  },
-  "charger": {
-    "inuse": "Đang sạc",
-    "offline": "Offline"
-  },
-  "chart": {
-    "title": "Doanh thu & đặt chỗ · 14 ngày",
-    "revenue": "Doanh thu",
-    "bookings": "Đặt chỗ"
+    "activeStations": "Trạm đang mở",
+    "pendingNote": "{{count}} trạm chờ duyệt",
+    "allApproved": "Đã duyệt toàn bộ",
+    "chargersOnline": "Trụ sạc Online",
+    "chargersOffline": "{{count}} trụ ngoại tuyến/bảo trì",
+    "allOnline": "Tất cả trụ đang hoạt động",
+    "connectorsAvailable": "Cổng khả dụng",
+    "sessionsToday": "Phiên sạc hôm nay",
+    "avgUtilization": "Hiệu suất hôm nay",
+    "avgUtilizationSub": "Công suất trung bình trong ngày"
   },
   "panel": {
-    "chargers": "Trụ sạc",
-    "manageLink": "Quản lý →",
-    "upcomingBookings": "Đặt chỗ sắp tới",
-    "allLink": "Tất cả →"
+    "actionItems": "Việc cần xử lý",
+    "upcomingBookings": "Lịch đặt sắp tới",
+    "allLink": "Xem tất cả →",
+    "noUpcoming": "Không có đặt chỗ sắp tới",
+    "pendingStations": "Hồ sơ trạm chờ duyệt",
+    "offlineConnectors": "Cổng sạc ngoại tuyến",
+    "openTickets": "Yêu cầu hỗ trợ đang mở",
+    "noActionItems": "Không có việc tồn đọng"
   }
 }

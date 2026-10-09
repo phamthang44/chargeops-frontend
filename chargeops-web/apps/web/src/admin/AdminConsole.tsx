@@ -19,6 +19,7 @@ import {
   IconUsers,
   IconWrench,
   NotificationBell,
+  NotificationToastStack,
   type NotificationItem,
   type ShellNavItem,
 } from '@chargeops/ui';
@@ -43,6 +44,7 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
 } from '../shared/notifications/useNotifications';
+import { useNotificationRealtime } from '../shared/notifications/useNotificationRealtime';
 import { formatRelativeTime } from '../shared/notifications/formatRelativeTime';
 
 /** Screens with a real implementation (others fall back to ComingSoon). */
@@ -89,6 +91,11 @@ function AdminConsoleContent({
   const markAllAsRead = useMarkAllAsRead({ context: 'admin' });
   const deleteNotif = useDeleteNotification({ context: 'admin' });
 
+  const { toasts, dismissToast } = useNotificationRealtime({
+    context: 'admin',
+    onNavigate: (path) => navigate(`${base}${path}`),
+  });
+
   const notificationItems = useMemo<NotificationItem[]>(() => {
     // 1. Persisted notices from API
     const items: NotificationItem[] = serverNotifs.map((n) => {
@@ -133,7 +140,9 @@ function AdminConsoleContent({
   }, [serverNotifs, base, navigate, t]);
 
   return (
-    <AppShell
+    <>
+      <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
+      <AppShell
       nav={NAV}
       activeKey={activeKey}
       onNavigate={(key) => navigate(`${base}/${key}`)}
@@ -182,6 +191,7 @@ function AdminConsoleContent({
         <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
       </Routes>
     </AppShell>
+    </>
   );
 }
 

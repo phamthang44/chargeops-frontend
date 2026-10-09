@@ -135,6 +135,16 @@
       "checkinWindow": "Cửa sổ check-in kéo dài bao lâu?",
       "bookingConfirm": "Khi nào đặt chỗ được xác nhận?",
       "stationFailure": "Quy định hoàn tiền khi trạm gặp sự cố?"
+    },
+    "thinking": {
+      "show": "Xem quá trình suy nghĩ",
+      "hide": "Ẩn quá trình suy nghĩ",
+      "title": "Quá trình suy nghĩ (Reasoning)",
+      "badge": "Reasoning"
+    },
+    "promptLibrary": {
+      "openBtn": "Thư viện 21 câu hỏi & Đáp án chuẩn v4.9",
+      "title": "Thư viện câu hỏi & Quy tắc chính sách v4.9"
     }
   },
   "bookings": {

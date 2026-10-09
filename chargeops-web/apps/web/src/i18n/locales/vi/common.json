@@ -134,17 +134,21 @@
       }
     },
     "ticket": {
+      "created": {
+        "title": "Phiếu hỗ trợ mới {{code}}",
+        "body": "Đã ghi nhận phiếu hỗ trợ {{code}} (danh mục: {{category}}). Vui lòng kiểm tra và xử lý."
+      },
       "resolved": {
         "title": "Phiếu hỗ trợ {{code}} đã được giải quyết",
         "body": "Kết quả xử lý: \"{{result}}\". Vui lòng xác nhận hoặc báo lại trước {{autoCloseAt}} (hết hạn sau 10 ngày). Sau thời hạn này phiếu sẽ tự động đóng; đây không phải xác nhận lỗi trạm hay hoàn tiền."
       },
       "assigned": {
-        "title": "Ticket {{code}} đã được phân công",
-        "body": "Ticket {{code}} tại trạm {{station}} đã được phân công xử lý."
+        "title": "Phiếu hỗ trợ {{code}} đã được phân công",
+        "body": "Phiếu hỗ trợ {{code}} đã được phân công xử lý."
       },
       "escalated": {
         "title": "Yêu cầu khiếu nại ca {{code}}",
-        "body": "Ca khiếu nại cho Ticket {{code}} cần Admin xem xét."
+        "body": "Ca khiếu nại cho Phiếu hỗ trợ {{code}} cần Admin xem xét."
       }
     }
   },

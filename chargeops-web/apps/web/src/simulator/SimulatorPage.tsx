@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createServices, type Connector, type Station } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
@@ -12,6 +13,7 @@ import {
 } from './components/SimulatorControlPanel';
 
 export function SimulatorPage() {
+  const { t } = useTranslation('simulator');
   const [searchParams, setSearchParams] = useSearchParams();
   const routeParams = useParams<{ connectorId?: string }>();
   const location = useLocation();
@@ -133,7 +135,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
     let active = true;
     async function loadStations() {
       try {
-        addLog('Đang kết nối lấy danh sách trạm qua Discovery API...', 'info');
+        addLog(t('logs.connectingDiscovery', 'Đang kết nối lấy danh sách trạm qua Discovery API...'), 'info');
 
         let stList: Station[] = [];
         try {
@@ -153,7 +155,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
               } as Station));
             }
           } else if (discRes.status === 401) {
-            addLog('API /stations trả về 401: Token chưa sẵn sàng hoặc phiên hết hạn.', 'warn');
+            addLog(t('logs.unauthorized401', 'API /stations trả về 401: Token chưa sẵn sàng hoặc phiên hết hạn.'), 'warn');
           }
         } catch {
           // Bỏ qua lỗi mạng
@@ -173,12 +175,12 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
           const matchedStation = stList.find((s) => s.id === urlStationId);
           const initialStationId = matchedStation ? matchedStation.id : stList[0].id;
           setSelectedStationId(initialStationId);
-          addLog(`Đã tải ${stList.length} trạm sạc từ API hệ thống.`, 'success');
+          addLog(t('logs.loadedStations', { count: stList.length, defaultValue: `Đã tải ${stList.length} trạm sạc từ API hệ thống.` }), 'success');
         } else {
-          addLog('Không tìm thấy trạm sạc nào trong hệ thống.', 'warn');
+          addLog(t('logs.noStations', 'Không tìm thấy trạm sạc nào trong hệ thống.'), 'warn');
         }
       } catch (err) {
-        addLog('Không thể tải danh sách trạm: ' + (err as Error).message, 'error');
+        addLog(t('logs.errorLoadingStations', { message: (err as Error).message, defaultValue: 'Không thể tải danh sách trạm: ' + (err as Error).message }), 'error');
       }
     }
 
@@ -195,7 +197,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
 
     async function loadConnectors() {
       try {
-        addLog(`Đang tải súng sạc qua API /stations/${selectedStationId}...`, 'info');
+        addLog(t('logs.loadingConnectors', { id: selectedStationId, defaultValue: `Đang tải súng sạc qua API /stations/${selectedStationId}...` }), 'info');
         let conns: Connector[] = [];
 
         // Thử lấy chi tiết trạm từ API discovery: GET /stations/{selectedStationId}
@@ -212,8 +214,10 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
                       conns.push({
                         id: c.id,
                         chargePointId: cp.id,
+                        chargePointCode: cp.chargePointCode,
+                        chargePointName: cp.name || cp.chargePointCode,
                         connectorCode: c.connectorCode,
-                        name: `Trụ ${cp.name || cp.chargePointCode} · Cổng ${c.connectorCode} (${c.connectorType || 'CCS2'})`,
+                        name: `Trụ ${cp.chargePointCode || cp.name} · Cổng ${c.connectorCode} (${c.connectorType || 'CCS2'})`,
                         connectorType: c.connectorType || 'CCS2',
                         powerKw: Number(c.powerKw || cp.maxPowerKw) || 0,
                         runtimeStatus: c.runtimeStatus || 'AVAILABLE',
@@ -229,7 +233,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
                 }
               }
             } else if (res.status === 401) {
-              addLog(`API /stations/${selectedStationId} trả về 401 Unauthorized.`, 'warn');
+              addLog(t('logs.unauthorizedStation401', { id: selectedStationId, defaultValue: `API /stations/${selectedStationId} trả về 401 Unauthorized.` }), 'warn');
             }
           } catch {
             // fallback
@@ -250,13 +254,13 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
           const matched = conns.find((c) => c.id === urlConnId || c.connectorCode === urlConnId);
           const nextConnId = matched ? matched.id : conns[0].id;
           setSelectedConnectorId(nextConnId);
-          addLog(`Đã nạp ${conns.length} súng sạc. Đang chọn: ${matched?.name || conns[0].name}`, 'success');
+          addLog(t('logs.loadedConnectors', { count: conns.length, name: matched?.name || conns[0].name, defaultValue: `Đã nạp ${conns.length} súng sạc. Đang chọn: ${matched?.name || conns[0].name}` }), 'success');
         } else {
           setSelectedConnectorId('');
-          addLog('Trạm này chưa có cổng sạc nào được cấu hình.', 'warn');
+          addLog(t('logs.noConnectors', 'Trạm này chưa có cổng sạc nào được cấu hình.'), 'warn');
         }
       } catch (err) {
-        addLog('Lỗi tải danh sách súng sạc: ' + (err as Error).message, 'error');
+        addLog(t('logs.errorLoadingConnectors', { message: (err as Error).message, defaultValue: 'Lỗi tải danh sách súng sạc: ' + (err as Error).message }), 'error');
       }
     }
 
@@ -273,7 +277,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
 
     // Kiểm tra định dạng UUID: tránh gửi ID giả như CCS2-01 gây lỗi crash Spring Boot
     if (!isUUID(connId)) {
-      addLog(`[Bỏ qua] Mã "${connId}" không phải UUID cổng sạc hợp lệ. Dùng token mô phỏng...`, 'warn');
+      addLog(t('logs.invalidUuidWarn', { id: connId, defaultValue: `[Bỏ qua] Mã "${connId}" không phải UUID cổng sạc hợp lệ. Dùng token mô phỏng...` }), 'warn');
       const fallbackToken = 'chk_' + Math.random().toString(36).substring(2, 12);
       setChallengeToken(fallbackToken);
       setRemainingSeconds(60);
@@ -282,17 +286,30 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
     }
 
     try {
-      addLog(`[API] POST /internal/connectors/${connId}/check-in-challenge...`, 'info');
-      const res = await services.challenge.create(connId);
-      setChallengeToken(res.challengeToken);
-      setRemainingSeconds(res.expiresInSeconds || 60);
-      addLog(
-        `[Challenge] Nhận token thành công: ${res.challengeToken.slice(0, 16)}... (TTL ${res.expiresInSeconds}s)`,
-        'success',
-      );
+      addLog(t('logs.fetchingChallenge', { id: connId, defaultValue: `[API] POST /internal/connectors/${connId}/check-in-challenge...` }), 'info');
+      const res = await authFetch(`/internal/connectors/${connId}/check-in-challenge`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data || json;
+        if (data?.challengeToken) {
+          setChallengeToken(data.challengeToken);
+          setRemainingSeconds(data.expiresInSeconds || 60);
+          addLog(
+            t('logs.challengeReceived', { token: data.challengeToken.slice(0, 16), ttl: data.expiresInSeconds || 60, defaultValue: `[Challenge] Nhận token thành công từ Backend Redis: ${data.challengeToken.slice(0, 16)}... (TTL ${data.expiresInSeconds || 60}s)` }),
+            'success',
+          );
+          return;
+        }
+      }
+
+      const errJson = await res.json().catch(() => null);
+      const errMsg = errJson?.error?.message || errJson?.message || `HTTP ${res.status}`;
+      throw new Error(errMsg);
     } catch (err) {
       const msg = (err as Error)?.message || 'Không thể tạo mã challenge';
-      addLog(`[Lỗi Backend] ${msg}. Sử dụng token mô phỏng tạm thời.`, 'warn');
+      addLog(t('logs.challengeError', { message: msg, defaultValue: `[Lỗi Backend] ${msg}. Sử dụng token mô phỏng tạm thời.` }), 'warn');
       const fallbackToken = 'chk_' + Math.random().toString(36).substring(2, 12);
       setChallengeToken(fallbackToken);
       setRemainingSeconds(60);
@@ -343,7 +360,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
   const handleSelectConnector = (cId: string) => {
     setSelectedConnectorId(cId);
     setSearchParams({ stationId: selectedStationId, connectorId: cId, mode: viewMode });
-    addLog(`Đã chuyển súng sạc sang ${cId}`, 'info');
+    addLog(t('logs.switchedConnector', { id: cId, defaultValue: `Đã chuyển súng sạc sang ${cId}` }), 'info');
   };
 
   const handleToggleViewMode = (mode: 'split' | 'kiosk') => {
@@ -352,9 +369,112 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
   };
 
   const handleSimulateDriverScan = () => {
-    addLog(`[Driver App] Tài xế quét mã QR token: ${challengeToken?.slice(0, 16)}...`, 'info');
-    addLog('[Backend] Xác thực Driver Booking thành công -> Booking status: CHECKED_IN', 'success');
+    addLog(t('logs.driverScanned', { token: challengeToken?.slice(0, 16) || '', defaultValue: `[Driver App] Tài xế quét mã QR token: ${challengeToken?.slice(0, 16)}...` }), 'info');
+    addLog(t('logs.backendVerified', '[Backend] Xác thực Driver Booking thành công -> Booking status: CHECKED_IN'), 'success');
     setScreenState('CHECKED_IN');
+  };
+
+  const handleQuickSync = async (rawQuery: string): Promise<{ found: boolean; message: string }> => {
+    const q = rawQuery.trim();
+    if (!q) return { found: false, message: t('logs.syncInputPrompt', 'Vui lòng nhập mã hoặc UUID cần tìm') };
+    const qLower = q.toLowerCase();
+
+    // 1. Khớp ngay trong connectors của trạm hiện tại
+    const localMatch = connectors.find((c) => {
+      const cId = (c.id || '').toLowerCase();
+      const cCode = (c.connectorCode || '').toLowerCase();
+      const cpCode = (c.chargePointCode || '').toLowerCase();
+      const name = (c.name || '').toLowerCase();
+      const combo = `${cpCode} ${cCode}`.toLowerCase();
+      const comboDash = `${cpCode}-${cCode}`.toLowerCase();
+      return (
+        cId === qLower ||
+        cCode === qLower ||
+        cpCode === qLower ||
+        combo === qLower ||
+        comboDash === qLower ||
+        (qLower.includes(cpCode) && qLower.includes(cCode)) ||
+        name.includes(qLower)
+      );
+    });
+    if (localMatch) {
+      setSelectedConnectorId(localMatch.id);
+      setSearchParams({ stationId: selectedStationId, connectorId: localMatch.id, mode: viewMode });
+      addLog(
+        t('logs.syncLocalSwitched', { chargePoint: localMatch.chargePointCode || 'N/A', connector: localMatch.connectorCode, defaultValue: `[Đồng bộ] Đã chuyển sang: Trụ ${localMatch.chargePointCode || 'N/A'} · Cổng ${localMatch.connectorCode}` }),
+        'success',
+      );
+      return { found: true, message: `Đã chọn: ${localMatch.name || localMatch.connectorCode}` };
+    }
+
+    // 2. Khớp trực tiếp trạm (theo UUID, stationCode, hoặc tên trạm)
+    const stMatch = stations.find(
+      (s) =>
+        s.id.toLowerCase() === qLower ||
+        (s.stationCode && s.stationCode.toLowerCase() === qLower) ||
+        (s.name && s.name.toLowerCase().includes(qLower)),
+    );
+    if (stMatch) {
+      setSelectedStationId(stMatch.id);
+      setSearchParams({ stationId: stMatch.id, mode: viewMode });
+      addLog(t('logs.syncStationSwitched', { stationName: stMatch.name, code: stMatch.stationCode || 'N/A', defaultValue: `[Đồng bộ] Đã chuyển sang trạm: ${stMatch.name} (${stMatch.stationCode || 'N/A'})` }), 'success');
+      return { found: true, message: `Đã tìm thấy trạm: ${stMatch.name}` };
+    }
+
+    // 3. Quét chi tiết tất cả các trạm trong hệ thống để tìm súng sạc
+    addLog(t('logs.syncScanning', { query: q, defaultValue: `Đang quét tìm "${q}" qua các trạm trong hệ thống...` }), 'info');
+    for (const st of stations) {
+      if (st.id === selectedStationId) continue;
+      if (!isUUID(st.id)) continue;
+      try {
+        const res = await authFetch(`/stations/${st.id}`);
+        if (res.ok) {
+          const json = await res.json();
+          const detail = json?.data || json;
+          if (detail?.chargePoints && Array.isArray(detail.chargePoints)) {
+            for (const cp of detail.chargePoints) {
+              if (cp.connectors && Array.isArray(cp.connectors)) {
+                for (const c of cp.connectors) {
+                  const cId = (c.id || '').toLowerCase();
+                  const cCode = (c.connectorCode || '').toLowerCase();
+                  const cpCode = (cp.chargePointCode || '').toLowerCase();
+                  const name = (c.name || '').toLowerCase();
+                  const combo = `${cpCode} ${cCode}`.toLowerCase();
+                  const comboDash = `${cpCode}-${cCode}`.toLowerCase();
+                  const matched =
+                    cId === qLower ||
+                    cCode === qLower ||
+                    cpCode === qLower ||
+                    combo === qLower ||
+                    comboDash === qLower ||
+                    (qLower.includes(cpCode) && qLower.includes(cCode)) ||
+                    name.includes(qLower);
+
+                  if (matched) {
+                    setSelectedStationId(st.id);
+                    setSelectedConnectorId(c.id);
+                    setSearchParams({ stationId: st.id, connectorId: c.id, mode: viewMode });
+                    addLog(
+                      t('logs.syncFound', { chargePoint: cp.chargePointCode || cp.name, connector: c.connectorCode, stationName: st.name, defaultValue: `[Đồng bộ thành công] Tìm thấy Trụ "${cp.chargePointCode || cp.name}" · Cổng "${c.connectorCode}" thuộc trạm "${st.name}"!` }),
+                      'success',
+                    );
+                    return {
+                      found: true,
+                      message: `Đã định vị: Trụ ${cp.chargePointCode || cp.name} · Cổng ${c.connectorCode} tại trạm "${st.name}"`,
+                    };
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // bỏ qua lỗi trạm đơn lẻ
+      }
+    }
+
+    addLog(t('logs.syncNotFound', { query: q, defaultValue: `Không tìm thấy cổng sạc hoặc trạm nào khớp với "${q}".` }), 'warn');
+    return { found: false, message: `Không tìm thấy súng sạc hoặc trạm nào khớp với "${q}"` };
   };
 
   const currentStation = stations.find((s) => s.id === selectedStationId) || stations[0] || null;
@@ -371,14 +491,14 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
             type="button"
             onClick={() => navigate(-1)}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-slate-300 hover:bg-white/20 transition-all cursor-pointer"
-            title="Quay lại"
+            title={t('back', 'Quay lại')}
           >
             ←
           </button>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-bold text-sm text-white tracking-tight">
-              ChargeOps Physical Charger Simulator
+              {t('title', 'ChargeOps Physical Charger Simulator')}
             </span>
           </div>
         </div>
@@ -395,7 +515,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              🛠️ Sandbox Mode
+              {t('modes.split', '🛠️ Sandbox Mode')}
             </button>
             <button
               type="button"
@@ -406,7 +526,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              🖥️ Fullscreen Kiosk
+              {t('modes.kiosk', '🖥️ Fullscreen Kiosk')}
             </button>
           </div>
         </div>
@@ -425,7 +545,7 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
           screenState={screenState}
           onStateChange={(st) => {
             setScreenState(st);
-            addLog(`Trạng thái màn hình chuyển sang: ${st}`, 'info');
+            addLog(t('logs.screenStateChanged', { state: st, defaultValue: `Trạng thái màn hình chuyển sang: ${st}` }), 'info');
           }}
         />
 
@@ -446,11 +566,12 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
             screenState={screenState}
             onStateChange={(st) => {
               setScreenState(st);
-              addLog(`Trạng thái màn hình chuyển sang: ${st}`, 'info');
+              addLog(t('logs.screenStateChanged', { state: st, defaultValue: `Trạng thái màn hình chuyển sang: ${st}` }), 'info');
             }}
             logs={logs}
             onClearLogs={() => setLogs([])}
             onSimulateDriverScan={handleSimulateDriverScan}
+            onQuickSync={handleQuickSync}
           />
         )}
       </div>

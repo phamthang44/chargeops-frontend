@@ -1,0 +1,181 @@
+{
+  "title": "ChargeOps Physical Charger Simulator",
+  "back": "Back",
+  "modes": {
+    "split": "🛠️ Sandbox Mode",
+    "kiosk": "🖥️ Fullscreen Kiosk"
+  },
+  "logs": {
+    "connectingDiscovery": "Connecting to fetch stations via Discovery API...",
+    "unauthorized401": "API /stations returned 401: Token not ready or session expired.",
+    "loadedStations": "Loaded {{count}} charging stations from system API.",
+    "noStations": "No charging stations found in system.",
+    "errorLoadingStations": "Could not load station list: {{message}}",
+    "loadingConnectors": "Loading connectors via API /stations/{{id}}...",
+    "unauthorizedStation401": "API /stations/{{id}} returned 401 Unauthorized.",
+    "loadedConnectors": "Loaded {{count}} connectors. Selected: {{name}}",
+    "noConnectors": "This station has no configured connectors.",
+    "errorLoadingConnectors": "Error loading connectors: {{message}}",
+    "switchedConnector": "Switched connector to {{id}}",
+    "invalidUuidWarn": "[Skipped] \"{{id}}\" is not a valid connector UUID. Using mock token...",
+    "fetchingChallenge": "[API] POST /internal/connectors/{{id}}/check-in-challenge...",
+    "challengeReceived": "[Challenge] Successfully retrieved token from Redis: {{token}}... (TTL {{ttl}}s)",
+    "challengeError": "[Backend Error] {{message}}. Using temporary mock token.",
+    "tokenExpiredAutoRefresh": "[TTL] QR token expired (0s). Auto-refreshing new token...",
+    "driverScanned": "[Driver App] Driver scanned QR token: {{token}}...",
+    "backendVerified": "[Backend] Verified Driver Booking -> Booking status: CHECKED_IN",
+    "screenStateChanged": "Screen state changed to: {{state}}",
+    "syncInputPrompt": "Please enter a code or UUID to search",
+    "syncLocalSwitched": "[Synced] Switched to: Charger {{chargePoint}} · Port {{connector}}",
+    "syncStationSwitched": "[Synced] Switched to station: {{stationName}} ({{code}})",
+    "syncScanning": "Scanning \"{{query}}\" across system stations...",
+    "syncFound": "[Sync Success] Found Charger \"{{chargePoint}}\" · Port \"{{connector}}\" at station \"{{stationName}}\"!",
+    "syncNotFound": "No connector or station found matching \"{{query}}\""
+  },
+  "kiosk": {
+    "brandTerminal": "Terminal 4.0",
+    "stationPill": {
+      "charger": "Charger:",
+      "connector": "Port:"
+    },
+    "clockDiagnostic": "4G LTE · 32°C",
+    "ready": {
+      "badge": "Ready for Service · Dynamic QR Check-in",
+      "title": "Scan QR Code to Check-in & Start Charging",
+      "desc": "Real-time dynamic security QR code, automatically rotates every 60 seconds.",
+      "generating": "Generating new code...",
+      "noQr": "No QR code",
+      "chargerLabel": "Charger:",
+      "connectorLabel": "Port:",
+      "copyId": "Copy ID",
+      "copiedId": "✓ Copied",
+      "copyIdTitle": "Copy UUID to paste into search or diagnostics",
+      "validityTitle": "Validity Period",
+      "validityDesc": "Auto-refreshes upon expiration",
+      "refreshNow": "Refresh code now",
+      "countdownRefreshTooltip": "Click to refresh QR code now",
+      "countdownExpired": "Expired",
+      "countdownValid": "Valid",
+      "redisValid": "Valid token from Redis Backend",
+      "localFallback": "Local mock token (Backend needed)",
+      "challengeCode": "Challenge Token:",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "step1Title": "Scan QR Code",
+      "step1Desc": "Use ChargeOps app to scan",
+      "step2Title": "Plug In Connector",
+      "step2Desc": "Detach gun and plug firmly into car",
+      "step3Title": "Auto Charging",
+      "step3Desc": "Monitor stats on kiosk screen"
+    },
+    "checkedIn": {
+      "badge": "Check-in Valid · Driver Verified",
+      "welcome": "Welcome, {{name}}!",
+      "bookingCodeLabel": "Booking Code:",
+      "connectorLabel": "Port:",
+      "plugPrompt": "Please plug the charging cable into your vehicle",
+      "plugDesc": "Once plugged in, power supply will start automatically after 5 seconds.",
+      "simulatePlugIn": "⚡ Simulate: Cable Plugged In (Start Charging)",
+      "cancelReturn": "Cancel & Return to Standby"
+    },
+    "charging": {
+      "badge": "Fast DC Charging · {{type}}",
+      "driverLabel": "Driver:",
+      "powerGauge": "Instantaneous Power",
+      "voltage": "Voltage: 418 V",
+      "current": "Current: {{current}} A",
+      "batterySoc": "Vehicle Battery (SoC)",
+      "targetSoc": "Target: 80%",
+      "energyDelivered": "Energy Delivered",
+      "chargingDuration": "Charging Time",
+      "totalCost": "Total Cost",
+      "stopSession": "Stop Charging Session"
+    },
+    "completed": {
+      "title": "Charging Session Completed",
+      "thankYou": "Thank you for using ChargeOps charging network!",
+      "bookingCodeLabel": "Booking Code:",
+      "totalEnergy": "Total Energy:",
+      "chargingDuration": "Duration:",
+      "totalCost": "Total Payment:",
+      "minutesUnit": "mins",
+      "unhookNotice": "⚠️ Please unplug the connector and return it to its cradle.",
+      "finishBtn": "Done & Return to Standby"
+    },
+    "faulted": {
+      "faultedBadge": "Charger Faulted",
+      "offlineBadge": "Offline / Maintenance",
+      "unavailableTitle": "Charging Port Temporarily Unavailable",
+      "faultedDesc": "Technical fault detected on CCS2 connector. A technician has been notified.",
+      "offlineDesc": "Port is undergoing scheduled maintenance.",
+      "hotline": "24/7 Support Hotline:",
+      "restoreBtn": "Restore to Ready State"
+    },
+    "footer": {
+      "addressLabel": "Station Address:",
+      "fwVersion": "FW Version: 2.4.0-release",
+      "statusLabel": "Status:",
+      "online": "Online"
+    }
+  },
+  "controlPanel": {
+    "title": "Simulator Control Panel",
+    "subtitle": "Hardware charger simulation & Check-in API verification",
+    "section1Title": "1. Select Station & Connector",
+    "quickSync": {
+      "title": "Quick Sync from Mobile App / Charger Code",
+      "placeholder": "Paste code or search (e.g., ST-1201-CP-04 C-01, UUID...)",
+      "button": "Sync",
+      "pasteClipboard": "Paste from Clipboard",
+      "pasteTooltip": "Quick paste content from Clipboard and sync immediately"
+    },
+    "stationPicker": {
+      "label": "1. Select Charging Station",
+      "fieldLabel": "Charging Station:",
+      "loading": "Loading stations...",
+      "placeholder": "Choose station...",
+      "searchPlaceholder": "Search by name, address, code, UUID...",
+      "all": "All",
+      "activeOnly": "Active Only",
+      "foundCount": "Found: {{count}} stations",
+      "empty": "No matching station found"
+    },
+    "connectorPicker": {
+      "label": "2. Select Connector",
+      "fieldLabel": "Connector:",
+      "selectedConnector": "Port {{code}}",
+      "loading": "Loading connectors...",
+      "placeholder": "Choose connector...",
+      "searchPlaceholder": "Search by C-01, CCS2, power kW, UUID...",
+      "all": "All",
+      "availableOnly": "Available",
+      "foundCount": "Found: {{count}} connectors",
+      "empty": "No matching connector found"
+    },
+    "challenge": {
+      "label": "3. Dynamic QR Challenge Token",
+      "autoRefresh": "Auto-refresh",
+      "refreshBtn": "Refresh Token",
+      "secondsLeft": "{{seconds}}s left"
+    },
+    "screenState": {
+      "label": "4. Kiosk Screen State Control",
+      "available": "Ready (Available)",
+      "checkedIn": "Checked In",
+      "charging": "Charging",
+      "completed": "Completed",
+      "faulted": "Faulted",
+      "offline": "Offline"
+    },
+    "actions": {
+      "label": "5. Simulation Test Actions",
+      "simulateScan": "📱 Simulate Successful Driver QR Scan",
+      "simulateScanDesc": "Simulates driver mobile app sending challenge token to Check-in API"
+    },
+    "logs": {
+      "title": "Simulator Telemetry Logs",
+      "clear": "Clear Logs",
+      "empty": "No events recorded yet."
+    }
+  }
+}

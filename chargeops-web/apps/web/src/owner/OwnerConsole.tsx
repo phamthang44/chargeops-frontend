@@ -7,7 +7,7 @@ import {
   createServices,
   useApi,
   resolveNotificationI18n,
-  type OwnerDashboard as OwnerDashboardData,
+  type OwnerOperationsSummary as OwnerDashboardData,
   type StaffDashboard as StaffDashboardData,
   type Station,
   type AppNotification,
@@ -29,6 +29,7 @@ import {
   IconUsers,
   IconBook,
   NotificationBell,
+  NotificationToastStack,
   type NotificationItem,
   type ShellNavItem,
 } from '@chargeops/ui';
@@ -43,6 +44,7 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
 } from '../shared/notifications/useNotifications';
+import { useNotificationRealtime } from '../shared/notifications/useNotificationRealtime';
 import { formatRelativeTime } from '../shared/notifications/formatRelativeTime';
 import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
@@ -173,6 +175,11 @@ function OwnerConsoleContent({
   const markAllAsRead = useMarkAllAsRead(mutationScope);
   const deleteNotif = useDeleteNotification(mutationScope);
 
+  const { toasts, dismissToast } = useNotificationRealtime({
+    context: notifContext,
+    onNavigate: (path) => navigate(`${base}${path}`),
+  });
+
   const notificationItems = useMemo<NotificationItem[]>(() => {
     // 1. Defensively extract notifications array regardless of envelope shape
     const notifArray: AppNotification[] = Array.isArray(serverNotifications)
@@ -227,7 +234,9 @@ function OwnerConsoleContent({
   }, [serverNotifications, base, navigate, t]);
 
   return (
-    <AppShell
+    <>
+      <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
+      <AppShell
       nav={nav}
       activeKey={activeKey}
       onNavigate={(key) => navigate(`${base}/${key}`)}
@@ -294,6 +303,7 @@ function OwnerConsoleContent({
         <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
       </Routes>
     </AppShell>
+    </>
   );
 }
 

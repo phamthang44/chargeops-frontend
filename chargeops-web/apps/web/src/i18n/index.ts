@@ -29,6 +29,8 @@ import viAdmin from './locales/vi/admin.json';
 import enAdmin from './locales/en/admin.json';
 import viErrors from './locales/vi/errors.json';
 import enErrors from './locales/en/errors.json';
+import viSimulator from './locales/vi/simulator.json';
+import enSimulator from './locales/en/simulator.json';
 
 export const SUPPORTED_LANGUAGES = ['vi', 'en'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -59,6 +61,7 @@ i18n.use(initReactI18next).init({
       owner: viOwner,
       admin: viAdmin,
       errors: viErrors,
+      simulator: viSimulator,
     },
     en: {
       common: enCommon,
@@ -72,6 +75,7 @@ i18n.use(initReactI18next).init({
       owner: enOwner,
       admin: enAdmin,
       errors: enErrors,
+      simulator: enSimulator,
     },
   },
   lng: initialLanguage(),

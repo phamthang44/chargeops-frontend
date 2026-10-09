@@ -135,6 +135,16 @@
       "checkinWindow": "How long is the check-in window?",
       "bookingConfirm": "When is a booking confirmed?",
       "stationFailure": "Refund rules for station failures?"
+    },
+    "thinking": {
+      "show": "Show reasoning process",
+      "hide": "Hide reasoning process",
+      "title": "Reasoning Process",
+      "badge": "Reasoning"
+    },
+    "promptLibrary": {
+      "openBtn": "Policy Benchmark Library (21 Cases)",
+      "title": "Policy Prompt & Benchmark Library"
     }
   },
   "bookings": {

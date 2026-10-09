@@ -1,6 +1,7 @@
 {
   "title": "Overview",
-  "subtitle": "{{station}} · {{date}}",
+  "subtitle": "{{date}}",
+  "subtitleFormatted": "Portfolio operations overview · {{date}}",
   "loadError": "Could not load overview data: {{message}}",
   "dashboard": {
     "error": {
@@ -11,37 +12,26 @@
       "missingDescription": "The dashboard endpoint (owner/dashboard) has not been deployed yet, so there are no figures to show."
     }
   },
-  "license": {
-    "active": "ACTIVE",
-    "expiring": "EXPIRING SOON",
-    "expired": "EXPIRED",
-    "label": "License: {{status}}",
-    "detail": "Expires {{date}} · {{days}} days left",
-    "renewalSoon": "Renewal coming up"
-  },
   "kpi": {
-    "bookingsToday": "BOOKINGS TODAY",
-    "bookingsDelta": "+{{count}} vs. yesterday",
-    "revenueToday": "REVENUE TODAY",
-    "revenueDelta": "+{{percent}}% vs. yesterday",
-    "chargersOnline": "CHARGERS ONLINE",
-    "allOnline": "All chargers online",
-    "avgUtilization": "AVG. UTILIZATION",
-    "utilizationDelta": "+{{points}} pts vs. last week"
-  },
-  "charger": {
-    "inuse": "In use",
-    "offline": "Offline"
-  },
-  "chart": {
-    "title": "Revenue & bookings · 14 days",
-    "revenue": "Revenue",
-    "bookings": "Bookings"
+    "activeStations": "Active stations",
+    "pendingNote": "{{count}} pending approval",
+    "allApproved": "All approved",
+    "chargersOnline": "Online chargers",
+    "chargersOffline": "{{count}} offline/maintenance",
+    "allOnline": "All chargers operational",
+    "connectorsAvailable": "Available connectors",
+    "sessionsToday": "Sessions today",
+    "avgUtilization": "Avg. utilization today",
+    "avgUtilizationSub": "Capacity utilization today"
   },
   "panel": {
-    "chargers": "Chargers",
-    "manageLink": "Manage →",
+    "actionItems": "Action items",
     "upcomingBookings": "Upcoming bookings",
-    "allLink": "See all →"
+    "allLink": "See all →",
+    "noUpcoming": "No upcoming bookings",
+    "pendingStations": "Stations pending approval",
+    "offlineConnectors": "Offline connectors",
+    "openTickets": "Open support tickets",
+    "noActionItems": "No pending action items"
   }
 }

@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ApiError, useApi, type AssistantCitation, type ConversationSummary } from '@chargeops/api';
+import { ApiError, parseAssistantThinking, useApi, type AssistantCitation, type ConversationSummary } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
 import {
   IconAlertTriangle,
   IconBook,
+  IconBrain,
   IconChat,
   IconCheck,
   IconChevronDown,
@@ -17,9 +18,11 @@ import {
   IconInfoCircle,
   IconRefreshCw,
   IconSend,
+  IconSparkles,
   IconX,
   PageHeader,
 } from '@chargeops/ui';
+import { PolicyPromptLibraryModal } from '../features/assistant/PolicyPromptLibrary';
 
 interface ChatMessage {
   id: string;
@@ -150,6 +153,69 @@ function formatRelativeTime(isoString?: string, locale: 'vi' | 'en' = 'vi'): str
   }
 }
 
+interface BotMessageContentProps {
+  text: string;
+}
+
+function BotMessageContent({ text }: BotMessageContentProps) {
+  const { t } = useTranslation('owner');
+  const [showThinking, setShowThinking] = useState(false);
+  const { thinking, answer } = useMemo(() => parseAssistantThinking(text), [text]);
+
+  const displayAnswer = answer || (thinking ? '' : text);
+
+  return (
+    <div className="flex flex-col gap-2">
+      {thinking && (
+        <div className="rounded-xl border border-line-2/80 bg-surface-2/60 p-2 text-[12px]">
+          <button
+            type="button"
+            onClick={() => setShowThinking((v) => !v)}
+            className="flex w-full items-center justify-between gap-2 text-left font-medium text-muted hover:text-ink transition cursor-pointer select-none"
+          >
+            <div className="flex items-center gap-1.5">
+              <IconBrain size={14} className="text-brand shrink-0" />
+              <span>
+                {showThinking
+                  ? t('assistant.thinking.hide', { defaultValue: 'Ẩn quá trình suy nghĩ' })
+                  : t('assistant.thinking.show', { defaultValue: 'Xem quá trình suy nghĩ' })}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted/70">
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                {t('assistant.thinking.badge', { defaultValue: 'Reasoning' })}
+              </span>
+              {showThinking ? <IconChevronUp size={13} /> : <IconChevronDown size={13} />}
+            </div>
+          </button>
+
+          {showThinking && (
+            <div className="mt-2.5 max-h-72 overflow-y-auto rounded-lg border border-line/60 bg-canvas/80 p-3 font-mono text-[11px] leading-relaxed text-muted whitespace-pre-wrap border-l-2 border-l-brand/70">
+              <div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+                <span>{t('assistant.thinking.title', { defaultValue: 'Quá trình suy nghĩ (Reasoning)' })}</span>
+                <span className="text-[10px] lowercase text-muted/50">{thinking.length} ký tự</span>
+              </div>
+              {thinking}
+            </div>
+          )}
+        </div>
+      )}
+
+      {displayAnswer ? (
+        <div className="whitespace-pre-wrap [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+          <Markdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
+            {displayAnswer}
+          </Markdown>
+        </div>
+      ) : (
+        <div className="text-[12px] italic text-muted">
+          {thinking ? t('assistant.searching', { defaultValue: 'Đang phản hồi…' }) : text}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** FR15 — Owner Policy Assistant (BKG-067 ask-only grounded RAG + BKG-067 chat history recovery). */
 export function Assistant() {
   const { t, i18n } = useTranslation('owner');
@@ -173,6 +239,7 @@ export function Assistant() {
   const [errorState, setErrorState] = useState<AssistantErrorState | null>(null);
   const [expandedCitationMessageIds, setExpandedCitationMessageIds] = useState<Record<string, boolean>>({});
   const [quotaLockedUntil, setQuotaLockedUntil] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -714,11 +781,7 @@ export function Assistant() {
                         {isUser ? (
                           <div className="whitespace-pre-wrap">{m.text}</div>
                         ) : (
-                          <div className="whitespace-pre-wrap [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <Markdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
-                              {m.text}
-                            </Markdown>
-                          </div>
+                          <BotMessageContent text={m.text} />
                         )}
                       </div>
 
@@ -853,22 +916,38 @@ export function Assistant() {
 
           {/* Composer & Quick Questions */}
           <div className="border-t border-line-3 bg-surface px-4 py-3 md:px-5">
-            {/* Quick prompts chips */}
-            <div className="mb-2.5 flex flex-wrap gap-1.5">
-              {QUICK_QS_KEYS.map((key) => {
-                const q = t(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => ask(q)}
-                    disabled={pending || isQuotaLocked}
-                    className="rounded-full border border-line bg-canvas px-3 py-1 text-[11.5px] font-medium text-body hover:border-brand hover:bg-surface disabled:opacity-40 transition"
-                  >
-                    {q}
-                  </button>
-                );
-              })}
+            {/* Quick prompts chips & High-End Library Bar */}
+            <div className="mb-2.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* High-End Library Island Trigger Button */}
+                <button
+                  type="button"
+                  onClick={() => setLibraryOpen(true)}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-brand/35 bg-brand-soft px-3 py-1 text-[11.5px] font-semibold text-brand hover:border-brand hover:bg-brand hover:text-white transition shadow-2xs cursor-pointer shrink-0"
+                >
+                  <IconSparkles size={13} className="text-brand group-hover:text-white transition" />
+                  <span>{t('assistant.promptLibrary.openBtn', { defaultValue: 'Thư viện câu hỏi & Đáp án chuẩn (21 ca)' })}</span>
+                  <span className="rounded-full bg-brand/15 px-1.5 py-0.2 font-mono text-[10px] text-brand-strong group-hover:bg-white/20 group-hover:text-white">
+                    21
+                  </span>
+                </button>
+
+                {/* Popular Quick Prompts Chips */}
+                {QUICK_QS_KEYS.map((key) => {
+                  const q = t(key);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => ask(q)}
+                      disabled={pending || isQuotaLocked}
+                      className="rounded-full border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-body hover:border-brand/40 hover:bg-surface disabled:opacity-40 transition shrink-0"
+                    >
+                      {q}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Input field + Send button */}
@@ -918,6 +997,13 @@ export function Assistant() {
           </div>
         </section>
       </div>
+
+      <PolicyPromptLibraryModal
+        isOpen={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        onSelectPrompt={(q) => ask(q)}
+        disabled={pending || isQuotaLocked}
+      />
     </>
   );
 }

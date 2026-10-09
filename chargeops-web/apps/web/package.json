@@ -14,6 +14,7 @@
     "@chargeops/auth": "*",
     "@chargeops/tokens": "*",
     "@chargeops/ui": "*",
+    "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.80.0",
     "i18next": "^26.3.6",
     "keycloak-js": "^26.2.4",

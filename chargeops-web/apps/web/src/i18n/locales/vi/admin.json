@@ -371,6 +371,16 @@
       "expiringLicensesVal": "{{count}} · {{days}} ngày",
       "expiredLicenses": "Giấy phép đã hết hạn",
       "reportedFaults": "Trụ lỗi được báo cáo"
+    },
+    "queue": {
+      "pendingApprovals": "Hồ sơ trạm chờ duyệt",
+      "platformTickets": "Ticket nền tảng cần hỗ trợ",
+      "escalatedCases": "Vụ việc khiếu nại leo thang",
+      "noPendingStations": "Không có trạm chờ duyệt",
+      "noPlatformTickets": "Không có ticket nền tảng",
+      "noEscalatedCases": "Không có vụ việc leo thang",
+      "seeAll": "Xem tất cả →",
+      "actionNeeded": "Cần xem xét"
     }
   },
   "licenses": {

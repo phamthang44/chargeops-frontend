@@ -96,9 +96,9 @@
       "chargePointsSub": "Station {{status}}",
       "connectors": "Connectors",
       "connectorsSub": "{{available}} available",
-      "openIncidents": "Open incidents",
-      "openIncidentsSub": "Connectors offline",
-      "noIncidents": "No offline connectors"
+      "openIncidents": "Connectors to check",
+      "openIncidentsSub": "Connectors or charge points offline",
+      "noIncidents": "All connectors operational"
     },
     "panel": {
       "todayBookings": "Bookings today",

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface RadialCountdownProps {
   /** Total duration in seconds (e.g. 60). */
@@ -23,6 +24,7 @@ export function RadialCountdown({
   className = '',
   onRefresh,
 }: RadialCountdownProps) {
+  const { t } = useTranslation('simulator');
   const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.max(0, Math.min(1, remainingSeconds / totalSeconds));
@@ -85,7 +87,7 @@ export function RadialCountdown({
       <button
         type="button"
         onClick={onRefresh}
-        title={onRefresh ? 'Nhấn để làm mới mã QR ngay' : undefined}
+        title={onRefresh ? t('kiosk.ready.countdownRefreshTooltip', 'Nhấn để làm mới mã QR ngay') : undefined}
         className="absolute inset-0 flex flex-col items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none cursor-pointer group"
       >
         <span
@@ -95,7 +97,9 @@ export function RadialCountdown({
           {Math.ceil(remainingSeconds)}s
         </span>
         <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-200 transition-colors">
-          {remainingSeconds <= 0 ? 'Hết hạn' : 'Hiệu lực'}
+          {remainingSeconds <= 0
+            ? t('kiosk.ready.countdownExpired', 'Hết hạn')
+            : t('kiosk.ready.countdownValid', 'Hiệu lực')}
         </span>
       </button>
     </div>

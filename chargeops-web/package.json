@@ -10,5 +10,9 @@
     "dev": "npm run dev --workspace apps/web",
     "demo": "npm run demo --workspace apps/web",
     "build": "npm run build --workspaces --if-present"
+  },
+  "dependencies": {
+    "@types/qrcode": "^1.5.6",
+    "qrcode": "^1.5.4"
   }
 }

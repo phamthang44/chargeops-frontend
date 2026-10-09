@@ -13,7 +13,7 @@ export interface HardwareChangedMessage {
   type: 'HARDWARE_CHANGED';
 }
 
-export type TopicHandler = (message: HardwareChangedMessage) => void;
+export type TopicHandler<T = any> = (message: T) => void;
 export type WireUnsubscribe = () => void;
 /** Creates a wire-level subscription; only called while connected. */
 export type WireSubscribe = (topic: string, onRawBody: (rawBody: string) => void) => WireUnsubscribe;
@@ -21,7 +21,7 @@ export type WireSubscribe = (topic: string, onRawBody: (rawBody: string) => void
 export type OnWireReady = () => void;
 
 interface TopicEntry {
-  handlers: Set<TopicHandler>;
+  handlers: Set<TopicHandler<any>>;
   onWireReady?: OnWireReady;
   wireUnsubscribe?: WireUnsubscribe;
 }
@@ -49,12 +49,25 @@ function parseHardwareMessage(rawBody: string): HardwareChangedMessage | null {
   }
 }
 
+function parseTopicMessage(topic: string, rawBody: string): any {
+  if (topic.includes('/hardware')) {
+    return parseHardwareMessage(rawBody);
+  }
+  try {
+    return JSON.parse(rawBody);
+  } catch {
+    return rawBody;
+  }
+}
+
 function subscribeOnWire(topic: string, entry: TopicEntry): void {
   if (!wire || entry.wireUnsubscribe) return;
   try {
+    console.log('[stompTopicRegistry] Subscribing on wire to:', topic);
     entry.wireUnsubscribe = wire(topic, (rawBody) => {
-      const message = parseHardwareMessage(rawBody);
-      if (!message) return;
+      console.log('[stompTopicRegistry] Received wire message on:', topic, rawBody);
+      const message = parseTopicMessage(topic, rawBody);
+      if (message === null || message === undefined) return;
       for (const handler of Array.from(entry.handlers)) {
         try {
           handler(message);
@@ -75,9 +88,9 @@ function subscribeOnWire(topic: string, entry: TopicEntry): void {
  * own initial fetch; it is invoked only when the wire connects/reconnects so
  * events missed during an outage trigger a catch-up refetch.
  */
-export function addTopicHandler(
+export function addTopicHandler<T = any>(
   topic: string,
-  handler: TopicHandler,
+  handler: TopicHandler<T>,
   onWireReady?: OnWireReady,
 ): () => void {
   let entry = entries.get(topic);

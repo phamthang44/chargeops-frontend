@@ -81,8 +81,10 @@ export function StompProvider({ children }: { children: ReactNode }) {
         pending.connectHeaders = { Authorization: `Bearer ${token}` };
       },
       onConnect: () => {
+        console.log('[StompProvider] STOMP connected to broker:', brokerURL);
         setConnected(true);
         attachWire((topic, onRawBody) => {
+          console.log('[StompProvider] Subscribing to topic on wire:', topic);
           const subscription = instance.subscribe(topic, (message: IMessage) => {
             onRawBody(message.body);
           });
@@ -96,14 +98,21 @@ export function StompProvider({ children }: { children: ReactNode }) {
         });
       },
       onDisconnect: () => {
+        console.log('[StompProvider] STOMP disconnected');
         setConnected(false);
         detachWire();
       },
-      onWebSocketClose: () => {
+      onWebSocketClose: (evt) => {
+        console.log('[StompProvider] WebSocket closed, code:', evt?.code, 'reason:', evt?.reason);
         setConnected(false);
         detachWire();
       },
-      onStompError: () => {
+      onStompError: (frame) => {
+        console.warn(
+          '[StompProvider] STOMP broker error:',
+          frame?.headers?.message,
+          frame?.body ? `| details: ${frame.body}` : ''
+        );
         // Broker ERROR (e.g. rejected authorization). Spring closes the socket
         // right after; onWebSocketClose detaches and stompjs schedules a
         // reconnect with a freshly ensured token.

@@ -19,6 +19,7 @@ import { AppButton } from '@/components/AppButton';
 import { GlassButton } from '@/components/GlassButton';
 import { TicketCard } from '@/components/ticket/TicketCard';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useNotificationSocket } from '@/hooks/useNotificationSocket';
 import type { RootStackParamList } from '@/navigation/types';
 import { getTickets } from '@/services/ticketService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -67,6 +68,13 @@ export function MyTicketsScreen() {
     setLoading(true);
     fetchTickets();
   }, [fetchTickets]);
+
+  // Tự động làm mới danh sách vé khi có thông báo mới từ WebSocket STOMP (/user/queue/notifications)
+  useNotificationSocket(
+    useCallback(() => {
+      fetchTickets();
+    }, [fetchTickets]),
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

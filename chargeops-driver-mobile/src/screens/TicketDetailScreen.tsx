@@ -34,6 +34,8 @@ import {
 } from '@/components/ticket';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useNotificationSocket } from '@/hooks/useNotificationSocket';
+import { useTicketChatSocket } from '@/hooks/useTicketChatSocket';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   confirmTicketClosed,
@@ -115,12 +117,13 @@ export function TicketDetailScreen() {
           return data;
         }
 
-        // Merge messages: keep server messages + any optimistic messages currently pending
+        // Merge messages: keep server messages + any optimistic/recent socket messages
         const serverMessages = data.messages || [];
-        const pendingOptimistic = (prev.messages || []).filter(
-          m => m.messageId.startsWith('temp-') && !serverMessages.some(sm => sm.body === m.body && sm.authorKind === m.authorKind)
+        const serverMsgIds = new Set(serverMessages.map(m => m.messageId));
+        const additionalMessages = (prev.messages || []).filter(
+          m => !serverMsgIds.has(m.messageId) && !serverMessages.some(sm => sm.body === m.body && sm.authorKind === m.authorKind)
         );
-        const mergedMessages = [...serverMessages, ...pendingOptimistic];
+        const mergedMessages = [...serverMessages, ...additionalMessages];
 
         const prevCount = prev.messages?.length || 0;
         const newCount = mergedMessages.length;
@@ -174,6 +177,52 @@ export function TicketDetailScreen() {
     const sub = AppState.addEventListener('change', handleAppStateChange);
     return () => sub.remove();
   }, [accessDenied, ticket?.status, fetchDetail, fetchEscalation]);
+
+  // Nhận tin nhắn chat theo thời gian thực qua WebSocket STOMP (/topic/tickets/{ticketId}/messages)
+  const handleIncomingSocketMessage = useCallback((incoming: TicketMessage) => {
+    console.log('[TicketDetailScreen] Received realtime message:', incoming.messageId, incoming.authorDisplayName, incoming.body);
+    setTicket(prev => {
+      if (!prev) return prev;
+      const currentMessages = prev.messages || [];
+      // Tránh trùng lặp tin nhắn
+      if (currentMessages.some(m => m.messageId === incoming.messageId)) {
+        return prev;
+      }
+      // Xoá tin nhắn optimistic temp nếu có
+      const filtered = currentMessages.filter(
+        m => !(m.messageId.startsWith('temp-') && m.body === incoming.body && m.authorKind === incoming.authorKind)
+      );
+      const updatedMessages = [...filtered, incoming];
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+      return {
+        ...prev,
+        messages: updatedMessages,
+      };
+    });
+
+    // Cập nhật trạng thái vé trong nền nếu tin nhắn đi kèm thay đổi trạng thái
+    void fetchDetail(true);
+    void fetchEscalation();
+  }, [fetchDetail, fetchEscalation]);
+
+  useTicketChatSocket(
+    ticketId,
+    handleIncomingSocketMessage,
+    useCallback(() => {
+      // Re-fetch nhẹ khi kết nối lại STOMP để tránh miss tin nhắn
+      fetchDetail(true);
+    }, [fetchDetail]),
+  );
+
+  // Lắng nghe notification hint realtime (/user/queue/notifications) để đồng bộ trạng thái khi Staff resolve/assign
+  useNotificationSocket(
+    useCallback(() => {
+      void fetchDetail(true);
+      void fetchEscalation();
+    }, [fetchDetail, fetchEscalation]),
+  );
 
   const handleEscalateSubmit = async (reason: string) => {
     setIsSubmittingEscalation(true);

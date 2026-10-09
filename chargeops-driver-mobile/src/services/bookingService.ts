@@ -1605,29 +1605,58 @@ export async function resolveCheckIn(
       let code: CheckInErrorCode = 'UNKNOWN_QR';
       let minutesUntilOpen: number | undefined;
 
-      if (rawCode === 'CHECK_IN_TOO_EARLY') {
+      if (
+        rawCode === 'CHECK_IN_TOO_EARLY' ||
+        rawCode === 'BKG_CHECK_IN_TOO_EARLY' ||
+        messageKey === 'error.booking.checkInTooEarly'
+      ) {
         code = 'TOO_EARLY';
         if (activeBooking?.startAt) {
           const start = new Date(activeBooking.startAt).getTime();
           minutesUntilOpen = Math.max(1, Math.ceil((start - Date.now()) / 60_000));
         }
-      } else if (rawCode === 'CHECK_IN_CLOSED') {
+      } else if (
+        rawCode === 'CHECK_IN_CLOSED' ||
+        rawCode === 'BKG_CHECK_IN_CLOSED' ||
+        messageKey === 'error.booking.checkInClosed'
+      ) {
         code = 'WINDOW_EXPIRED';
-      } else if (rawCode === 'CONNECTOR_MISMATCH') {
+      } else if (
+        rawCode === 'CONNECTOR_MISMATCH' ||
+        rawCode === 'BKG_CONNECTOR_MISMATCH' ||
+        messageKey === 'error.booking.connectorMismatch'
+      ) {
         code = 'WRONG_CONNECTOR';
-      } else if (rawCode === 'BOOKING_NOT_ACCESS') {
+      } else if (
+        rawCode === 'BOOKING_NOT_ACCESS' ||
+        rawCode === 'BKG_NOT_ACCESS' ||
+        messageKey === 'error.booking.notAccess'
+      ) {
         code = 'NOT_ACCESS';
-      } else if (rawCode === 'STATE_CONFLICT') {
+      } else if (
+        rawCode === 'STATE_CONFLICT' ||
+        rawCode === 'BKG_STATE_CONFLICT' ||
+        messageKey === 'error.booking.stateConflict'
+      ) {
         code = 'STATE_CONFLICT';
-      } else if (rawCode === 'STATION_UNAVAILABLE') {
+      } else if (
+        rawCode === 'STATION_UNAVAILABLE' ||
+        rawCode === 'BKG_STATION_UNAVAILABLE' ||
+        messageKey === 'error.booking.stationUnavailable'
+      ) {
         code = 'STATION_UNAVAILABLE';
       } else if (
         rawCode === 'INVALID_CHECK_IN_CHALLENGE' ||
+        rawCode === 'STATION_014' ||
         rawCode === 'error.station.invalidCheckInChallenge' ||
         messageKey === 'error.station.invalidCheckInChallenge'
       ) {
         code = 'CHALLENGE_EXPIRED';
-      } else if (rawCode === 'RESOURCE_NOT_FOUND') {
+      } else if (
+        rawCode === 'RESOURCE_NOT_FOUND' ||
+        rawCode === 'STATION_009' ||
+        messageKey === 'error.station.connectorNotFound'
+      ) {
         code = 'NO_BOOKING';
       }
 
@@ -1839,11 +1868,60 @@ export async function startCharging(id: string): Promise<Booking | null> {
   return simulateNetwork(booking ?? null);
 }
 
-export async function completeBooking(id: string): Promise<Booking | null> {
-  // NOW: mark COMPLETED at the end of a charging session; the remaining time is
-  // released for new bookings (BR-BOK-07).
-  // LATER: POST /bookings/:id/complete
+export async function completeBooking(
+  id: string,
+  options?: { expectedVersion?: number },
+  accessToken?: string | null,
+): Promise<Booking | null> {
+  if (!isMockMode()) {
+    try {
+      const token = resolveAccessToken(accessToken);
+      const idempotencyKey = generateIdempotencyKey();
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      let version = options?.expectedVersion;
+      if (version === undefined) {
+        const current = await getBookingById(id, token);
+        version = current?.version ?? 1;
+      }
+
+      const body = {
+        expectedVersion: version,
+      };
+
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/${encodeURIComponent(id)}/complete`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const updated = await getBookingById(id, token);
+        return updated;
+      }
+
+      const errJson = await res.json().catch(() => null);
+      const errObj = errJson?.error || errJson;
+      const code = errObj?.code || `HTTP_${res.status}`;
+      const message = errObj?.message || 'Không thể kết thúc phiên sạc.';
+      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey);
+    } catch (err) {
+      if (err instanceof BookingApiError) throw err;
+      console.warn('Network error completing booking, falling back to local store:', err);
+    }
+  }
+
   const booking = store.find((b) => b.id === id);
-  if (booking) booking.status = 'COMPLETED';
+  if (booking) {
+    booking.status = 'COMPLETED';
+    booking.completedAt = new Date().toISOString();
+  }
   return simulateNetwork(booking ?? null);
 }

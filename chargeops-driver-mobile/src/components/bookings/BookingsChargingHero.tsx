@@ -1,12 +1,13 @@
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { LiveDot } from '@/components/LiveDot';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
-import { formatCountdown, formatVnd } from '@/utils/format';
+import { formatTime, formatVnd } from '@/utils/format';
 
 interface BookingsChargingHeroProps {
   booking: Booking;
@@ -14,24 +15,24 @@ interface BookingsChargingHeroProps {
   onPress: () => void;
 }
 
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-
+/**
+ * BookingsChargingHero — Clean, realistic charging card on the Bookings tab.
+ * Displays accurate station/charger/connector metadata, booking slot time,
+ * and finalized total price (no fake counters or misleading "tạm tính" estimates).
+ * Fully localized with i18n support.
+ */
 export function BookingsChargingHero({
   booking,
-  now,
   onPress,
 }: BookingsChargingHeroProps) {
+  const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
-  const start = new Date(booking.startAt).getTime();
-  const end = new Date(booking.endAt).getTime();
-  const elapsed = Math.max(0, now - new Date(booking.checkedInAt ?? booking.startAt).getTime());
-  const totalDuration = Math.max(1, end - start);
-  const progress = clamp01((now - start) / totalDuration);
-  const percent = Math.min(99, Math.round(20 + progress * 68));
-  const kwhDelivered = (10 + progress * 32.5).toFixed(1);
-  const estSpent = Math.round(parseFloat(kwhDelivered) * 3000);
-  const remainingMs = Math.max(0, end - now);
+  const chargerCode =
+    booking.chargePointCode || booking.chargePointName || t('bookings.chargingHero.chargerFallback');
+  const connectorCode =
+    booking.connectorCode || booking.connectorName || t('bookings.chargingHero.connectorFallback');
+  const finalPrice = booking.totalPrice ?? (booking as any).totalAmount ?? 0;
 
   return (
     <Pressable
@@ -48,54 +49,53 @@ export function BookingsChargingHero({
       <View style={styles.heroTopRow}>
         <View style={styles.liveTagHero}>
           <LiveDot color="#10B981" />
-          <Text style={styles.liveTagText}>ĐANG SẠC TRỰC TIẾP</Text>
+          <Text style={styles.liveTagText}>{t('bookings.chargingHero.liveTag')}</Text>
         </View>
         <View style={styles.powerBadge}>
           <Ionicons name="flash" size={12} color="#10B981" />
-          <Text style={styles.powerBadgeText}>{booking.powerKw}kW Fast DC</Text>
+          <Text style={styles.powerBadgeText}>
+            {booking.powerKw}kW · {booking.connectorType || 'DC'}
+          </Text>
         </View>
       </View>
 
-      {/* Station Name & Connector */}
+      {/* Station Name */}
       <Text style={styles.chargingStationName} numberOfLines={1}>
         {booking.stationName}
       </Text>
-      <Text style={styles.chargingSub}>
-        {booking.chargePointName} · {booking.connectorName} ({booking.connectorType})
-      </Text>
 
-      {/* Big Live Percentage Counter */}
-      <View style={styles.gaugeBlock}>
-        <View style={styles.gaugeCenter}>
-          <Ionicons name="flash-sharp" size={32} color="#10B981" />
-          <Text style={styles.gaugePercent}>{percent}%</Text>
-        </View>
-        <View style={styles.gaugeStatsRight}>
-          <Text style={styles.gaugeMetricVal}>{kwhDelivered} kWh</Text>
-          <Text style={styles.gaugeMetricLabel}>Đã nạp</Text>
-        </View>
+      {/* Charger & Connector Info */}
+      <View style={styles.portPill}>
+        <Ionicons name="hardware-chip-outline" size={13} color="#34D399" />
+        <Text style={styles.portPillText}>
+          {t('bookings.chargingHero.chargerLabel')}:{' '}
+          <Text style={styles.portPillBold}>{chargerCode}</Text> ·{' '}
+          {t('bookings.chargingHero.connectorLabel')}:{' '}
+          <Text style={styles.portPillBold}>{connectorCode}</Text>
+        </Text>
       </View>
 
-      {/* Glowing Progress Bar */}
-      <View style={styles.chargingTrackBg}>
-        <View style={[styles.chargingTrackFill, { width: `${percent}%` }]} />
-      </View>
-
-      {/* Live Metrics Strip */}
+      {/* Booking Slot & Final Price Row */}
       <View style={styles.metricsRow}>
         <View style={styles.metricCell}>
-          <Text style={styles.metricCellLabel}>Thời gian sạc</Text>
-          <Text style={styles.metricCellVal}>{formatCountdown(elapsed)}</Text>
+          <Text style={styles.metricCellLabel}>{t('bookings.chargingHero.timeSlot')}</Text>
+          <Text style={styles.metricCellVal}>
+            {formatTime(booking.startAt)} – {formatTime(booking.endAt)}
+          </Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metricCell}>
-          <Text style={styles.metricCellLabel}>Còn lại</Text>
-          <Text style={styles.metricCellVal}>~{Math.max(1, Math.round(remainingMs / 60_000))} phút</Text>
+          <Text style={styles.metricCellLabel}>{t('bookings.chargingHero.duration')}</Text>
+          <Text style={styles.metricCellVal}>
+            {t('bookings.chargingHero.durationMinutes', { minutes: booking.durationMin })}
+          </Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metricCell}>
-          <Text style={styles.metricCellLabel}>Tạm tính</Text>
-          <Text style={styles.metricCellVal}>{formatVnd(estSpent)}</Text>
+          <Text style={styles.metricCellLabel}>{t('bookings.chargingHero.totalPayment')}</Text>
+          <Text style={[styles.metricCellVal, styles.finalPriceVal]}>
+            {formatVnd(finalPrice)}
+          </Text>
         </View>
       </View>
 
@@ -104,8 +104,10 @@ export function BookingsChargingHero({
         style={[styles.heroBtn, { backgroundColor: themeColors.primary, marginTop: spacing.xs }]}
         onPress={onPress}
       >
-        <Ionicons name="options-outline" size={18} color="#FFFFFF" />
-        <Text style={[styles.heroBtnText, { color: '#FFFFFF' }]}>Điều khiển phiên sạc</Text>
+        <Ionicons name="flash" size={18} color="#FFFFFF" />
+        <Text style={[styles.heroBtnText, { color: '#FFFFFF' }]}>
+          {t('bookings.chargingHero.actionDetails')}
+        </Text>
       </Pressable>
     </Pressable>
   );
@@ -137,19 +139,40 @@ const styles = StyleSheet.create({
   },
   powerBadgeText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: '#34D399' },
   chargingStationName: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, color: '#FFFFFF', marginTop: 2 },
-  chargingSub: { fontSize: fontSizes.caption, color: 'rgba(255, 255, 255, 0.7)' },
-  gaugeBlock: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: spacing.xs },
-  gaugeCenter: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  gaugePercent: { fontSize: 44, fontWeight: fontWeights.bold, color: '#FFFFFF', fontVariant: ['tabular-nums'] },
-  gaugeStatsRight: { alignItems: 'flex-end' },
-  gaugeMetricVal: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, color: '#34D399' },
-  gaugeMetricLabel: { fontSize: fontSizes.caption, color: 'rgba(255, 255, 255, 0.7)' },
-  chargingTrackBg: { height: 8, borderRadius: radius.full, backgroundColor: 'rgba(255, 255, 255, 0.15)', overflow: 'hidden' },
-  chargingTrackFill: { height: 8, borderRadius: radius.full, backgroundColor: '#10B981' },
-  metricsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.xs },
+  portPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    alignSelf: 'flex-start',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  portPillText: { fontSize: fontSizes.caption, color: 'rgba(255, 255, 255, 0.85)' },
+  portPillBold: { fontWeight: fontWeights.bold, color: '#FFFFFF' },
+  metricsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
   metricCell: { flex: 1, alignItems: 'center' },
-  metricCellLabel: { fontSize: fontSizes.caption, color: 'rgba(255, 255, 255, 0.6)' },
-  metricCellVal: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, color: '#FFFFFF', marginTop: 2, fontVariant: ['tabular-nums'] },
+  metricCellLabel: { fontSize: fontSizes.caption, color: 'rgba(255, 255, 255, 0.65)' },
+  metricCellVal: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+    color: '#FFFFFF',
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
+  },
+  finalPriceVal: {
+    color: '#34D399',
+  },
   metricDivider: { width: 1, height: 24, backgroundColor: 'rgba(255, 255, 255, 0.15)' },
   heroBtn: {
     flexDirection: 'row',

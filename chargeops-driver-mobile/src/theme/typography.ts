@@ -9,6 +9,7 @@ export const fontSizes = {
   heading: 18,
   title: 24,
   display: 28, // large screen headlines (splash, auth)
+  kpi: 34, // oversized KPI numbers (countdowns, live metrics) — DESIGN_SYSTEM §5
 } as const;
 
 export const fontWeights = {
@@ -25,6 +26,7 @@ export const lineHeights = {
   heading: 24,
   title: 32,
   display: 36,
+  kpi: 40,
 } as const;
 
 export const typography = {

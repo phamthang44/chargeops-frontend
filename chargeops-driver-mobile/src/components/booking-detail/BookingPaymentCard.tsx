@@ -6,6 +6,7 @@ import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatTime, formatVnd } from '@/utils/format';
+import { BezelCard } from './BezelCard';
 import { SectionHeading } from './SectionHeading';
 
 export interface BookingPaymentCardProps {
@@ -32,7 +33,7 @@ export function BookingPaymentCard({
         textColor={themeColors.textStrong}
       />
 
-      <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+      <BezelCard tone={themeColors.primary} contentStyle={styles.card}>
         {booking.priceLines.map((line, i) => {
           const fromTime = line.fromAt ?? (line as any).startAt ?? booking.startAt;
           const toTime = line.toAt ?? (line as any).endAt ?? booking.endAt;
@@ -136,27 +137,21 @@ export function BookingPaymentCard({
             {t('payment.paidVia', { method: t(`payment.${booking.paymentMethod}`) })}
           </Text>
         </View>
-      </View>
+      </BezelCard>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
   },
   invoiceRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },
   invoiceCopy: { flex: 1, minWidth: 0, gap: 3 },
   invoiceBandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
   bandPill: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: radius.full },
-  bandPillText: { fontSize: 11, fontWeight: fontWeights.bold, letterSpacing: 0.3 },
+  bandPillText: { fontSize: fontSizes.micro, fontWeight: fontWeights.bold, letterSpacing: 0.3 },
   invoiceTime: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
   invoiceSub: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, marginTop: 1 },
   invoiceValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold },

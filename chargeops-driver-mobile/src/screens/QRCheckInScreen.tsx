@@ -8,11 +8,11 @@ import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
-import { ChargerKioskModal } from '@/components/kiosk/ChargerKioskModal';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   confirmCheckIn,
+  getActiveBookings,
   getBookingById,
   resolveCheckIn,
   type CheckInErrorCode,
@@ -40,15 +40,20 @@ export function QRCheckInScreen() {
   const [result, setResult] = useState<CheckInResolution | null>(null);
   const [committing, setCommitting] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
-  const [kioskVisible, setKioskVisible] = useState(false);
   const handled = useRef(false);
 
   useEffect(() => {
-    if (!params?.bookingId) return;
     let active = true;
-    getBookingById(params.bookingId).then((b) => {
-      if (active) setExpected(b);
-    });
+    if (params?.bookingId) {
+      getBookingById(params.bookingId).then((b) => {
+        if (active && b) setExpected(b);
+      });
+    } else {
+      getActiveBookings().then((list) => {
+        const found = list.find((b) => b.status === 'CONFIRMED');
+        if (active && found) setExpected(found);
+      });
+    }
     return () => {
       active = false;
     };
@@ -186,9 +191,8 @@ export function QRCheckInScreen() {
         return t('qrCheckIn.errors.WINDOW_EXPIRED');
       case 'WRONG_CONNECTOR':
         return t('qrCheckIn.errors.WRONG_CONNECTOR', {
-          connector: r.booking?.connectorName ?? '',
-          chargePoint: r.booking?.chargePointName ?? '',
-          zone: r.booking?.zoneLabel ?? '',
+          connector: r.booking?.connectorCode || r.booking?.connectorName || 'Cổng sạc',
+          chargePoint: r.booking?.chargePointCode || r.booking?.chargePointName || 'Trụ sạc',
         });
       case 'UNKNOWN_QR':
         return t('qrCheckIn.errors.UNKNOWN_QR');
@@ -211,6 +215,35 @@ export function QRCheckInScreen() {
         <Text style={[styles.topTitle, { color: '#FFFFFF' }]}>{t('qrCheckIn.title')}</Text>
         <View style={styles.topSpacer} />
       </View>
+
+      {/* Target Booking Info Banner — Displays exact Station, Charge Point, and Connector */}
+      {expected && (
+        <View style={[styles.targetBanner, { backgroundColor: '#131917', borderColor: 'rgba(16, 185, 129, 0.35)' }]}>
+          <View style={styles.targetBannerTop}>
+            <View style={styles.targetDot} />
+            <Text style={styles.targetStation} numberOfLines={1}>
+              {expected.stationName}
+            </Text>
+          </View>
+          <View style={styles.targetPillRow}>
+            <View style={styles.targetBadge}>
+              <Text style={styles.targetBadgeLabel}>Trụ:</Text>
+              <Text style={styles.targetBadgeVal}>
+                {expected.chargePointCode || expected.chargePointName || 'N/A'}
+              </Text>
+            </View>
+            <View style={[styles.targetBadge, styles.targetBadgeHighlight]}>
+              <Text style={styles.targetBadgeLabel}>Cổng:</Text>
+              <Text style={styles.targetBadgeValHighlight}>
+                {expected.connectorCode || expected.connectorName}
+              </Text>
+            </View>
+            <Text style={styles.targetType}>
+              {expected.connectorType} · {expected.powerKw}kW
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* Camera / Scanner area */}
       <View style={styles.scannerArea}>
@@ -237,16 +270,6 @@ export function QRCheckInScreen() {
               <Text style={styles.scanHint}>
                 {scanning ? t('qrCheckIn.scanning') : t('qrCheckIn.scanHint')}
               </Text>
-              <Pressable
-                onPress={() => setKioskVisible(true)}
-                hitSlop={8}
-                style={styles.kioskLauncherBtn}
-              >
-                <Ionicons name="hardware-chip-outline" size={15} color={themeColors.primary} />
-                <Text style={[styles.simulateLink, { color: themeColors.primary }]}>
-                  {t('qrCheckIn.kioskModalBtn', 'Màn hình Trụ Sạc (Demo Kiosk)')}
-                </Text>
-              </Pressable>
             </View>
           </>
         ) : (
@@ -261,31 +284,9 @@ export function QRCheckInScreen() {
               onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())}
               style={styles.permissionBtn}
             />
-            <Pressable
-              onPress={() => setKioskVisible(true)}
-              hitSlop={8}
-              style={[styles.kioskLauncherBtn, { marginTop: spacing.xs }]}
-            >
-              <Ionicons name="hardware-chip-outline" size={15} color={themeColors.primary} />
-              <Text style={[styles.simulateLink, { color: themeColors.primary }]}>
-                {t('qrCheckIn.kioskModalBtn', 'Màn hình Trụ Sạc (Demo Kiosk)')}
-              </Text>
-            </Pressable>
           </View>
         )}
       </View>
-
-      {/* Charger Kiosk Simulator Modal */}
-      <ChargerKioskModal
-        visible={kioskVisible}
-        onClose={() => setKioskVisible(false)}
-        booking={expected}
-        connectorId={expected?.connectorId}
-        onSimulateScan={(simToken) => {
-          setKioskVisible(false);
-          void handleScan(simToken);
-        }}
-      />
 
       {/* Confirmation bottom sheet */}
       {result?.ok && (
@@ -373,6 +374,31 @@ export function QRCheckInScreen() {
             </View>
             <Text style={[styles.sheetTitle, { color: themeColors.textStrong }]}>{errorTitle(result.code)}</Text>
             <Text style={[styles.errorBody, { color: themeColors.textBody }]}>{errorBody(result)}</Text>
+            {result.code === 'WRONG_CONNECTOR' && result.booking && (
+              <View style={[styles.targetBox, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
+                <Text style={[styles.targetBoxTitle, { color: themeColors.primary }]}>
+                  Vị trí sạc trong lượt đặt của bạn:
+                </Text>
+                <View style={styles.targetBoxRow}>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Trụ sạc:</Text>
+                  <Text style={[styles.targetBoxValCode, { color: '#FFFFFF', backgroundColor: '#1E293B' }]}>
+                    {result.booking.chargePointCode || result.booking.chargePointName || 'N/A'}
+                  </Text>
+                </View>
+                <View style={styles.targetBoxRow}>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Cổng sạc:</Text>
+                  <Text style={[styles.targetBoxValHighlight, { color: themeColors.primary }]}>
+                    {result.booking.connectorCode || result.booking.connectorName}
+                  </Text>
+                </View>
+                <View style={styles.targetBoxRow}>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Trạm sạc:</Text>
+                  <Text style={[styles.targetBoxVal, { color: themeColors.textStrong }]} numberOfLines={1}>
+                    {result.booking.stationName}
+                  </Text>
+                </View>
+              </View>
+            )}
             {result.connector && (
               <Text style={[styles.sheetCode, { color: themeColors.textMuted }]}>
                 {t('qrCheckIn.scannedCode', { code: result.connector.id })}
@@ -439,18 +465,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   scanHint: { fontSize: fontSizes.body, color: '#FFFFFF', textAlign: 'center' },
-  simulateLink: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold },
-  kioskLauncherBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radius.full,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.35)',
-  },
 
   permissionBlock: {
     alignItems: 'center',
@@ -513,5 +527,116 @@ const styles = StyleSheet.create({
   countdownText: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
+  },
+
+  targetBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+  },
+  targetBannerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  targetDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+  },
+  targetStation: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+    color: '#E2E8F0',
+    flex: 1,
+  },
+  targetPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
+  },
+  targetBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+    gap: 4,
+  },
+  targetBadgeHighlight: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.4)',
+  },
+  targetBadgeLabel: {
+    fontSize: fontSizes.caption - 1,
+    color: '#94A3B8',
+  },
+  targetBadgeVal: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    color: '#FFFFFF',
+    fontFamily: 'monospace',
+  },
+  targetBadgeValHighlight: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    color: '#10B981',
+    fontFamily: 'monospace',
+  },
+  targetType: {
+    fontSize: fontSizes.caption - 1,
+    color: '#94A3B8',
+    marginLeft: 'auto',
+  },
+
+  targetBox: {
+    alignSelf: 'stretch',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.xs,
+    marginVertical: spacing.xs,
+  },
+  targetBoxTitle: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  targetBoxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+  },
+  targetBoxLabel: {
+    fontSize: fontSizes.caption,
+  },
+  targetBoxVal: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.semibold,
+  },
+  targetBoxValCode: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.bold,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 1,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+    fontFamily: 'monospace',
+  },
+  targetBoxValHighlight: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+    fontFamily: 'monospace',
   },
 });

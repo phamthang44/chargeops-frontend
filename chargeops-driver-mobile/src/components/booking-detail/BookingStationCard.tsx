@@ -5,6 +5,8 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
+import { PopIcon } from '@/components/common/PopIcon';
+import { BezelCard } from './BezelCard';
 import { DetailCell } from './DetailCell';
 import { SectionHeading } from './SectionHeading';
 
@@ -31,7 +33,7 @@ export function BookingStationCard({
         textColor={themeColors.textStrong}
       />
 
-      <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+      <BezelCard tone={themeColors.primary} contentStyle={styles.card}>
         {booking.stationImageUrl ? (
           <Image source={{ uri: booking.stationImageUrl }} style={styles.stationImage} resizeMode="cover" />
         ) : (
@@ -87,11 +89,6 @@ export function BookingStationCard({
             <Text style={[styles.ribbonValue, { color: themeColors.textStrong }]}>
               {booking.connectorCode || booking.connectorName}
             </Text>
-            {Boolean(booking.connectorId && booking.connectorId !== (booking.connectorCode || booking.connectorName)) && (
-              <Text style={[styles.ribbonSubId, { color: themeColors.textMuted }]} numberOfLines={1}>
-                ID: {booking.connectorId}
-              </Text>
-            )}
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -104,28 +101,22 @@ export function BookingStationCard({
             ]}
             onPress={() => onCopy(booking.connectorCode || booking.connectorName, 'connector')}
           >
-            <Ionicons
+            <PopIcon
               name={copiedField === 'connector' ? 'checkmark-circle' : 'copy-outline'}
               size={15}
               color={copiedField === 'connector' ? themeColors.success : themeColors.textMuted}
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </BezelCard>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
   },
   stationImage: { width: '100%', height: 156, borderRadius: radius.md },
   stationImageFallback: {
@@ -159,7 +150,6 @@ const styles = StyleSheet.create({
   ribbonCopy: { flex: 1, minWidth: 0 },
   ribbonLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, textTransform: 'uppercase', letterSpacing: 0.5 },
   ribbonValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, marginTop: 1 },
-  ribbonSubId: { fontSize: 11, marginTop: 2, letterSpacing: 0.3 },
   copyIconBtn: {
     width: 32,
     height: 32,

@@ -1,15 +1,57 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking, BookingStatus } from '@/types';
 import { formatTime } from '@/utils/format';
+import { BezelCard } from './BezelCard';
+
+/** Mass-carrying curve — never `linear` / `ease-in-out`. */
+const EASE = Easing.bezier(0.32, 0.72, 0, 1);
 
 interface BookingTimelineStepperProps {
   booking: Booking;
+}
+
+/** Node diameter drives the connector geometry — keep line offsets derived from it. */
+const NODE_SIZE = 30;
+/** Clear space between a node edge and its connecting line. */
+const NODE_LINE_GAP = 4;
+
+/**
+ * Draws itself forward (scaleX from the left edge) shortly after mount so the
+ * progress track feels choreographed instead of snapping in.
+ */
+function ConnectorLine({ color, delay }: { color: string; delay: number }) {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const run = Animated.timing(progress, {
+      toValue: 1,
+      duration: 460,
+      delay,
+      easing: EASE,
+      useNativeDriver: true,
+    });
+    run.start();
+    return () => run.stop();
+  }, [progress, delay]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.connectingLine,
+        {
+          backgroundColor: color,
+          opacity: progress,
+          transform: [{ scaleX: progress }],
+        },
+      ]}
+    />
+  );
 }
 
 interface StepItem {
@@ -23,7 +65,7 @@ interface StepItem {
 
 export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps) {
   const { t } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors } = usePreferences();
 
   const isCancelled = booking.status === 'CANCELLED';
   const isExpired = booking.status === 'EXPIRED';
@@ -107,25 +149,7 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: themeColors.surface,
-          borderColor: themeColors.border,
-          shadowColor: isDark ? '#000000' : themeColors.textStrong,
-        },
-      ]}
-    >
-      <View style={styles.headerRow}>
-        <View style={[styles.headerIconWrap, { backgroundColor: `${themeColors.primary}16` }]}>
-          <Ionicons name="git-network-outline" size={16} color={themeColors.primary} />
-        </View>
-        <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>
-          {t('bookingDetail.timelineTitle', 'Tiến trình đơn đặt')}
-        </Text>
-      </View>
-
+    <BezelCard tone={themeColors.primary} contentStyle={styles.container}>
       <View style={styles.stepperTrack}>
         {steps.map((step, index) => {
           const color = getStepColor(step.state);
@@ -145,12 +169,7 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
                   style={[
                     styles.nodeCircle,
                     {
-                      backgroundColor:
-                        step.state === 'completed'
-                          ? color
-                          : isDark
-                          ? '#1E293B'
-                          : '#FFFFFF',
+                      backgroundColor: step.state === 'completed' ? color : themeColors.surfaceAlt,
                       borderColor: color,
                     },
                   ]}
@@ -162,16 +181,7 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
                   />
                 </View>
 
-                {!isLast && (
-                  <View
-                    style={[
-                      styles.connectingLine,
-                      {
-                        backgroundColor: lineColor,
-                      },
-                    ]}
-                  />
-                )}
+                {!isLast && <ConnectorLine color={lineColor} delay={160 + index * 90} />}
               </View>
 
               <View style={styles.labelBlock}>
@@ -201,36 +211,14 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
           );
         })}
       </View>
-    </View>
+    </BezelCard>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  headerIconWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: fontSizes.body,
-    fontWeight: fontWeights.bold,
   },
   stepperTrack: {
     flexDirection: 'row',
@@ -247,12 +235,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: 30,
+    height: NODE_SIZE,
     position: 'relative',
   },
   nodeCircle: {
-    width: 30,
-    height: 30,
+    width: NODE_SIZE,
+    height: NODE_SIZE,
     borderRadius: radius.full,
     borderWidth: 2,
     alignItems: 'center',
@@ -263,12 +251,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: '50%',
     right: '-50%',
-    marginLeft: 19,
-    marginRight: 19,
+    marginLeft: NODE_SIZE / 2 + NODE_LINE_GAP,
+    marginRight: NODE_SIZE / 2 + NODE_LINE_GAP,
     height: 2,
     borderRadius: 1,
-    top: 14,
+    top: NODE_SIZE / 2 - 1,
     zIndex: 1,
+    transformOrigin: 'left',
   },
   labelBlock: {
     alignItems: 'center',
@@ -276,11 +265,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   stepLabel: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: fontSizes.caption,
     textAlign: 'center',
   },
   stepTime: {
-    fontSize: fontSizes.caption - 3,
+    fontSize: fontSizes.micro,
     marginTop: 2,
   },
 });

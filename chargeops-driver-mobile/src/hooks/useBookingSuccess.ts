@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBookingById } from '@/services/bookingService';
 import type { Booking } from '@/types';
+import { copyText } from '@/utils/clipboard';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'BookingSuccess'>;
 type Route = RouteProp<RootStackParamList, 'BookingSuccess'>;
@@ -28,13 +29,13 @@ export function useBookingSuccess() {
 
   function handleCopyCode() {
     if (!booking?.code) return;
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(booking.code).catch(() => {});
-    }
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    copyText(booking.code).then((ok) => {
+      if (!ok) return;
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    });
   }
 
   function goHome() {

@@ -10,6 +10,7 @@ import {
   BookingApiError,
 } from '@/services/bookingService';
 import type { Booking, BookingStatus } from '@/types';
+import { copyText } from '@/utils/clipboard';
 import {
   formatCountdown,
   formatTime,
@@ -70,11 +71,11 @@ export function useBookingDetail(bookingId: string) {
   const [now, setNow] = useState(getBookingNowMs());
 
   const handleCopy = (text: string, field: string) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).catch(() => {});
-    }
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
+    copyText(text).then((ok) => {
+      if (!ok) return;
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    });
   };
 
   const handleRefresh = async () => {

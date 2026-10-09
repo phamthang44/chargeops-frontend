@@ -4,18 +4,20 @@ import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
-import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
+import { copyText } from '@/utils/clipboard';
 import { formatVnd } from '@/utils/format';
+import { PopIcon } from '@/components/common/PopIcon';
+import { BezelCard } from './BezelCard';
 
 interface CheckoutQRCardProps {
   booking: Booking;
-  onPayNow?: () => void;
 }
 
 export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
   const { t } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors } = usePreferences();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const isSimulator =
@@ -48,26 +50,17 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
       : null;
 
   const copyToClipboard = (text: string, fieldName: string) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).catch(() => {});
-    }
-    setCopiedField(fieldName);
-    setTimeout(() => {
-      setCopiedField(null);
-    }, 2000);
+    copyText(text).then((ok) => {
+      if (!ok) return;
+      setCopiedField(fieldName);
+      setTimeout(() => {
+        setCopiedField(null);
+      }, 2000);
+    });
   };
 
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: themeColors.surface,
-          borderColor: `${themeColors.primary}40`,
-          shadowColor: isDark ? '#000000' : themeColors.textStrong,
-        },
-      ]}
-    >
+    <BezelCard tone={themeColors.primary} contentStyle={styles.card}>
       {/* Header */}
       <View style={styles.header}>
         <View
@@ -161,7 +154,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
                 style={[styles.copyBtn, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
                 onPress={() => copyToClipboard(bankAccount, 'account')}
               >
-                <Ionicons
+                <PopIcon
                   name={copiedField === 'account' ? 'checkmark' : 'copy-outline'}
                   size={14}
                   color={copiedField === 'account' ? themeColors.success : themeColors.primary}
@@ -207,11 +200,11 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
             style={[styles.copyBtn, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
             onPress={() => copyToClipboard(transferCode, 'content')}
           >
-            <Ionicons
-              name={copiedField === 'content' ? 'checkmark' : 'copy-outline'}
-              size={14}
-              color={copiedField === 'content' ? themeColors.success : themeColors.primary}
-            />
+              <PopIcon
+                name={copiedField === 'content' ? 'checkmark' : 'copy-outline'}
+                size={14}
+                color={copiedField === 'content' ? themeColors.success : themeColors.primary}
+              />
             <Text
               style={[
                 styles.copyBtnText,
@@ -239,11 +232,11 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
             style={[styles.copyBtn, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
             onPress={() => copyToClipboard(String(transferAmount), 'amount')}
           >
-            <Ionicons
-              name={copiedField === 'amount' ? 'checkmark' : 'copy-outline'}
-              size={14}
-              color={copiedField === 'amount' ? themeColors.success : themeColors.primary}
-            />
+              <PopIcon
+                name={copiedField === 'amount' ? 'checkmark' : 'copy-outline'}
+                size={14}
+                color={copiedField === 'amount' ? themeColors.success : themeColors.primary}
+              />
             <Text
               style={[
                 styles.copyBtnText,
@@ -293,20 +286,14 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
           </Text>
         </View>
       )}
-    </View>
+    </BezelCard>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
   header: {
     flexDirection: 'row',
@@ -334,18 +321,8 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
   },
   subtitle: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: fontSizes.caption,
     marginTop: 2,
-  },
-  sandboxBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  sandboxBadgeText: {
-    fontSize: 10,
-    fontWeight: fontWeights.bold,
-    letterSpacing: 0.8,
   },
   qrSection: {
     alignItems: 'center',
@@ -400,11 +377,11 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
   },
   infoValue: {
-    fontSize: fontSizes.body + 1,
+    fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
   },
   infoValueHigh: {
-    fontSize: fontSizes.heading - 1,
+    fontSize: fontSizes.heading,
     fontWeight: fontWeights.bold,
     letterSpacing: 0.5,
   },
@@ -418,7 +395,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   copyBtnText: {
-    fontSize: fontSizes.caption + 1,
+    fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
   },
   fieldDivider: {
@@ -433,7 +410,7 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     flex: 1,
-    fontSize: fontSizes.caption + 1,
-    lineHeight: 20,
+    fontSize: fontSizes.body,
+    lineHeight: lineHeights.body,
   },
 });

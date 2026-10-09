@@ -15,6 +15,8 @@ import {
   formatVnd,
 } from '@/utils/format';
 import { statusLabelKey, type StatusTone } from '@/hooks/useBookingDetail';
+import { PopIcon } from '@/components/common/PopIcon';
+import { BezelCard } from './BezelCard';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -67,16 +69,7 @@ export function BookingHeroCard({
   const { themeColors } = usePreferences();
 
   return (
-    <View
-      style={[
-        styles.heroCard,
-        {
-          backgroundColor: themeColors.surface,
-          borderColor: `${accent}40`,
-          shadowColor: themeColors.textStrong,
-        },
-      ]}
-    >
+    <BezelCard tone={accent} contentStyle={styles.heroCard}>
       {/* Top Row: Booking Code & Status Badge */}
       <View style={styles.heroTopRow}>
         <View style={styles.codeBlock}>
@@ -106,7 +99,7 @@ export function BookingHeroCard({
             >
               {booking.code}
             </Text>
-            <Ionicons
+            <PopIcon
               name={copiedField === 'bookingCode' ? 'checkmark-circle' : 'copy-outline'}
               size={13}
               color={copiedField === 'bookingCode' ? themeColors.success : themeColors.textMuted}
@@ -227,37 +220,52 @@ export function BookingHeroCard({
         </View>
       )}
 
-      {/* Hero Metrics Row */}
+      {/* Hero Metrics Row — asymmetric: schedule left, price island right */}
       <View style={[styles.heroMetrics, { borderTopColor: themeColors.border }]}>
-        <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.date')}</Text>
-          <Text style={[styles.metricValue, { color: themeColors.textStrong }]}>{formatDate(booking.startAt)}</Text>
+        <View style={styles.metricSchedule}>
+          <View style={styles.metricItem}>
+            <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.date')}</Text>
+            <Text
+              style={[styles.metricValue, { color: themeColors.textStrong }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+            >
+              {formatDate(booking.startAt)}
+            </Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.timeRange')}</Text>
+            <Text
+              style={[styles.metricValue, { color: themeColors.textStrong }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+            >
+              {formatTimeRange(booking.startAt, booking.endAt)}
+            </Text>
+          </View>
         </View>
-        <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.timeRange')}</Text>
-          <Text style={[styles.metricValue, { color: themeColors.textStrong }]}>
-            {formatTimeRange(booking.startAt, booking.endAt)}
+        <View
+          style={[
+            styles.metricTotal,
+            { backgroundColor: `${accent}12`, borderColor: `${accent}2E` },
+          ]}
+        >
+          <Text style={[styles.metricTotalLabel, { color: accent }]}>{t('bookingDetail.total')}</Text>
+          <Text style={[styles.metricTotalValue, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit>
+            {formatVnd(booking.totalPrice)}
           </Text>
         </View>
-        <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: themeColors.textMuted }]}>{t('bookingDetail.total')}</Text>
-          <Text style={[styles.metricValue, { color: accent }]}>{formatVnd(booking.totalPrice)}</Text>
-        </View>
       </View>
-    </View>
+    </BezelCard>
   );
 }
 
 const styles = StyleSheet.create({
   heroCard: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.lg,
     gap: spacing.lg,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    elevation: 3,
   },
   heroTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },
   codeBlock: { flex: 1, minWidth: 0 },
@@ -281,7 +289,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     maxWidth: '100%',
   },
-  code: { fontSize: 15, lineHeight: 18, fontWeight: fontWeights.bold, letterSpacing: 0.6 },
+  code: { flexShrink: 1, fontSize: fontSizes.body, fontWeight: fontWeights.bold, letterSpacing: 0.6 },
   statusBadge: { flexShrink: 1, paddingHorizontal: spacing.sm },
   statusSummary: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   statusIcon: {
@@ -304,7 +312,13 @@ const styles = StyleSheet.create({
   },
   countdownLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   countdownLabel: { fontSize: fontSizes.body, fontWeight: fontWeights.semibold },
-  countdown: { fontSize: 34, lineHeight: 40, fontWeight: fontWeights.bold, letterSpacing: 1.2 },
+  countdown: {
+    fontSize: fontSizes.kpi,
+    lineHeight: lineHeights.kpi,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 1.2,
+    fontVariant: ['tabular-nums'],
+  },
   countdownSub: {
     marginTop: spacing.xs,
     fontSize: fontSizes.caption,
@@ -362,9 +376,16 @@ const styles = StyleSheet.create({
   chargingMetaLabel: { fontSize: fontSizes.caption },
   heroMetrics: {
     flexDirection: 'row',
+    alignItems: 'center',
     borderTopWidth: 1,
     paddingTop: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
+  },
+  metricSchedule: {
+    flexDirection: 'row',
+    flex: 1,
+    minWidth: 0,
+    gap: spacing.md,
   },
   metricItem: { flex: 1, minWidth: 0 },
   metricLabel: {
@@ -373,5 +394,28 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  metricValue: { marginTop: spacing.xs, fontSize: fontSizes.body, fontWeight: fontWeights.bold },
+  metricValue: {
+    marginTop: spacing.xs,
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+  },
+  metricTotal: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: 2,
+    alignItems: 'flex-end',
+  },
+  metricTotalLabel: {
+    fontSize: fontSizes.micro,
+    fontWeight: fontWeights.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  metricTotalValue: {
+    fontSize: fontSizes.heading,
+    fontWeight: fontWeights.bold,
+    fontVariant: ['tabular-nums'],
+  },
 });

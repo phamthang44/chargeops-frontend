@@ -6,24 +6,20 @@ import { LiveDot } from '@/components/LiveDot';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
-import { formatCountdown } from '@/utils/format';
 
 interface BookingsChargingBannerProps {
   booking: Booking;
-  now: number;
+  now?: number;
 }
 
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-
-export function BookingsChargingBanner({ booking, now }: BookingsChargingBannerProps) {
+export function BookingsChargingBanner({ booking }: BookingsChargingBannerProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
 
-  const start = new Date(booking.startAt).getTime();
-  const end = new Date(booking.endAt).getTime();
-  const elapsed = Math.max(0, now - new Date(booking.checkedInAt ?? booking.startAt).getTime());
-  const progress = clamp01((now - start) / (end - start || 1));
-  const percent = Math.round(20 + progress * 60);
+  const chargerCode =
+    booking.chargePointCode || booking.chargePointName || t('bookings.chargingHero.chargerFallback');
+  const connectorCode =
+    booking.connectorCode || booking.connectorName || t('bookings.chargingHero.connectorFallback');
 
   return (
     <View style={[styles.chargeBanner, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
@@ -31,24 +27,26 @@ export function BookingsChargingBanner({ booking, now }: BookingsChargingBannerP
         <View style={styles.liveTag}>
           <LiveDot color={themeColors.info} />
           <Text style={[styles.liveText, { color: themeColors.info }]}>
-            {t('bookings.liveCharging')} · {percent}%
+            {t('bookings.liveCharging')}
           </Text>
         </View>
-        <Text style={[styles.elapsed, { color: themeColors.textStrong }]}>{formatCountdown(elapsed)}</Text>
-      </View>
-      <View style={[styles.track, { backgroundColor: themeColors.surface }]}>
-        <View style={[styles.fill, { width: `${percent}%`, backgroundColor: themeColors.info }]} />
+        <Text style={[styles.portInfo, { color: themeColors.textMuted }]}>
+          {t('bookings.chargerPort', { charger: chargerCode, connector: connectorCode })}
+        </Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  chargeBanner: { padding: spacing.sm, borderRadius: radius.md, borderWidth: 1, gap: spacing.xs },
+  chargeBanner: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
   chargeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   liveTag: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   liveText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0.5 },
-  elapsed: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, fontVariant: ['tabular-nums'] },
-  track: { height: 4, borderRadius: radius.full, overflow: 'hidden' },
-  fill: { height: 4, borderRadius: radius.full },
+  portInfo: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
 });

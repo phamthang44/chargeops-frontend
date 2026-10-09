@@ -14,6 +14,7 @@ import { QrCodeView } from '@/components/common/QrCodeView';
 import { generateSimulatorChallenge } from '@/services/bookingService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
+import { copyText } from '@/utils/clipboard';
 
 export interface ChargerKioskModalProps {
   visible: boolean;
@@ -93,11 +94,11 @@ export function ChargerKioskModal({
 
   const handleCopy = () => {
     if (!token) return;
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(token).catch(() => {});
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copyText(token).then((ok) => {
+      if (!ok) return;
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const progressPercent = Math.max(0, Math.min(100, (secondsRemaining / 60) * 100));

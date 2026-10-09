@@ -1,3 +1,4 @@
+export * from './BezelCard';
 export * from './BookingTimelineStepper';
 export * from './CheckoutQRCard';
 export * from './RefundStatusCard';

@@ -11,6 +11,9 @@
     "close": "Đóng",
     "retry": "Thử lại",
     "error": "Lỗi",
+    "ok": "OK",
+    "charger": "Trụ",
+    "connector": "Cổng",
     "eyebrow": {
       "confirm": "XÁC NHẬN",
       "success": "THÀNH CÔNG",
@@ -286,6 +289,19 @@
     "readyToCheckIn": "Đã đến giờ — check-in ngay",
     "checkInNow": "Check-in ngay",
     "liveCharging": "ĐANG SẠC",
+    "chargingHero": {
+      "liveTag": "ĐANG CẤP NGUỒN SẠC",
+      "chargerLabel": "Trụ",
+      "connectorLabel": "Cổng",
+      "chargerFallback": "Trụ sạc",
+      "connectorFallback": "Cổng sạc",
+      "timeSlot": "Khung giờ đặt chỗ",
+      "duration": "Thời lượng",
+      "durationMinutes": "{{minutes}} phút",
+      "totalPayment": "Tổng thanh toán",
+      "actionDetails": "Chi tiết phiên sạc & Kết thúc"
+    },
+    "chargerPort": "Trụ {{charger}} · Cổng {{connector}}",
     "pendingHoldLeft": "Giữ chỗ còn {{time}}",
     "cancelHold": "Hủy giữ chỗ",
     "payNow": "Thanh toán ngay",
@@ -581,11 +597,11 @@
       "coordinates": "Tọa độ"
     },
     "policy": {
-      "withinGrace": "Hoàn {{percent}}% khi máy chủ xử lý hủy trước hạn {{minutes}} phút từ xác nhận thanh toán, trước giờ bắt đầu và khi chưa check-in. Đúng hạn không còn ân hạn.",
-      "afterGrace": "Hủy do đổi ý từ hạn ân hạn: hoàn {{percent}}%.",
-      "noShow": "Vắng mặt thông thường: hoàn {{percent}}%. Đến muộn không kéo dài phiên.",
-      "stationFailure": "Lỗi trạm được xác lập trách nhiệm và đủ điều kiện thu tiền: hoàn {{percent}}% giá gói, kể cả giữa phiên hoặc sau no-show; không hoàn trùng.",
-      "note": "Deadline cụ thể theo máy chủ và snapshot của booking. Quyết định hoàn khác kết quả thực thi; Simulator không chứng minh chuyển tiền ngân hàng.",
+      "withinGrace": "Hoàn {{percent}}% khi hủy trong vòng {{minutes}} phút kể từ lúc thanh toán thành công, trước giờ bắt đầu sạc và khi chưa check-in.",
+      "afterGrace": "Hủy sau thời gian ân hạn: hoàn {{percent}}%.",
+      "noShow": "Không đến sạc (vắng mặt): hoàn {{percent}}%. Đến muộn không được kéo dài thời gian sạc.",
+      "stationFailure": "Trường hợp trạm sạc gặp sự cố kỹ thuật không thể phục vụ: hoàn {{percent}}% giá trị gói sạc.",
+      "note": "Thời hạn hủy và điều kiện hoàn tiền được áp dụng chính xác theo quy định khi đặt chỗ. Tiền hoàn sẽ được chuyển về phương thức thanh toán ban đầu.",
       "unavailable": "Chính sách hủy và hoàn tiền của trạm đang được cập nhật."
     },
     "action": {
@@ -663,7 +679,7 @@
     "serviceFee": "Phí dịch vụ",
     "total": "Tạm tính",
     "refundTitle": "Chính sách hủy & hoàn tiền",
-    "refundBody": "Hoàn 100% do đổi ý chỉ khi máy chủ xử lý hủy trước deadline snapshot và chưa check-in. Đúng/sau hạn: 0%. Xem số tiền hiện tại và xác nhận lại nếu thay đổi.",
+    "refundBody": "Hoàn 100% khi hủy trong thời gian ân hạn (trước giờ bắt đầu và chưa check-in). Sau thời gian này hoặc không đến sạc: không hỗ trợ hoàn tiền do đổi ý. Vui lòng kiểm tra lại số tiền trước khi xác nhận.",
     "policyPendingNotice": "Trạm sạc đang cập nhật chính sách hủy, tạm thời chưa thể đặt chỗ.",
     "selectHint": "Chọn một khung giờ khả dụng để tiếp tục",
     "minDurationHint": "Thời lượng đặt chỗ tối thiểu là {{minutes}} phút (tương đương {{count}} khung giờ)",
@@ -948,7 +964,7 @@
     "role": "TÀI XẾ",
     "code": "MÃ ĐẶT CHỖ",
     "countdownTitle": "Thời gian chờ Check-in còn lại",
-    "countdownNote": "Vui lòng có mặt đúng giờ, quét QR đúng cổng và xác nhận. Check-in từ giờ bắt đầu đến trước deadline của booking, mặc định giờ kết thúc trừ 15 phút; đúng hạn đã đóng.",
+    "countdownNote": "Vui lòng có mặt đúng giờ và quét QR tại cổng sạc đã đặt. Cổng check-in mở từ giờ bắt đầu và đóng trước khi kết thúc 15 phút.",
     "stationTitle": "Thông tin trạm sạc",
     "connector": "LOẠI ĐẦU SẠC",
     "date": "NGÀY SẠC",
@@ -956,7 +972,7 @@
     "serviceFee": "Phí dịch vụ",
     "total": "Tổng cộng",
     "refundTitle": "Chính sách hoàn tiền",
-    "refundBody": "Máy chủ xử lý hủy trước deadline snapshot, chưa check-in: hoàn 100% do đổi ý; đúng/sau hạn hoặc no-show thông thường: 0%. Lỗi trạm đủ căn cứ có thể hoàn đủ gói riêng. Xem số tiền mới trước xác nhận; nghĩa vụ hoàn khác kết quả Simulator.",
+    "refundBody": "Hủy trong thời gian ân hạn (trước giờ bắt đầu và chưa check-in): hoàn 100%. Quá hạn ân hạn hoặc không đến sạc: 0%. Trường hợp trạm sạc gặp sự cố không thể phục vụ: hoàn 100% theo quy trình hỗ trợ sự cố.",
     "cta": "Quét QR để Check-in",
     "payNow": "Thanh toán ngay",
     "cancel": "Hủy đặt chỗ",
@@ -1015,6 +1031,9 @@
     "refundStatusReconciling": "Đang tra soát hoàn tiền",
     "refundStatusProcessing": "Đang xử lý hoàn tiền",
     "refundStatusSucceeded": "Đã hoàn tiền thành công",
+    "refundBadgeSucceeded": "Đã hoàn tiền",
+    "refundBadgeProcessing": "Đang hoàn tiền",
+    "refundBadgeReconciling": "Đang tra soát",
     "refundDescReconciling": "Khoản tiền đang được bộ phận tài chính đối soát với đối tác thanh toán. Bạn không cần nộp thêm hay thực hiện thao tác nào.",
     "refundDescProcessing": "Yêu cầu hoàn tiền đã được ghi nhận và đang xử lý hoàn về phương thức thanh toán ban đầu.",
     "refundDescAutoProcessing": "Yêu cầu hoàn tiền đã được tạo và đang được hệ thống xử lý tự động về phương thức thanh toán ban đầu của bạn.",
@@ -1093,7 +1112,7 @@
     "errorTitles": {
       "UNKNOWN_QR": "Không nhận diện được mã QR",
       "NO_BOOKING": "Không tìm thấy lượt đặt",
-      "WRONG_CONNECTOR": "Sai cổng sạc",
+      "WRONG_CONNECTOR": "Sai cổng hoặc trụ sạc",
       "TOO_EARLY": "Chưa đến giờ check-in",
       "WINDOW_EXPIRED": "Đã quá hạn check-in",
       "CHALLENGE_EXPIRED": "Mã QR đã hết hạn",
@@ -1104,10 +1123,10 @@
     "errors": {
       "UNKNOWN_QR": "Mã QR này không thuộc hệ thống ChargeOps hoặc không đúng định dạng. Hãy kiểm tra xem bạn có đang quét đúng mã QR trên trụ sạc không.",
       "NO_BOOKING": "Bạn không có lượt đặt nào đang hiệu lực trên cổng sạc này vào lúc này.",
-      "WRONG_CONNECTOR": "Lượt đặt của bạn ở {{chargePoint}} · {{connector}} ({{zone}}). Hãy quét mã QR trên đúng cổng sạc đó.",
+      "WRONG_CONNECTOR": "Bạn vừa quét sai cổng hoặc trụ sạc! Lượt đặt chỗ của bạn được chỉ định tại Trụ: {{chargePoint}} · Cổng: {{connector}}. Vui lòng kiểm tra biển hiệu trên trụ sạc để quét đúng mã QR.",
       "TOO_EARLY": "Check-in mở lúc {{time}} — còn {{minutes}} phút nữa. Bạn chưa thể quét trước giờ bắt đầu.",
-      "WINDOW_EXPIRED": "Đã quá hạn check-in cho đơn đặt này. Cổng sạc chuẩn bị chuyển sang trạng thái no-show.",
-      "CHALLENGE_EXPIRED": "Mã QR đã hết hạn hoặc không hợp lệ. Vui lòng chờ màn hình trụ sạc sinh mã mới rồi quét lại.",
+      "WINDOW_EXPIRED": "Đã quá hạn check-in cho đơn đặt này (quá 15 phút so với giờ bắt đầu). Đơn đặt chỗ đã tự động bị hủy do vắng mặt.",
+      "CHALLENGE_EXPIRED": "Mã QR đã hết hạn (sau 60 giây) hoặc không hợp lệ. Vui lòng chờ màn hình trụ sạc sinh mã mới rồi quét lại.",
       "NOT_ACCESS": "Đơn đặt chỗ không thuộc tài khoản hiện tại.",
       "STATE_CONFLICT": "Trạng thái đơn đặt chỗ không hợp lệ để check-in.",
       "STATION_UNAVAILABLE": "Thiết bị tại trạm đang bảo trì hoặc tạm ngưng phục vụ. Vui lòng liên hệ hỗ trợ."
@@ -1115,32 +1134,39 @@
   },
   "chargingSession": {
     "title": "Phiên sạc",
-    "headerTitle": "Đang sạc - {{station}}",
+    "headerTitle": "Phiên sạc đang diễn ra",
     "role": "TÀI XẾ",
     "charging": "ĐANG SẠC",
-    "full": "ĐÃ ĐẦY",
+    "full": "ĐÃ HOÀN TẤT",
     "rangeLeft": "~{{km}} km còn lại",
-    "currentStatus": "Trạng thái dòng điện",
-    "currentStatusValue": "Ổn định (DC Fast Charge)",
+    "currentStatus": "Trạng thái",
+    "currentStatusValue": "Đang cấp nguồn sạc",
     "active": "Active",
     "power": "CÔNG SUẤT",
     "temperature": "NHIỆT ĐỘ",
-    "timeTitle": "Thông tin thời gian",
-    "elapsed": "Thời gian đã sạc",
-    "startedAt": "Bắt đầu lúc {{time}}",
-    "estEnd": "Thời gian dự kiến kết thúc",
-    "estEndValue": "{{time}} (Còn {{minutes}} phút)",
-    "estEndNote": "Dựa trên công suất hiện tại",
-    "controlTitle": "Điều khiển phần cứng",
-    "locked": "Locked",
-    "controlDisabledTitle": "Điều khiển bị vô hiệu hóa",
-    "controlDisabledBody": "Để đảm bảo an toàn, các nút điều khiển vật lý chỉ có thể thao tác trực tiếp tại trụ sạc hoặc sau khi phiên sạc kết thúc.",
-    "stop": "DỪNG",
-    "unlock": "MỞ KHÓA CẤP",
-    "autoNote": "Hệ thống sẽ tự động ngắt dòng điện khi đạt mức 100% hoặc khi hết khung giờ đã đặt chỗ.",
+    "stationInfo": "Thông tin điểm sạc",
+    "chargerAndPort": "Trụ & Cổng sạc",
+    "chargerLabel": "Trụ",
+    "connectorLabel": "Cổng",
+    "chargerLabelFallback": "Trụ sạc",
+    "connectorLabelFallback": "Cổng sạc",
+    "connectorType": "Chuẩn cổng sạc",
+    "timeTitle": "Khung giờ đặt chỗ",
+    "bookingCode": "Mã đặt chỗ",
+    "duration": "Thời lượng",
+    "minutesUnit": "phút",
+    "autoNote": "Hệ thống ghi nhận phiên sạc theo khung giờ đã đặt chỗ. Bạn có thể nhấn 'Kết thúc phiên sạc' bất kỳ lúc nào để hoàn tất.",
     "finish": "Kết thúc phiên sạc",
-    "finishWarn": "Dừng ở mức {{percent}}% — không thể hoàn tác",
-    "finishFull": "Hoàn tất phiên sạc"
+    "finishFull": "Đã hoàn tất phiên sạc",
+    "finishing": "Đang xử lý...",
+    "confirmFinishTitle": "Xác nhận kết thúc sạc?",
+    "confirmFinishMessage": "Bạn có chắc chắn muốn kết thúc phiên sạc ngay bây giờ không? Hệ thống sẽ ghi nhận hoàn tất và cập nhật trạng thái đặt chỗ.",
+    "finishSuccessTitle": "Kết thúc thành công",
+    "finishSuccessMessage": "Phiên sạc đã được ghi nhận hoàn tất thành công.",
+    "finishError": "Không thể kết thúc phiên sạc. Vui lòng thử lại.",
+    "goHome": "Về trang chủ",
+    "loading": "Đang tải thông tin phiên sạc...",
+    "notFound": "Không tìm thấy thông tin phiên sạc."
   },
   "ticket": {
     "resolved": {
@@ -1411,17 +1437,21 @@
       }
     },
     "ticket": {
+      "created": {
+        "title": "Phiếu hỗ trợ mới {{code}}",
+        "body": "Đã ghi nhận phiếu hỗ trợ {{code}} (danh mục: {{category}}). Vui lòng kiểm tra và xử lý."
+      },
       "resolved": {
         "title": "Phiếu hỗ trợ {{code}} đã được giải quyết",
         "body": "Kết quả xử lý: \"{{result}}\". Vui lòng xác nhận hoặc báo lại trước {{autoCloseAt}} (hết hạn sau 10 ngày). Sau thời hạn này phiếu sẽ tự động đóng; đây không phải xác nhận lỗi trạm hay hoàn tiền."
       },
       "assigned": {
-        "title": "Ticket {{code}} đã được phân công",
-        "body": "Ticket {{code}} tại trạm {{station}} đã được phân công xử lý."
+        "title": "Phiếu hỗ trợ {{code}} đã được phân công",
+        "body": "Phiếu hỗ trợ {{code}} đã được phân công xử lý."
       },
       "escalated": {
         "title": "Yêu cầu khiếu nại ca {{code}}",
-        "body": "Ca khiếu nại cho Ticket {{code}} cần Admin xem xét."
+        "body": "Ca khiếu nại cho Phiếu hỗ trợ {{code}} cần Admin xem xét."
       }
     }
   },

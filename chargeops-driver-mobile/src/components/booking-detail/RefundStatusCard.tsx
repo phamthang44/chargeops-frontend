@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
-import { fontSizes, fontWeights, radius, spacing } from '@/theme';
+import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatVnd } from '@/utils/format';
+import { BezelCard } from './BezelCard';
 
 interface RefundStatusCardProps {
   booking: Booking;
@@ -14,7 +15,7 @@ interface RefundStatusCardProps {
 
 export function RefundStatusCard({ booking }: RefundStatusCardProps) {
   const { t } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors } = usePreferences();
 
   const refund = booking.refunds?.[0];
   const refundAmount = refund?.amount ?? booking.refundAmount ?? 0;
@@ -60,6 +61,16 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
     return t('bookingDetail.refundStatusSucceeded', 'Đã hoàn tiền thành công');
   };
 
+  const getStatusBadge = () => {
+    if (isNeedsRec) {
+      return t('bookingDetail.refundBadgeReconciling', 'Đang tra soát');
+    }
+    if (isPending) {
+      return t('bookingDetail.refundBadgeProcessing', 'Đang hoàn tiền');
+    }
+    return t('bookingDetail.refundBadgeSucceeded', 'Đã hoàn tiền');
+  };
+
   const getStatusDesc = () => {
     if (isNeedsRec) {
       return t(
@@ -86,16 +97,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
   };
 
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: `${toneColor}0A`,
-          borderColor: `${toneColor}36`,
-          shadowColor: isDark ? '#000000' : themeColors.textStrong,
-        },
-      ]}
-    >
+    <BezelCard tone={toneColor} coreColor={`${toneColor}12`} contentStyle={styles.card}>
       <View style={styles.header}>
         <View style={[styles.iconWrap, { backgroundColor: `${toneColor}1A` }]}>
           <Ionicons
@@ -118,7 +120,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
         </View>
         <View style={[styles.statusBadge, { backgroundColor: `${toneColor}1A` }]}>
           <Text style={[styles.statusBadgeText, { color: toneColor }]}>
-            {refundStatus}
+            {getStatusBadge()}
           </Text>
         </View>
       </View>
@@ -135,20 +137,14 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
           {formatVnd(refundAmount)}
         </Text>
       </View>
-    </View>
+    </BezelCard>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.sm,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
   },
   header: {
     flexDirection: 'row',
@@ -170,7 +166,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
   },
   reasonLabel: {
-    fontSize: fontSizes.caption - 1,
+    fontSize: fontSizes.caption,
     fontWeight: fontWeights.medium,
     marginTop: 1,
   },
@@ -180,12 +176,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   statusBadgeText: {
-    fontSize: fontSizes.caption - 2,
+    fontSize: fontSizes.micro,
     fontWeight: fontWeights.bold,
   },
   description: {
     fontSize: fontSizes.caption,
-    lineHeight: 18,
+    lineHeight: lineHeights.body,
   },
   amountRow: {
     flexDirection: 'row',

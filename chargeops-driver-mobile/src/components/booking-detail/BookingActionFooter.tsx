@@ -46,7 +46,7 @@ export function BookingActionFooter({
   onReportIssue,
 }: BookingActionFooterProps) {
   const { t } = useTranslation();
-  const { themeColors, isDark } = usePreferences();
+  const { themeColors } = usePreferences();
 
   if (isConfirmed) {
     return (
@@ -62,6 +62,7 @@ export function BookingActionFooter({
               : t('bookingDetail.cta')
           }
           disabled={!canCheckIn}
+          icon={canCheckIn ? 'qr-code-outline' : undefined}
           onPress={onCheckIn}
         />
         <AppButton
@@ -117,14 +118,14 @@ export function BookingActionFooter({
           style={[
             styles.reportIssueBtn,
             {
-              backgroundColor: isDark ? 'rgba(245, 158, 11, 0.12)' : '#FEF3C7',
-              borderColor: isDark ? '#D97706' : '#F59E0B',
+              backgroundColor: `${themeColors.warning}14`,
+              borderColor: `${themeColors.warning}40`,
             },
           ]}
           onPress={onReportIssue}
         >
-          <Ionicons name="alert-circle-outline" size={20} color={isDark ? '#FBBF24' : '#D97706'} />
-          <Text style={[styles.reportIssueBtnText, { color: isDark ? '#FBBF24' : '#B45309' }]}>
+          <Ionicons name="alert-circle-outline" size={20} color={themeColors.warning} />
+          <Text style={[styles.reportIssueBtnText, { color: themeColors.warning }]}>
             {t('bookingDetail.reportIssueShort', 'Báo cáo sự cố')}
           </Text>
         </Pressable>
@@ -142,13 +143,18 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
     gap: spacing.sm,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 12,
   },
   reportIssueBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: 14,
+    paddingVertical: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1.5,
   },

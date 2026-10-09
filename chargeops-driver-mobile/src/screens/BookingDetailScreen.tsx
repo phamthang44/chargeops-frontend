@@ -25,6 +25,7 @@ import {
   RefundStatusCard,
   SectionHeading,
 } from '@/components';
+import { Reveal } from '@/components/common/Reveal';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useBookingDetail } from '@/hooks/useBookingDetail';
 import type { RootStackParamList } from '@/navigation/types';
@@ -75,7 +76,7 @@ export function BookingDetailScreen() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
-        <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
+        <View style={styles.header}>
           <AppBackButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()} />
           <View style={styles.headerTitleBlock}>
             <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
@@ -108,7 +109,7 @@ export function BookingDetailScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       {/* Navigation Header */}
-      <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
+      <View style={styles.header}>
         <AppBackButton accessibilityLabel={t('common.back')} onPress={() => navigation.goBack()} />
         <View style={styles.headerTitleBlock}>
           <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
@@ -130,63 +131,74 @@ export function BookingDetailScreen() {
         }
       >
         {/* 1. Hero Status & Timing Card */}
-        <BookingHeroCard
-          booking={booking}
-          tone={tone}
-          accent={accent}
-          statusNote={statusNote}
-          copiedField={copiedField}
-          onCopy={handleCopy}
-          isConfirmed={isConfirmed}
-          windowStarted={windowStarted}
-          msToCheckInClose={msToCheckInClose}
-          isWithinGrace={isWithinGrace}
-          graceRemainingMs={graceRemainingMs}
-          isCharging={isCharging}
-        />
+        <Reveal delay={0} style={styles.revealGroup}>
+          <BookingHeroCard
+            booking={booking}
+            tone={tone}
+            accent={accent}
+            statusNote={statusNote}
+            copiedField={copiedField}
+            onCopy={handleCopy}
+            isConfirmed={isConfirmed}
+            windowStarted={windowStarted}
+            msToCheckInClose={msToCheckInClose}
+            isWithinGrace={isWithinGrace}
+            graceRemainingMs={graceRemainingMs}
+            isCharging={isCharging}
+          />
+        </Reveal>
 
         {/* 2. Timeline Stepper */}
-        <SectionHeading
-          icon="git-commit-outline"
-          title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
-          color={themeColors.primary}
-          textColor={themeColors.textStrong}
-        />
-        <BookingTimelineStepper booking={booking} />
+        <Reveal delay={70} style={styles.revealGroup}>
+          <SectionHeading
+            icon="git-commit-outline"
+            title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
+            color={themeColors.primary}
+            textColor={themeColors.textStrong}
+          />
+          <BookingTimelineStepper booking={booking} />
+        </Reveal>
 
         {/* 3. Checkout QR for Pending payment */}
         {isPending && (
-          <CheckoutQRCard
-            booking={booking}
-            onPayNow={() => navigation.navigate('PaymentProcessing', { bookingId: booking.id })}
-          />
+          <Reveal delay={140} style={styles.revealGroup}>
+            <CheckoutQRCard booking={booking} />
+          </Reveal>
         )}
 
         {/* 4. Station & Connector Specifications Card */}
-        <BookingStationCard
-          booking={booking}
-          copiedField={copiedField}
-          onCopy={handleCopy}
-        />
+        <Reveal delay={210} style={styles.revealGroup}>
+          <BookingStationCard
+            booking={booking}
+            copiedField={copiedField}
+            onCopy={handleCopy}
+          />
+        </Reveal>
 
         {/* 5. Pricing Breakdown & Accounting Card */}
-        <BookingPaymentCard
-          booking={booking}
-          hasAccountingDiscrepancy={hasAccountingDiscrepancy}
-          durationText={durationText}
-        />
+        <Reveal delay={280} style={styles.revealGroup}>
+          <BookingPaymentCard
+            booking={booking}
+            hasAccountingDiscrepancy={hasAccountingDiscrepancy}
+            durationText={durationText}
+          />
+        </Reveal>
 
         {/* 6. Refund Status Card (if cancelled or refund issued) */}
         {(isCancelled || (booking.refunds && booking.refunds.length > 0)) && (
-          <RefundStatusCard booking={booking} />
+          <Reveal delay={350} style={styles.revealGroup}>
+            <RefundStatusCard booking={booking} />
+          </Reveal>
         )}
 
         {/* 7. Refund Policy Guarantee Card (if active) */}
         {!isCancelled && (
-          <BookingRefundPolicyCard
-            isConfirmed={isConfirmed}
-            refundableAmount={refundableAmount}
-          />
+          <Reveal delay={350} style={styles.revealGroup}>
+            <BookingRefundPolicyCard
+              isConfirmed={isConfirmed}
+              refundableAmount={refundableAmount}
+            />
+          </Reveal>
         )}
       </ScrollView>
 
@@ -239,12 +251,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   headerBtn: { width: 40, height: 40 },
   headerTitleBlock: { alignItems: 'center' },
   headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
   headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 1 },
-  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  content: { padding: spacing.lg, gap: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
+  revealGroup: { gap: spacing.lg },
 });

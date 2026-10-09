@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import { formatVnd } from '@/utils/format';
+import { BezelCard } from './BezelCard';
 
 export interface BookingRefundPolicyCardProps {
   isConfirmed: boolean;
@@ -19,14 +20,10 @@ export function BookingRefundPolicyCard({
   const { themeColors } = usePreferences();
 
   return (
-    <View
-      style={[
-        styles.refundCard,
-        {
-          backgroundColor: themeColors.surfaceAlt,
-          borderColor: themeColors.border,
-        },
-      ]}
+    <BezelCard
+      tone={themeColors.error}
+      coreColor={`${themeColors.error}0A`}
+      contentStyle={styles.refundCard}
     >
       <View style={styles.refundHeader}>
         <View style={[styles.refundIcon, { backgroundColor: `${themeColors.error}14` }]}>
@@ -40,7 +37,7 @@ export function BookingRefundPolicyCard({
         {t('bookingDetail.refundBody')}
       </Text>
       {isConfirmed && (
-        <View style={[styles.refundNowRow, { borderTopColor: themeColors.border }]}>
+        <View style={[styles.refundNowRow, { borderTopColor: `${themeColors.error}26` }]}>
           <Text style={[styles.refundNowLabel, { color: themeColors.textBody }]}>
             {t('bookingDetail.refundNow')}
           </Text>
@@ -49,14 +46,12 @@ export function BookingRefundPolicyCard({
           </Text>
         </View>
       )}
-    </View>
+    </BezelCard>
   );
 }
 
 const styles = StyleSheet.create({
   refundCard: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.lg,
     gap: spacing.sm,
   },

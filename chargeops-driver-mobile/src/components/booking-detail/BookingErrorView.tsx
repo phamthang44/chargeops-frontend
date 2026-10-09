@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppBackButton } from '@/components/AppBackButton';
 import { AppButton } from '@/components/AppButton';
+import { PopIcon } from '@/components/common/PopIcon';
 import { usePreferences } from '@/context/PreferencesContext';
 import { BookingApiError } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
@@ -95,7 +96,7 @@ export function BookingErrorView({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
-      <View style={[styles.header, { borderBottomColor: themeColors.border }]}>
+      <View style={styles.header}>
         <AppBackButton accessibilityLabel={t('common.back')} onPress={onGoBack} />
         <View style={styles.headerTitleBlock}>
           <Text style={[styles.headerTitle, { color: themeColors.textStrong }]}>{t('bookingDetail.title')}</Text>
@@ -201,7 +202,7 @@ export function BookingErrorView({
                   >
                     {bookingId}
                   </Text>
-                  <Ionicons
+                  <PopIcon
                     name={copiedField === 'errorParamId' ? 'checkmark-circle' : 'copy-outline'}
                     size={15}
                     color={copiedField === 'errorParamId' ? themeColors.success : themeColors.textMuted}
@@ -248,8 +249,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   headerBtn: { width: 40, height: 40 },
   headerTitleBlock: { alignItems: 'center' },
@@ -296,7 +297,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   errorStatusPillText: {
-    fontSize: 11,
+    fontSize: fontSizes.micro,
     fontWeight: fontWeights.bold,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
@@ -326,13 +327,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   errorParamLabel: {
-    fontSize: 10,
+    fontSize: fontSizes.micro,
     fontWeight: fontWeights.semibold,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   errorCopiedBadge: {
-    fontSize: 11,
+    fontSize: fontSizes.micro,
     fontWeight: fontWeights.semibold,
   },
   errorParamRow: {
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
   },
   errorParamValue: {
     flex: 1,
-    fontSize: 12,
+    fontSize: fontSizes.caption,
   },
   errorActionsGroup: {
     width: '100%',

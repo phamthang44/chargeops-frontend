@@ -244,6 +244,15 @@ assert(adaptCancellationPolicy({ policyVersion: 'booking-v4.9' } as any) === und
 assert(adaptCancellationPolicy({ gracePeriodMinutes: 'not-a-number' as any } as any) === undefined, 'non-numeric gracePeriodMinutes returns undefined');
 
 // Case 4: adaptStationDiscoveryDetail carries policy
+assert(adaptCancellationPolicy({ ...validBackendPolicy, withinGraceRefundPercent: undefined }) === undefined, 'missing refund percent must not default to 100');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, noShowRefundPercent: NaN }) === undefined, 'NaN refund must not render');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, gracePeriodMinutes: Infinity }) === undefined, 'infinite grace must not render');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, gracePeriodMinutes: -1 }) === undefined, 'negative grace must not render');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, requiresNotCheckedIn: false }) === undefined, 'unsupported conditions must not use current copy');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, policyVersion: '' }) === undefined, 'missing version must not render');
+assert(adaptCancellationPolicy({ ...validBackendPolicy, gracePeriodMinutes: 20, noShowRefundPercent: 25 })?.noShowRefundPercent === 25, 'non-default current values retained separately');
+
+// Case 4: adaptStationDiscoveryDetail carries policy
 const detailWithPolicy = adaptStationDiscoveryDetail({
   ...mockBackendDetail,
   cancellationPolicy: validBackendPolicy,

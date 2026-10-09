@@ -70,7 +70,9 @@ export async function fetchLegalDocument(
   lang: string = 'vi',
 ): Promise<LegalDocument> {
   const fallback = legalDocument(type, lang);
-  const slug = type === 'terms' ? 'terms-of-service' : 'privacy-policy';
+  const locale = lang.toLowerCase().startsWith('en') ? 'en' : 'vi';
+  const baseSlug = type === 'terms' ? 'terms-of-service' : 'privacy-policy';
+  const slug = locale === 'en' ? `${baseSlug}-en` : baseSlug;
 
   try {
     const controller = new AbortController();
@@ -89,7 +91,7 @@ export async function fetchLegalDocument(
     if (res.ok) {
       const payload = await res.json();
       const data = payload?.data || payload;
-      if (data && typeof data.content === 'string' && data.content.trim().length > 0) {
+      if (data && data.locale === locale && typeof data.content === 'string' && data.content.trim().length > 0) {
         const sections = parseMarkdownToSections(data.content);
         return {
           title: data.title || fallback.title,

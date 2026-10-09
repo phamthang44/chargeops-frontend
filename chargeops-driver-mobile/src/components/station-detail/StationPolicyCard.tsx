@@ -88,6 +88,17 @@ export function StationPolicyCard({ cancellationPolicy }: StationPolicyCardProps
             </Text>
           </View>
 
+          <View style={styles.ruleRow}>
+            <View style={[styles.badgePill, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.2)' : 'rgba(245, 158, 11, 0.15)' }]}>
+              <Text style={[styles.badgeText, { color: warningColor }]}>
+                {cancellationPolicy.noShowRefundPercent}%
+              </Text>
+            </View>
+            <Text style={[styles.ruleText, { color: textColor }]}>
+              {t('stationDetail.policy.noShow', { percent: cancellationPolicy.noShowRefundPercent })}
+            </Text>
+          </View>
+
           {/* Rule 3: Trạm gặp sự cố (100%) */}
           <View style={styles.ruleRow}>
             <View style={[styles.badgePill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : 'rgba(59, 130, 246, 0.15)' }]}>

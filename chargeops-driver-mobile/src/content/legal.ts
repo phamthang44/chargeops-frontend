@@ -14,7 +14,7 @@ export interface LegalDocument {
 
 const TERMS_VI: LegalDocument = {
   title: 'Điều khoản dịch vụ',
-  updatedAt: '08/09/2026',
+  updatedAt: '09/10/2026',
   intro:
     'Điều khoản dịch vụ cho nền tảng ChargeOps theo SRS v4.9. Điều khoản này quy định cách tài xế sử dụng ứng dụng để tìm trạm, đặt khung giờ sạc, thanh toán mô phỏng, hủy và hoàn tiền theo chính sách v4.9, và quét mã QR check-in.',
   sections: [
@@ -40,26 +40,30 @@ const TERMS_VI: LegalDocument = {
       ],
     },
     {
-      title: '4. Thanh toán và chính sách hủy, hoàn tiền v4.9',
+      title: "4. Thanh toán, hủy và hoàn Simulator",
       body: [
-        'Booking mới ở trạng thái Chờ thanh toán (PENDING) và được giữ chỗ tạm thời trong 10 phút kể từ lúc tạo. Quá thời hạn này, booking sẽ hết hạn (EXPIRED).',
-        'Ân hạn hủy 10 phút: Sau khi thanh toán thành công, tài xế hủy booking trong vòng 10 phút kể từ thời điểm thanh toán (và trước giờ bắt đầu sạc, chưa check-in) sẽ được hoàn tiền 100% giá gói.',
-        'Sau hạn 10 phút ân hạn hoặc nếu không đến nhận chỗ (No-show), mức hoàn tiền là 0% do đổi ý.',
-        'Trường hợp sự cố trạm sạc được hệ thống hoặc ban quản trị xác nhận, tài xế sẽ được hỗ trợ hoàn tiền 100% giá gói sạc.',
+        "Thanh toán toàn bộ giá gói thời gian, không đặt cọc hoặc tính theo điện năng thực đo. Thu và hoàn trong demo là Simulator, không chứng minh giao dịch ngân hàng thật.",
+        "Hold mặc định 10 phút từ lúc tạo booking; thử lại thanh toán không gia hạn. Receipt đến muộn, thiếu/thừa hoặc không khớp được đối soát riêng, không tự khôi phục booking.",
+        "Grace mặc định 10 phút từ xác nhận payment hợp lệ đầu tiên. Hạn hoàn do đổi ý là min(paymentConfirmedAt + graceMinutes, startAt). Booking CONFIRMED chưa check-in được hoàn 100% giá gói khi máy chủ xử lý trước hạn; đúng hoặc sau hạn hoàn 0%. Đơn cũ giữ snapshot khi cấu hình đổi.",
+        "Nếu máy chủ trả 409 BKG_CANCELLATION_CHANGED, booking chưa bị hủy: đọc số tiền mới và xác nhận lại nếu tiếp tục.",
+        "Lỗi trạm được Owner nhận trách nhiệm hoặc Admin grant đúng case escalated, đủ điều kiện payment/receipt, hoàn 100% giá gói kể cả giữa phiên hoặc sau no-show; không hoàn trùng. Staff finding hoặc ticket riêng lẻ chưa cấp quyền hoàn.",
+        "Nghĩa vụ PENDING khác kết quả SUCCEEDED. Attempt FAILED vẫn để nghĩa vụ PENDING; STARTED hoặc chưa rõ kết quả không được phát attempt mới. Owner retry khi hệ thống cho phép; không hứa retry tự động. Không có payout hoặc ví rút tiền.",
       ],
     },
     {
-      title: '5. Check-in QR và trạng thái trụ sạc',
+      title: "5. Check-in và kết thúc phiên",
       body: [
-        'Tài xế check-in bằng cách quét mã QR hợp lệ trên đúng cổng sạc đã đặt trước từ thời điểm bắt đầu phiên sạc đến trước giờ kết thúc 15 phút.',
-        'Nếu quá hạn chót check-in mà tài xế chưa quét QR, hệ thống sẽ ghi nhận vắng mặt (No-show, hoàn 0%) để giải phóng trụ sạc cho các phương tiện khác.',
-        'Trong phạm vi dự án, trạng thái trụ sạc và phiên sạc được mô phỏng theo mô hình trạng thái logic.',
+        "Quét QR của đúng cổng và xác nhận trên ứng dụng; quét hoặc xem trước chưa chứng minh check-in thành công.",
+        "Check-in từ startAt (bao gồm) đến trước checkInDeadline (loại trừ), mặc định endAt trừ 15 phút. Phiên 14:00–15:00 đóng đúng 14:45; dùng deadline máy chủ của booking.",
+        "Tại hoặc sau cutoff, CONFIRMED chưa check-in thành CANCELLED/NO_SHOW; thông thường hoàn 0%. Đến muộn không lùi giờ kết thúc, kết thúc sớm không tự hoàn thời gian chưa dùng. Lỗi trạm đủ căn cứ áp dụng riêng như mục 4.",
+        "CHECKED_IN/CHARGING không hủy tự nguyện; có sự cố cần xử lý an toàn qua Incident/resolve-session trước quyết định tài chính. Trạng thái thiết bị/phiên trong demo là mô phỏng.",
       ],
     },
     {
-      title: '6. Hỗ trợ sự cố và giải quyết khiếu nại',
+      title: "6. Hỗ trợ và trách nhiệm",
       body: [
-        'Người dùng có thể tạo phiếu hỗ trợ (Ticket) đối với các sự cố booking, thanh toán, tài khoản hoặc lỗi sạc tại trạm để được tiếp nhận và xử lý nhanh chóng.',
+        "Gửi ticket để báo sự cố. Staff ACTIVE đúng trạm ghi chứng cứ kỹ thuật, không quyết định hoặc retry hoàn. Owner đúng scope/snapshot nhận trách nhiệm, kể cả case đã escalated.",
+        "Admin chỉ rà chính sách tài chính trong đúng case escalated có hiệu lực; không có queue hoàn toàn nền tảng hoặc Manual Record. Đóng ticket không chứng minh đã hoàn tiền.",
       ],
     },
   ],
@@ -111,7 +115,7 @@ const PRIVACY_VI: LegalDocument = {
 
 const TERMS_EN: LegalDocument = {
   title: 'Terms of Service',
-  updatedAt: '2026-09-08',
+  updatedAt: '2026-10-09',
   intro:
     'Terms of Service for ChargeOps based on SRS v4.9. These terms govern how drivers use the app to discover stations, reserve charging slots, complete test payments, cancel and refund per v4.9 policy, and check in via QR code.',
   sections: [
@@ -137,26 +141,30 @@ const TERMS_EN: LegalDocument = {
       ],
     },
     {
-      title: '4. Payment and v4.9 cancellation & refund policy',
+      title: "4. Payment, cancellation and Simulator refunds",
       body: [
-        'New bookings hold the time range for 10 minutes in Pending Payment. Payments run in test mode for this demo.',
-        '10-Minute Grace Window: Drivers can cancel within 10 minutes from payment confirmation (before booking start time and before check-in) for a 100% package refund.',
-        'After the 10-minute grace window expires or in case of a no-show, refund is 0% due to change of mind.',
-        'In verified station failure incidents, drivers receive a 100% refund in accordance with support procedures.',
+        "Pay the full time-package price, without a deposit or metered-energy settlement. Demo collections/refunds use Simulator and do not prove real bank transactions.",
+        "Default hold is 10 minutes from booking creation; payment retries do not extend it. Late, short, excess or unmatched receipts are reconciled separately and do not automatically restore bookings.",
+        "Default grace is 10 minutes from the first valid payment confirmation. The change-of-mind refund deadline is min(paymentConfirmedAt + graceMinutes, startAt). A CONFIRMED booking without check-in receives 100% when the server processes cancellation before the deadline; exactly at or after it, the refund is 0%. Old bookings retain snapshots when configuration changes.",
+        "409 BKG_CANCELLATION_CHANGED means the booking has not been cancelled: read the new amount and consent again if continuing.",
+        "Station failure accepted by the Owner or granted by Admin in the exact escalated case, with valid payment/receipt evidence, qualifies for 100% of the package price even mid-session or after no-show; no duplicate refunds. A Staff finding or ticket alone does not grant entitlement.",
+        "A PENDING obligation differs from a SUCCEEDED outcome. A FAILED attempt leaves the obligation PENDING; STARTED or unknown outcomes block new attempts. The Owner may retry when permitted; automatic retries are not promised. There are no payouts or withdrawable wallets.",
       ],
     },
     {
-      title: '5. QR check-in & simulated hardware',
+      title: "5. Check-in and session ending",
       body: [
-        'Drivers check in by scanning the valid QR code at the reserved connector between booking start time and 15 minutes before booking end time.',
-        'Failing to check in by the deadline marks the booking as CANCELLED (NO_SHOW, 0% refund) to release the charger for other vehicles.',
-        'In this project scope, charger states and charging sessions represent logical simulated states.',
+        "Scan the correct connector QR and confirm in the app; scanning or previewing does not prove successful check-in.",
+        "Check-in opens at startAt (inclusive) and closes before checkInDeadline (exclusive), by default endAt minus 15 minutes. A 14:00–15:00 session closes exactly at 14:45; use the booking deadline from the server.",
+        "At or after cutoff, CONFIRMED without check-in becomes CANCELLED/NO_SHOW, ordinarily with 0% refund. Late arrival does not move the end time; ending early does not automatically refund unused time. Substantiated station failure is separate as explained in section 4.",
+        "CHECKED_IN/CHARGING cannot be voluntarily cancelled; incidents require safe Incident/resolve-session handling before financial decisions. Demo equipment/session states are simulated.",
       ],
     },
     {
-      title: '6. Incident support',
+      title: "6. Support and responsibility",
       body: [
-        'Users may submit support tickets for booking, payment, account, or station issues. Tickets are routed directly to station owners or platform admins.',
+        "Report incidents through tickets. Staff ACTIVE at the correct station records technical evidence, without deciding or retrying refunds. The Owner within scope/snapshot may accept responsibility even during escalation.",
+        "Admin reviews financial policy only in the exact active escalated case; there is no platform-wide refund queue or Manual Record. Closing a ticket does not prove a paid refund.",
       ],
     },
   ],

@@ -581,10 +581,11 @@
       "coordinates": "Coordinates"
     },
     "policy": {
-      "withinGrace": "{{percent}}% refund within {{minutes}} minutes after payment confirmation, before start time and prior to check-in.",
-      "afterGrace": "After this window or for no-show: {{percent}}% refund for voluntary cancellation.",
-      "stationFailure": "Verified station failure: {{percent}}% refund through support ticket procedure.",
-      "note": "Exact free cancellation deadline will be calculated and displayed upon payment confirmation.",
+      "withinGrace": "{{percent}}% refund when the server processes cancellation before the {{minutes}}-minute deadline from payment confirmation, before start and without check-in. Exactly at the deadline, grace has ended.",
+      "afterGrace": "Change-of-mind cancellation from the grace deadline: {{percent}}% refund.",
+      "noShow": "Ordinary no-show: {{percent}}% refund. Late arrival does not extend the session.",
+      "stationFailure": "Established station-failure responsibility with valid collection: {{percent}}% of the package price, including mid-session or after no-show; no duplicate refunds.",
+      "note": "Exact deadlines use server data and the booking snapshot. A refund decision differs from execution; Simulator does not prove bank transfers.",
       "unavailable": "Cancellation and refund policy is currently being updated."
     },
     "action": {
@@ -662,7 +663,7 @@
     "serviceFee": "Service fee",
     "total": "Estimated total",
     "refundTitle": "Cancellation & refund policy",
-    "refundBody": "100% refund during the grace window after payment confirmation, before start time and prior to check-in. Please review carefully before confirming.",
+    "refundBody": "100% change-of-mind refund only when the server processes cancellation before the snapshotted deadline and before check-in. Exactly at/after the deadline: 0%. Read the current amount and confirm again if it changes.",
     "policyPendingNotice": "Station cancellation policy is being updated, booking is temporarily disabled.",
     "selectHint": "Select an available time slot to continue",
     "minDurationHint": "Minimum booking duration is {{minutes}} minutes ({{count}} slots)",
@@ -947,7 +948,7 @@
     "role": "DRIVER",
     "code": "BOOKING CODE",
     "countdownTitle": "Check-in window remaining",
-    "countdownNote": "Please arrive on time and scan the QR code on the charger to start your session. The booking auto-cancels if you are more than 15 minutes late.",
+    "countdownNote": "Arrive on time, scan the correct connector QR and confirm. Check-in opens at start and closes before the booking deadline, by default end time minus 15 minutes; exactly at the deadline is closed.",
     "stationTitle": "Station info",
     "connector": "CONNECTOR",
     "date": "DATE",
@@ -955,7 +956,7 @@
     "serviceFee": "Service fee",
     "total": "Total",
     "refundTitle": "Refund policy",
-    "refundBody": "100% refund during grace period after payment confirmation (before start time and prior to check-in). 0% refund after grace period expires.",
+    "refundBody": "Server processing before the snapshot deadline without check-in: 100% change-of-mind refund; exactly at/after it or ordinary no-show: 0%. Substantiated station failure may separately refund the full package. Review the current amount before consent; obligation differs from Simulator execution.",
     "cta": "Scan QR to check in",
     "payNow": "Pay Now",
     "cancel": "Cancel booking",
@@ -1450,4 +1451,3 @@
     "clearAll": "Clear all notifications"
   }
 }
-

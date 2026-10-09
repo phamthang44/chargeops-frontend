@@ -259,18 +259,30 @@ function formatOperatingHours(
 export function adaptCancellationPolicy(
   policy?: BackendCancellationPolicyResponse | null,
 ): CancellationPolicy | undefined {
-  if (!policy || typeof policy.gracePeriodMinutes !== 'number') return undefined;
+  // This UI supports the current grace model only. Missing/invalid fields must
+  // not become invented refund promises through defaults.
+  if (!policy || !policy.policyVersion?.trim()
+    || !Number.isInteger(policy.gracePeriodMinutes) || policy.gracePeriodMinutes! < 0
+    || policy.graceStartsAt !== 'PAYMENT_CONFIRMED_AT'
+    || policy.requiresBeforeBookingStart !== true
+    || policy.requiresNotCheckedIn !== true
+    || policy.stationFailureRequiresVerification !== true
+    || ![policy.withinGraceRefundPercent, policy.afterGraceRefundPercent,
+      policy.noShowRefundPercent, policy.verifiedStationFailureRefundPercent]
+      .every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100)) {
+    return undefined;
+  }
   return {
     policyVersion: policy.policyVersion,
-    gracePeriodMinutes: Number(policy.gracePeriodMinutes),
-    graceStartsAt: policy.graceStartsAt ?? 'PAYMENT_CONFIRMED_AT',
-    requiresBeforeBookingStart: policy.requiresBeforeBookingStart ?? true,
-    requiresNotCheckedIn: policy.requiresNotCheckedIn ?? true,
-    withinGraceRefundPercent: Number(policy.withinGraceRefundPercent ?? 100),
-    afterGraceRefundPercent: Number(policy.afterGraceRefundPercent ?? 0),
-    noShowRefundPercent: Number(policy.noShowRefundPercent ?? 0),
-    verifiedStationFailureRefundPercent: Number(policy.verifiedStationFailureRefundPercent ?? 100),
-    stationFailureRequiresVerification: policy.stationFailureRequiresVerification ?? true,
+    gracePeriodMinutes: policy.gracePeriodMinutes!,
+    graceStartsAt: policy.graceStartsAt,
+    requiresBeforeBookingStart: policy.requiresBeforeBookingStart,
+    requiresNotCheckedIn: policy.requiresNotCheckedIn,
+    withinGraceRefundPercent: policy.withinGraceRefundPercent!,
+    afterGraceRefundPercent: policy.afterGraceRefundPercent!,
+    noShowRefundPercent: policy.noShowRefundPercent!,
+    verifiedStationFailureRefundPercent: policy.verifiedStationFailureRefundPercent!,
+    stationFailureRequiresVerification: policy.stationFailureRequiresVerification,
   };
 }
 

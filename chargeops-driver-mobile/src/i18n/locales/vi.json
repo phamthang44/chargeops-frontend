@@ -581,10 +581,11 @@
       "coordinates": "Tọa độ"
     },
     "policy": {
-      "withinGrace": "Hủy hoàn {{percent}}% trong {{minutes}} phút từ khi thanh toán được xác nhận, trước giờ bắt đầu và khi chưa check-in.",
-      "afterGrace": "Sau hạn này hoặc không đến trạm: hoàn {{percent}}% do đổi ý.",
-      "stationFailure": "Trạm không phục vụ được và đã được xác nhận: hoàn {{percent}}% theo quy trình hỗ trợ.",
-      "note": "Thời hạn hủy miễn phí chính xác theo đồng hồ máy chủ sẽ được cung cấp khi hoàn tất thanh toán.",
+      "withinGrace": "Hoàn {{percent}}% khi máy chủ xử lý hủy trước hạn {{minutes}} phút từ xác nhận thanh toán, trước giờ bắt đầu và khi chưa check-in. Đúng hạn không còn ân hạn.",
+      "afterGrace": "Hủy do đổi ý từ hạn ân hạn: hoàn {{percent}}%.",
+      "noShow": "Vắng mặt thông thường: hoàn {{percent}}%. Đến muộn không kéo dài phiên.",
+      "stationFailure": "Lỗi trạm được xác lập trách nhiệm và đủ điều kiện thu tiền: hoàn {{percent}}% giá gói, kể cả giữa phiên hoặc sau no-show; không hoàn trùng.",
+      "note": "Deadline cụ thể theo máy chủ và snapshot của booking. Quyết định hoàn khác kết quả thực thi; Simulator không chứng minh chuyển tiền ngân hàng.",
       "unavailable": "Chính sách hủy và hoàn tiền của trạm đang được cập nhật."
     },
     "action": {
@@ -662,7 +663,7 @@
     "serviceFee": "Phí dịch vụ",
     "total": "Tạm tính",
     "refundTitle": "Chính sách hủy & hoàn tiền",
-    "refundBody": "Hủy hoàn 100% trong thời gian ân hạn sau khi thanh toán được xác nhận, trước giờ bắt đầu và khi chưa check-in. Vui lòng kiểm tra kỹ trước khi xác nhận.",
+    "refundBody": "Hoàn 100% do đổi ý chỉ khi máy chủ xử lý hủy trước deadline snapshot và chưa check-in. Đúng/sau hạn: 0%. Xem số tiền hiện tại và xác nhận lại nếu thay đổi.",
     "policyPendingNotice": "Trạm sạc đang cập nhật chính sách hủy, tạm thời chưa thể đặt chỗ.",
     "selectHint": "Chọn một khung giờ khả dụng để tiếp tục",
     "minDurationHint": "Thời lượng đặt chỗ tối thiểu là {{minutes}} phút (tương đương {{count}} khung giờ)",
@@ -947,7 +948,7 @@
     "role": "TÀI XẾ",
     "code": "MÃ ĐẶT CHỖ",
     "countdownTitle": "Thời gian chờ Check-in còn lại",
-    "countdownNote": "Vui lòng có mặt đúng giờ và quét mã QR trên trụ sạc để bắt đầu phiên. Đặt chỗ sẽ tự động hủy nếu bạn trễ quá 15 phút.",
+    "countdownNote": "Vui lòng có mặt đúng giờ, quét QR đúng cổng và xác nhận. Check-in từ giờ bắt đầu đến trước deadline của booking, mặc định giờ kết thúc trừ 15 phút; đúng hạn đã đóng.",
     "stationTitle": "Thông tin trạm sạc",
     "connector": "LOẠI ĐẦU SẠC",
     "date": "NGÀY SẠC",
@@ -955,7 +956,7 @@
     "serviceFee": "Phí dịch vụ",
     "total": "Tổng cộng",
     "refundTitle": "Chính sách hoàn tiền",
-    "refundBody": "Hoàn 100% trong thời gian ân hạn từ khi xác nhận thanh toán (trước giờ bắt đầu và chưa check-in). Sau hạn ân hạn: không hoàn tiền (0%) khi tự ý hủy.",
+    "refundBody": "Máy chủ xử lý hủy trước deadline snapshot, chưa check-in: hoàn 100% do đổi ý; đúng/sau hạn hoặc no-show thông thường: 0%. Lỗi trạm đủ căn cứ có thể hoàn đủ gói riêng. Xem số tiền mới trước xác nhận; nghĩa vụ hoàn khác kết quả Simulator.",
     "cta": "Quét QR để Check-in",
     "payNow": "Thanh toán ngay",
     "cancel": "Hủy đặt chỗ",
@@ -1450,4 +1451,3 @@
     "clearAll": "Xóa tất cả thông báo"
   }
 }
-

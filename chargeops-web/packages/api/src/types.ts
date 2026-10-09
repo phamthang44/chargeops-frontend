@@ -374,6 +374,8 @@ export interface Connector {
   id: string;
   chargePointId: string;
   connectorCode: string;
+  chargePointCode?: string;
+  chargePointName?: string;
   name?: string;
   connectorType: ConnectorType;
   powerKw: number;
@@ -1597,6 +1599,30 @@ export interface OwnerDashboard {
   };
   chargers: (DashboardConnectorRow & Pick<Connector, 'utilizationPct'>)[];
   upcomingBookings: { id: string; startTime: string; driverName: string }[];
+}
+
+/** Owner operations summary endpoint: GET /api/v1/owner/dashboard/summary */
+export interface OwnerOperationsSummary {
+  generatedAt?: string;
+  date?: string;
+  timezone?: string;
+  stations: {
+    totalStations: number;
+    activeStations: number;
+    visibleToDrivers: number;
+    pendingApproval: number;
+    onlineChargePoints: number;
+    totalChargePoints: number;
+  };
+  hardware: {
+    totalConnectors: number;
+    availableConnectors: number;
+    chargingConnectors: number;
+    offlineConnectors: number;
+    unavailableConnectors: number;
+    sessionsToday: number;
+    averageUtilizationPercent: number;
+  };
 }
 
 export interface AnalyticsKpi {

@@ -25,6 +25,7 @@ import type {
   RecoverConnectorIncidentRequest,
   ResolveIncidentSessionRequest,
   AdminOperationsSummary,
+  OwnerOperationsSummary,
   ChargePoint,
   ChargePointStatusEvent,
   Connector,
@@ -494,7 +495,7 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     dashboard: {
-      owner: () => http.get('/dashboard/owner'),
+      owner: () => http.get<OwnerOperationsSummary>('/owner/dashboard/summary'),
       admin: () => http.get<AdminOperationsSummary>('/admin/dashboard/summary'),
       staff: () => http.get('/dashboard/staff'),
     },

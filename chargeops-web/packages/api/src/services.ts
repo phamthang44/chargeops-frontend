@@ -11,6 +11,7 @@ import type {
   OwnerBookingListItem,
   OwnerBookingListParams,
   OwnerBookingSummary,
+  OwnerOperationsSummary,
   AdminOperationsSummary,
   AdminStationDetail,
   AdminStationFilterParams,
@@ -64,7 +65,6 @@ import type {
   ReviewTicketEscalationPayload,
   RenewLicenseRequest,
   OperationalChargePointStatus,
-  OwnerDashboard,
   Page,
   PaymentMethod,
   PolicyDoc,
@@ -128,7 +128,7 @@ export interface LocationService {
 }
 
 export interface DashboardService {
-  owner(): Promise<OwnerDashboard>;
+  owner(): Promise<OwnerOperationsSummary>;
   admin(): Promise<AdminOperationsSummary>;
   /** Ops-only KPIs — no revenue/license fields exist on this DTO (see StaffDashboard). */
   staff(): Promise<StaffDashboard>;

@@ -17,7 +17,7 @@ import type {
   License,
   LicenseStatus,
   LicenseStatusEventDto,
-  OwnerDashboard,
+  OwnerOperationsSummary,
   PaymentMethod,
   ExecuteRefundRequest,
   RefundAttemptItem,
@@ -412,47 +412,41 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     },
 
     dashboard: {
-      async owner() {
+      async owner(): Promise<OwnerOperationsSummary> {
         await delay();
-        const lic = db.licenses[0];
-        // OFFLINE connectors drop out; AVAILABLE/IN_USE both count as connected/online
+        const myStations = db.ownerStations;
+        const activeStations = myStations.filter((s: Station) => s.status === 'active' || s.status === 'ACTIVE').length;
+        const pendingStations = myStations.filter((s: Station) => s.status === 'pending' || s.status === 'PENDING_APPROVAL').length;
         const mine = scopedConnectors();
         const live = mine.map((c) => ({ c, status: effectiveRuntimeStatus(c, db.chargePoints) }));
-        const online = live.filter((x) => x.status !== 'OFFLINE');
-        const offline = live.find((x) => x.status === 'OFFLINE')?.c;
-        const upcoming = scopedBookings()
-          .filter((b) => b.status === 'confirmed' || b.status === 'pending')
-          .slice(0, 4);
+        const available = live.filter((x) => x.status === 'AVAILABLE').length;
+        const inUse = live.filter((x) => x.status === 'IN_USE').length;
+        const offline = live.filter((x) => x.status === 'OFFLINE').length;
+        const myStationIds = new Set(myStations.map((s: Station) => s.id));
+        const myCps = db.chargePoints.filter((cp) => myStationIds.has(cp.stationId));
+        const onlineCps = myCps.filter((cp) => cp.operationalStatus === 'AVAILABLE').length;
+
         return {
-          license: {
-            status: lic.status,
-            expiryDate: lic.expiryDate || lic.expiresAt?.split('T')[0] || '',
-            daysLeft: lic.daysLeft ?? 0,
-            expiringSoon: lic.expiringSoon ?? false,
+          generatedAt: new Date().toISOString(),
+          date: new Date().toISOString().slice(0, 10),
+          timezone: 'Asia/Ho_Chi_Minh',
+          stations: {
+            totalStations: myStations.length,
+            activeStations,
+            visibleToDrivers: activeStations,
+            pendingApproval: pendingStations,
+            onlineChargePoints: onlineCps,
+            totalChargePoints: myCps.length,
           },
-          kpis: {
-            bookingsToday: 24,
-            bookingsDelta: 4,
-            revenueTodayVnd: 4_200_000,
-            revenueDeltaPct: 12,
-            chargersOnline: online.length,
-            chargersTotal: mine.length,
-            offlineChargerNote: offline ? `${offline.id} mất kết nối` : null,
-            avgUtilizationPct: 68,
-            utilizationDeltaPts: 5,
+          hardware: {
+            totalConnectors: mine.length,
+            availableConnectors: available,
+            chargingConnectors: inUse,
+            offlineConnectors: offline,
+            unavailableConnectors: Math.max(0, mine.length - available - inUse - offline),
+            sessionsToday: 12,
+            averageUtilizationPercent: 45.5,
           },
-          chargers: mine.map((c) => ({
-            id: c.id,
-            name: c.name || c.connectorCode || c.id,
-            zoneLabel: db.chargePoints.find((cp) => cp.id === c.chargePointId)?.zoneLabel ?? null,
-            runtimeStatus: effectiveRuntimeStatus(c, db.chargePoints),
-            utilizationPct: c.utilizationPct ?? 0,
-          })),
-          upcomingBookings: upcoming.map((b) => ({
-            id: b.id,
-            startTime: b.startAt.slice(11, 16),
-            driverName: b.driverName,
-          })),
         };
       },
       async admin() {

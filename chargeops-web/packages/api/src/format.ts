@@ -75,3 +75,42 @@ export function formatDuration(min: number): string {
   const m = min % 60;
   return `${h}h${String(m).padStart(2, '0')}`;
 }
+
+export interface ParsedAssistantMessage {
+  thinking: string | null;
+  answer: string;
+}
+
+/**
+ * Parses reasoning models (e.g. DeepSeek-R1, Qwen-Thinking) output containing <think>...</think>.
+ * Separates internal reasoning from the customer-facing answer text.
+ */
+export function parseAssistantThinking(rawText: string | null | undefined): ParsedAssistantMessage {
+  if (!rawText) return { thinking: null, answer: '' };
+
+  let text = rawText;
+  const thinkBlocks: string[] = [];
+  const closedRegex = /<think>([\s\S]*?)<\/think>/gi;
+
+  let match: RegExpExecArray | null;
+  while ((match = closedRegex.exec(rawText)) !== null) {
+    const chunk = match[1].trim();
+    if (chunk) thinkBlocks.push(chunk);
+  }
+
+  text = text.replace(closedRegex, '').trim();
+
+  // If there's an unclosed <think> tag (e.g. streaming or truncated output)
+  const unclosedIdx = text.search(/<think>/i);
+  if (unclosedIdx !== -1) {
+    const unclosedChunk = text.slice(unclosedIdx + 7).trim();
+    if (unclosedChunk) thinkBlocks.push(unclosedChunk);
+    text = text.slice(0, unclosedIdx).trim();
+  }
+
+  return {
+    thinking: thinkBlocks.length > 0 ? thinkBlocks.join('\n\n---\n\n') : null,
+    answer: text,
+  };
+}
+

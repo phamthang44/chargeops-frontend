@@ -18,6 +18,7 @@ import {
 } from '@chargeops/api';
 import { useToast } from '@chargeops/ui';
 import { getTicketErrorMeta } from '../utils/ticketErrors';
+import { useTicketChatRealtime } from './useTicketChatRealtime';
 
 export type TicketRoleOption = 'owner' | 'admin' | 'staff';
 
@@ -59,6 +60,12 @@ export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions 
     queryKey: ['tickets', 'messages', id, roleOption],
     queryFn: () => api.tickets.messages(id, { role: roleOption }),
     refetchOnWindowFocus: true,
+  });
+
+  // Lắng nghe WebSocket realtime cho tin nhắn chat trong ticket (/topic/tickets/{id}/messages)
+  useTicketChatRealtime({
+    ticketId: id,
+    roleOption,
   });
 
   // Danh tính người xem — dùng để nhận diện "tin của mình" theo authorId,

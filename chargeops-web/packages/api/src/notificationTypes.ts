@@ -127,6 +127,81 @@ export interface NotificationMutationParams {
   stationId?: string;
 }
 
+function getDefaultNotificationText(key: string, params: Record<string, any>, isEn: boolean): string {
+  const code = params.code ? String(params.code) : '';
+  switch (key) {
+    case 'notification.ticket.created.title':
+      return isEn
+        ? `New support ticket ${code}`.trim()
+        : `Phiếu hỗ trợ mới ${code}`.trim();
+    case 'notification.ticket.created.body':
+      return isEn
+        ? `Support ticket ${code}${params.category ? ` (category: ${params.category})` : ''} has been created. Please review and process.`
+        : `Đã ghi nhận phiếu hỗ trợ ${code}${params.category ? ` (danh mục: ${params.category})` : ''}. Vui lòng kiểm tra và xử lý.`;
+    case 'notification.ticket.resolved.title':
+      return isEn
+        ? `Ticket ${code} has been resolved`.trim()
+        : `Phiếu hỗ trợ ${code} đã được giải quyết`.trim();
+    case 'notification.ticket.resolved.body':
+      return isEn
+        ? `Resolution outcome: "${params.result || ''}". Please confirm or report back before ${params.autoCloseAt || ''}.`
+        : `Kết quả xử lý: "${params.result || ''}". Vui lòng xác nhận hoặc báo lại trước ${params.autoCloseAt || ''}.`;
+    case 'notification.ticket.assigned.title':
+      return isEn
+        ? `Ticket ${code} assigned`.trim()
+        : `Phiếu hỗ trợ ${code} đã được phân công`.trim();
+    case 'notification.ticket.assigned.body': {
+      const assignee = params.assignee ? String(params.assignee) : '';
+      const by = params.assigner ? String(params.assigner) : '';
+      return isEn
+        ? `Ticket ${code}${params.station ? ` at station ${params.station}` : ''}${assignee ? ` has been assigned to ${assignee}` : ' has been assigned for resolution'}${by ? ` (by ${by})` : ''}.`
+        : `Phiếu hỗ trợ ${code}${params.station ? ` tại trạm ${params.station}` : ''}${assignee ? ` đã được phân công cho ${assignee}` : ' đã được phân công xử lý'}${by ? ` (bởi ${by})` : ''}.`;
+    }
+    case 'notification.ticket.escalated.title':
+      return isEn
+        ? `Escalated case for ticket ${code}`.trim()
+        : `Yêu cầu khiếu nại ca ${code}`.trim();
+    case 'notification.ticket.escalated.body':
+      return isEn
+        ? `Escalation review requested for ticket ${code} requires Admin evaluation.`
+        : `Ca khiếu nại cho Phiếu hỗ trợ ${code} cần Admin xem xét.`;
+    case 'notification.booking.confirmed.title':
+      return isEn ? 'Booking confirmed' : 'Đặt chỗ đã được xác nhận';
+    case 'notification.booking.cancelled.title':
+      return isEn ? 'Booking cancelled' : 'Đặt chỗ đã bị hủy';
+    case 'notification.booking.no_show.title':
+      return isEn ? 'Booking ended due to no-show' : 'Đặt chỗ đã kết thúc do không check-in';
+    case 'notification.booking.completed.title':
+      return isEn ? 'Booking completed' : 'Đặt chỗ đã hoàn thành';
+    case 'notification.booking.reminder.title':
+      return isEn ? 'Upcoming booking reminder' : 'Sắp đến giờ đặt chỗ';
+    case 'notification.booking.state_message':
+      return isEn
+        ? `Booking ${code}. Please open booking to view current status.`
+        : `Booking ${code}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành.`;
+    case 'notification.refund.pending.title':
+      return isEn ? 'Refund obligation pending' : 'Nghĩa vụ hoàn tiền đang chờ xử lý';
+    case 'notification.refund.pending.body':
+      return isEn
+        ? `Booking ${code}. Refund obligation is held; funds are not yet considered refunded.`
+        : `Booking ${code}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn.`;
+    case 'notification.refund.attempt_failed.title':
+      return isEn ? 'Refund attempt unsuccessful' : 'Lần thực hiện hoàn tiền chưa thành công';
+    case 'notification.refund.attempt_failed.body':
+      return isEn
+        ? `Booking ${code}. Refund obligation is held; funds are not yet considered refunded.`
+        : `Booking ${code}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn.`;
+    case 'notification.refund.succeeded.title':
+      return isEn ? 'Refund succeeded in Simulator' : 'Hoàn tiền đã thành công trong Simulator';
+    case 'notification.refund.succeeded.body':
+      return isEn
+        ? `Booking ${code}. Simulator recorded refund success; this is not a real banking transaction.`
+        : `Booking ${code}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật.`;
+    default:
+      return key;
+  }
+}
+
 /**
  * Resolves a notification text string that may be an i18n key or key|{"param":"value"} JSON payload.
  * If rawText does not start with "notification.", it returns rawText unchanged.
@@ -138,9 +213,16 @@ export function resolveNotificationI18n(
   if (!rawText) return '';
   if (!rawText.startsWith('notification.')) return rawText;
 
+  const isEn =
+    (typeof t === 'function' && ((t as any)?.lng?.startsWith('en') || (t as any)?.language?.startsWith('en'))) ||
+    (typeof window !== 'undefined' && localStorage.getItem('chargeops.lang') === 'en');
+
   const pipeIdx = rawText.indexOf('|');
   if (pipeIdx === -1) {
-    return t(rawText, { ns: 'common', defaultValue: rawText });
+    const fallback = getDefaultNotificationText(rawText, {}, isEn);
+    if (typeof t !== 'function') return fallback;
+    const resolved = t(rawText, { ns: 'common', defaultValue: fallback });
+    return !resolved || resolved === rawText ? fallback : resolved;
   }
 
   const key = rawText.substring(0, pipeIdx);
@@ -152,13 +234,34 @@ export function resolveNotificationI18n(
     // If not valid JSON, fallback to raw key
   }
 
+  if (params.category && typeof params.category === 'string') {
+    const rawCategory = params.category.toUpperCase();
+    const categoryLabelsVi: Record<string, string> = {
+      CHARGING_ISSUE: 'Sự cố sạc',
+      BOOKING: 'Đặt chỗ',
+      PAYMENT: 'Thanh toán',
+      ACCOUNT: 'Tài khoản',
+      OTHER: 'Khác',
+      HARDWARE: 'Thiết bị phần cứng',
+      SYSTEM: 'Hệ thống',
+    };
+    const categoryLabelsEn: Record<string, string> = {
+      CHARGING_ISSUE: 'Charging Issue',
+      BOOKING: 'Booking',
+      PAYMENT: 'Payment',
+      ACCOUNT: 'Account',
+      OTHER: 'Other',
+      HARDWARE: 'Hardware',
+      SYSTEM: 'System',
+    };
+    params.category = isEn
+      ? (categoryLabelsEn[rawCategory] ?? params.category)
+      : (categoryLabelsVi[rawCategory] ?? params.category);
+  }
+
   if (params.autoCloseAt && typeof params.autoCloseAt === 'string') {
     const d = new Date(params.autoCloseAt);
     if (!isNaN(d.getTime())) {
-      const isEn =
-        (typeof t === 'function' && ((t as any)?.lng?.startsWith('en') || (t as any)?.language?.startsWith('en'))) ||
-        (typeof window !== 'undefined' && localStorage.getItem('chargeops.lang') === 'en');
-
       if (isEn) {
         const time = d.toLocaleTimeString('en-US', {
           timeZone: 'Asia/Ho_Chi_Minh',
@@ -191,5 +294,8 @@ export function resolveNotificationI18n(
     }
   }
 
-  return t(key, { ns: 'common', ...params, defaultValue: key });
+  const fallback = getDefaultNotificationText(key, params, isEn);
+  if (typeof t !== 'function') return fallback;
+  const resolved = t(key, { ns: 'common', ...params, defaultValue: fallback });
+  return !resolved || resolved === key ? fallback : resolved;
 }

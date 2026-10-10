@@ -73,9 +73,14 @@ export function AppButton({
     spring(iconShift, 0);
   };
 
+  const flattenedStyle = StyleSheet.flatten(style);
+  const customRadius = flattenedStyle?.borderRadius;
+  const customHeight = flattenedStyle?.height;
+
   return (
     <Animated.View
       style={[
+        styles.container,
         isSolid
           ? {
               backgroundColor: solidBg,
@@ -101,7 +106,11 @@ export function AppButton({
         disabled={isDisabled}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={styles.base}
+        style={[
+          styles.base,
+          customRadius !== undefined && { borderRadius: customRadius },
+          customHeight !== undefined && { height: customHeight },
+        ]}
       >
         {loading ? (
           <ActivityIndicator color={isSolid ? '#FFFFFF' : themeColors.primary} />

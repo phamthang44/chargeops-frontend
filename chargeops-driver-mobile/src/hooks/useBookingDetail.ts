@@ -2,6 +2,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useNotificationSocket } from '@/hooks/useNotificationSocket';
 import {
   createCheckout,
   getBookingById,
@@ -204,16 +205,39 @@ export function useBookingDetail(bookingId: string) {
     return () => clearInterval(id);
   }, [booking, silentRefresh]);
 
-  // Smart Polling: auto-refresh based on lifecycle state
+  // Listen to STOMP notifications on /user/queue/notifications for immediate real-time updates
+  useNotificationSocket(
+    useCallback(
+      (hint) => {
+        if (hint.type === 'NOTIFICATION_CREATED') {
+          silentRefresh();
+        }
+      },
+      [silentRefresh],
+    ),
+  );
+
+  // Smart Polling: auto-refresh based on lifecycle state and in-flight refund processing
   useEffect(() => {
     if (!isFocused || !booking) return;
 
-    if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED' || booking.status === 'EXPIRED') {
+    // Keep polling if booking is cancelled but refund is still in-flight (PENDING / PROCESSING)
+    const hasUnresolvedRefund =
+      booking.status === 'CANCELLED' &&
+      ((booking.refunds && booking.refunds.some((r) => r.status === 'PENDING' || r.status === 'PROCESSING')) ||
+        ((booking.refundAmount ?? 0) > 0 && (!booking.refunds || booking.refunds.length === 0)));
+
+    if (
+      (booking.status === 'COMPLETED' || booking.status === 'CANCELLED' || booking.status === 'EXPIRED') &&
+      !hasUnresolvedRefund
+    ) {
       return;
     }
 
     const intervalMs =
-      booking.status === 'PENDING'
+      hasUnresolvedRefund
+        ? 2500 // Fast polling while refund is being settled
+        : booking.status === 'PENDING'
         ? 4000
         : booking.status === 'CHARGING'
         ? 5000
@@ -224,7 +248,13 @@ export function useBookingDetail(bookingId: string) {
     }, intervalMs);
 
     return () => clearInterval(pollId);
-  }, [isFocused, booking?.status, silentRefresh]);
+  }, [
+    isFocused,
+    booking?.status,
+    booking?.refunds,
+    booking?.refundAmount,
+    silentRefresh,
+  ]);
 
   // Derived properties
   const startMs = booking ? new Date(booking.startAt).getTime() : 0;

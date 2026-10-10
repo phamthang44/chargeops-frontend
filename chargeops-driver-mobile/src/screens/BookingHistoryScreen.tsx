@@ -19,6 +19,7 @@ import {
 import { AppHeader, EmptyState, HeaderActionBtn, LifetimeStatsCard, SettingsModal, useTabBarInset, useTabBarScroll } from '@/components';
 import { HistoryBookingCard } from '@/components/HistoryBookingCard';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useNotificationSocket } from '@/hooks/useNotificationSocket';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   BOOKING_PAGE_SIZE,
@@ -126,10 +127,39 @@ export function BookingHistoryScreen() {
       getBookingStats().then((data) => {
         if (active) setStats(data);
       });
+      getBookingHistory({ query, status: filter }, { limit: BOOKING_PAGE_SIZE })
+        .then((page) => {
+          if (!active) return;
+          setItems(page.items);
+          setCursor(page.nextCursor);
+          setTotal(page.total);
+          updateCountsSafely(page.counts, filter, page.total);
+        })
+        .catch(() => {});
       return () => {
         active = false;
       };
-    }, []),
+    }, [query, filter]),
+  );
+
+  // Tự động làm mới lịch sử và thống kê khi có thông báo mới (ví dụ: hoàn tiền thành công)
+  useNotificationSocket(
+    useCallback(
+      (hint) => {
+        if (hint.type === 'NOTIFICATION_CREATED') {
+          getBookingStats().then(setStats).catch(() => {});
+          getBookingHistory({ query, status: filter }, { limit: BOOKING_PAGE_SIZE })
+            .then((page) => {
+              setItems(page.items);
+              setCursor(page.nextCursor);
+              setTotal(page.total);
+              updateCountsSafely(page.counts, filter, page.total);
+            })
+            .catch(() => {});
+        }
+      },
+      [query, filter],
+    ),
   );
 
   useEffect(() => {

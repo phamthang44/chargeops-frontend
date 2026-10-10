@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackButton } from '@/components/AppBackButton';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -13,19 +14,22 @@ interface TicketHeaderProps {
 export function TicketHeader({ onBack }: TicketHeaderProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
-      <AppBackButton onPress={onBack} />
-      <View style={styles.headerTitleBlock}>
-        <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
-          {t('ticket.create.title', 'Báo sự cố & Hỗ trợ')}
-        </Text>
-        <Text style={[styles.headerSubtitle, { color: themeColors.primary }]}>
-          {t('ticket.create.subtitle', 'TRỰC TUYẾN 24/7')}
-        </Text>
+    <View style={{ backgroundColor: themeColors.surface, paddingTop: insets.top }}>
+      <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
+        <AppBackButton onPress={onBack} />
+        <View style={styles.headerTitleBlock}>
+          <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
+            {t('ticket.create.title', 'Báo sự cố & Hỗ trợ')}
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: themeColors.primary }]}>
+            {t('ticket.create.subtitle', 'TRỰC TUYẾN 24/7')}
+          </Text>
+        </View>
+        <View style={styles.headerRightAction} />
       </View>
-      <View style={styles.headerRightAction} />
     </View>
   );
 }

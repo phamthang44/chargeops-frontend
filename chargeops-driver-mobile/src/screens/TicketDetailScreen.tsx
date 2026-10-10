@@ -8,6 +8,7 @@ import {
   AppState,
   type AppStateStatus,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,7 +18,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackButton } from '@/components/AppBackButton';
 import { AppButton } from '@/components/AppButton';
@@ -97,6 +98,22 @@ export function TicketDetailScreen() {
 
   const flatListRef = useRef<FlatList>(null);
   const prevMessagesCountRef = useRef<number>(0);
+
+  const insets = useSafeAreaInsets();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardOpen(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardOpen(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const bottomInset = keyboardOpen ? 0 : insets.bottom;
 
   const fetchEscalation = useCallback(async () => {
     try {
@@ -479,28 +496,34 @@ export function TicketDetailScreen() {
   const isClosedGeneric = isClosed && !isReporterConfirmed && !isAutoClosedNoResponse;
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]} edges={['top', 'bottom']}>
-      {/* Universal Sub-Screen Clean Navigation Header */}
-      <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
-        <AppBackButton onPress={() => navigation.goBack()} />
+    <View style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]}>
+      <View
+        style={{
+          backgroundColor: themeColors.surface,
+          paddingTop: insets.top,
+        }}
+      >
+        <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
+          <AppBackButton onPress={() => navigation.goBack()} />
 
-        <View style={styles.headerTitleBlock}>
-          <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
-            {ticket.ticketCode || (ticket.ticketId ? `TKT-${String(ticket.ticketId).slice(0, 8).toUpperCase()}` : t('ticket.detail.titleFallback', 'Phiếu hỗ trợ'))}
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: themeColors.textMuted }]} numberOfLines={1}>
-            {ticket.subject || t('ticket.detail.subjectFallback', 'Chi tiết sự cố')}
-          </Text>
-        </View>
+          <View style={styles.headerTitleBlock}>
+            <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
+              {ticket.ticketCode || (ticket.ticketId ? `TKT-${String(ticket.ticketId).slice(0, 8).toUpperCase()}` : t('ticket.detail.titleFallback', 'Phiếu hỗ trợ'))}
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: themeColors.textMuted }]} numberOfLines={1}>
+              {ticket.subject || t('ticket.detail.subjectFallback', 'Chi tiết sự cố')}
+            </Text>
+          </View>
 
-        <View style={styles.headerRightAction}>
-          {isClosed || isResolved ? (
-            <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
-          ) : ticket.isEscalated || (escalation?.ticketId && !escalation.resolvedAt) ? (
-            <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang được Admin xem xét')} dot />
-          ) : (
-            <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
-          )}
+          <View style={styles.headerRightAction}>
+            {isClosed || isResolved ? (
+              <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+            ) : ticket.isEscalated || (escalation?.ticketId && !escalation.resolvedAt) ? (
+              <StatusBadge variant="info" label={t('ticket.escalation.escalatedBadge', 'Đang được Admin xem xét')} dot />
+            ) : (
+              <StatusBadge variant={statusMeta.variant} label={statusLabel} dot />
+            )}
+          </View>
         </View>
       </View>
 
@@ -698,7 +721,11 @@ export function TicketDetailScreen() {
           <View
             style={[
               styles.closedBar,
-              { backgroundColor: themeColors.surface, borderTopColor: themeColors.border },
+              {
+                backgroundColor: themeColors.surface,
+                borderTopColor: themeColors.border,
+                paddingBottom: bottomInset + 16,
+              },
             ]}
           >
             <Ionicons name="lock-closed-outline" size={18} color={themeColors.textMuted} />
@@ -707,7 +734,16 @@ export function TicketDetailScreen() {
             </Text>
           </View>
         ) : isResolved ? (
-          <View style={[styles.resolvedInputNotice, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+          <View
+            style={[
+              styles.resolvedInputBar,
+              {
+                backgroundColor: themeColors.surface,
+                borderTopColor: themeColors.border,
+                paddingBottom: bottomInset + 14,
+              },
+            ]}
+          >
             <Text style={{ color: themeColors.textMuted, textAlign: 'center' }}>
               {t('ticket.continue.inputNotice', 'Chọn “Vấn đề vẫn còn” ở phía trên để mở lại phiếu và mô tả sự cố.')}
             </Text>
@@ -716,7 +752,11 @@ export function TicketDetailScreen() {
           <View
             style={[
               styles.inputBar,
-              { backgroundColor: themeColors.surface, borderTopColor: themeColors.border },
+              {
+                backgroundColor: themeColors.surface,
+                borderTopColor: themeColors.border,
+                paddingBottom: bottomInset + spacing.sm + 2,
+              },
             ]}
           >
             <TextInput
@@ -775,7 +815,7 @@ export function TicketDetailScreen() {
         onSubmit={handleContinueTicket}
       />
       {sheets}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -923,7 +963,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingTop: spacing.sm + 2,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
@@ -950,13 +990,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   closedText: {
     fontSize: 13.5,
     lineHeight: 20,
     textAlign: 'center',
+  },
+  resolvedInputBar: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 16,
+    paddingTop: 14,
   },
   resolvedInputNotice: {
     borderTopWidth: StyleSheet.hairlineWidth,

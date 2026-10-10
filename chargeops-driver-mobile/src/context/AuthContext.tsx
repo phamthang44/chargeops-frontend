@@ -26,7 +26,7 @@ import {
   updateCurrentProfile,
 } from '@/services/profileService';
 import { setStationApiTokenProvider } from '@/services/stationService';
-import { resetNotificationStore } from '@/services/notificationService';
+import { resetNotificationStore, setNotificationIdentity } from '@/services/notificationService';
 
 export type ProfileStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -138,8 +138,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setStationApiTokenProvider(() => session?.tokens.accessToken ?? null);
+    setNotificationIdentity(session?.user.id ?? null);
     return () => {
       setStationApiTokenProvider(() => null);
+      setNotificationIdentity(null);
     };
   }, [session]);
 
@@ -305,6 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshGenerationRef.current += 1;
         refreshPromiseRef.current = null;
         sessionRef.current = nextSession;
+        setNotificationIdentity(nextSession.user.id);
         setProfile(null);
         setProfileStatus('idle');
         setProfileError(null);
@@ -316,7 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshPromiseRef.current = null;
         sessionRef.current = null;
         // Clear in-memory notification cache immediately — prevents stale data leaking to next session.
-        resetNotificationStore();
+        void resetNotificationStore();
         setProfile(null);
         setProfileStatus('idle');
         setProfileError(null);

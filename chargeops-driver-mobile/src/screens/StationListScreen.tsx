@@ -69,7 +69,6 @@ export function StationListScreen() {
 
     // Notifications & quick booking
     unreadCount,
-    setUnreadCount,
     quickBookingId,
     handleQuickBook,
     onNotificationNavigate,
@@ -194,7 +193,6 @@ export function StationListScreen() {
         visible={notifOpen}
         onClose={() => setNotifOpen(false)}
         onNavigate={(n) => onNotificationNavigate(n, navigation)}
-        onUnreadChange={setUnreadCount}
       />
 
       {/* Settings modal (theme, language, support & demo simulation) */}

@@ -133,6 +133,9 @@ export function AppButton({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    borderRadius: radius.md
+  },
   base: {
     height: 48,
     borderRadius: radius.md,

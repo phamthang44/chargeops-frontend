@@ -18,12 +18,8 @@ import {
 import { BottomSheet } from '@/components/BottomSheet';
 import { EmptyState } from '@/components/illustrations/EmptyState';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useNotifications } from '@/context/NotificationContext';
 import {
-  clearAllNotifications,
-  deleteNotification,
-  getNotifications,
-  markAllNotificationsAsRead,
-  markNotificationAsRead,
   resolveNotificationI18n,
   type AppNotification,
 } from '@/services/notificationService';
@@ -262,22 +258,23 @@ export function NotificationSheet({
 }: NotificationSheetProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
-  const [items, setItems] = useState<AppNotification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    notifications: items,
+    unreadCount,
+    loading,
+    refreshNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification: deleteItem,
+    clearAll,
+  } = useNotifications();
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    const data = await getNotifications();
-    setItems(data);
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
-    if (visible) fetchItems();
-  }, [visible, fetchItems]);
-
-  const unreadCount = items.filter((i) => !i.read).length;
+    if (visible) {
+      void refreshNotifications();
+    }
+  }, [visible, refreshNotifications]);
 
   useEffect(() => {
     if (!loading) onUnreadChange?.(unreadCount);
@@ -290,31 +287,27 @@ export function NotificationSheet({
     return items;
   }, [items, activeTab]);
 
-  /* ---- Optimistic Handlers ---- */
+  /* ---- Handlers ---- */
 
   const handleMarkAllRead = async () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const updated = await markAllNotificationsAsRead();
-    setItems(updated);
+    await markAllAsRead();
   };
 
   const handleClearAll = async () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const updated = await clearAllNotifications();
-    setItems(updated);
+    await clearAll();
   };
 
   const handleDelete = async (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const updated = await deleteNotification(id);
-    setItems(updated);
+    await deleteItem(id);
   };
 
   const handlePress = async (notification: AppNotification) => {
-    // 1. Optimistically mark as read
+    // 1. Mark as read
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const updated = await markNotificationAsRead(notification.id);
-    setItems(updated);
+    await markAsRead(notification.id);
 
     // 2. Navigate if linked
     if (notification.referenceId && onNavigate) {

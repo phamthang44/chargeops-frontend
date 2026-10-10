@@ -33,7 +33,8 @@ import { usePreferences } from '@/context/PreferencesContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import type { RootStackParamList } from '@/navigation/types';
-import { getUnreadCount, type AppNotification } from '@/services/notificationService';
+import { useNotifications } from '@/context/NotificationContext';
+import type { AppNotification } from '@/services/notificationService';
 import { getNearbyStations, type StationFilter } from '@/services/stationService';
 import { executeQuickBook } from '@/utils/quickBook';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -60,7 +61,7 @@ export function MapScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useNotifications();
 
   const [filterState, setFilterState] = useState<DiscoveryFilterState>({
     connectorTypes: [],
@@ -70,16 +71,6 @@ export function MapScreen() {
     openOnly: false,
     maxDistanceKm: undefined,
   });
-
-  useEffect(() => {
-    let active = true;
-    getUnreadCount().then((n) => {
-      if (active) setUnreadCount(n);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const onNotificationNavigate = (n: AppNotification) => {
     if (!n.referenceId && !n.target) return;
@@ -255,7 +246,6 @@ export function MapScreen() {
         visible={notifOpen}
         onClose={() => setNotifOpen(false)}
         onNavigate={onNotificationNavigate}
-        onUnreadChange={setUnreadCount}
       />
 
       {/* Settings modal */}

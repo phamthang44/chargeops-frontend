@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { resolveWsUrl } from '@/utils/networkHost';
@@ -29,7 +29,7 @@ export function useStompStatus(): StompStatus {
 
 /**
  * App-level singleton STOMP client for the hardware-change path
- * (`/topic/stations/{id}/hardware`).
+ * (`/topic/stations/{id}/hardware`) and notification queue (`/user/queue/notifications`).
  *
  * - One `Client` for the whole app; screens register topics through the pure
  *   `stompTopicRegistry`, which holds a single wire subscription per topic.
@@ -37,7 +37,9 @@ export function useStompStatus(): StompStatus {
  *   fetched (and refreshed single-flight) in `beforeConnect` on every attempt.
  * - Connection only runs while authenticated (non-mock), the app is active and
  *   a valid broker URL exists; everything else is a clean deactivate.
- * - Debug logging is fully disabled: CONNECT frames contain the raw JWT.
+ * - On Native (Expo Go iOS/Android), uses `webSocketFactory` with explicit Origin header,
+ *   `appendMissingNULLonIncoming: true`, and `forceBinaryWSFrames: true` to prevent
+ *   native bridge null-byte truncation issues.
  */
 export function StompProvider({ children }: { children: ReactNode }) {
   const { session, initializing, ensureFreshAccessToken } = useAuth();
@@ -58,6 +60,7 @@ export function StompProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const client = useMemo(() => {
+    const protocols = ['v12.stomp', 'v11.stomp', 'v10.stomp'];
     const instance = new Client({
       ...(brokerURL ? { brokerURL } : {}),
       reconnectDelay: 5_000,
@@ -67,8 +70,31 @@ export function StompProvider({ children }: { children: ReactNode }) {
       // Server heartbeats are phased from broker start; tolerate up to 30 s
       // before treating the link as dead (backend test measured <= 28 s).
       heartbeatToleranceMultiplier: 3,
-      // Never log frames: CONNECT carries the raw access token.
-      debug: () => {},
+      // React Native mobile compatibility: prevents parser stall when native bridge trims NULL
+      appendMissingNULLonIncoming: true,
+      // Transmit frames as binary on native to avoid C++ bridge null-character corruption
+      forceBinaryWSFrames: Platform.OS !== 'web',
+      webSocketFactory: () => {
+        if (!brokerURL) {
+          throw new Error('STOMP brokerURL is not configured');
+        }
+        if (Platform.OS === 'web') {
+          return new WebSocket(brokerURL, protocols);
+        }
+        // React Native (iOS / Android) native WebSocket supports custom headers:
+        return new (globalThis.WebSocket as any)(brokerURL, protocols, {
+          headers: {
+            Origin: 'https://thang.tail704409.ts.net',
+          },
+        });
+      },
+      // Sanitized debug logging: never leak raw JWT access tokens
+      debug: (msg: string) => {
+        if (__DEV__) {
+          const sanitized = msg.replace(/Bearer\s+[A-Za-z0-9-_=.]+/g, 'Bearer [REDACTED]');
+          console.log('[STOMP]', sanitized);
+        }
+      },
       beforeConnect: async (pending) => {
         const token = await ensureFreshAccessToken();
         if (!token) {
@@ -106,6 +132,9 @@ export function StompProvider({ children }: { children: ReactNode }) {
         console.log('[StompProvider] WebSocket closed, code:', evt?.code, 'reason:', evt?.reason);
         setConnected(false);
         detachWire();
+      },
+      onWebSocketError: (evt) => {
+        console.warn('[StompProvider] WebSocket error:', evt);
       },
       onStompError: (frame) => {
         console.warn(

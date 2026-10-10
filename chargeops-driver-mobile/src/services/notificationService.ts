@@ -10,6 +10,13 @@
  */
 
 import { apiBaseUrl, isMockMode, resolveAccessToken } from './stationService';
+import {
+  clearCachedNotifications,
+  loadCachedNotifications,
+  loadCachedUnreadCount,
+  saveCachedNotifications,
+  saveCachedUnreadCount,
+} from './notificationStorage';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -86,6 +93,22 @@ function getDefaultNotificationText(key: string, params: Record<string, any>, is
       return isEn
         ? `Escalation review requested for ticket ${code} requires Admin evaluation.`
         : `Ca khiếu nại cho Phiếu hỗ trợ ${code} cần Admin xem xét.`;
+    case 'notification.ticket.closed.title':
+      return isEn
+        ? `Ticket ${code} closed`.trim()
+        : `Phiếu hỗ trợ ${code} đã đóng`.trim();
+    case 'notification.ticket.closed.body':
+      return isEn
+        ? `Ticket ${code} has been closed.${params.reason ? ` Note: ${params.reason}` : ''}`
+        : `Phiếu hỗ trợ ${code} đã được xác nhận đóng.${params.reason ? ` Ghi chú: ${params.reason}` : ''}`;
+    case 'notification.ticket.reopened.title':
+      return isEn
+        ? `Ticket ${code} reopened`.trim()
+        : `Phiếu hỗ trợ ${code} được mở lại`.trim();
+    case 'notification.ticket.reopened.body':
+      return isEn
+        ? `Ticket ${code} has been reopened for further action.${params.reason ? ` Reason: ${params.reason}` : ''}`
+        : `Phiếu hỗ trợ ${code} đã được mở lại để tiếp tục giải quyết.${params.reason ? ` Lý do: ${params.reason}` : ''}`;
     case 'notification.booking.confirmed.title':
       return isEn ? 'Booking confirmed' : 'Đặt chỗ đã được xác nhận';
     case 'notification.booking.cancelled.title':
@@ -224,14 +247,14 @@ export function resolveNotificationI18n(
 /*  Clean business seed data (compliant with BKG-066 / #58)           */
 /* ------------------------------------------------------------------ */
 
-const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
+export const MOCK_DRIVER_NOTIFICATIONS: AppNotification[] = [
   {
     id: 'notif-drv-1',
     type: 'booking',
     title: 'notification.booking.confirmed.title',
     body: 'notification.booking.state_message|{"code":"BKG-HN-8821"}',
     createdAt: new Date(Date.now() - 10 * 60_000).toISOString(),
-    read: false,
+    read: true,
     referenceId: '00000000-0000-4000-8000-000000000201',
     category: 'booking',
     eventType: 'BOOKING_CONFIRMED',
@@ -242,7 +265,7 @@ const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
     title: 'notification.booking.reminder.title',
     body: 'notification.booking.state_message|{"code":"BKG-HN-8821"}',
     createdAt: new Date(Date.now() - 25 * 60_000).toISOString(),
-    read: false,
+    read: true,
     referenceId: '00000000-0000-4000-8000-000000000201',
     category: 'booking',
     eventType: 'BOOKING_REMINDER',
@@ -254,7 +277,7 @@ const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
     body: 'notification.refund.succeeded.body|{"code":"BKG-HN-8821"}',
     createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
     read: true,
-    referenceId: '00000000-0000-4000-8000-000000000201', // same booking as the confirmed/reminder seeds
+    referenceId: '00000000-0000-4000-8000-000000000201',
     category: 'finance',
     eventType: 'REFUND_SUCCEEDED',
     target: { type: 'OPEN_BOOKING', bookingId: '00000000-0000-4000-8000-000000000201' },
@@ -276,15 +299,30 @@ const INITIAL_DRIVER_NOTIFICATIONS: AppNotification[] = [
 /*  In-memory store & Identity isolation                              */
 /* ------------------------------------------------------------------ */
 
-let notificationsList = [...INITIAL_DRIVER_NOTIFICATIONS];
+let notificationsList: AppNotification[] = [];
 let lastLoadedIdentity: string | null = null;
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function isUuid(id: string): boolean {
+  return UUID_REGEX.test(id);
+}
+
+/**
+ * Configure current active identity for scoping cached notifications.
+ */
+export function setNotificationIdentity(identityId?: string | null) {
+  lastLoadedIdentity = identityId ?? null;
+}
 
 /**
  * Reset local store when user logs out or switches accounts to prevent cache leaks.
  */
-export function resetNotificationStore(newIdentityId?: string | null) {
-  notificationsList = [...INITIAL_DRIVER_NOTIFICATIONS];
+export async function resetNotificationStore(newIdentityId?: string | null) {
+  notificationsList = [];
   lastLoadedIdentity = newIdentityId ?? null;
+  if (!newIdentityId) {
+    await clearCachedNotifications();
+  }
 }
 
 function mapBackendToAppNotification(raw: any): AppNotification {
@@ -330,8 +368,10 @@ function mapBackendToAppNotification(raw: any): AppNotification {
 /* ------------------------------------------------------------------ */
 
 /** Fetch all notifications for the current driver. */
-export async function getNotifications(): Promise<AppNotification[]> {
+export async function getNotifications(userId?: string | null): Promise<AppNotification[]> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
+
   if (!isMockMode() && token) {
     try {
       const res = await fetch(`${apiBaseUrl}/api/v1/notifications?context=driver&size=50`, {
@@ -344,21 +384,38 @@ export async function getNotifications(): Promise<AppNotification[]> {
         const json = await res.json();
         const rawItems = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
         notificationsList = rawItems.map(mapBackendToAppNotification);
+        await saveCachedNotifications(effectiveUserId, notificationsList);
+        const unreadCount = notificationsList.filter((n) => !n.read).length;
+        await saveCachedUnreadCount(effectiveUserId, unreadCount);
         return [...notificationsList];
+      } else {
+        console.warn('[notificationService] Failed to fetch notifications, HTTP status:', res.status);
       }
-    } catch {
-      // Fallback to local memory list on network disconnect
+    } catch (err) {
+      console.warn('[notificationService] Network error fetching notifications:', err);
     }
   }
 
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...notificationsList]), 80);
-  });
+  if (isMockMode()) {
+    if (notificationsList.length === 0) {
+      notificationsList = [...MOCK_DRIVER_NOTIFICATIONS];
+    }
+    return [...notificationsList];
+  }
+
+  // Fallback to local persistent cache — never fallback to static unread mock!
+  const cached = await loadCachedNotifications(effectiveUserId);
+  if (cached.length > 0) {
+    notificationsList = cached;
+  }
+  return [...notificationsList];
 }
 
 /** How many notifications are unread — drives the badge on the bell. */
-export async function getUnreadCount(): Promise<number> {
+export async function getUnreadCount(userId?: string | null): Promise<number> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
+
   if (!isMockMode() && token) {
     try {
       const res = await fetch(`${apiBaseUrl}/api/v1/notifications/unread-count?context=driver`, {
@@ -370,84 +427,121 @@ export async function getUnreadCount(): Promise<number> {
       if (res.ok) {
         const json = await res.json();
         const count = Number(json?.data?.count ?? json?.count ?? 0);
+        await saveCachedUnreadCount(effectiveUserId, count);
         return count;
+      } else {
+        console.warn('[notificationService] Failed to fetch unread count, HTTP status:', res.status);
       }
-    } catch {
-      // Fallback to local count on network error
+    } catch (err) {
+      console.warn('[notificationService] Network error fetching unread count:', err);
     }
   }
 
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(notificationsList.filter((n) => !n.read).length), 80);
-  });
+  if (isMockMode()) {
+    const list = notificationsList.length > 0 ? notificationsList : MOCK_DRIVER_NOTIFICATIONS;
+    return list.filter((n) => !n.read).length;
+  }
+
+  // Fallback to local persistent cache — zero if not cached yet
+  return await loadCachedUnreadCount(effectiveUserId);
 }
 
 /** Mark every notification as read. */
-export async function markAllNotificationsAsRead(): Promise<AppNotification[]> {
+export async function markAllNotificationsAsRead(userId?: string | null): Promise<AppNotification[]> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
+
   if (!isMockMode() && token) {
     try {
-      await fetch(`${apiBaseUrl}/api/v1/notifications/read-all?context=driver`, {
+      const res = await fetch(`${apiBaseUrl}/api/v1/notifications/read-all?context=driver`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-    } catch {
-      // Ignore network errors on background mutations
+      if (!res.ok) {
+        console.warn('[notificationService] markAllNotificationsAsRead HTTP status:', res.status);
+      }
+    } catch (err) {
+      console.warn('[notificationService] markAllNotificationsAsRead network error:', err);
     }
   }
 
   notificationsList = notificationsList.map((n) => ({ ...n, read: true }));
-  return new Promise((resolve) => resolve([...notificationsList]));
+  await saveCachedNotifications(effectiveUserId, notificationsList);
+  await saveCachedUnreadCount(effectiveUserId, 0);
+
+  return [...notificationsList];
 }
 
 /** Mark a single notification as read. */
-export async function markNotificationAsRead(id: string): Promise<AppNotification[]> {
+export async function markNotificationAsRead(id: string, userId?: string | null): Promise<AppNotification[]> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
-  if (!isMockMode() && token) {
+
+  if (!isMockMode() && token && isUuid(id)) {
     try {
-      await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/read?context=driver`, {
+      const res = await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/read?context=driver`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-    } catch {
-      // Ignore network errors on background mutations
+      if (!res.ok) {
+        console.warn('[notificationService] markNotificationAsRead HTTP status:', res.status);
+      }
+    } catch (err) {
+      console.warn('[notificationService] markNotificationAsRead network error:', err);
     }
   }
 
   notificationsList = notificationsList.map((n) => (n.id === id ? { ...n, read: true } : n));
-  return new Promise((resolve) => resolve([...notificationsList]));
+  await saveCachedNotifications(effectiveUserId, notificationsList);
+  const unreadCount = notificationsList.filter((n) => !n.read).length;
+  await saveCachedUnreadCount(effectiveUserId, unreadCount);
+
+  return [...notificationsList];
 }
 
 /** Dismiss/delete a single notification. */
-export async function deleteNotification(id: string): Promise<AppNotification[]> {
+export async function deleteNotification(id: string, userId?: string | null): Promise<AppNotification[]> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
-  if (!isMockMode() && token) {
+
+  if (!isMockMode() && token && isUuid(id)) {
     try {
-      await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/dismiss?context=driver`, {
+      const res = await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/dismiss?context=driver`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-    } catch {
-      // Ignore network errors on background mutations
+      if (!res.ok) {
+        console.warn('[notificationService] deleteNotification HTTP status:', res.status);
+      }
+    } catch (err) {
+      console.warn('[notificationService] deleteNotification network error:', err);
     }
   }
 
   notificationsList = notificationsList.filter((n) => n.id !== id);
-  return new Promise((resolve) => resolve([...notificationsList]));
+  await saveCachedNotifications(effectiveUserId, notificationsList);
+  const unreadCount = notificationsList.filter((n) => !n.read).length;
+  await saveCachedUnreadCount(effectiveUserId, unreadCount);
+
+  return [...notificationsList];
 }
 
 /** Remove every notification from the list. */
-export async function clearAllNotifications(): Promise<AppNotification[]> {
-  await markAllNotificationsAsRead();
+export async function clearAllNotifications(userId?: string | null): Promise<AppNotification[]> {
+  const effectiveUserId = userId ?? lastLoadedIdentity;
+  await markAllNotificationsAsRead(effectiveUserId);
   notificationsList = [];
-  return new Promise((resolve) => resolve([]));
+  await saveCachedNotifications(effectiveUserId, []);
+  await saveCachedUnreadCount(effectiveUserId, 0);
+  return [];
 }
+

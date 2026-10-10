@@ -12,7 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackButton } from '@/components/AppBackButton';
 import { AppButton } from '@/components/AppButton';
@@ -31,6 +31,7 @@ export function MyTicketsScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const { themeColors } = usePreferences();
+  const insets = useSafeAreaInsets();
 
   const filterTabs = useMemo<{ key: TicketStatus | 'ALL'; label: string }[]>(() => [
     { key: 'ALL', label: t('ticket.filter.all', 'Tất cả') },
@@ -82,31 +83,37 @@ export function MyTicketsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]} edges={['top', 'bottom']}>
-      {/* Universal Sub-Screen Clean Navigation Header */}
-      <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
-        <AppBackButton onPress={() => navigation.goBack()} />
+    <View
+      style={[
+        styles.root,
+        { backgroundColor: themeColors.surfaceAlt, paddingBottom: insets.bottom },
+      ]}
+    >
+      <View style={{ backgroundColor: themeColors.surface, paddingTop: insets.top }}>
+        <View style={[styles.header, { borderBottomColor: themeColors.border, backgroundColor: themeColors.surface }]}>
+          <AppBackButton onPress={() => navigation.goBack()} />
 
-        <View style={styles.headerTitleBlock}>
-          <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
-            {t('ticket.list.title', 'Phiếu hỗ trợ của tôi')}
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: themeColors.textMuted }]}>
-            {tickets.length > 0
-              ? t('ticket.list.countRecorded', { count: tickets.length })
-              : t('ticket.list.emptySubtitleHeader', 'Trung tâm sự cố & khiếu nại')}
-          </Text>
+          <View style={styles.headerTitleBlock}>
+            <Text style={[styles.headerTitle, { color: themeColors.textStrong }]} numberOfLines={1}>
+              {t('ticket.list.title', 'Phiếu hỗ trợ của tôi')}
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: themeColors.textMuted }]}>
+              {tickets.length > 0
+                ? t('ticket.list.countRecorded', { count: tickets.length })
+                : t('ticket.list.emptySubtitleHeader', 'Trung tâm sự cố & khiếu nại')}
+            </Text>
+          </View>
+
+          <GlassButton
+            size={40}
+            glassEffectStyle="regular"
+            fallbackColor={themeColors.surfaceAlt}
+            accessibilityLabel={t('ticket.list.newTicket', 'Tạo phiếu mới')}
+            onPress={() => navigation.navigate('CreateTicket', {})}
+          >
+            <Ionicons name="add" size={24} color={themeColors.primary} />
+          </GlassButton>
         </View>
-
-        <GlassButton
-          size={40}
-          glassEffectStyle="regular"
-          fallbackColor={themeColors.surfaceAlt}
-          accessibilityLabel={t('ticket.list.newTicket', 'Tạo phiếu mới')}
-          onPress={() => navigation.navigate('CreateTicket', {})}
-        >
-          <Ionicons name="add" size={24} color={themeColors.primary} />
-        </GlassButton>
       </View>
 
       {/* Filter Tabs Horizontal Scroll */}
@@ -195,7 +202,7 @@ export function MyTicketsScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

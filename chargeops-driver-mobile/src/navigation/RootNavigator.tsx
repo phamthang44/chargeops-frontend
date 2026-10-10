@@ -1,7 +1,9 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, View } from 'react-native';
+
+import { InAppNotificationToast } from '@/components/notifications/InAppNotificationToast';
 
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -37,6 +39,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * screens never need to imperatively navigate to/from the tabs.
  */
 export function RootNavigator() {
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const { t } = useTranslation();
   const { initializing, session, profile, profileStatus } = useAuth();
   const { themeColors } = usePreferences();
@@ -71,7 +74,7 @@ export function RootNavigator() {
   const profileCompleted = profile?.profileCompleted === true;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         initialRouteName={
           session
@@ -210,6 +213,7 @@ export function RootNavigator() {
           </>
         )}
       </Stack.Navigator>
+      <InAppNotificationToast navigationRef={navigationRef} />
     </NavigationContainer>
   );
 }

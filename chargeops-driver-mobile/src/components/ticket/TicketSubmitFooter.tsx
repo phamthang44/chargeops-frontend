@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Keyboard, Platform, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components/AppButton';
 import { usePreferences } from '@/context/PreferencesContext';
@@ -17,8 +18,23 @@ interface TicketSubmitFooterProps {
 export function TicketSubmitFooter({ submitting, errorCount = 0, onSubmit }: TicketSubmitFooterProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const insets = useSafeAreaInsets();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const hint = useRef(new Animated.Value(0)).current;
   const hasErrors = errorCount > 0;
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardOpen(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardOpen(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const bottomInset = keyboardOpen ? 0 : insets.bottom;
 
   // Keeps the last non-zero count on screen while the hint collapses, so the
   // driver never sees a "0 fields" flash mid-animation.
@@ -40,7 +56,16 @@ export function TicketSubmitFooter({ submitting, errorCount = 0, onSubmit }: Tic
   }, [hasErrors, hint]);
 
   return (
-    <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+    <View
+      style={[
+        styles.footer,
+        {
+          backgroundColor: themeColors.surface,
+          borderTopColor: themeColors.border,
+          paddingBottom: bottomInset + spacing.md,
+        },
+      ]}
+    >
       <Animated.View
         accessibilityRole={contentVisible ? 'alert' : 'none'}
         style={[
@@ -85,7 +110,8 @@ export function TicketSubmitFooter({ submitting, errorCount = 0, onSubmit }: Tic
 
 const styles = StyleSheet.create({
   footer: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   hintRow: {

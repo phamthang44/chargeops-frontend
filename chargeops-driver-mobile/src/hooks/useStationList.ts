@@ -12,7 +12,8 @@ import {
   type AdministrativeProvince,
   FALLBACK_PROVINCES,
 } from '@/services/locationService';
-import { getUnreadCount, type AppNotification } from '@/services/notificationService';
+import { useNotifications } from '@/context/NotificationContext';
+import type { AppNotification } from '@/services/notificationService';
 import { getNearbyStations, STATION_PAGE_SIZE, type StationFilter } from '@/services/stationService';
 import type { Station } from '@/types';
 import { executeQuickBook } from '@/utils/quickBook';
@@ -72,7 +73,7 @@ export function useStationList() {
   const [promoDismissed, setPromoDismissed] = useState(false);
 
   // Notifications & Quick booking
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useNotifications();
   const [quickBookingId, setQuickBookingId] = useState<string | null>(null);
 
   // Stations state
@@ -85,21 +86,17 @@ export function useStationList() {
   const [total, setTotal] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Parallel background fetching of provinces and unread notifications
+  // Parallel background fetching of administrative provinces
   useEffect(() => {
     let active = true;
-    Promise.allSettled([
-      getAdministrativeProvinces({ accessToken: getAccessToken() }),
-      getUnreadCount(),
-    ]).then(([provResult, notifResult]) => {
-      if (!active) return;
-      if (provResult.status === 'fulfilled' && provResult.value.length > 0) {
-        setProvinces([ALL_REGIONS_ITEM, ...provResult.value]);
-      }
-      if (notifResult.status === 'fulfilled') {
-        setUnreadCount(notifResult.value);
-      }
-    });
+    getAdministrativeProvinces({ accessToken: getAccessToken() })
+      .then((provList) => {
+        if (!active) return;
+        if (Array.isArray(provList) && provList.length > 0) {
+          setProvinces([ALL_REGIONS_ITEM, ...provList]);
+        }
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -283,7 +280,6 @@ export function useStationList() {
 
     // Notifications & quick booking
     unreadCount,
-    setUnreadCount,
     quickBookingId,
     handleQuickBook,
     onNotificationNavigate,

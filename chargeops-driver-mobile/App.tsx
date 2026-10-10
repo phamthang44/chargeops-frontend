@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/i18n'; // initialize i18n before any screen renders
 import { AuthProvider } from '@/context/AuthContext';
 import { PreferencesProvider, usePreferences } from '@/context/PreferencesContext';
+import { NotificationProvider } from '@/context/NotificationContext';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { StompProvider } from '@/providers/StompProvider';
 
@@ -14,7 +15,9 @@ function AppContent() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AuthProvider>
         <StompProvider>
-          <RootNavigator />
+          <NotificationProvider>
+            <RootNavigator />
+          </NotificationProvider>
         </StompProvider>
       </AuthProvider>
     </>

@@ -125,5 +125,8 @@ export function resolveWsUrl(): string {
   ) {
     url = `wss://${url.slice('ws://'.length)}`;
   }
+  if (__DEV__) {
+    console.log('[networkHost] Resolved STOMP broker URL:', url);
+  }
   return url;
 }

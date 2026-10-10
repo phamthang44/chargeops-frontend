@@ -8,7 +8,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   TicketCategorySelector,
@@ -103,7 +102,7 @@ export function CreateTicketScreen() {
   }, [handleSubmit, scrollToField]);
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]} edges={['top', 'bottom']}>
+    <View style={[styles.root, { backgroundColor: themeColors.surfaceAlt }]}>
       {/* Header */}
       <TicketHeader onBack={goBack} />
 
@@ -193,7 +192,7 @@ export function CreateTicketScreen() {
           onSubmit={handleSubmitPress}
         />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 

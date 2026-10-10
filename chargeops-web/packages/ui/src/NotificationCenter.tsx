@@ -7,6 +7,7 @@ import {
 } from './NotificationBell';
 import {
   IconBell,
+  IconBolt,
   IconCalendar,
   IconCard,
   IconLifebuoy,
@@ -73,6 +74,7 @@ export function NotificationCenter({
       { id: 'ticket', label: t('notificationCenter.categories.ticket', 'Vé hỗ trợ') },
       { id: 'finance', label: t('notificationCenter.categories.finance', 'Tài chính & Hoàn tiền') },
       { id: 'account', label: t('notificationCenter.categories.account', 'Hệ thống & tài khoản') },
+      { id: 'station', label: t('notificationCenter.categories.station', 'Trạm sạc') },
     ],
     [t],
   );
@@ -134,6 +136,13 @@ export function NotificationCenter({
           bg: 'bg-owner/15',
           border: 'border-owner/25',
           label: t('notificationCenter.categoryBadge.finance', 'Tài chính'),
+        };
+      case 'station':
+        return {
+          icon: <IconBolt size={17} className="text-owner-deep" />,
+          bg: 'bg-owner/15',
+          border: 'border-owner/25',
+          label: t('notificationCenter.categoryBadge.station', 'Trạm sạc'),
         };
       case 'account':
       default:

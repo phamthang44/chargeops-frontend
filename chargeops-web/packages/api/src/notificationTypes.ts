@@ -8,6 +8,7 @@ export type NotificationCategory =
   | 'alert'
   | 'session'
   | 'billing'
+  | 'station'
   | (string & {});
 
 export type NotificationAudience = 'PERSONAL' | 'DRIVER' | 'OWNER' | 'STAFF' | 'ADMIN';
@@ -16,6 +17,8 @@ export type NotificationEventType =
   | 'LEGACY_QUARANTINED'
   | 'TICKET_RESOLVED'
   | 'TICKET_ASSIGNED'
+  | 'TICKET_CLOSED'
+  | 'TICKET_REOPENED'
   | 'CASE_ESCALATED'
   | 'BOOKING_CONFIRMED'
   | 'BOOKING_CANCELLED'
@@ -27,6 +30,10 @@ export type NotificationEventType =
   | 'REFUND_ATTEMPT_FAILED'
   | 'REFUND_SUCCEEDED'
   | 'ACCOUNT_NOTICE'
+  | 'STATION_SUBMITTED'
+  | 'STATION_APPROVED'
+  | 'STATION_REJECTED'
+  | 'STATION_CHANGES_REQUESTED'
   | (string & {});
 
 export type NotificationActionType =
@@ -35,6 +42,7 @@ export type NotificationActionType =
   | 'OPEN_TICKET'
   | 'OPEN_REFUND'
   | 'OPEN_CASE'
+  | 'OPEN_STATION'
   | (string & {});
 
 export interface NotificationTarget {
@@ -165,6 +173,22 @@ function getDefaultNotificationText(key: string, params: Record<string, any>, is
       return isEn
         ? `Escalation review requested for ticket ${code} requires Admin evaluation.`
         : `Ca khiếu nại cho Phiếu hỗ trợ ${code} cần Admin xem xét.`;
+    case 'notification.ticket.closed.title':
+      return isEn
+        ? `Ticket ${code} closed`.trim()
+        : `Phiếu hỗ trợ ${code} đã đóng`.trim();
+    case 'notification.ticket.closed.body':
+      return isEn
+        ? `Ticket ${code} has been closed.${params.reason ? ` Note: ${params.reason}` : ''}`
+        : `Phiếu hỗ trợ ${code} đã được xác nhận đóng.${params.reason ? ` Ghi chú: ${params.reason}` : ''}`;
+    case 'notification.ticket.reopened.title':
+      return isEn
+        ? `Ticket ${code} reopened`.trim()
+        : `Phiếu hỗ trợ ${code} được mở lại`.trim();
+    case 'notification.ticket.reopened.body':
+      return isEn
+        ? `Ticket ${code} has been reopened for further action.${params.reason ? ` Reason: ${params.reason}` : ''}`
+        : `Phiếu hỗ trợ ${code} đã được mở lại để tiếp tục giải quyết.${params.reason ? ` Lý do: ${params.reason}` : ''}`;
     case 'notification.booking.confirmed.title':
       return isEn ? 'Booking confirmed' : 'Đặt chỗ đã được xác nhận';
     case 'notification.booking.cancelled.title':
@@ -197,6 +221,58 @@ function getDefaultNotificationText(key: string, params: Record<string, any>, is
       return isEn
         ? `Booking ${code}. Simulator recorded refund success; this is not a real banking transaction.`
         : `Booking ${code}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật.`;
+    case 'notification.station.submitted.title': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      return isEn
+        ? `New station pending review: ${stationName}`.trim()
+        : `Hồ sơ trạm sạc mới cần duyệt: ${stationName}`.trim();
+    }
+    case 'notification.station.submitted.body': {
+      const ownerName = params.ownerName ? String(params.ownerName) : '';
+      const stationName = params.stationName ? String(params.stationName) : '';
+      const stationCode = params.stationCode ? String(params.stationCode) : '';
+      return isEn
+        ? `Owner ${ownerName} submitted station ${stationName} (${stationCode}) for moderation review.`
+        : `Chủ trạm ${ownerName} vừa gửi hồ sơ trạm ${stationName} (${stationCode}). Vui lòng thẩm định vị trí và pháp lý.`;
+    }
+    case 'notification.station.approved.title': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      return isEn
+        ? `Station ${stationName} has been approved!`.trim()
+        : `Trạm sạc ${stationName} đã được phê duyệt!`.trim();
+    }
+    case 'notification.station.approved.body': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      return isEn
+        ? `Station ${stationName} passed verification and is now ready for operations.`
+        : `Hồ sơ trạm sạc ${stationName} đã vượt qua thẩm định và sẵn sàng kích hoạt các trụ sạc vận hành.`;
+    }
+    case 'notification.station.rejected.title': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      return isEn
+        ? `Station ${stationName} registration rejected`.trim()
+        : `Hồ sơ trạm sạc ${stationName} bị từ chối`.trim();
+    }
+    case 'notification.station.rejected.body': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      const reason = params.reason ? String(params.reason) : '';
+      return isEn
+        ? `Station ${stationName} was rejected. Reason: ${reason}`
+        : `Hồ sơ trạm ${stationName} không đủ điều kiện phê duyệt. Lý do: ${reason}`;
+    }
+    case 'notification.station.changes_requested.title': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      return isEn
+        ? `Action required: Update station ${stationName}`.trim()
+        : `Yêu cầu bổ sung hồ sơ trạm ${stationName}`.trim();
+    }
+    case 'notification.station.changes_requested.body': {
+      const stationName = params.stationName ? String(params.stationName) : '';
+      const reason = params.reason ? String(params.reason) : '';
+      return isEn
+        ? `Admin requested profile updates for station ${stationName}: ${reason}`
+        : `Quản trị viên yêu cầu cập nhật thông tin cho trạm ${stationName}: ${reason}`;
+    }
     default:
       return key;
   }

@@ -45,12 +45,16 @@ export function Notifications() {
           navigate(`/admin/tickets?escalationId=${n.target.escalationId}`);
         } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
           navigate(`/admin/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_STATION' && n.target.stationId) {
+          navigate(`/admin/stations/${n.target.stationId}`);
         } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
           navigate(`/admin/stations`);
         } else if (n.target?.type === 'OPEN_REFUND') {
           navigate(`/admin/tickets`);
         } else if (n.category === 'ticket') {
           navigate('/admin/tickets');
+        } else if (n.category === 'station') {
+          navigate('/admin/approvals');
         } else {
           navigate('/admin/dashboard');
         }
@@ -95,7 +99,7 @@ export function Notifications() {
         unreadCount={unreadCount}
         title={t('notifications.title', 'Trung tâm Thông báo & Cảnh báo')}
         description={t('notifications.description', 'Cảnh báo toàn hệ thống, phê duyệt trạm, giấy phép và các ca khiếu nại chuyển cấp.')}
-        categories={['all', 'ticket', 'account']}
+        categories={['all', 'ticket', 'account', 'station']}
         onMarkRead={handleMarkAsRead}
         onMarkAllRead={handleMarkAllRead}
         onDismiss={handleDismiss}

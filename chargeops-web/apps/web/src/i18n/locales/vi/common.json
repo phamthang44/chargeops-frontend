@@ -150,6 +150,24 @@
         "title": "Yêu cầu khiếu nại ca {{code}}",
         "body": "Ca khiếu nại cho Phiếu hỗ trợ {{code}} cần Admin xem xét."
       }
+    },
+    "station": {
+      "submitted": {
+        "title": "Hồ sơ trạm sạc mới cần duyệt: {{stationName}}",
+        "body": "Chủ trạm {{ownerName}} vừa gửi hồ sơ trạm {{stationName}} ({{stationCode}}). Vui lòng thẩm định vị trí và pháp lý."
+      },
+      "approved": {
+        "title": "Trạm sạc {{stationName}} đã được phê duyệt!",
+        "body": "Hồ sơ trạm sạc {{stationName}} đã vượt qua thẩm định và sẵn sàng kích hoạt các trụ sạc vận hành."
+      },
+      "rejected": {
+        "title": "Hồ sơ trạm sạc {{stationName}} bị từ chối",
+        "body": "Hồ sơ trạm {{stationName}} không đủ điều kiện phê duyệt. Lý do: {{reason}}"
+      },
+      "changes_requested": {
+        "title": "Yêu cầu bổ sung hồ sơ trạm {{stationName}}",
+        "body": "Quản trị viên yêu cầu cập nhật thông tin cho trạm {{stationName}}: {{reason}}"
+      }
     }
   },
   "relativeTime": {

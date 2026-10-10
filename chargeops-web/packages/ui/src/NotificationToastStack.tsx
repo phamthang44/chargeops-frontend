@@ -64,7 +64,7 @@ function ToastItem({ toast, onDismiss }: { toast: NotificationItem; onDismiss: (
                 : 'bg-brand/10 text-brand',
         ].join(' ')}
       >
-        {toast.category === 'session' ? (
+        {toast.category === 'session' || toast.category === 'station' ? (
           <IconBolt size={18} />
         ) : toast.category === 'ticket' ? (
           <IconLifebuoy size={18} />

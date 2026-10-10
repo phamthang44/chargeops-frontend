@@ -165,13 +165,15 @@
       "booking": "Bookings",
       "ticket": "Support Tickets",
       "finance": "Finance & Refunds",
-      "account": "System & Account"
+      "account": "System & Account",
+      "station": "Stations"
     },
     "categoryBadge": {
       "booking": "Bookings",
       "ticket": "Support Tickets",
       "finance": "Finance",
-      "account": "System"
+      "account": "System",
+      "station": "Station"
     }
   },
   "notificationBell": {
@@ -197,7 +199,8 @@
       "booking": "Bookings",
       "ticket": "Support Tickets",
       "finance": "Finance",
-      "account": "System"
+      "account": "System",
+      "station": "Stations"
     }
   }
 }

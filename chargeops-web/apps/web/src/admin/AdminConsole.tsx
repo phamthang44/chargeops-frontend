@@ -108,10 +108,14 @@ function AdminConsoleContent({
           navigate(`${base}/tickets?escalationId=${n.target.escalationId}`);
         } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
           navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_STATION' && n.target.stationId) {
+          navigate(`${base}/stations/${n.target.stationId}`);
         } else if (n.target?.type === 'OPEN_BOOKING' && n.target.bookingId) {
           navigate(`${base}/stations`);
         } else if (n.category === 'ticket') {
           navigate(`${base}/tickets`);
+        } else if (n.category === 'station') {
+          navigate(`${base}/approvals`);
         } else {
           navigate(`${base}/notifications`);
         }

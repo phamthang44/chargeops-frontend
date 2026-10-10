@@ -67,6 +67,10 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
             void queryClient.invalidateQueries({ queryKey: ['notifications'] });
             void queryClient.invalidateQueries({ queryKey: ['tickets'] });
             void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+            void queryClient.invalidateQueries({ queryKey: ['stations'] });
+            void queryClient.invalidateQueries({ queryKey: ['admin', 'stations'] });
+            void queryClient.invalidateQueries({ queryKey: ['approvals'] });
+            void queryClient.invalidateQueries({ queryKey: ['admin', 'queue', 'pendingStations'] });
 
             // 2. If a new notification was created, fetch it to show a toast popup
             if (data.type === 'NOTIFICATION_CREATED') {
@@ -86,6 +90,9 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
                         onNavigate?.(`/tickets/${latest.target.ticketId}`);
                       } else if (latest.target?.type === 'OPEN_CASE' && latest.target.escalationId) {
                         onNavigate?.(`/tickets?escalationId=${latest.target.escalationId}`);
+                      } else if (latest.target?.type === 'OPEN_STATION' && latest.target.stationId) {
+                        const base = context === 'admin' ? '/admin' : context === 'owner' ? '/owner' : '';
+                        onNavigate?.(`${base}/stations/${latest.target.stationId}`);
                       } else {
                         onNavigate?.('/tickets');
                       }

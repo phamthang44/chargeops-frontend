@@ -57,12 +57,16 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
           navigate(`${base}/bookings?bookingId=${n.target.bookingId}`);
         } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
           navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_STATION' && n.target.stationId) {
+          navigate(`${base}/stations?stationId=${n.target.stationId}`);
         } else if (n.target?.type === 'OPEN_REFUND') {
           navigate(`${base}/revenue`);
         } else if (n.category === 'booking') {
           navigate(`${base}/bookings`);
         } else if (n.category === 'ticket') {
           navigate(`${base}/tickets`);
+        } else if (n.category === 'station') {
+          navigate(`${base}/stations`);
         }
       };
 
@@ -188,7 +192,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
         key={context}
         serverFilters
         onFilterChange={(nextCategory, nextUnread) => { setCategory(nextCategory); setUnread(nextUnread); }}
-        categories={context === 'owner' ? ['all', 'ticket', 'finance'] : ['all', 'ticket', 'account']}
+        categories={context === 'owner' ? ['all', 'ticket', 'finance', 'station'] : ['all', 'ticket', 'account']}
         description={context === 'owner' ? t('notifications.center.ownerDescription', 'Thông báo vận hành các trạm của bạn. Kết quả ticket do bạn báo nằm trong mục Cá nhân.') : t('notifications.center.personalDescription', 'Thông báo về ticket do bạn báo và tài khoản của bạn.')}
         loading={isPending}
         error={isError && !isFetchNextPageError ? t('notifications.center.fetchError', 'Không tải được thông báo. Vui lòng thử lại.') : undefined}

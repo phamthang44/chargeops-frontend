@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IconBell,
+  IconBolt,
   IconX,
   IconCalendar,
   IconCard,
@@ -166,6 +167,7 @@ export function NotificationBell({
       { id: 'ticket', label: t('notificationBell.categories.ticket', 'Vé hỗ trợ') },
       { id: 'finance', label: t('notificationBell.categories.finance', 'Tài chính') },
       { id: 'account', label: t('notificationBell.categories.account', 'Hệ thống') },
+      { id: 'station', label: t('notificationBell.categories.station', 'Trạm sạc') },
     ],
     [t],
   );
@@ -266,6 +268,8 @@ export function NotificationBell({
         return <IconCard size={14} className="text-owner-deep" />;
       case 'ticket':
         return <IconLifebuoy size={14} className="text-bad-deep" />;
+      case 'station':
+        return <IconBolt size={14} className="text-owner-deep" />;
       case 'account':
       default:
         return <IconShield size={14} className="text-muted" />;

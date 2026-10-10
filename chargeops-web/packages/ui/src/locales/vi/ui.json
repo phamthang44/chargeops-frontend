@@ -165,13 +165,15 @@
       "booking": "Đặt chỗ",
       "ticket": "Vé hỗ trợ",
       "finance": "Tài chính & Hoàn tiền",
-      "account": "Hệ thống & tài khoản"
+      "account": "Hệ thống & tài khoản",
+      "station": "Trạm sạc"
     },
     "categoryBadge": {
       "booking": "Đặt chỗ",
       "ticket": "Vé hỗ trợ",
       "finance": "Tài chính",
-      "account": "Hệ thống"
+      "account": "Hệ thống",
+      "station": "Trạm sạc"
     }
   },
   "notificationBell": {
@@ -197,7 +199,8 @@
       "booking": "Đặt chỗ",
       "ticket": "Vé hỗ trợ",
       "finance": "Tài chính",
-      "account": "Hệ thống"
+      "account": "Hệ thống",
+      "station": "Trạm sạc"
     }
   }
 }

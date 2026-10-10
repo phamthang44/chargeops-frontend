@@ -1721,6 +1721,8 @@ export function createRestServices(http: HttpClient): Services {
               actionUrl = params?.context === 'admin' ? '/tickets' : '/revenue';
             } else if (raw.target.type === 'OPEN_CASE' && raw.target.escalationId) {
               actionUrl = `/tickets?escalationId=${raw.target.escalationId}`;
+            } else if (raw.target.type === 'OPEN_STATION' && raw.target.stationId) {
+              actionUrl = `/stations/${raw.target.stationId}`;
             }
           }
           const actionLabel = raw.actionLabel || raw.primaryAction?.label || (actionUrl ? 'Xem chi tiết' : undefined);

@@ -150,6 +150,24 @@
         "title": "Escalated case for ticket {{code}}",
         "body": "Escalation review requested for ticket {{code}} requires Admin evaluation."
       }
+    },
+    "station": {
+      "submitted": {
+        "title": "New station pending review: {{stationName}}",
+        "body": "Owner {{ownerName}} submitted station {{stationName}} ({{stationCode}}) for moderation review."
+      },
+      "approved": {
+        "title": "Station {{stationName}} has been approved!",
+        "body": "Station {{stationName}} passed verification and is now ready for operations."
+      },
+      "rejected": {
+        "title": "Station {{stationName}} registration rejected",
+        "body": "Station {{stationName}} was rejected. Reason: {{reason}}"
+      },
+      "changes_requested": {
+        "title": "Action required: Update station {{stationName}}",
+        "body": "Admin requested profile updates for station {{stationName}}: {{reason}}"
+      }
     }
   },
   "relativeTime": {

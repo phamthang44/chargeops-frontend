@@ -200,12 +200,16 @@ function OwnerConsoleContent({
           navigate(`${base}/bookings?bookingId=${n.target.bookingId}`);
         } else if (n.target?.type === 'OPEN_TICKET' && n.target.ticketId) {
           navigate(`${base}/tickets/${n.target.ticketId}`);
+        } else if (n.target?.type === 'OPEN_STATION' && n.target.stationId) {
+          navigate(`${base}/stations?stationId=${n.target.stationId}`);
         } else if (n.target?.type === 'OPEN_REFUND') {
           navigate(`${base}/revenue`);
         } else if (n.category === 'booking') {
           navigate(`${base}/bookings`);
         } else if (n.category === 'ticket') {
           navigate(`${base}/tickets`);
+        } else if (n.category === 'station') {
+          navigate(`${base}/stations`);
         } else {
           navigate(`${base}/notifications`);
         }

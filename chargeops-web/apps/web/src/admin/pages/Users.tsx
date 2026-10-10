@@ -17,10 +17,12 @@ import {
   PageHeader,
   Pagination,
   SearchInput,
+  Select,
   Skeleton,
   StatusPill,
   useToast,
   type FilterTab,
+  type SelectOption,
 } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../i18n';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
@@ -160,6 +162,11 @@ export function Users() {
     ];
   }, [summary, t]);
 
+  const statusOptions = useMemo<SelectOption[]>(
+    () => statusTabs.map((tab) => ({ value: tab.key, label: tab.count !== undefined ? `${tab.label} (${tab.count})` : tab.label })),
+    [statusTabs],
+  );
+
   const openDetail = (user: AdminUserProfile) => {
     setSelectedId(user.profileId);
     setSelectedSeed(user);
@@ -194,7 +201,14 @@ export function Users() {
 
           <div className="mb-3.5 flex flex-wrap items-center gap-2">
             <FilterTabs tabs={tabs} active={role} onChange={(r) => { setRole(r); setPage(0); }} accent="brand" />
-            <FilterTabs tabs={statusTabs} active={statusFilter} onChange={(s) => { setStatusFilter(s); setPage(0); }} accent="brand" />
+            <div className="w-[180px]">
+              <Select
+                value={statusFilter}
+                options={statusOptions}
+                onChange={(s) => { setStatusFilter(s as StatusFilter); setPage(0); }}
+                aria-label={t('users.statusFilters.all')}
+              />
+            </div>
             <div className="ml-auto">
               <SearchInput
                 value={searchInput}

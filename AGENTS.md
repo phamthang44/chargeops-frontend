@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **chargeops-frontend** (3631 symbols, 9059 relationships, 273 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **chargeops-frontend** (3679 symbols, 9203 relationships, 277 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -132,4 +132,3 @@ Toàn bộ tài liệu kiến trúc, đặc tả nghiệp vụ, API contract và
      https://thang.tail704409.ts.net/realms/chargeops/broker/google/endpoint
      ```
    - Bất kỳ URL redirect nào trả về chứa `8088` đều vi phạm contract của Google và gây lỗi `redirect_uri_mismatch`. Keycloak container luôn được cố định `KC_HOSTNAME: https://thang.tail704409.ts.net`.
-

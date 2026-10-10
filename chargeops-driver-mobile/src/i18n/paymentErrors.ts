@@ -99,6 +99,18 @@ export function paymentErrorMessage(t: TFunction, error: unknown): string {
         return t('payment.errors.PAY_SIMULATION_REQUEST_INVALID', 'Dữ liệu yêu cầu thanh toán không hợp lệ. Vui lòng thử lại.');
       case 'PAY_RECONCILIATION_REQUIRED':
         return t('payment.errors.PAY_RECONCILIATION_REQUIRED', 'Giao dịch đang chờ ngân hàng đối soát. Vui lòng đợi trong giây lát.');
+      case 'REF_EXECUTION_CONFLICT':
+        return t('payment.errors.REF_EXECUTION_CONFLICT', 'Yêu cầu hoàn tiền bị xung đột với một tiến trình xử lý khác.');
+      case 'REF_AMOUNT_CONFLICT':
+        return t('payment.errors.REF_AMOUNT_CONFLICT', 'Số tiền yêu cầu hoàn không khớp với nghĩa vụ hoàn hiện tại.');
+      case 'REF_VERSION_CONFLICT':
+        return t('payment.errors.REF_VERSION_CONFLICT', 'Dữ liệu hoàn tiền đã được cập nhật bởi thao tác khác. Vui lòng làm mới.');
+      case 'REF_REQUEST_CONFLICT':
+        return t('payment.errors.REF_REQUEST_CONFLICT', 'Yêu cầu hoàn tiền bị xung đột trạng thái.');
+      case 'REF_MODE_UNAVAILABLE':
+        return t('payment.errors.REF_MODE_UNAVAILABLE', 'Phương thức hoàn tiền hiện không khả dụng.');
+      case 'REF_INVALID_EXECUTION_REQUEST':
+        return t('payment.errors.REF_INVALID_EXECUTION_REQUEST', 'Dữ liệu yêu cầu thực hiện hoàn tiền không hợp lệ.');
       case 'BKG_HOLD_EXPIRED':
       case 'HOLD_EXPIRED':
         return t('payment.errors.BKG_HOLD_EXPIRED', 'Thời gian giữ chỗ (10 phút) đã hết hạn. Đơn đặt chỗ đã tự động hủy.');

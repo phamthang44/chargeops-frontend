@@ -19,6 +19,7 @@ import { ScheduleHistoryDrawer } from '../features/pricing/ScheduleHistoryDrawer
 import { useOwnerStation } from '../context/OwnerStationContext';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { ResourceStateCard } from '../../shared/components/ResourceStateCard';
+import { getApiErrorMessage } from '../../i18n';
 
 /**
  * Pricing & Hours (FR11). All four steps edit a single local draft; "Lưu thay
@@ -58,8 +59,13 @@ export function Pricing() {
       toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình và áp dụng thành công!' }), 'success');
     },
     onError: (e) => {
+      const code = (e as any)?.code || '';
       const msg = (e as Error)?.message || '';
       if (
+        code === 'STATION_053' ||
+        code === 'COMMON_009' ||
+        code === 'SYS_409' ||
+        (e as any)?.status === 409 ||
         msg.includes('409') ||
         msg.toLowerCase().includes('conflict') ||
         msg.includes('STATION_053') ||
@@ -74,7 +80,7 @@ export function Pricing() {
           'error',
         );
       } else {
-        toast(msg || t('pricing.saveError', { defaultValue: 'Không thể lưu cấu hình trạm' }), 'error');
+        toast(getApiErrorMessage(e) || t('pricing.saveError', { defaultValue: 'Không thể lưu cấu hình trạm' }), 'error');
       }
     },
   });

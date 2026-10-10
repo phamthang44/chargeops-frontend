@@ -975,7 +975,8 @@
       "DRIVER": "Tài xế",
       "OWNER": "Chủ trạm",
       "ADMIN": "Quản trị",
-      "STAFF": "Nhân viên"
+      "STAFF": "Nhân viên",
+      "UNKNOWN": "Chưa xác định"
     },
     "status": {
       "active": "Hoạt động",

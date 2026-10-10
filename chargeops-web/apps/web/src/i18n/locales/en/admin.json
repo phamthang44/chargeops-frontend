@@ -975,7 +975,8 @@
       "DRIVER": "Drivers",
       "OWNER": "Owners",
       "ADMIN": "Admins",
-      "STAFF": "Staff"
+      "STAFF": "Staff",
+      "UNKNOWN": "Unknown"
     },
     "status": {
       "active": "Active",

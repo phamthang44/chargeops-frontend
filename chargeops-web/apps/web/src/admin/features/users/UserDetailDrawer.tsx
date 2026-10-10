@@ -31,13 +31,15 @@ function initialsOf(name: string) {
 }
 
 function RoleBadge({ role }: { role: string }) {
+  const { t } = useTranslation('admin');
   const meta = USER_ROLE_BADGE[role as keyof typeof USER_ROLE_BADGE] ?? USER_ROLE_BADGE.UNKNOWN;
+  const label = t(`users.roles.${role}`, t('users.roles.UNKNOWN', 'Chưa xác định'));
   return (
     <span
       className="inline-block rounded-[6px] px-[9px] py-[3px] text-[10px] font-semibold uppercase tracking-[0.06em]"
       style={{ background: meta.bg, color: meta.fg }}
     >
-      {role}
+      {label}
     </span>
   );
 }

@@ -38,6 +38,15 @@ type TypeKey = TransactionType | 'all';
 type MainTab = 'transactions' | 'refund-queue';
 const GRID = '1.1fr 1.1fr 1.4fr 0.9fr 0.9fr 1.1fr 0.9fr';
 
+/**
+ * @deprecated [RETIRED per BKG-063 & FE-20 handoff]
+ * Quản lý tài chính / giao dịch toàn cục của Admin đã bị bãi bỏ.
+ * Admin không có quyền truy cập doanh thu hay sổ cái toàn cục của các Owner.
+ * Thẩm quyền tài chính của Admin chỉ giới hạn trong việc xem xét hoàn tiền theo từng
+ * vụ việc khiếu nại leo thang (Escalated support case) tại `/admin/tickets`.
+ * Màn hình này không nằm trong navigation của AdminConsole.
+ */
+
 const METHOD_COLORS: Record<PaymentMethod, string> = {
   VNPAY: '#5b54e8',
   MOMO: '#d63384',

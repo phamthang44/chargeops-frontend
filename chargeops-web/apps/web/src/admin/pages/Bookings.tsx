@@ -28,7 +28,12 @@ const PAGE_SIZE = 10;
 type FilterKey = BookingStatus | 'all';
 const GRID = '0.9fr 1.2fr 1.1fr 0.8fr 1fr 0.9fr 0.9fr';
 
-/** Platform-wide bookings (admin, all stations). */
+/**
+ * @deprecated [RETIRED per Admin Scope Specification]
+ * Quản lý danh sách đặt chỗ toàn nền tảng của Admin là trang di sản từ nguyên mẫu ban đầu.
+ * Đặt chỗ thuộc phạm vi vận hành trực tiếp của Tài xế (Driver Mobile) và Chủ trạm (Owner Console `/owner/bookings`).
+ * Màn hình này không nằm trong navigation chính thức của AdminConsole.
+ */
 export function Bookings() {
   const { t } = useTranslation('admin');
   const api = useApi();

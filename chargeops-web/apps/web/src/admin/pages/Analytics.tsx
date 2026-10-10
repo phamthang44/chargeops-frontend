@@ -34,7 +34,12 @@ function translateDelta(d: string, t: any): string {
   return d;
 }
 
-/** Platform-wide analytics (admin, read-only). */
+/**
+ * @deprecated [RETIRED / DEFERRED TO V2 per Dashboard Architecture]
+ * Bảng phân tích toàn nền tảng sử dụng số liệu mock từ bản nguyên mẫu ban đầu.
+ * Số liệu vận hành thời gian thực đã được hợp nhất tại `Dashboard.tsx` (`/admin/dashboard`).
+ * Biểu đồ xu hướng và phân tích kỳ (7/30 ngày) thuộc phạm vi thiết kế V2 khi có contract period riêng.
+ */
 export function Analytics() {
   const { t } = useTranslation('admin');
   const api = useApi();

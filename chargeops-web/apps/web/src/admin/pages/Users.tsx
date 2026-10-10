@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   USER_ROLE_BADGE,
@@ -58,15 +59,39 @@ export function Users() {
   const qc = useQueryClient();
   const toast = useToast();
 
-  const [role, setRole] = useState<RoleKey>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const paramRole = searchParams.get('role') as RoleKey | null;
+  const paramStatus = searchParams.get('status') as StatusFilter | null;
+  const paramQ = searchParams.get('q') || '';
+
+  const [role, setRole] = useState<RoleKey>(paramRole || 'all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(paramStatus || 'all');
+  const [searchInput, setSearchInput] = useState(paramQ);
+  const [debouncedSearch, setDebouncedSearch] = useState(paramQ);
   const [page, setPage] = useState(0);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedSeed, setSelectedSeed] = useState<AdminUserProfile | null>(null);
   const [actionState, setActionState] = useState<{ type: UserStatusAction; user: AdminUserProfile } | null>(null);
+
+  useEffect(() => {
+    const r = searchParams.get('role') as RoleKey | null;
+    if (r && r !== role) {
+      setRole(r);
+      setPage(0);
+    }
+    const s = searchParams.get('status') as StatusFilter | null;
+    if (s && s !== statusFilter) {
+      setStatusFilter(s);
+      setPage(0);
+    }
+    const q = searchParams.get('q');
+    if (q !== null && q !== searchInput) {
+      setSearchInput(q);
+      setDebouncedSearch(q);
+      setPage(0);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

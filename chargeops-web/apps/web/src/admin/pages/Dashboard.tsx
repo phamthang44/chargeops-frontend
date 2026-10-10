@@ -50,6 +50,13 @@ export function Dashboard() {
     refetchInterval: 30000,
   });
 
+  // User Overview: Summary of users by role & status (UM-01)
+  const userSummaryQ = useQuery({
+    queryKey: ['users', 'summary', 'adminDashboard'],
+    queryFn: () => api.users.summary(),
+    refetchInterval: 30000,
+  });
+
   const pendingStations = (pendingApprovalsQ.data as any)?.items ?? (pendingApprovalsQ.data as any)?.data ?? [];
   const pendingRows: SidePanelRow[] =
     pendingStations.length === 0
@@ -168,6 +175,68 @@ export function Dashboard() {
                 accent="#c0392b"
               />
             </button>
+          </div>
+
+          {/* User Overview Section (UM-01) with deep links */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+                {t('dashboard.usersOverview.title', { defaultValue: 'Người dùng nền tảng' })}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/users')}
+                className="text-[11.5px] font-medium text-brand transition hover:underline"
+              >
+                {t('dashboard.queue.seeAll', { defaultValue: 'Xem tất cả →' })}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <button
+                type="button"
+                onClick={() => navigate('/admin/users')}
+                className="text-left w-full cursor-pointer transition hover:opacity-90"
+              >
+                <MetricCard
+                  label={t('users.kpi.total', { defaultValue: 'Tổng tài khoản' })}
+                  value={userSummaryQ.isLoading ? '…' : String(userSummaryQ.data?.totalProfiles ?? 0)}
+                  accent="#5b54e8"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/users?role=DRIVER')}
+                className="text-left w-full cursor-pointer transition hover:opacity-90"
+              >
+                <MetricCard
+                  label={t('users.kpi.drivers', { defaultValue: 'Tài xế' })}
+                  value={userSummaryQ.isLoading ? '…' : String(userSummaryQ.data?.byRole?.DRIVER ?? 0)}
+                  accent="#0d8a5a"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/users?role=STAFF')}
+                className="text-left w-full cursor-pointer transition hover:opacity-90"
+              >
+                <MetricCard
+                  label={t('users.kpi.staff', { defaultValue: 'Nhân viên trạm' })}
+                  value={userSummaryQ.isLoading ? '…' : String(userSummaryQ.data?.byRole?.STAFF ?? 0)}
+                  accent="#b7791f"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/users?role=OWNER')}
+                className="text-left w-full cursor-pointer transition hover:opacity-90"
+              >
+                <MetricCard
+                  label={t('users.roles.OWNER', { defaultValue: 'Chủ trạm' })}
+                  value={userSummaryQ.isLoading ? '…' : String(userSummaryQ.data?.byRole?.OWNER ?? 0)}
+                  accent="#3b82f6"
+                />
+              </button>
+            </div>
           </div>
 
           {/* 3 Workload Action Queues */}

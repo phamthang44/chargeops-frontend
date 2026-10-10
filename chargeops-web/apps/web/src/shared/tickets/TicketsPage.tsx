@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   TICKET_CATEGORY,
@@ -45,16 +45,39 @@ export function TicketsPage({
   const { t } = useTranslation('tickets');
   const api = useApi();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const apiRole: 'owner' | 'admin' | 'staff' = role ?? (admin ? 'admin' : 'owner');
   const isStaffRole = apiRole === 'staff';
 
-  const [workstream, setWorkstream] = useState<AdminWorkstream>('platform');
-  const [status, setStatus] = useState<StatusKey>('all');
+  const initialWorkstream: AdminWorkstream = searchParams.get('escalated') === 'true' ? 'escalated' : 'platform';
+  const initialStatus = (searchParams.get('status')?.toLowerCase() as StatusKey) || 'all';
+  const initialSearch = searchParams.get('search') || searchParams.get('q') || '';
+
+  const [workstream, setWorkstream] = useState<AdminWorkstream>(initialWorkstream);
+  const [status, setStatus] = useState<StatusKey>(initialStatus);
   const [category, setCategory] = useState<CategoryKey>('all');
   const [stationId, setStationId] = useState<string | 'all'>('all');
   const [queueScope, setQueueScope] = useState<QueueScope>('all');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    const esc = searchParams.get('escalated');
+    if (esc === 'true') {
+      setWorkstream('escalated');
+      setPage(0);
+    }
+    const st = searchParams.get('status');
+    if (st) {
+      setStatus(st.toLowerCase() as StatusKey);
+      setPage(0);
+    }
+    const q = searchParams.get('search') || searchParams.get('q');
+    if (q !== null && q !== undefined && q !== search) {
+      setSearch(q);
+      setPage(0);
+    }
+  }, [searchParams]);
 
   const resetTo = (fn: () => void) => {
     setPage(0);

@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Button,
   Drawer,
   IconAlertTriangle,
+  IconLifebuoy,
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
@@ -80,6 +82,7 @@ export function UserDetailDrawer({
 }: UserDetailDrawerProps) {
   const { t } = useTranslation('admin');
   const api = useApi();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ['users', 'detail', profileId],
@@ -173,6 +176,22 @@ export function UserDetailDrawer({
             )}
             <Row label={t('users.drawer.version', 'Phiên bản')} value={String(user.version)} mono border />
             <Row label={t('users.drawer.profileId', 'Profile ID')} value={user.profileId} mono />
+          </div>
+
+          {/* Quick Actions: View related support tickets */}
+          <div className="mt-4 border-t border-hairline pt-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full justify-center text-[12px] text-brand"
+              onClick={() => {
+                onClose();
+                navigate(`/admin/tickets?search=${encodeURIComponent(user.email || user.displayName)}`);
+              }}
+            >
+              <IconLifebuoy size={14} className="mr-1.5" />
+              {t('users.drawer.viewRelatedTickets', { defaultValue: 'Tra cứu vé hỗ trợ liên quan' })}
+            </Button>
           </div>
 
           {canSuspend && (

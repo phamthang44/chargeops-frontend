@@ -209,11 +209,37 @@ export function PhysicalKioskScreen({
                     <div className="absolute -bottom-1.5 -right-1.5 h-5 w-5 border-b-2 border-r-2 border-emerald-400 rounded-br-lg" />
 
                     {/* QR Code Container */}
-                    <div className="relative flex h-[210px] w-[210px] items-center justify-center rounded-xl bg-white p-3 shadow-inner">
+                    <div className="relative flex h-[210px] w-[210px] items-center justify-center rounded-xl bg-white p-3 shadow-inner overflow-hidden">
                       {loadingToken ? (
                         <div className="flex flex-col items-center gap-2 text-slate-700">
                           <div className="h-8 w-8 animate-spin rounded-full border-3 border-slate-300 border-t-emerald-500" />
-                          <span className="text-xs font-medium">{t('kiosk.ready.generating', 'Đang tạo mã mới...')}</span>
+                          <span className="text-xs font-medium">{t('kiosk.ready.generating', 'Đang tải mã...') }</span>
+                        </div>
+                      ) : remainingSeconds === 0 ? (
+                        <div className="flex flex-col items-center justify-center text-center p-3 gap-2 bg-slate-900/95 absolute inset-0 z-20 backdrop-blur-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                          </div>
+                          <span className="text-xs font-bold text-white leading-tight">
+                            {t('kiosk.ready.expired', 'Mã QR đã hết hạn')}
+                          </span>
+                          <p className="text-[10px] text-slate-400 leading-tight">
+                            {t('kiosk.ready.expiredDesc', 'Bấm nút dưới để tạo mã mới khi cần check-in')}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={onRefreshChallenge}
+                            className="mt-1 flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-all cursor-pointer"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="23 4 23 10 17 10" />
+                              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                            </svg>
+                            {t('kiosk.ready.generateNew', 'Tạo mã mới')}
+                          </button>
                         </div>
                       ) : challengeToken ? (
                         <QrCodeRenderer
@@ -301,7 +327,12 @@ export function PhysicalKioskScreen({
 
                   {/* Token Status Badge */}
                   <div className="flex items-center gap-1.5 text-xs">
-                    {isRedisToken ? (
+                    {remainingSeconds === 0 ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold">
+                        <span className="h-2 w-2 rounded-full bg-rose-400" />
+                        {t('kiosk.ready.expiredBadge', 'Mã QR đã hết hạn - Hãy bấm tạo lại')}
+                      </span>
+                    ) : isRedisToken ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
                         <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                         {t('kiosk.ready.redisValid', 'Mã hợp lệ từ Backend Redis')}

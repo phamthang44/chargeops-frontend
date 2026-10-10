@@ -42,7 +42,8 @@ export function SimulatorPage() {
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(60);
   const [loadingToken, setLoadingToken] = useState<boolean>(false);
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+  // Mặc định false để hạn chế tự động gọi API sinh token khi chưa có thao tác từ người dùng
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
 
   // Screen operational state
   const [screenState, setScreenState] = useState<SimulatorScreenState>('AVAILABLE');
@@ -339,8 +340,10 @@ const FALLBACK_MOCK_CONNECTORS: Connector[] = [
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
           if (autoRefreshRef.current && selectedConnIdRef.current) {
-            addLog('[TTL] Mã QR đã hết hạn (0s). Đang tự động tạo mã mới...', 'warn');
+            addLog('[TTL] Mã QR đã hết hạn (0s). Đang tự động làm mới theo tùy chọn...', 'info');
             fetchChallenge(selectedConnIdRef.current);
+          } else if (prev === 1) {
+            addLog('[TTL] Mã QR đã hết hạn. Vui lòng bấm "Làm mới mã" khi cần check-in để hạn chế gọi API liên tục.', 'warn');
           }
           return 0;
         }

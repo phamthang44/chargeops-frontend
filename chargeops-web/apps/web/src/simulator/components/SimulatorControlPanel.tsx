@@ -728,7 +728,7 @@ export function SimulatorControlPanel({
             </div>
 
             <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2.5 dark:border-slate-700 text-xs">
-              <span className="text-slate-600 dark:text-slate-400">{t('controlPanel.challenge.autoRefresh', 'Tự động đổi sau 60s:')}</span>
+              <span className="text-slate-600 dark:text-slate-400" title="Bật nếu muốn tự động làm mới mã sau khi hết hạn mà không cần bấm thủ công">{t('controlPanel.challenge.autoRefresh', 'Tự động làm mới khi hết hạn:')}</span>
               <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"

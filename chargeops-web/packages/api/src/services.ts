@@ -116,10 +116,12 @@ import type {
   Transaction,
   TransactionSummary,
   TransactionType,
-  UserAccount,
+  AdminUserProfile,
+  AdminUserSummary,
+  AdminUserStatusRequest,
+  AdminUserStatusResponse,
   UserProfile,
   UserProfileUpdateRequest,
-  UserStatus,
 } from './types';
 
 export interface LocationService {
@@ -356,8 +358,23 @@ export interface LicenseService {
 }
 
 export interface UserService {
-  list(params?: { role?: string; search?: string }): Promise<UserAccount[]>;
-  setStatus(id: string, status: UserStatus): Promise<UserAccount>;
+  /**
+   * UM-01: server-paginated admin list. `page` is FE 0-based; the adapter
+   * converts to the backend's 1-based `page` and returns a 0-based `Page`.
+   */
+  list(params?: {
+    page?: number;
+    pageSize?: number;
+    q?: string;
+    role?: string;
+    status?: string;
+  }): Promise<Page<AdminUserProfile>>;
+  /** UM-01: scope-wide counts independent of the current page. */
+  summary(params?: { q?: string; role?: string; status?: string }): Promise<AdminUserSummary>;
+  /** UM-01: detail + `actions[]` for the target profile. */
+  detail(profileId: string): Promise<AdminUserProfile>;
+  /** UM-02: suspend/resume DRIVERS/STAFF with optimistic-lock version + reason + commandId. */
+  setStatus(profileId: string, input: AdminUserStatusRequest): Promise<AdminUserStatusResponse>;
 }
 
 export interface StaffService {

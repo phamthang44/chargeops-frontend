@@ -974,17 +974,27 @@
       "all": "Tất cả",
       "DRIVER": "Tài xế",
       "OWNER": "Chủ trạm",
-      "ADMIN": "Quản trị"
+      "ADMIN": "Quản trị",
+      "STAFF": "Nhân viên"
     },
     "status": {
       "active": "Hoạt động",
       "suspended": "Tạm khóa"
     },
+    "statusMap": {
+      "ACTIVE": "Hoạt động",
+      "SUSPENDED": "Tạm khóa"
+    },
+    "statusFilters": {
+      "all": "Mọi trạng thái"
+    },
     "toastStatus": "{{name}}: {{status}}",
+    "toastNoop": "Trạng thái đã ở chế độ này — không có thay đổi.",
     "error": "Không tải được người dùng: {{message}}",
     "kpi": {
       "total": "TỔNG TÀI KHOẢN",
       "drivers": "TÀI XẾ",
+      "staff": "NHÂN VIÊN",
       "owners": "CHỦ TRẠM",
       "suspended": "TẠM KHÓA"
     },
@@ -997,16 +1007,60 @@
         "status": "TRẠNG THÁI",
         "action": "HÀNH ĐỘNG"
       },
+      "emptyTitle": "Không tìm thấy người dùng",
+      "emptyDesc": "Thử thay đổi từ khóa hoặc bộ lọc vai trò/trạng thái.",
       "suspend": "Tạm khóa",
       "activate": "Kích hoạt"
     },
     "drawer": {
       "close": "Đóng",
       "role": "Vai trò",
+      "status": "Trạng thái",
+      "statusReason": "Lý do khóa",
+      "statusChangedAt": "Thay đổi lúc",
+      "statusChangedBy": "Bởi",
       "joined": "Tham gia",
+      "version": "Phiên bản",
+      "profileId": "Profile ID",
       "totalBookings": "Tổng đặt chỗ",
       "suspendAccount": "Tạm khóa tài khoản",
-      "activateAccount": "Kích hoạt tài khoản"
+      "activateAccount": "Kích hoạt tài khoản",
+      "suspendHint": "Tài khoản vẫn đăng nhập được nhưng mọi API sẽ trả AUTH_006 cho tới khi kích hoạt lại. Không thể khóa khi còn booking đang hiệu lực.",
+      "roleConflict": "Vai trò mâu thuẫn — cần đồng bộ lại từ Keycloak.",
+      "roleUnknown": "Vai trò chưa xác định — chưa thể suspend/resume."
+    },
+    "dialog": {
+      "reasonLabel": "Lý do thao tác (Bắt buộc, tối đa 500 ký tự)",
+      "reasonRequired": "Vui lòng nhập lý do (5–500 ký tự).",
+      "reasonPlaceholder": "Nhập lý do chi tiết hoặc chọn nhanh từ gợi ý…",
+      "presetSuggestions": "Gợi ý lý do:",
+      "cancelBtn": "Hủy bỏ",
+      "processing": "Đang xử lý…",
+      "suspend": {
+        "title": "Tạm khóa tài khoản",
+        "subtitle": "Tạm khóa tài khoản của {{name}}. Mọi API sẽ trả AUTH_006 cho tới khi kích hoạt lại.",
+        "notice": "Không thể tạm khóa khi người dùng còn booking đang hiệu lực (PENDING còn hạn, CONFIRMED sắp tới, CHECKED_IN/CHARGING) hoặc vé hỗ trợ đang xử lý. Token hiện tại vẫn sống tối đa TTL rồi hết hạn.",
+        "confirmBtn": "Xác nhận tạm khóa"
+      },
+      "resume": {
+        "title": "Kích hoạt lại tài khoản",
+        "subtitle": "Khôi phục quyền truy cập cho {{name}}.",
+        "notice": "Người dùng có thể tiếp tục đăng nhập và sử dụng mọi chức năng sau khi được kích hoạt lại.",
+        "confirmBtn": "Xác nhận kích hoạt"
+      },
+      "presets": {
+        "suspend": {
+          "policy": "Vi phạm chính sách sử dụng nền tảng ChargeOps",
+          "abuse": "Lạm dụng hệ thống hoặc hành vi quấy rối",
+          "payment": "Tranh chấp thanh toán chưa được giải quyết",
+          "request": "Yêu cầu tạm khóa từ chính người dùng"
+        },
+        "resume": {
+          "resolved": "Đã xử lý xong vi phạm, khôi phục quyền sử dụng",
+          "userRequest": "Người dùng yêu cầu mở khóa trở lại",
+          "mistake": "Khóa nhầm — khôi phục ngay"
+        }
+      }
     }
   },
   "renewModal": {

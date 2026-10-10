@@ -751,7 +751,7 @@ export function buildMockDb(): MockDb {
     ],
   };
 
-  /* ---- users (FR12) ---- */
+  /* ---- users (FR12 / UM-01) ---- */
   const users: UserAccount[] = [
     { id: 'U-2041', name: 'Nguyễn Văn An', email: 'an.nguyen@gmail.com', role: 'DRIVER', joined: '2026-03-01', bookingCount: 47, status: 'active' },
     { id: 'U-2038', name: 'EVGo Co. (Vũ A.)', email: 'ops@evgo.vn', role: 'OWNER', joined: '2025-09-01', bookingCount: 0, status: 'active' },
@@ -760,6 +760,8 @@ export function buildMockDb(): MockDb {
     { id: 'U-2024', name: 'Phạm Quốc Dũng', email: 'dung.pham@gmail.com', role: 'DRIVER', joined: '2025-11-01', bookingCount: 3, status: 'suspended' },
     { id: 'U-2011', name: 'Đỗ Hải Long', email: 'long.do@gmail.com', role: 'DRIVER', joined: '2025-05-01', bookingCount: 89, status: 'active' },
     { id: 'U-2002', name: 'Quản trị hệ thống', email: 'admin@chargeops.vn', role: 'ADMIN', joined: '2025-01-01', bookingCount: 0, status: 'active' },
+    { id: 'U-2018', name: 'Lê Thị Mai (Staff)', email: 'mai.le@chargeops.vn', role: 'STAFF', joined: '2025-10-01', bookingCount: 0, status: 'active' },
+    { id: 'U-2021', name: 'Hoàng Văn Nam (Staff)', email: 'nam.hoang@chargeops.vn', role: 'STAFF', joined: '2026-02-01', bookingCount: 0, status: 'active' },
   ];
 
   /* ---- station staff (FR17 & V19) — assignments across the owner's stations ---- */

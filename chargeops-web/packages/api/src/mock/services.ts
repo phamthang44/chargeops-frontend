@@ -78,6 +78,12 @@ import type {
   StaffInvitationResponse,
   StaffInvitationStatus,
   StaffOperationalBooking,
+  AdminUserProfile,
+  AdminUserSummary,
+  AdminUserStatusRequest,
+  AdminUserStatusResponse,
+  AdminUserRole,
+  AdminUserStatusValue,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
@@ -161,6 +167,40 @@ function computeRefundPct(b: Booking, now = Date.now()): number {
 }
 
 const delay = (ms = 250 + Math.random() * 250) => new Promise((r) => setTimeout(r, ms));
+
+/** UM-01 mock: map a legacy seed UserAccount onto the admin projection. */
+function toAdminUser(u: {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  joined: string;
+  status: string;
+}): AdminUserProfile {
+  const status: AdminUserStatusValue = u.status === 'suspended' ? 'SUSPENDED' : 'ACTIVE';
+  const role = u.role as AdminUserRole;
+  const actions =
+    role === 'ADMIN' || role === 'OWNER' || role === 'UNKNOWN' || role === 'CONFLICT'
+      ? ['VIEW_DETAIL']
+      : status === 'ACTIVE'
+        ? ['VIEW_DETAIL', 'SUSPEND']
+        : ['VIEW_DETAIL', 'RESUME'];
+  return {
+    profileId: u.id,
+    displayName: u.name,
+    email: u.email,
+    role,
+    primaryRoleState: 'OK',
+    status,
+    statusReason: status === 'SUSPENDED' ? 'Vi phạm chính sách nền tảng' : undefined,
+    statusChangedAt: status === 'SUSPENDED' ? '2026-09-20T08:00:00Z' : undefined,
+    statusChangedBy: status === 'SUSPENDED' ? 'Quản trị hệ thống' : undefined,
+    profileCreatedAt: u.joined,
+    roleSyncedAt: u.joined,
+    version: 0,
+    actions,
+  };
+}
 
 let seq = 3304;
 
@@ -2206,18 +2246,63 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     users: {
       async list(params = {}) {
         await delay();
-        const q = (params.search ?? '').trim().toLowerCase();
-        let rows = [...db.users];
+        const q = (params.q ?? '').trim().toLowerCase();
+        let rows = db.users.map(toAdminUser);
         if (params.role && params.role !== 'all') rows = rows.filter((u) => u.role === params.role);
-        if (q) rows = rows.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
-        return rows;
+        if (params.status && params.status !== 'all') rows = rows.filter((u) => u.status === params.status);
+        if (q) rows = rows.filter((u) => u.displayName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+        const page = params.page ?? 0;
+        const pageSize = params.pageSize ?? 20;
+        const start = page * pageSize;
+        return { items: rows.slice(start, start + pageSize), total: rows.length, page, pageSize };
       },
-      async setStatus(id, status) {
+      async summary(params = {}) {
         await delay();
-        const u = db.users.find((x) => x.id === id);
-        if (!u) throw new Error(`Không tìm thấy người dùng ${id}`);
-        u.status = status;
-        return { ...u };
+        const q = (params.q ?? '').trim().toLowerCase();
+        const roleScope = params.role && params.role !== 'all' ? params.role : undefined;
+        const statusScope = params.status && params.status !== 'all' ? params.status : undefined;
+        const all = db.users.map(toAdminUser);
+        const inQRoleStatus = all.filter((u) => {
+          if (roleScope && u.role !== roleScope) return false;
+          if (statusScope && u.status !== statusScope) return false;
+          if (q && !u.displayName.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+          return true;
+        });
+        const byRole: Record<string, number> = { DRIVER: 0, OWNER: 0, ADMIN: 0, STAFF: 0, UNKNOWN: 0, CONFLICT: 0 };
+        for (const u of inQRoleStatus) byRole[u.role] = (byRole[u.role] ?? 0) + 1;
+        const inQRole = all.filter((u) => {
+          if (roleScope && u.role !== roleScope) return false;
+          if (q && !u.displayName.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+          return true;
+        });
+        const byStatus: Record<string, number> = { ACTIVE: 0, SUSPENDED: 0 };
+        for (const u of inQRole) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1;
+        return {
+          totalProfiles: inQRoleStatus.length,
+          byRole,
+          byStatus,
+          evaluatedAt: new Date().toISOString(),
+        } satisfies AdminUserSummary;
+      },
+      async detail(profileId: string) {
+        await delay();
+        const u = db.users.find((x) => x.id === profileId);
+        if (!u) throw new ApiError(404, 'PROFILE_003', 'Không tìm thấy người dùng');
+        return toAdminUser(u);
+      },
+      async setStatus(profileId: string, input: AdminUserStatusRequest): Promise<AdminUserStatusResponse> {
+        await delay();
+        const u = db.users.find((x) => x.id === profileId);
+        if (!u) throw new ApiError(404, 'PROFILE_003', 'Không tìm thấy người dùng');
+        const role = u.role as AdminUserRole;
+        if (role === 'ADMIN') throw new ApiError(403, 'USER_001', 'Không thể thao tác trên tài khoản quản trị');
+        if (role === 'OWNER') throw new ApiError(403, 'USER_007', 'Tài khoản chủ trạm được quản lý ngoài ứng dụng');
+        const current: AdminUserStatusValue = u.status === 'suspended' ? 'SUSPENDED' : 'ACTIVE';
+        if (current === input.status) {
+          return { profileId, status: current, version: 0, changed: false, commandId: input.commandId };
+        }
+        u.status = input.status === 'SUSPENDED' ? 'suspended' : 'active';
+        return { profileId, status: input.status, version: 1, changed: true, commandId: input.commandId };
       },
     },
 

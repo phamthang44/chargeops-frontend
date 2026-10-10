@@ -35,6 +35,16 @@
     "STATION_033": "Connector hardware cannot be changed after charge-point activation.",
     "STATION_034": "Connector is not available for check-in.",
 
+    "AUTH_006": "This account has been suspended. Contact an administrator to reactivate it.",
+    "USER_001": "This account cannot be modified.",
+    "USER_002": "Invalid action reason.",
+    "USER_003": "The record was changed by another action. Please refresh.",
+    "USER_004": "Cannot suspend while the user still has an active charging session or booking.",
+    "USER_005": "Could not verify the user's current role. Please try again.",
+    "USER_007": "Station-owner accounts are managed outside the app.",
+    "PROFILE_003": "User profile not found.",
+    "PROFILE_004": "Your account is not active.",
+
     "LICENSE_003": "License was modified concurrently.",
     "LICENSE_004": "Invalid license status transition.",
     "LICENSE_005": "Operation is outside the effective license period.",

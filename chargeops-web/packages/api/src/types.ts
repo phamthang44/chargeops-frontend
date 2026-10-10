@@ -914,6 +914,57 @@ export interface UserAccount {
   status: UserStatus;
 }
 
+/** UM-01/02: canonical backend `PrimaryRole` (uppercase). UNKNOWN/CONFLICT are projection states. */
+export type AdminUserRole = UserRole | 'UNKNOWN' | 'CONFLICT';
+/** UM-02: canonical backend `UserStatus` (uppercase). */
+export type AdminUserStatusValue = 'ACTIVE' | 'SUSPENDED';
+
+/** UM-01 list/detail item — `GET /admin/users` + `GET /admin/users/{id}`. */
+export interface AdminUserProfile {
+  profileId: string;
+  displayName: string;
+  email: string;
+  role: AdminUserRole;
+  /** "OK" when role projection is healthy; else UNKNOWN/CONFLICT. */
+  primaryRoleState: string;
+  status: AdminUserStatusValue;
+  statusReason?: string;
+  statusChangedAt?: string;
+  /** Display name of the last actor (never an internal UUID). */
+  statusChangedBy?: string;
+  profileCreatedAt?: string;
+  roleSyncedAt?: string;
+  version: number;
+  /** VIEW_DETAIL + SUSPEND/RESUME per role/status/self (UM-00 §6.2). */
+  actions: string[];
+}
+
+/** UM-01 summary — independent of the page currently viewed. */
+export interface AdminUserSummary {
+  scope?: { q?: string; role?: string; status?: string };
+  totalProfiles: number;
+  byRole: Record<string, number>;
+  byStatus: Record<string, number>;
+  evaluatedAt?: string;
+}
+
+/** UM-02 PATCH body — no actorId/role/keycloakId from client. */
+export interface AdminUserStatusRequest {
+  status: AdminUserStatusValue;
+  expectedVersion: number;
+  reason: string;
+  /** Client-generated UUID; replays return the current snapshot with changed=false. */
+  commandId: string;
+}
+
+export interface AdminUserStatusResponse {
+  profileId: string;
+  status: AdminUserStatusValue;
+  version: number;
+  changed: boolean;
+  commandId: string;
+}
+
 /* ---------- station staff (FR17 & V19) ---------- */
 
 export type StaffAssignmentStatus = 'ACTIVE' | 'REVOKED';

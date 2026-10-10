@@ -35,6 +35,16 @@
     "STATION_033": "Thông số phần cứng súng sạc không thể thay đổi sau khi kích hoạt.",
     "STATION_034": "Súng sạc không khả dụng để check-in.",
 
+    "AUTH_006": "Tài khoản đã bị tạm khóa. Liên hệ quản trị viên để được kích hoạt lại.",
+    "USER_001": "Không thể thao tác trên tài khoản này.",
+    "USER_002": "Lý do thao tác không hợp lệ.",
+    "USER_003": "Dữ liệu đã thay đổi bởi thao tác khác. Vui lòng tải lại.",
+    "USER_004": "Không thể tạm khóa khi người dùng còn phiên sạc hoặc booking đang hiệu lực.",
+    "USER_005": "Không xác minh được vai trò hiện tại của người dùng. Vui lòng thử lại.",
+    "USER_007": "Tài khoản Chủ trạm được quản lý ngoài ứng dụng.",
+    "PROFILE_003": "Không tìm thấy hồ sơ người dùng.",
+    "PROFILE_004": "Tài khoản của bạn chưa hoạt động.",
+
     "LICENSE_003": "Giấy phép đã bị chỉnh sửa bởi thao tác khác.",
     "LICENSE_004": "Trạng thái chuyển đổi giấy phép không hợp lệ.",
     "LICENSE_005": "Thời điểm thao tác nằm ngoài thời hạn hiệu lực của giấy phép.",

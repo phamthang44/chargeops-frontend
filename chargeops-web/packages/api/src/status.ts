@@ -89,9 +89,11 @@ export const LICENSE_STATUS: Record<LicenseStatus, StatusMeta> = {
   expired: { label: 'Đã hết hạn', tone: 'bad' },
 };
 
-export const USER_STATUS: Record<UserStatus, StatusMeta> = {
+export const USER_STATUS: Record<UserStatus | 'ACTIVE' | 'SUSPENDED', StatusMeta> = {
   active: { label: 'Hoạt động', tone: 'good' },
   suspended: { label: 'Tạm khóa', tone: 'bad' },
+  ACTIVE: { label: 'Hoạt động', tone: 'good' },
+  SUSPENDED: { label: 'Tạm khóa', tone: 'bad' },
 };
 
 export const TICKET_STATUS: Record<TicketStatus, StatusMeta> = {
@@ -164,13 +166,15 @@ export const TICKET_EVENT_TYPE: Record<TicketEventType, { label: string; tone: T
 
 /** Role badge colours (mono chips) — CSS var references so dark mode repaints them via inline style. */
 export const USER_ROLE_BADGE: Record<
-  'DRIVER' | 'OWNER' | 'ADMIN' | 'STAFF',
+  'DRIVER' | 'OWNER' | 'ADMIN' | 'STAFF' | 'UNKNOWN' | 'CONFLICT',
   { bg: string; fg: string }
 > = {
   DRIVER: { bg: 'var(--color-chip)', fg: 'var(--color-body)' },
   OWNER: { bg: 'var(--color-owner-soft)', fg: 'var(--color-owner-deep)' },
   ADMIN: { bg: 'var(--color-solid)', fg: 'var(--color-solid-fg)' },
   STAFF: { bg: 'var(--color-warn-soft)', fg: 'var(--color-warn-deep)' },
+  UNKNOWN: { bg: 'var(--color-chip)', fg: 'var(--color-muted)' },
+  CONFLICT: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)' },
 };
 
 /**

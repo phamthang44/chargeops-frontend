@@ -974,17 +974,27 @@
       "all": "All",
       "DRIVER": "Drivers",
       "OWNER": "Owners",
-      "ADMIN": "Admins"
+      "ADMIN": "Admins",
+      "STAFF": "Staff"
     },
     "status": {
       "active": "Active",
       "suspended": "Suspended"
     },
+    "statusMap": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "statusFilters": {
+      "all": "Any status"
+    },
     "toastStatus": "{{name}}: {{status}}",
+    "toastNoop": "Status is already in this state — no change applied.",
     "error": "Failed to load users: {{message}}",
     "kpi": {
       "total": "TOTAL ACCOUNTS",
       "drivers": "DRIVERS",
+      "staff": "STAFF",
       "owners": "OWNERS",
       "suspended": "SUSPENDED"
     },
@@ -997,16 +1007,60 @@
         "status": "STATUS",
         "action": "ACTION"
       },
+      "emptyTitle": "No users found",
+      "emptyDesc": "Try a different keyword or role/status filter.",
       "suspend": "Suspend",
       "activate": "Activate"
     },
     "drawer": {
       "close": "Close",
       "role": "Role",
+      "status": "Status",
+      "statusReason": "Suspension reason",
+      "statusChangedAt": "Changed at",
+      "statusChangedBy": "By",
       "joined": "Joined",
+      "version": "Version",
+      "profileId": "Profile ID",
       "totalBookings": "Total Bookings",
       "suspendAccount": "Suspend Account",
-      "activateAccount": "Activate Account"
+      "activateAccount": "Activate Account",
+      "suspendHint": "The account can still sign in but every API returns AUTH_006 until reactivated. Suspend is blocked while the user has an active booking.",
+      "roleConflict": "Role projection is in conflict — re-sync from Keycloak required.",
+      "roleUnknown": "Role is unknown — suspend/resume is not available."
+    },
+    "dialog": {
+      "reasonLabel": "Reason (required, max 500 characters)",
+      "reasonRequired": "Please enter a reason (5–500 characters).",
+      "reasonPlaceholder": "Enter a detailed reason or pick a suggestion...",
+      "presetSuggestions": "Suggested reasons:",
+      "cancelBtn": "Cancel",
+      "processing": "Processing...",
+      "suspend": {
+        "title": "Suspend account",
+        "subtitle": "Suspend {{name}}. Every API will return AUTH_006 until reactivated.",
+        "notice": "Suspend is blocked while the user has an effective booking (unexpired PENDING, upcoming CONFIRMED, CHECKED_IN/CHARGING) or an in-progress support ticket. The current token lives at most its TTL.",
+        "confirmBtn": "Confirm suspend"
+      },
+      "resume": {
+        "title": "Reactivate account",
+        "subtitle": "Restore access for {{name}}.",
+        "notice": "The user can sign in and use all features again after reactivation.",
+        "confirmBtn": "Confirm reactivate"
+      },
+      "presets": {
+        "suspend": {
+          "policy": "Violation of ChargeOps platform policy",
+          "abuse": "System abuse or harassment",
+          "payment": "Unresolved payment dispute",
+          "request": "Account owner requested temporary suspension"
+        },
+        "resume": {
+          "resolved": "Violation handled — restore access",
+          "userRequest": "User requested unlock",
+          "mistake": "Suspended by mistake — restore now"
+        }
+      }
     }
   },
   "renewModal": {

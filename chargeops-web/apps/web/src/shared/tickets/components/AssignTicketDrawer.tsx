@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useApi, type StationStaffMember, type Ticket, type UserAccount } from '@chargeops/api';
+import { useApi, type StationStaffMember, type Ticket, type AdminUserProfile } from '@chargeops/api';
 import {
   Avatar,
   Button,
@@ -64,7 +64,7 @@ export function AssignTicketDrawer({
   // Admin users query (for admin platform ticket assignment)
   const adminUsersQuery = useQuery({
     queryKey: ['users', 'admins'],
-    queryFn: () => api.users.list({ role: 'ADMIN' }),
+    queryFn: () => api.users.list({ role: 'ADMIN', pageSize: 100 }),
     enabled: open && isAdminPlatform,
   });
 
@@ -82,8 +82,12 @@ export function AssignTicketDrawer({
   }));
 
   const activeAdminList = useMemo(() => {
-    const raw: UserAccount[] = Array.isArray(adminUsersQuery.data) ? adminUsersQuery.data : [];
-    return raw.filter((u) => u.status === 'active' || String(u.status).toUpperCase() === 'ACTIVE');
+    const raw: AdminUserProfile[] = Array.isArray(adminUsersQuery.data?.items)
+      ? adminUsersQuery.data.items
+      : [];
+    return raw
+      .filter((u) => u.status === 'ACTIVE')
+      .map((u) => ({ id: u.profileId, name: u.displayName, email: u.email, status: u.status }));
   }, [adminUsersQuery.data]);
 
   const handleSubmit = async (e: React.FormEvent) => {

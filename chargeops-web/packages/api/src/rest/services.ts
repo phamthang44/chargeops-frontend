@@ -73,6 +73,9 @@ import type {
   StaffOperationalBooking,
   StaffStationOverview,
   StaffInvitationStatus,
+  AdminUserProfile,
+  AdminUserSummary,
+  AdminUserStatusResponse,
   Page,
 } from '../types';
 
@@ -1077,8 +1080,33 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     users: {
-      list: (params = {}) => http.get('/admin/users', params),
-      setStatus: (id, status) => http.patch(`/admin/users/${id}/status`, { status }),
+      list: async (params = {}) => {
+        const query: Record<string, unknown> = {
+          page: (params.page ?? 0) + 1,
+          size: params.pageSize ?? 20,
+          q: params.q || undefined,
+          role: params.role && params.role !== 'all' ? params.role : undefined,
+          status: params.status && params.status !== 'all' ? params.status : undefined,
+        };
+        // HttpClient converts Spring meta {page(1-based),size,totalElements} into
+        // {items,total,page(1-based),pageSize,meta,counts} — normalize to FE 0-based.
+        const res: any = await http.get('/admin/users', query);
+        return toPage<AdminUserProfile>(res, params.page ?? 0, params.pageSize ?? 20);
+      },
+      summary: (params = {}) =>
+        http.get<AdminUserSummary>('/admin/users/summary', {
+          q: params.q || undefined,
+          role: params.role && params.role !== 'all' ? params.role : undefined,
+          status: params.status && params.status !== 'all' ? params.status : undefined,
+        }),
+      detail: (profileId) => http.get<AdminUserProfile>(`/admin/users/${profileId}`),
+      setStatus: (profileId, input) =>
+        http.patch<AdminUserStatusResponse>(`/admin/users/${profileId}/status`, {
+          status: input.status,
+          expectedVersion: input.expectedVersion,
+          reason: input.reason,
+          commandId: input.commandId,
+        }),
     },
 
     staff: {

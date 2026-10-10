@@ -41,6 +41,7 @@ export function FinanceLedgerTab() {
   const [page, setPage] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<OwnerFinanceBooking | null>(null);
   const [isReceiptsOpen, setIsReceiptsOpen] = useState(false);
+  const [loadingReceiptBookingId, setLoadingReceiptBookingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Dedicated Summary Query with 30s auto polling
@@ -68,9 +69,20 @@ export function FinanceLedgerTab() {
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const handleOpenReceipts = (booking: OwnerFinanceBooking) => {
-    setSelectedBooking(booking);
-    setIsReceiptsOpen(true);
+  const handleOpenReceipts = async (booking: OwnerFinanceBooking) => {
+    setLoadingReceiptBookingId(booking.bookingId);
+    try {
+      const detail = await api.ownerFinance.get(booking.bookingId);
+      setSelectedBooking(detail);
+      setIsReceiptsOpen(true);
+    } catch {
+      toast(
+        t('finance.receiptsDrawer.loadError', 'Không thể tải chứng từ. Vui lòng thử lại.'),
+        'error',
+      );
+    } finally {
+      setLoadingReceiptBookingId(null);
+    }
   };
 
   const filteredItems = useMemo(() => {
@@ -323,10 +335,15 @@ export function FinanceLedgerTab() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleOpenReceipts(b)}
+                            disabled={loadingReceiptBookingId === b.bookingId}
                             className="h-7 px-2.5 text-[11px] font-semibold text-brand hover:bg-brand/10 rounded-lg"
                           >
                             <IconCard size={12} className="mr-1" />
-                            <span>{t('finance.table.receiptsBtn', 'Chứng từ')}</span>
+                            <span>
+                              {loadingReceiptBookingId === b.bookingId
+                                ? t('common:loading', 'Đang tải...')
+                                : t('finance.table.receiptsBtn', 'Chứng từ')}
+                            </span>
                           </Button>
                         </div>
                       </div>

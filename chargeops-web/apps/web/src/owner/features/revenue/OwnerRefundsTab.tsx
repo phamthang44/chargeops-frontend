@@ -47,6 +47,7 @@ export function OwnerRefundsTab() {
   const [retryRefund, setRetryRefund] = useState<OwnerRefund | null>(null);
   const [isAttemptsDrawerOpen, setIsAttemptsDrawerOpen] = useState(false);
   const [isRetryModalOpen, setIsRetryModalOpen] = useState(false);
+  const [loadingAttemptsRefundId, setLoadingAttemptsRefundId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Dedicated Summary Query with 30s auto polling
@@ -83,9 +84,20 @@ export function OwnerRefundsTab() {
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const handleOpenAttempts = (r: OwnerRefund) => {
-    setSelectedRefund(r);
-    setIsAttemptsDrawerOpen(true);
+  const handleOpenAttempts = async (r: OwnerRefund) => {
+    setLoadingAttemptsRefundId(r.refundId);
+    try {
+      const detail = await api.ownerRefunds.get(r.refundId);
+      setSelectedRefund(detail);
+      setIsAttemptsDrawerOpen(true);
+    } catch {
+      toast(
+        t('finance.attemptsDrawer.loadError', 'Không thể tải lịch sử hoàn tiền. Vui lòng thử lại.'),
+        'error',
+      );
+    } finally {
+      setLoadingAttemptsRefundId(null);
+    }
   };
 
   const handleOpenRetry = (r: OwnerRefund) => {
@@ -291,7 +303,9 @@ export function OwnerRefundsTab() {
                 ) : (
                   displayItems.map((r) => {
                     const isPending = r.status === 'PENDING';
-                    const hasFailedAttempt = Boolean(r.attempts && r.attempts.some((a) => a.status === 'FAILED'));
+                    const hasFailedAttempt = r.requiresOwnerAction
+                      || Boolean(r.attempts && r.attempts.some((a) => a.status === 'FAILED'));
+                    const attemptsCount = r.attempts?.length ? r.attempts.length : null;
 
                     return (
                       <div
@@ -366,7 +380,7 @@ export function OwnerRefundsTab() {
                                 : 'bg-surface-2 text-muted border border-hairline'
                             }`}
                           >
-                            x{r.attempts?.length ?? 1}
+                            {attemptsCount === null ? '—' : `x${attemptsCount}`}
                           </span>
                         </div>
 
@@ -386,9 +400,12 @@ export function OwnerRefundsTab() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleOpenAttempts(r)}
+                            disabled={loadingAttemptsRefundId === r.refundId}
                             className="h-7 px-2 text-[11px] font-semibold text-muted hover:text-ink rounded-lg"
                           >
-                            {t('finance.refunds.table.historyBtn', 'Lịch sử')}
+                            {loadingAttemptsRefundId === r.refundId
+                              ? t('common:loading', 'Đang tải...')
+                              : t('finance.refunds.table.historyBtn', 'Lịch sử')}
                           </Button>
                         </div>
                       </div>

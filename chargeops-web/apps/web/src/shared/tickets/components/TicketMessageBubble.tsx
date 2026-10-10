@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { formatDateVn, formatTimeVn, type TicketMessage } from '@chargeops/api';
 import { Avatar } from '@chargeops/ui';
 
-export function getActorMeta(m: TicketMessage) {
+function getActorMeta(m: TicketMessage) {
   const kind = m.authorKind;
   if (kind === 'ADMIN') {
     return {

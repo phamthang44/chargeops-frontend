@@ -71,7 +71,7 @@ export function StaffNotifications({ base = '/staff' }: { base?: string }) {
         stationName: n.stationName,
         chargerId: n.chargerId,
         badge: n.badge,
-        actionLabel: n.actionLabel || n.primaryAction?.label,
+        actionLabel: resolveNotificationI18n(n.actionLabel || n.primaryAction?.label, t),
         onSelect: navigateToTarget,
         onAction: navigateToTarget,
       };

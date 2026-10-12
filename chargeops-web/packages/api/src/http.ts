@@ -42,6 +42,8 @@ export class HttpClient {
 
     const headers: Record<string, string> = { Accept: 'application/json', ...(opts.headers ?? {}) };
     if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+    const language = this.cfg.getLanguage?.();
+    if (language) headers['Accept-Language'] = language;
     const token = await this.cfg.getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
 

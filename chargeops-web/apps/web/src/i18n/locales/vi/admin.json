@@ -235,7 +235,7 @@
     }
   },
   "analytics": {
-    "error": "Không tải được phân tích: {{message}}",
+    "error": "Không thể tải số liệu phân tích",
     "ranges": {
       "30d": "30 ngày",
       "90d": "90 ngày",
@@ -266,7 +266,7 @@
     "toastApproved": "Đã duyệt hồ sơ {{name}}",
     "toastRejected": "Đã từ chối {{name}}",
     "toastIssued": "Đã ghi nhận & kích hoạt License thành công cho {{name}}",
-    "error": "Không tải được hồ sơ: {{message}}",
+    "error": "Không thể tải danh sách phê duyệt",
     "emptyTitle": "Hết hồ sơ chờ duyệt",
     "emptyDesc": "Tất cả trạm đăng ký đã được xử lý.",
     "table": {
@@ -336,7 +336,7 @@
     }
   },
   "dashboard": {
-    "error": "Không tải được dữ liệu tổng quan: {{message}}",
+    "error": "Không thể tải dữ liệu tổng quan",
     "ops": {
       "platformOpenTickets": "Ticket nền tảng đang mở",
       "escalatedOpenCases": "Case trạm cần xem xét",
@@ -384,6 +384,7 @@
     }
   },
   "licenses": {
+    "title": "Giấy phép",
     "toastRenewal": "Đã ghi nhận gia hạn License cho {{name}}",
     "updateSuccess": "Thao tác cập nhật trạng thái License thành công.",
     "kpi": {
@@ -601,7 +602,7 @@
     "toastSaved": "Đã lưu & tái tạo embedding",
     "toastDeleted": "Đã xóa tài liệu",
     "addDocBtn": "Tạo văn bản mới",
-    "error": "Không tải được kho chính sách: {{message}}",
+    "error": "Không thể tải kho chính sách",
     "syncNote": "Embedding đồng bộ · cập nhật 29/06",
     "categorySidebar": "DANH MỤC",
     "searchPlaceholder": "Tìm trong nội dung chính sách…",
@@ -769,7 +770,187 @@
       "AVAILABLE": "Sẵn sàng",
       "IN_USE": "Đang sạc",
       "OFFLINE": "Ngoại tuyến",
-      "MAINTENANCE": "Bảo trì"
+      "MAINTENANCE": "Bảo trì",
+      "DRAFT": "Chưa mở sạc",
+      "SUSPENDED": "Tạm dừng theo trụ"
+    },
+    "legend": {
+      "title": "Bảng chú giải ý nghĩa Trạng thái Thiết bị",
+      "subtitle": "Quy tắc tách bạch 2 tầng trạng thái: Quản trị cấp phép (Admin) và Vận hành kỹ thuật (OCPP Telemetry)",
+      "badge": "Kiến trúc 2 tầng",
+      "toggleOpen": "Xem chú giải chi tiết ▼",
+      "toggleClose": "Thu gọn chú giải ▲",
+      "cpSection": "1. Trạng thái Trụ sạc (Charge Point)",
+      "cpAdminGroup": "A. Quản trị Cấp phép (Admin Provisioning):",
+      "cpPendingDesc": "Bản nháp, đang cấu hình súng & công suất, chưa mở cho tài xế.",
+      "cpActiveDesc": "Đã duyệt quy hoạch, khóa cứng phần cứng và đưa vào hoạt động kinh doanh.",
+      "cpSuspendedDesc": "Admin tạm dừng toàn bộ trụ vì lý do hành chính, sự cố hoặc bảo trì.",
+      "cpTechGroup": "B. Kết nối Kỹ thuật (OCPP Telemetry - khi trụ Đang hoạt động):",
+      "cpAvailableDesc": "Trụ Online, tín hiệu kết nối OCPP thông suốt, sẵn sàng cấp điện.",
+      "cpOfflineDesc": "Trụ mất kết nối Internet/OCPP hoặc mất nguồn điện thực tế.",
+      "cpMaintDesc": "Trụ đang trong chế độ bảo dưỡng kỹ thuật tại chỗ.",
+      "cpNoteTitle": "Vì sao có trụ vừa 'Đang hoạt động' vừa 'Ngoại tuyến'?",
+      "cpNoteBody": "'Đang hoạt động' là phê duyệt quản trị của Admin cho phép trạm kinh doanh. 'Ngoại tuyến' là tình trạng phần cứng thực tế đang mất sóng mạng hoặc mất điện nguồn với máy chủ.",
+      "connectorSection": "2. Trạng thái Súng sạc (Connector Runtime)",
+      "connectorSectionSub": "Khả năng phục vụ sạc của từng đầu cắm:",
+      "connAvailableDesc": "Cổng sạc rảnh rỗi, sẵn sàng cắm sạc ngay hoặc nhận đặt chỗ trước.",
+      "connInUseDesc": "Có xe đang cắm giữ súng và phiên sạc đang diễn ra.",
+      "connOfflineDesc": "Cổng sạc bị ngắt (Chủ trạm/Nhân viên tắt bảo dưỡng hoặc gặp sự cố).",
+      "connPendingDesc": "Súng sạc tự động đóng do Trụ cha chưa kích hoạt hoặc bị tạm ngưng.",
+      "connRuleTitle": "Phân quyền vận hành (SRS 4.8 & BR-CHG-05):",
+      "connRuleBody": "Admin phụ trách cấp phép & niêm phong phần cứng Trụ (FR14). Chủ trạm (Owner) & Nhân viên (Staff) phụ trách bật/tắt vận hành từng Súng sạc (BR-CHG-05)."
+    },
+    "tooltips": {
+      "cpPending": "Cấp phép Admin: Bản nháp, đang cấu hình phần cứng và chưa mở cho tài xế.",
+      "cpActive": "Cấp phép Admin: Trụ đã khóa cấu hình phần cứng và được duyệt hoạt động kinh doanh.",
+      "cpSuspended": "Cấp phép Admin: Trụ bị tạm ngưng vận hành theo quyết định của Admin.",
+      "cpAvailable": "Kết nối Kỹ thuật: Trụ Online, kết nối máy chủ OCPP ổn định và sẵn sàng cấp điện.",
+      "cpOffline": "Kết nối Kỹ thuật: Trụ mất kết nối mạng OCPP hoặc mất nguồn điện ngoài thực tế.",
+      "cpMaintenance": "Kết nối Kỹ thuật: Trụ đang trong quá trình bảo dưỡng kỹ thuật.",
+      "connAvailable": "Súng sạc rảnh rỗi, sẵn sàng cấp sạc hoặc nhận đặt chỗ trước.",
+      "connInUse": "Đang có xe cắm sạc và thực hiện phiên nạp điện.",
+      "connOffline": "Cổng sạc bị ngắt (Chủ trạm/Nhân viên tắt bảo dưỡng hoặc có lỗi).",
+      "connDraft": "Trụ sạc chưa kích hoạt, súng sạc ở trạng thái cấu hình nháp.",
+      "connSuspended": "Trụ sạc bị tạm ngưng, cổng sạc tạm thời không tiếp nhận phiên sạc."
+    },
+    "badgeLabels": {
+      "admin": "Cấp phép:",
+      "telemetry": "Kỹ thuật:"
+    },
+    "pills": {
+      "pending": "Chờ kích hoạt",
+      "active": "Đang hoạt động",
+      "suspended": "Tạm ngưng vận hành",
+      "available": "Sẵn sàng",
+      "offline": "Ngoại tuyến",
+      "maintenance": "Bảo trì",
+      "inUse": "Đang sạc",
+      "sealed": "Chưa mở sạc / Tạm dừng",
+      "closed": "Chưa mở sạc",
+      "byCp": "Tạm dừng theo trụ"
+    },
+    "connectorTypes": {
+      "CCS2": "CCS2 (Sạc nhanh DC)",
+      "CHADEMO": "CHAdeMO (DC)",
+      "TYPE2": "Type 2 AC (Chuẩn)",
+      "GBT": "GB/T (Chuẩn Trung Quốc)"
+    },
+    "workspace": {
+      "backToList": "Quay lại danh sách trạm sạc",
+      "viewLicense": "Xem giấy phép License ↗",
+      "fr14Badge": "Không gian Cấp trụ (FR14)",
+      "ownerLabel": "Chủ trạm:",
+      "ownerFallback": "Chủ trạm",
+      "plannedLabel": "Quy hoạch duyệt:",
+      "plannedCount_one": "{{count}} Trụ",
+      "plannedCount_other": "{{count}} Trụ",
+      "listTitle": "Danh mục Trụ sạc đã cấp ({{count}}/{{planned}} Trụ quy hoạch)",
+      "listSubtitle": "Đã cấp {{count}} trụ thực tế trên tổng số {{planned}} trụ được duyệt quy hoạch",
+      "openForDrivers_one": "{{count}} trụ đang mở cho tài xế",
+      "openForDrivers_other": "{{count}} trụ đang mở cho tài xế",
+      "emptyTitle": "Trạm sạc này chưa có trụ nào",
+      "emptyDescription": "Bắt đầu cấp hạ tầng bằng cách tạo mã Trụ sạc đầu tiên cho trạm.",
+      "emptyCreateBtn": "Tạo Trụ sạc ngay",
+      "steps": {
+        "step1": "1. Tạo Trụ kèm sẵn Súng sạc",
+        "step2": "2. Rà soát / sửa cấu hình bản nháp",
+        "step3": "3. Kích hoạt và khóa phần cứng"
+      },
+      "common": {
+        "cpLabel": "Trụ:",
+        "stationLabel": "Trạm:",
+        "processing": "Đang xử lý..."
+      },
+      "chargePoint": {
+        "nameFallback": "Trụ sạc",
+        "maxPowerLabel": "Công suất tối đa:",
+        "connectorCountLabel": "Súng sạc:",
+        "connectorUnit_one": "{{count}} Súng",
+        "connectorUnit_other": "{{count}} Súng",
+        "configuring": "⚙️ Đang cấu hình phần cứng",
+        "hardwareLocked": "Phần cứng đã khóa",
+        "historyTitle": "Xem toàn bộ lịch sử trạng thái của trụ sạc",
+        "historyBtn": "Lịch sử trụ",
+        "deleteDraftBtn": "Xóa bản nháp trụ",
+        "suspendBtn": "Tạm ngưng trụ sạc",
+        "reactivateBtn": "Mở lại hoạt động"
+      },
+      "connector": {
+        "kindAc": "AC Tiêu chuẩn",
+        "kindDc": "DC Sạc nhanh",
+        "historyTitle": "Xem lịch sử thay đổi trạng thái súng sạc",
+        "historyBtn": "Lịch sử",
+        "editTitle": "Chỉnh sửa chuẩn kết nối và công suất trước khi kích hoạt",
+        "editBtn": "Sửa",
+        "deleteTitle": "Xóa súng sạc bản nháp",
+        "deleteBtn": "Xóa",
+        "lockedTitle": "Sau khi trụ kích hoạt ACTIVE, cấu hình phần cứng súng sạc được cố định",
+        "lockedBtn": "Cố định phần cứng",
+        "noConnectorsWarning": "Trụ sạc này chưa có súng sạc nào. Vui lòng nhấn nút <bold>\"{{btn}}\"</bold> bên dưới để thiết lập chuẩn kết nối và công suất trước khi kích hoạt mở cho tài xế."
+      },
+      "activate": {
+        "title": "Xác nhận cấu hình trước khi kích hoạt",
+        "warning": "Sau khi kích hoạt, cấu hình phần cứng súng sạc sẽ được <bold>khóa cố định</bold> (Hardware Immutable) để đảm bảo an toàn vận hành và tương thích hệ thống đặt lịch. Hệ thống hiện ghi nhận <bold>{{count}} súng sạc</bold>.",
+        "countLabel": "Nhập tổng số súng sạc đã lắp đặt *",
+        "countPlaceholder": "Nhập {{count}} để xác nhận",
+        "countMismatch": "Số xác nhận phải khớp đúng {{count}} súng sạc đang có.",
+        "confirmBtn": "Xác nhận và kích hoạt"
+      },
+      "suspend": {
+        "title": "Tạm ngưng hoạt động Trụ sạc",
+        "body": "Khi tạm ngưng trụ <bold>{{name}}</bold>, tất cả các súng sạc thuộc trụ này sẽ tạm dừng tiếp nhận lượt sạc mới và cập nhật trạng thái trên app tài xế.",
+        "reasonLabel": "Lý do tạm ngưng *",
+        "reasonPlaceholder": "Nhập lý do tạm ngưng (vd: Bảo trì định kỳ, sự cố nguồn điện, thay thế linh kiện...)",
+        "confirmBtn": "Xác nhận tạm ngưng"
+      },
+      "reactivate": {
+        "title": "Mở lại hoạt động Trụ sạc",
+        "body": "Xác nhận mở lại trụ <bold>{{name}}</bold> để tiếp tục phục vụ người dùng và nhận đặt lịch sạc.",
+        "reasonLabel": "Lý do mở lại *",
+        "reasonPlaceholder": "Nhập lý do mở lại (vd: Đã kiểm tra an toàn điện và sẵn sàng phục vụ...)",
+        "confirmBtn": "Xác nhận mở lại"
+      },
+      "create": {
+        "title": "Khởi tạo Trụ sạc mới",
+        "nameLabel": "Tên / Ký hiệu vị trí (không bắt buộc)",
+        "namePlaceholder": "Ví dụ: Trụ A, Khu B, Tầng hầm 1",
+        "zoneLabel": "Vị trí / Zone gợi ý cho tài xế",
+        "zonePlaceholder": "Ví dụ: Cạnh cổng bảo vệ, Tầng hầm B1 khu A",
+        "standardLabel": "Chuẩn sạc",
+        "powerLabel": "Công suất mỗi súng",
+        "quantityLabel": "Số lượng súng",
+        "help": "Trụ và toàn bộ Súng sạc được tạo cùng một giao dịch. Mã CP và C-01… được hệ thống cấp tự động; công suất trụ được suy ra từ Súng mạnh nhất.",
+        "submitting": "Đang tạo...",
+        "submitBtn": "Xác nhận tạo trụ"
+      },
+      "connectorForm": {
+        "codeLabel": "Mã súng sạc (Connector Code) *",
+        "codePlaceholder": "Ví dụ: C-01, C-02",
+        "typeLabel": "Loại chuẩn kết nối súng *",
+        "powerLabel": "Công suất sạc (kW) *",
+        "addTitle": "Thêm Súng sạc vào Trụ",
+        "addHelp": "Hệ thống tự động liên kết <bold>Dynamic QR Check-in</bold> cho súng sạc này khi tài xế cắm sạc thực tế.",
+        "addSubmitting": "Đang thêm...",
+        "addSubmitBtn": "Xác nhận thêm súng",
+        "editTitle": "Chỉnh sửa thông số Súng sạc",
+        "editCodeLabel": "Mã súng:",
+        "editNotice": "⚙️ Trụ sạc đang ở trạng thái <bold>Chờ kích hoạt (PENDING_ACTIVATION)</bold>. Admin có thể tùy chỉnh chuẩn sạc và công suất định mức trước khi kích hoạt khóa phần cứng.",
+        "editSubmitting": "Đang lưu...",
+        "editSubmitBtn": "Lưu thay đổi",
+        "updateToast": "Cập nhật súng {{id}} thành công"
+      },
+      "delete": {
+        "cpTitle": "Xóa bản nháp Trụ sạc",
+        "connTitle": "Xóa bản nháp Súng sạc",
+        "connectorFallback": "Súng sạc",
+        "cpLabel": "Trụ sạc:",
+        "codeLabel": "Mã súng:",
+        "cpBody": "Bạn đang thực hiện xóa trụ sạc <bold>{{name}}</bold> và <bold>toàn bộ súng sạc bên trong</bold> khỏi cấu hình nháp của trạm. Hành động này không thể hoàn tác.",
+        "connBody": "Súng sạc <bold>{{code}}</bold> ({{type}} · {{power}} kW) sẽ bị xóa vĩnh viễn khỏi trụ sạc <bold>{{cp}}</bold>.",
+        "deleting": "Đang xóa...",
+        "confirmCpBtn": "Xác nhận xóa trụ",
+        "confirmConnectorBtn": "Xác nhận xóa súng"
+      }
     },
     "toastDownloading": "Đang tải QR cho {{id}}… (demo)",
     "downloadQr": "Tải QR",
@@ -991,7 +1172,7 @@
     },
     "toastStatus": "{{name}}: {{status}}",
     "toastNoop": "Trạng thái đã ở chế độ này — không có thay đổi.",
-    "error": "Không tải được người dùng: {{message}}",
+    "error": "Không thể tải danh sách người dùng",
     "kpi": {
       "total": "TỔNG TÀI KHOẢN",
       "drivers": "TÀI XẾ",
@@ -1129,8 +1310,10 @@
         "createdAt": "NGÀY TẠO",
         "actions": "THAO TÁC"
       },
-      "chargersCount": "{{chargePoints}} trụ · {{connectors}} cổng",
-      "empty": "Không tìm thấy trạm sạc nào phù hợp với bộ lọc."
+    "chargersCount": "{{chargePoints}} trụ · {{connectors}} cổng",
+    "empty": "Không tìm thấy trạm sạc nào phù hợp với bộ lọc.",
+    "emptyTitle": "Không tìm thấy trạm",
+    "emptyInitial": "Thông tin trạm không tồn tại hoặc đã bị xóa."
     },
     "actions": {
       "viewDetail": "Xem chi tiết",
@@ -1188,6 +1371,49 @@
       "phone": "Điện thoại:",
       "email": "Email:",
       "address": "Địa chỉ:",
+      "licenseLabel": "Giấy phép",
+      "overview": {
+        "locationTitle": "Vị trí & Địa chỉ",
+        "openMaps": "Mở Google Maps",
+        "province": "Tỉnh / Thành phố:",
+        "ward": "Phường / Xã:",
+        "addressDetail": "Địa chỉ chi tiết:",
+        "lat": "Tọa độ Vĩ độ (Lat):",
+        "lng": "Tọa độ Kinh độ (Lng):",
+        "phone": "Hotline liên hệ trạm:",
+        "createdAt": "Ngày khởi tạo hồ sơ:",
+        "operatingHoursTitle": "Khung giờ hoạt động",
+        "open247": "Mở cửa 24/7 toàn bộ các ngày trong tuần.",
+        "assetsTitle": "Hình ảnh trạm sạc & giấy tờ ({{count}})",
+        "primaryAsset": "Ảnh chính"
+      },
+      "owner": {
+        "profileTitle": "Hồ sơ Chủ sở hữu trạm (CPO)",
+        "name": "Tên đại diện CPO:",
+        "email": "Email tài khoản:",
+        "phone": "Số điện thoại liên hệ:",
+        "uuid": "Mã định danh CPO (UUID):",
+        "licenseTitle": "Giấy phép hoạt động (Subscription License)",
+        "manageLicense": "Quản lý License ↗",
+        "planYearly": "Gói Năm (12 Tháng)",
+        "planMonthly": "Gói Tháng (30 Ngày)",
+        "active": "Đang hiệu lực",
+        "expiresAt": "Thời hạn kết thúc:",
+        "noLicense": "Trạm chưa được cấp hoặc chưa kích hoạt License."
+      },
+      "hardware": {
+        "title": "Danh sách Trụ sạc ({{current}}/{{planned}})",
+        "configureBtn": "Cấu hình trụ sạc ↗",
+        "empty": "Chưa có trụ sạc nào được cấu hình cho trạm này.",
+        "powerSummary": "Công suất: {{power}} kW · {{count}} Súng sạc",
+        "connectorsTitle": "Danh sách súng sạc:"
+      },
+      "history": {
+        "title": "Lịch sử biến động trạng thái trạm",
+        "reason": "Lý do",
+        "performedBy": "Thực hiện bởi",
+        "defaultActor": "Quản trị viên"
+      },
       "operatingHours": "Khung giờ hoạt động",
       "licenseStatus": "Tình trạng Giấy phép (License)",
       "amenities": "Tiện ích xung quanh",

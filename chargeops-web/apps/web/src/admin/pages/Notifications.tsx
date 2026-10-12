@@ -73,7 +73,7 @@ export function Notifications() {
         stationName: n.stationName,
         chargerId: n.chargerId,
         badge: n.badge,
-        actionLabel: n.actionLabel || n.primaryAction?.label,
+        actionLabel: resolveNotificationI18n(n.actionLabel || n.primaryAction?.label, t),
         onSelect: navigateToTarget,
         onAction: navigateToTarget,
       };

@@ -10,17 +10,23 @@ import {
   type Services,
 } from '@chargeops/api';
 import { Button, IconAlertTriangle } from '@chargeops/ui';
-import { getApiErrorMessage } from '../i18n';
+import { getApiErrorMessage, default as i18n } from '../i18n';
 
 /** One shared service instance per mount — the staff pages read through it too. */
 export function useStaffServices(): Services {
   const { getToken } = useAuth();
-  return useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
+  return useMemo(
+    () => createServices({ ownerView: true, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
 }
 
 export function useStaffContext() {
   const { getToken, user } = useAuth();
-  const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
+  const services = useMemo(
+    () => createServices({ ownerView: true, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
   const isOwner = user?.roles.includes('station_owner');
   const isAdmin = user?.roles.includes('platform_admin');
 

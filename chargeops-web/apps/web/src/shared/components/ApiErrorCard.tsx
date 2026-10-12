@@ -106,7 +106,10 @@ export function ApiErrorCard({
                 {eyebrow ?? t('errorCard.eyebrow', { defaultValue: 'Lỗi tải dữ liệu' })}
               </span>
               <div className="mt-1 text-[14.5px] font-bold leading-snug text-ink">
-                {title ?? t('errorCard.title', { defaultValue: 'Không thể tải dữ liệu' })}
+                {(title ?? t('errorCard.title', { defaultValue: 'Không thể tải dữ liệu' }))
+                  .replace(/:\s*\{\{\s*message\s*\}\}/g, '')
+                  .replace(/\{\{\s*message\s*\}\}/g, '')
+                  .trim()}
               </div>
             </div>
           </div>

@@ -317,7 +317,11 @@ export function NotificationCenter({
         <div className="space-y-2.5">
           {filteredItems.map((item) => {
             const cfg = getCategoryConfig(item);
-            const actionLabel = item.actionLabel || item.primaryAction?.label;
+            const rawAction = item.actionLabel || item.primaryAction?.label;
+            const actionLabel =
+              !rawAction || rawAction === 'Xem chi tiết' || rawAction === 'View details'
+                ? t('notificationCenter.viewDetail', 'Xem chi tiết')
+                : rawAction;
 
             return (
               <div

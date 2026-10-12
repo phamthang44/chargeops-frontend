@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createServices, type Connector, type Station } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
+import i18n from '../i18n';
 import {
   PhysicalKioskScreen,
   type SimulatorScreenState,
@@ -26,7 +27,10 @@ export function SimulatorPage() {
   });
 
   // Services client (fallback-safe for standalone simulator)
-  const services = useMemo(() => createServices({ ownerView: false, getToken }), [getToken]);
+  const services = useMemo(
+    () => createServices({ ownerView: false, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
 
   // Station and Connector data
   const [stations, setStations] = useState<Station[]>([]);

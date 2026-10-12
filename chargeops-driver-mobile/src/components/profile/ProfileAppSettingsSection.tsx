@@ -15,6 +15,15 @@ interface ProfileAppSettingsSectionProps {
   onPressHelpCenter: () => void;
 }
 
+/** Circular trailing chevron ("island" button-in-button). */
+function ChevronIsland({ bg, border, color }: { bg: string; border: string; color: string }) {
+  return (
+    <View style={[styles.chevronIsland, { backgroundColor: bg, borderColor: border }]}>
+      <Ionicons name="chevron-forward" size={13} color={color} />
+    </View>
+  );
+}
+
 export function ProfileAppSettingsSection({
   language,
   onPressNotifications,
@@ -35,7 +44,10 @@ export function ProfileAppSettingsSection({
       </View>
 
       {/* List Item: Notifications */}
-      <Pressable style={styles.menuRow} onPress={onPressNotifications}>
+      <Pressable
+        style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
+        onPress={onPressNotifications}
+      >
         <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#431407' : '#FFF7ED' }]}>
           <Ionicons name="notifications-outline" size={20} color="#F97316" />
         </View>
@@ -47,13 +59,16 @@ export function ProfileAppSettingsSection({
             {t('profile.appSettings.notificationsSub')}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+        <ChevronIsland border={themeColors.border} bg={themeColors.surface} color={themeColors.textMuted} />
       </Pressable>
 
       <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
       {/* List Item: Language */}
-      <Pressable style={styles.menuRow} onPress={onPressLanguage}>
+      <Pressable
+        style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
+        onPress={onPressLanguage}
+      >
         <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#2E1065' : '#F5F3FF' }]}>
           <Ionicons name="language-outline" size={20} color="#8B5CF6" />
         </View>
@@ -65,13 +80,16 @@ export function ProfileAppSettingsSection({
             {language === 'en' ? 'English' : 'Tiếng Việt'}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+        <ChevronIsland border={themeColors.border} bg={themeColors.surface} color={themeColors.textMuted} />
       </Pressable>
 
       <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
       {/* Appearance */}
-      <Pressable style={styles.menuRow} onPress={onPressAppearance}>
+      <Pressable
+        style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
+        onPress={onPressAppearance}
+      >
         <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#312E81' : '#EEF2FF' }]}>
           <Ionicons name="contrast-outline" size={20} color="#6366F1" />
         </View>
@@ -83,13 +101,16 @@ export function ProfileAppSettingsSection({
             {t('profile.appSettings.appearanceSub')}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+        <ChevronIsland border={themeColors.border} bg={themeColors.surface} color={themeColors.textMuted} />
       </Pressable>
 
       <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
       {/* List Item: Help Center */}
-      <Pressable style={styles.menuRow} onPress={onPressHelpCenter}>
+      <Pressable
+        style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
+        onPress={onPressHelpCenter}
+      >
         <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#172554' : '#EFF6FF' }]}>
           <Ionicons name="help-buoy-outline" size={20} color="#3B82F6" />
         </View>
@@ -101,7 +122,7 @@ export function ProfileAppSettingsSection({
             {t('profile.appSettings.helpCenterSub')}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+        <ChevronIsland border={themeColors.border} bg={themeColors.surface} color={themeColors.textMuted} />
       </Pressable>
     </Card>
   );
@@ -152,5 +173,13 @@ const styles = StyleSheet.create({
   },
   menuSub: {
     fontSize: fontSizes.caption,
+  },
+  chevronIsland: {
+    width: 26,
+    height: 26,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
   },
 });

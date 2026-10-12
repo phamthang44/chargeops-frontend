@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { useTranslation } from 'react-i18next';
 import { ApiProvider, createServices, useApi, resolveNotificationI18n } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
+import i18n from '../i18n';
 import {
   AppShell,
   IconBolt,
@@ -49,7 +50,10 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
 export function StaffConsole({ base }: { base: string }) {
   const { getToken } = useAuth();
   const { t } = useTranslation('staff');
-  const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
+  const services = useMemo(
+    () => createServices({ ownerView: true, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
   const location = useLocation();
 
   const nav: (ShellNavItem & { title: string; subtitle: string })[] = ['dashboard', 'chargers', 'bookings', 'tickets', 'legal'].map(
@@ -144,7 +148,7 @@ function StaffConsoleContent({
         stationName: n.stationName,
         chargerId: n.chargerId,
         badge: n.badge,
-        actionLabel: n.actionLabel || n.primaryAction?.label,
+        actionLabel: resolveNotificationI18n(n.actionLabel || n.primaryAction?.label, t),
         onSelect: navigateToTarget,
         onAction: navigateToTarget,
       };

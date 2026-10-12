@@ -1,7 +1,7 @@
 {
   "title": "Overview",
   "subtitle": "Your station activity today.",
-  "loadError": "Could not load overview data: {{message}}",
+  "loadError": "Could not load overview data",
   "kpi": {
     "bookingsToday": "BOOKINGS TODAY",
     "bookingsDelta": "+{{count}} vs yesterday",

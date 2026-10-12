@@ -1,7 +1,7 @@
 {
   "title": "Tổng quan",
   "subtitle": "Hoạt động trạm của bạn hôm nay.",
-  "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+  "loadError": "Không tải được dữ liệu tổng quan",
   "kpi": {
     "bookingsToday": "ĐẶT CHỖ HÔM NAY",
     "bookingsDelta": "+{{count}} so với hôm qua",

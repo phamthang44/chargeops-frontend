@@ -28,6 +28,8 @@ export interface CreateServicesOptions extends Partial<ApiConfig> {
  */
 export function createServices(options: CreateServicesOptions = {}): Services {
   const cfg = resolveConfig(options);
-  if (cfg.useMocks) return createMockServices({ ownerView: options.ownerView ?? true });
+  if (cfg.useMocks) {
+    return createMockServices({ ownerView: options.ownerView ?? true, getLanguage: cfg.getLanguage });
+  }
   return createRestServices(new HttpClient(cfg));
 }

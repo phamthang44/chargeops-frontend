@@ -1725,7 +1725,7 @@ export function createRestServices(http: HttpClient): Services {
               actionUrl = `/stations/${raw.target.stationId}`;
             }
           }
-          const actionLabel = raw.actionLabel || raw.primaryAction?.label || (actionUrl ? 'Xem chi tiết' : undefined);
+          const actionLabel = raw.actionLabel || raw.primaryAction?.label;
 
           return {
             id: String(raw.id),
@@ -1753,7 +1753,7 @@ export function createRestServices(http: HttpClient): Services {
             actionLabel,
             primaryAction: actionUrl
               ? {
-                  label: actionLabel || 'Xem chi tiết',
+                  label: actionLabel,
                   actionUrl,
                   actionType: 'link' as const,
                 }

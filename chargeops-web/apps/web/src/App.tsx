@@ -4,6 +4,7 @@ import { AuthGate, AuthProvider, type Role } from '@chargeops/auth';
 import { ToastProvider } from '@chargeops/ui';
 import { RoleRouter } from './RoleRouter';
 import { ThemeProvider } from './theme';
+import i18n from './i18n';
 
 /**
  * ChargeOps operator console — one app, one origin, one Keycloak client.
@@ -28,6 +29,13 @@ function pickMockUser() {
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
+});
+
+// Cached API data (station province/ward names, location lists…) is localized
+// server-side via Accept-Language — drop the cache so queries refetch in the
+// new language.
+i18n.on('languageChanged', () => {
+  queryClient.invalidateQueries();
 });
 
 export function App() {

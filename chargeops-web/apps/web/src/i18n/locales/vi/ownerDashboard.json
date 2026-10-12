@@ -2,7 +2,7 @@
   "title": "Tổng quan",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Tổng quan vận hành toàn bộ danh mục trạm · {{date}}",
-  "loadError": "Không tải được dữ liệu tổng quan: {{message}}",
+  "loadError": "Không tải được dữ liệu tổng quan",
   "dashboard": {
     "error": {
       "eyebrow": "Bảng điều khiển",

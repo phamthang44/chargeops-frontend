@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { useQuery } from '@tanstack/react-query';
 import { ApiProvider, createServices, resolveNotificationI18n } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
+import i18n from '../i18n';
 import {
   AppShell,
   ComingSoon,
@@ -134,7 +135,7 @@ function AdminConsoleContent({
         stationName: n.stationName,
         chargerId: n.chargerId,
         badge: n.badge,
-        actionLabel: n.actionLabel || n.primaryAction?.label,
+        actionLabel: resolveNotificationI18n(n.actionLabel || n.primaryAction?.label, t),
         onSelect: navigateToTarget,
         onAction: navigateToTarget,
       };
@@ -206,7 +207,10 @@ export function AdminConsole({ base }: { base: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { getToken } = useAuth();
-  const services = useMemo(() => createServices({ ownerView: false, getToken }), [getToken]);
+  const services = useMemo(
+    () => createServices({ ownerView: false, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
   const activeKey = location.pathname.split('/')[2] || 'dashboard';
 
   const NAV: (ShellNavItem & { title: string })[] = useMemo(

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, FormField, IconAlertTriangle, IconCheckCircle, Modal } from '@chargeops/ui';
 import type { AdminStationDetail, AdminStationListItem } from '@chargeops/api';
+import { getApiErrorMessage } from '../../../i18n';
 
 export type StationActionType = 'suspend' | 'reactivate';
 
@@ -31,17 +32,17 @@ export function StationActionModal({
   const isSuspend = type === 'suspend';
 
   const title = isSuspend
-    ? t('stations.modal.suspendTitle', 'Tạm ngưng vận hành trạm sạc')
-    : t('stations.modal.reactivateTitle', 'Kích hoạt lại trạm sạc');
+    ? t('stations.modal.suspendTitle')
+    : t('stations.modal.reactivateTitle');
   const confirmLabel = isSuspend
-    ? t('stations.modal.suspendConfirm', 'Xác nhận tạm ngưng')
-    : t('stations.modal.reactivateConfirm', 'Xác nhận kích hoạt');
+    ? t('stations.modal.suspendConfirm')
+    : t('stations.modal.reactivateConfirm');
   const confirmTone = isSuspend ? 'destructive' : 'primary';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSuspend && (!reason.trim() || reason.trim().length < 5)) {
-      setError(t('stations.modal.validationReason', 'Vui lòng nhập lý do tạm ngưng trạm (tối thiểu 5 ký tự).'));
+      setError(t('stations.modal.validationReason'));
       return;
     }
     setError(null);
@@ -49,8 +50,8 @@ export function StationActionModal({
       await onConfirm(reason.trim());
       setReason('');
       onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Có lỗi xảy ra khi thực hiện thao tác.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err));
     }
   };
 
@@ -83,20 +84,19 @@ export function StationActionModal({
               {t('stations.modal.stationCode', {
                 code: station.stationCode || station.id,
                 owner: station.ownerDisplayName || '—',
-                defaultValue: `Mã trạm: ${station.stationCode || station.id} · Chủ trạm: ${station.ownerDisplayName || '—'}`
               })}
             </div>
             <div className="mt-1 text-[12px] leading-relaxed text-muted">
               {isSuspend
-                ? t('stations.modal.suspendNotice', 'Khi tạm ngưng, trạm sạc sẽ bị ẩn khỏi ứng dụng tìm kiếm của tài xế và tạm dừng mọi lượt đặt chỗ mới.')
-                : t('stations.modal.reactivateNotice', 'Trạm sạc sẽ được mở lại trạng thái hoạt động công khai nếu trạm có giấy phép License còn hiệu lực.')}
+                ? t('stations.modal.suspendNotice')
+                : t('stations.modal.reactivateNotice')}
             </div>
           </div>
         </div>
 
         <FormField
-          label={isSuspend ? t('stations.modal.suspendReasonLabel', 'Lý do tạm ngưng vận hành *') : t('stations.modal.reactivateReasonLabel', 'Ghi chú / Lý do kích hoạt')}
-          hint={isSuspend ? t('stations.modal.suspendReasonHint', 'Bắt buộc nhập từ 5 - 500 ký tự') : t('stations.modal.optionalHint', 'Không bắt buộc')}
+          label={isSuspend ? t('stations.modal.suspendReasonLabel') : t('stations.modal.reactivateReasonLabel')}
+          hint={isSuspend ? t('stations.modal.suspendReasonHint') : t('stations.modal.optionalHint')}
         >
           <textarea
             value={reason}
@@ -106,8 +106,8 @@ export function StationActionModal({
             }}
             placeholder={
               isSuspend
-                ? t('stations.modal.suspendPlaceholder', 'Ví dụ: Tạm ngưng do sự cố trạm biến áp, bảo trì hệ thống định kỳ...')
-                : t('stations.modal.reactivatePlaceholder', 'Ví dụ: Đã hoàn tất sửa chữa và kiểm định an toàn điện...')
+                ? t('stations.modal.suspendPlaceholder')
+                : t('stations.modal.reactivatePlaceholder')
             }
             rows={3}
             className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
@@ -132,7 +132,7 @@ export function StationActionModal({
             }}
             disabled={loading}
           >
-            {t('stations.modal.cancelBtn', 'Hủy bỏ')}
+            {t('stations.modal.cancelBtn')}
           </Button>
           <Button
             type="submit"
@@ -140,7 +140,7 @@ export function StationActionModal({
             disabled={loading}
             className="px-4"
           >
-            {loading ? t('provisioning.submitting', 'Đang xử lý...') : confirmLabel}
+            {loading ? t('provisioning.submitting') : confirmLabel}
           </Button>
         </div>
       </form>

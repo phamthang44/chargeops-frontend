@@ -8,6 +8,11 @@ export interface ApiConfig {
    * Real mode: () => keycloak.token from @chargeops/auth.
    */
   getToken?: () => string | null | Promise<string | null>;
+  /**
+   * Current UI language supplier sent as Accept-Language on every request.
+   * Real mode: () => i18n.language so backend can localize names (e.g. provinces).
+   */
+  getLanguage?: () => string;
 }
 
 /**
@@ -21,5 +26,6 @@ export function resolveConfig(overrides: Partial<ApiConfig> = {}): ApiConfig {
     baseUrl: overrides.baseUrl ?? env.VITE_API_URL ?? '/api/v1',
     useMocks: overrides.useMocks ?? env.VITE_USE_MOCKS !== 'false',
     getToken: overrides.getToken,
+    getLanguage: overrides.getLanguage ?? (() => 'vi'),
   };
 }

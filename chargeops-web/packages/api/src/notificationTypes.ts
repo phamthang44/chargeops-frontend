@@ -287,11 +287,16 @@ export function resolveNotificationI18n(
   t: (key: string, options?: any) => string,
 ): string {
   if (!rawText) return '';
-  if (!rawText.startsWith('notification.')) return rawText;
 
   const isEn =
     (typeof t === 'function' && ((t as any)?.lng?.startsWith('en') || (t as any)?.language?.startsWith('en'))) ||
     (typeof window !== 'undefined' && localStorage.getItem('chargeops.lang') === 'en');
+
+  if (rawText === 'Xem chi tiết' || rawText === 'View details') {
+    return isEn ? 'View details' : 'Xem chi tiết';
+  }
+
+  if (!rawText.startsWith('notification.')) return rawText;
 
   const pipeIdx = rawText.indexOf('|');
   if (pipeIdx === -1) {

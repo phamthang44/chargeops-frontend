@@ -128,6 +128,58 @@ const MOCK_WARDS: Record<string, AdministrativeWard[]> = {
   ],
 };
 
+const MOCK_PROVINCES_EN: Record<string, { name: string; fullName: string }> = {
+  '01': { name: 'Hanoi', fullName: 'Hanoi City' },
+  '79': { name: 'Ho Chi Minh City', fullName: 'Ho Chi Minh City' },
+  '48': { name: 'Da Nang', fullName: 'Da Nang City' },
+  '92': { name: 'Can Tho', fullName: 'Can Tho City' },
+  '31': { name: 'Hai Phong', fullName: 'Hai Phong City' },
+};
+
+const MOCK_WARDS_EN: Record<string, Record<string, { name: string; fullName: string }>> = {
+  '01': {
+    '00001': { name: 'Phuc Xa', fullName: 'Phuc Xa Ward' },
+    '00004': { name: 'Truc Bach', fullName: 'Truc Bach Ward' },
+    '00006': { name: 'Vinh Phuc', fullName: 'Vinh Phuc Ward' },
+    '00028': { name: 'Hang Bac', fullName: 'Hang Bac Ward' },
+    '00037': { name: 'Trang Tien', fullName: 'Trang Tien Ward' },
+  },
+  '79': {
+    '26734': { name: 'Ben Nghe', fullName: 'Ben Nghe Ward' },
+    '26737': { name: 'Ben Thanh', fullName: 'Ben Thanh Ward' },
+    '26740': { name: 'Cau Kho', fullName: 'Cau Kho Ward' },
+    '26743': { name: 'Cau Ong Lanh', fullName: 'Cau Ong Lanh Ward' },
+    '26746': { name: 'Co Giang', fullName: 'Co Giang Ward' },
+    '26884': { name: 'Thao Dien', fullName: 'Thao Dien Ward' },
+  },
+  '48': {
+    '20194': { name: 'Hai Chau 1', fullName: 'Hai Chau 1 Ward' },
+    '20197': { name: 'Hai Chau 2', fullName: 'Hai Chau 2 Ward' },
+    '20200': { name: 'Thach Thang', fullName: 'Thach Thang Ward' },
+  },
+  '92': {
+    '31147': { name: 'Tan An', fullName: 'Tan An Ward' },
+    '31150': { name: 'An Cu', fullName: 'An Cu Ward' },
+    '31153': { name: 'An Hoa', fullName: 'An Hoa Ward' },
+  },
+  '31': {
+    '11383': { name: 'Hoang Van Thu', fullName: 'Hoang Van Thu Ward' },
+    '11386': { name: 'Minh Khai', fullName: 'Minh Khai Ward' },
+  },
+};
+
+function localizedProvince(p: AdministrativeProvince, lang: string): AdministrativeProvince {
+  if (!lang.startsWith('en')) return p;
+  const en = MOCK_PROVINCES_EN[p.code];
+  return en ? { ...p, name: en.name, fullName: en.fullName } : p;
+}
+
+function localizedWard(w: AdministrativeWard, lang: string): AdministrativeWard {
+  if (!lang.startsWith('en')) return w;
+  const en = MOCK_WARDS_EN[w.provinceCode]?.[w.code];
+  return en ? { ...w, name: en.name, fullName: en.fullName } : w;
+}
+
 import { mockLegalDocs as initialMockLegalDocs } from './legal-documents.data';
 
 const mockLegalDocs: LegalDocumentDetail[] = [...initialMockLegalDocs];
@@ -204,8 +256,9 @@ function toAdminUser(u: {
 
 let seq = 3304;
 
-export function createMockServices(scope: { ownerView: boolean } = { ownerView: true }): Services {
+export function createMockServices(scope: { ownerView: boolean; getLanguage?: () => string } = { ownerView: true }): Services {
   const db = buildMockDb();
+  const currentLang = () => scope.getLanguage?.() ?? 'vi';
   const reviewedEscalations = new Map<string, TicketEscalation>();
   const mockIncidents = new Map<string, ConnectorIncidentResponse>();
 
@@ -443,11 +496,13 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
     location: {
       async getProvinces() {
         await delay();
-        return [...MOCK_PROVINCES];
+        const lang = currentLang();
+        return MOCK_PROVINCES.map((p) => localizedProvince(p, lang));
       },
       async getWards(provinceCode: string) {
         await delay();
-        return [...(MOCK_WARDS[provinceCode] ?? [])];
+        const lang = currentLang();
+        return (MOCK_WARDS[provinceCode] ?? []).map((w) => localizedWard(w, lang));
       },
     },
 
@@ -1157,10 +1212,13 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       },
       async register(input) {
         await delay();
+        const lang = currentLang();
         const province = MOCK_PROVINCES.find((p) => p.code === input.provinceCode);
         const ward = input.provinceCode ? MOCK_WARDS[input.provinceCode]?.find((w) => w.code === input.wardCode) : undefined;
-        const cityName = province?.name ?? input.city ?? 'Hà Nội';
-        const addressText = [input.addressLine || input.address, ward?.name, province?.name].filter(Boolean).join(', ') || input.addressLine || input.address || '';
+        const provinceLocal = province ? localizedProvince(province, lang) : undefined;
+        const wardLocal = ward ? localizedWard(ward, lang) : undefined;
+        const cityName = provinceLocal?.name ?? input.city ?? 'Hà Nội';
+        const addressText = [input.addressLine || input.address, wardLocal?.name, provinceLocal?.name].filter(Boolean).join(', ') || input.addressLine || input.address || '';
         const code = 'ST-' + (1057 + db.ownerStations.length);
         const chargers = input.plannedChargePointCount ?? input.plannedChargers ?? 4;
         const st: Station = {
@@ -1196,9 +1254,12 @@ export function createMockServices(scope: { ownerView: boolean } = { ownerView: 
       async updateRegistration(id, version, input) {
         const st = await this.registration(id);
         if (!['pending', 'PENDING_APPROVAL'].includes(st.status) || st.version !== version) throw new Error('Registration changed. Reload and try again.');
+        const lang = currentLang();
         const province = MOCK_PROVINCES.find((p) => p.code === input.provinceCode);
         const ward = MOCK_WARDS[input.provinceCode]?.find((w) => w.code === input.wardCode);
-        const updated = { ...st, ...input, provinceName: province?.fullName, wardName: ward?.fullName, address: undefined, version: version + 1 };
+        const provinceLocal = province ? localizedProvince(province, lang) : undefined;
+        const wardLocal = ward ? localizedWard(ward, lang) : undefined;
+        const updated = { ...st, ...input, provinceName: provinceLocal?.fullName, wardName: wardLocal?.fullName, address: undefined, version: version + 1 };
         Object.assign(db.ownerStations.find((s) => s.id === id)!, updated);
         return updated;
       },

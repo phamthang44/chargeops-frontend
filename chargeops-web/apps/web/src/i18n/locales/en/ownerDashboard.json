@@ -2,7 +2,7 @@
   "title": "Overview",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Portfolio operations overview · {{date}}",
-  "loadError": "Could not load overview data: {{message}}",
+  "loadError": "Could not load overview data",
   "dashboard": {
     "error": {
       "eyebrow": "Dashboard",

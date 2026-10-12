@@ -13,6 +13,7 @@ import {
   type AppNotification,
 } from '@chargeops/api';
 import { useAuth } from '@chargeops/auth';
+import i18n from '../i18n';
 import {
   AppShell,
   ComingSoon,
@@ -228,7 +229,7 @@ function OwnerConsoleContent({
         stationName: n.stationName,
         chargerId: n.chargerId,
         badge: n.badge,
-        actionLabel: n.actionLabel || n.primaryAction?.label,
+        actionLabel: resolveNotificationI18n(n.actionLabel || n.primaryAction?.label, t),
         onSelect: navigateToTarget,
         onAction: navigateToTarget,
       };
@@ -320,7 +321,10 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
   const location = useLocation();
   const { getToken } = useAuth();
   const { t } = useTranslation('owner');
-  const services = useMemo(() => createServices({ ownerView: true, getToken }), [getToken]);
+  const services = useMemo(
+    () => createServices({ ownerView: true, getToken, getLanguage: () => i18n.language }),
+    [getToken],
+  );
 
   const items = reduced ? NAV.filter((n) => STAFF_KEYS.has(n.key)) : NAV;
   const nav: (ShellNavItem & { title: string; subtitle: string })[] = items.map((item) => ({

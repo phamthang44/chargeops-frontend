@@ -235,7 +235,7 @@
     }
   },
   "analytics": {
-    "error": "Failed to load analytics: {{message}}",
+    "error": "Failed to load analytics",
     "ranges": {
       "30d": "30 days",
       "90d": "90 days",
@@ -266,7 +266,7 @@
     "toastApproved": "Approved application for {{name}}",
     "toastRejected": "Rejected {{name}}",
     "toastIssued": "Successfully recorded & activated License for {{name}}",
-    "error": "Failed to load profiles: {{message}}",
+    "error": "Failed to load approval list",
     "emptyTitle": "No pending registrations",
     "emptyDesc": "All registered stations have been processed.",
     "table": {
@@ -336,7 +336,7 @@
     }
   },
   "dashboard": {
-    "error": "Failed to load overview data: {{message}}",
+    "error": "Failed to load overview data",
     "ops": {
       "platformOpenTickets": "Open platform tickets",
       "escalatedOpenCases": "Station cases for review",
@@ -384,6 +384,7 @@
     }
   },
   "licenses": {
+    "title": "Licenses",
     "toastRenewal": "Recorded license renewal for {{name}}",
     "updateSuccess": "License status updated successfully.",
     "kpi": {
@@ -601,7 +602,7 @@
     "toastSaved": "Saved & regenerated embeddings",
     "toastDeleted": "Deleted document",
     "addDocBtn": "Create Document",
-    "error": "Failed to load policy library: {{message}}",
+    "error": "Failed to load policy library",
     "syncNote": "Embeddings in sync · updated 29/06",
     "categorySidebar": "CATEGORIES",
     "searchPlaceholder": "Search policy content...",
@@ -769,7 +770,187 @@
       "AVAILABLE": "Available",
       "IN_USE": "In use",
       "OFFLINE": "Offline",
-      "MAINTENANCE": "Maintenance"
+      "MAINTENANCE": "Maintenance",
+      "DRAFT": "Draft (closed)",
+      "SUSPENDED": "Suspended by CP"
+    },
+    "legend": {
+      "title": "Equipment Status Reference Guide",
+      "subtitle": "Two-tier status architecture: Administrative Provisioning (Admin) vs Operational Telemetry (OCPP)",
+      "badge": "2-Tier Architecture",
+      "toggleOpen": "View Detailed Guide ▼",
+      "toggleClose": "Collapse Guide ▲",
+      "cpSection": "1. Charge Point Statuses",
+      "cpAdminGroup": "A. Admin Provisioning Lifecycle:",
+      "cpPendingDesc": "Draft state, configuring connectors & power, not yet open to drivers.",
+      "cpActiveDesc": "Plan approved, hardware sealed/locked, and active in commercial operation.",
+      "cpSuspendedDesc": "Admin suspended the entire charge point for administrative or safety reasons.",
+      "cpTechGroup": "B. Operational Telemetry (OCPP - when Active):",
+      "cpAvailableDesc": "Online, OCPP connection established, ready to supply power.",
+      "cpOfflineDesc": "Lost Internet/OCPP signal or station lost physical grid power.",
+      "cpMaintDesc": "Hardware is currently undergoing on-site technical maintenance.",
+      "cpNoteTitle": "Why can a charge point be 'Active' AND 'Offline' simultaneously?",
+      "cpNoteBody": "'Active' is the administrative license/approval by Admin allowing commercial service. 'Offline' is the physical device telemetry indicating loss of network/power. Both dimensions are independent.",
+      "connectorSection": "2. Connector Runtime Statuses",
+      "connectorSectionSub": "Service availability for each vehicle plug:",
+      "connAvailableDesc": "Plug is idle, ready for driver check-in or reservations.",
+      "connInUseDesc": "Vehicle connected and charging session is currently in progress.",
+      "connOfflineDesc": "Plug disabled (Station Owner/Staff paused for maintenance or hardware fault).",
+      "connPendingDesc": "Connector sealed/paused due to parent Charge Point draft or suspended state.",
+      "connRuleTitle": "Operational Authority Rules (SRS 4.8 & BR-CHG-05):",
+      "connRuleBody": "Admin provisions & seals Charge Point hardware (FR14). Station Owner & Staff manage daily runtime toggle of individual Connectors (BR-CHG-05)."
+    },
+    "tooltips": {
+      "cpPending": "Admin Provisioning: Draft state, hardware unsealed, closed to drivers.",
+      "cpActive": "Admin Provisioning: Hardware sealed and active for commercial use.",
+      "cpSuspended": "Admin Provisioning: Charge point suspended by Admin.",
+      "cpAvailable": "Operational Telemetry: Online, OCPP communication healthy, ready to charge.",
+      "cpOffline": "Operational Telemetry: Offline, lost network or power connection.",
+      "cpMaintenance": "Operational Telemetry: Currently under technical maintenance.",
+      "connAvailable": "Connector is idle, available for immediate charging or booking.",
+      "connInUse": "Active charging session in progress.",
+      "connOffline": "Connector disabled (owner/staff maintenance or fault).",
+      "connDraft": "Parent charge point is pending activation, connector in draft state.",
+      "connSuspended": "Parent charge point suspended, connector unavailable."
+    },
+    "badgeLabels": {
+      "admin": "Provisioning:",
+      "telemetry": "Telemetry:"
+    },
+    "pills": {
+      "pending": "Pending Activation",
+      "active": "Active",
+      "suspended": "Operation Suspended",
+      "available": "Available",
+      "offline": "Offline",
+      "maintenance": "Maintenance",
+      "inUse": "Charging",
+      "sealed": "Not Open / Paused",
+      "closed": "Not Open",
+      "byCp": "Paused by Charge Point"
+    },
+    "connectorTypes": {
+      "CCS2": "CCS2 (DC Fast Charging)",
+      "CHADEMO": "CHAdeMO (DC)",
+      "TYPE2": "Type 2 AC (Standard)",
+      "GBT": "GB/T (China Standard)"
+    },
+    "workspace": {
+      "backToList": "Back to station list",
+      "viewLicense": "View License ↗",
+      "fr14Badge": "Charge Point Provisioning (FR14)",
+      "ownerLabel": "Owner:",
+      "ownerFallback": "Station owner",
+      "plannedLabel": "Planned quota:",
+      "plannedCount_one": "{{count}} charger",
+      "plannedCount_other": "{{count}} chargers",
+      "listTitle": "Issued Charge Points ({{count}}/{{planned}} planned)",
+      "listSubtitle": "{{count}} charge points issued out of {{planned}} approved in the plan",
+      "openForDrivers_one": "{{count}} open to drivers",
+      "openForDrivers_other": "{{count}} open to drivers",
+      "emptyTitle": "This station has no charge points yet",
+      "emptyDescription": "Start provisioning by creating this station's first Charge Point.",
+      "emptyCreateBtn": "Create charge point now",
+      "steps": {
+        "step1": "1. Create charge point with connectors",
+        "step2": "2. Review / edit draft configuration",
+        "step3": "3. Activate and lock hardware"
+      },
+      "common": {
+        "cpLabel": "Charge point:",
+        "stationLabel": "Station:",
+        "processing": "Processing..."
+      },
+      "chargePoint": {
+        "nameFallback": "Charge point",
+        "maxPowerLabel": "Max power:",
+        "connectorCountLabel": "Connectors:",
+        "connectorUnit_one": "{{count}} connector",
+        "connectorUnit_other": "{{count}} connectors",
+        "configuring": "⚙️ Configuring hardware",
+        "hardwareLocked": "Hardware locked",
+        "historyTitle": "View the full status history of this charge point",
+        "historyBtn": "CP history",
+        "deleteDraftBtn": "Delete draft charge point",
+        "suspendBtn": "Suspend charge point",
+        "reactivateBtn": "Resume operation"
+      },
+      "connector": {
+        "kindAc": "Standard AC",
+        "kindDc": "Fast DC",
+        "historyTitle": "View connector status change history",
+        "historyBtn": "History",
+        "editTitle": "Edit plug type and power before activation",
+        "editBtn": "Edit",
+        "deleteTitle": "Delete draft connector",
+        "deleteBtn": "Delete",
+        "lockedTitle": "Once the charge point is Active, connector hardware configuration is locked",
+        "lockedBtn": "Hardware locked",
+        "noConnectorsWarning": "This charge point has no connectors yet. Press the <bold>\"{{btn}}\"</bold> button below to set the plug type and power before opening it to drivers."
+      },
+      "activate": {
+        "title": "Confirm configuration before activation",
+        "warning": "After activation, connector hardware configuration will be <bold>locked</bold> (Hardware Immutable) to guarantee operational safety and booking compatibility. The system currently records <bold>{{count}} connectors</bold>.",
+        "countLabel": "Enter the total number of installed connectors *",
+        "countPlaceholder": "Type {{count}} to confirm",
+        "countMismatch": "The confirmation must match the {{count}} connectors on record.",
+        "confirmBtn": "Confirm and activate"
+      },
+      "suspend": {
+        "title": "Suspend charge point",
+        "body": "Suspending charge point <bold>{{name}}</bold> will stop all of its connectors from accepting new charging sessions and update their status on the driver app.",
+        "reasonLabel": "Reason for suspension *",
+        "reasonPlaceholder": "Enter the reason (e.g. scheduled maintenance, power outage, parts replacement...)",
+        "confirmBtn": "Confirm suspension"
+      },
+      "reactivate": {
+        "title": "Resume charge point",
+        "body": "Confirm reopening charge point <bold>{{name}}</bold> to resume service and accept charging reservations.",
+        "reasonLabel": "Reason for resuming *",
+        "reasonPlaceholder": "Enter the reason (e.g. electrical safety checked and ready to serve...)",
+        "confirmBtn": "Confirm resume"
+      },
+      "create": {
+        "title": "Create new Charge Point",
+        "nameLabel": "Name / location label (optional)",
+        "namePlaceholder": "e.g. Charger A, Zone B, Basement 1",
+        "zoneLabel": "Zone / location hint for drivers",
+        "zonePlaceholder": "e.g. Next to the guard post, Basement B1 zone A",
+        "standardLabel": "Plug standard",
+        "powerLabel": "Power per connector",
+        "quantityLabel": "Number of connectors",
+        "help": "The charge point and all of its connectors are created in a single transaction. CP and C-01… codes are generated automatically; charge point power is derived from the strongest connector.",
+        "submitting": "Creating...",
+        "submitBtn": "Confirm create"
+      },
+      "connectorForm": {
+        "codeLabel": "Connector code *",
+        "codePlaceholder": "e.g. C-01, C-02",
+        "typeLabel": "Connector plug type *",
+        "powerLabel": "Charging power (kW) *",
+        "addTitle": "Add Connector to Charge Point",
+        "addHelp": "The system automatically links <bold>Dynamic QR Check-in</bold> to this connector when a driver actually plugs in.",
+        "addSubmitting": "Adding...",
+        "addSubmitBtn": "Confirm add",
+        "editTitle": "Edit connector settings",
+        "editCodeLabel": "Connector code:",
+        "editNotice": "⚙️ The charge point is in <bold>Pending Activation</bold> state. Admin can adjust the plug standard and rated power before the hardware is locked on activation.",
+        "editSubmitting": "Saving...",
+        "editSubmitBtn": "Save changes",
+        "updateToast": "Updated connector {{id}}"
+      },
+      "delete": {
+        "cpTitle": "Delete draft Charge Point",
+        "connTitle": "Delete draft Connector",
+        "connectorFallback": "Connector",
+        "cpLabel": "Charge point:",
+        "codeLabel": "Connector code:",
+        "cpBody": "You are about to delete charge point <bold>{{name}}</bold> and <bold>all connectors inside it</bold> from the station's draft configuration. This action cannot be undone.",
+        "connBody": "Connector <bold>{{code}}</bold> ({{type}} · {{power}} kW) will be permanently deleted from charge point <bold>{{cp}}</bold>.",
+        "deleting": "Deleting...",
+        "confirmCpBtn": "Delete charge point",
+        "confirmConnectorBtn": "Delete connector"
+      }
     },
     "toastDownloading": "Downloading QR for {{id}}... (demo)",
     "downloadQr": "Download QR",
@@ -991,7 +1172,7 @@
     },
     "toastStatus": "{{name}}: {{status}}",
     "toastNoop": "Status is already in this state — no change applied.",
-    "error": "Failed to load users: {{message}}",
+    "error": "Failed to load users",
     "kpi": {
       "total": "TOTAL ACCOUNTS",
       "drivers": "DRIVERS",
@@ -1129,8 +1310,10 @@
         "createdAt": "CREATED DATE",
         "actions": "ACTIONS"
       },
-      "chargersCount": "{{chargePoints}} EVSEs · {{connectors}} ports",
-      "empty": "No stations match your search or filter."
+    "chargersCount": "{{chargePoints}} EVSEs · {{connectors}} ports",
+    "empty": "No stations match your search or filter.",
+    "emptyTitle": "Station not found",
+    "emptyInitial": "This station does not exist or has been deleted."
     },
     "actions": {
       "viewDetail": "View Details",
@@ -1188,6 +1371,49 @@
       "phone": "Phone:",
       "email": "Email:",
       "address": "Address:",
+      "licenseLabel": "License",
+      "overview": {
+        "locationTitle": "Location & Coordinates",
+        "openMaps": "Open in Google Maps",
+        "province": "Province / City:",
+        "ward": "Ward / Commune:",
+        "addressDetail": "Detailed Address:",
+        "lat": "Latitude (Lat):",
+        "lng": "Longitude (Lng):",
+        "phone": "Station Hotline:",
+        "createdAt": "Registration Date:",
+        "operatingHoursTitle": "Operating Hours",
+        "open247": "Open 24/7 every day of the week.",
+        "assetsTitle": "Station Photos & Documents ({{count}})",
+        "primaryAsset": "Cover Photo"
+      },
+      "owner": {
+        "profileTitle": "Host / Operator Profile (CPO)",
+        "name": "Representative Name:",
+        "email": "Account Email:",
+        "phone": "Contact Phone:",
+        "uuid": "CPO UUID:",
+        "licenseTitle": "Subscription License",
+        "manageLicense": "Manage License ↗",
+        "planYearly": "Yearly Plan (12 Months)",
+        "planMonthly": "Monthly Plan (30 Days)",
+        "active": "Active",
+        "expiresAt": "Expiration Date:",
+        "noLicense": "Station does not have an active subscription license."
+      },
+      "hardware": {
+        "title": "Charge Point Directory ({{current}}/{{planned}})",
+        "configureBtn": "Configure Chargers ↗",
+        "empty": "No charge points configured for this station.",
+        "powerSummary": "Power: {{power}} kW · {{count}} Connectors",
+        "connectorsTitle": "Connectors / Ports:"
+      },
+      "history": {
+        "title": "Station Status Audit History",
+        "reason": "Reason",
+        "performedBy": "Performed by",
+        "defaultActor": "System Admin"
+      },
       "operatingHours": "Operating Hours",
       "licenseStatus": "License Status",
       "amenities": "Surrounding Amenities",

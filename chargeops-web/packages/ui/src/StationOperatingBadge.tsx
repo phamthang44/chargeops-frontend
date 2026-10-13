@@ -44,13 +44,13 @@ const STATE_CONFIG: Record<
   },
   SCHEDULE_NOT_CONFIGURED: {
     label: 'Chưa cấu hình lịch',
-    bg: 'bg-surface-2 border-line-3',
+    bg: 'bg-surface-2 border-line',
     text: 'text-muted',
     dot: 'bg-faint',
   },
   UNAVAILABLE_BY_PLATFORM: {
     label: 'Không đủ điều kiện',
-    bg: 'bg-surface-2 border-line-3',
+    bg: 'bg-surface-2 border-line',
     text: 'text-muted',
     dot: 'bg-faint',
   },

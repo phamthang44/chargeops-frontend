@@ -201,7 +201,7 @@ export function LicenseDetailDrawer({
             >
               {copiedKey === 'code' ? <IconCheck size={13} className="text-good" /> : <IconCopy size={13} />}
             </button>
-            <StatusPill tone={meta.tone} label={meta.label} />
+            <StatusPill tone={meta.tone} label={t(`licenses.status.${normStatus}`, { defaultValue: meta.label })} />
           </div>
           <div className="text-[12px] text-muted">
             {license?.stationName || '—'} ·{' '}
@@ -224,7 +224,7 @@ export function LicenseDetailDrawer({
       ) : (
         <div className="flex flex-col gap-4">
           {/* Section 1: Overview & Financial Snapshot */}
-          <div className="rounded-[10px] border border-line-2 bg-surface-2 p-3.5">
+          <div className="rounded-[10px] border border-line bg-surface-2 p-3.5">
             <div className="mb-2.5 flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
                 {t('licenses.drawer.overviewTitle', 'Thông tin gói & Hiệu lực')}
@@ -256,7 +256,7 @@ export function LicenseDetailDrawer({
             </div>
 
             {/* Derived Remaining Days Banner */}
-            <div className="mt-3 flex items-center justify-between rounded-[8px] border border-hairline bg-surface px-3 py-2 text-[12px]">
+            <div className="mt-3 flex items-center justify-between rounded-[8px] bg-surface px-3 py-2 text-[12px]">
               <div className="flex items-center gap-1.5 text-muted">
                 <IconClock size={14} className={normStatus === 'EXPIRED' ? 'text-bad' : days <= 30 ? 'text-warn' : 'text-good'} />
                 <span>{t('licenses.drawer.operatingValidity', 'Thời hạn vận hành:')}</span>
@@ -334,7 +334,7 @@ export function LicenseDetailDrawer({
           </div>
 
           {/* Section 2: Contextual Lifecycle Actions */}
-          <div className="rounded-[10px] border border-line-2 bg-surface p-3.5">
+          <div className="rounded-[10px] border border-line bg-surface p-3.5">
             <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-faint">
               {t('licenses.drawer.lifecycleTitle', 'Thao tác vòng đời (Lifecycle Actions)')}
             </div>
@@ -433,7 +433,7 @@ export function LicenseDetailDrawer({
                   <button
                     type="button"
                     onClick={() => setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
-                    className="flex items-center gap-1.5 rounded-[6px] border border-line-2 bg-surface-2 px-2 py-1 text-[11px] font-medium text-body transition hover:border-line hover:text-ink"
+                    className="flex items-center gap-1.5 rounded-[6px] border border-line bg-surface-2 px-2 py-1 text-[11px] font-medium text-body transition hover:border-line hover:text-ink"
                   >
                     <IconRefreshCw size={11} className="text-faint" />
                     <span>
@@ -450,14 +450,14 @@ export function LicenseDetailDrawer({
                     <Skeleton className="h-16 w-full rounded-[8px]" />
                   </div>
                 ) : !sortedEvents || sortedEvents.length === 0 ? (
-                  <div className="rounded-[9px] border border-line-2 bg-surface-2 py-8 text-center text-[12.5px] text-faint">
+                  <div className="rounded-[9px] border border-line bg-surface-2 py-8 text-center text-[12.5px] text-faint">
                     {t(
                       'licenses.drawer.emptyStatusEvents',
                       'Chưa có sự kiện trạng thái nào được ghi nhận cho License này.'
                     )}
                   </div>
                 ) : (
-                  <div className="relative pl-5 border-l-2 border-line-2 flex flex-col gap-4 my-1">
+                  <div className="relative pl-5 border-l-2 border-line flex flex-col gap-4 my-1">
                     {sortedEvents.map((evt, idx) => {
                       const isCurrentState =
                         sortDirection === 'asc'
@@ -484,13 +484,13 @@ export function LicenseDetailDrawer({
                             className={`absolute -left-[27px] top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-bold shadow-sm ${
                               isCurrentState
                                 ? fallbackCfg.tone === 'good'
-                                  ? 'border-good bg-good text-white ring-4 ring-good/20'
+                                  ? 'border-good bg-good text-white'
                                   : fallbackCfg.tone === 'warn'
-                                    ? 'border-warn bg-warn text-white ring-4 ring-warn/20'
+                                    ? 'border-warn bg-warn text-white'
                                     : fallbackCfg.tone === 'bad'
-                                      ? 'border-bad bg-bad text-white ring-4 ring-bad/20'
-                                      : 'border-brand bg-brand text-white ring-4 ring-brand/20'
-                                : 'border-line-2 bg-surface-2 text-muted'
+                                      ? 'border-bad bg-bad text-white'
+                                      : 'border-brand bg-brand text-white'
+                                : 'border-line bg-surface-2 text-muted'
                             }`}
                           >
                             {stepNumber}
@@ -499,8 +499,8 @@ export function LicenseDetailDrawer({
                           <div
                             className={`rounded-[10px] border p-3 text-[12px] transition ${
                               isCurrentState
-                                ? 'border-brand/40 bg-surface shadow-sm ring-1 ring-brand/20'
-                                : 'border-line-2 bg-surface-2 hover:border-line'
+                                ? 'border-brand/40 bg-surface shadow-sm'
+                                : 'border-line bg-surface-2 hover:border-line'
                             }`}
                           >
                             <div className="flex items-start justify-between gap-2">
@@ -535,7 +535,7 @@ export function LicenseDetailDrawer({
                             </div>
 
                             {evt.reason && (
-                              <div className="mt-2.5 rounded-[7px] border border-line-2 bg-surface p-2.5 text-[11.5px] leading-relaxed text-body">
+                              <div className="mt-2.5 rounded-[7px] bg-surface p-2.5 text-[11.5px] leading-relaxed text-body">
                                 <span className="font-semibold text-ink">{t('licenses.drawer.reason', 'Lý do: ')}</span>
                                 <span>{evt.reason}</span>
                               </div>
@@ -570,7 +570,7 @@ export function LicenseDetailDrawer({
                     <Skeleton className="h-20 w-full rounded-[8px]" />
                   </div>
                 ) : !stationPeriods || stationPeriods.length === 0 ? (
-                  <div className="rounded-[9px] border border-line-2 bg-surface-2 py-8 text-center text-[12.5px] text-faint">
+                  <div className="rounded-[9px] border border-line bg-surface-2 py-8 text-center text-[12.5px] text-faint">
                     {t('licenses.drawer.emptyPeriods', 'Trạm chưa có lịch sử các kỳ License khác.')}
                   </div>
                 ) : (
@@ -583,8 +583,8 @@ export function LicenseDetailDrawer({
                     return (
                       <Card
                         key={p.id}
-                        className={`p-3 text-[12px] border ${
-                          isCurrent ? 'border-brand bg-brand-soft/10 ring-1 ring-brand/30' : 'border-line-2 bg-surface-2'
+                        className={`p-3 text-[12px] ${
+                          isCurrent ? 'border-brand bg-brand-soft/10' : 'bg-surface-2'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -603,7 +603,7 @@ export function LicenseDetailDrawer({
                                 : t('licenses.drawer.planStationMonthly', 'Gói Tháng')}
                             </span>
                           </div>
-                          <StatusPill tone={pMeta.tone} label={pMeta.label} />
+                          <StatusPill tone={pMeta.tone} label={t(`licenses.status.${String(p.status).toUpperCase()}`, { defaultValue: pMeta.label })} />
                         </div>
 
                         <div className="mt-2 grid grid-cols-2 gap-2 text-[11.5px] text-body border-t border-hairline pt-2">

@@ -92,9 +92,21 @@ export function ChargerDetailPanel({
         {t('chargePoints.panel.identityGroup')}
       </SectionTitle>
       <FieldLabel>{t('chargePoints.panel.chargePointId')}</FieldLabel>
-      <div className="mb-[5px] flex items-center gap-2 rounded-[10px] border border-line-3 bg-chip px-[13px] py-[11px]">
-        <span className="flex-1 font-mono text-[13px] font-semibold text-body">{chargePoint.id}</span>
-        <IconLock size={14} className="text-disabled" />
+      <div className="mb-[5px] flex items-center justify-between gap-2 rounded-[10px] border border-line bg-chip px-[13px] py-[11px]">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono text-[13px] font-semibold text-body">
+            {chargePoint.chargePointCode || chargePoint.id}
+          </span>
+          {chargePoint.chargePointCode && (
+            <span className="font-mono text-[10.5px] text-faint truncate">({chargePoint.id})</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[11px] font-bold font-mono">
+            ⚡ {chargePoint.maxPowerKw || connectors.reduce((m, c) => Math.max(m, c.powerKw || 0), 0) || 0} kW
+          </span>
+          <IconLock size={14} className="text-disabled" />
+        </div>
       </div>
       <p className="mb-[15px] text-[11px] leading-[1.5] text-faint">{t('chargePoints.panel.idHelp')}</p>
 
@@ -102,7 +114,7 @@ export function ChargerDetailPanel({
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="mb-[15px] w-full rounded-[10px] border border-line-3 bg-surface px-3 py-2.5 text-[13px] font-semibold"
+        className="mb-[15px] w-full rounded-[10px] border border-line bg-surface px-3 py-2.5 text-[13px] font-semibold"
       />
 
       <FieldLabel>{t('chargePoints.panel.zoneLabel')}</FieldLabel>
@@ -110,7 +122,7 @@ export function ChargerDetailPanel({
         value={zoneLabel}
         onChange={(e) => setZoneLabel(e.target.value)}
         placeholder={t('chargePoints.panel.zonePlaceholder')}
-        className="mb-[15px] w-full rounded-[10px] border border-line-3 bg-surface px-3 py-2.5 text-[13px] font-semibold"
+        className="mb-[15px] w-full rounded-[10px] border border-line bg-surface px-3 py-2.5 text-[13px] font-semibold"
       />
 
       <Button
@@ -128,7 +140,7 @@ export function ChargerDetailPanel({
         {t('chargePoints.panel.statusGroup')}
       </SectionTitle>
 
-      <div className="mb-2 rounded-[10px] border border-line-3 p-3">
+      <div className="mb-2 rounded-[10px] bg-canvas p-3">
         <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
           {t('chargePoints.panel.provStatus')}
         </div>
@@ -149,7 +161,7 @@ export function ChargerDetailPanel({
         </div>
       </div>
 
-      <div className="rounded-[10px] border border-line-3 p-3">
+      <div className="rounded-[10px] bg-canvas p-3">
         <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
           {t('chargePoints.panel.operStatus')}
         </div>
@@ -229,7 +241,7 @@ function ConnectorCard({
   const inheritedDown = cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
 
   return (
-    <div className="rounded-card border border-line-3 p-3.5">
+    <div className="rounded-card border border-line p-3.5">
       <div className="mb-2.5 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="font-mono text-[12px] font-semibold text-brand">{c.connectorCode || c.id}</span>
@@ -295,7 +307,7 @@ function ConnectorCard({
           <button
             type="button"
             onClick={() => onViewConnectorHistory(c)}
-            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-md border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-md border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
           >
             <IconHistory size={12} strokeWidth={2} />
             <span>{t('connectors.panel.historyBtn', 'Lịch sử')}</span>
@@ -347,7 +359,7 @@ function LockedSpec({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1">
       <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
-      <div className="rounded-[10px] border border-line-3 bg-chip px-3 py-2 text-[12px] font-semibold text-body truncate">
+      <div className="rounded-[10px] border border-line bg-chip px-3 py-2 text-[12px] font-semibold text-body truncate">
         {value}
       </div>
     </div>

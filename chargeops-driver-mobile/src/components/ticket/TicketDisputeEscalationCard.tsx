@@ -190,7 +190,11 @@ export function TicketDisputeEscalationCard({
   // State 3: Countdown Active (< 24h & no rejecting findings)
   const remainingHours = Math.floor(remainingMs / (3600 * 1000));
   const remainingMins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
-  const countdownText = `${remainingHours} giờ ${remainingMins} phút`;
+  const countdownText = t('time.durationHourMin', {
+    hours: remainingHours,
+    minutes: remainingMins,
+    defaultValue: `${remainingHours} giờ ${remainingMins} phút`,
+  });
 
   return (
     <View

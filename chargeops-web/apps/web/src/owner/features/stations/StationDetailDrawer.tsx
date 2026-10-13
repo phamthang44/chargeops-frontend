@@ -359,7 +359,7 @@ export function StationDetailDrawer({
                 </div>
 
                 {station.operationalStatus !== 'OPERATING' && station.operationalStatus && (
-                  <div className="rounded-[8px] border border-line-2 bg-surface-2 p-2.5 text-[12px] leading-relaxed text-muted">
+                  <div className="rounded-[8px] bg-surface-2 p-2.5 text-[12px] leading-relaxed text-muted">
                     <span className="font-semibold text-ink">
                       {t('stations.operationalModal.reason', { defaultValue: 'Lý do:' })}{' '}
                     </span>
@@ -466,7 +466,7 @@ export function StationDetailDrawer({
 
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-              <div className="rounded-[9px] border border-line-3 bg-surface p-3">
+              <div className="rounded-[9px] border border-line bg-surface p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
                   {t('stations.drawer.metrics.plannedChargers', { defaultValue: 'Số trụ dự kiến' })}
                 </div>
@@ -475,7 +475,7 @@ export function StationDetailDrawer({
                 </div>
               </div>
 
-              <div className="rounded-[9px] border border-line-3 bg-surface p-3">
+              <div className="rounded-[9px] border border-line bg-surface p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
                   {t('stations.drawer.metrics.onlineChargers', { defaultValue: 'Trụ đang Online' })}
                 </div>
@@ -484,7 +484,7 @@ export function StationDetailDrawer({
                 </div>
               </div>
 
-              <div className="rounded-[9px] border border-line-3 bg-surface p-3">
+              <div className="rounded-[9px] border border-line bg-surface p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
                   {t('stations.drawer.metrics.bookingsToday', { defaultValue: 'Lượt đặt hôm nay' })}
                 </div>
@@ -493,7 +493,7 @@ export function StationDetailDrawer({
                 </div>
               </div>
 
-              <div className="rounded-[9px] border border-line-3 bg-surface p-3">
+              <div className="rounded-[9px] border border-line bg-surface p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
                   {t('stations.drawer.metrics.utilization', { defaultValue: 'Tỷ lệ sử dụng' })}
                 </div>
@@ -584,7 +584,7 @@ export function StationDetailDrawer({
                   const isCpOnline = cp.operationalStatus === 'AVAILABLE';
 
                   return (
-                    <Card key={cp.id} className="p-3.5 flex flex-col gap-2.5 border border-line-2">
+                    <Card key={cp.id} className="p-3.5 flex flex-col gap-2.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span
@@ -614,7 +614,7 @@ export function StationDetailDrawer({
                             return (
                               <div
                                 key={conn.id}
-                                className="flex items-center justify-between rounded-[7px] border border-line-3 bg-surface-2 p-2 text-[12px]"
+                                className="flex items-center justify-between rounded-[7px] bg-surface-2 p-2 text-[12px]"
                               >
                                 <div className="flex items-center gap-2">
                                   <span
@@ -678,7 +678,7 @@ export function StationDetailDrawer({
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day) => (
-                  <div key={day} className="rounded-[8px] border border-line-3 bg-surface-2 p-2 text-center text-[12px]">
+                  <div key={day} className="rounded-[8px] bg-surface-2 p-2 text-center text-[12px]">
                     <div className="font-semibold text-ink">
                       {t(`pricing.dayNames.${day}`, { defaultValue: DAY_LABELS[day] || day })}
                     </div>
@@ -722,7 +722,7 @@ export function StationDetailDrawer({
                       className={`flex items-center gap-2 rounded-[8px] border p-2.5 text-left text-[12.5px] transition-colors cursor-pointer ${
                         isChecked
                           ? 'border-owner bg-owner-soft/50 font-semibold text-owner-deep'
-                          : 'border-line-3 bg-surface hover:bg-surface-2 text-body'
+                          : 'border-line bg-surface hover:bg-surface-2 text-body'
                       }`}
                     >
                       <span className="text-[15px]">{AMENITY_EMOJI[amenity]}</span>

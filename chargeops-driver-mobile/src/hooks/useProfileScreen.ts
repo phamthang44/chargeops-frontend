@@ -31,6 +31,7 @@ export function useProfileScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [settingsSection, setSettingsSection] = useState<'all' | 'language' | 'appearance'>('all');
   const [supportVisible, setSupportVisible] = useState(false);
+  const [supportTab, setSupportTab] = useState<'guide' | 'faq' | 'tickets'>('guide');
   const [ownerModalVisible, setOwnerModalVisible] = useState(false);
 
   // Async action loading states
@@ -51,6 +52,11 @@ export function useProfileScreen() {
   function openSettingsWithSection(section: 'all' | 'language' | 'appearance') {
     setSettingsSection(section);
     setSettingsVisible(true);
+  }
+
+  function openSupportWithTab(tab: 'guide' | 'faq' | 'tickets' = 'guide') {
+    setSupportTab(tab);
+    setSupportVisible(true);
   }
 
   async function handleOwnerAction() {
@@ -135,6 +141,9 @@ export function useProfileScreen() {
     openSettingsWithSection,
     supportVisible,
     setSupportVisible,
+    supportTab,
+    setSupportTab,
+    openSupportWithTab,
     ownerModalVisible,
     setOwnerModalVisible,
 

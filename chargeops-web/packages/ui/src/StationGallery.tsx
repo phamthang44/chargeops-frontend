@@ -140,7 +140,7 @@ export const StationGallery: React.FC<StationGalleryProps> = ({
                 key={assetKey}
                 className={`group relative flex flex-col rounded-xl overflow-hidden border transition-all duration-200 bg-surface ${
                   isPrimary
-                    ? 'border-owner ring-2 ring-owner/20 shadow-sm'
+                    ? 'border-owner shadow-sm'
                     : 'border-line hover:border-line-hover shadow-sm'
                 }`}
               >
@@ -189,7 +189,7 @@ export const StationGallery: React.FC<StationGalleryProps> = ({
 
                 {/* Footer Controls */}
                 {!readOnly && (
-                  <div className="flex items-center justify-between p-2.5 border-t border-line-2 text-xs">
+                  <div className="flex items-center justify-between p-2.5 border-t border-line text-xs">
                     {!isPrimary ? (
                       <button
                         type="button"

@@ -48,7 +48,7 @@ function ToastItem({ toast, onDismiss }: { toast: NotificationItem; onDismiss: (
             ? 'border-warn/30 bg-warn-soft/90 text-ink'
             : tone === 'good'
               ? 'border-owner/30 bg-owner-soft/90 text-ink'
-              : 'border-line-2 bg-surface/95 text-ink',
+              : 'border-line bg-surface/95 text-ink',
       ].join(' ')}
     >
       {/* Icon */}

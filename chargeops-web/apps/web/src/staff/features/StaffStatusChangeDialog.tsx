@@ -122,7 +122,7 @@ export function StaffStatusChangeDialog({
       </div>
 
       {goingDown && (
-        <ul className="flex flex-col gap-2 rounded-card border border-line-3 p-3.5">
+        <ul className="flex flex-col gap-2 rounded-card bg-surface-2 p-3.5">
           <Impact tone="bad">
             {target.kind === 'chargePoint'
               ? t('statusDialog.impactDevice', { count: target.connectorCount })
@@ -151,7 +151,7 @@ export function StaffStatusChangeDialog({
         </div>
       )}
 
-      <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] border border-line-2 bg-surface-2 p-3">
+      <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] bg-surface-2 p-3">
         <label className="text-[11.5px] font-bold text-ink">
           {t('statusDialog.reasonLabel')}
           {requiresReason && <span className="text-bad"> *</span>}
@@ -166,7 +166,7 @@ export function StaffStatusChangeDialog({
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition ${
                   reason === p
                     ? 'border-owner bg-owner text-white font-semibold'
-                    : 'border-line-2 bg-surface text-body hover:border-line-3'
+                    : 'border-line bg-surface text-body hover:border-line'
                 }`}
               >
                 {p}

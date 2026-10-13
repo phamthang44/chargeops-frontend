@@ -7,11 +7,13 @@ export interface KpiCardProps {
   delta?: string;
   /** Tailwind text-colour class for the delta line, e.g. "text-good". */
   deltaClass?: string;
+  /** Set false when nested inside an already-bordered container (single-border policy). */
+  bordered?: boolean;
 }
 
-export function KpiCard({ label, value, suffix, delta, deltaClass = 'text-faint' }: KpiCardProps) {
+export function KpiCard({ label, value, suffix, delta, deltaClass = 'text-faint', bordered }: KpiCardProps) {
   return (
-    <Card className="px-4 py-[15px]">
+    <Card bordered={bordered} className="px-4 py-[15px]">
       <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
         {label}
       </div>

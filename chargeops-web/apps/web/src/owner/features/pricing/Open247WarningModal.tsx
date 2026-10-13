@@ -38,7 +38,7 @@ export function Open247WarningModal({
         {/* Commitment Checklist */}
         <div className="mb-5 flex flex-col gap-2.5">
           {/* Item 1: Access */}
-          <div className="flex items-start gap-3 rounded-[10px] border border-line-2 bg-surface-2 p-3 text-[12px] leading-relaxed">
+          <div className="flex items-start gap-3 rounded-[10px] bg-surface-2 p-3 text-[12px] leading-relaxed">
             <span className="shrink-0 text-base leading-none mt-0.5">🚗</span>
             <div>
               <div className="font-semibold text-ink">
@@ -72,7 +72,7 @@ export function Open247WarningModal({
           </div>
 
           {/* Item 3: TOU Pricing Recommendation */}
-          <div className="flex items-start gap-3 rounded-[10px] border border-line-2 bg-surface-2 p-3 text-[12px] leading-relaxed">
+          <div className="flex items-start gap-3 rounded-[10px] bg-surface-2 p-3 text-[12px] leading-relaxed">
             <span className="shrink-0 text-base leading-none mt-0.5">⚡</span>
             <div>
               <div className="font-semibold text-ink">

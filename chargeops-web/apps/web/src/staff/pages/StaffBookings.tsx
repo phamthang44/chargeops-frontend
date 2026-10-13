@@ -106,7 +106,7 @@ export function StaffBookings() {
 
       <section
         aria-label={t('bookings.filter.eyebrow')}
-        className="mb-4 rounded-panel border border-line-2 bg-surface-2/70 p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+        className="mb-4 rounded-panel bg-surface-2/70 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
         style={{ animation: 'riseIn .6s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="relative rounded-[8px] border border-hairline bg-surface px-4 pb-4 pt-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
@@ -141,7 +141,7 @@ export function StaffBookings() {
                 disabled={!isFiltered}
                 className="group -mr-1.5"
               >
-                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-line-2 bg-surface-2 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:rotate-180">
+                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-line bg-surface-2 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:rotate-180">
                   <IconRefreshCw size={11} strokeWidth={2.2} />
                 </span>
                 {t('bookings.filter.reset')}

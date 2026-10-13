@@ -146,7 +146,7 @@ function StaffGuardScreen({
         <h2 className="mb-2 text-[18px] font-bold text-ink">{title}</h2>
         <p className="mb-6 text-[13px] leading-relaxed text-muted">{body}</p>
         {detail ? (
-          <p className="mb-6 rounded-xl border border-line bg-canvas px-4 py-3 text-[12px] leading-relaxed text-muted">
+          <p className="mb-6 rounded-xl bg-canvas px-4 py-3 text-[12px] leading-relaxed text-muted">
             {detail}
           </p>
         ) : null}

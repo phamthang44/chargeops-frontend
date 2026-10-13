@@ -49,7 +49,7 @@ const TONE_CLASSES: Record<
     dot: 'bg-bad',
   },
   neutral: {
-    pill: 'bg-surface-2 text-muted border-line-3',
+    pill: 'bg-surface-2 text-muted border-line',
     dot: 'bg-faint',
   },
   brand: {

@@ -388,12 +388,12 @@ export function PolicyPromptLibraryModal({
         onClick={onClose}
       />
 
-      {/* Double-Bezel Modal Container (Doppelrand) */}
-      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col rounded-[2rem] border border-line/60 bg-surface/95 p-2 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 md:p-3">
+      {/* Modal Container */}
+      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col rounded-[2rem] bg-surface/95 shadow-2xl">
         {/* Inner Core Enclosure */}
-        <div className="flex flex-1 flex-col overflow-hidden rounded-[calc(2rem-0.375rem)] bg-canvas shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+        <div className="flex flex-1 flex-col overflow-hidden rounded-[2rem] border border-line bg-canvas shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
           {/* Header */}
-          <div className="flex flex-col gap-3.5 border-b border-line-2 bg-surface/70 px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex flex-col gap-3.5 border-b border-line bg-surface/70 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand shadow-xs">
@@ -459,7 +459,7 @@ export function PolicyPromptLibraryModal({
                     className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-medium transition cursor-pointer ${
                       isActive
                         ? 'bg-brand text-white shadow-xs'
-                        : 'border border-line-2 bg-surface text-muted hover:border-brand/40 hover:text-ink'
+                        : 'border border-line bg-surface text-muted hover:border-brand/40 hover:text-ink'
                     }`}
                   >
                     <span>{cat.icon}</span>
@@ -470,7 +470,7 @@ export function PolicyPromptLibraryModal({
             </div>
           </div>
 
-          {/* Cards Grid / List (Asymmetrical Bento feel with Double-Bezel items) */}
+          {/* Cards Grid / List (Asymmetrical Bento feel with single-outline items) */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 md:p-6">
             {filteredItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center text-muted">
@@ -493,10 +493,10 @@ export function PolicyPromptLibraryModal({
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-line-2/80 bg-surface-2/40 p-1.5 transition-all duration-300 hover:border-brand/50 hover:bg-surface-2/80 hover:shadow-xs"
+                      className="group relative flex flex-col justify-between rounded-2xl bg-surface-2/40 transition-all duration-300 hover:bg-surface-2/80 hover:shadow-xs"
                     >
                       {/* Inner Core */}
-                      <div className="flex h-full flex-col justify-between rounded-[calc(1rem-0.25rem)] bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+                      <div className="flex h-full flex-col justify-between rounded-2xl border border-line/80 group-hover:border-brand/50 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
                         <div>
                           {/* Card Top: Tag + Category + ID */}
                           <div className="flex items-center justify-between gap-2 mb-2">
@@ -529,7 +529,7 @@ export function PolicyPromptLibraryModal({
                         </div>
 
                         {/* Card Actions: Button-in-Button */}
-                        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-line-2/60 pt-2.5">
+                        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-line/60 pt-2.5">
                           <button
                             type="button"
                             onClick={(e) => handleCopy(e, item)}
@@ -561,7 +561,7 @@ export function PolicyPromptLibraryModal({
           </div>
 
           {/* Footer note */}
-          <div className="border-t border-line-2 bg-surface-2/40 px-4 py-2.5 text-center text-[11px] text-muted sm:px-6">
+          <div className="border-t border-line bg-surface-2/40 px-4 py-2.5 text-center text-[11px] text-muted sm:px-6">
             <span>
               {isEn
                 ? '💡 Tip: Review the Ground-Truth Policy box for instant answers without consuming LLM tokens.'

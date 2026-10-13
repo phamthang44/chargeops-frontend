@@ -234,6 +234,7 @@
   },
   "live": {
     "badge": "Trực tiếp",
+    "refreshBtn": "Làm mới",
     "refreshTooltip": "Làm mới tin nhắn"
   },
   "filters": {
@@ -256,6 +257,20 @@
     "IN_PROGRESS": "Đang xử lý",
     "RESOLVED": "Đã giải quyết",
     "CLOSED": "Đã đóng"
+  },
+  "statusExplains": {
+    "title": "Ý nghĩa các trạng thái sự cố & Quy trình xử lý",
+    "collapseHint": "Nhấn để ẩn/hiện giải thích",
+    "openTitle": "Chờ tiếp nhận (Open)",
+    "openDesc": "Sự cố mới được gửi từ tài xế hoặc phát hiện tự động; đang chờ nhân viên trạm hoặc admin tiếp nhận xử lý.",
+    "inProgressTitle": "Đang xử lý (In Progress)",
+    "inProgressDesc": "Nhân viên trạm hoặc kỹ thuật viên đang trực tiếp kiểm tra thiết bị, khắc phục lỗi hoặc trao đổi với tài xế.",
+    "resolvedTitle": "Đã giải quyết (Resolved - Giám sát 10 ngày)",
+    "resolvedDesc": "Sự cố kỹ thuật đã khắc phục xong và gửi kết quả cho tài xế. Hệ thống đếm ngược 10 ngày trước khi tự động đóng.",
+    "closedTitle": "Đã đóng (Closed)",
+    "closedDesc": "Quy trình hỗ trợ hoàn tất sau khi tài xế xác nhận hoặc hết 10 ngày theo chính sách nền tảng. Hồ sơ lưu trữ chỉ đọc.",
+    "escalatedTitle": "Chuyển cấp Admin (Escalated)",
+    "escalatedDesc": "Hồ sơ được trạm chuyển lên Quản trị viên xem xét giải quyết tranh chấp hoặc thẩm định chính sách ngoài thẩm quyền trạm."
   },
   "closeReason": {
     "auto": "Tự đóng sau 10 ngày",
@@ -333,10 +348,16 @@
       "handler": "NGƯỜI PHỤ TRÁCH",
       "status": "TRẠNG THÁI"
     },
-    "unassigned": "Chờ tiếp nhận"
+    "unassigned": "Chờ tiếp nhận",
+    "refund100": "Hoàn 100%",
+    "daysLeft": "{{count}} ngày",
+    "daysLeft_one": "{{count}} ngày",
+    "daysLeft_other": "{{count}} ngày",
+    "expired": "Quá hạn"
   },
   "detail": {
     "back": "Quay lại danh sách",
+    "refresh": "Làm mới",
     "defaultSubject": "Phiếu hỗ trợ",
     "deadline": "Hạn chót: {{time}} ngày {{date}}",
     "cycleBadge": "Lần #{{cycle}}",
@@ -438,10 +459,13 @@
     "title": "Xác nhận Giải quyết Sự cố",
     "cycle": "Lần xử lý thứ {{cycle}}",
     "tenDaysBadge": "10 ngày tự đóng",
+    "deadlineFormat": "{{time}} ngày {{date}}",
     "reasonLabel": "Kết quả & Nội dung xử lý sự cố",
     "reasonHelp": "Mô tả chi tiết giải pháp kỹ thuật đã khắc phục. Nội dung này sẽ được thông báo trực tiếp cho tài xế.",
     "reasonPlaceholder": "Ví dụ: Đã kiểm tra lại cáp tín hiệu, khởi động lại trụ sạc DC và kiểm thử phiên sạc thành công...",
+    "reasonFallback": "[Kết quả xử lý]",
     "notificationPreviewTitle": "Xem trước thông báo gửi cho tài xế:",
+    "notificationPreviewText": "“Phiếu hỗ trợ {{ticketCode}} đã được nhân viên trạm đánh dấu đã giải quyết: {{reason}}. Vui lòng kiểm tra và chọn ‘Xác nhận’ hoặc ‘Vấn đề vẫn còn’ trước {{deadlinePreview}}. Nếu không nhận được phản hồi sau 10 ngày, phiếu sẽ tự động đóng theo quy định.”",
     "disclaimer": "* Sau khi gửi, hệ thống dành 10 ngày để tài xế phản hồi hoặc xác nhận. Nếu tài xế gửi tin nhắn hoặc báo vấn đề vẫn còn, phiếu sẽ tự động chuyển về trạng thái Đang xử lý.",
     "submitting": "Đang cập nhật...",
     "submit": "Hoàn tất & Đánh dấu Giải quyết"

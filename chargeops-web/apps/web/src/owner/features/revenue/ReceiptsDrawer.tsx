@@ -67,7 +67,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
         </div>
 
         {/* Summary Card */}
-        <div className="rounded-2xl border border-line-2 bg-surface p-4 shadow-2xs space-y-2">
+        <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs space-y-2">
           <div className="flex justify-between text-[12px]">
             <span className="text-muted">{t('finance.receiptsDrawer.collected', 'Thu ghi nhận')}:</span>
             <span className="font-mono font-bold text-good">+{formatVnd(booking.collectedAmount)}</span>
@@ -97,7 +97,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
               {receipts.map((r, idx) => (
                 <div
                   key={r.receiptId || idx}
-                  className="rounded-xl border border-hairline bg-surface p-3 text-[12px] transition hover:border-line-2 shadow-2xs"
+                  className="rounded-xl border border-hairline bg-surface p-3 text-[12px] transition hover:border-line shadow-2xs"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="font-mono font-bold text-brand text-[11.5px]">

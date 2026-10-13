@@ -29,7 +29,7 @@ export function TicketErrorState({
         {t('errors.backToList', 'Quay lại danh sách phiếu')}
       </button>
 
-      <Card className="rounded-2xl p-6 sm:p-8 border border-red-500/25 bg-surface text-center shadow-xs">
+      <Card bordered={false} className="rounded-2xl border border-red-500/25 bg-surface p-6 sm:p-8 text-center shadow-xs">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
           <IconShieldAlert size={28} strokeWidth={2} />
         </div>

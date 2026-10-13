@@ -152,7 +152,7 @@ export function ReviewEscalationModal({ open, action, pending, onClose, onSubmit
             />
 
             {/* Dynamic Reason Hint */}
-            <div className="flex items-center gap-1.5 rounded-lg bg-surface-2/60 px-2.5 py-1.5 text-[11px] text-muted border border-hairline">
+            <div className="flex items-center gap-1.5 rounded-lg bg-surface-2/60 px-2.5 py-1.5 text-[11px] text-muted">
               <IconInfoCircle size={12} className="shrink-0 text-faint" />
               <span>{REASON_HINTS[reason]}</span>
             </div>

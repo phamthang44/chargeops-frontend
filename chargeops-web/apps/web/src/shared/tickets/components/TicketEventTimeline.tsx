@@ -109,7 +109,7 @@ export function TicketEventTimeline({ ticketId, role }: TicketEventTimelineProps
                 )}
 
                 {evt.reason && (
-                  <div className="mt-1.5 rounded-lg border border-line bg-surface-2 p-2 text-[11.5px] italic text-body">
+                  <div className="mt-1.5 rounded-lg bg-surface-2 p-2 text-[11.5px] italic text-body">
                     “{evt.reason}”
                   </div>
                 )}

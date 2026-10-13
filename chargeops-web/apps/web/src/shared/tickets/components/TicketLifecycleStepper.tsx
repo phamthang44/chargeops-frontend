@@ -117,7 +117,7 @@ export function TicketLifecycleStepper({
               titleClasses = 'text-ink font-semibold';
               connectorProgress = 'bg-good/70';
             } else if (step.isActive) {
-              badgeClasses = 'bg-brand text-white border-brand ring-4 ring-brand/15 shadow-sm';
+              badgeClasses = 'bg-brand text-white border-brand shadow-sm';
               titleClasses = 'text-brand font-bold';
             }
 
@@ -175,7 +175,7 @@ export function TicketLifecycleStepper({
               titleClasses = 'text-ink font-semibold';
               cardBorder = 'border-good/25 bg-good-soft/20';
             } else if (step.isActive) {
-              badgeClasses = 'bg-brand text-white border-brand ring-4 ring-brand/15 shadow-sm';
+              badgeClasses = 'bg-brand text-white border-brand shadow-sm';
               titleClasses = 'text-brand font-bold';
               cardBorder = 'border-brand/40 bg-brand/5 shadow-2xs';
             }

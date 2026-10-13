@@ -26,28 +26,28 @@ const TONE: Record<
   { shell: string; frame: string; icon: (props: IconProps) => ReactNode; iconBox: string; eyebrow: string }
 > = {
   owner: {
-    shell: 'bg-surface-2 ring-line/70 hover:ring-line-hover/70',
+    shell: 'bg-surface-2 hover:ring-line-hover/70',
     frame: 'border-line/70 bg-surface',
     icon: IconShieldAlert,
     iconBox: 'border-owner-border bg-owner-soft text-owner-deep',
     eyebrow: 'text-muted',
   },
   brand: {
-    shell: 'bg-brand/5 ring-brand/25 hover:ring-brand/40',
+    shell: 'bg-brand/5 hover:ring-brand/40',
     frame: 'border-brand/25 bg-surface',
     icon: IconShieldAlert,
     iconBox: 'border-brand/25 bg-brand-soft text-brand',
     eyebrow: 'text-brand-strong',
   },
   neutral: {
-    shell: 'bg-surface-2 ring-line/70 hover:ring-line-hover/70',
+    shell: 'bg-surface-2 hover:ring-line-hover/70',
     frame: 'border-line/70 bg-surface',
     icon: IconShieldAlert,
     iconBox: 'border-line bg-chip text-muted',
     eyebrow: 'text-muted',
   },
   warning: {
-    shell: 'bg-warn/5 ring-warn/25 hover:ring-warn/40',
+    shell: 'bg-warn/5 hover:ring-warn/40',
     frame: 'border-warn/25 bg-surface',
     icon: IconShieldAlert,
     iconBox: 'border-warn/25 bg-warn-soft text-warn-deep',
@@ -83,7 +83,7 @@ export function ResourceRetryButton({
 }
 
 /**
- * Premium "resource not here" card — double-bezel shell, eyebrow pill,
+ * Premium "resource not here" card — single-outline shell, eyebrow pill,
  * staggered rise-in. Use it for legitimate absence of data (no license yet,
  * endpoint not built, empty list at page level), never for real failures;
  * those go through ApiErrorState/ApiErrorCard.
@@ -110,11 +110,11 @@ export function ResourceStateCard({
 
   return (
     <div
-      className={`group relative rounded-2xl p-1 ring-1 transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${meta.shell} ${className}`}
+      className={`group relative rounded-2xl transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${meta.shell} ${className}`}
       style={{ animation: 'riseIn 560ms cubic-bezier(0.32,0.72,0,1) both', animationDelay: `${delay}ms` }}
     >
       <div
-        className={`rounded-[calc(1rem-0.25rem)] border text-center shadow-sm ${
+        className={`rounded-2xl border text-center shadow-sm ${
           compact ? 'px-5 py-7' : 'px-6 py-10 sm:px-10'
         } ${meta.frame}`}
       >
@@ -149,7 +149,7 @@ export function ResourceStateCard({
 
         {hint && (
           <div
-            className={`mx-auto mt-5 flex max-w-xl items-start gap-2 rounded-xl border border-line/70 bg-canvas p-3 text-left text-[11.5px] leading-relaxed text-muted ${
+            className={`mx-auto mt-5 flex max-w-xl items-start gap-2 rounded-xl bg-canvas p-3 text-left text-[11.5px] leading-relaxed text-muted ${
               compact ? 'mt-3' : ''
             }`}
             style={stagger(300)}

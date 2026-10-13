@@ -37,7 +37,7 @@ export function TicketHandlerCard({
   const { t } = useTranslation('tickets');
 
   return (
-    <Card className="rounded-2xl border border-line bg-surface p-4 shadow-xs">
+    <Card className="rounded-2xl p-4 shadow-xs">
       <div className="flex items-center justify-between mb-3 border-b border-hairline pb-2.5">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-surface-2 text-muted">
@@ -106,7 +106,7 @@ export function TicketHandlerCard({
           )}
 
           {isAdminStationSupervisory && (
-            <div className="rounded-xl bg-surface-2 p-2.5 text-[11.5px] text-muted border border-hairline leading-relaxed">
+            <div className="rounded-xl bg-surface-2 p-2.5 text-[11.5px] text-muted leading-relaxed">
               {t(
                 'supervisory.stationAssignedNotice',
                 'Kỹ thuật viên trạm đang trực tiếp kiểm tra và xử lý sự cố thiết bị tại chỗ.'
@@ -115,7 +115,7 @@ export function TicketHandlerCard({
           )}
 
           {(assignedStaff?.email || assignedStaff?.maskedPhone) && (
-            <div className="rounded-xl bg-surface-2 p-2.5 text-[11.5px] text-muted space-y-1 border border-hairline">
+            <div className="rounded-xl bg-surface-2 p-2.5 text-[11.5px] text-muted space-y-1">
               {assignedStaff.email && (
                 <div className="truncate">
                   <span className="text-faint">Email:</span> {assignedStaff.email}

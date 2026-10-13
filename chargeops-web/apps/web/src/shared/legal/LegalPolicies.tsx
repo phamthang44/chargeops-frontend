@@ -273,7 +273,7 @@ export function LegalPolicies({
                     className={`group relative flex w-full items-start justify-between rounded-xl p-3.5 text-left transition ${
                       isSelected
                         ? 'border-2 border-owner bg-owner-soft shadow-xs'
-                        : 'border border-line bg-surface hover:border-line-2 hover:bg-surface-2'
+                        : 'border border-line bg-surface hover:border-line hover:bg-surface-2'
                     }`}
                   >
                     <div className="flex-1 pr-2">

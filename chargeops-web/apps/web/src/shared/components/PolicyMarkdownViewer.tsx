@@ -313,7 +313,7 @@ export function PolicyMarkdownViewer({
 
       // Horizontal rule
       if (/^---+$/.test(trimmed)) {
-        elements.push(<hr key={`hr-${i}`} className="my-6 border-line-2" />);
+        elements.push(<hr key={`hr-${i}`} className="my-6 border-line" />);
         continue;
       }
 
@@ -345,7 +345,7 @@ export function PolicyMarkdownViewer({
             <div
               key={`h3-${i}`}
               id={id}
-              className="mb-2 mt-5 flex items-center justify-between rounded-lg bg-surface-2/80 px-3 py-1.5 scroll-mt-6 border border-line-3"
+              className="mb-2 mt-5 flex items-center justify-between rounded-lg bg-surface-2/80 px-3 py-1.5 scroll-mt-6 border border-line"
             >
               <h3 className={`${typo.h3} font-bold text-body`}>{renderInline(text, searchQuery)}</h3>
               <a
@@ -384,7 +384,7 @@ export function PolicyMarkdownViewer({
         const itemText = numMatch[2];
         elements.push(
           <div key={`num-${i}`} className={`my-2.5 flex items-start gap-2.5 pl-1 text-body ${typo.body} ${typo.leading}`}>
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-canvas text-[11px] font-bold text-muted border border-line-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-canvas text-[11px] font-bold text-muted border border-line">
               {num}
             </span>
             <div className="flex-1 pt-0.5">{renderInline(itemText, searchQuery)}</div>
@@ -520,7 +520,7 @@ export function PolicyMarkdownViewer({
 
           <button
             onClick={handleCopyMarkdown}
-            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line-2 hover:bg-canvas active:scale-98"
+            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line hover:bg-canvas active:scale-98"
             title={t('markdownViewer.actions.copyTitle', { defaultValue: 'Sao chép toàn bộ mã nguồn Markdown' })}
           >
             {copied ? (
@@ -542,7 +542,7 @@ export function PolicyMarkdownViewer({
 
           <button
             onClick={handleDownloadMd}
-            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line-2 hover:bg-canvas active:scale-98"
+            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-[12px] font-medium text-body transition hover:border-line hover:bg-canvas active:scale-98"
             title={t('markdownViewer.actions.downloadTitle', { defaultValue: 'Tải tệp .md về máy' })}
           >
             <span>{t('markdownViewer.actions.downloadBtn', { defaultValue: 'Tải .md' })}</span>
@@ -561,7 +561,7 @@ export function PolicyMarkdownViewer({
         {showToc && headings.length > 1 && (
           <div className="sticky top-6 flex flex-col gap-3">
             <div className="rounded-xl border border-line bg-surface p-4 shadow-xs">
-              <div className="mb-2.5 flex items-center justify-between border-b border-line-3 pb-2 text-[12px]">
+              <div className="mb-2.5 flex items-center justify-between border-b border-line pb-2 text-[12px]">
                 <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-muted">
                   <IconBook size={13} className="text-brand" />
                   <span>{t('markdownViewer.toc', { defaultValue: 'Mục lục điều khoản' })}</span>

@@ -75,7 +75,7 @@ export function License() {
 
       {/* High-End Station Selector Bar */}
       {stationList.length > 1 ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-card border border-line-2 bg-surface p-3.5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-card border border-line bg-surface p-3.5 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-owner-soft text-owner-deep">
               <IconBolt size={20} />
@@ -116,7 +116,7 @@ export function License() {
           </div>
         </div>
       ) : currentStation ? (
-        <div className="flex items-center gap-3 rounded-card border border-line-2 bg-surface p-3 px-4 shadow-sm">
+        <div className="flex items-center gap-3 rounded-card border border-line bg-surface p-3 px-4 shadow-sm">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-owner-soft text-owner-deep">
             <IconBolt size={18} />
           </div>
@@ -387,7 +387,7 @@ function Body({ license, station, history }: { license: License; station: Statio
             </div>
           </div>
 
-          <div className="mt-5 rounded-[8px] border border-hairline bg-surface-2 p-2.5 text-[11.5px] text-muted">
+          <div className="mt-5 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] text-muted">
             {t('license.details.currentTerm', { defaultValue: 'Kỳ hạn hiện tại:' })}{' '}
             <span className="font-semibold text-ink">{startDate ? formatDateVn(startDate) : '—'}</span> →{' '}
             <span className="font-semibold text-ink">{expiryDate ? formatDateVn(expiryDate) : '—'}</span>
@@ -406,7 +406,7 @@ function Body({ license, station, history }: { license: License; station: Statio
 
             {/* Pricing Packages Box */}
             <div className="mb-3.5 grid grid-cols-2 gap-2">
-              <div className="rounded-[8px] border border-line-2 bg-surface-2 p-2.5">
+              <div className="rounded-[8px] bg-surface-2 p-2.5">
                 <div className="text-[11px] font-bold text-ink">
                   {t('license.guidelines.monthlyTitle', { defaultValue: 'Gói Tháng (1 tháng)' })}
                 </div>

@@ -151,7 +151,7 @@ export function BookingDetailDrawer({
 
             {/* Cancellation reason if cancelled */}
             {booking.cancellationReason && (
-              <div className="rounded-card border border-line-3 bg-surface-2 px-3.5 py-2 text-[12px] font-medium text-body">
+              <div className="rounded-card border border-line bg-surface-2 px-3.5 py-2 text-[12px] font-medium text-body">
                 <span className="font-semibold text-bad">{t('bookings.drawer.cancellationReasonLabel', 'Lý do hủy:')} </span>
                 {t(`bookings.cancellationReason.${booking.cancellationReason}`, {
                   defaultValue: CANCELLATION_REASON[booking.cancellationReason]?.label ?? booking.cancellationReason,
@@ -166,7 +166,7 @@ export function BookingDetailDrawer({
             />
 
             {/* time window */}
-            <div className="rounded-card border border-line-3 bg-surface-2 p-4">
+            <div className="rounded-card border border-line bg-surface-2 p-4">
               <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
                 {t('bookings.rangeLabel')}
               </div>
@@ -209,7 +209,7 @@ export function BookingDetailDrawer({
             </div>
 
             {/* price snapshot */}
-            <div className="rounded-card border border-line-3 p-4">
+            <div className="rounded-card border border-line p-4">
               <div className="mb-[11px] flex items-center justify-between">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('bookings.snapshotLabel')}</div>
                 <span className="rounded-full bg-warn-pill px-2 py-0.5 text-[10px] font-medium text-warn">
@@ -246,7 +246,7 @@ export function BookingDetailDrawer({
                     <span className="font-mono">{formatVnd(booking.totalAmount)}</span>
                   </div>
                 )}
-                <div className="mt-0.5 flex justify-between border-t border-line-3 pt-2 text-[14px] font-bold text-ink">
+                <div className="mt-0.5 flex justify-between border-t border-line pt-2 text-[14px] font-bold text-ink">
                   <span>{t('bookings.total')}</span>
                   <span className="font-mono">{formatVnd(booking.totalAmount)}</span>
                 </div>
@@ -255,7 +255,7 @@ export function BookingDetailDrawer({
 
             {/* Payment & Checkout Details */}
             {booking.payment && (
-              <div className="rounded-card border border-line-3 bg-surface-2 p-4">
+              <div className="rounded-card border border-line bg-surface-2 p-4">
                 <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
                   {t('bookings.drawer.paymentMethod', { method: booking.payment.method, defaultValue: `THANH TOÁN · ${booking.payment.method}` })}
                 </div>
@@ -294,7 +294,7 @@ export function BookingDetailDrawer({
             )}
 
             {/* Refund policy guidelines */}
-            <div className="rounded-card border border-line-3 p-4">
+            <div className="rounded-card border border-line p-4">
               <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
                 {t('bookings.refundPolicy')}
               </div>

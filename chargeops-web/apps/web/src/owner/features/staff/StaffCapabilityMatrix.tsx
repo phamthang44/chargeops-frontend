@@ -14,7 +14,7 @@ export function StaffCapabilityMatrix() {
   ] as const;
 
   return (
-    <Card className="p-4 border border-line/60 shadow-subtle">
+    <Card className="p-4 shadow-subtle">
       <div className="mb-1.5 flex items-center gap-2">
         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-warn-soft text-warn-deep">
           <IconLock size={13} />
@@ -23,7 +23,7 @@ export function StaffCapabilityMatrix() {
       </div>
       <p className="mb-3 text-[11.5px] leading-relaxed text-faint">{t('staff.matrix.help')}</p>
 
-      <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
+      <div className="overflow-hidden rounded-lg bg-canvas">
         <div
           className="grid border-b border-hairline bg-surface-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-faint"
           style={{ gridTemplateColumns: '1fr 56px 56px' }}

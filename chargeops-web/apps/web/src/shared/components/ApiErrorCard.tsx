@@ -48,7 +48,7 @@ function hintKey(code?: string, status?: number): string {
 }
 
 /**
- * High-end failure state: double-bezel shell, friendly localized headline,
+ * High-end failure state: single-outline shell, friendly localized headline,
  * actionable retry and a collapsed technical block for support hand-off.
  * The raw backend message (often an English string with UUIDs) never leads —
  * it stays tucked inside the technical details.
@@ -88,11 +88,11 @@ export function ApiErrorCard({
   return (
     <div
       role="alert"
-      className={`group relative rounded-2xl bg-bad/5 p-1 ring-1 ring-bad/20 transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-bad/35 ${className}`}
+      className={`group relative rounded-2xl bg-bad/5 transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-bad/35 ${className}`}
       style={{ animation: 'riseIn 560ms cubic-bezier(0.32,0.72,0,1) both' }}
     >
       <div
-        className={`rounded-[calc(1rem-0.25rem)] border border-bad/20 bg-surface/95 shadow-sm ${
+        className={`rounded-2xl border border-bad/20 bg-surface/95 shadow-sm ${
           compact ? 'p-3' : 'p-4 sm:p-5'
         }`}
       >
@@ -135,7 +135,7 @@ export function ApiErrorCard({
 
         {hint && (
           <div
-            className="mt-2.5 flex items-start gap-2 rounded-xl border border-line/70 bg-canvas p-2.5 text-[11.5px] leading-relaxed text-muted"
+            className="mt-2.5 flex items-start gap-2 rounded-xl bg-canvas p-2.5 text-[11.5px] leading-relaxed text-muted"
             style={stagger(220)}
           >
             <IconInfoCircle size={14} className="mt-0.5 shrink-0 text-faint" />
@@ -145,7 +145,7 @@ export function ApiErrorCard({
 
         {(facts.code || facts.status || facts.message) && (
           <div className="mt-3" style={stagger(300)}>
-            <details className="group/details overflow-hidden rounded-xl border border-line/70 bg-canvas/70">
+            <details className="group/details overflow-hidden rounded-xl bg-canvas/70">
               <summary className="flex items-center justify-between gap-2 px-3 py-2 text-[11px] font-semibold text-muted transition-colors duration-300 hover:text-ink">
                 <span>{t('errorCard.details', { defaultValue: 'Chi tiết kỹ thuật' })}</span>
                 <span className="flex items-center gap-2">

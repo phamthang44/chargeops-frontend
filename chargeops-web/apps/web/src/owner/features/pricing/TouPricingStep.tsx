@@ -67,7 +67,7 @@ function TimelineTrack({
         </div>
       </div>
 
-      <div className="flex h-6 w-full overflow-hidden rounded-[6px] border border-line-2 bg-chip">
+      <div className="flex h-6 w-full overflow-hidden rounded-[6px] border border-line bg-chip">
         {hours.map((h) => {
           const match = getHourRate(h);
           let bg = 'bg-surface-3';
@@ -112,7 +112,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
   const hasDaySplit = hasWeekdaySpecific || hasWeekendSpecific;
 
   return (
-    <div className="mb-4 rounded-[10px] border border-line-3 bg-surface-2 p-3.5 flex flex-col gap-3">
+    <div className="mb-4 rounded-[10px] bg-surface-2 p-3.5 flex flex-col gap-3">
       {/* Header & Legend */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2.5">
         <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-faint">
@@ -124,7 +124,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
             <span className="text-muted">{t('pricing.steps.step3.legendLow', { defaultValue: 'Thấp điểm' })}</span>
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-surface-3 border border-line-2" />
+            <span className="h-2 w-2 rounded-full bg-surface-3 border border-line" />
             <span className="text-muted">{t('pricing.steps.step3.legendBase', { defaultValue: 'Giá cơ bản' })}</span>
           </span>
           <span className="flex items-center gap-1">
@@ -192,7 +192,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
           </button>
         }
       />
-      <div className="rounded-panel border border-line-2 bg-surface p-5">
+      <div className="rounded-panel border border-line bg-surface p-5">
         {/* 24h Timeline Bar */}
         <TouTimeline24h rules={rules} basePriceVnd={basePriceVnd} />
 
@@ -207,7 +207,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                 const pct = pricePctVsBase(r.rateVnd, basePriceVnd);
                 const higher = pct >= 0;
                 return (
-                  <div key={r.id} className="rounded-card border border-line-3 p-4 bg-surface transition-shadow hover:shadow-sm">
+                  <div key={r.id} className="rounded-card border border-line p-4 bg-surface transition-shadow hover:shadow-sm">
                     <div className="mb-[13px] flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-[11px]">
                         <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-owner-soft">

@@ -698,7 +698,7 @@ export function SimulatorControlPanel({
             {t('controlPanel.challenge.label', '2. Dynamic QR Challenge Token')}
           </h3>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
+          <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/50">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500 dark:text-slate-400">{t('kiosk.ready.challengeCode', 'Mã Token:')}</span>
               <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
@@ -706,7 +706,7 @@ export function SimulatorControlPanel({
               </span>
             </div>
             
-            <div className="mt-1.5 break-all rounded-lg border border-slate-200 bg-white p-2.5 font-mono text-[11px] text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            <div className="mt-1.5 break-all rounded-lg bg-white p-2.5 font-mono text-[11px] text-slate-800 dark:bg-slate-900 dark:text-slate-200">
               {challengeToken || t('kiosk.ready.generating', 'Đang tạo...')}
             </div>
 
@@ -853,7 +853,7 @@ export function SimulatorControlPanel({
           </button>
         </div>
 
-        <div className="h-32 overflow-y-auto rounded-xl border border-slate-200 bg-slate-950 p-3 font-mono text-[11px] text-slate-300 space-y-1.5">
+        <div className="h-32 overflow-y-auto rounded-xl bg-slate-950 p-3 font-mono text-[11px] text-slate-300 space-y-1.5">
           {logs.length === 0 ? (
             <div className="text-slate-600 italic">{t('controlPanel.logs.empty', 'Chưa có sự kiện nào được ghi nhận.')}</div>
           ) : (

@@ -37,7 +37,7 @@ export function ProfileUserCard({
           <Pressable
             onPress={onPressAvatar}
             accessibilityRole="button"
-            accessibilityLabel={userAvatar ? 'Xem ảnh đại diện' : t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
+            accessibilityLabel={userAvatar ? t('profile.viewAvatar', 'Xem ảnh đại diện') : t('profile.changeAvatar', 'Thay đổi ảnh đại diện')}
           >
             <View style={[styles.avatar, { backgroundColor: themeColors.primarySoft }]}>
               {userAvatar ? (

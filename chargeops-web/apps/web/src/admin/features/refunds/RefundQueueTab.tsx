@@ -172,7 +172,7 @@ export function RefundQueueTab() {
         return {
           label: reason,
           tone: 'neutral' as const,
-          badgeBg: 'bg-line-3 text-muted border-line-2',
+          badgeBg: 'bg-line-3 text-muted border-line',
           dot: 'bg-muted',
         };
     }
@@ -187,11 +187,11 @@ export function RefundQueueTab() {
 
   return (
     <>
-      {/* 1. Double-Bezel Bento KPI Cards */}
+      {/* 1. Bento KPI Cards (single border each) */}
       {s ? (
         <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {/* Pending Card */}
-          <div className="group relative overflow-hidden rounded-[18px] border border-line-2 bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-warn/40">
+          <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-warn/40">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
@@ -230,7 +230,7 @@ export function RefundQueueTab() {
           </div>
 
           {/* Succeeded Card */}
-          <div className="group relative overflow-hidden rounded-[18px] border border-line-2 bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-good/40">
+          <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-good/40">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
@@ -262,7 +262,7 @@ export function RefundQueueTab() {
           </div>
 
           {/* Total Obligations Card */}
-          <div className="group relative overflow-hidden rounded-[18px] border border-line-2 bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-brand/40">
+          <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-brand/40">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
@@ -291,7 +291,7 @@ export function RefundQueueTab() {
           </div>
 
           {/* Action Required / Failed Attempts Card (Replaces Mode Card per §7.3) */}
-          <div className="group relative overflow-hidden rounded-[18px] border border-line-2 bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-rose-500/40">
+          <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-rose-500/40">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
@@ -351,7 +351,7 @@ export function RefundQueueTab() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick Date Range Filter */}
-          <div className="flex items-center gap-1 rounded-xl border border-line-2 bg-surface p-1 shadow-2xs">
+          <div className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
             <span className="flex items-center gap-1 pl-2 pr-1 text-[11px] font-semibold text-faint">
               <IconCalendar size={13} />
             </span>
@@ -394,8 +394,8 @@ export function RefundQueueTab() {
         </div>
       </div>
 
-      {/* 3. Double-Bezel Table Card */}
-      <div className="rounded-[18px] border border-line-2 bg-surface shadow-xs overflow-hidden">
+      {/* 3. Table Card (single border) */}
+      <div className="rounded-[18px] border border-line bg-surface shadow-xs overflow-hidden">
         {listQuery.isLoading || !data ? (
           <div className="p-4 space-y-2.5">
             {Array.from({ length: 5 }, (_, i) => (
@@ -408,7 +408,7 @@ export function RefundQueueTab() {
               <div className="min-w-[920px]">
                 {/* Header */}
                 <div
-                  className="grid border-b border-line-2 bg-surface-2/70 px-4 py-3 text-[10.5px] font-bold uppercase tracking-[0.08em] text-faint"
+                  className="grid border-b border-line bg-surface-2/70 px-4 py-3 text-[10.5px] font-bold uppercase tracking-[0.08em] text-faint"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>{t('refunds.table.cols.id', 'MÃ REFUND')}</span>
@@ -596,7 +596,7 @@ export function RefundQueueTab() {
               </div>
             </div>
 
-            <div className="border-t border-line-2 bg-surface/50 p-2.5">
+            <div className="border-t border-line bg-surface/50 p-2.5">
               <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
             </div>
           </>

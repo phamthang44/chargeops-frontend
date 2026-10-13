@@ -149,7 +149,7 @@ export function StaffStatusHistoryDrawer({
                   ? 'border-owner/30 bg-owner-soft text-owner'
                   : evt.actorType === 'ADMIN'
                     ? 'border-brand/30 bg-brand-soft text-brand'
-                    : 'border-line-2 bg-surface-2 text-faint';
+                    : 'border-line bg-surface-2 text-faint';
 
               return (
                 <div key={evt.id || idx} className="flex items-stretch gap-3">
@@ -161,7 +161,7 @@ export function StaffStatusHistoryDrawer({
                   </div>
 
                   <div className={`flex-1 ${isLast ? 'pb-2' : 'pb-4'}`}>
-                    <div className="flex flex-col gap-2 rounded-xl border border-line-2 bg-surface p-3.5 shadow-xs transition hover:border-brand/30 hover:shadow-sm">
+                    <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 shadow-xs transition hover:border-brand/30 hover:shadow-sm">
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2 text-[11px]">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold ${actorBadgeClass}`}
@@ -204,7 +204,7 @@ export function StaffStatusHistoryDrawer({
                       </div>
 
                       {evt.reason && (
-                        <div className="rounded-[8px] border border-line-2/50 bg-surface-2 px-2.5 py-1.5 text-[11.5px] leading-relaxed text-body">
+                        <div className="rounded-[8px] bg-surface-2 px-2.5 py-1.5 text-[11.5px] leading-relaxed text-body">
                           <span className="font-semibold text-faint">
                             {t('equipmentHistory.reasonLabel', 'Lý do:')}{' '}
                           </span>

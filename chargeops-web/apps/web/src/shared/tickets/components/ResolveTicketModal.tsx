@@ -32,8 +32,12 @@ export function ResolveTicketModal({
 
   const deadlinePreview = useMemo(() => {
     const deadline = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-    return `${formatTimeVn(deadline.toISOString())} ngày ${formatDateVn(deadline.toISOString())}`;
-  }, []);
+    return t('resolveModal.deadlineFormat', {
+      time: formatTimeVn(deadline.toISOString()),
+      date: formatDateVn(deadline.toISOString()),
+      defaultValue: `${formatTimeVn(deadline.toISOString())} ngày ${formatDateVn(deadline.toISOString())}`,
+    });
+  }, [t]);
 
   const nextCycle = (ticket.resolutionCycle ?? 0) + 1;
   const ticketCode = ticket.ticketCode || ticket.ticketNo || `#${ticket.id.slice(0, 8).toUpperCase()}`;
@@ -60,7 +64,7 @@ export function ResolveTicketModal({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Cycle & Policy Info Tag */}
-        <div className="flex items-center justify-between rounded-xl border border-hairline bg-surface-2 p-3 text-[12px]">
+        <div className="flex items-center justify-between rounded-xl bg-surface-2 p-3 text-[12px]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-bold text-brand">{ticketCode}</span>
             <span className="text-faint">·</span>
@@ -102,7 +106,12 @@ export function ResolveTicketModal({
             <span>{t('resolveModal.notificationPreviewTitle', 'Xem trước thông báo gửi cho tài xế:')}</span>
           </div>
           <p className="mt-1 leading-relaxed text-muted italic">
-            “Phiếu hỗ trợ <strong>{ticketCode}</strong> đã được nhân viên trạm đánh dấu đã giải quyết: {reason.trim() ? `“${reason.trim()}”` : '[Kết quả xử lý]'}. Vui lòng kiểm tra và chọn ‘Xác nhận’ hoặc ‘Vấn đề vẫn còn’ trước <strong>{deadlinePreview}</strong>. Nếu không nhận được phản hồi sau 10 ngày, phiếu sẽ tự động đóng theo quy định.”
+            {t('resolveModal.notificationPreviewText', {
+              ticketCode,
+              reason: reason.trim() ? `“${reason.trim()}”` : t('resolveModal.reasonFallback', '[Kết quả xử lý]'),
+              deadlinePreview,
+              defaultValue: `“Phiếu hỗ trợ ${ticketCode} đã được nhân viên trạm đánh dấu đã giải quyết: ${reason.trim() ? `“${reason.trim()}”` : '[Kết quả xử lý]'}. Vui lòng kiểm tra và chọn ‘Xác nhận’ hoặc ‘Vấn đề vẫn còn’ trước ${deadlinePreview}. Nếu không nhận được phản hồi sau 10 ngày, phiếu sẽ tự động đóng theo quy định.”`,
+            })}
           </p>
         </div>
 

@@ -49,7 +49,7 @@ export function ApproveModal({
       </div>
 
       {/* Station Summary Box */}
-      <div className="mt-4 rounded-[10px] border border-line-2 bg-surface-2 p-3 text-[12px]">
+      <div className="mt-4 rounded-[10px] bg-surface-2 p-3 text-[12px]">
         <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-faint">
           {t('approveModal.stationInfoTitle', { defaultValue: 'THÔNG TIN TRẠM SẠC' })}
         </div>
@@ -76,7 +76,7 @@ export function ApproveModal({
       </div>
 
       {/* Info Callout */}
-      <div className="mt-3.5 flex items-start gap-2 rounded-[9px] border border-good-border bg-good-soft p-3 text-[12px] leading-relaxed text-good-deep">
+      <div className="mt-3.5 flex items-start gap-2 rounded-[9px] bg-good-soft p-3 text-[12px] leading-relaxed text-good-deep">
         <IconInfo size={16} className="mt-0.5 shrink-0 text-good" />
         <div>
           <div>

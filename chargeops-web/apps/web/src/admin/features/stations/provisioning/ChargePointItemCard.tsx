@@ -58,12 +58,12 @@ export function ChargePointItemCard({
 
   return (
     <Card
-      className={`overflow-hidden border transition duration-150 ${
+      className={`overflow-hidden transition duration-150 ${
         isSuspended
-          ? 'border-warn/40 bg-surface shadow-sm ring-1 ring-warn/10'
+          ? 'border-warn/40 bg-surface shadow-sm'
           : isPendingActivation
           ? 'border-brand/30 bg-surface shadow-sm'
-          : 'border-line-2 bg-surface shadow-sm'
+          : 'bg-surface shadow-sm'
       }`}
     >
       {/* Top Header of CP */}
@@ -87,7 +87,7 @@ export function ChargePointItemCard({
               </span>
               <span className="font-mono text-[12px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
               {cp.zoneLabel && (
-                <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-faint border border-line-2">
+                <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-faint border border-line">
                   <IconPin size={11} className="inline mr-1 text-faint" />
                   {cp.zoneLabel}
                 </span>
@@ -123,7 +123,7 @@ export function ChargePointItemCard({
         <div className="flex flex-wrap items-center gap-2">
           {/* Cấp phép Admin (Provisioning Status) */}
           <div
-            className="flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 border border-line-2 cursor-help transition hover:border-brand/40"
+            className="flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 border border-line cursor-help transition hover:border-brand/40"
             title={
               isPendingActivation
                 ? t('provisioning.tooltips.cpPending')
@@ -143,7 +143,7 @@ export function ChargePointItemCard({
           {/* Kết nối Kỹ thuật (OCPP Telemetry Status if Active ONLY) */}
           {isActive && (
             <div
-              className="flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 border border-line-2 cursor-help transition hover:border-brand/40"
+              className="flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 border border-line cursor-help transition hover:border-brand/40"
               title={
                 operStatus === 'AVAILABLE'
                   ? t('provisioning.tooltips.cpAvailable')
@@ -173,7 +173,7 @@ export function ChargePointItemCard({
       {/* Connector List */}
       <div className="bg-surface-2 p-3.5">
         {connectors.length === 0 ? (
-          <div className="flex items-start gap-2.5 rounded-[9px] border border-warn-border bg-warn-soft p-3.5 text-[12px] text-warn-deep leading-relaxed">
+          <div className="flex items-start gap-2.5 rounded-[9px] bg-warn-soft p-3.5 text-[12px] text-warn-deep leading-relaxed">
             <IconLock size={16} className="mt-0.5 shrink-0" />
             <span>
               <Trans
@@ -217,7 +217,7 @@ export function ChargePointItemCard({
               return (
                 <div
                   key={c.id}
-                  className="group relative flex flex-col justify-between gap-2.5 rounded-[10px] border border-line-2 bg-surface p-3.5 shadow-sm transition hover:border-brand/40 hover:shadow"
+                  className="group relative flex flex-col justify-between gap-2.5 rounded-[10px] bg-surface p-3.5 shadow-sm transition hover:shadow"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2.5 min-w-0">
@@ -235,7 +235,7 @@ export function ChargePointItemCard({
                           <span className="font-mono text-[12px] font-bold text-ink">
                             {c.connectorCode || c.id}
                           </span>
-                          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10.5px] font-bold text-body border border-line-2">
+                          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10.5px] font-bold text-body border border-line">
                             {c.connectorType}
                           </span>
                           <span className="text-[10px] font-medium text-faint">
@@ -258,7 +258,7 @@ export function ChargePointItemCard({
                       <button
                         type="button"
                         onClick={() => onViewConnectorHistory(c)}
-                        className="inline-flex items-center gap-1 rounded-[6px] border border-line-2 bg-surface-2 px-2 py-1 text-[11px] font-semibold text-muted hover:border-brand hover:text-brand transition cursor-pointer"
+                        className="inline-flex items-center gap-1 rounded-[6px] border border-line bg-surface-2 px-2 py-1 text-[11px] font-semibold text-muted hover:border-brand hover:text-brand transition cursor-pointer"
                         title={t('provisioning.workspace.connector.historyTitle')}
                       >
                         <IconHistory size={12} strokeWidth={2} />
@@ -289,7 +289,7 @@ export function ChargePointItemCard({
                       </span>
                     ) : (
                       <span
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-faint bg-surface-2 px-2 py-0.5 rounded border border-line-2"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-faint bg-surface-2 px-2 py-0.5 rounded border border-line"
                         title={t('provisioning.workspace.connector.lockedTitle')}
                       >
                         <IconLock size={11} />

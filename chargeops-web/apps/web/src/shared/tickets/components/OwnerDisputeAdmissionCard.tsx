@@ -53,7 +53,7 @@ export function OwnerDisputeAdmissionCard({
 
   if (isLoading) {
     return (
-      <Card className="rounded-2xl border border-line bg-surface p-4 shadow-sm space-y-2">
+      <Card className="rounded-2xl p-4 shadow-sm space-y-2">
         <Skeleton className="h-4 w-1/2" />
         <Skeleton className="h-12 w-full rounded-xl" />
       </Card>
@@ -63,7 +63,7 @@ export function OwnerDisputeAdmissionCard({
   if (!booking) return null;
 
   return (
-    <Card className="rounded-2xl border border-owner-border/70 bg-owner-soft/30 p-4 shadow-sm space-y-3">
+    <Card bordered={false} className="rounded-2xl border border-owner-border/70 bg-owner-soft/30 p-4 shadow-sm space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 border-b border-hairline pb-2.5">
         <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function OwnerDisputeAdmissionCard({
         </div>
       ) : (
         <>
-          <div className="rounded-xl border border-line-2 bg-surface p-3 text-[11.5px] space-y-1.5">
+          <div className="rounded-xl bg-surface p-3 text-[11.5px] space-y-1.5">
             <div className="flex justify-between">
               <span className="text-muted">{t('escalation.ownerAdmission.bookingAmountLabel', 'Gói sạc liên quan:')}</span>
               <span className="font-mono font-semibold text-ink">
@@ -113,7 +113,7 @@ export function OwnerDisputeAdmissionCard({
             </div>
           </div>
 
-          <div className="flex items-start gap-2 rounded-xl bg-surface/70 p-2.5 text-[11px] leading-relaxed text-muted border border-hairline">
+          <div className="flex items-start gap-2 rounded-xl bg-surface/70 p-2.5 text-[11px] leading-relaxed text-muted">
             <IconInfoCircle size={14} className="mt-0.5 shrink-0 text-owner" />
             <div>
               {t(

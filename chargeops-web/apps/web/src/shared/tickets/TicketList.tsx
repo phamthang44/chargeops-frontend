@@ -23,10 +23,10 @@ function PriorityDot({ priority }: { priority?: TicketPriority }) {
     p === 'CRITICAL'
       ? 'bg-bad-deep ring-2 ring-bad/20 animate-pulse'
       : p === 'HIGH'
-      ? 'bg-warn-deep'
+      ? 'bg-orange-500 dark:bg-orange-400'
       : p === 'MEDIUM'
-      ? 'bg-brand'
-      : 'bg-muted';
+      ? 'bg-amber-500 dark:bg-amber-400'
+      : 'bg-blue-500 dark:bg-blue-400';
 
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted">
@@ -59,7 +59,7 @@ function Meta({ t: tk }: { t: Ticket }) {
         {hasRefund && (
           <span className="inline-flex shrink-0 items-center gap-1 rounded bg-good-soft px-1.5 py-0.5 text-[10px] font-bold text-good-deep">
             <IconCheckCircle size={11} strokeWidth={2.2} />
-            <span>Hoàn 100%</span>
+            <span>{t('table.refund100', 'Hoàn 100%')}</span>
           </span>
         )}
       </div>
@@ -143,12 +143,19 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
 
             <div className="flex flex-col items-center gap-1">
               <StatusPill tone={meta.tone} label={statusLabel} />
-              {statusKey === 'RESOLVED' && tk.autoCloseAt && (
-                <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
-                  <IconClock size={10} strokeWidth={2.2} />
-                  <span>10 ngày</span>
-                </span>
-              )}
+              {statusKey === 'RESOLVED' && tk.autoCloseAt && (() => {
+                const diff = new Date(tk.autoCloseAt).getTime() - Date.now();
+                const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+                const text = daysLeft <= 0
+                  ? t('table.expired', 'Quá hạn')
+                  : t('table.daysLeft', { count: daysLeft, defaultValue: `${daysLeft} ngày` });
+                return (
+                  <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
+                    <IconClock size={10} strokeWidth={2.2} />
+                    <span>{text}</span>
+                  </span>
+                );
+              })()}
             </div>
           </div>
         );
@@ -176,13 +183,28 @@ export function TicketCards({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
         const handlerName = tk.assignedHandlerName || tk.assignedToName;
 
         return (
-          <Card key={tk.id} className="cursor-pointer p-3.5 hover:border-line-2 transition-all" onClick={() => onOpen(tk)}>
+          <Card key={tk.id} className="cursor-pointer p-3.5 transition-all" onClick={() => onOpen(tk)}>
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[11.5px] font-bold text-brand">{code}</span>
                 <PriorityDot priority={tk.priority} />
               </div>
-              <StatusPill tone={meta.tone} label={statusLabel} />
+              <div className="flex items-center gap-1.5">
+                {statusKey === 'RESOLVED' && tk.autoCloseAt && (() => {
+                  const diff = new Date(tk.autoCloseAt).getTime() - Date.now();
+                  const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+                  const text = daysLeft <= 0
+                    ? t('table.expired', 'Quá hạn')
+                    : t('table.daysLeft', { count: daysLeft, defaultValue: `${daysLeft} ngày` });
+                  return (
+                    <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
+                      <IconClock size={10} strokeWidth={2.2} />
+                      <span>{text}</span>
+                    </span>
+                  );
+                })()}
+                <StatusPill tone={meta.tone} label={statusLabel} />
+              </div>
             </div>
 
             <div className="mb-1 flex items-center gap-2">
@@ -190,7 +212,7 @@ export function TicketCards({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
               {hasRefund && (
                 <span className="inline-flex shrink-0 items-center gap-1 rounded bg-good-soft px-1.5 py-0.5 text-[10px] font-bold text-good-deep">
                   <IconCheckCircle size={11} strokeWidth={2.2} />
-                  <span>Hoàn 100%</span>
+                  <span>{t('table.refund100', 'Hoàn 100%')}</span>
                 </span>
               )}
             </div>

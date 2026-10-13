@@ -66,7 +66,7 @@ export function AmenitiesModal({
               onClick={() => toggle(a)}
               aria-pressed={on}
               className={`flex items-center gap-2.5 rounded-[10px] border px-3 py-2.5 text-left text-[13px] font-medium transition ${
-                on ? 'border-owner bg-owner-soft text-owner-deep' : 'border-line-2 text-body hover:border-line-3'
+                on ? 'border-owner bg-owner-soft text-owner-deep' : 'border-line text-body hover:border-line'
               }`}
             >
               <span className="text-[18px] leading-none">{AMENITY_EMOJI[a]}</span>

@@ -7,7 +7,7 @@ export function ProvisioningStatusLegend() {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <Card className="overflow-hidden border border-line-2 bg-surface-2 transition shadow-sm">
+    <Card className="overflow-hidden bg-surface-2 transition shadow-sm">
       <div
         className="flex cursor-pointer items-center justify-between px-4 py-3 select-none hover:bg-surface-3/30 transition"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -51,7 +51,7 @@ export function ProvisioningStatusLegend() {
         <div className="border-t border-hairline px-4 py-3.5 bg-surface/50 text-[12px] space-y-3.5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Cột 1: Trụ sạc (Charge Point) */}
-            <div className="flex flex-col gap-2 rounded-[8px] border border-line-2 bg-surface p-3">
+            <div className="flex flex-col gap-2 rounded-[8px] bg-surface p-3">
               <div className="flex items-center gap-1.5 text-ink font-bold text-[12.5px] border-b border-hairline pb-1.5">
                 <IconBolt size={15} className="text-brand" />
                 <span>{t('provisioning.legend.cpSection')}</span>
@@ -112,7 +112,7 @@ export function ProvisioningStatusLegend() {
               </div>
 
               {/* Note tháo gỡ thắc mắc */}
-              <div className="mt-1 rounded-[6px] border border-brand/20 bg-brand-soft/20 p-2.5 text-[11px] text-body leading-relaxed">
+              <div className="mt-1 rounded-[6px] bg-brand-soft/20 p-2.5 text-[11px] text-body leading-relaxed">
                 <span className="font-bold text-brand">💡 {t('provisioning.legend.cpNoteTitle')}</span>
                 <p className="mt-0.5 text-muted">
                   {t('provisioning.legend.cpNoteBody')}
@@ -121,7 +121,7 @@ export function ProvisioningStatusLegend() {
             </div>
 
             {/* Cột 2: Súng sạc (Connector) */}
-            <div className="flex flex-col gap-2 rounded-[8px] border border-line-2 bg-surface p-3">
+            <div className="flex flex-col gap-2 rounded-[8px] bg-surface p-3">
               <div className="flex items-center gap-1.5 text-ink font-bold text-[12.5px] border-b border-hairline pb-1.5">
                 <IconBolt size={15} className="text-cyan-600" />
                 <span>{t('provisioning.legend.connectorSection')}</span>
@@ -160,7 +160,7 @@ export function ProvisioningStatusLegend() {
               </div>
 
               {/* Note phân quyền */}
-              <div className="mt-auto rounded-[6px] border border-line-2 bg-surface-2 p-2.5 text-[11px] text-body leading-relaxed">
+              <div className="mt-auto rounded-[6px] bg-surface-2 p-2.5 text-[11px] text-body leading-relaxed">
                 <span className="font-bold text-ink">⚡ {t('provisioning.legend.connRuleTitle')}</span>
                 <p className="mt-0.5 text-muted">
                   {t('provisioning.legend.connRuleBody')}

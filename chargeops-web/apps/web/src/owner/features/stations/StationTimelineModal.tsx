@@ -105,7 +105,7 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
         </div>
 
         {/* Station Subheader */}
-        <div className="flex items-center justify-between rounded-[10px] border border-hairline bg-surface-2 p-3">
+        <div className="flex items-center justify-between rounded-[10px] bg-surface-2 p-3">
           <div>
             <div className="text-[13px] font-bold text-ink">{station.name}</div>
             <div className="text-[11.5px] text-muted">{station.city || station.provinceName}</div>

@@ -206,7 +206,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
 
       <div className="space-y-4 px-4 py-4">
         {/* Case context */}
-        <div className="space-y-1.5 rounded-xl border border-hairline bg-line-2/40 p-3">
+        <div className="space-y-1.5 rounded-xl bg-line-2/40 p-3">
           <Row
             label={t('escalation.dossier.stationLabel')}
             value={ticket.stationName ?? t('escalation.refundPolicy.unknownAmount')}
@@ -258,7 +258,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
           <>
             {/* 01 · Identify */}
             <Section index="01" title={t('escalation.dossier.sectionIdentify')}>
-              <div className="space-y-1.5 rounded-xl border border-hairline p-3">
+              <div className="space-y-1.5 rounded-xl bg-surface-2 p-3">
                 <Row
                   label={t('escalation.dossier.bookingCode')}
                   value={context.bookingCode ?? ticket.bookingCode ?? t('escalation.refundPolicy.unknownAmount')}
@@ -360,7 +360,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
             {/* 02 · Timeline */}
             <Section index="02" title={t('escalation.dossier.sectionTimeline')}>
               {milestones.length > 0 ? (
-                <ul className="rounded-xl border border-hairline p-3">
+                <ul className="rounded-xl bg-surface-2 p-3">
                   {milestones.map((m, i) => (
                     <MilestoneRow
                       key={m.key}
@@ -376,7 +376,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   ))}
                 </ul>
               ) : (
-                <p className="rounded-xl border border-dashed border-hairline px-3 py-3 text-[11px] text-muted">
+                <p className="rounded-xl bg-surface-2 px-3 py-3 text-[11px] text-muted">
                   {t('escalation.dossier.timelineEmpty')}
                 </p>
               )}
@@ -384,7 +384,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
 
             {/* 03 · Money */}
             <Section index="03" title={t('escalation.dossier.sectionMoney')}>
-              <div className="space-y-1.5 rounded-xl border border-hairline p-3">
+              <div className="space-y-1.5 rounded-xl bg-surface-2 p-3">
                 <Row
                   label={t('escalation.dossier.payment')}
                   value={
@@ -489,7 +489,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
 
             {/* 04 · Basis & prior decision */}
             <Section index="04" title={t('escalation.dossier.sectionBasis')}>
-              <div className="space-y-2 rounded-xl border border-hairline p-3">
+              <div className="space-y-2 rounded-xl bg-surface-2 p-3">
                 <Row
                   label={t('escalation.dossier.latestDecision')}
                   value={
@@ -530,7 +530,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                 />
               </div>
 
-              <div className="space-y-1.5 rounded-xl border border-hairline p-3">
+              <div className="space-y-1.5 rounded-xl bg-surface-2 p-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
                   {t('escalation.dossier.conditionsTitle')}
                 </p>

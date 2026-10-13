@@ -158,7 +158,7 @@ export function NotificationCenter({
   return (
     <div className="space-y-6">
       {/* ===== HEADER BANNER (Clean & Modern) ===== */}
-      <div className="rounded-2xl border border-line-2 bg-surface p-5 shadow-xs">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3.5">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-2xs">
@@ -193,7 +193,7 @@ export function NotificationCenter({
             <button
               type="button"
               onClick={() => onMarkAllRead(activeTab !== 'all' ? activeTab : undefined)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-line-2 bg-surface hover:bg-chip px-3.5 py-2 text-[12px] font-bold text-ink shadow-2xs transition-colors self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface hover:bg-chip px-3.5 py-2 text-[12px] font-bold text-ink shadow-2xs transition-colors self-start sm:self-auto"
             >
               <IconCheck size={14} strokeWidth={2.5} className="text-brand" />
               <span>
@@ -211,7 +211,7 @@ export function NotificationCenter({
         {/* Status & Category Tabs */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Segmented Tabs */}
-          <div className="flex items-center rounded-xl border border-line-2 bg-surface p-1 shadow-2xs">
+          <div className="flex items-center rounded-xl border border-line bg-surface p-1 shadow-2xs">
             <button
               type="button"
               onClick={() => { setStatusTab('all'); onFilterChange?.(activeTab, false); }}
@@ -253,7 +253,7 @@ export function NotificationCenter({
                     'rounded-xl px-3 py-1.5 text-[12px] font-bold transition-all border',
                     active
                       ? 'bg-brand/10 text-brand border-brand/30 shadow-2xs'
-                      : 'border-line-2 bg-surface text-body hover:text-ink hover:bg-chip',
+                      : 'border-line bg-surface text-body hover:text-ink hover:bg-chip',
                   ].join(' ')}
                 >
                   {tab.label}
@@ -298,7 +298,7 @@ export function NotificationCenter({
           </button>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="rounded-2xl border border-line-2 bg-surface p-12 text-center shadow-xs">
+        <div className="rounded-2xl border border-line bg-surface p-12 text-center shadow-xs">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-chip text-faint">
             <IconBell size={26} strokeWidth={1.6} />
           </div>
@@ -329,7 +329,7 @@ export function NotificationCenter({
                 className={[
                   'group relative overflow-hidden rounded-2xl border transition-all duration-200 shadow-2xs p-4 sm:p-5',
                   item.read
-                    ? 'border-line-2/70 bg-surface/70 hover:bg-surface hover:border-line-3 opacity-80 hover:opacity-100'
+                    ? 'border-line/70 bg-surface/70 hover:bg-surface hover:border-line opacity-80 hover:opacity-100'
                     : 'border-brand/25 bg-surface hover:border-brand/40 shadow-xs',
                 ].join(' ')}
               >
@@ -366,7 +366,7 @@ export function NotificationCenter({
                         </h4>
 
                         {item.badge && (
-                          <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[10px] font-bold text-muted border border-line-2">
+                          <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[10px] font-bold text-muted border border-line">
                             {item.badge}
                           </span>
                         )}
@@ -382,7 +382,7 @@ export function NotificationCenter({
                       {/* Station reference (if present) */}
                       {item.stationName && (
                         <div className="mt-2 flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-muted border border-line-2">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-muted border border-line">
                             📍 {item.stationName}
                           </span>
                         </div>
@@ -407,7 +407,7 @@ export function NotificationCenter({
                           onClick={() => onMarkRead(item.id)}
                           title={t('notificationCenter.markAsRead', 'Đánh dấu đã đọc')}
                           aria-label={t('notificationCenter.markAsRead', 'Đánh dấu đã đọc')}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-owner-deep hover:bg-owner-soft transition-colors"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface text-faint hover:text-owner-deep hover:bg-owner-soft transition-colors"
                         >
                           <IconCheck size={13} strokeWidth={2.5} />
                         </button>
@@ -420,7 +420,7 @@ export function NotificationCenter({
                           onClick={() => onDismiss(item.id)}
                           title={t('notificationCenter.dismiss', 'Ẩn thông báo')}
                           aria-label={t('notificationCenter.dismiss', 'Ẩn thông báo')}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface text-faint hover:text-bad-deep hover:bg-bad-soft transition-colors"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface text-faint hover:text-bad-deep hover:bg-bad-soft transition-colors"
                         >
                           <IconX size={13} strokeWidth={2.2} />
                         </button>
@@ -436,7 +436,7 @@ export function NotificationCenter({
                           if (item.onAction) item.onAction();
                           else if (item.onSelect) item.onSelect();
                         }}
-                        className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface hover:bg-chip px-2.5 py-1 text-[11.5px] font-bold text-ink hover:text-brand transition-all shadow-2xs group/btn active:scale-95"
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface hover:bg-chip px-2.5 py-1 text-[11.5px] font-bold text-ink hover:text-brand transition-all shadow-2xs group/btn active:scale-95"
                       >
                         <span>{actionLabel || t('notificationCenter.viewDetail', 'Xem chi tiết')}</span>
                         <IconArrowRight size={11} strokeWidth={2.5} className="group-hover/btn:translate-x-0.5 transition-transform" />
@@ -458,7 +458,7 @@ export function NotificationCenter({
                 type="button"
                 onClick={onLoadMore}
                 disabled={isLoadingMore}
-                className="inline-flex items-center gap-2 rounded-xl border border-line-2 bg-surface px-5 py-2 text-[13px] font-bold text-ink shadow-2xs hover:bg-chip disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2 text-[13px] font-bold text-ink shadow-2xs hover:bg-chip disabled:opacity-50 transition-colors"
               >
                 {isLoadingMore ? (
                   <>

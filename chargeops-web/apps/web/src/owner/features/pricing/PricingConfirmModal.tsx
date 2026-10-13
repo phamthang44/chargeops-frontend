@@ -126,7 +126,7 @@ export function PricingConfirmModal({
         </div>
 
         {/* Change Comparison Summary */}
-        <div className="mb-4 flex flex-col gap-2 rounded-[11px] border border-line-2 bg-surface-2 p-3.5 text-[12.5px]">
+        <div className="mb-4 flex flex-col gap-2 rounded-[11px] bg-surface-2 p-3.5 text-[12.5px]">
           <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-faint mb-1">
             {t('pricing.confirmModal.summaryTitle', { defaultValue: 'Tóm tắt các thông số điều chỉnh' })}
           </div>
@@ -187,7 +187,7 @@ export function PricingConfirmModal({
               </span>
             </div>
             {hoursDiffs.length > 0 && (
-              <div className="mt-1 flex flex-col gap-1 rounded-[8px] bg-surface p-2.5 border border-hairline text-[11.5px]">
+              <div className="mt-1 flex flex-col gap-1 rounded-[8px] bg-surface p-2.5 text-[11.5px]">
                 {hoursDiffs.map((diff, i) => (
                   <div key={i} className="flex items-center justify-between py-0.5">
                     <span className="font-semibold text-ink">{diff.dayLabel}:</span>
@@ -235,7 +235,10 @@ export function PricingConfirmModal({
           <div className="flex items-center justify-between py-1 text-faint text-[11.5px]">
             <span>{t('pricing.confirmModal.bufferRow', { defaultValue: 'Thời gian giãn ca giữa 2 lượt:' })}</span>
             <span className="font-mono font-medium">
-              {SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} {t('pricing.steps.step4.bufferBadge', { defaultValue: 'phút cố định' })}
+              {t('pricing.steps.step4.bufferBadge', {
+                minutes: SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES,
+                defaultValue: `${SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định`,
+              })}
             </span>
           </div>
         </div>

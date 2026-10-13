@@ -55,28 +55,28 @@ export function Observability() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
             </span>
-            <span>Gateway & Telemetry Online</span>
+            <span>{t('observability.gatewayOnline', 'Gateway & Telemetry Online')}</span>
           </div>
         </div>
       </div>
 
-      {/* Main Mission Control Shell (Double-Bezel Architecture) */}
+      {/* Main Mission Control Shell (single border) */}
       <div
         className={`transition-all duration-300 ${
           isFullscreen
             ? 'fixed inset-0 z-50 flex flex-col bg-[#0b0c10] p-4'
-            : 'rounded-2xl border border-line-2 bg-surface shadow-xs'
+            : 'overflow-hidden rounded-2xl border border-line bg-surface shadow-xs'
         }`}
       >
         {/* Mission Control Action Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-2 bg-surface-raised/40 px-4 py-2.5 backdrop-blur-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface px-4 py-2.5">
           {/* Left: Quick Time Presets */}
           <div className="flex items-center gap-1.5">
             <span className="flex items-center gap-1 text-[11px] font-medium text-faint">
               <IconClock size={14} className="text-faint" />
-              <span>Phạm vi:</span>
+              <span>{t('observability.timeRangeLabel', 'Phạm vi:')}</span>
             </span>
-            <div className="flex items-center rounded-lg border border-line-2 bg-surface p-0.5 shadow-2xs">
+            <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 shadow-2xs">
               {TIME_PRESETS.map((preset) => {
                 const isActive = timeRange === preset.value;
                 return (
@@ -87,7 +87,7 @@ export function Observability() {
                     className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-all ${
                       isActive
                         ? 'bg-brand text-white shadow-2xs'
-                        : 'text-faint hover:text-foreground hover:bg-surface-raised'
+                        : 'text-faint hover:text-foreground hover:bg-canvas'
                     }`}
                   >
                     {preset.label}
@@ -103,42 +103,43 @@ export function Observability() {
             <button
               type="button"
               onClick={handleRefresh}
-              title="Làm mới bảng điều khiển"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-surface-raised transition-all active:scale-95"
+              title={t('observability.refreshTooltip', 'Làm mới bảng điều khiển')}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-body hover:border-line-hover hover:bg-canvas hover:text-ink transition-all active:scale-95"
             >
               <IconRefreshCw
                 size={13}
                 className={`transition-transform duration-500 ${isRotating ? 'rotate-180 text-brand' : ''}`}
               />
-              <span className="hidden sm:inline">Làm mới</span>
+              <span className="hidden sm:inline">{t('observability.refreshBtn', 'Làm mới')}</span>
             </button>
 
             {/* Fullscreen Toggle Button */}
             <button
               type="button"
               onClick={() => setIsFullscreen((prev) => !prev)}
-              className="inline-flex items-center gap-1 rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-surface-raised transition-all active:scale-95"
+              title={isFullscreen ? t('observability.fullscreenExit', 'Thu nhỏ') : t('observability.fullscreenEnter', 'Toàn màn hình')}
+              className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-body hover:border-line-hover hover:bg-canvas hover:text-ink transition-all active:scale-95"
             >
               {isFullscreen ? (
                 <>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                   </svg>
-                  <span>Thu nhỏ</span>
+                  <span>{t('observability.fullscreenExit', 'Thu nhỏ')}</span>
                 </>
               ) : (
                 <>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                   </svg>
-                  <span>Toàn màn hình</span>
+                  <span>{t('observability.fullscreenEnter', 'Toàn màn hình')}</span>
                 </>
               )}
             </button>
 
             {/* Open in new tab link */}
             <a
-              className="inline-flex items-center gap-1 rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-brand hover:underline hover:bg-surface-raised transition-all"
+              className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[11.5px] font-medium text-brand hover:border-brand-line hover:bg-brand-soft transition-all"
               href={currentDashboardUrl}
               target="_blank"
               rel="noreferrer"
@@ -154,7 +155,7 @@ export function Observability() {
         </div>
 
         {/* Dashboard Iframe with Smooth OLED Dark Framing */}
-        <div className={`relative w-full overflow-hidden bg-[#111217] ${isFullscreen ? 'flex-1' : 'rounded-b-2xl'}`}>
+        <div className={`relative w-full overflow-hidden bg-[#111217] ${isFullscreen ? 'flex-1' : ''}`}>
           <iframe
             key={refreshKey}
             className={`w-full border-0 transition-opacity duration-300 ${

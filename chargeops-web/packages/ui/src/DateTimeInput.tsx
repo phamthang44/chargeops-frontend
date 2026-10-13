@@ -297,7 +297,7 @@ export function DateTimeInput({
         return {
           activeBorder: 'border-amber-500/80',
           ring: 'focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20',
-          openRing: 'border-amber-500 ring-2 ring-amber-500/20 shadow-xs',
+          openRing: 'border-amber-500 shadow-xs',
           pillSelected: 'bg-amber-500 text-white font-bold shadow-xs',
           todayRing: 'ring-1 ring-inset ring-amber-500/60 dark:ring-amber-400/60 font-bold text-amber-700 dark:text-amber-300',
           badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25',
@@ -307,7 +307,7 @@ export function DateTimeInput({
         return {
           activeBorder: 'border-owner',
           ring: 'focus-within:border-owner focus-within:ring-2 focus-within:ring-owner/20',
-          openRing: 'border-owner ring-2 ring-owner/20 shadow-xs',
+          openRing: 'border-owner shadow-xs',
           pillSelected: 'bg-owner text-white font-bold shadow-xs',
           todayRing: 'ring-1 ring-inset ring-owner/60 font-bold text-owner-deep',
           badge: 'bg-owner-soft text-owner-deep border border-owner-border',
@@ -318,7 +318,7 @@ export function DateTimeInput({
         return {
           activeBorder: 'border-brand',
           ring: 'focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20',
-          openRing: 'border-brand ring-2 ring-brand/20 shadow-xs',
+          openRing: 'border-brand shadow-xs',
           pillSelected: 'bg-brand text-white font-bold shadow-xs',
           todayRing: 'ring-1 ring-inset ring-brand/60 font-bold text-brand',
           badge: 'bg-brand-soft text-brand-strong border border-brand/20',
@@ -356,10 +356,10 @@ export function DateTimeInput({
         }}
         className={`group flex items-center justify-between gap-2 rounded-xl border bg-surface px-3 py-[9px] text-left cursor-pointer shadow-2xs select-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.995] ${
           error
-            ? 'border-bad ring-1 ring-bad/20'
+            ? 'border-bad'
             : isOpen
               ? accentClasses.openRing
-              : 'border-line-2 hover:border-line'
+              : 'border-line hover:border-line'
         } ${disabled ? 'opacity-60 cursor-not-allowed bg-surface-2' : ''}`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
@@ -420,7 +420,7 @@ export function DateTimeInput({
               <button
                 type="button"
                 onClick={() => setPreset(preset.offset)}
-                className={`cursor-pointer rounded-full border border-line-2 bg-surface-2 px-2.5 py-[3px] text-[10.5px] font-semibold text-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px active:scale-95 ${accentClasses.chipHover}`}
+                className={`cursor-pointer rounded-full border border-line bg-surface-2 px-2.5 py-[3px] text-[10.5px] font-semibold text-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px active:scale-95 ${accentClasses.chipHover}`}
               >
                 {preset.label}
               </button>
@@ -434,7 +434,7 @@ export function DateTimeInput({
         <div
           role="dialog"
           aria-label="Bộ chọn ngày giờ"
-          className="absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-[300px] max-w-[calc(100vw-1.5rem)] origin-top-left rounded-2xl border border-line-2 bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md ring-1 ring-black/5"
+          className="absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-[300px] max-w-[calc(100vw-1.5rem)] origin-top-left rounded-2xl border border-line bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md"
           style={{ animation: 'popIn .12s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Popover Header: Month & Year Navigator */}
@@ -443,7 +443,7 @@ export function DateTimeInput({
               type="button"
               onClick={prevMonth}
               title="Tháng trước"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
             >
               <IconChevronLeft size={14} strokeWidth={2.4} />
             </button>
@@ -456,7 +456,7 @@ export function DateTimeInput({
               type="button"
               onClick={nextMonth}
               title="Tháng sau"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
             >
               <IconChevronRight size={14} strokeWidth={2.4} />
             </button>
@@ -497,7 +497,7 @@ export function DateTimeInput({
           <div className="my-3 border-t border-hairline" />
 
           {/* 24-Hour Time Stepper Section */}
-          <div className="space-y-2 rounded-xl border border-line-2 bg-surface-2/60 p-2.5">
+          <div className="space-y-2 rounded-xl bg-surface-2/60 p-2.5">
             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted">
               <span className="flex items-center gap-1.5 text-ink">
                 <IconClock size={12} className="text-faint" />
@@ -510,7 +510,7 @@ export function DateTimeInput({
 
             <div className="flex items-center justify-between gap-2">
               {/* Hours Stepper */}
-              <div className="flex flex-1 items-center justify-between rounded-lg border border-line bg-surface px-1.5 py-1">
+              <div className="flex flex-1 items-center justify-between rounded-lg bg-surface px-1.5 py-1">
                 <button
                   type="button"
                   onClick={() => updateTime(hours - 1, minutes)}
@@ -536,7 +536,7 @@ export function DateTimeInput({
               <span className="font-mono text-[14px] font-bold text-faint">:</span>
 
               {/* Minutes Stepper */}
-              <div className="flex flex-1 items-center justify-between rounded-lg border border-line bg-surface px-1.5 py-1">
+              <div className="flex flex-1 items-center justify-between rounded-lg bg-surface px-1.5 py-1">
                 <button
                   type="button"
                   onClick={() => updateTime(hours, minutes - 5)}
@@ -590,7 +590,7 @@ export function DateTimeInput({
                 setPreset(0);
                 setIsOpen(false);
               }}
-              className="rounded-lg border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-colors cursor-pointer"
+              className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-colors cursor-pointer"
             >
               Chọn bây giờ
             </button>

@@ -349,7 +349,33 @@
       "eyebrow": "Connectors",
       "title": "Could not load the connector list"
     },
-    "description": "Connector type & power are provisioned by Admin — read-only. You can edit names, zone labels, and status. Click a Charge Point row to view details."
+    "description": "Connector type & power are provisioned by Admin — read-only. You can edit names, zone labels, and status. Click a Charge Point row to view details.",
+    "noZone": "No zone specified",
+    "ports": "connectors",
+    "createdAt": "Created at",
+    "sessionsCount": "sessions today",
+    "pendingActivationBadge": "Pending Activation",
+    "statusGuide": {
+      "title": "Charge Point & Connector Status Guide",
+      "cpSection": "Charge Point Status",
+      "connSection": "Connector / Port Status",
+      "onlineTitle": "Online",
+      "onlineDesc": "Charge point is online and connected. Connectors are ready for charging sessions.",
+      "maintTitle": "Maintenance",
+      "maintDesc": "Charge point is under technical maintenance. Bookings on all child connectors are paused.",
+      "offlineTitle": "Offline",
+      "offlineDesc": "Network disconnected or powered off. New bookings are automatically prevented.",
+      "pendingTitle": "Pending Activation",
+      "pendingDesc": "Newly provisioned by Admin. Requires inspection before opening for bookings.",
+      "availTitle": "Available",
+      "availDesc": "Connector is idle. Drivers can reserve in advance or scan QR to start charging.",
+      "chargingTitle": "In Use",
+      "chargingDesc": "Vehicle is plugged in and charging. Active kW and kWh consumption are being tracked.",
+      "incidentTitle": "Incident",
+      "incidentDesc": "Urgent fault reported (BKG-054). Temporarily suspended for safety.",
+      "connOfflineTitle": "Offline",
+      "connOfflineDesc": "Connector turned off individually or inheriting offline state from its charge point."
+    }
   },
   "chargePoints": {
     "updateSuccess": "Updated {{id}}",
@@ -678,7 +704,8 @@
         "basePriceHelp": "This price applies to any hours not covered by a custom TOU rate window below.",
         "stepLabel": "DURATION STEP INCREMENT",
         "bufferLabel": "TURNAROUND BUFFER",
-        "maxDurationLabel": "MAX CHARGING DURATION"
+        "maxDurationLabel": "MAX CHARGING DURATION",
+        "minutesUnit": "mins"
       },
       "step2": {
         "title": "Operating Hours",

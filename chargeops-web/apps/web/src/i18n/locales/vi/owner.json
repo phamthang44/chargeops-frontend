@@ -342,14 +342,40 @@
     }
   },
   "chargers": {
-    "title": "Trụ sạc",
-    "subtitle": "Tên hiển thị, trạng thái và QR check-in của từng cổng sạc (connector).",
+    "title": "Trụ sạc & Cổng sạc",
+    "subtitle": "Tên hiển thị, trạng thái và mã QR check-in của từng cổng sạc (connector).",
     "loadError": "Không tải được danh sách trụ: {{message}}",
     "error": {
       "eyebrow": "Cổng sạc",
       "title": "Không thể tải danh sách cổng sạc"
     },
-    "description": "Loại đầu cắm & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên, khu vực và trạng thái. Nhấp một Trụ sạc để xem chi tiết."
+    "description": "Loại đầu cắm & công suất do Quản trị viên cấp — chỉ đọc. Bạn chỉnh được tên, khu vực và trạng thái. Nhấp một Trụ sạc để xem chi tiết.",
+    "noZone": "Chưa ghi chú vị trí",
+    "ports": "cổng sạc",
+    "createdAt": "Tạo ngày",
+    "sessionsCount": "lượt sạc hôm nay",
+    "pendingActivationBadge": "Chờ kích hoạt",
+    "statusGuide": {
+      "title": "Ý nghĩa các trạng thái Trụ & Cổng sạc",
+      "cpSection": "Trạng thái Trụ sạc (Charge Point)",
+      "connSection": "Trạng thái Cổng sạc (Connector / Port)",
+      "onlineTitle": "Hoạt động (Online)",
+      "onlineDesc": "Trụ kết nối mạng ổn định, các cổng sạc sẵn sàng tiếp nhận xe.",
+      "maintTitle": "Bảo trì (Maintenance)",
+      "maintDesc": "Trụ đang bảo dưỡng kỹ thuật, tạm dừng nhận đặt chỗ trên mọi cổng con.",
+      "offlineTitle": "Ngoại tuyến (Offline)",
+      "offlineDesc": "Mất kết nối mạng hoặc ngắt điện, tự động bảo vệ không nhận đơn mới.",
+      "pendingTitle": "Chờ kích hoạt (Pending)",
+      "pendingDesc": "Trụ mới cấp hạ tầng từ Admin, cần kiểm tra nghiệm thu trước khi mở bán.",
+      "availTitle": "Sẵn sàng (Available)",
+      "availDesc": "Cổng sạc rảnh rỗi, tài xế có thể đặt chỗ trước hoặc quét mã cắm sạc ngay.",
+      "chargingTitle": "Đang sạc (In Use)",
+      "chargingDesc": "Xe đang cắm súng và nạp điện. Trụ ghi nhận công suất & sản lượng kWh thực tế.",
+      "incidentTitle": "Sự cố (Incident)",
+      "incidentDesc": "Cổng báo lỗi khẩn cấp BKG-054, tạm dừng mọi lượt đặt để bảo đảm an toàn.",
+      "connOfflineTitle": "Tắt súng (Offline)",
+      "connOfflineDesc": "Cổng bị ngắt riêng lẻ hoặc kế thừa trạng thái ngắt điện từ trụ sạc cha."
+    }
   },
   "chargePoints": {
     "updateSuccess": "Đã cập nhật {{id}}",
@@ -678,7 +704,8 @@
         "basePriceHelp": "Mức giá này áp dụng cho mọi khung giờ không nằm trong các quy tắc giờ cao điểm/thấp điểm bên dưới.",
         "stepLabel": "BƯỚC TĂNG THỜI GIAN",
         "bufferLabel": "THỜI GIAN GIÃN CA (ĐỔI XE)",
-        "maxDurationLabel": "THỜI LƯỢNG SẠC TỐI ĐA"
+        "maxDurationLabel": "THỜI LƯỢNG SẠC TỐI ĐA",
+        "minutesUnit": "phút"
       },
       "step2": {
         "title": "Giờ hoạt động",

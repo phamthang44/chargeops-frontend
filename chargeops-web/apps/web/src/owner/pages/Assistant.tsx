@@ -111,7 +111,7 @@ const MD_COMPONENTS = {
   td: ({ children }: { children?: ReactNode }) => (
     <td className="border border-line px-2 py-1 align-top">{children}</td>
   ),
-  hr: () => <hr className="my-2.5 border-line-2" />,
+  hr: () => <hr className="my-2.5 border-line" />,
 };
 
 /** Format ISO instant string using user's browser locale and local timezone */
@@ -167,7 +167,7 @@ function BotMessageContent({ text }: BotMessageContentProps) {
   return (
     <div className="flex flex-col gap-2">
       {thinking && (
-        <div className="rounded-xl border border-line-2/80 bg-surface-2/60 p-2 text-[12px]">
+        <div className="rounded-xl bg-surface-2/60 p-2 text-[12px]">
           <button
             type="button"
             onClick={() => setShowThinking((v) => !v)}
@@ -598,17 +598,17 @@ export function Assistant() {
       />
 
       <div
-        className="flex min-h-[500px] flex-col md:flex-row overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-xs"
+        className="flex min-h-[500px] flex-col md:flex-row overflow-hidden rounded-2xl border border-line bg-surface shadow-xs"
         style={{ height: 'calc(100vh - 210px)' }}
       >
         {/* Sidebar: Conversation History */}
         <aside
-          className={`border-b md:border-b-0 md:border-r border-line-3 bg-surface-2/40 flex flex-col shrink-0 transition-all duration-200 ${
+          className={`border-b md:border-b-0 md:border-r border-line bg-surface-2/40 flex flex-col shrink-0 transition-all duration-200 ${
             sidebarOpen ? 'w-full md:w-64 lg:w-72' : 'hidden md:flex md:w-0 md:border-r-0 md:overflow-hidden'
           }`}
         >
           {/* Sidebar Top: New Chat Button */}
-          <div className="p-3 border-b border-line-3 flex items-center justify-between gap-2">
+          <div className="p-3 border-b border-line flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={handleNewChat}
@@ -655,7 +655,7 @@ export function Assistant() {
                   className={`w-full text-left rounded-xl px-3 py-2.5 transition flex flex-col gap-0.5 border ${
                     isSelected
                       ? 'border-brand/40 bg-brand-soft text-brand-strong font-medium shadow-2xs'
-                      : 'border-transparent text-ink hover:bg-surface hover:border-line-3'
+                      : 'border-transparent text-ink hover:bg-surface hover:border-line'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1.5 w-full">
@@ -674,7 +674,7 @@ export function Assistant() {
 
             {conversationsLoading && (
               <div className="flex items-center justify-center py-4 text-muted text-[12px] gap-2">
-                <span className="h-3.5 w-3.5 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line-3 border-t-brand" />
+                <span className="h-3.5 w-3.5 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line border-t-brand" />
                 <span>{t('assistant.loadingHistory')}</span>
               </div>
             )}
@@ -696,7 +696,7 @@ export function Assistant() {
         {/* Main Content Area */}
         <section className="flex flex-1 flex-col overflow-hidden bg-surface">
           {/* Header toolbar */}
-          <div className="flex items-center justify-between border-b border-line-3 px-4 py-3 bg-surface-2/40">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3 bg-surface-2/40">
             <div className="flex items-center gap-2.5">
               {!sidebarOpen && (
                 <button
@@ -756,7 +756,7 @@ export function Assistant() {
           <div ref={scrollRef} className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 md:p-5">
             {historyLoading && (
               <div className="flex items-center justify-center py-8 text-muted gap-2 text-[12.5px]">
-                <span className="h-4 w-4 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line-3 border-t-brand" />
+                <span className="h-4 w-4 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line border-t-brand" />
                 <span>{t('assistant.loadingHistory')}</span>
               </div>
             )}
@@ -775,7 +775,7 @@ export function Assistant() {
                         className={`rounded-2xl px-4 py-3 text-[13.5px] leading-relaxed shadow-2xs ${
                           isUser
                             ? 'rounded-tr-xs bg-brand text-white'
-                            : 'rounded-tl-xs border border-line-2 bg-canvas text-ink'
+                            : 'rounded-tl-xs border border-line bg-canvas text-ink'
                         }`}
                       >
                         {isUser ? (
@@ -802,7 +802,7 @@ export function Assistant() {
 
                               {/* Expanded Citation Cards */}
                               {isExpanded && (
-                                <div className="mt-1 flex flex-col gap-2 rounded-xl border border-line-2 bg-surface p-3">
+                                <div className="mt-1 flex flex-col gap-2 rounded-xl border border-line bg-surface p-3">
                                   {m.citations!.map((cit, idx) => {
                                     const scorePercent = cit.score != null ? Math.round(cit.score * 100) : null;
                                     return (
@@ -850,8 +850,8 @@ export function Assistant() {
             {/* Pending search indicator */}
             {pending && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2.5 rounded-2xl rounded-tl-xs border border-line-3 bg-canvas px-4 py-3 shadow-2xs">
-                  <span className="h-4 w-4 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line-3 border-t-brand" />
+                <div className="flex items-center gap-2.5 rounded-2xl rounded-tl-xs border border-line bg-canvas px-4 py-3 shadow-2xs">
+                  <span className="h-4 w-4 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line border-t-brand" />
                   <span className="text-[12.5px] font-medium text-muted">{t('assistant.searching')}</span>
                 </div>
               </div>
@@ -915,7 +915,7 @@ export function Assistant() {
           </div>
 
           {/* Composer & Quick Questions */}
-          <div className="border-t border-line-3 bg-surface px-4 py-3 md:px-5">
+          <div className="border-t border-line bg-surface px-4 py-3 md:px-5">
             {/* Quick prompts chips & High-End Library Bar */}
             <div className="mb-2.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-1.5 flex-wrap">

@@ -75,7 +75,7 @@ export function TicketStatusBanners({
               </span>
             </div>
 
-            <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[12px] bg-surface rounded-xl p-3 border border-line shadow-2xs">
+            <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[12px] bg-surface rounded-xl p-3 shadow-2xs">
               <div>
                 <span className="text-muted font-medium">{t('escalation.requestedBy', 'Người yêu cầu xem xét')}: </span>
                 <span className="font-semibold text-ink inline-flex items-center gap-1.5">
@@ -116,7 +116,7 @@ export function TicketStatusBanners({
             </div>
 
             {escalation.resolvedAt ? (
-              <div className="mt-2.5 rounded-xl border border-line bg-surface/90 p-3 space-y-2 shadow-2xs">
+              <div className="mt-2.5 rounded-xl bg-surface/90 p-3 space-y-2 shadow-2xs">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[11.5px] font-bold text-ink">
                     {t('escalation.review.resultLabel', 'Kết quả xem xét:')}

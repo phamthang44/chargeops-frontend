@@ -70,7 +70,7 @@ export function StationActionModal({
           <h3 className="text-[16px] font-bold text-ink">{title}</h3>
         </div>
 
-        <div className="flex items-start gap-3 rounded-[10px] border border-line-2 bg-surface-2 p-3.5">
+        <div className="flex items-start gap-3 rounded-[10px] bg-surface-2 p-3.5">
           <div
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
               isSuspend ? 'bg-warn-soft text-warn-deep' : 'bg-good-soft text-good'
@@ -110,13 +110,13 @@ export function StationActionModal({
                 : t('stations.modal.reactivatePlaceholder')
             }
             rows={3}
-            className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             disabled={loading}
           />
         </FormField>
 
         {error && (
-          <div className="rounded-[6px] border border-bad-border bg-bad-soft p-2.5 text-[12px] text-bad-deep">
+          <div className="rounded-[6px] bg-bad-soft p-2.5 text-[12px] text-bad-deep">
             {error}
           </div>
         )}

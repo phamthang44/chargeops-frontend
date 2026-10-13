@@ -68,7 +68,7 @@ export function IssueLicenseModal({
         </div>
 
         {/* Station Summary Box */}
-        <div className="mt-4 rounded-[10px] border border-line-2 bg-surface-2 p-3 text-[12px]">
+        <div className="mt-4 rounded-[10px] bg-surface-2 p-3 text-[12px]">
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-faint">
             {t('issueLicenseModal.stationInfoTitle', { defaultValue: 'THÔNG TIN TRẠM SẠC' })}
           </div>
@@ -96,7 +96,7 @@ export function IssueLicenseModal({
               className={`flex flex-col items-start rounded-[9px] border p-3 text-left transition-all ${
                 plan === 'MONTHLY'
                   ? 'border-brand bg-brand-soft/20 text-brand'
-                  : 'border-line bg-surface-2 text-body hover:border-line-2'
+                  : 'border-line bg-surface-2 text-body hover:border-line'
               }`}
             >
               <div className="flex w-full items-center justify-between">
@@ -115,7 +115,7 @@ export function IssueLicenseModal({
               className={`flex flex-col items-start rounded-[9px] border p-3 text-left transition-all ${
                 plan === 'YEARLY'
                   ? 'border-brand bg-brand-soft/20 text-brand'
-                  : 'border-line bg-surface-2 text-body hover:border-line-2'
+                  : 'border-line bg-surface-2 text-body hover:border-line'
               }`}
             >
               <div className="flex w-full items-center justify-between">
@@ -134,7 +134,7 @@ export function IssueLicenseModal({
         </div>
 
         {/* Standard Fee Summary Box */}
-        <div className="mt-3.5 flex items-center justify-between rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12.5px]">
+        <div className="mt-3.5 flex items-center justify-between rounded-[9px] bg-surface-2 p-3 text-[12.5px]">
           <span className="text-muted font-medium">Mức phí niêm yết theo gói:</span>
           <span className="font-mono font-bold text-ink text-[14px]">
             {plan === 'YEARLY' ? '5.000.000 đ' : '500.000 đ'}
@@ -142,7 +142,7 @@ export function IssueLicenseModal({
         </div>
 
         {/* Info Callout */}
-        <div className="mt-3.5 flex items-start gap-2 rounded-[9px] border border-brand-border bg-brand-soft/30 p-3 text-[12px] leading-relaxed text-ink">
+        <div className="mt-3.5 flex items-start gap-2 rounded-[9px] bg-brand-soft/30 p-3 text-[12px] leading-relaxed text-ink">
           <IconInfo size={16} className="mt-0.5 shrink-0 text-brand" />
           <div>
             <div>
@@ -159,7 +159,7 @@ export function IssueLicenseModal({
         </div>
 
         {/* Verification Checkbox */}
-        <div className="mt-3.5 rounded-[9px] border border-line-2 bg-surface-2 p-3">
+        <div className="mt-3.5 rounded-[9px] bg-surface-2 p-3">
           <Checkbox
             checked={verified}
             onChange={(checked) => {

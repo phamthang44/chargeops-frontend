@@ -69,12 +69,10 @@ export function matchDocumentCategory(slug: string, tabId: CategoryTab, docType?
       );
 
     case 'booking':
-      // Exclude items that explicitly belong to owner ledger or FAQ/glossary
+      // Exclude items that explicitly belong to owner ledger or refund-attempts
       if (
         s.includes('owner-ledger') ||
-        s.includes('refund-attempts') ||
-        s.includes('faq') ||
-        s.includes('glossary')
+        s.includes('refund-attempts')
       ) {
         return false;
       }
@@ -111,9 +109,7 @@ export function matchDocumentCategory(slug: string, tabId: CategoryTab, docType?
         s.includes('staff') ||
         s.includes('owner-payout') ||
         s.includes('payout') ||
-        s.includes('adjustment') ||
-        s.includes('faq') ||
-        s.includes('glossary')
+        s.includes('adjustment')
       );
 
     default:
@@ -472,11 +468,11 @@ export function PolicyKB() {
         />
       </div>
 
-      {/* KPI Metric Strip - Double-Bezel Architecture */}
+      {/* KPI Metric Strip - Single-border cards */}
       <div className="mb-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {/* Metric 1: Total Docs */}
-        <div className="group rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs transition duration-300 hover:border-brand/30 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-xl border border-line/40 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-brand/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-105">
               <IconBook size={20} />
             </div>
@@ -488,8 +484,8 @@ export function PolicyKB() {
         </div>
 
         {/* Metric 2: Active Docs */}
-        <div className="group rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs transition duration-300 hover:border-good/30 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-xl border border-line/40 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-good/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-good-soft text-good transition-transform duration-300 group-hover:scale-105">
               <IconShieldCheck size={20} />
             </div>
@@ -503,13 +499,15 @@ export function PolicyKB() {
         </div>
 
         {/* Metric 3: Booking & Pricing Category Docs */}
-        <div className="group rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs transition duration-300 hover:border-amber-400/30 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-xl border border-line/40 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-amber-400/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-transform duration-300 group-hover:scale-105">
               <IconBolt size={20} />
             </div>
             <div>
-              <div className="text-[11.5px] font-medium text-muted">Đặt chỗ & Biểu giá</div>
+              <div className="text-[11.5px] font-medium text-muted">
+                {t('policyKB.categories.booking', 'Đặt chỗ & Biểu giá')}
+              </div>
               <div className="font-mono text-[22px] font-black tracking-tight text-ink">
                 {allDocs.filter((d) => matchDocumentCategory(d.slug, 'booking', d.docType)).length}
               </div>
@@ -518,8 +516,8 @@ export function PolicyKB() {
         </div>
 
         {/* Metric 4: Owner & License Docs */}
-        <div className="group rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs transition duration-300 hover:border-emerald-400/30 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-xl border border-line/40 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-emerald-400/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-105">
               <IconHome size={20} />
             </div>
@@ -546,8 +544,8 @@ export function PolicyKB() {
       ) : (
         <div className="flex flex-col gap-5">
           {/* Category Tabs - Floating Glass Segmented Dock */}
-          <div className="rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs backdrop-blur-xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-line/30 bg-surface p-1 scrollbar-none">
+          <div className="rounded-2xl bg-surface-2/40 shadow-xs backdrop-blur-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-line/30 bg-surface p-1 scrollbar-none">
               {categoryTabs.map((tab) => {
                 const count = allDocs.filter((d) => matchDocumentCategory(d.slug, tab.id, d.docType)).length;
                 const isActive = activeTab === tab.id;
@@ -578,9 +576,9 @@ export function PolicyKB() {
             </div>
           </div>
 
-          {/* Filter & Search Toolbar - Double-Bezel Control Architecture */}
-          <div className="rounded-2xl border border-line/80 bg-surface-2/40 p-1.5 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-3.5 rounded-xl border border-line/40 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+          {/* Filter & Search Toolbar - Single-border control bar */}
+          <div className="rounded-2xl bg-surface-2/40 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-line/40 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
               {/* Search Box with explicit action (click or Enter) */}
               <form
                 onSubmit={(e) => {
@@ -620,7 +618,7 @@ export function PolicyKB() {
               {/* Filters & Quick Locale Pill Segmented Control */}
               <div className="flex flex-wrap items-center gap-3">
                 {/* 1-Click Locale Quick Switcher */}
-                <div className="flex items-center gap-1 rounded-xl border border-line-2 bg-canvas p-1 shadow-2xs">
+                <div className="flex items-center gap-1 rounded-xl border border-line bg-canvas p-1 shadow-2xs">
                   <button
                     type="button"
                     onClick={() => setSelectedLocale('all')}
@@ -721,10 +719,10 @@ export function PolicyKB() {
             )}
           </div>
 
-          {/* Document Cards Grid - Double-Bezel Nested Architecture */}
+          {/* Document Cards Grid - Single-border nested cards */}
           {filteredDocs.length === 0 ? (
-            <div className="rounded-3xl border border-line/80 bg-surface-2/40 p-2 shadow-xs">
-              <div className="rounded-2xl border border-line/40 bg-surface p-12 text-center">
+            <div className="rounded-3xl bg-surface-2/40 shadow-xs">
+              <div className="rounded-3xl border border-line/40 bg-surface p-12 text-center">
                 <EmptyState>
                   Không tìm thấy văn bản pháp lý nào phù hợp với bộ lọc hiện tại. Thử chọn "Tất cả văn bản" hoặc xóa từ khóa tìm kiếm.
                 </EmptyState>
@@ -748,9 +746,9 @@ export function PolicyKB() {
                 return (
                   <div
                     key={doc.id}
-                    className="group rounded-[1.75rem] border border-line/70 bg-surface-2/30 p-1.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lg"
+                    className="group rounded-[1.75rem] bg-surface-2/30 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:shadow-lg"
                   >
-                    <div className="flex flex-col justify-between gap-4 rounded-[calc(1.75rem-0.375rem)] border border-line/40 bg-surface p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] lg:flex-row lg:items-start">
+                    <div className="flex flex-col justify-between gap-4 rounded-[1.75rem] border border-line/40 group-hover:border-brand/40 bg-surface p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] lg:flex-row lg:items-start">
                       <div className="flex-1">
                         {/* Top Micro-Pills Row */}
                         <div className="mb-2.5 flex flex-wrap items-center gap-2">
@@ -816,7 +814,7 @@ export function PolicyKB() {
                           <button
                             type="button"
                             onClick={() => handleCopySlug(doc.slug)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-canvas px-2.5 py-1 font-mono text-[11px] font-semibold text-brand-strong transition hover:border-brand/40 hover:bg-brand-soft/30 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas px-2.5 py-1 font-mono text-[11px] font-semibold text-brand-strong transition hover:border-brand/40 hover:bg-brand-soft/30 active:scale-95"
                             title="Nhấn để sao chép slug"
                           >
                             {copiedSlug === doc.slug ? (
@@ -845,7 +843,7 @@ export function PolicyKB() {
                             {doc.keywords.slice(0, 5).map((kw, idx) => (
                               <span
                                 key={idx}
-                                className="rounded-md border border-line-2 bg-canvas px-2 py-0.5 font-mono text-[11px] text-body shadow-2xs"
+                                className="rounded-md border border-line bg-canvas px-2 py-0.5 font-mono text-[11px] text-body shadow-2xs"
                               >
                                 {kw}
                               </span>
@@ -1214,7 +1212,7 @@ export function PolicyKB() {
               </div>
 
               {/* Formatting Toolbar */}
-              <div className="mb-2 flex flex-wrap items-center gap-1.5 rounded-lg border border-line-2 bg-surface-2 p-1.5 text-[11.5px]">
+              <div className="mb-2 flex flex-wrap items-center gap-1.5 rounded-lg border border-line bg-surface-2 p-1.5 text-[11.5px]">
                 <button
                   type="button"
                   onClick={() => insertMarkdown('### 1. ')}

@@ -39,8 +39,8 @@ export function SuspendReactivateChargePointModal({
         </div>
 
         <div
-          className={`flex items-start gap-3 rounded-xl border p-3.5 text-xs leading-relaxed ${
-            isSuspend ? 'border-warn-border bg-warn-soft text-warn-deep' : 'border-good/30 bg-good-soft/30 text-ink'
+          className={`flex items-start gap-3 rounded-xl p-3.5 text-xs leading-relaxed ${
+            isSuspend ? 'bg-warn-soft text-warn-deep' : 'bg-good-soft/30 text-ink'
           }`}
         >
           <div className="mt-0.5 shrink-0">
@@ -81,7 +81,7 @@ export function SuspendReactivateChargePointModal({
                 ? t('provisioning.workspace.suspend.reasonPlaceholder')
                 : t('provisioning.workspace.reactivate.reasonPlaceholder')
             }
-            className="w-full rounded-xl border border-line-2 bg-surface p-3 text-xs text-ink placeholder:text-faint focus:border-brand focus:outline-none"
+            className="w-full rounded-xl border border-line bg-surface p-3 text-xs text-ink placeholder:text-faint focus:border-brand focus:outline-none"
           />
         </div>
 

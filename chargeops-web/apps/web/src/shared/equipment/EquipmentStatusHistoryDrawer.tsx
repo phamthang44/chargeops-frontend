@@ -124,7 +124,7 @@ export function EquipmentStatusHistoryDrawer({
     >
       <div className="flex flex-col gap-4 p-4 text-[13px] text-body">
         {/* Context info banner */}
-        <div className="rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12px] text-muted">
+        <div className="rounded-[9px] border border-line bg-surface-2 p-3 text-[12px] text-muted">
           <div className="flex items-center gap-2">
             <IconBolt size={14} className="text-brand shrink-0" />
             <span>
@@ -186,7 +186,7 @@ export function EquipmentStatusHistoryDrawer({
                   ? 'border-brand/30 bg-brand-soft text-brand'
                   : evt.actorType === 'OWNER'
                   ? 'border-owner/30 bg-owner-soft text-owner'
-                  : 'border-line-2 bg-surface-2 text-faint';
+                  : 'border-line bg-surface-2 text-faint';
 
               return (
                 <div key={evt.id || idx} className="flex items-stretch gap-3">
@@ -200,7 +200,7 @@ export function EquipmentStatusHistoryDrawer({
 
                   {/* Event Card Content */}
                   <div className={`flex-1 ${isLast ? 'pb-2' : 'pb-4'}`}>
-                    <div className="flex flex-col gap-2 rounded-xl border border-line-2 bg-surface p-3.5 shadow-xs transition hover:border-brand/30 hover:shadow-sm">
+                    <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-3.5 shadow-xs transition hover:border-brand/30 hover:shadow-sm">
                       {/* Event Header: Actor & Timestamp */}
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2 text-[11px]">
                         <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold ${actorBadgeClass}`}>
@@ -236,7 +236,7 @@ export function EquipmentStatusHistoryDrawer({
 
                       {/* Reason / Note if available */}
                       {evt.reason && (
-                        <div className="rounded-[8px] bg-surface-2 px-2.5 py-1.5 text-[11.5px] text-body border border-line-2/50 leading-relaxed">
+                        <div className="rounded-[8px] bg-surface-2 px-2.5 py-1.5 text-[11.5px] text-body leading-relaxed">
                           <span className="font-semibold text-faint">{t('equipmentHistory.reasonLabel')} </span>
                           <span className="text-ink font-medium">
                             {formatStatusReason(evt.reason, t, 'incidentAction' in evt ? evt : undefined)}

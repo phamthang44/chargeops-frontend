@@ -85,11 +85,14 @@ export function AvatarUploadModal({
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          'Quyền thư viện bị từ chối',
-          'Vui lòng cấp quyền truy cập thư viện ảnh trong Cài đặt hệ thống để tải ảnh lên.',
+          t('profile.avatarUpload.permissionDenied', 'Quyền thư viện bị từ chối'),
+          t(
+            'profile.avatarUpload.permissionDeniedBody',
+            'Vui lòng cấp quyền truy cập thư viện ảnh trong Cài đặt hệ thống để tải ảnh lên.',
+          ),
           [
-            { text: 'Hủy', style: 'cancel' },
-            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+            { text: t('common.cancel', 'Hủy'), style: 'cancel' },
+            { text: t('profile.avatarUpload.openSettings', 'Mở Cài đặt'), onPress: () => Linking.openSettings() },
           ],
         );
         return;
@@ -122,11 +125,14 @@ export function AvatarUploadModal({
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          'Quyền camera bị từ chối',
-          'Vui lòng cấp quyền camera trong Cài đặt hệ thống để chụp ảnh đại diện.',
+          t('profile.avatarUpload.cameraPermissionDenied', 'Quyền camera bị từ chối'),
+          t(
+            'profile.avatarUpload.cameraPermissionDeniedBody',
+            'Vui lòng cấp quyền camera trong Cài đặt hệ thống để chụp ảnh đại diện.',
+          ),
           [
-            { text: 'Hủy', style: 'cancel' },
-            { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
+            { text: t('common.cancel', 'Hủy'), style: 'cancel' },
+            { text: t('profile.avatarUpload.openSettings', 'Mở Cài đặt'), onPress: () => Linking.openSettings() },
           ],
         );
         return;
@@ -277,7 +283,10 @@ export function AvatarUploadModal({
       setRawFile(null);
       setPreviewUrl(uploadRes.url);
       onClose();
-      Alert.alert('Thành công', 'Đã cập nhật ảnh đại diện mới.');
+      Alert.alert(
+        t('common.success', 'Thành công'),
+        t('profile.avatarUpload.successNewAvatar', 'Đã cập nhật ảnh đại diện mới.'),
+      );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tải ảnh lên thất bại.';
       setError(message);
@@ -298,7 +307,10 @@ export function AvatarUploadModal({
       setUploading(false);
       setPreviewUrl(urlInput.trim());
       onClose();
-      Alert.alert('Thành công', 'Đã cập nhật ảnh đại diện từ liên kết.');
+      Alert.alert(
+        t('common.success', 'Thành công'),
+        t('profile.avatarUpload.successFromUrl', 'Đã cập nhật ảnh đại diện từ liên kết.'),
+      );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Cập nhật ảnh đại diện thất bại.';
       setError(message);
@@ -315,7 +327,13 @@ export function AvatarUploadModal({
       setUrlInput('');
       setUploading(false);
       onClose();
-      Alert.alert('Thành công', 'Đã gỡ ảnh đại diện, chuyển về avatar mặc định.');
+      Alert.alert(
+        t('common.success', 'Thành công'),
+        t(
+          'profile.avatarUpload.successRemoveAvatar',
+          'Đã gỡ ảnh đại diện, chuyển về avatar mặc định.',
+        ),
+      );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Không thể gỡ ảnh đại diện.';
       setError(message);
@@ -390,17 +408,25 @@ export function AvatarUploadModal({
             <View style={styles.header}>
               <View style={styles.headerCopy}>
                 <Text style={[styles.title, { color: themeColors.textStrong }]}>
-                  {cropImageUri ? 'Căn chỉnh ảnh đại diện' : t('profile.avatarModalTitle', 'Ảnh đại diện')}
+                  {cropImageUri
+                    ? t('profile.avatarUpload.adjustTitle', 'Căn chỉnh ảnh đại diện')
+                    : t('profile.avatarModalTitle', 'Ảnh đại diện')}
                 </Text>
                 <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
                   {cropImageUri
-                    ? 'Kéo ảnh để điều chỉnh vùng hiển thị trong vòng tròn.'
-                    : t('profile.avatarModalSubtitle', 'Cập nhật ảnh hiển thị cho tài khoản của bạn.')}
+                    ? t(
+                        'profile.avatarUpload.adjustSubtitle',
+                        'Kéo ảnh để điều chỉnh vùng hiển thị trong vòng tròn.',
+                      )
+                    : t(
+                        'profile.avatarModalSubtitle',
+                        'Cập nhật ảnh hiển thị cho tài khoản của bạn.',
+                      )}
                 </Text>
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Đóng"
+                accessibilityLabel={t('common.close', 'Đóng')}
                 disabled={uploading}
                 hitSlop={8}
                 onPress={resetModalState}
@@ -469,7 +495,9 @@ export function AvatarUploadModal({
                       ) : (
                         <>
                           <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-                          <Text style={styles.primaryBtnText}>Cắt & Lưu ảnh đại diện</Text>
+                          <Text style={styles.primaryBtnText}>
+                            {t('profile.avatarUpload.cropAndSave', 'Cắt & Lưu ảnh đại diện')}
+                          </Text>
                         </>
                       )}
                     </Pressable>
@@ -486,7 +514,7 @@ export function AvatarUploadModal({
                       disabled={uploading}
                     >
                       <Text style={[styles.outlineBtnText, { color: themeColors.textStrong }]}>
-                        Chọn ảnh khác
+                        {t('profile.avatarUpload.pickAnother', 'Chọn ảnh khác')}
                       </Text>
                     </Pressable>
                   </View>
@@ -508,7 +536,7 @@ export function AvatarUploadModal({
                       }}
                       disabled={!activeAvatar || uploading}
                       accessibilityRole="button"
-                      accessibilityLabel="Xem ảnh đại diện rõ nét"
+                      accessibilityLabel={t('profile.avatarUpload.tapToViewClear', 'Xem ảnh đại diện rõ nét')}
                     >
                       {activeAvatar ? (
                         <>
@@ -544,7 +572,7 @@ export function AvatarUploadModal({
                       >
                         <Ionicons name="eye-outline" size={13} color={themeColors.primary} />
                         <Text style={[styles.viewHintText, { color: themeColors.primary }]}>
-                          Nhấn để xem rõ avatar
+                          {t('profile.avatarUpload.tapToViewClear', 'Nhấn để xem rõ avatar')}
                         </Text>
                       </Pressable>
                     )}
@@ -582,7 +610,9 @@ export function AvatarUploadModal({
                           disabled={uploading}
                         >
                           <Ionicons name="camera" size={18} color="#FFFFFF" />
-                          <Text style={styles.primaryBtnText}>Chụp ảnh & Cắt 1:1</Text>
+                          <Text style={styles.primaryBtnText}>
+                            {t('profile.avatarUpload.takePhotoCrop', 'Chụp ảnh & Cắt 1:1')}
+                          </Text>
                         </Pressable>
 
                         {/* Native Button 2: Chọn từ thư viện & Cắt 1:1 bằng công cụ iOS/Android */}
@@ -596,7 +626,9 @@ export function AvatarUploadModal({
                           disabled={uploading}
                         >
                           <Ionicons name="images-outline" size={18} color="#FFFFFF" />
-                          <Text style={styles.primaryBtnText}>Chọn ảnh từ thư viện máy</Text>
+                          <Text style={styles.primaryBtnText}>
+                            {t('profile.avatarUpload.pickFromGallery', 'Chọn ảnh từ thư viện máy')}
+                          </Text>
                         </Pressable>
 
                         {/* Native Button 3: Chụp chân dung căn khung Oval in-app */}

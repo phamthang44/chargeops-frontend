@@ -16,7 +16,7 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
   return (
     <div>
       <StepHeader n={4} title={t('pricing.steps.step4.title', { defaultValue: 'Quy chuẩn Khả dụng & Vận hành' })} />
-      <div className="rounded-panel border border-line-2 bg-surface px-5 pb-[18px] pt-2 flex flex-col gap-1">
+      <div className="rounded-panel border border-line bg-surface px-5 pb-[18px] pt-2 flex flex-col gap-1">
         {/* Row 1: No-Show Auto-Release */}
         <Row
           title={t('pricing.steps.step4.lockTitle', { defaultValue: 'Tự động hủy khi quá giờ hẹn (Không đến nhận chỗ)' })}

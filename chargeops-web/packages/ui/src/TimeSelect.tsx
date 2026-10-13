@@ -114,9 +114,9 @@ export function TimeSelect({
         onClick={() => !disabled && setOpen((v) => !v)}
         className={`flex h-[36px] w-full items-center justify-between gap-1.5 rounded-[9px] border px-2.5 text-center font-mono text-[12.5px] font-medium transition cursor-pointer ${
           disabled
-            ? 'border-line-2 bg-chip text-faint cursor-not-allowed opacity-70'
+            ? 'border-line bg-chip text-faint cursor-not-allowed opacity-70'
             : open
-              ? 'border-line-hover bg-surface text-ink shadow-xs ring-2 ring-owner/15'
+              ? 'border-line-hover bg-surface text-ink shadow-xs'
               : 'border-line bg-surface text-ink hover:border-line-hover hover:bg-surface-2'
         } ${ring}`}
       >
@@ -139,7 +139,7 @@ export function TimeSelect({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-full z-50 mt-1 max-h-56 w-full min-w-[130px] overflow-hidden rounded-[11px] border border-line-2 bg-surface shadow-[0_10px_30px_rgba(16,17,26,.14)]"
+          className="absolute left-0 top-full z-50 mt-1 max-h-56 w-full min-w-[130px] overflow-hidden rounded-[11px] border border-line bg-surface shadow-[0_10px_30px_rgba(16,17,26,.14)]"
           style={{ animation: 'popIn .12s ease' }}
         >
           {/* Quick search input inside dropdown */}

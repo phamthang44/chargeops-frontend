@@ -70,7 +70,7 @@ export function LicenseHistoryDrawer({
             const fee = l.feeAmount ?? l.priceVnd ?? 0;
 
             return (
-              <Card key={l.id} className="border border-line-2 bg-surface-2 p-3.5">
+              <Card key={l.id} bordered={false} className="bg-surface-2 p-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[12px] font-bold text-brand">{l.licenseCode || l.id}</span>
@@ -80,7 +80,7 @@ export function LicenseHistoryDrawer({
                         : t('licenses.historyDrawer.planMonthly', 'Gói Tháng (1 tháng)')}
                     </span>
                   </div>
-                  <StatusPill tone={meta.tone} label={meta.label} />
+                  <StatusPill tone={meta.tone} label={t(`licenses.status.${String(l.status).toUpperCase()}`, { defaultValue: meta.label })} />
                 </div>
 
                 <div className="mt-2.5 grid grid-cols-2 gap-2 text-[12px] font-medium text-body border-t border-hairline pt-2">

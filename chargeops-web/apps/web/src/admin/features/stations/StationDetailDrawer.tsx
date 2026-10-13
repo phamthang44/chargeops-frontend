@@ -146,7 +146,7 @@ export function StationDetailDrawer({
       ) : (
         <div className="flex flex-col gap-5 p-5 text-[13px] text-body">
           {/* Top Hero Station Card */}
-          <div className="relative overflow-hidden rounded-[12px] border border-line-2 bg-surface p-4 shadow-sm">
+          <div className="relative overflow-hidden rounded-[12px] border border-line bg-surface p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ export function StationDetailDrawer({
                     {station.operatingPeriods.map((p, idx) => (
                       <div
                         key={p.id || idx}
-                        className="flex items-center justify-between rounded-[6px] border border-line-2 bg-surface-2 px-2.5 py-1.5"
+                        className="flex items-center justify-between rounded-[6px] bg-surface-2 px-2.5 py-1.5"
                       >
                         <span className="font-medium text-body">
                           {t(`stations.drawer.days.${p.dayOfWeek}`)}
@@ -324,7 +324,7 @@ export function StationDetailDrawer({
                         href={asset.assetUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="group relative aspect-video overflow-hidden rounded-[8px] border border-line-2 bg-canvas transition hover:border-brand"
+                        className="group relative aspect-video overflow-hidden rounded-[8px] bg-canvas transition"
                       >
                         <img
                           src={asset.assetUrl}
@@ -395,7 +395,7 @@ export function StationDetailDrawer({
                 </div>
 
                 {license ? (
-                  <div className="rounded-[8px] border border-brand/30 bg-brand-soft/10 p-3 text-[12px]">
+                  <div className="rounded-[8px] bg-brand-soft/10 p-3 text-[12px]">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-brand">
                         {license.plan === 'YEARLY'
@@ -412,7 +412,7 @@ export function StationDetailDrawer({
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-[8px] border border-line-2 bg-surface-2 p-3 text-center text-[12px] text-muted">
+                  <div className="rounded-[8px] bg-surface-2 p-3 text-center text-[12px] text-muted">
                     {t('stations.drawer.owner.noLicense')}
                   </div>
                 )}
@@ -449,7 +449,7 @@ export function StationDetailDrawer({
                   <Skeleton className="h-20 w-full rounded-[8px]" />
                 </div>
               ) : !chargePoints || chargePoints.length === 0 ? (
-                <div className="rounded-[10px] border border-line-2 bg-surface-2 py-8 text-center text-[12.5px] text-faint">
+                <div className="rounded-[10px] border border-line bg-surface-2 py-8 text-center text-[12.5px] text-faint">
                   {t('stations.drawer.hardware.empty')}
                 </div>
               ) : (
@@ -472,7 +472,7 @@ export function StationDetailDrawer({
                               <span className="font-bold text-[13.5px] text-ink">{cp.name || t('provisioning.cpListTitle')}</span>
                               <span className="font-mono text-[11px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
                               {cp.zoneLabel && (
-                                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-medium text-faint border border-line-2">
+                                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-medium text-faint border border-line">
                                   {cp.zoneLabel}
                                 </span>
                               )}
@@ -534,7 +534,7 @@ export function StationDetailDrawer({
                               }
 
                               return (
-                                <div key={c.id} className="flex items-center justify-between gap-1.5 rounded-[6px] border border-line-2 bg-surface-2 px-2.5 py-1.5 text-[11px]">
+                                <div key={c.id} className="flex items-center justify-between gap-1.5 rounded-[6px] bg-surface-2 px-2.5 py-1.5 text-[11px]">
                                   <div className="flex items-center gap-1.5">
                                     <span className="font-mono font-bold text-brand">{c.connectorCode || c.id}</span>
                                     <span className="text-muted">({c.powerKw} kW - {c.connectorType})</span>
@@ -565,23 +565,23 @@ export function StationDetailDrawer({
                   <Skeleton className="h-16 w-full rounded-[8px]" />
                 </div>
               ) : !historyList || historyList.length === 0 ? (
-                <div className="rounded-[10px] border border-line-2 bg-surface-2 py-8 text-center text-[12.5px] text-faint">
+                <div className="rounded-[10px] border border-line bg-surface-2 py-8 text-center text-[12.5px] text-faint">
                   {t('stations.drawer.emptyHistory')}
                 </div>
               ) : (
-                <div className="relative pl-5 border-l-2 border-line-2 flex flex-col gap-3.5 my-1">
+                <div className="relative pl-5 border-l-2 border-line flex flex-col gap-3.5 my-1">
                   {historyList.map((evt, idx) => {
                     const isLatest = idx === 0;
                     return (
                       <div key={evt.id || idx} className="relative group">
                         <div
                           className={`absolute -left-[27px] top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-bold shadow-sm ${
-                            isLatest ? 'border-brand bg-brand text-white ring-4 ring-brand/20' : 'border-line-2 bg-surface-2 text-muted'
+                            isLatest ? 'border-brand bg-brand text-white' : 'border-line bg-surface-2 text-muted'
                           }`}
                         >
                           {historyList.length - idx}
                         </div>
-                        <div className="rounded-[9px] border border-line-2 bg-surface-2 p-3 text-[12px]">
+                        <div className="rounded-[9px] border border-line bg-surface-2 p-3 text-[12px]">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-ink">{evt.eventType}</span>
@@ -597,7 +597,7 @@ export function StationDetailDrawer({
                           </div>
 
                           {evt.reason && (
-                            <div className="mt-2 rounded-[6px] border border-line-2 bg-surface p-2 text-[11.5px] text-body">
+                            <div className="mt-2 rounded-[6px] bg-surface p-2 text-[11.5px] text-body">
                               <span className="font-semibold text-faint">
                                 {t('stations.drawer.history.reason')}:{' '}
                               </span>

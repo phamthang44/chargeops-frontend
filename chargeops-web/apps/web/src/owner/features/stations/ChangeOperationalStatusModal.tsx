@@ -129,11 +129,11 @@ export function ChangeOperationalStatusModal({
             }}
             className={`flex items-start gap-3 rounded-[10px] border p-3 cursor-pointer transition-all ${
               selectedStatus === 'OPERATING'
-                ? 'border-emerald-500/70 bg-emerald-500/5 ring-1 ring-emerald-500/20'
-                : 'border-line-2 bg-surface hover:bg-surface-2'
+                ? 'border-emerald-500/70 bg-emerald-500/5'
+                : 'border-line bg-surface hover:bg-surface-2'
             }`}
           >
-            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line-3">
+            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line">
               {selectedStatus === 'OPERATING' && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
             </span>
             <div className="flex-1">
@@ -162,11 +162,11 @@ export function ChangeOperationalStatusModal({
             }}
             className={`flex items-start gap-3 rounded-[10px] border p-3 cursor-pointer transition-all ${
               selectedStatus === 'PAUSED'
-                ? 'border-rose-500/70 bg-rose-500/5 ring-1 ring-rose-500/20'
-                : 'border-line-2 bg-surface hover:bg-surface-2'
+                ? 'border-rose-500/70 bg-rose-500/5'
+                : 'border-line bg-surface hover:bg-surface-2'
             }`}
           >
-            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line-3">
+            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line">
               {selectedStatus === 'PAUSED' && <span className="h-2 w-2 rounded-full bg-rose-500" />}
             </span>
             <div className="flex-1">
@@ -194,11 +194,11 @@ export function ChangeOperationalStatusModal({
             }}
             className={`flex items-start gap-3 rounded-[10px] border p-3 cursor-pointer transition-all ${
               selectedStatus === 'MAINTENANCE'
-                ? 'border-amber-500/70 bg-amber-500/5 ring-1 ring-amber-500/20'
-                : 'border-line-2 bg-surface hover:bg-surface-2'
+                ? 'border-amber-500/70 bg-amber-500/5'
+                : 'border-line bg-surface hover:bg-surface-2'
             }`}
           >
-            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line-3">
+            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-line">
               {selectedStatus === 'MAINTENANCE' && <span className="h-2 w-2 rounded-full bg-amber-500" />}
             </span>
             <div className="flex-1">
@@ -221,7 +221,7 @@ export function ChangeOperationalStatusModal({
 
         {/* Reason Input when PAUSED or MAINTENANCE */}
         {selectedStatus !== 'OPERATING' && (
-          <div className="mb-4 flex flex-col gap-2 rounded-[10px] border border-line-2 bg-surface-2/60 p-3">
+          <div className="mb-4 flex flex-col gap-2 rounded-[10px] bg-surface-2/60 p-3">
             <div className="flex items-center justify-between">
               <label className="text-[12px] font-bold text-ink">
                 {t('stations.operationalModal.reasonLabel', { defaultValue: 'Lý do thay đổi trạng thái (Bắt buộc):' })}

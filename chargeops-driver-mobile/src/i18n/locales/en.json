@@ -12,6 +12,18 @@
     "retry": "Try again",
     "error": "Error",
     "ok": "OK",
+    "new": "NEW",
+    "newBadge": "NEW",
+    "notice": "Notice",
+    "delete": "Delete",
+    "success": "Success",
+    "justNow": "Just now",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    },
     "charger": "Charger",
     "connector": "Port",
     "eyebrow": {
@@ -382,6 +394,34 @@
     "uploadAvatar": "Upload avatar",
     "avatarModalTitle": "Profile Photo",
     "avatarModalSubtitle": "Update your driver account display photo.",
+    "viewAvatar": "View profile picture",
+    "avatarViewer": {
+      "defaultTitle": "Profile Picture",
+      "hiResSubtitle": "High-resolution preview mode",
+      "noAvatarSubtitle": "No profile picture",
+      "openOriginal": "Open original image",
+      "circleMode": "Circular Avatar",
+      "fullMode": "Full Photo",
+      "changePhoto": "Change & Adjust Photo",
+      "uploadNewPhoto": "Upload New Photo"
+    },
+    "avatarUpload": {
+      "successNewAvatar": "New profile picture has been updated.",
+      "successFromUrl": "Profile picture updated from URL.",
+      "successRemoveAvatar": "Profile picture removed, reset to default avatar.",
+      "permissionDenied": "Library permission denied",
+      "permissionDeniedBody": "Please grant photo library access in device Settings to upload a photo.",
+      "cameraPermissionDenied": "Camera permission denied",
+      "cameraPermissionDeniedBody": "Please grant camera access in device Settings to take a profile photo.",
+      "openSettings": "Open Settings",
+      "cropAndSave": "Crop & Save Avatar",
+      "pickAnother": "Choose another photo",
+      "takePhotoCrop": "Take photo & Crop 1:1",
+      "pickFromGallery": "Choose photo from library",
+      "tapToViewClear": "Tap to view clear avatar",
+      "adjustTitle": "Adjust Profile Picture",
+      "adjustSubtitle": "Drag photo to adjust visible area inside the circular frame."
+    },
     "account": {
       "sectionTitle": "Personal account",
       "unknownName": "ChargeOps user",
@@ -435,7 +475,12 @@
       "paymentMethods": "Payment methods",
       "defaultPrefix": "Preferred",
       "history": "Transaction history",
-      "historySub": "Review paid invoices"
+      "historySub": "Review paid invoices",
+      "onlineGateway": "Online Payment Gateway",
+      "directGateway": "Direct Payment Gateway",
+      "onlineDirectSubtitle": "Instant direct payment for charging session",
+      "vietqrGateway": "VietQR Transfer (SePay Gateway)",
+      "vietqrSubtitle": "MBBank · Acc: 9876543210 (Dynamic VietQR)"
     },
     "appSettings": {
       "sectionTitle": "App Settings",
@@ -446,12 +491,109 @@
       "language": "Language",
       "appearance": "Appearance",
       "appearanceSub": "Light, dark, or system theme",
-      "helpCenter": "Help center",
-      "helpCenterSub": "Quick guides and support status"
+      "quickGuide": "Driver Quick Guide",
+      "quickGuideSub": "Charging steps, QR check-in & 15-minute rule",
+      "helpCenter": "Help Center",
+      "helpCenterSub": "FAQs, technical support & tickets"
     },
     "support": {
-      "title": "Help center",
-      "subtitle": "Resolve common issues directly in ChargeOps.",
+      "title": "Help Center",
+      "subtitle": "Feature guides, FAQs & direct support",
+      "tabs": {
+        "guide": "Quick Guide",
+        "faq": "FAQs",
+        "tickets": "Tickets"
+      },
+      "guideWelcomeTitle": "ChargeOps EV Driver Handbook",
+      "guideWelcomeBody": "6-step guide covering discovery, slot booking, QR check-in, charging sessions, and refunds.",
+      "guides": {
+        "discovery": {
+          "title": "1. Discover & Pick the Right Station",
+          "summary": "Search stations by map, distance, and connector types (CCS2, Type 2).",
+          "step1": "Open the Map or Station List tab to view active stations around you.",
+          "step2": "Filter by connector: CCS2 (DC fast 30kW–180kW) or Type 2 (AC standard 7kW–22kW).",
+          "step3": "Check live status: Available (Green), In Use (Blue), Maintenance (Yellow), Full (Red).",
+          "tip": "Tip: Tap on a station pin to view max power output and hourly pricing rates.",
+          "action": "Find stations on Map"
+        },
+        "booking": {
+          "title": "2. Pre-book a Charging Slot",
+          "summary": "Reserve slots in advance to avoid waiting, plus the 15-minute grace period rule.",
+          "step1": "Select a charger and connector compatible with your vehicle's inlet.",
+          "step2": "Choose your preferred duration (30 min, 60 min, or 120 min).",
+          "step3": "Pay the holding deposit securely (100% credited toward your actual charging bill upon completion).",
+          "tip": "15-minute rule: You must arrive and check in within 15 minutes of your booking start time to avoid a No-Show cancellation.",
+          "action": "View your bookings"
+        },
+        "checkIn": {
+          "title": "3. Arrive & Check In via QR Code",
+          "summary": "Park in your designated bay and scan the QR code on the charger.",
+          "step1": "Park in the reserved charging bay and open your car's charge port door.",
+          "step2": "Open the ChargeOps app, tap 'QR Check-in' or open your booking details.",
+          "step3": "Aim your camera at the QR code on the charger body to unlock the connector.",
+          "tip": "Tip: If the QR code is dim at night, toggle the flashlight or type the charger code manually.",
+          "action": "Open QR Scanner"
+        },
+        "charging": {
+          "title": "4. Plug In & Monitor Live Session",
+          "summary": "Lock the connector securely and monitor real-time battery SoC and kW power.",
+          "step1": "Unholster the charging gun and plug it firmly into your car inlet until it clicks.",
+          "step2": "The indicator light on the charger turns pulsing blue to signify charging started.",
+          "step3": "Monitor live metrics in the app: Charging power (kW), battery SoC (%), energy delivered (kWh), and estimated cost.",
+          "tip": "To finish early, tap 'Stop Charging' in the app before unplugging the cable.",
+          "action": "Charging safety tips"
+        },
+        "cancellation": {
+          "title": "5. Cancellation & Refund Policy",
+          "summary": "Transparent 100% refund rules protecting EV drivers.",
+          "step1": "Cancel prior to the deadline: 100% of your deposit is automatically refunded to your original payment method.",
+          "step2": "Station technical failure (outage, hardware fault): 100% auto-refund with no penalty fees.",
+          "step3": "Over 15 minutes late without check-in: Slot is automatically released, deposit deducted according to no-show policy.",
+          "tip": "Refund timing: Typically 5–15 minutes for e-wallets or 1–3 business days for bank cards.",
+          "action": "Review refund terms"
+        },
+        "safety": {
+          "title": "6. Emergency Handling & Support Tickets",
+          "summary": "Emergency stop button and how to file support tickets with station technicians.",
+          "step1": "In case of fire, smoke, or extreme overheating: Immediately press the red mechanical Emergency Stop button on the charger.",
+          "step2": "If the charger errors out or the cable is stuck: Safely unlatch and notify station staff.",
+          "step3": "Submit a support ticket in the app with photos/descriptions for technical review and refund resolution.",
+          "tip": "You can track ticket progress and chat directly with technicians under 'My Support Tickets'.",
+          "action": "Submit a ticket now"
+        }
+      },
+      "faqs": {
+        "connectorType": {
+          "q": "How do I know which connector my EV uses?",
+          "a": "Most modern EVs in Vietnam (VinFast VF5–VF9, BYD, Porsche Taycan, Hyundai Ioniq 5, BMW iX, etc.) use DC CCS2 for fast charging and AC Type 2 for standard charging. You can filter chargers by CCS2 or Type 2 directly in search."
+        },
+        "lateArrival": {
+          "q": "What happens if I arrive more than 15 minutes late?",
+          "a": "After 15 minutes past your scheduled start time, the system automatically cancels the slot to free it up for other drivers. A no-show fee applies. If you still need a charge, you can book a new slot or start an ad-hoc session if available."
+        },
+        "qrError": {
+          "q": "What if the QR code fails to scan on the charger?",
+          "a": "Check your 4G/WiFi network, clean your camera lens, or toggle the flashlight. If the QR code is damaged, enter the Charger Code printed beneath the QR code manually."
+        },
+        "refundTiming": {
+          "q": "When and where is my deposit refunded?",
+          "a": "Upon completing your session, the deposit is automatically applied to your electricity bill. If you cancel on time or an excess deposit remains, it is automatically refunded to your original payment method within 5–15 minutes."
+        },
+        "blockedSlot": {
+          "q": "What if an unauthorized car is parked in my reserved bay?",
+          "a": "Open your Booking Details, tap 'Report Issue' and select 'Bay Blocked / ICEing'. Station management and parking staff will intervene promptly."
+        }
+      },
+      "faqNotice": "Couldn't find what you need? Station technicians are available to resolve issues via support tickets.",
+      "faqTicketBtn": "Submit Support Ticket",
+      "ticketSectionTitle": "Direct Support Channels & Issues",
+      "myTicketsTitle": "My Support Tickets",
+      "myTicketsBody": "Track progress, chat with technicians & review refund conclusions",
+      "newTicketTitle": "Submit New Support Request",
+      "newTicketBody": "Report charging errors, booking glitches, payment disputes, or feedback",
+      "emergencyCardTitle": "Station Emergency Procedures",
+      "emergencyCardBody": "In case of electrical hazard, smoke, or extreme heat: Immediately press the red Emergency Stop button on the charger to cut power instantly. Then report the emergency or notify on-site staff.",
+      "emergencyReportBtn": "Report Emergency Issue",
       "welcomeTitle": "How can we help?",
       "welcomeBody": "Start with the quick guides below. ChargeOps will not send external email until a real support channel is configured.",
       "quickHelp": "Quick help",
@@ -471,11 +613,7 @@
       },
       "requestTitle": "Send a support request",
       "requestBody": "Once completed, requests will go through ChargeOps. The demo environment will capture them internally without sending real email.",
-      "myTicketsTitle": "My Support Tickets",
-      "myTicketsBody": "Track progress, chat with technicians & review refund conclusions",
-      "newTicketTitle": "Submit New Support Request",
-      "newTicketBody": "Report charging issues, booking glitches, payment disputes, or feedback",
-      "close": "Got it"
+      "close": "Close"
     },
     "logout": "Log out account",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",
@@ -502,7 +640,10 @@
       "updateLater": "Will update later",
       "comingSoon": "Will update later",
       "crudDisabledNotice": "Custom payment method management is under development and will be released in an upcoming update. The system currently supports default methods.",
-      "sepayDisabledNotice": "VietQR gateway is currently being synchronized and will be available in the upcoming update. Please use the online gateway to proceed."
+      "sepayDisabledNotice": "VietQR gateway is currently being synchronized and will be available in the upcoming update. Please use the online gateway to proceed.",
+      "vietqrTitle": "VietQR Transfer (SePay Gateway)",
+      "vietqrSubtitle": "MBBank · Acc: 9876543210 (Dynamic VietQR)",
+      "cannotDeleteLast": "You need to keep at least one payment method."
     },
     "ownerModal": {
       "title": "Station Owner Mode",
@@ -1489,6 +1630,12 @@
     "delete": "Delete",
     "viewDetail": "View detail",
     "markAllRead": "Mark all as read",
-    "clearAll": "Clear all notifications"
+    "clearAll": "Clear all notifications",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    }
   }
 }

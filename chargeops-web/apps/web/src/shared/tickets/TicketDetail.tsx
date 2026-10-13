@@ -208,7 +208,7 @@ export function TicketDetail({
             onClick={() => setMobileTab('conversation')}
             className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-[12.5px] font-semibold transition-all ${
               mobileTab === 'conversation'
-                ? 'bg-surface-2 text-ink shadow-xs border border-line'
+                ? 'bg-surface-2 text-ink shadow-xs'
                 : 'text-muted hover:text-ink'
             }`}
           >
@@ -224,7 +224,7 @@ export function TicketDetail({
             onClick={() => setMobileTab('records')}
             className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-[12.5px] font-semibold transition-all ${
               mobileTab === 'records'
-                ? 'bg-surface-2 text-ink shadow-xs border border-line'
+                ? 'bg-surface-2 text-ink shadow-xs'
                 : 'text-muted hover:text-ink'
             }`}
           >
@@ -283,7 +283,7 @@ export function TicketDetail({
                   onClick={() => setActiveTab('thread')}
                   className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-all ${
                     activeTab === 'thread'
-                      ? 'bg-surface text-ink shadow-2xs border border-line'
+                      ? 'bg-surface text-ink shadow-2xs'
                       : 'text-muted hover:text-ink'
                   }`}
                 >
@@ -299,7 +299,7 @@ export function TicketDetail({
                   onClick={() => setActiveTab('events')}
                   className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-all ${
                     activeTab === 'events'
-                      ? 'bg-surface text-ink shadow-2xs border border-line'
+                      ? 'bg-surface text-ink shadow-2xs'
                       : 'text-muted hover:text-ink'
                   }`}
                 >

@@ -101,10 +101,10 @@ export function UserStatusDialog({ open, type, user, pending, onClose, onConfirm
       </div>
 
       <div
-        className={`mt-4 rounded-[9px] border p-3 text-[12px] leading-relaxed ${
+        className={`mt-4 rounded-[9px] p-3 text-[12px] leading-relaxed ${
           config.tone === 'bad'
-            ? 'border-bad-border bg-bad-soft/40 text-bad-deep font-medium'
-            : 'border-good-border bg-good-soft/40 text-good-deep'
+            ? 'bg-bad-soft/40 text-bad-deep font-medium'
+            : 'bg-good-soft/40 text-good-deep'
         }`}
       >
         {config.notice}
@@ -128,7 +128,7 @@ export function UserStatusDialog({ open, type, user, pending, onClose, onConfirm
                 }}
                 className={`rounded-full border px-2.5 py-1 text-left text-[11.5px] transition ${
                   isSelected
-                    ? 'border-brand bg-brand-soft font-semibold text-brand ring-1 ring-brand'
+                    ? 'border-brand bg-brand-soft font-semibold text-brand'
                     : 'border-line bg-surface text-body hover:border-brand/40 hover:bg-surface-2'
                 }`}
               >
@@ -157,7 +157,7 @@ export function UserStatusDialog({ open, type, user, pending, onClose, onConfirm
               }}
               placeholder={t('users.dialog.reasonPlaceholder', 'Nhập lý do chi tiết hoặc chọn nhanh từ gợi ý…')}
               className={`h-[76px] w-full resize-none rounded-[9px] border px-3 py-2 text-[12.5px] leading-relaxed transition ${
-                err ? 'border-bad bg-bad-soft/10 ring-1 ring-bad' : 'border-line bg-surface focus:border-brand'
+                err ? 'border-bad bg-bad-soft/10' : 'border-line bg-surface focus:border-brand'
               }`}
             />
           </FormField>

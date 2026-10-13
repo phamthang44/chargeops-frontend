@@ -9,10 +9,18 @@ const TONES: Record<PillTone, string> = {
   ink: 'bg-solid text-solid-fg',
 };
 
-export function StatusPill({ tone, label }: { tone: PillTone; label: string }) {
+export function StatusPill({
+  tone,
+  label,
+  className = '',
+}: {
+  tone: PillTone;
+  label: string;
+  className?: string;
+}) {
   return (
     <span
-      className={`inline-block rounded-full px-[9px] py-[3px] text-[10.5px] font-semibold ${TONES[tone]}`}
+      className={`inline-block rounded-full px-[9px] py-[3px] text-[10.5px] font-semibold ${TONES[tone]} ${className}`.trim()}
     >
       {label}
     </span>

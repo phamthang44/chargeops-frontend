@@ -10,6 +10,7 @@ import {
 import { IconLock, PageHeader, Skeleton, useToast } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../i18n';
 import { ChargerStatsStrip } from '../features/chargers/ChargerStatsStrip';
+import { ChargerStatusGuide } from '../features/chargers/ChargerStatusGuide';
 import { ChargerTable, type ChargePointGroup } from '../features/chargers/ChargerTable';
 import { ChargerDetailPanel } from '../features/chargers/ChargerDetailPanel';
 import { StatusChangeDialog, type StatusIntent } from '../features/chargers/StatusChangeDialog';
@@ -218,6 +219,8 @@ export function Chargers() {
             <IconLock size={15} className="shrink-0 text-warn" />
             <span>{t('chargers.description')}</span>
           </div>
+
+          <ChargerStatusGuide />
 
           <div
             className="grid items-start gap-[13px]"

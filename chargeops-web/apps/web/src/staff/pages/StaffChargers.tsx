@@ -276,7 +276,7 @@ function ChargePointCard({
   const provisioned = chargePoint.provisioningStatus === 'ACTIVE';
 
   return (
-    <Card className="overflow-hidden border border-line/60 shadow-subtle">
+    <Card className="overflow-hidden shadow-subtle">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-surface-2/80 px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">

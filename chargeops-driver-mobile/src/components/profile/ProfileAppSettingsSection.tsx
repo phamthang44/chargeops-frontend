@@ -12,6 +12,7 @@ interface ProfileAppSettingsSectionProps {
   onPressNotifications: () => void;
   onPressLanguage: () => void;
   onPressAppearance: () => void;
+  onPressQuickGuide?: () => void;
   onPressHelpCenter: () => void;
 }
 
@@ -29,6 +30,7 @@ export function ProfileAppSettingsSection({
   onPressNotifications,
   onPressLanguage,
   onPressAppearance,
+  onPressQuickGuide,
   onPressHelpCenter,
 }: ProfileAppSettingsSectionProps) {
   const { t } = useTranslation();
@@ -42,6 +44,34 @@ export function ProfileAppSettingsSection({
           {t('profile.appSettings.sectionTitle')}
         </Text>
       </View>
+
+      {/* List Item: Driver Quick Guide */}
+      <Pressable
+        style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
+        onPress={onPressQuickGuide ?? onPressHelpCenter}
+      >
+        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#064E3B' : '#ECFDF5' }]}>
+          <Ionicons name="book-outline" size={20} color={themeColors.primary} />
+        </View>
+        <View style={styles.menuTextContent}>
+          <View style={styles.menuTitleRow}>
+            <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
+              {t('profile.appSettings.quickGuide')}
+            </Text>
+            <View style={[styles.guidePill, { backgroundColor: themeColors.primarySoft }]}>
+              <Text style={[styles.guidePillText, { color: themeColors.primaryDark }]}>
+                {t('common.new', 'MỚI')}
+              </Text>
+            </View>
+          </View>
+          <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
+            {t('profile.appSettings.quickGuideSub')}
+          </Text>
+        </View>
+        <ChevronIsland border={themeColors.border} bg={themeColors.surface} color={themeColors.textMuted} />
+      </Pressable>
+
+      <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
       {/* List Item: Notifications */}
       <Pressable
@@ -167,9 +197,24 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  menuTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   menuTitle: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
+  },
+  guidePill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: radius.full,
+  },
+  guidePillText: {
+    fontSize: 9.5,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 0.4,
   },
   menuSub: {
     fontSize: fontSizes.caption,

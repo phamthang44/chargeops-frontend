@@ -101,6 +101,16 @@ Compact sans-serif (system default: SF Pro / Roboto).
 
 Cards: 1px `border` + very subtle shadow (`shadowOpacity ~0.05`, `elevation 2`). Minimal, flat-ish.
 
+### Single-border policy (web + mobile)
+
+Every visible component draws **exactly one outline layer.**
+
+- **No double-bezel frames.** A `p-1`/`p-1.5` wrapper with its own `border` around a second bordered surface is forbidden. Flatten the wrapper (drop its `border*` classes + padding) and keep the border on the inner surface.
+- **No nested decorative borders.** A plain content box inside `Card` / `Modal` / `SidePanel` / `Banner` is separated by background tint (`surface-2` / `canvas`), not a second `border`. A card that must sit inside another bordered container takes `bordered={false}` (`packages/ui/Card`).
+- **No `border` + static `ring-N`** on the same element. `ring-*` is reserved for `focus-visible` / `hover` states (accessibility) and for elements whose only outline is the ring (icon tiles, dots).
+- **Allowed second edges:** single-edge dividers (`border-b`, `border-t`), accent bars (`border-l-2`), borders on interactive controls (input / select / button / popover / segmented), and self-contained badges & pills.
+- **Border greys:** one container grey (`border-line`) + one divider grey (`border-hairline`). Do not introduce `line-2` / `line-3` for borders.
+
 ---
 
 ## 7. Core components (shared vocabulary)

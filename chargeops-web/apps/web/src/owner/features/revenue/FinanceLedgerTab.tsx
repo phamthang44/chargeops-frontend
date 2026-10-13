@@ -101,12 +101,12 @@ export function FinanceLedgerTab() {
 
   return (
     <>
-      {/* 1. Double-Bezel Bento KPI Showcase */}
+      {/* 1. Bento KPI Showcase (single-outline cards) */}
       {s ? (
         <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
           {/* Card 1: Gross Collected */}
-          <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-brand/30">
-            <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+            <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
               <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -130,8 +130,8 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 2: Total Refunded */}
-          <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-bad/30">
-            <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+            <div className="rounded-[20px] border border-line group-hover:border-bad/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
               <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -154,8 +154,8 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 3: Pending Obligations */}
-          <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-warn/30">
-            <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+            <div className="rounded-[20px] border border-line group-hover:border-warn/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
               <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -176,8 +176,8 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 4: Net Recorded Amount */}
-          <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-good/30">
-            <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+            <div className="rounded-[20px] border border-line group-hover:border-good/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
               <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -226,8 +226,8 @@ export function FinanceLedgerTab() {
         </div>
       </div>
 
-      {/* 3. Double-Bezel Table Card */}
-      <Card className="overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-xs">
+      {/* 3. Table Card (single outline) */}
+      <Card className="overflow-hidden rounded-2xl shadow-xs">
         {listQuery.isLoading || !data ? (
           <div className="p-4 space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (

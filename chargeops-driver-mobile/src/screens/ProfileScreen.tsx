@@ -53,6 +53,8 @@ export function ProfileScreen() {
     openSettingsWithSection,
     supportVisible,
     setSupportVisible,
+    supportTab,
+    openSupportWithTab,
     ownerModalVisible,
     setOwnerModalVisible,
     openingOwnerPortal,
@@ -63,10 +65,16 @@ export function ProfileScreen() {
     handleNotificationSettings,
   } = useProfileScreen();
 
-  const preferredPaymentTitle =
-    savedPaymentMethods.find(
-      (m) => m.type === preferredPaymentMethod || m.isDefault,
-    )?.title ?? 'Cổng thanh toán trực tuyến';
+  const preferredPayment = savedPaymentMethods.find(
+    (m) => m.type === preferredPaymentMethod || m.isDefault,
+  );
+  const preferredPaymentTitle = preferredPayment
+    ? preferredPayment.id === 'pm-sim' || preferredPayment.type === 'SIMULATOR'
+      ? t('profile.wallet.onlineGateway', 'Cổng thanh toán trực tuyến')
+      : preferredPayment.id === 'pm-sepay'
+      ? t('profile.wallet.vietqrGateway', 'Chuyển khoản VietQR (Cổng SePay)')
+      : preferredPayment.title
+    : t('profile.wallet.onlineGateway', 'Cổng thanh toán trực tuyến');
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.surfaceAlt }]}>
@@ -137,7 +145,8 @@ export function ProfileScreen() {
           onPressNotifications={handleNotificationSettings}
           onPressLanguage={() => openSettingsWithSection('language')}
           onPressAppearance={() => openSettingsWithSection('appearance')}
-          onPressHelpCenter={() => setSupportVisible(true)}
+          onPressQuickGuide={() => openSupportWithTab('guide')}
+          onPressHelpCenter={() => openSupportWithTab('faq')}
         />
 
         {/* 6. Logout & Version Footer */}
@@ -177,6 +186,7 @@ export function ProfileScreen() {
       {/* Support Center Modal */}
       <SupportCenterModal
         visible={supportVisible}
+        initialTab={supportTab}
         onClose={() => setSupportVisible(false)}
       />
 

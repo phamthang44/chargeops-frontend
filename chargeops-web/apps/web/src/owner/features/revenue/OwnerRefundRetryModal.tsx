@@ -93,7 +93,7 @@ export function OwnerRefundRetryModal({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-line-2 bg-surface p-4 shadow-2xs space-y-2 text-[12px]">
+        <div className="rounded-2xl bg-surface-2 p-4 shadow-2xs space-y-2 text-[12px]">
           <div className="flex justify-between">
             <span className="text-muted">{t('finance.refunds.table.cols.station', 'Trạm sạc')}:</span>
             <span className="font-semibold text-ink">#{refund.stationId}</span>

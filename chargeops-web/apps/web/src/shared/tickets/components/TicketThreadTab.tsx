@@ -108,7 +108,7 @@ export function TicketThreadTab({
       {/* Adaptive Composer or Terminal Sealed Vault */}
       <div className="border-t border-hairline p-3.5 bg-surface-2/40">
         {isClosed ? (
-          <div className="flex items-center justify-center gap-2.5 rounded-xl border border-line bg-surface p-3.5 text-[12.5px] text-muted shadow-sm">
+          <div className="flex items-center justify-center gap-2.5 rounded-xl bg-surface p-3.5 text-[12.5px] text-muted shadow-sm">
             <IconLock size={16} className="text-faint" />
             <span>
               {t(
@@ -118,12 +118,12 @@ export function TicketThreadTab({
             </span>
           </div>
         ) : readOnlyNotice ? (
-          <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-3 text-sm text-muted">
+          <div className="flex items-center gap-2 rounded-xl bg-surface p-3 text-sm text-muted">
             <IconLock size={16} />
             <span>{readOnlyNotice}</span>
           </div>
         ) : isResolved ? (
-          <div className="space-y-2 rounded-xl border border-line bg-surface p-3">
+          <div className="space-y-2 rounded-xl bg-surface p-3">
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-warn-deep px-1">
               <IconClock size={12} strokeWidth={2.2} />
               <span>

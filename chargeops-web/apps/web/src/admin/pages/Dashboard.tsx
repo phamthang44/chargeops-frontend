@@ -231,7 +231,7 @@ export function Dashboard() {
                 className="text-left w-full cursor-pointer transition hover:opacity-90"
               >
                 <MetricCard
-                  label={t('users.roles.OWNER', { defaultValue: 'Chủ trạm' })}
+                  label={t('users.kpi.owners', { defaultValue: 'Chủ trạm' })}
                   value={userSummaryQ.isLoading ? '…' : String(userSummaryQ.data?.byRole?.OWNER ?? 0)}
                   accent="#3b82f6"
                 />

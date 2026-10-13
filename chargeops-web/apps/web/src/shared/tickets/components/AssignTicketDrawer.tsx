@@ -122,7 +122,7 @@ export function AssignTicketDrawer({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Ticket Header info */}
-        <div className="flex items-center justify-between rounded-xl border border-hairline bg-surface-2 p-3 text-[12px]">
+          <div className="flex items-center justify-between rounded-xl bg-surface-2 p-3 text-[12px]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-bold text-brand">{ticket.ticketCode || ticket.ticketNo || `#${ticket.id.slice(0, 8)}`}</span>
             <span className="text-faint">·</span>
@@ -157,8 +157,8 @@ export function AssignTicketDrawer({
                   <Skeleton className="h-12 w-full rounded-xl" />
                 </div>
               ) : activeAdminList.length === 0 ? (
-                <div className="rounded-xl border border-line bg-surface p-4 text-center text-[12px] text-muted space-y-2.5">
-                  <IconShield size={20} className="mx-auto text-brand" />
+            <div className="rounded-xl bg-surface-2 p-4 text-center text-[12px] text-muted space-y-2.5">
+              <IconShield size={20} className="mx-auto text-brand" />
                   <div>{t('assignModal.noAdmins', 'Chưa tìm thấy chuyên viên Quản trị viên nào trong hệ thống.')}</div>
                   <Button
                     type="button"
@@ -184,8 +184,8 @@ export function AssignTicketDrawer({
                       onClick={() => setSelectedHandlerId(adminUser.id)}
                       className={`flex cursor-pointer items-center justify-between rounded-xl border p-3 transition-all ${
                         isSelected
-                          ? 'border-brand bg-brand-soft/20 ring-2 ring-brand/15'
-                          : 'border-line bg-surface hover:border-line-2'
+                          ? 'border-brand bg-brand-soft/20'
+                          : 'border-line bg-surface hover:border-line'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -239,8 +239,8 @@ export function AssignTicketDrawer({
                   <Skeleton className="h-12 w-full rounded-xl" />
                 </div>
               ) : stationChoices.length === 0 ? (
-                <div className="rounded-xl border border-line bg-surface p-4 text-center text-[12px] text-muted space-y-2.5">
-                  <IconAlertCircle size={20} className="mx-auto text-warn" />
+            <div className="rounded-xl bg-surface-2 p-4 text-center text-[12px] text-muted space-y-2.5">
+              <IconAlertCircle size={20} className="mx-auto text-warn" />
                   <div>{t('assignModal.noActiveStaff', 'Không tìm thấy nhân viên nào đang làm việc tại trạm này. Vui lòng liên hệ Chủ trạm.')}</div>
                   {!isAdminStation && <Button
                     type="button"
@@ -267,8 +267,8 @@ export function AssignTicketDrawer({
                       onClick={() => setSelectedHandlerId(handlerUserId)}
                       className={`flex cursor-pointer items-center justify-between rounded-xl border p-3 transition-all ${
                         isSelected
-                          ? 'border-brand bg-brand-soft/20 ring-2 ring-brand/15'
-                          : 'border-line bg-surface hover:border-line-2'
+                          ? 'border-brand bg-brand-soft/20'
+                          : 'border-line bg-surface hover:border-line'
                       }`}
                     >
                       <div className="flex items-center gap-3">

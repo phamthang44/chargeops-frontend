@@ -94,7 +94,7 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
   }, []);
 
   return (
-    <Card className="p-[18px] border border-line/60 shadow-subtle flex flex-col gap-4">
+    <Card className="p-[18px] shadow-subtle flex flex-col gap-4">
       <div className="flex items-center justify-between border-b border-hairline pb-3">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-owner-soft text-owner">
@@ -205,7 +205,7 @@ export function StaffAssignForm({ stations }: StaffAssignFormProps) {
             : t('staff.assign.submitBtn')}
         </Button>
 
-        <p className="rounded-xl bg-surface-2 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-muted border border-hairline">
+        <p className="rounded-xl bg-surface-2 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-muted">
           {t('staff.assign.help')}
         </p>
       </div>

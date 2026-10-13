@@ -73,7 +73,7 @@ export function CreateChargePointModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('provisioning.workspace.create.namePlaceholder')}
-              className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
+              className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
             />
           </div>
 
@@ -85,7 +85,7 @@ export function CreateChargePointModal({
               value={zoneLabel}
               onChange={(e) => setZoneLabel(e.target.value)}
               placeholder={t('provisioning.workspace.create.zonePlaceholder')}
-              className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
+              className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
             />
           </div>
 
@@ -121,12 +121,12 @@ export function CreateChargePointModal({
                 value={quantity}
                 onChange={(event) => setQuantity(Number(event.target.value))}
                 required
-                className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
+                className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] text-ink focus:border-brand focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="rounded-[8px] bg-surface-2 p-3 text-[11.5px] text-muted border border-line-2">
+          <div className="rounded-[8px] bg-surface-2 p-3 text-[11.5px] text-muted">
             {t('provisioning.workspace.create.help')}
           </div>
         </div>

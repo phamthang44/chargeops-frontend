@@ -84,7 +84,7 @@ export function AvatarDropdown({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-panel border border-line-2 bg-surface p-2.5 shadow-[0_12px_32px_rgba(16,17,26,0.12)] backdrop-blur-md"
+          className="absolute right-0 top-full z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-panel border border-line bg-surface p-2.5 shadow-[0_12px_32px_rgba(16,17,26,0.12)] backdrop-blur-md"
           style={{ animation: 'popIn .12s ease-out' }}
         >
           {/* User Profile Header */}
@@ -140,7 +140,7 @@ export function AvatarDropdown({
             {/* Theme Toggle Segmented Control */}
             <div className="flex items-center justify-between px-2.5 py-1.5">
               <span className="text-[13px] font-medium text-body">{t('avatarMenu.theme')}</span>
-              <div className="flex rounded-ctl bg-chip p-0.5 border border-line-3">
+              <div className="flex rounded-ctl bg-chip p-0.5 border border-line">
                 <button
                   type="button"
                   onClick={() => toggleTheme('light')}

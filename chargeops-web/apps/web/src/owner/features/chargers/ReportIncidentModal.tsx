@@ -152,7 +152,7 @@ export function ReportIncidentModal({
         </div>
 
         {/* Connector Details Box */}
-        <div className="flex items-center justify-between rounded-lg border border-line-2 bg-surface-2 px-3 py-2 text-[12px]">
+        <div className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2 text-[12px]">
           <div className="flex items-center gap-2">
             <IconBolt size={14} className="text-owner" />
             <span className="font-semibold text-body">{t('incidents.report.connectorCodeLabel', 'Mã cổng sạc:')}</span>
@@ -199,7 +199,7 @@ export function ReportIncidentModal({
                 className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
                   reason === p
                     ? 'border-bad bg-bad text-white font-semibold'
-                    : 'border-line-2 bg-surface text-body hover:border-line-3'
+                    : 'border-line bg-surface text-body hover:border-line'
                 }`}
               >
                 {p}

@@ -95,8 +95,8 @@ type GroupState = { type: GlobalSearchType; label: string; icon?: ReactNode; res
  * without a per-item route is dropped by the adapter instead of pretending
  * to deep-link.
  *
- * Shell = "double bezel": a frosted outer tray (blur lives here, never on the
- * scrolling core) wrapping a solid inner surface. Rows stagger in on mount,
+ * Shell = a frosted outer tray (blur lives here, never on the
+ * scrolling core) wrapping a solid inner surface — one outline per layer. Rows stagger in on mount,
  * highlight the matched substring and support full keyboard navigation
  * (⌘K / Ctrl+K focuses the field from anywhere).
  */
@@ -256,7 +256,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
   );
 
   const keyboardFooter = (
-    <div className="flex items-center gap-3.5 border-t border-line-3 px-3 pb-1 pt-2 text-[10px] text-faint">
+    <div className="flex items-center gap-3.5 border-t border-line px-3 pb-1 pt-2 text-[10px] text-faint">
       {hintRow('↑↓', t('search.hintNav'))}
       {hintRow('↵', t('search.hintOpen'))}
       {hintRow('esc', t('search.hintClose'))}
@@ -267,7 +267,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
 
   return (
     <div ref={panelRef} className="relative hidden md:block">
-      {/* ---- Trigger: outer tray + inner field (double bezel) ---- */}
+      {/* ---- Trigger: outer tray + inner field (single outline each) ---- */}
       <div
         onClick={() => inputRef.current?.focus()}
         className={`group flex h-9 w-[264px] max-w-full cursor-text items-center gap-2.5 rounded-full border border-line bg-surface px-3.5 shadow-[inset_0_1px_2px_rgba(16,17,26,.05)] transition-[border-color,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:ring-2 ${acc.field}`}
@@ -366,7 +366,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
             ) : (
               <>
                 {model.groups.map((g, gi) => (
-                  <div key={g.type} className={gi > 0 ? 'mt-1 border-t border-line-3 pt-1' : ''}>
+                  <div key={g.type} className={gi > 0 ? 'mt-1 border-t border-line pt-1' : ''}>
                     <div className="px-2.5 pb-1 pt-1.5">
                       <span
                         className={`inline-flex items-center rounded-full border px-2.5 py-[2px] text-[9.5px] font-bold uppercase tracking-[0.18em] ${acc.label}`}

@@ -147,12 +147,12 @@ export function LicenseActionModal({
       </div>
 
       <div
-        className={`mt-4 rounded-[9px] border p-3 text-[12px] leading-relaxed ${
+        className={`mt-4 rounded-[9px] p-3 text-[12px] leading-relaxed ${
           config.tone === 'bad'
-            ? 'border-bad-border bg-bad-soft/40 text-bad-deep font-medium'
+            ? 'bg-bad-soft/40 text-bad-deep font-medium'
             : config.tone === 'warn'
-              ? 'border-warn-border bg-warn-soft/40 text-warn-deep'
-              : 'border-good-border bg-good-soft/40 text-good-deep'
+              ? 'bg-warn-soft/40 text-warn-deep'
+              : 'bg-good-soft/40 text-good-deep'
         }`}
       >
         {config.notice}
@@ -176,7 +176,7 @@ export function LicenseActionModal({
                 onClick={() => handleSelectPreset(translatedText)}
                 className={`rounded-full border px-2.5 py-1 text-[11.5px] transition text-left ${
                   isSelected
-                    ? 'border-brand bg-brand-soft font-semibold text-brand ring-1 ring-brand'
+                    ? 'border-brand bg-brand-soft font-semibold text-brand'
                     : 'border-line bg-surface text-body hover:border-brand/40 hover:bg-surface-2'
                 }`}
               >
@@ -213,7 +213,7 @@ export function LicenseActionModal({
                 'Nhập lý do chi tiết hoặc chọn nhanh từ các gợi ý bên trên…'
               )}
               className={`h-[76px] w-full resize-none rounded-[9px] border px-3 py-2 text-[12.5px] leading-relaxed transition ${
-                err ? 'border-bad bg-bad-soft/10 ring-1 ring-bad' : 'border-line bg-surface focus:border-brand'
+                err ? 'border-bad bg-bad-soft/10' : 'border-line bg-surface focus:border-brand'
               }`}
             />
           </FormField>

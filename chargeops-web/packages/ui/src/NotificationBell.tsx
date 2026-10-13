@@ -284,7 +284,7 @@ export function NotificationBell({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="group relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface hover:bg-surface-2 hover:border-line-3 transition-all duration-150 active:scale-95 shadow-2xs"
+        className="group relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface hover:bg-surface-2 hover:border-line transition-all duration-150 active:scale-95 shadow-2xs"
         title={t('notificationBell.title', 'Thông báo')}
       >
         <IconBell size={17} strokeWidth={1.9} className="text-body group-hover:text-ink transition-colors" />
@@ -299,11 +299,11 @@ export function NotificationBell({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:ring-1 dark:ring-white/[0.06]"
+          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl"
           style={{ animation: 'popIn .18s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Header Bar */}
-          <div className="border-b border-line-2 bg-surface-2/90 px-4 py-3 backdrop-blur-md">
+          <div className="border-b border-line bg-surface-2/90 px-4 py-3 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-[14px] font-black text-ink tracking-tight">{t('notificationBell.headerTitle', 'Hộp Thông Báo')}</span>
@@ -333,7 +333,7 @@ export function NotificationBell({
 
             {/* Novu / Knock Segmented Tabs (Tất cả vs Chưa đọc) */}
             <div className="mt-2.5 flex items-center justify-between gap-2">
-              <div className="flex items-center rounded-lg bg-surface border border-line-2 p-0.5 shadow-2xs">
+              <div className="flex items-center rounded-lg bg-surface border border-line p-0.5 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setStatusTab('all')}
@@ -438,7 +438,7 @@ export function NotificationBell({
                         'group relative flex flex-col gap-2 rounded-xl p-3 text-left cursor-pointer border',
                         'transition-[background-color,border-color,transform,translate,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px',
                         n.read
-                          ? 'bg-surface hover:bg-chip/50 border-line/30 opacity-75 hover:opacity-100 dark:bg-surface-2 dark:hover:bg-chip dark:border-line-2 dark:opacity-90'
+                          ? 'bg-surface hover:bg-chip/50 border-line/30 opacity-75 hover:opacity-100 dark:bg-surface-2 dark:hover:bg-chip dark:border-line dark:opacity-90'
                           : `${cfg.bg} ${cfg.border} ${cfg.darkBg} ${cfg.darkBorder} shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.06)]`,
                       ].join(' ')}
                     >
@@ -509,17 +509,17 @@ export function NotificationBell({
                       {(n.stationName || n.chargerId || n.badge) && (
                         <div className="flex flex-wrap items-center gap-1.5 pl-[38px]">
                           {n.stationName && (
-                            <span className="rounded-md bg-surface border border-line-2 dark:bg-chip dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
+                            <span className="rounded-md bg-surface border border-line dark:bg-chip dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
                               📍 {n.stationName}
                             </span>
                           )}
                           {n.chargerId && (
-                            <span className="rounded-md bg-surface border border-line-2 dark:bg-chip dark:border-line px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted shadow-2xs">
+                            <span className="rounded-md bg-surface border border-line dark:bg-chip dark:border-line px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted shadow-2xs">
                               ⚡ {n.chargerId}
                             </span>
                           )}
                           {n.badge && (
-                            <span className="rounded-md bg-surface-2 border border-line-2 dark:bg-line dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-muted">
+                            <span className="rounded-md bg-surface-2 border border-line dark:bg-line dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-muted">
                               {n.badge}
                             </span>
                           )}
@@ -538,7 +538,7 @@ export function NotificationBell({
                               if (n.onAction) n.onAction();
                               else if (n.onSelect) n.onSelect();
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line-2 hover:border-brand/40 dark:bg-chip dark:border-line dark:hover:border-brand/50 dark:hover:bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-[background-color,border-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] shadow-2xs group/btn"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-surface border border-line hover:border-brand/40 dark:bg-chip dark:border-line dark:hover:border-brand/50 dark:hover:bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-ink hover:text-brand hover:bg-brand-soft/30 transition-[background-color,border-color,color,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] shadow-2xs group/btn"
                           >
                             <span>{n.primaryAction?.label || n.actionLabel}</span>
                             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-chip group-hover/btn:bg-brand group-hover/btn:text-white group-hover/btn:translate-x-0.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
@@ -555,7 +555,7 @@ export function NotificationBell({
           </div>
 
           {/* Footer Bar */}
-          <div className="flex items-center justify-between border-t border-line-2 bg-surface-2/70 px-4 py-2.5 text-[11.5px]">
+          <div className="flex items-center justify-between border-t border-line bg-surface-2/70 px-4 py-2.5 text-[11.5px]">
             <span className="font-medium text-faint">
               {unreadCount === 0 ? t('notificationBell.footerAllRead', 'Tất cả đã đọc') : t('notificationBell.footerUnread', { unreadCount, total: items.length, defaultValue: `${unreadCount} chưa đọc trong tổng số ${items.length}` })}
             </span>

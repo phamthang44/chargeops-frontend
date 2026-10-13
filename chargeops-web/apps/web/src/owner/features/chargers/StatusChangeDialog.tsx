@@ -161,7 +161,7 @@ export function StatusChangeDialog({
 
       {/* ---- mandatory reason input when going offline / maintenance ---- */}
       {!blocked && !checking && requiresReason && (
-        <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] border border-line-2 bg-surface-2 p-3">
+        <div className="mt-3.5 flex flex-col gap-1.5 rounded-[10px] bg-surface-2 p-3">
           <label className="text-[11.5px] font-bold text-ink">
             {t('statusDialog.reasonLabel', 'Lý do thay đổi trạng thái')} <span className="text-bad">*</span>
           </label>
@@ -174,7 +174,7 @@ export function StatusChangeDialog({
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition ${
                   reason === p
                     ? 'border-owner bg-owner text-white font-semibold'
-                    : 'border-line-2 bg-surface text-body hover:border-line-3'
+                    : 'border-line bg-surface text-body hover:border-line'
                 }`}
               >
                 {p}
@@ -239,7 +239,7 @@ function BlockedBody({
           : t('statusDialog.blockedBodyConnector', { count: blockers.length })}
       </p>
 
-      <div className="mt-3 max-h-[190px] overflow-y-auto rounded-card border border-line-3">
+      <div className="mt-3 max-h-[190px] overflow-y-auto rounded-card bg-surface-2">
         {blockers.map((b) => {
           const meta = BOOKING_STATUS[b.status];
           return (
@@ -323,7 +323,7 @@ function OfflineBody({ intent, connectors, isMaintenance }: { intent: StatusInte
             : t('statusDialog.offlineBodyConnector')}
       </p>
 
-      <ul className="mt-3 flex flex-col gap-2 rounded-card border border-line-3 p-3.5">
+      <ul className="mt-3 flex flex-col gap-2 rounded-card bg-surface-2 p-3.5">
         <Impact tone="bad">{t('statusDialog.impactNoBookings')}</Impact>
         <Impact tone="bad">{t('statusDialog.impactHiddenFromDrivers')}</Impact>
         <Impact tone="muted">{t('statusDialog.impactRestores')}</Impact>
@@ -366,7 +366,7 @@ function OnlineBody({ intent, connectors }: { intent: StatusIntent; connectors: 
         {t('statusDialog.onlineBodyDevice', { returning: returning.length, total: connectors.length })}
       </p>
 
-      <div className="mt-3 flex flex-col gap-1.5 rounded-card border border-line-3 p-3.5">
+      <div className="mt-3 flex flex-col gap-1.5 rounded-card bg-surface-2 p-3.5">
         {connectors.map((c) => {
           const back = c.runtimeStatus !== 'OFFLINE';
           return (

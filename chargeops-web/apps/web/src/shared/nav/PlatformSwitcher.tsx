@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { IconChevronDown } from '@chargeops/ui';
 
 export function getDriverAppUrl(): string {
@@ -23,6 +24,7 @@ interface PlatformItem {
 }
 
 export function PlatformSwitcher() {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -36,12 +38,12 @@ export function PlatformSwitcher() {
   const isCurrentStaff = location.pathname.startsWith('/staff');
 
   const currentLabel = isCurrentAdmin
-    ? 'Quản trị viên'
+    ? t('platformSwitcher.roles.admin', 'Quản trị viên')
     : isCurrentOwner
-      ? 'Chủ trạm'
+      ? t('platformSwitcher.roles.owner', 'Chủ trạm')
       : isCurrentStaff
-        ? 'Nhân viên trạm'
-        : 'Hệ thống';
+        ? t('platformSwitcher.roles.staff', 'Nhân viên trạm')
+        : t('platformSwitcher.roles.system', 'Hệ thống');
 
   const currentIcon = isCurrentAdmin
     ? '👑'
@@ -55,7 +57,7 @@ export function PlatformSwitcher() {
     ? 'bg-brand-soft text-brand border-brand-tint'
     : isCurrentOwner
       ? 'bg-owner-soft text-owner-deep border-owner-border'
-      : 'bg-chip text-body border-line-2';
+      : 'bg-chip text-body border-line';
 
   useEffect(() => {
     if (!open) return;
@@ -78,8 +80,8 @@ export function PlatformSwitcher() {
   const PLATFORMS: PlatformItem[] = [
     {
       id: 'admin',
-      title: 'Quản trị hệ thống (Admin Platform)',
-      subtitle: 'Duyệt trạm, quản lý giấy phép, giám sát & tài khoản toàn sàn',
+      title: t('platformSwitcher.platforms.admin.title', 'Quản trị hệ thống (Admin Platform)'),
+      subtitle: t('platformSwitcher.platforms.admin.subtitle', 'Duyệt trạm, quản lý giấy phép, giám sát & tài khoản toàn sàn'),
       icon: '👑',
       type: 'route',
       target: '/admin',
@@ -88,8 +90,8 @@ export function PlatformSwitcher() {
     },
     {
       id: 'owner',
-      title: 'Chủ trạm sạc (Owner Portal)',
-      subtitle: 'Vận hành trạm, cài đặt giá TOU, lịch mở cửa & doanh thu',
+      title: t('platformSwitcher.platforms.owner.title', 'Chủ trạm sạc (Owner Portal)'),
+      subtitle: t('platformSwitcher.platforms.owner.subtitle', 'Vận hành trạm, cài đặt giá TOU, lịch mở cửa & doanh thu'),
       icon: '🏢',
       type: 'route',
       target: '/owner',
@@ -98,8 +100,8 @@ export function PlatformSwitcher() {
     },
     {
       id: 'driver',
-      title: 'Ứng dụng Tài xế (Driver Mobile)',
-      subtitle: 'Tìm trạm sạc, bản đồ trực quan, đặt chỗ & theo dõi phiên sạc',
+      title: t('platformSwitcher.platforms.driver.title', 'Ứng dụng Tài xế (Driver Mobile)'),
+      subtitle: t('platformSwitcher.platforms.driver.subtitle', 'Tìm trạm sạc, bản đồ trực quan, đặt chỗ & theo dõi phiên sạc'),
       icon: '🚗',
       type: 'external',
       target: driverUrl,
@@ -109,8 +111,8 @@ export function PlatformSwitcher() {
     },
     {
       id: 'simulator',
-      title: 'Bộ mô phỏng trụ sạc (Simulator)',
-      subtitle: 'Giả lập cắm sạc xe điện, đồng hồ điện tử & kiểm thử OCPP',
+      title: t('platformSwitcher.platforms.simulator.title', 'Bộ mô phỏng trụ sạc (Simulator)'),
+      subtitle: t('platformSwitcher.platforms.simulator.subtitle', 'Giả lập cắm sạc xe điện, đồng hồ điện tử & kiểm thử OCPP'),
       icon: '⚡',
       type: 'external',
       target: '/simulator',
@@ -135,12 +137,14 @@ export function PlatformSwitcher() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`group flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all duration-150 hover:shadow-xs cursor-pointer ${currentBadgeTone}`}
-        title="Bấm để chuyển đổi góc nhìn nền tảng"
-        aria-label={`Góc nhìn: ${currentLabel}`}
+        title={t('platformSwitcher.triggerTitle', 'Bấm để chuyển đổi góc nhìn nền tảng')}
+        aria-label={t('platformSwitcher.triggerAria', { label: currentLabel, defaultValue: `Góc nhìn: ${currentLabel}` })}
         aria-expanded={open}
       >
         <span className="shrink-0 text-[13px] leading-none">{currentIcon}</span>
-        <span className="hidden shrink-0 font-medium text-ink xl:inline">Góc nhìn:</span>
+        <span className="hidden shrink-0 font-medium text-ink xl:inline">
+          {t('platformSwitcher.viewLabel', 'Góc nhìn:')}
+        </span>
         <span className="min-w-0 max-w-[112px] truncate font-bold">{currentLabel}</span>
         <IconChevronDown
           size={12}
@@ -153,21 +157,21 @@ export function PlatformSwitcher() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-80 sm:w-88 origin-top-right overflow-hidden rounded-panel border border-line-2 bg-surface p-2 shadow-[0_16px_36px_rgba(16,17,26,0.15)] backdrop-blur-md"
+          className="absolute right-0 top-full z-50 mt-2 w-80 sm:w-88 origin-top-right overflow-hidden rounded-panel border border-line bg-surface p-2 shadow-[0_16px_36px_rgba(16,17,26,0.15)] backdrop-blur-md"
           style={{ animation: 'popIn .12s ease-out' }}
         >
           {/* Header */}
-          <div className="px-2.5 pt-2 pb-2.5 border-b border-line-3">
+          <div className="px-2.5 pt-2 pb-2.5 border-b border-line">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
-                Chuyển đổi góc nhìn
+                {t('platformSwitcher.popoverTitle', 'Chuyển đổi góc nhìn')}
               </span>
               <span className="rounded-[4px] bg-chip px-1.5 py-0.5 text-[9.5px] font-mono font-medium text-faint">
                 {isDemo ? 'DEMO MODE' : 'DEV MODE'}
               </span>
             </div>
             <p className="mt-0.5 text-[11.5px] text-body">
-              Chuyển nhanh góc nhìn tại localhost:5173 hoặc mở app tài xế
+              {t('platformSwitcher.popoverSubtitle', 'Chuyển nhanh góc nhìn tại localhost:5173 hoặc mở app tài xế')}
             </p>
           </div>
 
@@ -202,7 +206,7 @@ export function PlatformSwitcher() {
                       </span>
                       {isCurrent && (
                         <span className="rounded-full bg-good-soft text-good px-1.5 py-0.2 text-[9px] font-bold leading-tight">
-                          Đang xem
+                          {t('platformSwitcher.activeBadge', 'Đang xem')}
                         </span>
                       )}
                       {item.type === 'external' && (
@@ -219,7 +223,7 @@ export function PlatformSwitcher() {
           </div>
 
           {/* Footer Target Info */}
-          <div className="mt-1 pt-2 border-t border-line-3 px-2.5 py-1.5 bg-canvas/60 rounded-b-md flex items-center justify-between text-[10.5px] text-muted">
+          <div className="mt-1 pt-2 border-t border-line px-2.5 py-1.5 bg-canvas/60 rounded-b-md flex items-center justify-between text-[10.5px] text-muted">
             <span className="truncate">Driver: <span className="font-mono text-ink">{driverUrl}</span></span>
             <span className="shrink-0 text-faint ml-2">port 8082</span>
           </div>

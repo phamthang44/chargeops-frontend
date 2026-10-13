@@ -175,6 +175,42 @@
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "platformSwitcher": {
+    "viewLabel": "Perspective:",
+    "triggerTitle": "Click to switch platform perspective",
+    "triggerAria": "Perspective: {{label}}",
+    "popoverTitle": "Switch Perspective",
+    "popoverSubtitle": "Quickly switch perspective or open driver app",
+    "activeBadge": "Active",
+    "roles": {
+      "admin": "Administrator",
+      "owner": "Station Owner",
+      "staff": "Station Staff",
+      "system": "System"
+    },
+    "platforms": {
+      "admin": {
+        "title": "System Admin (Admin Platform)",
+        "subtitle": "Approve stations, manage licenses, platform monitoring & accounts"
+      },
+      "owner": {
+        "title": "Station Owner (Owner Portal)",
+        "subtitle": "Operate stations, configure TOU rates, schedules & revenue"
+      },
+      "staff": {
+        "title": "Station Staff (Staff View)",
+        "subtitle": "Inspect chargers, check-in arrivals & report technical incidents"
+      },
+      "driver": {
+        "title": "Driver App (Driver Mobile)",
+        "subtitle": "Find stations, interactive map, reservations & charging sessions"
+      },
+      "simulator": {
+        "title": "OCPP Charger Simulator",
+        "subtitle": "Simulate EV plug-in, electric meters & test OCPP protocols"
+      }
+    }
   }
 }
 

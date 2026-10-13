@@ -37,7 +37,7 @@ export function ActivateChargePointModal({
           </p>
         </div>
 
-        <div className="rounded-xl border border-warn-border bg-warn-soft p-3.5 text-xs leading-relaxed text-warn-deep">
+        <div className="rounded-xl bg-warn-soft p-3.5 text-xs leading-relaxed text-warn-deep">
           <Trans
             t={t}
             i18nKey="provisioning.workspace.activate.warning"
@@ -58,7 +58,7 @@ export function ActivateChargePointModal({
             value={expectedCount}
             onChange={(event) => setExpectedCount(event.target.value)}
             placeholder={t('provisioning.workspace.activate.countPlaceholder', { count: actualConnectorCount })}
-            className="w-full rounded-xl border border-line-2 bg-surface p-3 text-xs text-ink placeholder:text-faint focus:border-brand focus:outline-none"
+            className="w-full rounded-xl border border-line bg-surface p-3 text-xs text-ink placeholder:text-faint focus:border-brand focus:outline-none"
           />
           {isPositiveInteger && !countMatches && (
             <p className="mt-1.5 text-xs text-bad font-medium">

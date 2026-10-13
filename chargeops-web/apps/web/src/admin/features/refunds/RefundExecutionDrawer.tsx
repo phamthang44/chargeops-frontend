@@ -354,7 +354,7 @@ export function RefundExecutionDrawer({
 
         {/* Grace Entitlement Callout */}
         {isGrace && (
-          <div className="flex items-start gap-2.5 rounded-xl bg-good-soft/30 border border-good/25 p-3 text-[12px] text-body">
+          <div className="flex items-start gap-2.5 rounded-xl bg-good-soft/30 p-3 text-[12px] text-body">
             <IconShield size={16} className="text-good shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-semibold text-good block">
@@ -372,7 +372,7 @@ export function RefundExecutionDrawer({
 
         {/* Auto Processing Notice */}
         {isAutoProcessing && (
-          <div className="flex items-start gap-2.5 rounded-xl bg-brand/10 border border-brand/25 p-3 text-[12px] text-body">
+          <div className="flex items-start gap-2.5 rounded-xl bg-brand/10 p-3 text-[12px] text-body">
             <IconBolt size={16} className="text-brand shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-semibold text-brand block">
@@ -467,7 +467,7 @@ export function RefundExecutionDrawer({
                 onClick={() => setExecutionMode('SIMULATOR')}
                 className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${
                   executionMode === 'SIMULATOR'
-                    ? 'border-brand bg-brand-soft/20 ring-1 ring-brand'
+                    ? 'border-brand bg-brand-soft/20'
                     : 'border-hairline bg-surface hover:bg-surface-2'
                 }`}
               >
@@ -484,8 +484,8 @@ export function RefundExecutionDrawer({
                 onClick={() => setExecutionMode('MANUAL_RECORD')}
                 className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${
                   executionMode === 'MANUAL_RECORD'
-                    ? 'border-amber-500/80 dark:border-amber-400 bg-amber-500/10 dark:bg-amber-400/15 ring-1 ring-amber-500/40 shadow-xs'
-                    : 'border-line-2 bg-surface hover:bg-surface-2'
+                    ? 'border-amber-500/80 dark:border-amber-400 bg-amber-500/10 dark:bg-amber-400/15 shadow-xs'
+                    : 'border-line bg-surface hover:bg-surface-2'
                 }`}
               >
                 <div
@@ -545,7 +545,7 @@ export function RefundExecutionDrawer({
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.simRefPlaceholder', 'ví dụ: SIM-REF-902184')}
-                  className="w-full rounded-lg border border-line-3 bg-surface px-3 py-1.5 font-mono text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 font-mono text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
                 />
               </div>
 
@@ -561,7 +561,7 @@ export function RefundExecutionDrawer({
                 </button>
 
                 {showTestTools && (
-                  <div className="mt-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2 text-[11.5px]">
+                  <div className="mt-2.5 rounded-lg bg-amber-500/10 p-3 space-y-2 text-[11.5px]">
                     <div className="font-semibold text-amber-800 dark:text-amber-200">
                       Tùy chọn kết quả mô phỏng (Chỉ dùng cho mục đích Demo / Kiểm thử ngoại lệ):
                     </div>
@@ -629,7 +629,7 @@ export function RefundExecutionDrawer({
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.manualRefPlaceholder', 'ví dụ: FT260925987123 / VCB1982736')}
-                  className="w-full rounded-xl border border-line-2 bg-surface px-3.5 py-2 font-mono text-[13px] font-medium text-ink placeholder:text-faint focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs transition-all"
+                  className="w-full rounded-xl border border-line bg-surface px-3.5 py-2 font-mono text-[13px] font-medium text-ink placeholder:text-faint focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs transition-all"
                 />
                 <span className="text-[11px] text-muted mt-1 block">
                   {t(
@@ -663,7 +663,7 @@ export function RefundExecutionDrawer({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t('refunds.drawer.notePlaceholder', 'Nhập ghi chú giải trình hoặc lý do xử lý hoàn tiền…')}
-              className="w-full rounded border border-line-3 bg-surface px-3 py-2 text-[12.5px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
+              className="w-full rounded border border-line bg-surface px-3 py-2 text-[12.5px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
             />
           </div>
 

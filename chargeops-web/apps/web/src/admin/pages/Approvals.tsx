@@ -219,16 +219,16 @@ function ApprovalDetail({
   const fullAddress = detail
     ? [detail.addressLine, detail.wardName, detail.provinceName].filter(Boolean).join(', ')
     : detailLoading
-      ? 'Đang tải địa chỉ…'
+      ? t('approvals.detail.loadingAddress', { defaultValue: 'Đang tải địa chỉ…' })
       : [station.provinceName || station.city].filter(Boolean).join(', ') || '—';
   const count = detail?.plannedChargePointCount ?? station.plannedChargePointCount ?? station.chargerCount ?? 0;
   const hasActiveLicense = Boolean(detail?.licenseSubmitted);
 
   const licenseValue = detailLoading
-    ? 'Đang kiểm tra…'
+    ? t('approvals.detail.checkingLicense', { defaultValue: 'Đang kiểm tra…' })
     : hasActiveLicense
       ? t('approvals.detail.submittedVal', { defaultValue: 'Đang hoạt động ✓' })
-      : 'Chưa có license đang hiệu lực';
+      : t('approvals.detail.noActiveLicense', { defaultValue: 'Chưa có license đang hiệu lực' });
   const licenseClass = detailLoading
     ? 'font-medium text-faint'
     : hasActiveLicense
@@ -267,8 +267,8 @@ function ApprovalDetail({
           {detail?.assets?.length ? ` (${detail.assets.length})` : ''}
         </div>
         {detailLoading ? (
-          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] border border-line-2 bg-surface-2 font-mono text-[11px] text-faint">
-            <span>Đang tải danh sách tài liệu...</span>
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-surface-2 font-mono text-[11px] text-faint">
+            <span>{t('approvals.detail.loadingDocuments', 'Đang tải danh sách tài liệu...')}</span>
           </div>
         ) : detail?.assets && detail.assets.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
@@ -278,7 +278,7 @@ function ApprovalDetail({
                 href={asset.assetUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 rounded-[8px] border border-line bg-surface-2 p-2 text-[11.5px] transition-colors hover:border-brand hover:bg-surface-3"
+                className="flex items-center gap-2 rounded-[8px] bg-surface-2 p-2 text-[11.5px] transition-colors hover:bg-surface-3"
               >
                 {asset.assetType === 'IMAGE' ? (
                   <img
@@ -293,15 +293,15 @@ function ApprovalDetail({
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold text-ink">{asset.altText || asset.assetType}</div>
-                  <div className="text-[10px] text-faint">{asset.isPrimary ? 'Ảnh chính' : asset.assetType}</div>
+                  <div className="text-[10px] text-faint">{asset.isPrimary ? t('approvals.detail.primaryPhoto', 'Ảnh chính') : asset.assetType}</div>
                 </div>
               </a>
             ))}
           </div>
         ) : (
-          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] border border-dashed border-line font-mono text-[11px] text-ghost">
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-canvas font-mono text-[11px] text-ghost">
             <IconClipboardCheck size={15} className="text-ghost" />
-            <span>Chưa có tài liệu đính kèm</span>
+            <span>{t('approvals.detail.noDocuments', { defaultValue: 'Chưa có tài liệu đính kèm' })}</span>
           </div>
         )}
       </div>
@@ -318,21 +318,21 @@ function ApprovalDetail({
         </button>
 
         {showHistory && (
-          <div className="mt-2.5 flex flex-col gap-2 rounded-[8px] border border-line-2 bg-surface-2 p-2.5 text-[11.5px]">
+          <div className="mt-2.5 flex flex-col gap-2 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px]">
             {historyLoading ? (
-              <div className="py-2 text-center text-faint">Đang tải lịch sử...</div>
+              <div className="py-2 text-center text-faint">{t('approvals.history.loading', 'Đang tải lịch sử...')}</div>
             ) : !history || history.length === 0 ? (
-              <div className="py-2 text-center text-faint">Chưa có lịch sử trạng thái</div>
+              <div className="py-2 text-center text-faint">{t('approvals.history.empty', 'Chưa có lịch sử trạng thái')}</div>
             ) : (
               history.map((h) => {
                 const eventLabels: Record<string, { label: string; tone: string }> = {
-                  SUBMITTED: { label: 'Đã nộp hồ sơ', tone: 'text-brand' },
-                  APPROVED: { label: 'Đã phê duyệt', tone: 'text-good' },
-                  REJECTED: { label: 'Từ chối duyệt', tone: 'text-bad-deep' },
-                  RESUBMITTED: { label: 'Đã nộp lại', tone: 'text-brand' },
-                  SUSPENDED: { label: 'Tạm ngưng', tone: 'text-warn-deep' },
-                  REACTIVATED: { label: 'Kích hoạt lại', tone: 'text-good' },
-                  WITHDRAWN: { label: 'Rút đơn', tone: 'text-faint' },
+                  SUBMITTED: { label: t('approvals.history.submitted', 'Đã nộp hồ sơ'), tone: 'text-brand' },
+                  APPROVED: { label: t('approvals.history.approved', 'Đã phê duyệt'), tone: 'text-good' },
+                  REJECTED: { label: t('approvals.history.rejected', 'Từ chối duyệt'), tone: 'text-bad-deep' },
+                  RESUBMITTED: { label: t('approvals.history.resubmitted', 'Đã nộp lại'), tone: 'text-brand' },
+                  SUSPENDED: { label: t('approvals.history.suspended', 'Tạm ngưng'), tone: 'text-warn-deep' },
+                  REACTIVATED: { label: t('approvals.history.reactivated', 'Kích hoạt lại'), tone: 'text-good' },
+                  WITHDRAWN: { label: t('approvals.history.withdrawn', 'Rút đơn'), tone: 'text-faint' },
                 };
                 const ev = eventLabels[h.eventType] ?? { label: h.eventType, tone: 'text-ink' };
 
@@ -343,7 +343,7 @@ function ApprovalDetail({
                       <span className="font-mono text-[10.5px] text-faint">{formatDateTimeVn(h.performedAt)}</span>
                     </div>
                     <div className="mt-0.5 text-[11px] text-muted">
-                      <span>Bởi: </span>
+                      <span>{t('approvals.history.by', 'Bởi: ')}</span>
                       <span className="font-semibold text-ink">{h.performedByName}</span>
                       {h.performedByEmail && <span className="text-faint"> ({h.performedByEmail})</span>}
                       {h.performedByRole && (
@@ -359,7 +359,7 @@ function ApprovalDetail({
                     </div>
                     {h.reason && (
                       <div className="mt-1.5 rounded bg-bad-soft p-2 text-[11px] text-bad-deep">
-                        <span className="font-semibold">Lý do: </span>
+                        <span className="font-semibold">{t('approvals.history.reason', 'Lý do: ')}</span>
                         {h.reason}
                       </div>
                     )}
@@ -387,10 +387,10 @@ function ApprovalDetail({
             <Button fullWidth variant="primary" onClick={onIssue} disabled={issuing || detailLoading}>
               {issuing ? t('approvals.detail.issuing', { defaultValue: 'Đang ghi nhận…' }) : t('approvals.detail.issueBtn', { defaultValue: 'Ghi nhận & kích hoạt license' })}
             </Button>
-            <div className="rounded-[8px] border border-warn-border bg-warn-soft/40 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
+            <div className="rounded-[8px] bg-warn-soft/40 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
               <div className="flex items-center gap-1.5 font-semibold">
                 <IconInfo size={14} className="shrink-0 text-warn" />
-                <span>Trạm chưa có active license</span>
+                <span>{t('approvals.detail.noActiveLicenseWarning', { defaultValue: 'Trạm chưa có active license' })}</span>
               </div>
               <div className="mt-0.5 text-[11px] opacity-90">
                 {t('approvals.detail.licenseRequiredHint', {

@@ -10,7 +10,7 @@ export function PlatformDirectGuideCard({ ticket }: PlatformDirectGuideCardProps
   const { t } = useTranslation('tickets');
 
   return (
-    <Card className="rounded-2xl border border-brand-line/50 bg-surface p-4 shadow-xs space-y-3">
+    <Card bordered={false} className="rounded-2xl border border-brand-line/50 bg-surface p-4 shadow-xs space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-hairline pb-2.5">
         <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export function PlatformDirectGuideCard({ ticket }: PlatformDirectGuideCardProps
       </p>
 
       {/* Recommended Workflow Steps */}
-      <div className="space-y-2 rounded-xl bg-surface-2 p-3 text-[11.5px] border border-hairline">
+      <div className="space-y-2 rounded-xl bg-surface-2 p-3 text-[11.5px]">
         <div className="flex items-start gap-2">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand font-bold text-[10.5px] mt-0.5">
             1

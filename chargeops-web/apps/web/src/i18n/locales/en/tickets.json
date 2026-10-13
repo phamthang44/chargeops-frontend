@@ -234,6 +234,7 @@
   },
   "live": {
     "badge": "Live Sync",
+    "refreshBtn": "Refresh",
     "refreshTooltip": "Refresh messages"
   },
   "filters": {
@@ -256,6 +257,20 @@
     "IN_PROGRESS": "In Progress",
     "RESOLVED": "Resolved",
     "CLOSED": "Closed"
+  },
+  "statusExplains": {
+    "title": "Incident Status Guide & Lifecycle Workflow",
+    "collapseHint": "Click to toggle explanation",
+    "openTitle": "Pending Claim (Open)",
+    "openDesc": "Newly submitted incident from driver or auto-detected; awaiting station staff or admin to claim and handle.",
+    "inProgressTitle": "In Progress",
+    "inProgressDesc": "Station staff or technician is actively investigating, fixing hardware issues, or communicating with the driver.",
+    "resolvedTitle": "Resolved (10-Day Policy Watch)",
+    "resolvedDesc": "Technical issue resolved and outcome sent to the driver. System counts down 10 days before auto-closing.",
+    "closedTitle": "Closed & Completed",
+    "closedDesc": "Support workflow completed after driver confirmation or after 10 days per policy. Record is permanently read-only.",
+    "escalatedTitle": "Escalated to Admin",
+    "escalatedDesc": "Ticket escalated by station to Administrator to arbitrate disputes or evaluate financial/policy claims beyond station scope."
   },
   "closeReason": {
     "auto": "10-Day Auto-Closed",
@@ -333,10 +348,16 @@
       "handler": "ASSIGNED STAFF",
       "status": "STATUS"
     },
-    "unassigned": "Pending Claim"
+    "unassigned": "Pending Claim",
+    "refund100": "100% Refund",
+    "daysLeft": "{{count}} days",
+    "daysLeft_one": "1 day",
+    "daysLeft_other": "{{count}} days",
+    "expired": "Expired"
   },
   "detail": {
     "back": "Ticket list",
+    "refresh": "Refresh",
     "defaultSubject": "Support Ticket",
     "deadline": "Deadline: {{time}} on {{date}}",
     "cycleBadge": "Cycle #{{cycle}}",
@@ -438,10 +459,13 @@
     "title": "Confirm Incident Resolution",
     "cycle": "Resolution attempt #{{cycle}}",
     "tenDaysBadge": "10-day auto-close",
+    "deadlineFormat": "{{time}} on {{date}}",
     "reasonLabel": "Resolution Outcome & Corrective Action",
     "reasonHelp": "Describe in detail the technical fix performed. This note will be dispatched directly to the driver.",
     "reasonPlaceholder": "E.g., Reconnected communication cable, restarted DC charger unit and verified charge cycle successfully...",
+    "reasonFallback": "[Resolution outcome]",
     "notificationPreviewTitle": "Live driver notification preview:",
+    "notificationPreviewText": "“Support ticket {{ticketCode}} has been marked resolved by station staff: {{reason}}. Please check and select ‘Confirm’ or ‘Issue persists’ before {{deadlinePreview}}. If no response is received after 10 days, the ticket will auto-close per policy.”",
     "disclaimer": "* After submission, the driver has 10 days to reply or confirm. If the driver replies or indicates the issue persists, the ticket will automatically return to In Progress.",
     "submitting": "Updating...",
     "submit": "Complete & Mark Resolved"

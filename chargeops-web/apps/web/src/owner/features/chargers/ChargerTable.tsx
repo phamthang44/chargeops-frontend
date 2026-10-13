@@ -101,7 +101,7 @@ function ChargePointCard({
   return (
     <div
       className={`overflow-hidden rounded-card border bg-surface transition ${
-        selected ? 'border-owner ring-2 ring-owner/15' : 'border-line-2'
+        selected ? 'border-owner' : 'border-line'
       }`}
     >
       {/* ---- device header ---- */}
@@ -134,25 +134,40 @@ function ChargePointCard({
                     setDraft(cp.name);
                     setEditing(true);
                   }}
-                  className="cursor-text border-b border-dashed border-ghost pb-px text-[14.5px] font-bold hover:border-owner"
+                  className="cursor-text border-b border-dashed border-ghost pb-px text-[14.5px] font-bold hover:border-owner text-ink"
                 >
                   {cp.name}
                 </span>
               )}
             </span>
-            <span className="font-mono text-[11px] font-semibold text-faint">{cp.id}</span>
+            {cp.chargePointCode ? (
+              <span className="rounded bg-brand-soft text-brand font-mono px-1.5 py-0.5 text-[11px] font-bold border border-brand-line">
+                {cp.chargePointCode}
+              </span>
+            ) : null}
+            <span className="font-mono text-[11px] text-faint">#{cp.id.slice(0, 8)}</span>
+            <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 text-[10.5px] font-bold font-mono">
+              ⚡ {cp.maxPowerKw || connectors.reduce((max, c) => Math.max(max, c.powerKw || 0), 0) || 0} kW Max
+            </span>
           </div>
 
           <div className="mt-[3px] flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] font-medium text-faint">
-            {cp.zoneLabel && (
-              <span className="flex items-center gap-1">
+            {cp.zoneLabel ? (
+              <span className="flex items-center gap-1 text-muted">
                 <IconPin size={11} strokeWidth={2} />
                 {cp.zoneLabel}
               </span>
+            ) : (
+              <span className="text-[10.5px] text-faint italic">{t('chargers.noZone', 'Chưa ghi chú vị trí')}</span>
             )}
             <span className="flex items-center gap-1">
               <span className="h-[3px] w-[3px] rounded-full bg-disabled" />
-              {t('chargePoints.connectorCount', { count: connectors.length })}
+              <span>{t('chargePoints.connectorCount', { count: connectors.length })}</span>
+              {connectors.length > 0 && (
+                <span className="text-faint font-mono">
+                  ({connectors.map((c) => `${c.connectorType} ${c.powerKw}kW`).join(', ')})
+                </span>
+              )}
             </span>
           </div>
         </div>
@@ -164,7 +179,7 @@ function ChargePointCard({
               e.stopPropagation();
               onViewCpHistory(cp);
             }}
-            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full border border-line-2 bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
             title={t('chargePoints.history.cpTooltip')}
           >
             <IconHistory size={12} strokeWidth={2} />
@@ -250,7 +265,7 @@ function ConnectorRow({
   const inheritedDown = cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
 
   return (
-    <div className={`rounded-[10px] border border-line-3 bg-surface px-3 py-2.5 ${inheritedDown ? 'opacity-70' : ''}`}>
+    <div className={`rounded-[10px] border border-line bg-surface px-3 py-2.5 ${inheritedDown ? 'opacity-70' : ''}`}>
       {/* identity + runtime status */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
@@ -293,6 +308,18 @@ function ConnectorRow({
             <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
           </span>
 
+          {c.sessionsToday !== undefined && c.sessionsToday > 0 && (
+            <span className="inline-flex items-center gap-1 rounded bg-surface-2 px-2 py-0.5 font-mono text-[10.5px] text-muted border border-hairline">
+              <span>⚡ {c.sessionsToday} {t('chargers.sessionsCount', 'lượt sạc')}</span>
+            </span>
+          )}
+
+          {c.kwhToday !== undefined && c.kwhToday > 0 && (
+            <span className="inline-flex items-center gap-1 rounded bg-surface-2 px-2 py-0.5 font-mono text-[10.5px] text-muted border border-hairline">
+              <span>🔋 {c.kwhToday} kWh</span>
+            </span>
+          )}
+
           {hasActiveIncident && (
             <span className="inline-flex items-center gap-1 rounded-md bg-bad-soft px-2 py-0.5 text-[11px] font-semibold text-bad">
               <IconShieldAlert size={12} strokeWidth={2} />
@@ -302,6 +329,15 @@ function ConnectorRow({
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onDownloadQr(c)}
+            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line bg-surface-2 px-2 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            title={t('connectors.panel.downloadQrBtn', 'Tải QR')}
+          >
+            <span>QR</span>
+          </button>
+
           {hasActiveIncident && (
             <button
               type="button"
@@ -317,7 +353,7 @@ function ConnectorRow({
           <button
             type="button"
             onClick={() => onViewConnectorHistory(c)}
-            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line-2 bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
             title={t('chargePoints.history.connectorTooltip')}
           >
             <IconHistory size={12} strokeWidth={2} />

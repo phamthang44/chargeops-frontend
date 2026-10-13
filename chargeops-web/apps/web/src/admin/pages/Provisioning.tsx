@@ -491,7 +491,7 @@ function ChargePointCard({
 
       <div className="border-t border-hairline bg-surface-2 px-3 py-2.5">
         {connectors.length === 0 ? (
-          <div className="flex items-start gap-2 rounded-[9px] border border-warn-border bg-warn-soft px-3 py-2.5 text-[11.5px] font-medium leading-[1.5] text-warn-deep">
+          <div className="flex items-start gap-2 rounded-[9px] bg-warn-soft px-3 py-2.5 text-[11.5px] font-medium leading-[1.5] text-warn-deep">
             <IconLock size={13} strokeWidth={2} className="mt-px shrink-0" />
             <span>{t('provisioning.noConnectors')}</span>
           </div>
@@ -500,9 +500,9 @@ function ChargePointCard({
             {connectors.map((c) => (
               <div
                 key={c.id}
-                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[10px] border border-line-3 bg-surface px-3 py-2.5"
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[10px] bg-surface px-3 py-2.5"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-line-3 bg-surface-2">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-surface-2">
                   <QrGlyph size={22} />
                 </span>
                 <span className="flex min-w-0 flex-col">

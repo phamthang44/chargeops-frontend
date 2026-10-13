@@ -76,7 +76,7 @@ export function AddConnectorModal({
               onChange={(e) => setConnectorCode(e.target.value)}
               placeholder={t('provisioning.workspace.connectorForm.codePlaceholder')}
               required
-              className="w-full rounded-[8px] border border-line-2 bg-surface p-2.5 text-[12.5px] font-mono text-ink focus:border-brand focus:outline-none"
+              className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] font-mono text-ink focus:border-brand focus:outline-none"
             />
           </div>
 
@@ -104,7 +104,7 @@ export function AddConnectorModal({
             </div>
           </div>
 
-          <div className="rounded-[8px] bg-surface-2 p-3 text-[11.5px] text-muted border border-line-2">
+          <div className="rounded-[8px] bg-surface-2 p-3 text-[11.5px] text-muted">
             <Trans
               t={t}
               i18nKey="provisioning.workspace.connectorForm.addHelp"

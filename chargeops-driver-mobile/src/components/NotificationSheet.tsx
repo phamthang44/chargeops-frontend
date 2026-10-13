@@ -182,7 +182,7 @@ function NotificationItem({ notification, themeColors, index, onPress, onDelete 
             <View style={styles.timeWrap}>
               <Ionicons name="time-outline" size={11} color={themeColors.textMuted} />
               <Text style={[styles.time, { color: themeColors.textMuted }]}>
-                {formatRelativeTime(notification.createdAt)}
+                {formatRelativeTime(notification.createdAt, t)}
               </Text>
             </View>
 
@@ -238,7 +238,7 @@ function NotificationItem({ notification, themeColors, index, onPress, onDelete 
           pressed && { backgroundColor: `${themeColors.textMuted}20` },
         ]}
         accessibilityRole="button"
-        accessibilityLabel="Xóa thông báo"
+        accessibilityLabel={t('notifications.delete', 'Xóa thông báo')}
       >
         <Ionicons name="close" size={14} color={themeColors.textMuted} />
       </Pressable>

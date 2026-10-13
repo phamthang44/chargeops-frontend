@@ -73,8 +73,14 @@
   "observability": {
     "dashboardTitle": "ChargeOps Overview",
     "accessHint": "Grafana authenticates with Keycloak and only accepts the OBSERVABILITY_ADMIN role.",
-    "openInNewTab": "Open fullscreen",
-    "iframeTitle": "ChargeOps observability dashboard"
+    "openInNewTab": "Open in new tab",
+    "iframeTitle": "ChargeOps observability dashboard",
+    "refreshTooltip": "Refresh dashboard",
+    "refreshBtn": "Refresh",
+    "fullscreenExit": "Exit Fullscreen",
+    "fullscreenEnter": "Fullscreen",
+    "timeRangeLabel": "Range:",
+    "gatewayOnline": "Gateway & Telemetry Online"
   },
   "notifications": {
     "title": "Notification & Alert Center",
@@ -294,7 +300,27 @@
       "approving": "Approving...",
       "rejectBtn": "Reject (reason required)",
       "auditHistory": "Status Transition History",
-      "licenseRequiredHint": "License issuance is required before approving this station profile."
+      "licenseRequiredHint": "License issuance is required before approving this station profile.",
+      "noActiveLicense": "No active license",
+      "noActiveLicenseWarning": "Station has no active license",
+      "noDocuments": "No attached documents",
+      "loadingAddress": "Loading address…",
+      "checkingLicense": "Checking license…",
+      "loadingDocuments": "Loading document list...",
+      "primaryPhoto": "Primary photo"
+    },
+    "history": {
+      "loading": "Loading history...",
+      "empty": "No status history recorded",
+      "by": "By: ",
+      "reason": "Reason: ",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "resubmitted": "Resubmitted",
+      "suspended": "Suspended",
+      "reactivated": "Reactivated",
+      "withdrawn": "Withdrawn"
     }
   },
   "bookings": {
@@ -337,6 +363,9 @@
   },
   "dashboard": {
     "error": "Failed to load overview data",
+    "usersOverview": {
+      "title": "Platform Users"
+    },
     "ops": {
       "platformOpenTickets": "Open platform tickets",
       "escalatedOpenCases": "Station cases for review",
@@ -413,6 +442,29 @@
       "SUSPENDED": "Suspended",
       "EXPIRED": "Expired",
       "CANCELLED": "Cancelled"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "PENDING": "Pending",
+      "SUSPENDED": "Suspended",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "active": "Active",
+      "expiring": "Expiring Soon",
+      "expired": "Expired"
+    },
+    "statusExplains": {
+      "title": "License Status Guide & Operational Policy",
+      "activeTitle": "Active",
+      "activeDesc": "License subscription is currently valid. Station is eligible to operate, receive charging bookings, and appear on driver search maps.",
+      "pendingTitle": "Pending",
+      "pendingDesc": "License record is created but has not reached its effective start date or is awaiting administrative activation.",
+      "suspendedTitle": "Suspended",
+      "suspendedDesc": "Station operating rights are temporarily suspended (due to maintenance, policy violation, or host request). Hidden from driver app.",
+      "expiredTitle": "Expired",
+      "expiredDesc": "License term has ended. Station automatically halts accepting new bookings (LICENSE_SEARCH_VISIBILITY) until renewed.",
+      "cancelledTitle": "Cancelled",
+      "cancelledDesc": "License has been terminated permanently and cannot be reactivated. A new license must be issued to reopen the station."
     },
     "policyCard": {
       "title": "Subscription License Policy",
@@ -1196,6 +1248,7 @@
     },
     "drawer": {
       "close": "Close",
+      "viewRelatedTickets": "View Related Support Tickets",
       "role": "Role",
       "status": "Status",
       "statusReason": "Suspension reason",
@@ -1318,6 +1371,7 @@
     "actions": {
       "viewDetail": "View Details",
       "provisioning": "Provisioning (FR14)",
+      "provisioningBtn": "Provision",
       "suspend": "Suspend Operation",
       "reactivate": "Reactivate Station",
       "manageLicense": "Manage License"

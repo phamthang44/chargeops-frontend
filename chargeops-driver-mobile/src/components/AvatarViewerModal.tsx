@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Dimensions,
@@ -37,6 +38,7 @@ export function AvatarViewerModal({
   displayName,
   onEdit,
 }: AvatarViewerModalProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { themeColors } = usePreferences();
   const [loading, setLoading] = useState(true);
@@ -103,10 +105,12 @@ export function AvatarViewerModal({
         <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
           <View style={styles.titleColumn}>
             <Text style={styles.displayNameText} numberOfLines={1}>
-              {displayName || 'Ảnh đại diện'}
+              {displayName || t('profile.avatarViewer.defaultTitle', 'Ảnh đại diện')}
             </Text>
             <Text style={styles.subtitleText}>
-              {avatarUrl ? 'Chế độ xem độ phân giải cao' : 'Chưa có ảnh đại diện'}
+              {avatarUrl
+                ? t('profile.avatarViewer.hiResSubtitle', 'Chế độ xem độ phân giải cao')
+                : t('profile.avatarViewer.noAvatarSubtitle', 'Chưa có ảnh đại diện')}
             </Text>
           </View>
 
@@ -114,7 +118,7 @@ export function AvatarViewerModal({
             {Boolean(avatarUrl) && (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Mở ảnh gốc"
+                accessibilityLabel={t('profile.avatarViewer.openOriginal', 'Mở ảnh gốc')}
                 hitSlop={8}
                 onPress={handleOpenOriginalInTab}
                 style={styles.iconCircleBtn}
@@ -125,7 +129,7 @@ export function AvatarViewerModal({
 
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Đóng"
+              accessibilityLabel={t('common.close', 'Đóng')}
               hitSlop={8}
               onPress={onClose}
               style={styles.iconCircleBtn}
@@ -156,7 +160,7 @@ export function AvatarViewerModal({
                   viewMode === 'circle' && styles.modePillTextActive,
                 ]}
               >
-                Vòng tròn Avatar
+                {t('profile.avatarViewer.circleMode', 'Vòng tròn Avatar')}
               </Text>
             </Pressable>
 
@@ -178,7 +182,7 @@ export function AvatarViewerModal({
                   viewMode === 'full' && styles.modePillTextActive,
                 ]}
               >
-                Ảnh gốc đầy đủ
+                {t('profile.avatarViewer.fullMode', 'Ảnh gốc đầy đủ')}
               </Text>
             </Pressable>
           </View>
@@ -223,13 +227,15 @@ export function AvatarViewerModal({
             >
               <Ionicons name="create-outline" size={18} color="#FFFFFF" />
               <Text style={styles.actionBtnText}>
-                {avatarUrl ? 'Thay đổi & Căn chỉnh ảnh' : 'Tải lên ảnh mới'}
+                {avatarUrl
+                  ? t('profile.avatarViewer.changePhoto', 'Thay đổi & Căn chỉnh ảnh')
+                  : t('profile.avatarViewer.uploadNewPhoto', 'Tải lên ảnh mới')}
               </Text>
             </Pressable>
           )}
 
           <Pressable style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>Đóng</Text>
+            <Text style={styles.closeBtnText}>{t('common.close', 'Đóng')}</Text>
           </Pressable>
         </View>
       </View>

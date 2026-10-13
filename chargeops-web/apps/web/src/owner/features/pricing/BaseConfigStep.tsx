@@ -24,7 +24,7 @@ export function BaseConfigStep({
   return (
     <div>
       <StepHeader n={1} title={t('pricing.steps.step1.title', { defaultValue: 'Cấu hình cơ bản & Thời lượng' })} />
-      <div className="rounded-panel border border-line-2 bg-surface p-5 flex flex-col gap-5">
+      <div className="rounded-panel border border-line bg-surface p-5 flex flex-col gap-5">
         {/* Section 1: Commercial Minimum Duration (Owner Configurable) */}
         <div>
           <div className="mb-3 flex items-start gap-[11px]">
@@ -142,7 +142,7 @@ export function BaseConfigStep({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
+            <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
               <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
                 {t('pricing.steps.step1.turnaroundBufferTitle', { defaultValue: 'Thời gian giãn ca (đổi xe)' })}
               </div>
@@ -156,7 +156,7 @@ export function BaseConfigStep({
               </div>
             </div>
 
-            <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
+            <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
               <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
                 {t('pricing.steps.step1.stepIncrementTitle', { defaultValue: 'Bước tăng thời gian' })}
               </div>
@@ -170,7 +170,7 @@ export function BaseConfigStep({
               </div>
             </div>
 
-            <div className="rounded-[9px] border border-line-2 bg-surface-2 p-2.5">
+            <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
               <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
                 {t('pricing.steps.step1.maxDurationTitle', { defaultValue: 'Thời lượng sạc tối đa' })}
               </div>

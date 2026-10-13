@@ -210,7 +210,7 @@ export function Staff() {
             ) : (
               <div className="flex flex-col gap-3.5">
                 {byStation.map(([id, { stationName, members }]) => (
-                  <Card key={id} className="overflow-hidden border border-line/60 shadow-subtle">
+                  <Card key={id} className="overflow-hidden shadow-subtle">
                     {/* Station Header */}
                     <div className="flex items-center justify-between border-b border-hairline bg-surface-2/80 px-4 py-2.5">
                       <div className="flex items-center gap-2">
@@ -257,7 +257,7 @@ export function Staff() {
                                 </div>
 
                                 {m.note && (
-                                  <div className="mt-1.5 inline-block rounded-md bg-surface-2 px-2.5 py-1 text-[11px] font-medium text-body border border-hairline">
+                                  <div className="mt-1.5 inline-block rounded-md bg-surface-2 px-2.5 py-1 text-[11px] font-medium text-body">
                                     <span className="text-faint font-semibold mr-1">{t('staff.list.note')}:</span>
                                     {m.note}
                                   </div>

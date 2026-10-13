@@ -159,10 +159,10 @@ export function OwnerCancelBookingModal({
 
         {/* Operational Warning Context */}
         <div
-          className={`flex items-start gap-2.5 rounded-xl border p-3 text-[11.5px] leading-relaxed ${
+          className={`flex items-start gap-2.5 rounded-xl p-3 text-[11.5px] leading-relaxed ${
             isPaid
-              ? 'border-bad-border bg-bad-soft text-bad-deep'
-              : 'border-line-2 bg-surface-2 text-muted'
+              ? 'border border-bad-border bg-bad-soft text-bad-deep'
+              : 'bg-surface-2 text-muted'
           }`}
         >
           <IconAlertTriangle
@@ -192,7 +192,7 @@ export function OwnerCancelBookingModal({
         </div>
 
         {/* Booking Snapshot Breakdown */}
-        <div className="rounded-xl border border-line bg-surface p-3.5 text-[12px] space-y-2">
+        <div className="rounded-xl bg-surface-2 p-3.5 text-[12px] space-y-2">
           <div className="flex justify-between">
             <span className="text-muted">{t('bookings.ownerCancelModal.connectorLabel', 'Cổng sạc:')}</span>
             <span className="font-semibold text-ink">

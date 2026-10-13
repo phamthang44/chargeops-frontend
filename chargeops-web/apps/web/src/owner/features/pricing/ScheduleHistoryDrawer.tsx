@@ -94,7 +94,7 @@ export function ScheduleHistoryDrawer({
       }
     >
       {/* Informational Callout */}
-      <div className="rounded-[10px] border border-line-2 bg-surface-2 p-3 text-[12px] leading-relaxed text-muted">
+      <div className="rounded-[10px] border border-line bg-surface-2 p-3 text-[12px] leading-relaxed text-muted">
         💡 <b>{t('pricing.history.calloutTitle', { defaultValue: 'Quy cách chu kỳ giờ hoạt động:' })}</b>{' '}
         {t('pricing.history.calloutDesc', {
           defaultValue:
@@ -134,8 +134,8 @@ export function ScheduleHistoryDrawer({
                 key={item.scheduleId || index}
                 className={`flex flex-col gap-3 rounded-[12px] border p-4 transition-all ${
                   isActive
-                    ? 'border-owner-border/70 bg-owner-soft/20 shadow-xs ring-1 ring-owner/20'
-                    : 'border-line-2 bg-surface'
+                    ? 'border-owner-border/70 bg-owner-soft/20 shadow-xs'
+                    : 'border-line bg-surface'
                 }`}
               >
                 {/* Header of history card */}
@@ -218,7 +218,7 @@ export function ScheduleHistoryDrawer({
                 )}
 
                 {/* Operating hours breakdown */}
-                <div className="rounded-[9px] border border-line-2 bg-surface-2/70 p-2.5 text-[11.5px]">
+                <div className="rounded-[9px] bg-surface-2/70 p-2.5 text-[11.5px]">
                   {item.open24Hours ? (
                     <div className="flex items-center gap-2 font-medium text-owner-deep">
                       <IconCheck size={14} className="text-owner" />

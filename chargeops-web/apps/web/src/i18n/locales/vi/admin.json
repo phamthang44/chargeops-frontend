@@ -73,8 +73,14 @@
   "observability": {
     "dashboardTitle": "ChargeOps Overview",
     "accessHint": "Grafana xác thực riêng qua Keycloak và chỉ chấp nhận role OBSERVABILITY_ADMIN.",
-    "openInNewTab": "Mở toàn màn hình",
-    "iframeTitle": "Bảng điều khiển giám sát ChargeOps"
+    "openInNewTab": "Mở tab mới",
+    "iframeTitle": "Bảng điều khiển giám sát ChargeOps",
+    "refreshTooltip": "Làm mới bảng điều khiển",
+    "refreshBtn": "Làm mới",
+    "fullscreenExit": "Thu nhỏ",
+    "fullscreenEnter": "Toàn màn hình",
+    "timeRangeLabel": "Phạm vi:",
+    "gatewayOnline": "Gateway & Telemetry Trực tuyến"
   },
   "notifications": {
     "title": "Trung tâm Thông báo & Cảnh báo",
@@ -294,7 +300,27 @@
       "approving": "Đang duyệt…",
       "rejectBtn": "Từ chối (cần lý do)",
       "auditHistory": "Lịch sử thay đổi trạng thái",
-      "licenseRequiredHint": "Cần cấp gói Giấy phép (License) trước khi có thể duyệt hồ sơ trạm."
+      "licenseRequiredHint": "Cần cấp gói Giấy phép (License) trước khi có thể duyệt hồ sơ trạm.",
+      "noActiveLicense": "Chưa có license đang hiệu lực",
+      "noActiveLicenseWarning": "Trạm chưa có active license",
+      "noDocuments": "Chưa có tài liệu đính kèm",
+      "loadingAddress": "Đang tải địa chỉ…",
+      "checkingLicense": "Đang kiểm tra…",
+      "loadingDocuments": "Đang tải danh sách tài liệu...",
+      "primaryPhoto": "Ảnh chính"
+    },
+    "history": {
+      "loading": "Đang tải lịch sử...",
+      "empty": "Chưa có lịch sử trạng thái",
+      "by": "Bởi: ",
+      "reason": "Lý do: ",
+      "submitted": "Đã nộp hồ sơ",
+      "approved": "Đã phê duyệt",
+      "rejected": "Từ chối duyệt",
+      "resubmitted": "Đã nộp lại",
+      "suspended": "Tạm ngưng",
+      "reactivated": "Kích hoạt lại",
+      "withdrawn": "Rút đơn"
     }
   },
   "bookings": {
@@ -337,6 +363,9 @@
   },
   "dashboard": {
     "error": "Không thể tải dữ liệu tổng quan",
+    "usersOverview": {
+      "title": "Người dùng nền tảng"
+    },
     "ops": {
       "platformOpenTickets": "Ticket nền tảng đang mở",
       "escalatedOpenCases": "Case trạm cần xem xét",
@@ -413,6 +442,29 @@
       "SUSPENDED": "Tạm ngưng",
       "EXPIRED": "Hết hạn",
       "CANCELLED": "Đã hủy"
+    },
+    "status": {
+      "ACTIVE": "Đang hoạt động",
+      "PENDING": "Chờ hiệu lực",
+      "SUSPENDED": "Tạm ngưng",
+      "EXPIRED": "Đã hết hạn",
+      "CANCELLED": "Đã hủy",
+      "active": "Đang hoạt động",
+      "expiring": "Sắp hết hạn",
+      "expired": "Đã hết hạn"
+    },
+    "statusExplains": {
+      "title": "Ý nghĩa các trạng thái License & Quy định vận hành",
+      "activeTitle": "Đang hoạt động (Active)",
+      "activeDesc": "Gói License đang có hiệu lực. Trạm sạc đủ điều kiện vận hành, hiển thị trên bản đồ tìm kiếm và nhận lượt đặt sạc từ tài xế.",
+      "pendingTitle": "Chờ hiệu lực (Pending)",
+      "pendingDesc": "Gói License đã ghi nhận nhưng chưa đến ngày bắt đầu kỳ hạn hoặc đang chờ kích hoạt chính thức từ Quản trị viên.",
+      "suspendedTitle": "Tạm ngưng (Suspended)",
+      "suspendedDesc": "Tạm dừng quyền vận hành của trạm (do bảo trì, vi phạm hoặc yêu cầu chủ trạm). Trạm sẽ tạm ẩn khỏi ứng dụng tài xế.",
+      "expiredTitle": "Đã hết hạn (Expired)",
+      "expiredDesc": "Kỳ hạn License đã kết thúc. Trạm tự động ngưng nhận lịch đặt mới (theo quy định LICENSE_SEARCH_VISIBILITY) cho đến khi hoàn tất gia hạn.",
+      "cancelledTitle": "Đã hủy (Cancelled)",
+      "cancelledDesc": "Giấy phép đã bị hủy bỏ vĩnh viễn và không thể khôi phục. Cần cấp mới License nếu muốn mở lại trạm."
     },
     "policyCard": {
       "title": "Quy định Subscription License",
@@ -1196,6 +1248,7 @@
     },
     "drawer": {
       "close": "Đóng",
+      "viewRelatedTickets": "Tra cứu vé hỗ trợ liên quan",
       "role": "Vai trò",
       "status": "Trạng thái",
       "statusReason": "Lý do khóa",
@@ -1318,6 +1371,7 @@
     "actions": {
       "viewDetail": "Xem chi tiết",
       "provisioning": "Cấp hạ tầng (FR14)",
+      "provisioningBtn": "Cấp trụ",
       "suspend": "Tạm ngưng vận hành",
       "reactivate": "Kích hoạt lại",
       "manageLicense": "Quản lý giấy phép"

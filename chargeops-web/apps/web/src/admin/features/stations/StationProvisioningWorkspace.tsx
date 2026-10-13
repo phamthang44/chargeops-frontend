@@ -215,7 +215,7 @@ export function StationProvisioningWorkspace({
       </Card>
 
       {/* FR14 Step flow guideline */}
-      <Card className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 bg-surface-2 border-line-2">
+      <Card className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 bg-surface-2">
         {[
           { step: 1, title: t('provisioning.workspace.steps.step1') },
           { step: 2, title: t('provisioning.workspace.steps.step2') },

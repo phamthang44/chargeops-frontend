@@ -38,7 +38,7 @@ export function Drawer({ open, onClose, title, width = '460px', footer, children
         className="fixed inset-y-0 right-0 z-[91] flex max-w-[100vw] flex-col bg-surface shadow-[-8px_0_30px_rgba(0,0,0,.2)]"
         style={{ width, animation: 'drawerIn .22s cubic-bezier(.2,.7,.2,1)' }}
       >
-        <div className="flex items-center justify-between border-b border-line-3 px-[18px] py-4">
+        <div className="flex items-center justify-between border-b border-line px-[18px] py-4">
           <div className="flex items-center gap-2.5">{title}</div>
           <button
             onClick={onClose}
@@ -49,7 +49,7 @@ export function Drawer({ open, onClose, title, width = '460px', footer, children
           </button>
         </div>
         <div className="flex flex-1 flex-col gap-[15px] overflow-y-auto p-[18px]">{children}</div>
-        {footer && <div className="flex gap-2.5 border-t border-line-3 px-[18px] py-4">{footer}</div>}
+        {footer && <div className="flex gap-2.5 border-t border-line px-[18px] py-4">{footer}</div>}
       </div>
     </>,
     document.body,

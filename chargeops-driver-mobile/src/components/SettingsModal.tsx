@@ -345,18 +345,8 @@ export function SettingsModal({
               {showLanguage ? (
                 <Reveal delay={40} duration={560} style={styles.sectionWrap}>
                   <SectionHeading icon="globe-outline" label={t('settings.language')} accent="#8B5CF6" />
-                  {/* Double-bezel shell: tinted outer tray + machined inner core */}
-                  <View
-                    style={[
-                      styles.languageShell,
-                      {
-                        backgroundColor: isDark ? 'rgba(139, 92, 246, 0.06)' : 'rgba(139, 92, 246, 0.05)',
-                        borderColor: isDark ? 'rgba(139, 92, 246, 0.20)' : 'rgba(139, 92, 246, 0.18)',
-                      },
-                    ]}
-                  >
-                    <LanguageSwitcher />
-                  </View>
+                  {/* Single bezel — LanguageSwitcher already draws its own border. */}
+                  <LanguageSwitcher />
                 </Reveal>
               ) : null}
 
@@ -851,12 +841,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 17,
     marginTop: -2,
-  },
-
-  languageShell: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    padding: 5,
   },
 
   appearanceRow: {

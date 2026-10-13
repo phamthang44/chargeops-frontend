@@ -56,7 +56,7 @@ export function ConfirmDeleteModal({
           </p>
         </div>
 
-        <div className="flex items-start gap-3 rounded-[10px] border border-bad/20 bg-bad-soft/30 p-3.5 text-xs leading-relaxed text-bad-deep">
+        <div className="flex items-start gap-3 rounded-[10px] bg-bad-soft/30 p-3.5 text-xs leading-relaxed text-bad-deep">
           <IconAlertTriangle size={18} className="mt-0.5 shrink-0 text-bad" />
           <div>
             {isCp ? (

@@ -12,6 +12,18 @@
     "retry": "Thử lại",
     "error": "Lỗi",
     "ok": "OK",
+    "new": "MỚI",
+    "newBadge": "MỚI",
+    "notice": "Thông báo",
+    "delete": "Xóa",
+    "success": "Thành công",
+    "justNow": "Vừa xong",
+    "time": {
+      "justNow": "Vừa xong",
+      "minutesAgo": "{{count}} phút trước",
+      "hoursAgo": "{{count}} giờ trước",
+      "daysAgo": "{{count}} ngày trước"
+    },
     "charger": "Trụ",
     "connector": "Cổng",
     "eyebrow": {
@@ -382,6 +394,34 @@
     "uploadAvatar": "Tải ảnh đại diện",
     "avatarModalTitle": "Ảnh đại diện",
     "avatarModalSubtitle": "Cập nhật ảnh hiển thị cho tài khoản tài xế của bạn.",
+    "viewAvatar": "Xem ảnh đại diện",
+    "avatarViewer": {
+      "defaultTitle": "Ảnh đại diện",
+      "hiResSubtitle": "Chế độ xem độ phân giải cao",
+      "noAvatarSubtitle": "Chưa có ảnh đại diện",
+      "openOriginal": "Mở ảnh gốc",
+      "circleMode": "Vòng tròn Avatar",
+      "fullMode": "Ảnh gốc đầy đủ",
+      "changePhoto": "Thay đổi & Căn chỉnh ảnh",
+      "uploadNewPhoto": "Tải lên ảnh mới"
+    },
+    "avatarUpload": {
+      "successNewAvatar": "Đã cập nhật ảnh đại diện mới.",
+      "successFromUrl": "Đã cập nhật ảnh đại diện từ liên kết.",
+      "successRemoveAvatar": "Đã gỡ ảnh đại diện, chuyển về avatar mặc định.",
+      "permissionDenied": "Quyền thư viện bị từ chối",
+      "permissionDeniedBody": "Vui lòng cấp quyền truy cập thư viện ảnh trong Cài đặt hệ thống để tải ảnh lên.",
+      "cameraPermissionDenied": "Quyền camera bị từ chối",
+      "cameraPermissionDeniedBody": "Vui lòng cấp quyền camera trong Cài đặt hệ thống để chụp ảnh đại diện.",
+      "openSettings": "Mở Cài đặt",
+      "cropAndSave": "Cắt & Lưu ảnh đại diện",
+      "pickAnother": "Chọn ảnh khác",
+      "takePhotoCrop": "Chụp ảnh & Cắt 1:1",
+      "pickFromGallery": "Chọn ảnh từ thư viện máy",
+      "tapToViewClear": "Nhấn để xem rõ avatar",
+      "adjustTitle": "Căn chỉnh ảnh đại diện",
+      "adjustSubtitle": "Kéo ảnh để điều chỉnh vùng hiển thị trong vòng tròn."
+    },
     "account": {
       "sectionTitle": "Tài khoản cá nhân",
       "unknownName": "Người dùng ChargeOps",
@@ -435,7 +475,12 @@
       "paymentMethods": "Phương thức thanh toán",
       "defaultPrefix": "Ưu tiên",
       "history": "Lịch sử giao dịch",
-      "historySub": "Xem lại các hóa đơn đã thanh toán"
+      "historySub": "Xem lại các hóa đơn đã thanh toán",
+      "onlineGateway": "Cổng thanh toán trực tuyến",
+      "directGateway": "Cổng thanh toán trực tiếp",
+      "onlineDirectSubtitle": "Thanh toán trực tiếp tức thì cho phiên sạc",
+      "vietqrGateway": "Chuyển khoản VietQR (Cổng SePay)",
+      "vietqrSubtitle": "MBBank · STK: 9876543210 (VietQR động)"
     },
     "appSettings": {
       "sectionTitle": "Cài đặt ứng dụng",
@@ -446,12 +491,109 @@
       "language": "Ngôn ngữ",
       "appearance": "Giao diện",
       "appearanceSub": "Sáng, tối hoặc theo hệ thống",
+      "quickGuide": "Hướng dẫn nhanh cho tài xế",
+      "quickGuideSub": "Quy trình sạc xe, check-in QR & quy tắc 15 phút",
       "helpCenter": "Trung tâm trợ giúp",
-      "helpCenterSub": "Hướng dẫn nhanh và trạng thái hỗ trợ"
+      "helpCenterSub": "Câu hỏi thường gặp & Hỗ trợ kỹ thuật"
     },
     "support": {
       "title": "Trung tâm trợ giúp",
-      "subtitle": "Tự xử lý những vấn đề thường gặp ngay trong ChargeOps.",
+      "subtitle": "Hướng dẫn nhanh tính năng, câu hỏi thường gặp & hỗ trợ kỹ thuật",
+      "tabs": {
+        "guide": "Hướng dẫn nhanh",
+        "faq": "Hỏi & Đáp (FAQ)",
+        "tickets": "Phiếu hỗ trợ"
+      },
+      "guideWelcomeTitle": "Cẩm nang sạc xe điện ChargeOps",
+      "guideWelcomeBody": "Hướng dẫn 6 bước từ tìm trạm, đặt chỗ, quét mã QR đến sạc xe và giải quyết sự cố.",
+      "guides": {
+        "discovery": {
+          "title": "1. Tìm & Chọn trạm sạc phù hợp",
+          "summary": "Tra cứu trạm theo bản đồ, khoảng cách và loại cổng sạc (CCS2, Type 2).",
+          "step1": "Mở tab Bản đồ hoặc Tìm trạm để xem các trạm sạc khả dụng gần bạn.",
+          "step2": "Sử dụng bộ lọc cổng sạc: CCS2 (DC sạc nhanh 30kW–180kW) hoặc Type 2 (AC sạc tiêu chuẩn 7kW–22kW).",
+          "step3": "Kiểm tra trạng thái thời gian thực: Xanh (Sẵn sàng), Xanh dương (Đang sạc), Vàng (Bảo trì), Đỏ (Hết chỗ).",
+          "tip": "Mẹo: Nhấn vào thông tin trạm để xem chi tiết công suất tối đa và biểu giá từng khung giờ.",
+          "action": "Tìm trạm trên bản đồ"
+        },
+        "booking": {
+          "title": "2. Đặt trước khung giờ sạc (Slot Booking)",
+          "summary": "Giữ chỗ trước tránh tình trạng chờ đợi và quy tắc 15 phút vàng.",
+          "step1": "Chọn trụ sạc và cổng cắm tương thích với xe của bạn.",
+          "step2": "Chọn khung giờ sạc mong muốn (30 phút, 60 phút hoặc 120 phút).",
+          "step3": "Thanh toán khoản cọc giữ chỗ (được cấn trừ 100% vào tiền sạc thực tế khi hoàn tất).",
+          "tip": "Quy tắc 15 phút: Bạn cần có mặt và check-in trong vòng 15 phút kể từ giờ bắt đầu. Quá 15 phút sẽ bị hủy để nhường trụ và tính phí vắng mặt (No-Show).",
+          "action": "Xem lịch đặt chỗ của bạn"
+        },
+        "checkIn": {
+          "title": "3. Check-in quét mã QR tại trạm",
+          "summary": "Đến trạm đỗ xe và quét mã QR dán trên trụ sạc để kích hoạt.",
+          "step1": "Đỗ xe đúng ô sạc đã đặt và mở nắp cổng sạc của xe.",
+          "step2": "Mở app ChargeOps, chọn nút 'Quét QR Check-in' hoặc mở từ chi tiết đặt chỗ.",
+          "step3": "Hướng camera quét mã QR dán trên thân trụ sạc để hệ thống mở khóa trụ sạc.",
+          "tip": "Mẹo: Nếu camera khó quét do trời tối, hãy bật đèn flash trên màn hình quét hoặc nhập mã trụ bằng tay.",
+          "action": "Mở máy quét QR"
+        },
+        "charging": {
+          "title": "4. Cắm súng sạc & Theo dõi phiên sạc",
+          "summary": "Khóa chốt an toàn và theo dõi % pin, công suất sạc thời gian thực.",
+          "step1": "Rút súng sạc khỏi giá đỡ và cắm chắc chắn vào cổng sạc xe cho đến khi nghe tiếng tách khóa chốt.",
+          "step2": "Đèn tín hiệu trên trụ sạc chuyển sang màu xanh dương nhấp nháy báo hiệu đang nạp điện.",
+          "step3": "Theo dõi trực tiếp trên app: Tốc độ sạc (kW), dung lượng pin (% SoC), kWh tiêu thụ và tiền tạm tính.",
+          "tip": "Khi muốn dừng sạc, hãy bấm nút 'Dừng sạc' trên ứng dụng trước khi rút súng sạc.",
+          "action": "Xem phiên sạc"
+        },
+        "cancellation": {
+          "title": "5. Chính sách Hủy chỗ & Hoàn tiền cọc",
+          "summary": "Quy định hoàn tiền 100% minh bạch và bảo vệ quyền lợi tài xế.",
+          "step1": "Hủy trước giờ hẹn quy định: Tiền cọc được hoàn lại 100% tự động vào phương thức thanh toán ban đầu.",
+          "step2": "Sự cố khách quan (mất điện, trụ sạc hỏng): Hệ thống tự động hủy và hoàn cọc 100%, không áp dụng bất kỳ phí phạt nào.",
+          "step3": "Đến muộn quá 15 phút không check-in: Phiên đặt tự động hủy để nhường chỗ, tiền cọc được khấu trừ theo chính sách vắng mặt (No-show).",
+          "tip": "Thời gian hoàn tiền: Thông thường từ 5 - 15 phút đối với ví điện tử hoặc 1 - 3 ngày làm việc đối với thẻ ngân hàng.",
+          "action": "Chính sách hoàn cọc"
+        },
+        "safety": {
+          "title": "6. Xử lý sự cố & Phiếu hỗ trợ (Ticket)",
+          "summary": "Quy trình dừng khẩn cấp và gửi khiếu nại tới kỹ thuật viên trạm.",
+          "step1": "Nếu có dấu hiệu cháy nổ, mùi khét hoặc quá nhiệt: Nhấn ngay nút Dừng khẩn cấp màu đỏ (Emergency Stop) trên trụ sạc.",
+          "step2": "Nếu trụ sạc báo lỗi không sạc được hoặc súng sạc bị kẹt: Rút súng cẩn thận và liên hệ nhân viên trực trạm.",
+          "step3": "Gửi phiếu hỗ trợ (Ticket) trên app kèm hình ảnh/mô tả sự cố để được kỹ thuật viên xử lý và xem xét hoàn tiền.",
+          "tip": "Bạn có thể theo dõi tiến độ xử lý và trao đổi trực tiếp với nhân viên kỹ thuật trong mục 'Phiếu hỗ trợ của tôi'.",
+          "action": "Gửi phiếu hỗ trợ ngay"
+        }
+      },
+      "faqs": {
+        "connectorType": {
+          "q": "Làm sao để biết xe của tôi dùng loại súng sạc nào?",
+          "a": "Đa số các dòng ô tô điện hiện đại tại Việt Nam (VinFast VF5-VF9, BYD, Porsche Taycan, Hyundai Ioniq 5, BMW iX...) sử dụng chuẩn sạc nhanh DC CCS2 và sạc tiêu chuẩn AC Type 2. Bạn có thể lọc trạm theo chuẩn CCS2 hoặc Type 2 ngay trên thanh công cụ tìm kiếm."
+        },
+        "lateArrival": {
+          "q": "Tôi đến trễ quá 15 phút thì có sạc được không?",
+          "a": "Sau 15 phút tính từ giờ hẹn bắt đầu, hệ thống sẽ tự động hủy phiên đặt chỗ để giải phóng trụ sạc cho tài xế khác có nhu cầu. Bạn sẽ bị tính phí vắng mặt (No-Show). Nếu đến trễ, bạn có thể tạo một lượt đặt chỗ mới hoặc chọn sạc trực tiếp tại chỗ nếu trụ vẫn còn trống."
+        },
+        "qrError": {
+          "q": "Không quét được mã QR trên trụ thì xử lý thế nào?",
+          "a": "Hãy kiểm tra xem kết nối 4G/WiFi của điện thoại có ổn định không, lau sạch camera hoặc bật đèn flash trên app. Nếu mã QR trên trụ bị mờ hoặc rách, bạn có thể nhập thủ công Mã trụ sạc (gồm chữ và số in bên dưới mã QR) để check-in."
+        },
+        "refundTiming": {
+          "q": "Tiền cọc được hoàn lại khi nào và vào đâu?",
+          "a": "Khi phiên sạc hoàn tất, tiền cọc sẽ được cấn trừ tự động vào hóa đơn tiền điện thực tế. Nếu số tiền cọc lớn hơn tiền sạc, hoặc bạn hủy đặt chỗ đúng hạn, số tiền chênh lệch sẽ được hoàn trả tự động vào đúng phương thức bạn đã dùng để đặt cọc trong vòng 5-15 phút."
+        },
+        "blockedSlot": {
+          "q": "Có xe khác đỗ chiếm chỗ ô sạc tôi đã đặt trước?",
+          "a": "Bạn có thể vào Chi tiết đặt chỗ, nhấn nút 'Báo cáo sự cố' và chọn lý do 'Ô sạc bị chiếm chỗ'. Đội ngũ quản lý bãi đỗ xe hoặc nhân viên trạm sẽ can thiệp ngay để giải phóng chỗ cho bạn."
+        }
+      },
+      "faqNotice": "Chưa tìm thấy câu trả lời? Kỹ thuật viên trạm luôn sẵn sàng hỗ trợ bạn qua hệ thống phiếu yêu cầu.",
+      "faqTicketBtn": "Tạo phiếu yêu cầu hỗ trợ",
+      "ticketSectionTitle": "Kênh hỗ trợ trực tiếp & Sự cố",
+      "myTicketsTitle": "Phiếu hỗ trợ của tôi",
+      "myTicketsBody": "Theo dõi tiến độ, trao đổi với kỹ thuật trạm & kết luận hoàn phí",
+      "newTicketTitle": "Gửi yêu cầu hỗ trợ mới",
+      "newTicketBody": "Báo cáo lỗi sạc trạm, đặt chỗ, thanh toán hoặc khiếu nại",
+      "emergencyCardTitle": "Xử lý khẩn cấp tại trạm sạc",
+      "emergencyCardBody": "Khi phát hiện nguy cơ chập điện, khói hoặc quá nhiệt: Hãy nhấn ngay nút Emergency Stop (màu đỏ) trên thân trụ sạc để ngắt hoàn toàn nguồn điện. Sau đó tạo báo cáo khẩn cấp hoặc báo nhân viên quản lý trạm.",
+      "emergencyReportBtn": "Báo cáo sự cố khẩn cấp",
       "welcomeTitle": "Chúng tôi có thể giúp gì cho bạn?",
       "welcomeBody": "Xem hướng dẫn nhanh bên dưới. ChargeOps không gửi email ra ngoài khi kênh hỗ trợ thật chưa được cấu hình.",
       "quickHelp": "Hướng dẫn nhanh",
@@ -471,11 +613,7 @@
       },
       "requestTitle": "Gửi yêu cầu hỗ trợ",
       "requestBody": "Khi hoàn thiện, yêu cầu sẽ được gửi qua hệ thống ChargeOps. Môi trường demo sẽ tiếp nhận nội bộ mà không gửi email thật ra ngoài.",
-      "myTicketsTitle": "Phiếu hỗ trợ của tôi",
-      "myTicketsBody": "Theo dõi tiến độ, trao đổi với kỹ thuật trạm & kết luận hoàn phí",
-      "newTicketTitle": "Gửi yêu cầu hỗ trợ mới",
-      "newTicketBody": "Báo cáo lỗi sạc trạm, đặt chỗ, thanh toán hoặc khiếu nại",
-      "close": "Đã hiểu"
+      "close": "Đóng"
     },
     "logout": "Đăng xuất tài khoản",
     "version": "CHARGEOPS VERSION 2.4.0 (BUILD 82)",
@@ -502,7 +640,10 @@
       "updateLater": "Sẽ cập nhật sau",
       "comingSoon": "Sẽ cập nhật sau",
       "crudDisabledNotice": "Tính năng thêm/sửa/xóa phương thức thanh toán đang được phát triển và sẽ ra mắt ở phiên bản tiếp theo. Hiện tại hệ thống hỗ trợ phương thức mặc định.",
-      "sepayDisabledNotice": "Cổng chuyển khoản VietQR đang được đồng bộ và sẽ hoàn tất trong phiên bản tiếp theo. Vui lòng chọn cổng thanh toán trực tuyến để tiếp tục."
+      "sepayDisabledNotice": "Cổng chuyển khoản VietQR đang được đồng bộ và sẽ hoàn tất trong phiên bản tiếp theo. Vui lòng chọn cổng thanh toán trực tuyến để tiếp tục.",
+      "vietqrTitle": "Chuyển khoản VietQR (Cổng SePay)",
+      "vietqrSubtitle": "MBBank · STK: 9876543210 (VietQR động)",
+      "cannotDeleteLast": "Bạn cần giữ lại ít nhất một phương thức thanh toán."
     },
     "ownerModal": {
       "title": "Chế độ Chủ trạm sạc",
@@ -1489,6 +1630,12 @@
     "delete": "Xóa",
     "viewDetail": "Xem chi tiết",
     "markAllRead": "Đã đọc hết",
-    "clearAll": "Xóa tất cả thông báo"
+    "clearAll": "Xóa tất cả thông báo",
+    "time": {
+      "justNow": "Vừa xong",
+      "minutesAgo": "{{count}} phút trước",
+      "hoursAgo": "{{count}} giờ trước",
+      "daysAgo": "{{count}} ngày trước"
+    }
   }
 }

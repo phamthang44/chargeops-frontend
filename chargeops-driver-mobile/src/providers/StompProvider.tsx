@@ -84,7 +84,7 @@ export function StompProvider({ children }: { children: ReactNode }) {
         // React Native (iOS / Android) native WebSocket supports custom headers:
         return new (globalThis.WebSocket as any)(brokerURL, protocols, {
           headers: {
-            Origin: 'https://thang.tail704409.ts.net',
+            Origin: new URL(brokerURL.replace(/^ws/, 'http')).origin,
           },
         });
       },

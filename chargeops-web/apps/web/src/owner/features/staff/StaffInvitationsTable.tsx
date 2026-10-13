@@ -110,7 +110,7 @@ export function StaffInvitationsTable({ stationId }: StaffInvitationsTableProps)
   const rows = listQ.data?.items ?? [];
 
   return (
-    <Card className="overflow-hidden border border-line/60 shadow-subtle">
+    <Card className="overflow-hidden shadow-subtle">
       <div className="flex items-center justify-between border-b border-hairline bg-surface-2/80 px-4 py-2.5">
         <span className="text-[13px] font-bold text-ink">{t('staff.invitations.title')}</span>
         <span className="rounded-full bg-owner-soft px-2.5 py-0.5 text-[11px] font-bold text-owner-deep">

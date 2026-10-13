@@ -127,7 +127,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
           </p>
         </div>
 
-        <div className="inline-flex p-1 bg-chip rounded-xl border border-line/60 self-start sm:self-auto shrink-0" role="tablist" aria-label={t('notifications.center.scopeLabel', 'Phạm vi thông báo')}>
+        <div className="inline-flex p-1 bg-chip rounded-xl self-start sm:self-auto shrink-0" role="tablist" aria-label={t('notifications.center.scopeLabel', 'Phạm vi thông báo')}>
           <button
             type="button"
             role="tab"

@@ -105,6 +105,26 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
     );
   };
 
+  const getMethodTitle = (method: SavedPaymentMethod) => {
+    if (method.id === 'pm-sim' || method.type === 'SIMULATOR') {
+      return t('profile.wallet.onlineGateway', 'Cổng thanh toán trực tuyến');
+    }
+    if (method.id === 'pm-sepay') {
+      return t('profile.paymentMethodsModal.vietqrTitle', 'Chuyển khoản VietQR (Cổng SePay)');
+    }
+    return method.title;
+  };
+
+  const getMethodSubtitle = (method: SavedPaymentMethod) => {
+    if (method.id === 'pm-sim' || method.type === 'SIMULATOR') {
+      return t('profile.wallet.onlineDirectSubtitle', 'Thanh toán trực tiếp tức thì cho phiên sạc');
+    }
+    if (method.id === 'pm-sepay') {
+      return t('profile.paymentMethodsModal.vietqrSubtitle', 'MBBank · STK: 9876543210 (VietQR động)');
+    }
+    return method.subtitle;
+  };
+
   const handleDelete = (method: SavedPaymentMethod) => {
     if (savedPaymentMethods.length <= 1) {
       Alert.alert(
@@ -119,7 +139,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
       t(
         'profile.paymentMethodsModal.deleteConfirmBody',
         'Bạn có chắc muốn xóa "{{title}}"?',
-        { title: method.title },
+        { title: getMethodTitle(method) },
       ),
       [
         { text: t('common.cancel', 'Hủy'), style: 'cancel' },
@@ -264,7 +284,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
                           ]}
                           numberOfLines={1}
                         >
-                          {method.title}
+                          {getMethodTitle(method)}
                         </Text>
                         {isSelected && !isMethodDisabled && (
                           <View style={[styles.defaultBadge, { backgroundColor: themeColors.primary }]}>
@@ -288,7 +308,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
                         )}
                       </View>
                       <Text style={[styles.methodSub, { color: themeColors.textMuted }]} numberOfLines={1}>
-                        {method.subtitle}
+                        {getMethodSubtitle(method)}
                       </Text>
                     </View>
 

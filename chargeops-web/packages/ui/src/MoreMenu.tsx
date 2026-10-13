@@ -56,7 +56,7 @@ export function MoreMenu({ items, trigger, align = 'right', className = '' }: Mo
       {open && (
         <div
           role="menu"
-          className={`absolute z-[60] min-w-[175px] overflow-hidden rounded-[11px] border border-line-2 bg-surface py-1.5 shadow-[0_12px_32px_rgba(0,0,0,.18)] ${
+          className={`absolute z-[60] min-w-[175px] overflow-hidden rounded-[11px] border border-line bg-surface py-1.5 shadow-[0_12px_32px_rgba(0,0,0,.18)] ${
             openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           } ${align === 'right' ? 'right-0' : 'left-0'}`}
           style={{ animation: 'popIn .12s ease' }}

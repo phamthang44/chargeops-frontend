@@ -114,7 +114,7 @@ export function PhysicalKioskScreen({
   );
 
   return (
-    <div className="relative mx-auto flex w-full max-w-[1020px] flex-col overflow-hidden rounded-[2.2rem] border border-white/15 bg-gradient-to-b from-[#0a0f14] via-[#05090c] to-[#020507] p-2.5 shadow-[0_25px_70px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.15)] text-white select-none antialiased">
+    <div className="relative mx-auto flex w-full max-w-[1020px] flex-col overflow-hidden rounded-[2.2rem] bg-gradient-to-b from-[#0a0f14] via-[#05090c] to-[#020507] p-2.5 shadow-[0_25px_70px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.15)] text-white select-none antialiased">
       {/* Machined Outer Frame Bezel */}
       <div className="relative flex flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#070b0e] p-6 sm:p-8 backdrop-blur-2xl">
         

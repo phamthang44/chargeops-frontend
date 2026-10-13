@@ -270,7 +270,7 @@ export function Licenses() {
                         return (
                           <div
                             key={l.id}
-                            className="flex items-center justify-between gap-2.5 rounded-[9px] border border-line-2 bg-surface-2 p-2.5 transition-colors hover:border-line"
+                            className="flex items-center justify-between gap-2.5 rounded-[9px] bg-surface-2 p-2.5 transition-colors"
                           >
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
@@ -335,9 +335,38 @@ export function Licenses() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Status Explanations Guide */}
+                  <div className="mt-3.5 border-t border-hairline pt-3">
+                    <div className="text-[11.5px] font-semibold text-ink mb-2">
+                      {t('licenses.statusExplains.title', 'Ý nghĩa các trạng thái License & Quy định vận hành')}
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 text-[11px]">
+                      <div className="flex items-start gap-2">
+                        <StatusPill tone="good" label={t('licenses.status.ACTIVE', 'Hoạt động')} className="shrink-0" />
+                        <span className="text-muted leading-tight">{t('licenses.statusExplains.activeDesc')}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <StatusPill tone="brand" label={t('licenses.status.PENDING', 'Chờ hiệu lực')} className="shrink-0" />
+                        <span className="text-muted leading-tight">{t('licenses.statusExplains.pendingDesc')}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <StatusPill tone="warn" label={t('licenses.status.SUSPENDED', 'Tạm ngưng')} className="shrink-0" />
+                        <span className="text-muted leading-tight">{t('licenses.statusExplains.suspendedDesc')}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <StatusPill tone="neutral" label={t('licenses.status.EXPIRED', 'Hết hạn')} className="shrink-0" />
+                        <span className="text-muted leading-tight">{t('licenses.statusExplains.expiredDesc')}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <StatusPill tone="bad" label={t('licenses.status.CANCELLED', 'Đã hủy')} className="shrink-0" />
+                        <span className="text-muted leading-tight">{t('licenses.statusExplains.cancelledDesc')}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-3 rounded-[8px] border border-hairline bg-surface-2 p-2.5 text-[11px] text-faint">
+                <div className="mt-3 rounded-[8px] bg-surface-2 p-2.5 text-[11px] text-faint">
                   {t('licenses.policyCard.totalFeeRecorded', 'Tổng phí đã ghi nhận:')}{' '}
                   <span className="font-semibold text-ink">{formatVnd(totalFeeRecorded)}</span>
                 </div>
@@ -601,7 +630,7 @@ function LicenseRow({
 
       {/* Status Pill */}
       <div>
-        <StatusPill tone={meta.tone} label={meta.label} />
+        <StatusPill tone={meta.tone} label={t(`licenses.status.${normStatus}`, { defaultValue: meta.label })} />
       </div>
 
       {/* Contextual Actions */}

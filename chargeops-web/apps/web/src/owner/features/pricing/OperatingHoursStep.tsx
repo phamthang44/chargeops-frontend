@@ -108,7 +108,7 @@ export function OperatingHoursStep({
               onClick={handleToggle247}
               className={`flex items-center gap-1.5 rounded-[7px] px-2.5 py-1 text-[12px] font-semibold transition cursor-pointer ${
                 isOpen247
-                  ? 'border border-owner-border bg-owner-soft text-owner-deep ring-1 ring-owner/20'
+                  ? 'border border-owner-border bg-owner-soft text-owner-deep'
                   : 'border border-line bg-surface text-owner hover:border-owner/40 hover:bg-owner-soft/40'
               }`}
             >
@@ -123,9 +123,9 @@ export function OperatingHoursStep({
         }
       />
 
-      <div className="rounded-panel border border-line-2 bg-surface p-5 flex flex-col gap-3.5">
+      <div className="rounded-panel border border-line bg-surface p-5 flex flex-col gap-3.5">
         {/* Effective Version Status & Reassurance Policies */}
-        <div className="flex flex-col gap-2 rounded-[10px] border border-line-2 bg-surface-2/70 p-3">
+        <div className="flex flex-col gap-2 rounded-[10px] bg-surface-2/70 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               {scheduleStatus === 'UNCONFIGURED' ? (
@@ -216,7 +216,7 @@ export function OperatingHoursStep({
                       <span>{t('pricing.steps.step2.open247Row', { defaultValue: 'Mở liên tục 24/7 (00:00 – 24:00)' })}</span>
                     </div>
                   ) : isClosed ? (
-                    <div className="flex h-[36px] items-center justify-center gap-1.5 rounded-[9px] border border-line-2 bg-chip/80 px-3 text-center text-[12px] font-medium text-faint">
+                    <div className="flex h-[36px] items-center justify-center gap-1.5 rounded-[9px] border border-line bg-chip/80 px-3 text-center text-[12px] font-medium text-faint">
                       <span>{t('pricing.steps.step2.closedRow', { defaultValue: 'Đóng cửa (Nghỉ phục vụ)' })}</span>
                     </div>
                   ) : (
@@ -254,7 +254,7 @@ export function OperatingHoursStep({
         </div>
 
         {/* Footer helper note */}
-        <div className="mt-1 flex items-start gap-2 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted border border-hairline">
+        <div className="mt-1 flex items-start gap-2 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted">
           <span className="shrink-0 text-base leading-none">💡</span>
           <div>
             <b>{t('pricing.steps.step2.footerTitle', { defaultValue: 'Quy cách giờ đóng mở:' })}</b>{' '}

@@ -34,7 +34,6 @@ export function SegmentedControl<K extends string>({
           const on = s.key === active;
           const accentBg   = accent === 'owner' ? 'bg-owner-soft border-owner-border' : 'bg-brand-soft border-brand-line';
           const accentText = accent === 'owner' ? 'text-owner-deep' : 'text-brand';
-          const accentRing = accent === 'owner' ? 'ring-owner/20' : 'ring-brand/20';
           return (
             <button
               key={s.key}
@@ -42,7 +41,7 @@ export function SegmentedControl<K extends string>({
               className={[
                 'flex flex-1 flex-col items-center gap-[9px] rounded-[11px] border-[1.5px] px-4 py-[14px] text-center transition-all duration-150 select-none',
                 on
-                  ? `${accentBg} ring-2 ${accentRing} shadow-sm`
+                  ? `${accentBg} shadow-sm`
                   : 'border-line bg-surface hover:border-line-hover hover:bg-canvas',
               ].join(' ')}
             >
@@ -86,7 +85,7 @@ export function SegmentedControl<K extends string>({
             onClick={() => onChange(s.key)}
             className={[
               'inline-flex items-center gap-[6px] px-[13px] py-2 text-[12px] font-semibold transition-colors duration-100',
-              i > 0 ? 'border-l border-line-3' : '',
+              i > 0 ? 'border-l border-line' : '',
               on ? accentActive : 'bg-surface text-body hover:bg-canvas',
             ].join(' ')}
           >

@@ -246,7 +246,7 @@ export function AdminRefundPolicyModal({
               }}
               className={`cursor-pointer rounded-xl border p-3.5 transition shadow-2xs space-y-1.5 ${
                 outcome === 'GRANT_FULL_REFUND'
-                  ? 'border-good-border bg-good-soft/30 ring-2 ring-good/20'
+                  ? 'border-good-border bg-good-soft/30'
                   : 'border-line bg-surface hover:border-line-hover'
               }`}
             >
@@ -275,7 +275,7 @@ export function AdminRefundPolicyModal({
               }}
               className={`cursor-pointer rounded-xl border p-3.5 transition shadow-2xs space-y-1.5 ${
                 outcome === 'INSUFFICIENT_EVIDENCE'
-                  ? 'border-warn-border bg-warn-soft/40 ring-2 ring-warn/20'
+                  ? 'border-warn-border bg-warn-soft/40'
                   : 'border-line bg-surface hover:border-line-hover'
               }`}
             >
@@ -359,7 +359,7 @@ export function AdminRefundPolicyModal({
         </div>
 
         {/* Operational Independence Notice */}
-        <div className="rounded-xl border border-hairline bg-surface-2 p-3 text-[11px] text-muted flex items-start gap-2">
+        <div className="rounded-xl bg-surface-2 p-3 text-[11px] text-muted flex items-start gap-2">
           <IconAlertTriangle size={14} className="mt-0.5 shrink-0 text-faint" />
           <span>
             {t(

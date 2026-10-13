@@ -175,6 +175,42 @@
     "minutesAgo": "{{count}} phút trước",
     "hoursAgo": "{{count}} giờ trước",
     "daysAgo": "{{count}} ngày trước"
+  },
+  "platformSwitcher": {
+    "viewLabel": "Góc nhìn:",
+    "triggerTitle": "Bấm để chuyển đổi góc nhìn nền tảng",
+    "triggerAria": "Góc nhìn: {{label}}",
+    "popoverTitle": "Chuyển đổi góc nhìn",
+    "popoverSubtitle": "Chuyển nhanh góc nhìn tại localhost:5173 hoặc mở app tài xế",
+    "activeBadge": "Đang xem",
+    "roles": {
+      "admin": "Quản trị viên",
+      "owner": "Chủ trạm",
+      "staff": "Nhân viên trạm",
+      "system": "Hệ thống"
+    },
+    "platforms": {
+      "admin": {
+        "title": "Quản trị hệ thống (Admin Platform)",
+        "subtitle": "Duyệt trạm, quản lý giấy phép, giám sát & tài khoản toàn sàn"
+      },
+      "owner": {
+        "title": "Chủ trạm sạc (Owner Portal)",
+        "subtitle": "Vận hành trạm, cài đặt giá TOU, lịch mở cửa & doanh thu"
+      },
+      "staff": {
+        "title": "Nhân viên trực trạm (Staff View)",
+        "subtitle": "Kiểm tra trụ, tiếp đón tài xế check-in & báo sự cố kỹ thuật"
+      },
+      "driver": {
+        "title": "Ứng dụng Tài xế (Driver Mobile)",
+        "subtitle": "Tìm trạm sạc, bản đồ trực quan, đặt chỗ & theo dõi phiên sạc"
+      },
+      "simulator": {
+        "title": "Bộ mô phỏng trụ sạc (Simulator)",
+        "subtitle": "Giả lập cắm sạc xe điện, đồng hồ điện tử & kiểm thử OCPP"
+      }
+    }
   }
 }
 

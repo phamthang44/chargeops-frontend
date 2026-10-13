@@ -101,7 +101,7 @@ export function TicketFindingsCard({
   const isArbitrationForm = false;
 
   return (
-    <Card className="rounded-2xl p-4 shadow-sm border border-line bg-surface">
+    <Card className="rounded-2xl p-4 shadow-sm">
       {/* Header */}
       <div className="mb-3.5 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-[13.5px] font-bold text-ink">
@@ -121,7 +121,7 @@ export function TicketFindingsCard({
 
       {/* Findings List */}
       {findings.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line bg-canvas/40 px-3.5 py-4 text-center">
+        <div className="rounded-xl bg-canvas/40 px-3.5 py-4 text-center">
           <p className="text-[12px] text-muted leading-relaxed">
             {t('detail.findings.empty', 'Chưa có kết luận kỹ thuật nào được ghi nhận cho phiếu này.')}
           </p>

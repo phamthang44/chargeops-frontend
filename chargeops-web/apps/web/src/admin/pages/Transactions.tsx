@@ -55,7 +55,7 @@ const METHOD_COLORS: Record<PaymentMethod, string> = {
 
 /**
  * Platform-wide transactions & financial ledger (Admin).
- * Redesigned with High-End Double-Bezel Bento Architecture & full i18n support.
+ * Redesigned with High-End Bento Architecture & full i18n support.
  */
 export function Transactions() {
   const { t } = useTranslation('admin');
@@ -181,13 +181,13 @@ export function Transactions() {
         <RefundQueueTab />
       ) : (
         <>
-          {/* 3. High-End Double-Bezel Bento Metrics Showcase */}
+          {/* 3. High-End Bento Metrics Showcase */}
           {s ? (
             <div className="mb-5 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
                 {/* Metric 1: Gross Platform Revenue */}
-                <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-brand/30">
-                  <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+                  <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
                     <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -211,8 +211,8 @@ export function Transactions() {
                 </div>
 
                 {/* Metric 2: Total Refunded */}
-                <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-bad/30">
-                  <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+                  <div className="rounded-[20px] border border-line group-hover:border-bad/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
                     <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -237,8 +237,8 @@ export function Transactions() {
                 </div>
 
                 {/* Metric 3: Net Revenue */}
-                <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-good/30">
-                  <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+                  <div className="rounded-[20px] border border-line group-hover:border-good/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
                     <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -263,8 +263,8 @@ export function Transactions() {
                 </div>
 
                 {/* Metric 4: Average Ticket Value */}
-                <div className="group relative rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs transition-all duration-300 hover:shadow-md hover:border-brand/30">
-                  <div className="rounded-[calc(20px-4px)] bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
+                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
+                  <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
                     <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -289,9 +289,9 @@ export function Transactions() {
                 </div>
               </div>
 
-              {/* Payment Gateway Breakdown Strip (Double-Bezel Card) */}
-              <div className="rounded-[20px] p-1 bg-surface-2/80 border border-line-2 shadow-2xs">
-                <div className="rounded-[calc(20px-4px)] bg-surface p-4 sm:p-5">
+              {/* Payment Gateway Breakdown Strip (Single-border Card) */}
+              <div className="rounded-[20px] bg-surface-2/80 shadow-2xs">
+                <div className="rounded-[20px] border border-line bg-surface p-4 sm:p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3.5">
                     <div>
                       <h4 className="text-[13.5px] font-bold text-ink">
@@ -328,7 +328,7 @@ export function Transactions() {
                       return (
                         <div
                           key={m.method}
-                          className="flex items-center justify-between p-3 rounded-xl border border-hairline bg-surface-2/40 hover:bg-surface-2 transition duration-150"
+                          className="flex items-center justify-between p-3 rounded-xl bg-surface-2/40 hover:bg-surface-2 transition duration-150"
                         >
                           <div className="flex items-center gap-2.5">
                             <span
@@ -392,7 +392,7 @@ export function Transactions() {
           </div>
 
           {/* 5. Refined Table Container */}
-          <Card className="overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-xs">
+          <Card className="overflow-hidden rounded-2xl shadow-xs">
             {listQuery.isLoading || !rawData ? (
               <div className="p-4 space-y-2">
                 {Array.from({ length: 6 }).map((_, i) => (

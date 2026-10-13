@@ -13,7 +13,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
   const { t } = useTranslation('tickets');
 
   return (
-    <Card className="rounded-2xl p-4 shadow-sm border border-line bg-surface">
+    <Card className="rounded-2xl p-4 shadow-sm">
       <div className="mb-2 flex items-center gap-1.5 text-[13px] font-bold text-ink">
         <IconCheckCircle size={15} className="text-good-deep" />
         <span>{t('detail.refund.title', 'Chính sách bồi hoàn cọc')}</span>
@@ -42,7 +42,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 text-[11.5px] leading-relaxed text-muted">
+        <div className="rounded-xl bg-surface-2/60 p-3 text-[11.5px] leading-relaxed text-muted">
           {t(
             'detail.refund.policyNotice',
             'Biên bản kỹ thuật ghi nhận sự cố không tự động chuyển tiền. Nghĩa vụ hoàn tiền 100% được xác lập khi Chủ trạm nhận trách nhiệm (BKG-056) hoặc Admin ra phán quyết chính sách tranh chấp (BKG-057).'

@@ -44,7 +44,7 @@ import { ApiErrorState } from '../../shared/components/ApiErrorState';
 type FilterKey = 'all' | 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'REJECTED';
 
 const PAGE_SIZE = 8;
-const GRID_COLS = '120px 1.8fr 1.3fr 100px 125px 115px 95px 135px';
+const GRID_COLS = '120px 1.8fr 1.3fr 100px 125px 115px 95px 142px';
 
 const STATUS_META: Record<
   string,
@@ -269,7 +269,7 @@ export function Stations() {
             </div>
 
             {/* Stations Data Table */}
-            <Card className="overflow-hidden border-line-2 bg-surface">
+            <Card className="overflow-hidden bg-surface">
               <div className="overflow-x-auto">
                 <div className="min-w-[980px]">
                   {/* Table Header */}
@@ -519,7 +519,7 @@ function StationRow({
             </span>
           </>
         ) : (
-          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-faint border border-line-2 w-fit">
+          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-faint border border-line w-fit">
             {t('provisioning.filters.needsSetup', 'Chưa cấp')}
           </span>
         )}
@@ -544,7 +544,7 @@ function StationRow({
           size="sm"
           variant="secondary"
           onClick={onProvision}
-          className="h-[28px] px-2 text-[11.5px] flex items-center gap-1 hover:border-brand"
+          className="h-[28px] px-2.5 text-[11.5px] flex items-center gap-1 hover:border-brand whitespace-nowrap shrink-0"
         >
           <IconBolt size={12} className="text-brand" />
           <span>{t('stations.actions.provisioningBtn', 'Cấp trụ')}</span>

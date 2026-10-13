@@ -206,7 +206,7 @@ export function OwnerAdmitFailureModal({
         </div>
 
         {/* Booking Summary */}
-        <div className="rounded-xl border border-line bg-surface p-3.5 text-[12px] space-y-2">
+        <div className="rounded-xl bg-surface-2 p-3.5 text-[12px] space-y-2">
           <div className="flex justify-between">
             <span className="text-muted">{t('bookings.ownerAdmitModal.connectorLabel', 'Cổng sạc:')}</span>
             <span className="font-semibold text-ink">

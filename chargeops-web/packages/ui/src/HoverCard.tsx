@@ -43,7 +43,7 @@ export function HoverCard({ trigger, children, openDelay = 200, closeDelay = 150
         <div
           onMouseEnter={show}
           onMouseLeave={hide}
-          className={`absolute top-full z-45 mt-2 w-64 rounded-[11px] border border-line-2 bg-surface p-3.5 text-left shadow-[0_10px_30px_rgba(16,17,26,.12)] ${
+          className={`absolute top-full z-45 mt-2 w-64 rounded-[11px] border border-line bg-surface p-3.5 text-left shadow-[0_10px_30px_rgba(16,17,26,.12)] ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
           style={{ animation: 'popIn .12s ease' }}

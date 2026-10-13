@@ -4,6 +4,8 @@
  * Implemented without Intl so it works under Hermes without locale data.
  */
 
+import i18n from '@/i18n';
+
 /** Group a non-negative integer with '.' thousands separators. */
 function groupThousands(value: number): string {
   return Math.round(value)
@@ -137,16 +139,44 @@ export function formatCountdown(ms: number): string {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
-/** Format ISO string to human relative time string e.g. "5 phút trước", "2 giờ trước", "1 ngày trước". */
-export function formatRelativeTime(iso: string, t?: any): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
+/**
+ * Format ISO string to human relative time string e.g. "Vừa xong", "5 phút trước", "2 giờ trước", "1 ngày trước".
+ * Supports i18n via passed translation function `t` or falls back to global `i18n.t`.
+ */
+export function formatRelativeTime(
+  iso: any,
+  t?: (key: string, options?: any) => string,
+): string {
+  const d = parseSafeDate(iso);
+  if (!d) return '';
+  const diffMs = Math.max(0, Date.now() - d.getTime());
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return 'Vừa xong';
-  if (diffMin < 60) return `${diffMin} phút trước`;
+
+  const translate = t || i18n.t.bind(i18n);
+
+  if (diffMin < 1) {
+    return translate('notifications.time.justNow', {
+      defaultValue: translate('common.justNow', 'Vừa xong'),
+    });
+  }
+  if (diffMin < 60) {
+    return translate('notifications.time.minutesAgo', {
+      count: diffMin,
+      defaultValue: `${diffMin} phút trước`,
+    });
+  }
   const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours} giờ trước`;
+  if (diffHours < 24) {
+    return translate('notifications.time.hoursAgo', {
+      count: diffHours,
+      defaultValue: `${diffHours} giờ trước`,
+    });
+  }
   const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} ngày trước`;
+  return translate('notifications.time.daysAgo', {
+    count: diffDays,
+    defaultValue: `${diffDays} ngày trước`,
+  });
 }
 
 /**

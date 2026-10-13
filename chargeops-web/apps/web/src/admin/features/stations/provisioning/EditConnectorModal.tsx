@@ -67,7 +67,7 @@ export function EditConnectorModal({
           </p>
         </div>
 
-        <div className="rounded-[8px] border border-brand/30 bg-brand-soft/20 p-3 text-[11.5px] leading-relaxed text-brand-strong">
+        <div className="rounded-[8px] bg-brand-soft/20 p-3 text-[11.5px] leading-relaxed text-brand-strong">
           <Trans
             t={t}
             i18nKey="provisioning.workspace.connectorForm.editNotice"

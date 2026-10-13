@@ -197,7 +197,7 @@ export function NotificationsShowcase() {
       <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {/* Top Showcase Navigation Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line-2 pb-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-5">
         <div>
           <span className="rounded-full bg-brand/10 border border-brand/20 px-3 py-1 font-mono text-[10.5px] font-extrabold text-brand uppercase tracking-wider">
             UI/UX Showcase & Live Design
@@ -211,7 +211,7 @@ export function NotificationsShowcase() {
         </div>
 
         {/* View Toggle Mode */}
-        <div className="flex items-center gap-2 rounded-xl border border-line-2 bg-surface p-1 shadow-2xs">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-1 shadow-2xs">
           <button
             type="button"
             onClick={() => setDemoView('center')}
@@ -249,7 +249,7 @@ export function NotificationsShowcase() {
       {/* DEMO VIEW 2: POPOVER DROPDOWN INTERACTIVE PREVIEW */}
       {demoView === 'popover' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-line-2 bg-surface p-6 shadow-sm max-w-xl mx-auto text-center">
+          <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm max-w-xl mx-auto text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 text-brand">
               <IconBell size={24} />
             </div>
@@ -258,7 +258,7 @@ export function NotificationsShowcase() {
               Bấm vào chiếc chuông dưới đây để mở xem popover thông báo viền kép với bộ lọc tab và tìm kiếm.
             </p>
 
-            <div className="mt-6 flex items-center justify-center gap-4 py-4 bg-surface-2 rounded-xl border border-line/50">
+            <div className="mt-6 flex items-center justify-center gap-4 py-4 bg-surface-2 rounded-xl">
               <span className="text-[12.5px] font-extrabold text-ink">Thanh Header mẫu:</span>
               <NotificationBell
                 items={items}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ import {
   IconAlertCircle,
   IconCheckCircle,
   IconClock,
+  IconInfo,
   IconLock,
   IconRefreshCw,
   IconUsers,
@@ -25,6 +26,7 @@ import {
   SearchInput,
   Select,
   Skeleton,
+  StatusPill,
   type FilterTab,
 } from '@chargeops/ui';
 import { TicketCards, TicketTable } from './TicketList';
@@ -60,6 +62,7 @@ export function TicketsPage({
   const [queueScope, setQueueScope] = useState<QueueScope>('all');
   const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(0);
+  const [showStatusGuide, setShowStatusGuide] = useState(false);
 
   useEffect(() => {
     const esc = searchParams.get('escalated');
@@ -239,6 +242,7 @@ export function TicketsPage({
           }}
           disabled={summaryQuery.isFetching || listQuery.isFetching}
           className="flex items-center gap-1.5 h-[34px]"
+          title={t('live.refreshBtn', 'Làm mới')}
         >
           <IconRefreshCw
             size={13}
@@ -251,7 +255,7 @@ export function TicketsPage({
       {/* BKG-052 4-Box Asymmetric Bento Metric Header (Clean Single-Bezel) */}
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Box 1: OPEN (Unassigned / Pending Claim) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
@@ -273,7 +277,7 @@ export function TicketsPage({
         </Card>
 
         {/* Box 2: IN_PROGRESS (Active SLA) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
@@ -295,7 +299,7 @@ export function TicketsPage({
         </Card>
 
         {/* Box 3: RESOLVED (10-Day Auto-Close Watch) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
@@ -317,7 +321,7 @@ export function TicketsPage({
         </Card>
 
         {/* Box 4: CLOSED (Terminal Completed) */}
-        <Card className="rounded-2xl border border-line bg-surface p-4 shadow-2xs hover:border-line-2 transition-all flex flex-col justify-between">
+        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
@@ -335,6 +339,48 @@ export function TicketsPage({
             {t('kpi.completedHelp', 'Đã hoàn thành và đóng')}
           </div>
         </Card>
+      </div>
+
+      {/* Incident Status Explanations Accordion */}
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setShowStatusGuide((prev) => !prev)}
+          className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-muted hover:text-ink transition-colors"
+        >
+          <IconInfo size={14} className="text-brand" />
+          <span>{t('statusExplains.title', 'Ý nghĩa các trạng thái sự cố & Quy trình xử lý')}</span>
+          <span className="text-[10px] text-faint">({showStatusGuide ? '▲' : '▼'})</span>
+        </button>
+
+        {showStatusGuide && (
+          <Card className="mt-2 p-3.5 bg-surface-2/60 border border-line">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-[11.5px]">
+              <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">
+                <StatusPill tone="warn" label={t('statusExplains.openTitle', 'Chờ tiếp nhận (Open)')} className="shrink-0" />
+                <span className="text-muted leading-relaxed">{t('statusExplains.openDesc')}</span>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">
+                <StatusPill tone="brand" label={t('statusExplains.inProgressTitle', 'Đang xử lý (In Progress)')} className="shrink-0" />
+                <span className="text-muted leading-relaxed">{t('statusExplains.inProgressDesc')}</span>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">
+                <StatusPill tone="good" label={t('statusExplains.resolvedTitle', 'Đã giải quyết (Resolved)')} className="shrink-0" />
+                <span className="text-muted leading-relaxed">{t('statusExplains.resolvedDesc')}</span>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">
+                <StatusPill tone="neutral" label={t('statusExplains.closedTitle', 'Đã đóng (Closed)')} className="shrink-0" />
+                <span className="text-muted leading-relaxed">{t('statusExplains.closedDesc')}</span>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline md:col-span-2 lg:col-span-2">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded bg-brand-soft text-brand px-1.5 py-0.5 text-[10px] font-bold border border-brand-line">
+                  ⚡ {t('statusExplains.escalatedTitle', 'Chuyển cấp Admin (Escalated)')}
+                </span>
+                <span className="text-muted leading-relaxed">{t('statusExplains.escalatedDesc')}</span>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Admin Workstream Separation (Platform Issues vs Station Dispute Escalations) */}

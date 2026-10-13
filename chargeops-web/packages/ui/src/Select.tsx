@@ -99,11 +99,11 @@ export function Select({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-full z-45 mt-1.5 max-h-72 w-full min-w-full overflow-hidden rounded-[11px] border border-line-2 bg-surface shadow-[0_10px_30px_rgba(16,17,26,.12)]"
+          className="absolute left-0 top-full z-45 mt-1.5 max-h-72 w-full min-w-full overflow-hidden rounded-[11px] border border-line bg-surface shadow-[0_10px_30px_rgba(16,17,26,.12)]"
           style={{ animation: 'popIn .12s ease' }}
         >
           {searchable && (
-            <div className="border-b border-line-2 p-2">
+            <div className="border-b border-line p-2">
               <div className="flex items-center gap-1.5 rounded-[7px] border border-line bg-canvas px-2.5 py-1.5 text-[12px]">
                 <IconSearch size={13} strokeWidth={2.2} className="shrink-0 text-faint" />
                 <input

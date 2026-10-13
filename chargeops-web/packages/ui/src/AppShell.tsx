@@ -118,7 +118,7 @@ function StationSelector({
       {open && stations.length > 0 && (
         <div
           role="listbox"
-          className="absolute left-0 top-full z-50 mt-1.5 min-w-[260px] max-w-[340px] overflow-y-auto rounded-[11px] border border-line-2 bg-surface py-1.5 shadow-[0_10px_30px_rgba(16,17,26,.12)]"
+          className="absolute left-0 top-full z-50 mt-1.5 min-w-[260px] max-w-[340px] overflow-y-auto rounded-[11px] border border-line bg-surface py-1.5 shadow-[0_10px_30px_rgba(16,17,26,.12)]"
         >
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
             Trạm sạc của bạn
@@ -220,7 +220,7 @@ export function AppShell({
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ animation: 'fadeIn .25s ease' }}>
       {/* ===== TOP BAR ===== */}
-      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line-2 bg-surface px-5 md:px-7">
+      <div className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-line bg-surface px-5 md:px-7">
         <div className="flex min-w-0 items-center gap-[13px]">
           <button
             onClick={() => setDrawerOpen((v) => !v)}
@@ -285,7 +285,7 @@ export function AppShell({
       <div className="flex flex-1 overflow-hidden">
         {/* ===== DESKTOP SIDEBAR ===== */}
         <div
-          className="hidden shrink-0 flex-col border-r border-line-2 bg-surface-2 px-2.5 py-3 transition-[width] duration-150 md:flex"
+          className="hidden shrink-0 flex-col border-r border-line bg-surface-2 px-2.5 py-3 transition-[width] duration-150 md:flex"
           style={{ width: collapsed ? 62 : 228 }}
         >
           {navList(false)}
@@ -309,7 +309,7 @@ export function AppShell({
               style={{ animation: 'fadeIn .15s ease' }}
             />
             <div
-              className="fixed bottom-0 left-0 top-14 z-31 flex w-[264px] flex-col border-r border-line-2 bg-surface px-2.5 py-3 md:hidden"
+              className="fixed bottom-0 left-0 top-14 z-31 flex w-[264px] flex-col border-r border-line bg-surface px-2.5 py-3 md:hidden"
               style={{ animation: 'slideIn .2s ease' }}
             >
               {navList(true)}

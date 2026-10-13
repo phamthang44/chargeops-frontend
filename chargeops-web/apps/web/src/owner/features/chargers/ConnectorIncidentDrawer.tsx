@@ -234,7 +234,7 @@ export function ConnectorIncidentDrawer({
         ) : (
           <div className="flex flex-col gap-5 py-1">
             {/* Overview Card */}
-            <Card className="rounded-xl border border-line-2 bg-surface p-4 space-y-3">
+            <Card className="rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between border-b border-hairline pb-2.5">
                 <span className="text-[12px] font-semibold text-muted">
                   {t('incidents.drawer.fullIdLabel', 'Mã định danh đầy đủ:')}
@@ -328,7 +328,7 @@ export function ConnectorIncidentDrawer({
               </div>
 
               {incident.affectedBookings.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-line-2 bg-surface-2 p-4 text-center text-[12px] text-muted">
+                <div className="rounded-xl border border-dashed border-line bg-surface-2 p-4 text-center text-[12px] text-muted">
                   {t('incidents.drawer.noAffectedBookings', 'Không có lượt đặt chỗ nào bị ảnh hưởng tại thời điểm xảy ra sự cố.')}
                 </div>
               ) : (
@@ -345,7 +345,7 @@ export function ConnectorIncidentDrawer({
                             ? 'border-bad/40 bg-bad-soft/40 shadow-xs'
                             : isResolved
                               ? 'border-good/30 bg-surface'
-                              : 'border-line-2 bg-surface'
+                              : 'border-line bg-surface'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -549,7 +549,7 @@ export function ConnectorIncidentDrawer({
               </div>
             </div>
 
-            <div className="rounded-xl border border-line-2 bg-surface-2 p-3 text-[12px] text-body leading-relaxed space-y-1">
+            <div className="rounded-xl bg-surface-2 p-3 text-[12px] text-body leading-relaxed space-y-1">
               <p>
                 {t('incidents.drawer.recoverModal.info1', 'Lệnh phục hồi sẽ chuyển sự cố sang RECOVERED.')}
               </p>

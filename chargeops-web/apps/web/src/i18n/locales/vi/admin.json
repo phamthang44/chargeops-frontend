@@ -363,6 +363,10 @@
   },
   "dashboard": {
     "error": "Không thể tải dữ liệu tổng quan",
+    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
+    "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu.",
+    "refresh": "Làm mới",
+    "refreshing": "Đang cập nhật...",
     "usersOverview": {
       "title": "Người dùng nền tảng"
     },

@@ -89,6 +89,8 @@
       "eyebrow": "Bảng điều khiển",
       "title": "Không thể tải bảng điều khiển"
     },
+    "refresh": "Làm mới",
+    "refreshing": "Đang cập nhật...",
     "kpi": {
       "bookingsToday": "Lịch sạc hôm nay",
       "bookingsTodaySub": "Tổng số lượt đặt chỗ trong ngày",

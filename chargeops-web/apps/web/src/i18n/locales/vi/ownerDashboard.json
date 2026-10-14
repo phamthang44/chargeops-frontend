@@ -20,9 +20,11 @@
     "chargersOffline": "{{count}} trụ ngoại tuyến/bảo trì",
     "allOnline": "Tất cả trụ đang hoạt động",
     "connectorsAvailable": "Cổng khả dụng",
+    "connectorsDelta": "{{charging}} đang sạc · {{offline}} ngoại tuyến",
     "sessionsToday": "Phiên sạc hôm nay",
     "avgUtilization": "Hiệu suất hôm nay",
-    "avgUtilizationSub": "Công suất trung bình trong ngày"
+    "avgUtilizationSub": "Công suất trung bình trong ngày",
+    "utilizationDelta": "Hiệu suất: {{pct}}%"
   },
   "panel": {
     "actionItems": "Việc cần xử lý",
@@ -33,5 +35,16 @@
     "offlineConnectors": "Cổng sạc ngoại tuyến",
     "openTickets": "Yêu cầu hỗ trợ đang mở",
     "noActionItems": "Không có việc tồn đọng"
+  },
+  "actions": {
+    "refresh": "Làm mới",
+    "refreshing": "Đang cập nhật..."
+  },
+  "hardwareDistribution": {
+    "title": "Tình trạng cổng sạc hạ tầng ({{count}} cổng)",
+    "available": "Sẵn sàng",
+    "charging": "Đang sạc",
+    "offline": "Ngoại tuyến",
+    "maintenance": "Bảo trì"
   }
 }

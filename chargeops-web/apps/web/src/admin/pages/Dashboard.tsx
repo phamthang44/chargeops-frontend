@@ -2,7 +2,15 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useApi, type AdminOperationsSummary } from '@chargeops/api';
-import { MetricCard, PageHeader, SidePanel, Skeleton, type SidePanelRow } from '@chargeops/ui';
+import {
+  Button,
+  IconRefreshCw,
+  MetricCard,
+  PageHeader,
+  SidePanel,
+  Skeleton,
+  type SidePanelRow,
+} from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { ResourceRetryButton, ResourceStateCard } from '../../shared/components/ResourceStateCard';
 
@@ -90,7 +98,31 @@ export function Dashboard() {
 
   return (
     <>
-      <PageHeader title={t('console.nav.dashboard.title')} subtitle={t('console.nav.dashboard.subtitle')} />
+      <PageHeader
+        title={t('console.nav.dashboard.title')}
+        subtitle={t('console.nav.dashboard.subtitle')}
+        action={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              refetch();
+              pendingApprovalsQ.refetch();
+              platformTicketsQ.refetch();
+              escalatedCasesQ.refetch();
+              userSummaryQ.refetch();
+            }}
+            disabled={isFetching}
+            icon={<IconRefreshCw size={13} className={isFetching ? 'animate-spin' : ''} />}
+          >
+            <span>
+              {isFetching
+                ? t('dashboard.refreshing', { defaultValue: 'Đang cập nhật...' })
+                : t('dashboard.refresh', { defaultValue: 'Làm mới' })}
+            </span>
+          </Button>
+        }
+      />
       {error ? (
         <ApiErrorState
           error={error}

@@ -19,13 +19,14 @@ COPY packages ./packages
 
 # Public environment variables for build
 ARG VITE_KEYCLOAK_ENABLED=true
-ARG VITE_KEYCLOAK_URL=https://thang.tail704409.ts.net
+ARG VITE_KEYCLOAK_URL=https://auth.chargeops.online
 ARG VITE_KEYCLOAK_REALM=chargeops
 ARG VITE_KEYCLOAK_CLIENT_ID=chargeops-web
 ARG VITE_USE_MOCKS=false
-ARG VITE_API_URL=https://thang.tail704409.ts.net/api/v1
-ARG VITE_DRIVER_APP_URL=http://localhost:8082
-ARG VITE_GRAFANA_URL=/grafana/
+ARG VITE_API_URL=https://api.chargeops.online/api/v1
+ARG VITE_DRIVER_APP_URL_DEV=https://driver.chargeops.online
+ARG VITE_DRIVER_APP_URL=https://driver.chargeops.online
+ARG VITE_GRAFANA_URL=https://grafana.chargeops.online/
 
 ENV VITE_KEYCLOAK_ENABLED=$VITE_KEYCLOAK_ENABLED \
     VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL \
@@ -33,6 +34,7 @@ ENV VITE_KEYCLOAK_ENABLED=$VITE_KEYCLOAK_ENABLED \
     VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID \
     VITE_USE_MOCKS=$VITE_USE_MOCKS \
     VITE_API_URL=$VITE_API_URL \
+    VITE_DRIVER_APP_URL_DEV=$VITE_DRIVER_APP_URL_DEV \
     VITE_DRIVER_APP_URL=$VITE_DRIVER_APP_URL \
     VITE_GRAFANA_URL=$VITE_GRAFANA_URL
 

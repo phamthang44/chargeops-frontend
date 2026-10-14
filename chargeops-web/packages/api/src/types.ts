@@ -308,6 +308,8 @@ export interface OwnerBookingFilter {
   from?: string; // ISO Instant
   to?: string;   // ISO Instant
   status?: ApiBookingStatus;
+  sort?: string;
+  windowMode?: 'OVERLAP' | 'START_IN_WINDOW';
 }
 
 export interface OwnerBookingListParams extends OwnerBookingFilter {

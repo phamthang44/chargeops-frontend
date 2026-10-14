@@ -25,7 +25,7 @@ export default async function StationsPage() {
   return (
     <>
       <SiteHeader />
-      <main>
+      <main className="pt-20 sm:pt-24">
         <section className="bg-soft-radial">
           <div className="container-x py-14 sm:py-16">
             <nav aria-label="Breadcrumb" className="text-sm text-ink-muted">
@@ -73,7 +73,7 @@ function JsonLd() {
     itemListElement: STATIONS.map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://chargeops.vn/tram-sac/${s.slug}`,
+      url: `https://chargeops.online/tram-sac/${s.slug}`,
       name: s.name,
     })),
   };

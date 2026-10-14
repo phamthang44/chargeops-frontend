@@ -64,45 +64,92 @@ body {
 }
 
 @layer components {
-  /* Liquid-glass surface — carried over from the app's iOS-26 aesthetic. */
+  /* Liquid-glass surface with specular edge refraction. */
   .glass {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: saturate(180%) blur(18px);
-    -webkit-backdrop-filter: saturate(180%) blur(18px);
-    border: 1px solid rgba(229, 231, 235, 0.7);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   }
 
   .glass-dark {
-    background: rgba(17, 24, 39, 0.55);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(9, 13, 12, 0.75);
+    backdrop-filter: saturate(160%) blur(20px);
+    -webkit-backdrop-filter: saturate(160%) blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Floating Fluid Island Nav pill */
+  .island-nav {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: saturate(190%) blur(24px);
+    -webkit-backdrop-filter: saturate(190%) blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  }
+
+  /* Double-Bezel (Doppelrand / Nested Architecture) */
+  .double-bezel {
+    @apply p-1.5 sm:p-2 rounded-bezel bg-black/[0.025] ring-1 ring-black/[0.04] transition-all duration-500 ease-haptic;
+  }
+  .double-bezel-inner {
+    @apply rounded-bezel-inner bg-white border border-black/[0.04] p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_4px_20px_-8px_rgba(0,0,0,0.03)] transition-all duration-500 ease-haptic;
+  }
+
+  .double-bezel-dark {
+    @apply p-1.5 sm:p-2 rounded-bezel bg-white/[0.04] ring-1 ring-white/10 transition-all duration-500 ease-haptic;
+  }
+  .double-bezel-dark-inner {
+    @apply rounded-bezel-inner bg-obsidian border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all duration-500 ease-haptic;
   }
 
   .container-x {
     @apply mx-auto w-full max-w-6xl px-5 sm:px-6;
   }
 
+  /* Nested Island Primary CTA Button */
+  .btn-island-primary {
+    @apply group inline-flex items-center justify-center gap-3 rounded-full bg-primary pl-6 pr-2 py-2 text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic hover:bg-primary-dark active:scale-[0.98];
+  }
+  .btn-island-primary .btn-icon-bubble {
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-haptic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105;
+  }
+
+  /* Nested Island Secondary CTA Button */
+  .btn-island-secondary {
+    @apply group inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white/90 pl-6 pr-2 py-2 text-sm font-semibold text-ink-strong shadow-card backdrop-blur transition-all duration-300 ease-haptic hover:border-primary/40 hover:bg-surface-alt active:scale-[0.98];
+  }
+  .btn-island-secondary .btn-icon-bubble {
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-alt text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-haptic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3
-      text-sm font-semibold text-white shadow-glass transition
-      hover:-translate-y-0.5 hover:bg-primary-dark active:translate-y-0 active:scale-[0.99];
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3
+      text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic
+      hover:bg-primary-dark active:scale-[0.98];
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30
-      bg-white px-5 py-3 text-sm font-semibold text-primary-dark transition
-      hover:border-primary/60 hover:bg-primary-soft/40;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line
+      bg-white px-6 py-3 text-sm font-semibold text-ink-strong transition-all duration-300 ease-haptic
+      hover:border-primary/50 hover:bg-surface-alt active:scale-[0.98];
   }
 
   .pill {
-    @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold;
   }
 
-  /* Emphasis text with the brand gradient. */
+  /* High-end Eyebrow tag */
+  .eyebrow-tag {
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary-soft/60 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-dark shadow-sm backdrop-blur;
+  }
+
+  /* Emphasis text with the cyber emerald brand gradient. */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(120deg, #10b981 0%, #059669 60%, #34d399 100%);
+    background-image: linear-gradient(135deg, #059669 0%, #10b981 50%, #00e599 100%);
   }
 }
 

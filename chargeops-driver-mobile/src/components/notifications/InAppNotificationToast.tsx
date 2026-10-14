@@ -177,8 +177,7 @@ export function InAppNotificationToast({ navigationRef }: InAppNotificationToast
       ]}
       pointerEvents="box-none"
     >
-      <Pressable
-        onPress={handlePress}
+      <View
         style={[
           styles.toastCard,
           {
@@ -187,41 +186,46 @@ export function InAppNotificationToast({ navigationRef }: InAppNotificationToast
             shadowColor: '#000',
           },
         ]}
-        accessibilityRole="button"
-        accessibilityLabel={`Thông báo: ${title}`}
       >
-        {/* Category Accent Icon */}
-        <View style={[styles.iconWrapper, { backgroundColor: `${cfg.color}1E` }]}>
-          <Ionicons name={cfg.icon} size={20} color={cfg.color} />
-        </View>
+        <Pressable
+          onPress={handlePress}
+          style={styles.contentPressable}
+          accessibilityRole="button"
+          accessibilityLabel={`Thông báo: ${title}`}
+        >
+          {/* Category Accent Icon */}
+          <View style={[styles.iconWrapper, { backgroundColor: `${cfg.color}1E` }]}>
+            <Ionicons name={cfg.icon} size={20} color={cfg.color} />
+          </View>
 
-        {/* Text Content */}
-        <View style={styles.textWrapper}>
-          <View style={styles.headerRow}>
-            <View style={[styles.badgePill, { backgroundColor: `${cfg.color}24` }]}>
-              <Text style={[styles.badgeText, { color: cfg.color }]}>
-                {cfg.badge}
+          {/* Text Content */}
+          <View style={styles.textWrapper}>
+            <View style={styles.headerRow}>
+              <View style={[styles.badgePill, { backgroundColor: `${cfg.color}24` }]}>
+                <Text style={[styles.badgeText, { color: cfg.color }]}>
+                  {cfg.badge}
+                </Text>
+              </View>
+              <Text style={[styles.brandText, { color: themeColors.textMuted }]}>
+                {t('notifications.inAppToastBrand', 'ChargeOps · Realtime')}
               </Text>
             </View>
-            <Text style={[styles.brandText, { color: themeColors.textMuted }]}>
-              {t('notifications.inAppToastBrand', 'ChargeOps · Realtime')}
+            <Text
+              style={[styles.title, { color: themeColors.textStrong }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </Text>
+            <Text
+              style={[styles.body, { color: themeColors.textMuted }]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {body}
             </Text>
           </View>
-          <Text
-            style={[styles.title, { color: themeColors.textStrong }]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {title}
-          </Text>
-          <Text
-            style={[styles.body, { color: themeColors.textMuted }]}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {body}
-          </Text>
-        </View>
+        </Pressable>
 
         {/* Dismiss Button */}
         <Pressable
@@ -233,7 +237,7 @@ export function InAppNotificationToast({ navigationRef }: InAppNotificationToast
         >
           <Ionicons name="close" size={16} color={themeColors.textMuted} />
         </Pressable>
-      </Pressable>
+      </View>
     </Animated.View>
   );
 }
@@ -257,6 +261,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 16,
     elevation: 10,
+  },
+  contentPressable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   iconWrapper: {
     width: 38,

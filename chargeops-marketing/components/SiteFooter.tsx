@@ -3,13 +3,12 @@ import { BoltIcon } from "./Icons";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-line bg-surface-alt">
-      <div className="container-x grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-black/[0.06] bg-[#FAFBFB]">
+      <div className="container-x grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <Logo />
-          <p className="mt-4 max-w-xs text-sm text-ink-muted">
-            Nền tảng đặt chỗ &amp; quản lý trạm sạc xe điện cho tài xế và chủ
-            trạm tại Việt Nam.
+          <p className="mt-4 max-w-xs text-xs sm:text-sm text-ink-muted leading-relaxed">
+            Nền tảng hạ tầng đặt chỗ &amp; quản trị trạm sạc xe điện thông minh cho tài xế và đối tác chủ trạm tại Việt Nam.
           </p>
         </div>
 
@@ -18,7 +17,7 @@ export function SiteFooter() {
           links={[
             { label: "Cách hoạt động", href: "/#cach-hoat-dong" },
             { label: "Tính năng", href: "/#tinh-nang" },
-            { label: "Trạm sạc", href: "/tram-sac" },
+            { label: "Mạng lưới trạm sạc", href: "/tram-sac" },
             { label: "Tải ứng dụng", href: "/#tai-ung-dung" },
           ]}
         />
@@ -26,11 +25,12 @@ export function SiteFooter() {
           title="Đối tác"
           links={[
             { label: "Dành cho chủ trạm", href: "/#doi-tac" },
-            { label: "Đăng ký trạm", href: "/#doi-tac" },
+            { label: "Bảng giá Subscription", href: "/#bang-gia-license" },
+            { label: "Đăng ký kết nối trạm", href: "mailto:phamthang3564@gmail.com" },
           ]}
         />
         <FooterCol
-          title="Liên hệ"
+          title="Liên hệ & Pháp lý"
           links={[
             { label: "phamthang3564@gmail.com", href: "mailto:phamthang3564@gmail.com" },
             { label: "Điều khoản dịch vụ", href: "/dieu-khoan" },
@@ -39,10 +39,12 @@ export function SiteFooter() {
         />
       </div>
 
-      <div className="border-t border-line">
-        <div className="container-x flex flex-col items-center justify-between gap-2 py-5 text-xs text-ink-muted sm:flex-row">
-          <p>© {new Date().getFullYear()} ChargeOps. Đồ án tốt nghiệp.</p>
-          <p className="inline-flex items-center gap-1">Made in Vietnam <BoltIcon className="h-3.5 w-3.5" /></p>
+      <div className="border-t border-black/[0.04]">
+        <div className="container-x flex flex-col items-center justify-between gap-3 py-6 text-xs text-ink-muted sm:flex-row">
+          <p>© {new Date().getFullYear()} ChargeOps. Đồ án tốt nghiệp chuyên ngành Kỹ thuật Phần mềm.</p>
+          <p className="inline-flex items-center gap-1.5 font-medium text-ink-strong">
+            Made with pride in Vietnam <BoltIcon className="h-3.5 w-3.5 text-primary" />
+          </p>
         </div>
       </div>
     </footer>

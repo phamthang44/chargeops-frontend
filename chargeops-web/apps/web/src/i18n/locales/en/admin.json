@@ -363,6 +363,10 @@
   },
   "dashboard": {
     "error": "Failed to load overview data",
+    "missingTitle": "Dashboard is not connected yet",
+    "missingDescription": "Platform overview endpoint (admin/dashboard/summary) has no data yet.",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
     "usersOverview": {
       "title": "Platform Users"
     },

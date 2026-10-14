@@ -17,126 +17,144 @@ export function OwnerPricing() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
+        <div className="mt-14 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
           {/* Monthly Plan */}
-          <Reveal delay={80} className="flex flex-col justify-between rounded-card border border-line bg-white p-7 sm:p-8 shadow-card transition-all hover:border-primary/40">
-            <div>
-              <div className="flex items-center justify-between">
+          <Reveal delay={80} className="flex">
+            <div className="double-bezel w-full flex flex-col justify-between">
+              <div className="double-bezel-inner flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-ink-strong">Gói Tháng</h3>
-                  <p className="text-xs text-ink-muted mt-0.5">Hiệu lực 1 tháng lịch</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-ink-strong">Gói Tháng</h3>
+                      <p className="text-xs text-ink-muted mt-0.5">Hiệu lực 1 tháng lịch</p>
+                    </div>
+                    <span className="rounded-full bg-surface-alt border border-line px-3 py-1 text-xs font-semibold text-ink-body">
+                      Linh hoạt
+                    </span>
+                  </div>
+
+                  <div className="mt-6 flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold text-ink-strong">500.000</span>
+                    <span className="text-base font-semibold text-ink-body">đ</span>
+                    <span className="text-sm text-ink-muted">/ tháng / trạm</span>
+                  </div>
+                  <p className="mt-2 text-xs text-ink-muted leading-relaxed">
+                    Phù hợp cho trạm sạc mới thử nghiệm thị trường và tối ưu dòng tiền ngắn hạn.
+                  </p>
+
+                  <div className="mt-7 border-t border-black/5 pt-6">
+                    <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-3.5">
+                      Quyền lợi bao gồm:
+                    </p>
+                    <ul className="space-y-3 text-sm text-ink-body">
+                      {[
+                        "Không giới hạn số lượng trụ & cổng sạc",
+                        "Hiển thị trạm trên bản đồ tìm kiếm tài xế",
+                        "Tự đặt giá bán điện & khung giờ cao điểm (TOU)",
+                        "Hệ thống check-in QR & đặt chỗ thời gian thực",
+                        "Báo cáo thống kê lượt sạc & doanh thu",
+                      ].map((feat) => (
+                        <li key={feat} className="flex items-start gap-2.5">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-dark">
+                            <CheckIcon className="h-3 w-3" />
+                          </span>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <span className="rounded-full bg-surface-alt border border-line px-3 py-1 text-xs font-semibold text-ink-body">
-                  Linh hoạt
-                </span>
-              </div>
 
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-ink-strong">500.000</span>
-                <span className="text-base font-semibold text-ink-body">đ</span>
-                <span className="text-sm text-ink-muted">/ tháng / trạm</span>
+                <div className="mt-8 pt-4">
+                  <a
+                    href="mailto:phamthang3564@gmail.com?subject=Đăng ký Gói Tháng License Trạm sạc ChargeOps"
+                    className="btn-island-secondary w-full justify-between"
+                  >
+                    <span>Đăng ký Gói Tháng</span>
+                    <span className="btn-icon-bubble">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </span>
+                  </a>
+                </div>
               </div>
-              <p className="mt-2 text-xs text-ink-muted">
-                Phù hợp cho trạm sạc mới thử nghiệm thị trường và tối ưu dòng tiền ngắn hạn.
-              </p>
-
-              <div className="mt-7 border-t border-line pt-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-3">
-                  Quyền lợi bao gồm:
-                </p>
-                <ul className="space-y-2.5 text-sm text-ink-body">
-                  {[
-                    "Không giới hạn số lượng trụ & cổng sạc",
-                    "Hiển thị trạm trên bản đồ tìm kiếm tài xế",
-                    "Tự đặt giá bán điện & khung giờ cao điểm (TOU)",
-                    "Hệ thống check-in QR & đặt chỗ thời gian thực",
-                    "Báo cáo thống kê lượt sạc & doanh thu",
-                  ].map((feat) => (
-                    <li key={feat} className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-dark">
-                        <CheckIcon className="h-3 w-3" />
-                      </span>
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <a
-                href="mailto:phamthang3564@gmail.com?subject=Đăng ký Gói Tháng License Trạm sạc ChargeOps"
-                className="btn-secondary w-full text-center"
-              >
-                Đăng ký Gói Tháng
-              </a>
             </div>
           </Reveal>
 
           {/* Yearly Plan - Best Value */}
-          <Reveal delay={160} className="relative flex flex-col justify-between rounded-card border-2 border-primary bg-white p-7 sm:p-8 shadow-glass transition-all">
+          <Reveal delay={160} className="flex relative">
             {/* Discount Ribbon Badge */}
-            <div className="absolute -top-3.5 right-6 rounded-full bg-brand-gradient px-3.5 py-1 text-xs font-bold text-white shadow-md flex items-center gap-1">
+            <div className="absolute -top-3.5 right-8 z-20 rounded-full bg-brand-gradient px-4 py-1 text-xs font-bold text-white shadow-glow-emerald flex items-center gap-1.5">
               <StarIcon className="h-3.5 w-3.5 text-yellow-300" />
               <span>Tiết kiệm 1.000.000 đ (~16.7%)</span>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
+            <div className="p-2 rounded-bezel bg-gradient-to-b from-primary/30 via-primary/10 to-transparent ring-2 ring-primary/40 shadow-glow-emerald w-full flex flex-col justify-between">
+              <div className="double-bezel-inner flex-1 flex flex-col justify-between border-primary/20">
                 <div>
-                  <h3 className="text-xl font-bold text-ink-strong">Gói Năm</h3>
-                  <p className="text-xs text-primary-dark font-medium mt-0.5">Hiệu lực 1 năm lịch liên tục</p>
-                </div>
-                <span className="rounded-full bg-primary-soft text-primary-dark px-3 py-1 text-xs font-bold">
-                  Khuyên dùng
-                </span>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-ink-strong">Gói Năm</h3>
+                      <p className="text-xs text-primary-dark font-semibold mt-0.5">Hiệu lực 1 năm lịch liên tục</p>
+                    </div>
+                    <span className="rounded-full bg-primary-soft text-primary-dark px-3 py-1 text-xs font-bold">
+                      Khuyên dùng
+                    </span>
+                  </div>
 
-              <div className="mt-6 flex flex-col">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-extrabold text-primary-dark">5.000.000</span>
-                  <span className="text-base font-semibold text-primary-dark">đ</span>
-                  <span className="text-sm text-ink-muted">/ năm / trạm</span>
+                  <div className="mt-6 flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-extrabold text-primary-dark">5.000.000</span>
+                      <span className="text-base font-semibold text-primary-dark">đ</span>
+                      <span className="text-sm text-ink-muted">/ năm / trạm</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-2 text-xs">
+                      <span className="line-through text-ink-muted">6.000.000 đ</span>
+                      <span className="font-semibold text-primary-dark">Chỉ ~416.000 đ / tháng</span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-ink-muted leading-relaxed">
+                    Lựa chọn tối ưu cho chủ trạm vận hành lâu dài, duy trì trạng thái tìm kiếm liên tục cho tài xế.
+                  </p>
+
+                  <div className="mt-7 border-t border-black/5 pt-6">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary-dark mb-3.5">
+                      Toàn bộ quyền lợi Gói Tháng, cộng thêm:
+                    </p>
+                    <ul className="space-y-3 text-sm text-ink-body">
+                      {[
+                        "Tiết kiệm ngay 1.000.000 đ so với đóng từng tháng",
+                        "Ưu tiên hiển thị nổi bật trên bản đồ ChargeOps",
+                        "Hỗ trợ cấu hình kỹ thuật & onboard trạm 1-1",
+                        "Bảo đảm vận hành thông suốt 365 ngày không lo gián đoạn",
+                        "Hỗ trợ kỹ thuật ưu tiên 24/7 từ đội ngũ ChargeOps",
+                      ].map((feat) => (
+                        <li key={feat} className="flex items-start gap-2.5">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                            <CheckIcon className="h-3 w-3" />
+                          </span>
+                          <span className="font-medium text-ink-strong">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <div className="mt-1 flex items-center gap-2 text-xs">
-                  <span className="line-through text-ink-muted">6.000.000 đ</span>
-                  <span className="font-semibold text-primary-dark">Chỉ ~416.000 đ / tháng</span>
+
+                <div className="mt-8 pt-4">
+                  <a
+                    href="mailto:phamthang3564@gmail.com?subject=Đăng ký Gói Năm License Trạm sạc ChargeOps (Ưu đãi 5 triệu)"
+                    className="btn-island-primary w-full justify-between"
+                  >
+                    <span>Đăng ký Gói Năm (Ưu đãi)</span>
+                    <span className="btn-icon-bubble">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </span>
+                  </a>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-ink-muted">
-                Lựa chọn tối ưu cho chủ trạm vận hành lâu dài, duy trì trạng thái tìm kiếm liên tục cho tài xế.
-              </p>
-
-              <div className="mt-7 border-t border-line pt-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary-dark mb-3">
-                  Toàn bộ quyền lợi Gói Tháng, cộng thêm:
-                </p>
-                <ul className="space-y-2.5 text-sm text-ink-body">
-                  {[
-                    "Tiết kiệm ngay 1.000.000 đ so với đóng từng tháng",
-                    "Ưu tiên hiển thị nổi bật trên bản đồ ChargeOps",
-                    "Hỗ trợ cấu hình kỹ thuật & onboard trạm 1-1",
-                    "Bảo đảm vận hành thông suốt 365 ngày không lo gián đoạn",
-                    "Hỗ trợ kỹ thuật ưu tiên 24/7 từ đội ngũ ChargeOps",
-                  ].map((feat) => (
-                    <li key={feat} className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-                        <CheckIcon className="h-3 w-3" />
-                      </span>
-                      <span className="font-medium text-ink-strong">{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <a
-                href="mailto:phamthang3564@gmail.com?subject=Đăng ký Gói Năm License Trạm sạc ChargeOps (Ưu đãi 5 triệu)"
-                className="btn-primary w-full text-center"
-              >
-                Đăng ký Gói Năm (Ưu đãi)
-              </a>
             </div>
           </Reveal>
         </div>

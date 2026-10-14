@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatTimeVn, useApi, type OwnerOperationsSummary } from '@chargeops/api';
 import {
+  Button,
+  IconRefreshCw,
   KpiCard,
   PageHeader,
   SidePanel,
@@ -36,6 +38,21 @@ export function Dashboard() {
           date: todayFormatted,
           defaultValue: `Tổng quan vận hành toàn bộ danh mục trạm · ${todayFormatted}`,
         })}
+        action={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            icon={<IconRefreshCw size={13} className={isFetching ? 'animate-spin' : ''} />}
+          >
+            <span>
+              {isFetching
+                ? t('actions.refreshing', { defaultValue: 'Đang cập nhật...' })
+                : t('actions.refresh', { defaultValue: 'Làm mới' })}
+            </span>
+          </Button>
+        }
       />
       {error ? (
         <ApiErrorState
@@ -77,11 +94,15 @@ function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
   const navigate = useNavigate();
 
   // Upcoming confirmed bookings (max 5)
+  const nowIso = new Date().toISOString();
   const upcomingQ = useQuery({
     queryKey: ['owner', 'bookings', 'upcoming'],
     queryFn: () =>
       api.ownerBookings.list({
         status: 'confirmed' as any,
+        from: nowIso,
+        sort: 'startAt,asc',
+        windowMode: 'START_IN_WINDOW',
         pageSize: 5,
       }),
   });
@@ -209,7 +230,11 @@ function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
           <KpiCard
             label={t('kpi.connectorsAvailable', { defaultValue: 'Cổng khả dụng' })}
             value={`${hardware.availableConnectors}/${hardware.totalConnectors}`}
-            delta={`${hardware.chargingConnectors} đang sạc · ${hardware.offlineConnectors} ngoại tuyến`}
+            delta={t('kpi.connectorsDelta', {
+              charging: hardware.chargingConnectors,
+              offline: hardware.offlineConnectors,
+              defaultValue: `${hardware.chargingConnectors} đang sạc · ${hardware.offlineConnectors} ngoại tuyến`,
+            })}
             deltaClass={hardware.offlineConnectors > 0 ? 'text-bad' : 'text-good'}
           />
         </button>
@@ -222,13 +247,83 @@ function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
           <KpiCard
             label={t('kpi.sessionsToday', { defaultValue: 'Phiên sạc hôm nay' })}
             value={String(hardware.sessionsToday)}
-            delta={`${t('kpi.avgUtilization', { defaultValue: 'Hiệu suất' })}: ${Number(
-              hardware.averageUtilizationPercent ?? 0,
-            ).toFixed(1)}%`}
+            delta={t('kpi.utilizationDelta', {
+              pct: Number(hardware.averageUtilizationPercent ?? 0).toFixed(1),
+              defaultValue: `Hiệu suất: ${Number(hardware.averageUtilizationPercent ?? 0).toFixed(1)}%`,
+            })}
             deltaClass="text-brand"
           />
         </button>
       </div>
+
+      {/* Hardware Status Breakdown */}
+      {hardware.totalConnectors > 0 && (
+        <div className="mb-4 rounded-card border border-line bg-surface p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">
+              {t('hardwareDistribution.title', {
+                count: hardware.totalConnectors,
+                defaultValue: `Tình trạng cổng sạc hạ tầng (${hardware.totalConnectors} cổng)`,
+              })}
+            </span>
+            <div className="flex flex-wrap items-center gap-4 text-[12px] font-medium text-body">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-good" />
+                <span className="text-muted">{t('hardwareDistribution.available', { defaultValue: 'Sẵn sàng' })}:</span>
+                <strong className="font-semibold text-ink">{hardware.availableConnectors}</strong>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-brand" />
+                <span className="text-muted">{t('hardwareDistribution.charging', { defaultValue: 'Đang sạc' })}:</span>
+                <strong className="font-semibold text-ink">{hardware.chargingConnectors}</strong>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-bad" />
+                <span className="text-muted">{t('hardwareDistribution.offline', { defaultValue: 'Ngoại tuyến' })}:</span>
+                <strong className="font-semibold text-ink">{hardware.offlineConnectors}</strong>
+              </span>
+              {hardware.unavailableConnectors > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-warn" />
+                  <span className="text-muted">{t('hardwareDistribution.maintenance', { defaultValue: 'Bảo trì' })}:</span>
+                  <strong className="font-semibold text-ink">{hardware.unavailableConnectors}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Visual Progress Bar */}
+          <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-chip border border-line">
+            {hardware.availableConnectors > 0 && (
+              <div
+                style={{ width: `${(hardware.availableConnectors / hardware.totalConnectors) * 100}%` }}
+                className="bg-good transition-all duration-500"
+                title={`${t('hardwareDistribution.available', { defaultValue: 'Sẵn sàng' })}: ${hardware.availableConnectors}`}
+              />
+            )}
+            {hardware.chargingConnectors > 0 && (
+              <div
+                style={{ width: `${(hardware.chargingConnectors / hardware.totalConnectors) * 100}%` }}
+                className="bg-brand transition-all duration-500"
+                title={`${t('hardwareDistribution.charging', { defaultValue: 'Đang sạc' })}: ${hardware.chargingConnectors}`}
+              />
+            )}
+            {hardware.offlineConnectors > 0 && (
+              <div
+                style={{ width: `${(hardware.offlineConnectors / hardware.totalConnectors) * 100}%` }}
+                className="bg-bad transition-all duration-500"
+                title={`${t('hardwareDistribution.offline', { defaultValue: 'Ngoại tuyến' })}: ${hardware.offlineConnectors}`}
+              />
+            )}
+            {hardware.unavailableConnectors > 0 && (
+              <div
+                style={{ width: `${(hardware.unavailableConnectors / hardware.totalConnectors) * 100}%` }}
+                className="bg-warn transition-all duration-500"
+                title={`${t('hardwareDistribution.maintenance', { defaultValue: 'Bảo trì' })}: ${hardware.unavailableConnectors}`}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Action queues & upcoming side panels */}
       <div className="grid gap-[13px] lg:grid-cols-2">

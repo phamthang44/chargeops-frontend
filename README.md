@@ -9,16 +9,21 @@ ChargeOps is an end-to-end electric vehicle (EV) charging infrastructure ecosyst
 
 ## 🌐 Public Domain & Network Architecture Invariant
 
-All web clients, mobile apps, Keycloak authentication realms, and OAuth callbacks operate exclusively over the single secure Public Domain:
+Public client URLs are separated by role:
 
 ```text
-https://thang.tail704409.ts.net
+https://chargeops.online
+https://console.chargeops.online
+https://driver.chargeops.online
+https://api.chargeops.online
+https://auth.chargeops.online
 ```
 
 > [!IMPORTANT]
 > **Strict Domain Contract**:
-> - **Canonical Public Origin**: All client-facing APIs, WebSocket/STOMP channels, and Keycloak issuer endpoints MUST point to `https://thang.tail704409.ts.net`.
-> - **Internal Port 8088 Prohibition**: Port `8088` (`127.0.0.1:8088`) is strictly a local host listening port used by Nginx Gateway to receive incoming traffic forwarded from Tailscale Funnel (`443 -> 8088`). External clients, OAuth redirect URIs, and frontend configs must **NEVER** use `http://localhost:8088` or expose port 8088 directly.
+> - `chargeops.online` is the marketing site; `console.chargeops.online` is the Admin/Owner/Staff web console; `driver.chargeops.online` is Expo Web.
+> - `api.chargeops.online` serves REST and WebSocket; `auth.chargeops.online` is the Keycloak issuer and Google broker callback origin. Native builds keep `chargeops://auth/callback`.
+> - Port `8088` remains local to the Nginx gateway. Never use local service ports in public URLs or OAuth callbacks.
 
 ---
 
@@ -147,7 +152,7 @@ npm run dev
 
 - Open [http://localhost:5173](http://localhost:5173) in your browser.  
 - Switch roles dynamically in the top navigation bar between **Station Owner**, **Platform Admin**, and **Station Staff**.
-- Connects to backend API at `https://thang.tail704409.ts.net/api/v1` (or local proxy in `.env`).
+- Connects to backend API at `https://api.chargeops.online/api/v1` (or local proxy in `.env`).
 
 ---
 
@@ -160,7 +165,7 @@ npm start
 ```
 
 - Scan the generated QR code using **Expo Go (SDK 54)** on iOS or Android, or press `a` for Android Emulator / `w` for Web preview.
-- Configured with `EXPO_PUBLIC_API_URL=https://thang.tail704409.ts.net/api/v1`.
+- Configured with `EXPO_PUBLIC_API_BASE_URL=https://api.chargeops.online`; the app appends `/api/v1`.
 
 ---
 

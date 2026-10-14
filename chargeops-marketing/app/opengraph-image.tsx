@@ -53,7 +53,7 @@ export default function OpengraphImage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }}>chargeops.vn</div>
+          <div style={{ fontSize: 30, color: "rgba(255,255,255,0.9)" }}>chargeops.online</div>
           <div
             style={{
               fontSize: 26,

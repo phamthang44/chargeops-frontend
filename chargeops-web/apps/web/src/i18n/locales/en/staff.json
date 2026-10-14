@@ -89,6 +89,8 @@
       "eyebrow": "Dashboard",
       "title": "Could not load the dashboard"
     },
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
     "kpi": {
       "bookingsToday": "Bookings today",
       "bookingsTodaySub": "Total bookings for the day",

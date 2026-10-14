@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { STATIONS } from "@/components/stations";
 
-const SITE_URL = "https://chargeops.vn";
+const SITE_URL = "https://chargeops.online";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

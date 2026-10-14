@@ -106,7 +106,7 @@ VITE_DRIVER_APP_URL=http://localhost:8082
 
 ## 4. Script 1-Click Kích Hoạt Tailscale Funnel (Mỗi Khi Mở Máy)
 
-Mỗi lần khởi động lại máy tính hoặc khi cần test app trên iPhone, bạn chỉ cần mở PowerShell (hoặc chạy file `start-funnel.bat`) với các lệnh sau:
+Tài liệu này mô tả cấu hình Tailscale cũ. File launcher được giữ làm bản tham khảo tại `launchers/archive/start-funnel.bat`; cấu hình public hiện tại dùng Cloudflare Tunnel.
 
 ```powershell
 # 1. Expose Mobile Driver Web (Cổng 8082 -> https://thang.tail704409.ts.net:443/)
@@ -155,5 +155,5 @@ https://thang.tail704409.ts.net:8443 (Funnel on)
 2. [ ] Khởi động Backend Spring Boot (`mvn spring-boot:run` hoặc Run trong IDE ở port 8081).
 3. [ ] Khởi động Web Portal (`npm run dev` ở port 5173).
 4. [ ] Khởi động Mobile Driver (`npm start` ở port 8082).
-5. [ ] Chạy 3 lệnh `tailscale funnel` ở mục 4 (hoặc chạy file `start-funnel.bat`).
+5. [ ] Bản Tailscale cũ: chạy các lệnh ở mục 4 (hoặc khôi phục `launchers/archive/start-funnel.bat` về thư mục gốc). Cấu hình hiện tại dùng Cloudflare Tunnel.
 6. [ ] Mở Expo Go trên iPhone, quét mã QR và test mượt mà không cần bất kỳ thao tác cấu hình nào khác!

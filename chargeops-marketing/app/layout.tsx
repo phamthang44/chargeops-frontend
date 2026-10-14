@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const SITE_URL = "https://chargeops.vn";
+const SITE_URL = "https://chargeops.online";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -54,7 +55,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={inter.variable}>
+    <html lang="vi" className={plusJakartaSans.variable}>
       <head>
         <noscript>
           <style>{`.reveal{opacity:1 !important;transform:none !important;}`}</style>

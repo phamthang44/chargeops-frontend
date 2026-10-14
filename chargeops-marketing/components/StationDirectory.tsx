@@ -197,51 +197,58 @@ export function StationDirectory({
 
         {/* Station cards grid */}
         {!isLoading && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2">
             {filtered.map((s) => {
               const full = s.available === 0;
               return (
                 <Link
                   key={s.id}
                   href={`/tram-sac/${s.slug}`}
-                  className="group flex flex-col rounded-card border border-line bg-white p-5 shadow-card transition duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glass"
+                  className="double-bezel group block hover:-translate-y-1"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-semibold text-ink-strong group-hover:text-primary-dark line-clamp-1">
-                      {s.name}
-                    </h2>
-                    <span
-                      className={`pill shrink-0 ${
-                        full ? "bg-danger/10 text-danger font-semibold" : "bg-primary-soft text-primary-dark font-semibold"
-                      }`}
-                    >
-                      {full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-ink-muted line-clamp-1">
-                    {s.district}, {s.city}
-                  </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs text-ink-body">
-                      {s.fast ? (
-                        <>
-                          <BoltIcon className="h-3 w-3 text-primary" /> Sạc nhanh DC
-                        </>
-                      ) : (
-                        <>
-                          <ACPlugIcon className="h-3 w-3 text-ink-muted" /> Sạc thường AC
-                        </>
-                      )}
-                    </span>
-                    <span className="text-xs font-bold text-primary-dark">
-                      {s.pricePerKwh}/kWh
-                    </span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3 text-xs">
-                    <span className="text-ink-muted">{s.connectors.slice(0, 2).join(" · ")}</span>
-                    <span className="font-semibold text-primary-dark group-hover:translate-x-0.5 transition-transform">
-                      Xem chi tiết ›
-                    </span>
+                  <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <h2 className="font-bold text-ink-strong group-hover:text-primary-dark transition-colors line-clamp-1">
+                          {s.name}
+                        </h2>
+                        <span
+                          className={`pill shrink-0 text-[11px] font-bold ${
+                            full ? "bg-danger/10 text-danger" : "bg-primary-soft text-primary-dark"
+                          }`}
+                        >
+                          {full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-ink-muted line-clamp-1">
+                        {s.district}, {s.city}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-black/[0.04]">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs font-medium text-ink-body">
+                          {s.fast ? (
+                            <>
+                              <BoltIcon className="h-3 w-3 text-primary" /> DC Siêu nhanh
+                            </>
+                          ) : (
+                            <>
+                              <ACPlugIcon className="h-3 w-3 text-ink-muted" /> AC Tiêu chuẩn
+                            </>
+                          )}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-primary-dark">
+                          {s.pricePerKwh}/kWh
+                        </span>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-ink-muted">
+                        <span>{s.connectors.slice(0, 2).join(" · ")}</span>
+                        <span className="font-semibold text-primary-dark group-hover:translate-x-0.5 transition-transform">
+                          Xem chi tiết ›
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               );

@@ -20,9 +20,11 @@
     "chargersOffline": "{{count}} offline/maintenance",
     "allOnline": "All chargers operational",
     "connectorsAvailable": "Available connectors",
+    "connectorsDelta": "{{charging}} charging · {{offline}} offline",
     "sessionsToday": "Sessions today",
     "avgUtilization": "Avg. utilization today",
-    "avgUtilizationSub": "Capacity utilization today"
+    "avgUtilizationSub": "Capacity utilization today",
+    "utilizationDelta": "Utilization: {{pct}}%"
   },
   "panel": {
     "actionItems": "Action items",
@@ -33,5 +35,16 @@
     "offlineConnectors": "Offline connectors",
     "openTickets": "Open support tickets",
     "noActionItems": "No pending action items"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "refreshing": "Refreshing..."
+  },
+  "hardwareDistribution": {
+    "title": "Hardware connector distribution ({{count}} connectors)",
+    "available": "Available",
+    "charging": "Charging",
+    "offline": "Offline",
+    "maintenance": "Maintenance"
   }
 }

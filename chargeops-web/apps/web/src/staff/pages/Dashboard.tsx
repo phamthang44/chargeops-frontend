@@ -2,7 +2,15 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { formatTimeVn, useApi, type StaffStationOverview } from '@chargeops/api';
-import { KpiCard, PageHeader, SidePanel, Skeleton, type SidePanelRow } from '@chargeops/ui';
+import {
+  Button,
+  IconRefreshCw,
+  KpiCard,
+  PageHeader,
+  SidePanel,
+  Skeleton,
+  type SidePanelRow,
+} from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useStaffStation } from '../context/StaffStationContext';
 import { useStaffEquipment } from '../hooks/useStaffEquipment';
@@ -64,9 +72,35 @@ export function Dashboard() {
           overviewQ.data
             ? t('dashboard.subtitle', {
                 station: overviewQ.data.name,
-                status: t(`stationStatus.${overviewQ.data.operationalStatus}`),
+                status: t(`stationStatus.${overviewQ.data.operationalStatus}`, {
+                  defaultValue: overviewQ.data.operationalStatus,
+                }),
               })
             : currentStation?.name || t('dashboard.subtitleFallback')
+        }
+        action={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              overviewQ.refetch();
+              bookingsQ.refetch();
+              equipment.refetch();
+            }}
+            disabled={overviewQ.isFetching || bookingsQ.isFetching}
+            icon={
+              <IconRefreshCw
+                size={13}
+                className={overviewQ.isFetching || bookingsQ.isFetching ? 'animate-spin' : ''}
+              />
+            }
+          >
+            <span>
+              {overviewQ.isFetching || bookingsQ.isFetching
+                ? t('dashboard.refreshing', { defaultValue: 'Đang cập nhật...' })
+                : t('dashboard.refresh', { defaultValue: 'Làm mới' })}
+            </span>
+          </Button>
         }
       />
 
@@ -169,7 +203,9 @@ function DashboardBody({
             delta={
               overview
                 ? t('dashboard.kpi.chargePointsSub', {
-                    status: t(`stationStatus.${overview.operationalStatus}`),
+                    status: t(`stationStatus.${overview.operationalStatus}`, {
+                      defaultValue: overview.operationalStatus,
+                    }),
                   })
                 : undefined
             }

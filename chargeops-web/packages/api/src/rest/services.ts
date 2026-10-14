@@ -523,6 +523,8 @@ export function createRestServices(http: HttpClient): Services {
         if (params.from) query.from = params.from;
         if (params.to) query.to = params.to;
         if (params.status && (params.status as any) !== 'all') query.status = params.status;
+        if (params.sort) query.sort = params.sort;
+        if (params.windowMode) query.windowMode = params.windowMode;
         query.page = (params.page ?? 0) + 1; // UI 0-based to API 1-based
         query.size = params.pageSize ?? 20;
 

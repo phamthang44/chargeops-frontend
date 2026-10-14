@@ -119,7 +119,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
 
       <SiteHeader />
 
-      <main className="min-h-screen bg-surface-alt pb-24 text-ink-body antialiased">
+      <main className="min-h-screen bg-surface-alt pt-20 sm:pt-24 pb-24 text-ink-body antialiased">
         {/* Hero Section */}
         <section className="relative overflow-hidden border-b border-line bg-white print:border-none print:pb-0">
           <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary-soft/40 blur-3xl" />
@@ -313,10 +313,10 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                       Mọi câu hỏi về điều khoản và dữ liệu cá nhân, vui lòng liên hệ:
                     </p>
                     <a
-                      href="mailto:support@chargeops.vn"
+                      href="mailto:support@chargeops.online"
                       className="mt-1.5 inline-block font-semibold text-primary-dark hover:underline"
                     >
-                      support@chargeops.vn
+                      support@chargeops.online
                     </a>
                   </div>
                 </div>

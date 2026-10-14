@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import Constants from 'expo-constants';
 import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { Station } from '@/types';
 
@@ -36,6 +37,7 @@ function buildLeafletHtml(
   selectedStationId: string | null | undefined,
   userCoords: { latitude: number; longitude: number } | null | undefined,
   isDark: boolean,
+  mapBoxPublicKey: string,
 ): string {
   // Find initial focus
   const selectedStation = stations.find((s) => s.id === selectedStationId);
@@ -80,17 +82,23 @@ function buildLeafletHtml(
     .dark-map .leaflet-tile-pane {
       filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
     }
-    .leaflet-control-attribution,
-    .leaflet-control-container .leaflet-bottom,
-    .leaflet-control-container .leaflet-control-attribution {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      height: 0 !important;
-      pointer-events: none !important;
-    }
     .leaflet-control-zoom {
       display: none !important; /* Mobile EV app style: clean view without bulky zoom buttons */
+    }
+    .route-notice {
+      position: absolute;
+      z-index: 1000;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: none;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(17, 24, 39, 0.88);
+      color: #FFFFFF;
+      font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.4;
+      pointer-events: none;
     }
 
     /* Custom EV Station Pin */
@@ -187,23 +195,27 @@ function buildLeafletHtml(
 </head>
 <body class="${isDark ? 'dark-map' : ''}">
   <div id="map"></div>
+  <div id="routeNotice" class="route-notice" role="status" aria-live="polite"></div>
   <script>
     var stations = ${serializedStations};
     var selectedId = ${JSON.stringify(selectedStationId ?? null)};
     var userCoords = ${JSON.stringify(userCoords ?? null)};
     var isDark = ${isDark ? 'true' : 'false'};
+    var mapBoxPublicKey = ${JSON.stringify(mapBoxPublicKey)};
 
     // Initialize Map
     var map = L.map('map', {
       center: [${initialLat}, ${initialLng}],
       zoom: ${initialZoom},
       zoomControl: false,
-      attributionControl: false
+      attributionControl: true
     });
 
     var tileLayer = L.tileLayer('${osmTileUrl}', {
-      maxZoom: 19
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+    map.attributionControl.addAttribution('Directions powered by <a href="https://www.mapbox.com/">Mapbox</a>');
 
     function sendToHost(type, payload) {
       var msg = JSON.stringify(Object.assign({ type: type }, payload || {}));
@@ -217,6 +229,68 @@ function buildLeafletHtml(
     var markerMap = {};
     var userMarker = null;
     var routeLine = null;
+    var routeRequestId = 0;
+
+    function setRouteNotice(message) {
+      var notice = document.getElementById('routeNotice');
+      if (!notice) return;
+      notice.textContent = message || '';
+      notice.style.display = message ? 'block' : 'none';
+    }
+
+    function requestRoute(destination) {
+      var requestId = ++routeRequestId;
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+      }
+      if (!userCoords || !Number.isFinite(userCoords.latitude) || !Number.isFinite(userCoords.longitude)) {
+        setRouteNotice('Chưa lấy được vị trí hiện tại để tìm đường.');
+        return;
+      }
+      if (!mapBoxPublicKey) {
+        setRouteNotice('Thiếu MAP_BOX_PUBLIC_KEY trong file .env.');
+        return;
+      }
+
+      setRouteNotice('Đang tìm tuyến đường…');
+      var origin = userCoords.longitude + ',' + userCoords.latitude;
+      var target = destination.longitude + ',' + destination.latitude;
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + origin + ';' + target +
+        '?geometries=geojson&overview=full&steps=true&access_token=' + encodeURIComponent(mapBoxPublicKey);
+
+      fetch(url)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Mapbox trả về HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function(result) {
+          if (requestId !== routeRequestId) return;
+          if (result.code !== 'Ok' || !result.routes || !result.routes.length) {
+            throw new Error(result.message || 'Mapbox không tìm thấy tuyến đường phù hợp.');
+          }
+
+          var route = result.routes[0];
+          var latLngs = route.geometry.coordinates.map(function(point) {
+            return [point[1], point[0]];
+          });
+          routeLine = L.polyline(latLngs, {
+            color: '#10B981',
+            weight: 5,
+            opacity: 0.95
+          }).addTo(map);
+          map.fitBounds(routeLine.getBounds(), { padding: [80, 80], maxZoom: 16 });
+
+          var distanceKm = (route.distance / 1000).toFixed(1);
+          var durationMinutes = Math.max(1, Math.round(route.duration / 60));
+          setRouteNotice('Tuyến Mapbox: ' + distanceKm + ' km · khoảng ' + durationMinutes + ' phút. Hãy tuân thủ biển báo thực tế.');
+        })
+        .catch(function(error) {
+          if (requestId !== routeRequestId) return;
+          console.warn('Mapbox Directions request failed:', error);
+          setRouteNotice(error.message || 'Không tải được tuyến đường.');
+        });
+    }
 
     function getPinStatus(s) {
       if (s.operatingState === 'PAUSED_BY_OWNER') return 'paused';
@@ -344,33 +418,8 @@ function buildLeafletHtml(
           if (data.stationId) {
             selectStation(data.stationId, false);
           }
-          if (data.latitude && data.longitude) {
-            if (routeLine) {
-              map.removeLayer(routeLine);
-              routeLine = null;
-            }
-            if (userCoords && userCoords.latitude && userCoords.longitude) {
-              routeLine = L.polyline(
-                [
-                  [userCoords.latitude, userCoords.longitude],
-                  [data.latitude, data.longitude]
-                ],
-                {
-                  color: '#10B981',
-                  weight: 4,
-                  dashArray: '8, 8',
-                  opacity: 0.9
-                }
-              ).addTo(map);
-
-              var bounds = L.latLngBounds(
-                [userCoords.latitude, userCoords.longitude],
-                [data.latitude, data.longitude]
-              );
-              map.fitBounds(bounds, { padding: [80, 80], maxZoom: 16 });
-            } else {
-              map.flyTo([data.latitude, data.longitude], 16, { duration: 1.2 });
-            }
+          if (Number.isFinite(data.latitude) && Number.isFinite(data.longitude)) {
+            requestRoute({ latitude: data.latitude, longitude: data.longitude });
           }
         } else if (data.type === 'FLY_TO_USER') {
           if (userCoords && userCoords.latitude) {
@@ -417,7 +466,13 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
     const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
     const htmlContent = useMemo(
-      () => buildLeafletHtml(stations, selectedStationId, userCoords, isDark),
+      () => buildLeafletHtml(
+        stations,
+        selectedStationId,
+        userCoords,
+        isDark,
+        Constants.expoConfig?.extra?.mapBoxPublicKey ?? '',
+      ),
       // We only recreate HTML on full initial mount or drastic change, other updates happen via messages
       [isDark],
     );

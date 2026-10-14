@@ -111,18 +111,24 @@ body {
 
   /* Nested Island Primary CTA Button */
   .btn-island-primary {
-    @apply group inline-flex items-center justify-center gap-3 rounded-full bg-primary pl-6 pr-2 py-2 text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic hover:bg-primary-dark active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3 rounded-full bg-primary pl-6 pr-2 py-2 text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic hover:bg-primary-dark active:scale-[0.98];
   }
   .btn-island-primary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-haptic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-haptic;
+  }
+  .btn-island-primary:hover .btn-icon-bubble {
+    @apply translate-x-0.5 -translate-y-0.5 scale-105;
   }
 
   /* Nested Island Secondary CTA Button */
   .btn-island-secondary {
-    @apply group inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white/90 pl-6 pr-2 py-2 text-sm font-semibold text-ink-strong shadow-card backdrop-blur transition-all duration-300 ease-haptic hover:border-primary/40 hover:bg-surface-alt active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white/90 pl-6 pr-2 py-2 text-sm font-semibold text-ink-strong shadow-card backdrop-blur transition-all duration-300 ease-haptic hover:border-primary/40 hover:bg-surface-alt active:scale-[0.98];
   }
   .btn-island-secondary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-alt text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-haptic group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-alt text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-haptic;
+  }
+  .btn-island-secondary:hover .btn-icon-bubble {
+    @apply translate-x-0.5 -translate-y-0.5 scale-105;
   }
 
   .btn-primary {

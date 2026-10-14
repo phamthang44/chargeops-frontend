@@ -28,6 +28,8 @@ export type CoverageStation = {
   maxPowerKw?: number | null;
   operatingState?: string;
   operationalStatus?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export const CITIES = ["Tất cả", "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"] as const;
@@ -40,6 +42,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Quận 1",
     city: "TP. Hồ Chí Minh",
     address: "72 Lê Thánh Tôn, Quận 1, TP. Hồ Chí Minh",
+    latitude: 10.7779,
+    longitude: 106.7024,
     available: 4,
     total: 6,
     fast: true,
@@ -59,6 +63,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Bình Thạnh",
     city: "TP. Hồ Chí Minh",
     address: "720A Điện Biên Phủ, Bình Thạnh, TP. Hồ Chí Minh",
+    latitude: 10.7950,
+    longitude: 106.7219,
     available: 2,
     total: 8,
     fast: true,
@@ -78,6 +84,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Quận 7",
     city: "TP. Hồ Chí Minh",
     address: "101 Tôn Dật Tiên, Quận 7, TP. Hồ Chí Minh",
+    latitude: 10.7188,
+    longitude: 106.7183,
     available: 5,
     total: 6,
     fast: false,
@@ -97,6 +105,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Hai Bà Trưng",
     city: "Hà Nội",
     address: "191 Bà Triệu, Hai Bà Trưng, Hà Nội",
+    latitude: 21.0118,
+    longitude: 105.8499,
     available: 3,
     total: 6,
     fast: true,
@@ -116,6 +126,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Ba Đình",
     city: "Hà Nội",
     address: "54 Liễu Giai, Ba Đình, Hà Nội",
+    latitude: 21.0323,
+    longitude: 105.8126,
     available: 0,
     total: 4,
     fast: true,
@@ -135,6 +147,8 @@ export const STATIONS: CoverageStation[] = [
     district: "Sơn Trà",
     city: "Đà Nẵng",
     address: "910A Ngô Quyền, Sơn Trà, Đà Nẵng",
+    latitude: 16.0718,
+    longitude: 108.2323,
     available: 6,
     total: 8,
     fast: false,

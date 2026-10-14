@@ -327,6 +327,8 @@ export function mapBackendToCoverageStation(
     maxPowerKw: powerKw > 0 ? powerKw : null,
     operatingState: b.operatingState,
     operationalStatus: b.operationalStatus,
+    latitude: b.latitude,
+    longitude: b.longitude,
   };
 }
 

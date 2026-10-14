@@ -22,6 +22,8 @@ export function StationDirectory({
   const [query, setQuery] = useState("");
   const [fastOnly, setFastOnly] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   // Asynchronously fetch stations from backend API
   useEffect(() => {
@@ -77,234 +79,432 @@ export function StationDirectory({
     });
   }, [stationList, city, query, fastOnly, availableOnly]);
 
-  return (
-    <div className="container-x grid gap-8 py-10 lg:grid-cols-[1fr_320px]">
-      <div>
-        {/* Search Bar and City Pills */}
-        <div className="flex flex-col gap-4">
-          <div className="relative">
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm theo tên trạm, quận hoặc địa chỉ…"
-              aria-label="Tìm trạm sạc"
-              className="w-full rounded-2xl border border-line bg-white px-4 py-3.5 pl-11 text-sm outline-none transition placeholder:text-ink-muted focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm"
-            />
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">
-              <MapPinIcon className="h-4 w-4" />
-            </span>
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink-muted hover:text-ink-strong"
-              >
-                Xóa
-              </button>
-            )}
-          </div>
+  // Active station currently spotlighted on the map
+  const activeStation = useMemo(() => {
+    if (selectedStationId) {
+      const found = filtered.find((s) => s.id === selectedStationId);
+      if (found) return found;
+    }
+    return filtered[0] || stationList[0] || null;
+  }, [selectedStationId, filtered, stationList]);
 
-          {/* City Pills */}
-          <div className="flex flex-wrap items-center gap-2">
-            {availableCities.map((c) => (
+  // OpenStreetMap embed URL centered on active station or city
+  const mapEmbedUrl = useMemo(() => {
+    if (activeStation && activeStation.latitude && activeStation.longitude) {
+      const lat = activeStation.latitude;
+      const lng = activeStation.longitude;
+      const deltaLat = 0.007;
+      const deltaLng = 0.009;
+      const minLng = (lng - deltaLng).toFixed(5);
+      const minLat = (lat - deltaLat).toFixed(5);
+      const maxLng = (lng + deltaLng).toFixed(5);
+      const maxLat = (lat + deltaLat).toFixed(5);
+      return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${lat.toFixed(5)}%2C${lng.toFixed(5)}`;
+    }
+    if (city === "Hà Nội") {
+      return `https://www.openstreetmap.org/export/embed.html?bbox=105.7800%2C20.9800%2C105.8800%2C21.0600&layer=mapnik`;
+    }
+    if (city === "Đà Nẵng") {
+      return `https://www.openstreetmap.org/export/embed.html?bbox=108.1800%2C16.0200%2C108.2800%2C16.1000&layer=mapnik`;
+    }
+    return `https://www.openstreetmap.org/export/embed.html?bbox=106.6500%2C10.7400%2C106.7500%2C10.8200&layer=mapnik`;
+  }, [activeStation, city]);
+
+  const googleMapsDirectionsUrl = activeStation
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+        activeStation.name + ", " + activeStation.address
+      )}`
+    : "#";
+
+  return (
+    <div className="container-x py-8 sm:py-10">
+      {/* Mobile View Switcher (Visible only below lg breakpoint) */}
+      <div className="mb-6 flex lg:hidden items-center rounded-2xl bg-surface-alt p-1 border border-line shadow-sm">
+        <button
+          type="button"
+          onClick={() => setMobileView("list")}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer ${
+            mobileView === "list"
+              ? "bg-white text-ink-strong shadow-sm ring-1 ring-black/5"
+              : "text-ink-muted hover:text-ink-strong"
+          }`}
+        >
+          <span>📋</span>
+          <span>Danh sách trạm ({filtered.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView("map")}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer ${
+            mobileView === "map"
+              ? "bg-primary text-white shadow-glow-emerald"
+              : "text-ink-muted hover:text-ink-strong"
+          }`}
+        >
+          <span>🗺️</span>
+          <span>Bản đồ & Chỉ đường</span>
+        </button>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px]">
+        {/* Left Column: Search, Filters & Station Cards */}
+        <div className={mobileView === "map" ? "hidden lg:block" : "block"}>
+          {/* Search Bar and City Pills */}
+          <div className="flex flex-col gap-4">
+            <div className="relative">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Tìm theo tên trạm, quận hoặc địa chỉ…"
+                aria-label="Tìm trạm sạc"
+                className="w-full rounded-2xl border border-line bg-white px-4 py-3.5 pl-11 text-sm outline-none transition placeholder:text-ink-muted focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm"
+              />
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">
+                <MapPinIcon className="h-4 w-4" />
+              </span>
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink-muted hover:text-ink-strong cursor-pointer"
+                >
+                  Xóa
+                </button>
+              )}
+            </div>
+
+            {/* City Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              {availableCities.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setCity(c);
+                    setSelectedStationId(null);
+                  }}
+                  className={`cursor-pointer rounded-pill px-4 py-2 text-xs font-semibold transition ${
+                    city === c
+                      ? "bg-primary text-white shadow-glass"
+                      : "border border-line bg-white text-ink-body hover:border-primary/40"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* Feature Filters */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               <button
-                key={c}
                 type="button"
-                onClick={() => setCity(c)}
-                className={`cursor-pointer rounded-pill px-4 py-2 text-xs font-semibold transition ${
-                  city === c
-                    ? "bg-primary text-white shadow-glass"
-                    : "border border-line bg-white text-ink-body hover:border-primary/40"
+                onClick={() => setFastOnly(!fastOnly)}
+                className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+                  fastOnly
+                    ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
+                    : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
                 }`}
               >
-                {c}
+                <BoltIcon className="h-3.5 w-3.5" />
+                Sạc nhanh DC
               </button>
-            ))}
-          </div>
 
-          {/* Feature Filters */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setFastOnly(!fastOnly)}
-              className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition ${
-                fastOnly
-                  ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
-                  : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
-              }`}
-            >
-              <BoltIcon className="h-3.5 w-3.5" />
-              Sạc nhanh DC
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setAvailableOnly(!availableOnly)}
-              className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition ${
-                availableOnly
-                  ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
-                  : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
-              }`}
-            >
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              Đang còn chỗ
-            </button>
-          </div>
-        </div>
-
-        {/* Status indicator bar */}
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
-          <p>
-            Tìm thấy <strong className="text-ink-strong">{filtered.length}</strong> trạm sạc
-            {city !== "Tất cả" ? ` tại ${city}` : " trên toàn quốc"}
-          </p>
-
-          {/* Live API sync status indicator */}
-          <div className="flex items-center gap-2">
-            {isLive ? (
-              <span className="inline-flex items-center gap-1.5 rounded-pill bg-primary-soft px-2.5 py-1 font-semibold text-primary-dark">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Dữ liệu trực tuyến (API kết nối)
-              </span>
-            ) : (
-              <span
-                className="inline-flex items-center gap-1.5 rounded-pill bg-surface-alt px-2.5 py-1 font-medium text-ink-muted ring-1 ring-line"
-                title="Sẵn sàng kết nối khi Backend triển khai API công khai"
+              <button
+                type="button"
+                onClick={() => setAvailableOnly(!availableOnly)}
+                className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+                  availableOnly
+                    ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
+                    : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
+                }`}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-ink-muted/50" />
-                Chế độ xem trước (Sẵn sàng API)
-              </span>
-            )}
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Đang còn chỗ
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Loading Skeletons */}
-        {isLoading && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="animate-pulse rounded-card border border-line bg-white p-5 shadow-card space-y-3"
-              >
-                <div className="h-5 w-3/4 rounded bg-surface-alt" />
-                <div className="h-4 w-1/2 rounded bg-surface-alt" />
-                <div className="h-6 w-1/3 rounded bg-surface-alt" />
-              </div>
-            ))}
-          </div>
-        )}
+          {/* Status indicator bar */}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
+            <p>
+              Tìm thấy <strong className="text-ink-strong">{filtered.length}</strong> trạm sạc
+              {city !== "Tất cả" ? ` tại ${city}` : " trên toàn quốc"}
+            </p>
 
-        {/* Station cards grid */}
-        {!isLoading && (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            {filtered.map((s) => {
-              const full = s.available === 0;
-              return (
-                <Link
-                  key={s.id}
-                  href={`/tram-sac/${s.slug}`}
-                  className="double-bezel group block hover:-translate-y-1"
+            {/* Live API sync status indicator */}
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <span className="inline-flex items-center gap-1.5 rounded-pill bg-primary-soft px-2.5 py-1 font-semibold text-primary-dark">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  Dữ liệu trực tuyến (API kết nối)
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-pill bg-surface-alt px-2.5 py-1 font-medium text-ink-muted ring-1 ring-line"
+                  title="Sẵn sàng kết nối khi Backend triển khai API công khai"
                 >
-                  <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <h2 className="font-bold text-ink-strong group-hover:text-primary-dark transition-colors line-clamp-1">
-                          {s.name}
-                        </h2>
-                        <span
-                          className={`pill shrink-0 text-[11px] font-bold ${
-                            full ? "bg-danger/10 text-danger" : "bg-primary-soft text-primary-dark"
-                          }`}
-                        >
-                          {full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-ink-muted line-clamp-1">
-                        {s.district}, {s.city}
-                      </p>
-                    </div>
+                  <span className="h-1.5 w-1.5 rounded-full bg-ink-muted/50" />
+                  Chế độ xem trước (Sẵn sàng API)
+                </span>
+              )}
+            </div>
+          </div>
 
-                    <div className="mt-5 pt-3 border-t border-black/[0.04]">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs font-medium text-ink-body">
-                          {s.fast ? (
-                            <>
-                              <BoltIcon className="h-3 w-3 text-primary" /> DC Siêu nhanh
-                            </>
-                          ) : (
-                            <>
-                              <ACPlugIcon className="h-3 w-3 text-ink-muted" /> AC Tiêu chuẩn
-                            </>
-                          )}
-                        </span>
-                        <span className="font-mono text-xs font-bold text-primary-dark">
-                          {s.pricePerKwh}/kWh
-                        </span>
+          {/* Loading Skeletons */}
+          {isLoading && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-card border border-line bg-white p-5 shadow-card space-y-3"
+                >
+                  <div className="h-5 w-3/4 rounded bg-surface-alt" />
+                  <div className="h-4 w-1/2 rounded bg-surface-alt" />
+                  <div className="h-6 w-1/3 rounded bg-surface-alt" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Station cards grid */}
+          {!isLoading && (
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              {filtered.map((s) => {
+                const full = s.available === 0;
+                const isSelected = activeStation?.id === s.id;
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                  s.name + ", " + s.address
+                )}`;
+
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => setSelectedStationId(s.id)}
+                    onMouseEnter={() => setSelectedStationId(s.id)}
+                    className={`double-bezel group block transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                      isSelected
+                        ? "ring-2 ring-primary border-primary shadow-lg"
+                        : ""
+                    }`}
+                  >
+                    <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <h2 className="font-bold text-ink-strong group-hover:text-primary-dark transition-colors line-clamp-1">
+                            {s.name}
+                          </h2>
+                          <span
+                            className={`pill shrink-0 text-[11px] font-bold ${
+                              full ? "bg-danger/10 text-danger" : "bg-primary-soft text-primary-dark"
+                            }`}
+                          >
+                            {full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-ink-muted line-clamp-1">
+                          {s.district}, {s.city}
+                        </p>
                       </div>
-                      <div className="mt-3 flex items-center justify-between text-xs text-ink-muted">
-                        <span>{s.connectors.slice(0, 2).join(" · ")}</span>
-                        <span className="font-semibold text-primary-dark group-hover:translate-x-0.5 transition-transform">
-                          Xem chi tiết ›
-                        </span>
+
+                      <div className="mt-5 pt-3 border-t border-black/[0.04]">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs font-medium text-ink-body">
+                            {s.fast ? (
+                              <>
+                                <BoltIcon className="h-3 w-3 text-primary" /> DC Siêu nhanh
+                              </>
+                            ) : (
+                              <>
+                                <ACPlugIcon className="h-3 w-3 text-ink-muted" /> AC Tiêu chuẩn
+                              </>
+                            )}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-primary-dark">
+                            {s.pricePerKwh}/kWh
+                          </span>
+                        </div>
+                        <div className="mt-3.5 flex items-center justify-between text-xs text-ink-muted">
+                          <a
+                            href={directionsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 font-semibold text-primary hover:text-primary-dark hover:underline"
+                            title="Mở chỉ đường trên Google Maps"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
+                              <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                            </svg>
+                            <span>Chỉ đường</span>
+                          </a>
+
+                          <Link
+                            href={`/tram-sac/${s.slug}`}
+                            className="font-semibold text-ink-strong hover:text-primary transition-colors flex items-center gap-0.5"
+                          >
+                            <span>Chi tiết trạm</span>
+                            <span className="group-hover:translate-x-0.5 transition-transform">›</span>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </Link>
-              );
-            })}
+                );
+              })}
 
-            {filtered.length === 0 && (
-              <div className="col-span-2 rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-ink-muted">
-                <p className="font-medium text-ink-strong">Không tìm thấy trạm sạc phù hợp</p>
-                <p className="mt-1">Thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setCity("Tất cả");
-                    setFastOnly(false);
-                    setAvailableOnly(false);
-                  }}
-                  className="mt-4 inline-flex items-center rounded-pill bg-primary-soft px-4 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-soft/80"
-                >
-                  Đặt lại bộ lọc
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Map panel */}
-      <aside className="hidden lg:block">
-        <div className="sticky top-20">
-          <div className="relative h-[420px] overflow-hidden rounded-2xl border border-line bg-surface-alt bg-grid shadow-sm">
-            <MapPin className="left-12 top-16" />
-            <MapPin className="left-40 top-28" />
-            <MapPin className="left-24 top-52" muted />
-            <MapPin className="left-52 top-72" />
-            <span className="absolute bottom-3 right-3 rounded-pill border border-line bg-white px-3 py-1 text-xs font-medium text-ink-muted shadow-sm">
-              Bản đồ định vị
-            </span>
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-ink-muted">
-            Vị trí, độ trống và giá hiển thị mang tính minh hoạ. Mở ứng dụng di động ChargeOps để
-            đặt khung giờ theo thời gian thực.
-          </p>
+              {filtered.length === 0 && (
+                <div className="col-span-2 rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-ink-muted">
+                  <p className="font-medium text-ink-strong">Không tìm thấy trạm sạc phù hợp</p>
+                  <p className="mt-1">Thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setCity("Tất cả");
+                      setFastOnly(false);
+                      setAvailableOnly(false);
+                    }}
+                    className="mt-4 inline-flex items-center rounded-pill bg-primary-soft px-4 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-soft/80 cursor-pointer"
+                  >
+                    Đặt lại bộ lọc
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      </aside>
-    </div>
-  );
-}
 
-function MapPin({ className, muted }: { className?: string; muted?: boolean }) {
-  return (
-    <span
-      className={`absolute ${muted ? "text-ink-muted" : "text-primary"} ${className ?? ""}`}
-      aria-hidden
-    >
-      <MapPinIcon className="h-7 w-7 drop-shadow-sm" />
-    </span>
+        {/* Right Column: Live Interactive Map & Station Spotlight Card */}
+        <aside className={mobileView === "list" ? "hidden lg:block" : "block"}>
+          <div className="sticky top-24 space-y-4">
+            <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+              {/* Map Header */}
+              <div className="flex items-center justify-between border-b border-line bg-surface-alt px-4 py-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                  <span className="truncate text-xs font-bold text-ink-strong">
+                    {activeStation ? activeStation.name : "Bản đồ mạng lưới trạm sạc"}
+                  </span>
+                </div>
+                <span className="shrink-0 rounded-pill bg-white px-2.5 py-0.5 text-[10px] font-semibold text-primary-dark ring-1 ring-line">
+                  {city !== "Tất cả" ? city : "Vị trí thực tế"}
+                </span>
+              </div>
+
+              {/* Interactive OpenStreetMap embed */}
+              <div className="relative h-[290px] sm:h-[320px] w-full bg-[#E5E3DF] overflow-hidden">
+                <iframe
+                  key={activeStation?.id ?? city}
+                  src={mapEmbedUrl}
+                  title="Bản đồ trạm sạc OpenStreetMap"
+                  className="h-full w-full border-0 select-none"
+                  loading="lazy"
+                />
+
+                {/* Floating Navigation Shortcut */}
+                <div className="absolute right-3 top-3 flex flex-col gap-1.5 z-10">
+                  <a
+                    href={googleMapsDirectionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Mở chỉ đường trên Google Maps"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-ink-body shadow-md backdrop-blur transition hover:bg-white hover:text-primary hover:scale-105"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                      <circle cx="12" cy="9" r="2.5" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              {/* Station Spotlight Card */}
+              {activeStation ? (
+                <div className="p-4 sm:p-5 bg-white">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/tram-sac/${activeStation.slug}`}
+                        className="block text-sm font-bold text-ink-strong hover:text-primary transition-colors line-clamp-1"
+                      >
+                        {activeStation.name}
+                      </Link>
+                      <p className="mt-1 flex items-start gap-1.5 text-xs text-ink-muted line-clamp-2">
+                        <MapPinIcon className="h-3.5 w-3.5 shrink-0 text-primary mt-0.5" />
+                        <span>{activeStation.address}</span>
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold ${
+                        activeStation.available === 0
+                          ? "bg-danger/10 text-danger"
+                          : "bg-primary-soft text-primary-dark"
+                      }`}
+                    >
+                      {activeStation.available === 0
+                        ? "Hết chỗ"
+                        : `${activeStation.available}/${activeStation.total} trống`}
+                    </span>
+                  </div>
+
+                  {/* Quick Specs */}
+                  <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-y border-line py-2.5 text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-ink-body">
+                      {activeStation.fast ? (
+                        <>
+                          <BoltIcon className="h-3.5 w-3.5 text-primary" />
+                          <span>DC Siêu nhanh</span>
+                        </>
+                      ) : (
+                        <>
+                          <ACPlugIcon className="h-3.5 w-3.5 text-ink-muted" />
+                          <span>AC Tiêu chuẩn</span>
+                        </>
+                      )}
+                    </span>
+                    <span className="font-mono font-bold text-primary-dark">
+                      {activeStation.pricePerKwh}/kWh
+                    </span>
+                    <span className="text-ink-muted text-[11px]">{activeStation.hours}</span>
+                  </div>
+
+                  {/* Action CTA Buttons */}
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <a
+                      href={googleMapsDirectionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white shadow-glow-emerald transition hover:bg-primary-dark active:scale-[0.98]"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
+                        <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                      </svg>
+                      <span>Chỉ đường</span>
+                    </a>
+
+                    <Link
+                      href={`/tram-sac/${activeStation.slug}`}
+                      className="flex items-center justify-center gap-1 rounded-xl border border-line bg-surface-alt px-3 py-2.5 text-xs font-semibold text-ink-strong transition hover:border-primary/40 hover:bg-white active:scale-[0.98]"
+                    >
+                      <span>Chi tiết trạm ›</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-5 text-center text-xs text-ink-muted">
+                  Chọn một trạm sạc từ danh sách để xem vị trí và chỉ đường.
+                </div>
+              )}
+            </div>
+
+            {/* Hint footnote */}
+            <p className="px-2 text-[11px] leading-relaxed text-ink-muted">
+              📍 Vị trí trạm được đồng bộ theo tọa độ GPS thực tế. Bấm <strong>Chỉ đường</strong> để mở dẫn đường trực tiếp trên Google Maps.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }

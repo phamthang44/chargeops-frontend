@@ -30,6 +30,7 @@ export type CoverageStation = {
   operationalStatus?: string;
   latitude?: number;
   longitude?: number;
+  images?: string[];
 };
 
 export const CITIES = ["Tất cả", "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"] as const;
@@ -47,12 +48,15 @@ export const STATIONS: CoverageStation[] = [
     available: 4,
     total: 6,
     fast: true,
+    maxPowerKw: 120,
     pricePerKwh: "3.850đ",
     connectors: ["CCS2", "CHAdeMO"],
     amenities: ["Mái che", "Cafe", "Nhà vệ sinh", "Wifi"],
     hours: "06:00 – 22:00",
     rating: 4.8,
     reviewCount: 126,
+    primaryImageUrl: "/screens/charging.jpg",
+    images: ["/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/home.jpg", "/screens/success.jpg"],
     description:
       "Trạm sạc nhanh DC ngay trung tâm Quận 1, trong khu mua sắm Vincom Đồng Khởi. Thuận tiện vừa sạc vừa nghỉ ngơi, mua sắm.",
   },
@@ -68,12 +72,15 @@ export const STATIONS: CoverageStation[] = [
     available: 2,
     total: 8,
     fast: true,
+    maxPowerKw: 150,
     pricePerKwh: "4.100đ",
     connectors: ["CCS2", "Type 2 (AC)"],
     amenities: ["Mái che", "Bãi đỗ rộng", "Cafe", "Mở 24/7"],
     hours: "Mở cửa 24/7",
     rating: 4.7,
     reviewCount: 203,
+    primaryImageUrl: "/screens/home.jpg",
+    images: ["/screens/home.jpg", "/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/qr.jpg"],
     description:
       "Cụm trụ sạc lớn dưới tầng hầm Landmark 81, hoạt động 24/7. Phù hợp cho cả tài xế cá nhân và dịch vụ.",
   },
@@ -89,12 +96,15 @@ export const STATIONS: CoverageStation[] = [
     available: 5,
     total: 6,
     fast: false,
+    maxPowerKw: 60,
     pricePerKwh: "3.500đ",
     connectors: ["Type 2 (AC)", "GB/T"],
     amenities: ["Mái che", "Nhà vệ sinh", "Bãi đỗ rộng"],
     hours: "08:00 – 22:00",
     rating: 4.6,
     reviewCount: 88,
+    primaryImageUrl: "/screens/slot-picker.jpg",
+    images: ["/screens/slot-picker.jpg", "/screens/home.jpg", "/screens/charging.jpg", "/screens/qr.jpg"],
     description:
       "Trạm sạc AC giá tốt tại khu Phú Mỹ Hưng, gần trung tâm thương mại Crescent Mall. Lý tưởng khi đỗ xe lâu.",
   },
@@ -110,12 +120,15 @@ export const STATIONS: CoverageStation[] = [
     available: 3,
     total: 6,
     fast: true,
+    maxPowerKw: 120,
     pricePerKwh: "3.950đ",
     connectors: ["CCS2", "CHAdeMO"],
     amenities: ["Mái che", "Cafe", "Wifi"],
     hours: "07:00 – 22:00",
     rating: 4.7,
     reviewCount: 142,
+    primaryImageUrl: "/screens/charging.jpg",
+    images: ["/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/home.jpg", "/screens/success.jpg"],
     description:
       "Trạm sạc nhanh trung tâm Hà Nội, trong tòa Vincom Bà Triệu. Sạc nhanh DC, vị trí dễ tiếp cận.",
   },
@@ -131,12 +144,15 @@ export const STATIONS: CoverageStation[] = [
     available: 0,
     total: 4,
     fast: true,
+    maxPowerKw: 120,
     pricePerKwh: "4.200đ",
     connectors: ["CCS2"],
     amenities: ["Mái che", "Bãi đỗ rộng"],
     hours: "06:00 – 23:00",
     rating: 4.5,
     reviewCount: 67,
+    primaryImageUrl: "/screens/home.jpg",
+    images: ["/screens/home.jpg", "/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/qr.jpg"],
     description:
       "Trạm sạc nhanh tại Lotte Center Hà Nội. Hiện đang đầy chỗ, đặt trước trong ứng dụng để giữ khung giờ.",
   },
@@ -152,12 +168,15 @@ export const STATIONS: CoverageStation[] = [
     available: 6,
     total: 8,
     fast: false,
+    maxPowerKw: 60,
     pricePerKwh: "3.400đ",
     connectors: ["Type 2 (AC)", "GB/T"],
     amenities: ["Mái che", "Cafe", "Nhà vệ sinh", "Bãi đỗ rộng"],
     hours: "07:00 – 22:00",
     rating: 4.8,
     reviewCount: 54,
+    primaryImageUrl: "/screens/slot-picker.jpg",
+    images: ["/screens/slot-picker.jpg", "/screens/home.jpg", "/screens/charging.jpg", "/screens/success.jpg"],
     description:
       "Trạm sạc giá tốt bên bờ Đông sông Hàn, Đà Nẵng. Nhiều trụ trống, phù hợp cho khách du lịch và người dân.",
   },

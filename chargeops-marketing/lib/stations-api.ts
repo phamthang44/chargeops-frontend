@@ -324,6 +324,14 @@ export function mapBackendToCoverageStation(
     reviewCount: 88,
     description,
     primaryImageUrl: primaryImg,
+    images:
+      "assets" in b && Array.isArray(b.assets) && b.assets.length > 0
+        ? b.assets
+            .map((a: BackendStationAsset) => a.assetUrl)
+            .filter((url): url is string => Boolean(url))
+        : primaryImg
+        ? [primaryImg]
+        : ["/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/home.jpg"],
     maxPowerKw: powerKw > 0 ? powerKw : null,
     operatingState: b.operatingState,
     operationalStatus: b.operationalStatus,

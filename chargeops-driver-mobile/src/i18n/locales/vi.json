@@ -274,6 +274,14 @@
     "noResults": "Không tìm thấy trạm phù hợp.",
     "placeholder": "Màn hình bản đồ trạm sạc (placeholder)",
     "body": "Bản đồ Google Maps sẽ hiển thị ở đây.",
+    "directions": {
+      "attribution": "Chỉ đường © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+      "loading": "Đang tìm đường đến trạm…",
+      "noLocation": "Chưa xác định được vị trí hiện tại. Vui lòng bật định vị rồi thử lại.",
+      "notConfigured": "Tính năng chỉ đường chưa được cấu hình.",
+      "notFound": "Chưa tìm được đường đi. Vui lòng thử lại sau.",
+      "summary": "Đã tìm được đường đi: {{distance}} km · khoảng {{duration}} phút. Hãy tuân thủ biển báo giao thông."
+    },
     "legend": {
       "available": "Còn chỗ",
       "busy": "Sắp đầy",

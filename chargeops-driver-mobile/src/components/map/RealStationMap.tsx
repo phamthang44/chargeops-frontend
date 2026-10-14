@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import Constants from 'expo-constants';
+import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { Station } from '@/types';
 
@@ -38,6 +39,14 @@ function buildLeafletHtml(
   userCoords: { latitude: number; longitude: number } | null | undefined,
   isDark: boolean,
   mapBoxPublicKey: string,
+  routeMessages: {
+    attribution: string;
+    loading: string;
+    noLocation: string;
+    notConfigured: string;
+    notFound: string;
+    summary: string;
+  },
 ): string {
   // Find initial focus
   const selectedStation = stations.find((s) => s.id === selectedStationId);
@@ -215,7 +224,7 @@ function buildLeafletHtml(
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    map.attributionControl.addAttribution('Directions powered by <a href="https://www.mapbox.com/">Mapbox</a>');
+    map.attributionControl.addAttribution(${JSON.stringify(routeMessages.attribution)});
 
     function sendToHost(type, payload) {
       var msg = JSON.stringify(Object.assign({ type: type }, payload || {}));
@@ -245,15 +254,15 @@ function buildLeafletHtml(
         routeLine = null;
       }
       if (!userCoords || !Number.isFinite(userCoords.latitude) || !Number.isFinite(userCoords.longitude)) {
-        setRouteNotice('Chưa lấy được vị trí hiện tại để tìm đường.');
+        setRouteNotice(${JSON.stringify(routeMessages.noLocation)});
         return;
       }
       if (!mapBoxPublicKey) {
-        setRouteNotice('Thiếu MAP_BOX_PUBLIC_KEY trong file .env.');
+        setRouteNotice(${JSON.stringify(routeMessages.notConfigured)});
         return;
       }
 
-      setRouteNotice('Đang tìm tuyến đường…');
+      setRouteNotice(${JSON.stringify(routeMessages.loading)});
       var origin = userCoords.longitude + ',' + userCoords.latitude;
       var target = destination.longitude + ',' + destination.latitude;
       var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + origin + ';' + target +
@@ -283,12 +292,15 @@ function buildLeafletHtml(
 
           var distanceKm = (route.distance / 1000).toFixed(1);
           var durationMinutes = Math.max(1, Math.round(route.duration / 60));
-          setRouteNotice('Tuyến Mapbox: ' + distanceKm + ' km · khoảng ' + durationMinutes + ' phút. Hãy tuân thủ biển báo thực tế.');
+          var summary = ${JSON.stringify(routeMessages.summary)}
+            .replace('__DISTANCE__', distanceKm)
+            .replace('__DURATION__', durationMinutes);
+          setRouteNotice(summary);
         })
         .catch(function(error) {
           if (requestId !== routeRequestId) return;
           console.warn('Mapbox Directions request failed:', error);
-          setRouteNotice(error.message || 'Không tải được tuyến đường.');
+          setRouteNotice(${JSON.stringify(routeMessages.notFound)});
         });
     }
 
@@ -462,6 +474,7 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
     },
     ref,
   ) {
+    const { t, i18n } = useTranslation();
     const webViewRef = useRef<any>(null);
     const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
@@ -472,9 +485,20 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
         userCoords,
         isDark,
         Constants.expoConfig?.extra?.mapBoxPublicKey ?? '',
+        {
+          attribution: t('map.directions.attribution'),
+          loading: t('map.directions.loading'),
+          noLocation: t('map.directions.noLocation'),
+          notConfigured: t('map.directions.notConfigured'),
+          notFound: t('map.directions.notFound'),
+          summary: t('map.directions.summary', {
+            distance: '__DISTANCE__',
+            duration: '__DURATION__',
+          }),
+        },
       ),
       // We only recreate HTML on full initial mount or drastic change, other updates happen via messages
-      [isDark],
+      [isDark, t, i18n.resolvedLanguage],
     );
 
     // Send updates through postMessage when selection or stations change

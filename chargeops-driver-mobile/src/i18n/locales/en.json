@@ -274,6 +274,14 @@
     "noResults": "No stations match your search.",
     "placeholder": "Charging-station map screen (placeholder)",
     "body": "The Google Maps view will appear here.",
+    "directions": {
+      "attribution": "Directions © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+      "loading": "Finding a route to the station…",
+      "noLocation": "We couldn't determine your current location. Turn on location and try again.",
+      "notConfigured": "Directions haven't been configured yet.",
+      "notFound": "We couldn't find a route. Please try again.",
+      "summary": "Route found: {{distance}} km · about {{duration}} min. Please follow road signs."
+    },
     "legend": {
       "available": "Available",
       "busy": "Almost full",

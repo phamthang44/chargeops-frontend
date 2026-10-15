@@ -18,6 +18,8 @@ import {
   KpiCard,
   PageHeader,
   SegmentedControl,
+  Select,
+  type SelectOption,
   Skeleton,
   StatusPill,
 } from '@chargeops/ui';
@@ -58,6 +60,16 @@ export function OwnerDashboard() {
   });
   const stations = stationList.data ?? [];
   const selectedStation = stations.find((station: any) => station.id === stationId);
+  const stationOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: '', label: t('filters.allStations') },
+      ...stations.map((station: any) => ({
+        value: station.id,
+        label: `${station.name} · ${station.stationCode || station.id}`,
+      })),
+    ],
+    [stations, t],
+  );
   const summary = useQuery({ queryKey: ['owner-dashboard', 'summary'], queryFn: () => api.dashboard.owner(), enabled: !stationId });
   const activity = useQuery({ queryKey: ['owner-dashboard', 'activity', stationId, period], queryFn: () => api.dashboard.ownerActivity({ stationId, period }) });
   const stationRows = useQuery({ queryKey: ['owner-dashboard', 'stations', stationId, period], queryFn: () => api.dashboard.ownerStations({ stationId, period, page: 1, size: 5 }) });
@@ -94,15 +106,21 @@ export function OwnerDashboard() {
         </Button>} />
     </header>
 
-    <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-6">
-      <label className="flex min-w-0 flex-1 flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-faint">
-        {t('filters.scope')}
-        <select aria-label={t('filters.scope')} className="min-h-11 w-full rounded-ctl border border-line bg-surface px-3 text-sm font-medium normal-case tracking-normal text-ink focus-visible:border-owner sm:max-w-sm"
-          value={stationId ?? ''} onChange={(event) => update('stationId', event.target.value || undefined)}>
-          <option value="">{t('filters.allStations')}</option>
-          {stations.map((station: any) => <option key={station.id} value={station.id}>{station.name} · {station.stationCode || station.id}</option>)}
-        </select>
-      </label>
+    <Card className="relative z-10 flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-6 overflow-visible">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-faint">
+        <label htmlFor="owner-station-scope" className="cursor-pointer">{t('filters.scope')}</label>
+        <div className="w-full sm:max-w-sm">
+          <Select
+            value={stationId ?? ''}
+            onChange={(value) => update('stationId', value || undefined)}
+            options={stationOptions}
+            searchable={stations.length > 3}
+            searchPlaceholder={t('filters.searchPlaceholder', { defaultValue: 'Tìm trạm sạc...' })}
+            accent="owner"
+            aria-label={t('filters.scope')}
+          />
+        </div>
+      </div>
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-faint">{t('filters.period')}</p>
         <SegmentedControl segments={PERIODS.map((value) => ({ key: value, label: t(`filters.${value}`) }))}

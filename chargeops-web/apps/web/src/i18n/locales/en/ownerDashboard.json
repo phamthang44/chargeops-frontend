@@ -21,6 +21,7 @@
     "ariaLabel": "Dashboard filters",
     "scope": "Scope",
     "allStations": "All stations",
+    "searchPlaceholder": "Search stations...",
     "period": "Time range",
     "7d": "7 days",
     "30d": "30 days"

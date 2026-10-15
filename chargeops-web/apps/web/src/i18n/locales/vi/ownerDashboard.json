@@ -21,6 +21,7 @@
     "ariaLabel": "Bộ lọc dashboard",
     "scope": "Phạm vi",
     "allStations": "Tất cả trạm",
+    "searchPlaceholder": "Tìm trạm sạc...",
     "period": "Khoảng thời gian",
     "7d": "7 ngày",
     "30d": "30 ngày"

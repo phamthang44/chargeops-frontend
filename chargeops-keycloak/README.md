@@ -164,14 +164,14 @@ Native Terms mode records Keycloak's `terms_and_conditions` acceptance. Keep
 the separate `privacyAccepted` attribute if privacy consent must be captured
 independently.
 
-Legal links default to the local marketing routes in `login/theme.properties`:
+Legal links use the public marketing routes in `login/theme.properties`:
 
 ```properties
-chargeopsTermsUrl=http://localhost:3000/dieu-khoan
-chargeopsPrivacyUrl=http://localhost:3000/chinh-sach-bao-mat
+chargeopsTermsUrl=https://chargeops.online/dieu-khoan
+chargeopsPrivacyUrl=https://chargeops.online/chinh-sach-bao-mat
 ```
 
-Replace these two values with the public HTTPS marketing URL before deploying.
+The same links work from the public Keycloak hostname and local development.
 
 ## Required actions
 
@@ -228,7 +228,7 @@ chargeops-web
 
 chargeops-driver-mobile
   Valid redirect URI: chargeops://auth/callback
-  Valid redirect URI: http://localhost:8082/*
+  Valid redirect URI: http://localhost:8082
   Web origin:         http://localhost:8082
 ```
 
@@ -251,7 +251,7 @@ In Google Cloud, register Keycloak's broker callback as an authorized redirect
 URI, for example:
 
 ```text
-http://localhost:8080/realms/chargeops/broker/google/endpoint
+https://auth.chargeops.online/realms/chargeops/broker/google/endpoint
 ```
 
 For driver self-registration, assign the `DRIVER` realm role through a default

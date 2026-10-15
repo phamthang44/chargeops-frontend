@@ -2,7 +2,23 @@
   "title": "Overview",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Portfolio operations overview · {{date}}",
+  "hero": {
+    "eyebrow": "OWNER / OPERATIONS",
+    "stationScope": "Viewing operations for {{station}}",
+    "selectedStation": "selected station",
+    "scoped": "Station filter active",
+    "liveKicker": "LIVE OPERATIONS SNAPSHOT",
+    "liveStatus": "Current data",
+    "now": "NOW",
+    "activeStationNote": "stations currently active",
+    "onlineNote": "charge points online",
+    "availableNote": "connectors ready for use",
+    "chargingNote": "connectors in an active session",
+    "attentionHint": "Items requiring action, grouped by priority",
+    "confirmedOnly": "Confirmed bookings only"
+  },
   "filters": {
+    "ariaLabel": "Dashboard filters",
     "scope": "Scope",
     "allStations": "All stations",
     "period": "Time range",
@@ -23,7 +39,9 @@
     "charging": "Charging",
     "needsCheck": "Needs check",
     "sessions": "Sessions started",
-    "bookingsScheduled": "Bookings scheduled"
+    "bookingsScheduled": "Bookings scheduled",
+    "availability": "Availability",
+    "connectorAvailability": "{{available}} of {{total}} connectors available"
   },
   "empty": {
     "noStations": "There are no stations in this portfolio yet.",
@@ -43,6 +61,13 @@
     "OPEN_TICKET": "Open ticket", "LICENSE_EXPIRED": "License expired", "LICENSE_EXPIRING": "License expiring soon"
   },
   "loadError": "Could not load overview data",
+  "chart": {
+    "sessionsByDay": "Charging sessions by day",
+    "accessibleLabel": "Chart of charging sessions started each day",
+    "pointLabel": "{{date}}: {{count}} sessions",
+    "viewDailyValues": "View daily values",
+    "bookingStatuses": "Booking statuses in this time range"
+  },
   "dashboard": {
     "error": {
       "eyebrow": "Dashboard",
@@ -81,7 +106,8 @@
     "refreshing": "Refreshing...",
     "viewAll": "View all",
     "manage": "Manage",
-    "open": "Open"
+    "open": "Open",
+    "registerStation": "Register a station"
   },
   "hardwareDistribution": {
     "title": "Hardware connector distribution ({{count}} connectors)",

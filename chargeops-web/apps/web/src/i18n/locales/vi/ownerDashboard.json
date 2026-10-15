@@ -2,7 +2,23 @@
   "title": "Tổng quan",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Tổng quan vận hành toàn bộ danh mục trạm · {{date}}",
+  "hero": {
+    "eyebrow": "VẬN HÀNH / CHỦ TRẠM",
+    "stationScope": "Đang xem hoạt động của {{station}}",
+    "selectedStation": "trạm đã chọn",
+    "scoped": "Đang lọc theo trạm",
+    "liveKicker": "ẢNH CHỤP VẬN HÀNH",
+    "liveStatus": "Dữ liệu hiện tại",
+    "now": "HIỆN TẠI",
+    "activeStationNote": "trạm đang hoạt động",
+    "onlineNote": "trụ sạc đang trực tuyến",
+    "availableNote": "cổng sạc đang sẵn sàng",
+    "chargingNote": "cổng sạc đang có phiên",
+    "attentionHint": "Các mục cần xử lý theo mức ưu tiên",
+    "confirmedOnly": "Chỉ hiển thị đặt chỗ đã xác nhận"
+  },
   "filters": {
+    "ariaLabel": "Bộ lọc dashboard",
     "scope": "Phạm vi",
     "allStations": "Tất cả trạm",
     "period": "Khoảng thời gian",
@@ -23,7 +39,9 @@
     "charging": "Đang sạc",
     "needsCheck": "Cần kiểm tra",
     "sessions": "Phiên bắt đầu",
-    "bookingsScheduled": "Booking có lịch"
+    "bookingsScheduled": "Booking có lịch",
+    "availability": "Tỷ lệ sẵn sàng",
+    "connectorAvailability": "{{available}} trên {{total}} cổng sạc đang sẵn sàng"
   },
   "empty": {
     "noStations": "Chưa có trạm trong danh mục.",
@@ -43,6 +61,13 @@
     "OPEN_TICKET": "Ticket đang mở", "LICENSE_EXPIRED": "License đã hết hạn", "LICENSE_EXPIRING": "License sắp hết hạn"
   },
   "loadError": "Không tải được dữ liệu tổng quan",
+  "chart": {
+    "sessionsByDay": "Phiên sạc theo ngày",
+    "accessibleLabel": "Biểu đồ số phiên sạc khởi tạo mỗi ngày",
+    "pointLabel": "{{date}}: {{count}} phiên",
+    "viewDailyValues": "Xem số liệu từng ngày",
+    "bookingStatuses": "Trạng thái đặt chỗ trong khoảng thời gian"
+  },
   "dashboard": {
     "error": {
       "eyebrow": "Bảng điều khiển",
@@ -53,7 +78,7 @@
     }
   },
   "kpi": {
-    "activeStations": "Trạm đang mở",
+    "activeStations": "Trạm đang hoạt động",
     "pendingNote": "{{count}} trạm chờ duyệt",
     "allApproved": "Đã duyệt toàn bộ",
     "chargersOnline": "Trụ sạc Online",
@@ -81,7 +106,8 @@
     "refreshing": "Đang cập nhật...",
     "viewAll": "Xem tất cả",
     "manage": "Quản lý",
-    "open": "Mở"
+    "open": "Mở",
+    "registerStation": "Đăng ký trạm"
   },
   "hardwareDistribution": {
     "title": "Tình trạng cổng sạc hạ tầng ({{count}} cổng)",

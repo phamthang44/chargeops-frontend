@@ -73,6 +73,7 @@
   "observability": {
     "dashboardTitle": "ChargeOps Overview",
     "accessHint": "Grafana authenticates with Keycloak and only accepts the OBSERVABILITY_ADMIN role.",
+    "iframeAuthHint": "For the first Grafana sign-in, choose “Open in new tab” to finish Keycloak authentication. The auth.chargeops.online sign-in page cannot be displayed inside this iframe. Then return here and select “Refresh”.",
     "openInNewTab": "Open in new tab",
     "iframeTitle": "ChargeOps observability dashboard",
     "refreshTooltip": "Refresh dashboard",

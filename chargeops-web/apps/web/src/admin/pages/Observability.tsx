@@ -154,6 +154,10 @@ export function Observability() {
           </div>
         </div>
 
+        <p className="border-b border-line bg-canvas px-4 py-2 text-xs text-muted">
+          {t('observability.iframeAuthHint')}
+        </p>
+
         {/* Dashboard Iframe with Smooth OLED Dark Framing */}
         <div className={`relative w-full overflow-hidden bg-[#111217] ${isFullscreen ? 'flex-1' : ''}`}>
           <iframe

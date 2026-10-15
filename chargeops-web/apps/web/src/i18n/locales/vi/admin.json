@@ -73,6 +73,7 @@
   "observability": {
     "dashboardTitle": "ChargeOps Overview",
     "accessHint": "Grafana xác thực riêng qua Keycloak và chỉ chấp nhận role OBSERVABILITY_ADMIN.",
+    "iframeAuthHint": "Lần đầu đăng nhập Grafana, hãy chọn “Mở tab mới” để hoàn tất đăng nhập Keycloak. Trang đăng nhập auth.chargeops.online không thể hiển thị bên trong iframe. Sau đó quay lại đây và bấm “Làm mới”.",
     "openInNewTab": "Mở tab mới",
     "iframeTitle": "Bảng điều khiển giám sát ChargeOps",
     "refreshTooltip": "Làm mới bảng điều khiển",

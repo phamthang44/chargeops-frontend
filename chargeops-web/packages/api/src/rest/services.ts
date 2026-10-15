@@ -72,6 +72,13 @@ import type {
   StaffInvitationResponse,
   StaffOperationalBooking,
   StaffStationOverview,
+  StaffDashboardSummary,
+  StaffDashboardPage,
+  StaffDashboardBookingItem,
+  StaffDashboardBookingView,
+  StaffDashboardEquipmentItem,
+  StaffDashboardTicketItem,
+  StaffDashboardTicketView,
   StaffInvitationStatus,
   AdminUserProfile,
   AdminUserSummary,
@@ -499,8 +506,18 @@ export function createRestServices(http: HttpClient): Services {
 
     dashboard: {
       owner: () => http.get<OwnerOperationsSummary>('/owner/dashboard/summary'),
+      ownerActivity: (params) => http.get('/owner/dashboard/activity', params),
+      ownerStations: (params) => http.get('/owner/dashboard/stations', params),
+      ownerAttention: (params) => http.get('/owner/dashboard/attention', params),
       admin: () => http.get<AdminOperationsSummary>('/admin/dashboard/summary'),
       staff: () => http.get('/dashboard/staff'),
+      staffSummary: (stationId) => http.request('GET', `/staff/stations/${stationId}/dashboard/summary`, { headers: NO_STORE }),
+      staffBookings: (stationId, view, page = 1, size = 5) =>
+        http.request('GET', `/staff/stations/${stationId}/dashboard/bookings`, { params: { view, page, size }, headers: NO_STORE }),
+      staffEquipment: (stationId, page = 1, size = 5) =>
+        http.request('GET', `/staff/stations/${stationId}/dashboard/equipment`, { params: { page, size }, headers: NO_STORE }),
+      staffTickets: (stationId, view, page = 1, size = 5) =>
+        http.request('GET', `/staff/stations/${stationId}/dashboard/tickets`, { params: { view, page, size }, headers: NO_STORE }),
     },
 
     analytics: {

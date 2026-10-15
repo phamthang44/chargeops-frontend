@@ -18,6 +18,17 @@ import type {
   LicenseStatus,
   LicenseStatusEventDto,
   OwnerOperationsSummary,
+  OwnerDashboardActivity,
+  OwnerDashboardAttentionItem,
+  OwnerDashboardAttentionPage,
+  OwnerDashboardStationPage,
+  StaffDashboardSummary,
+  StaffDashboardPage,
+  StaffDashboardBookingItem,
+  StaffDashboardBookingView,
+  StaffDashboardEquipmentItem,
+  StaffDashboardTicketItem,
+  StaffDashboardTicketView,
   PaymentMethod,
   ExecuteRefundRequest,
   RefundAttemptItem,
@@ -507,6 +518,108 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
     },
 
     dashboard: {
+      async staffSummary(stationId): Promise<StaffDashboardSummary> {
+        await delay();
+        const station = db.ownerStations.find((item) => item.id === stationId);
+        if (!station) throw new ApiError(404, 'NOT_FOUND', 'Station not found');
+        const chargePoints = db.chargePoints.filter((cp) => cp.stationId === stationId);
+        const cpIds = new Set(chargePoints.map((cp) => cp.id));
+        const connectors = db.connectors.filter((connector) => cpIds.has(connector.chargePointId));
+        const bookings = db.bookings.filter((booking) => booking.stationId === stationId) as any[];
+        const tickets = db.tickets.filter((ticket) => ticket.stationId === stationId) as any[];
+        const generatedAt = new Date().toISOString();
+        const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+        return {
+          stationId, stationName: station.name, address: station.address ?? '', stationStatus: String(station.status).toUpperCase(),
+          operationalStatus: String(station.operationalStatus ?? 'OPERATING').toUpperCase(), generatedAt, date, timezone: 'Asia/Ho_Chi_Minh',
+          bookingsToday: bookings.filter((booking) => booking.startAt && new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(booking.startAt)) === date).length,
+          chargingBookings: bookings.filter((booking) => String(booking.status).toUpperCase() === 'CHARGING').length,
+          availableConnectors: connectors.filter((connector) => effectiveRuntimeStatus(connector, chargePoints) === 'AVAILABLE').length,
+          unclaimedTickets: tickets.filter((ticket) => ['OPEN', 'IN_PROGRESS'].includes(String(ticket.status).toUpperCase()) && !ticket.assignedHandlerId).length,
+        };
+      },
+      async staffBookings(stationId, view, page = 1, size = 5): Promise<StaffDashboardPage<StaffDashboardBookingItem>> {
+        await delay();
+        const now = new Date();
+        const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(now);
+        const dayEnd = new Date(`${day}T00:00:00+07:00`).getTime() + 86400000;
+        const rows = (db.bookings.filter((booking) => booking.stationId === stationId) as any[])
+          .filter((booking) => view === 'CHARGING'
+            ? String(booking.status).toUpperCase() === 'CHARGING'
+            : ['CONFIRMED', 'CHECKED_IN'].includes(String(booking.status).toUpperCase()) && new Date(booking.startAt).getTime() >= now.getTime() && new Date(booking.startAt).getTime() < dayEnd)
+          .sort((a, b) => (view === 'CHARGING' ? a.endAt.localeCompare(b.endAt) : a.startAt.localeCompare(b.startAt)) || String(a.id).localeCompare(String(b.id)))
+          .map((booking) => {
+            const connector = db.connectors.find((item) => item.id === booking.connectorId);
+            return { bookingId: booking.id, bookingCode: booking.bookingCode ?? booking.id, status: String(booking.status).toUpperCase(),
+              connectorId: booking.connectorId, connectorCode: connector?.connectorCode ?? '',
+              driverDisplayName: booking.driverDisplayName ?? booking.driverName ?? '', startAt: booking.startAt, endAt: booking.endAt,
+              checkedInAt: booking.checkedInAt ?? null, checkInDeadline: booking.checkInDeadline ?? null, chargingStartedAt: booking.chargingStartedAt ?? null };
+          });
+        return { stationId, generatedAt: now.toISOString(), items: rows.slice((page - 1) * size, page * size), page, size, totalElements: rows.length, totalPages: Math.ceil(rows.length / size) };
+      },
+      async staffEquipment(stationId, page = 1, size = 5): Promise<StaffDashboardPage<StaffDashboardEquipmentItem>> {
+        await delay();
+        const chargePoints = db.chargePoints.filter((cp) => cp.stationId === stationId);
+        const cpRows = chargePoints.filter((cp) => cp.provisioningStatus === 'ACTIVE' && ['OFFLINE', 'MAINTENANCE'].includes(String(cp.operationalStatus).toUpperCase())).map((cp) => ({
+          equipmentType: 'CHARGE_POINT' as const, equipmentId: cp.id, code: cp.chargePointCode ?? cp.id, chargePointId: cp.id, connectorId: null,
+          chargePointStatus: String(cp.operationalStatus).toUpperCase(), connectorStatus: null,
+          reasonCode: String(cp.operationalStatus).toUpperCase() === 'OFFLINE' ? 'CHARGE_POINT_OFFLINE' : 'CHARGE_POINT_MAINTENANCE', activeIncidentId: null,
+        }));
+        const cpIds = new Set(chargePoints.filter((cp) => cp.provisioningStatus === 'ACTIVE' && String(cp.operationalStatus).toUpperCase() === 'AVAILABLE').map((cp) => cp.id));
+        const connectorRows = db.connectors.filter((connector) => cpIds.has(connector.chargePointId) && effectiveRuntimeStatus(connector, chargePoints) === 'OFFLINE').map((connector) => ({
+          equipmentType: 'CONNECTOR' as const, equipmentId: connector.id, code: connector.connectorCode,
+          chargePointId: connector.chargePointId, connectorId: connector.id, chargePointStatus: null, connectorStatus: 'OFFLINE',
+          reasonCode: 'CONNECTOR_OFFLINE', activeIncidentId: (connector as any).activeIncidentId ?? null,
+        }));
+        const rows = [...cpRows, ...connectorRows];
+        return { stationId, generatedAt: new Date().toISOString(), items: rows.slice((page - 1) * size, page * size), page, size, totalElements: rows.length, totalPages: Math.ceil(rows.length / size) };
+      },
+      async staffTickets(stationId, view: StaffDashboardTicketView, page = 1, size = 5): Promise<StaffDashboardPage<StaffDashboardTicketItem>> {
+        await delay();
+        const rows = (db.tickets.filter((ticket) => ticket.stationId === stationId) as any[])
+          .filter((ticket) => ['OPEN', 'IN_PROGRESS'].includes(String(ticket.status).toUpperCase()) && (view === 'UNCLAIMED' ? !ticket.assignedHandlerId : ticket.assignedHandlerId === 'user-staff-01'))
+          .sort((a, b) => String(a.createdAt ?? a.updatedAt).localeCompare(String(b.createdAt ?? b.updatedAt)))
+          .map((ticket) => ({ ticketId: ticket.id, ticketCode: ticket.ticketCode ?? ticket.id, subject: ticket.subject, status: String(ticket.status).toUpperCase(),
+            createdAt: ticket.createdAt ?? ticket.updatedAt, handlerId: ticket.assignedHandlerId ?? null, handlerDisplayName: ticket.assignedHandlerName ?? null }));
+        return { stationId, generatedAt: new Date().toISOString(), items: rows.slice((page - 1) * size, page * size), page, size, totalElements: rows.length, totalPages: Math.ceil(rows.length / size) };
+      },
+      async ownerActivity({ period }): Promise<OwnerDashboardActivity> {
+        await delay();
+        const today = new Date();
+        const count = period === '30d' ? 30 : 7;
+        const daily = Array.from({ length: count }, (_, index) => {
+          const date = new Date(today);
+          date.setDate(today.getDate() - (count - index - 1));
+          return { date: date.toISOString().slice(0, 10), sessionsStarted: index % 5 === 0 ? 0 : (index % 4) + 1 };
+        });
+        return { generatedAt: new Date().toISOString(), timezone: 'Asia/Ho_Chi_Minh', period,
+          from: `${daily[0]?.date}T00:00:00+07:00`, to: `${new Date(today.getTime() + 86400000).toISOString().slice(0, 10)}T00:00:00+07:00`,
+          sessionsStarted: daily.reduce((sum, item) => sum + item.sessionsStarted, 0), bookingsScheduled: 8,
+          bookingsByStatus: { PENDING: 0, CONFIRMED: 4, CHECKED_IN: 1, CHARGING: 1, COMPLETED: 2, EXPIRED: 0, CANCELLED: 0 }, daily };
+      },
+      async ownerStations({ stationId, period, page = 1, size = 5 }): Promise<OwnerDashboardStationPage> {
+        await delay();
+        const rows = db.ownerStations.filter((station) => !stationId || station.id === stationId).map((station) => {
+          const points = db.chargePoints.filter((cp) => cp.stationId === station.id);
+          const connectors = db.connectors.filter((connector) => points.some((cp) => cp.id === connector.chargePointId));
+          return { stationId: station.id, stationCode: station.stationCode || station.id, stationName: station.name, status: String(station.status),
+            totalConnectors: connectors.length, availableConnectors: connectors.filter((c) => c.runtimeStatus === 'AVAILABLE').length,
+            chargingConnectors: connectors.filter((c) => c.runtimeStatus === 'IN_USE').length,
+            connectorsNeedingCheck: connectors.filter((c) => c.runtimeStatus === 'OFFLINE').length, sessionsStarted: 0 };
+        });
+        return { generatedAt: new Date().toISOString(), period, from: '', to: '', items: rows.slice((page - 1) * size, page * size), page, size, total: rows.length };
+      },
+      async ownerAttention({ kind, stationId, page = 1, size = 5 }): Promise<OwnerDashboardAttentionPage> {
+        await delay();
+        const points: OwnerDashboardAttentionItem[] = db.chargePoints.filter((point) => ['OFFLINE', 'MAINTENANCE'].includes(point.operationalStatus)).flatMap((point) => {
+          const station = db.ownerStations.find((item) => item.id === point.stationId);
+          return station ? [{ kind: 'EQUIPMENT' as const, entityId: point.id, code: point.chargePointCode || point.id,
+            stationId: station.id, stationName: station.name, reasonCode: String(point.operationalStatus), status: String(point.operationalStatus), occurredAt: null }] : [];
+        });
+        const items: OwnerDashboardAttentionItem[] = kind === 'EQUIPMENT' ? points : [];
+        const scoped = items.filter((item) => !stationId || item.stationId === stationId);
+        return { generatedAt: new Date().toISOString(), kind, items: scoped.slice((page - 1) * size, page * size), page, size, total: scoped.length };
+      },
       async owner(): Promise<OwnerOperationsSummary> {
         await delay();
         const myStations = db.ownerStations;

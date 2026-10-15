@@ -34,7 +34,7 @@ import {
   type NotificationItem,
   type ShellNavItem,
 } from '@chargeops/ui';
-import { Dashboard } from './pages/Dashboard';
+import { OwnerDashboard as Dashboard } from './pages/OwnerDashboard';
 import { Stations } from './pages/Stations';
 import { Bookings } from './pages/Bookings';
 import { Chargers } from './pages/Chargers';

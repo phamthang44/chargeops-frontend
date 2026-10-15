@@ -1,29 +1,64 @@
 {
-  "title": "Tổng quan",
-  "subtitle": "Hoạt động trạm của bạn hôm nay.",
-  "loadError": "Không tải được dữ liệu tổng quan",
+  "title": "Bảng điều hành trạm",
+  "subtitle": "Theo dõi công việc vận hành tại trạm được phân công.",
+  "refresh": "Làm mới",
+  "refreshing": "Đang cập nhật…",
+  "retry": "Thử lại",
+  "stationAddressUnavailable": "Chưa có địa chỉ trạm",
+  "updatedAt": "Cập nhật lúc {{time}}",
   "kpi": {
+    "section": "Chỉ số vận hành hôm nay",
     "bookingsToday": "ĐẶT CHỖ HÔM NAY",
-    "bookingsDelta": "+{{count}} so với hôm qua",
-    "chargersOnline": "TRỤ ONLINE",
-    "allOnline": "Tất cả trụ đang online",
-    "openTickets": "TICKET ĐANG MỞ",
-    "openTicketsSub": "cần xử lý",
-    "pendingCheckins": "CẦN CHECK-IN",
-    "pendingCheckinsSub": "đã xác nhận, chờ khách tới"
+    "bookingsTodayHint": "Theo giờ bắt đầu trong ngày",
+    "chargingNow": "ĐANG SẠC",
+    "chargingNowHint": "Bao gồm phiên bắt đầu từ hôm trước",
+    "availableConnectors": "ĐẦU SẠC SẴN SÀNG",
+    "availableConnectorsHint": "Trên các trụ đang hoạt động",
+    "unclaimedTickets": "YÊU CẦU CHƯA NHẬN",
+    "unclaimedTicketsHint": "Đang mở hoặc đang xử lý"
   },
-  "charger": {
-    "available": "Sẵn sàng",
-    "inuse": "Đang sạc",
-    "offline": "Offline"
+  "bookings": {
+    "title": "Lịch đặt chỗ",
+    "all": "Tất cả đặt chỗ",
+    "upcoming": "Sắp tới",
+    "charging": "Đang sạc",
+    "startedAt": "Bắt đầu sạc lúc {{time}}",
+    "emptyUpcoming": "Không có lượt đặt chỗ sắp tới trong hôm nay.",
+    "emptyCharging": "Hiện không có lượt sạc nào."
   },
-  "panel": {
-    "chargers": "Trạng thái trụ",
-    "manageLink": "Quản lý →",
-    "upcomingBookings": "Sắp tới",
-    "allBookingsLink": "Tất cả →",
-    "recentTickets": "Hỗ trợ gần đây",
-    "allTicketsLink": "Xem tất cả →",
-    "noTickets": "Không có ticket nào gần đây."
+  "equipment": {
+    "title": "Thiết bị cần kiểm tra",
+    "all": "Quản lý thiết bị",
+    "empty": "Thiết bị trong trạm đang hoạt động bình thường.",
+    "types": { "CHARGE_POINT": "Trụ sạc", "CONNECTOR": "Đầu sạc" },
+    "reasons": {
+      "CHARGE_POINT_OFFLINE": "Trụ đang ngoại tuyến",
+      "CHARGE_POINT_MAINTENANCE": "Trụ đang bảo trì",
+      "CONNECTOR_OFFLINE": "Đầu sạc ngoại tuyến"
+    }
+  },
+  "tickets": {
+    "title": "Yêu cầu hỗ trợ",
+    "all": "Tất cả yêu cầu",
+    "unclaimed": "Chưa nhận",
+    "mine": "Tôi phụ trách",
+    "notClaimed": "Chưa có người nhận",
+    "emptyUnclaimed": "Không có yêu cầu nào đang chờ nhận.",
+    "emptyMine": "Bạn chưa có yêu cầu nào đang phụ trách."
+  },
+  "states": {
+    "noStation": "Tài khoản chưa được phân công trạm đang hoạt động.",
+    "summaryError": "Không tải được chỉ số vận hành.",
+    "bookingsError": "Không tải được lịch đặt chỗ.",
+    "equipmentError": "Không tải được danh sách thiết bị cần kiểm tra.",
+    "ticketsError": "Không tải được yêu cầu hỗ trợ."
+  },
+  "pagination": "Trang {{page}} / {{pages}}",
+  "status": {
+    "OPERATING": "Đang vận hành", "PAUSED": "Tạm dừng", "MAINTENANCE": "Bảo trì",
+    "OFFLINE": "Ngoại tuyến", "AVAILABLE": "Sẵn sàng", "ACTIVE": "Đang hoạt động",
+    "OPEN": "Đang mở", "IN_PROGRESS": "Đang xử lý", "CONFIRMED": "Đã xác nhận",
+    "CHECKED_IN": "Đã check-in", "CHARGING": "Đang sạc", "COMPLETED": "Hoàn tất",
+    "CANCELLED": "Đã hủy", "EXPIRED": "Hết hạn", "RESOLVED": "Đã xử lý", "CLOSED": "Đã đóng"
   }
 }

@@ -2,6 +2,46 @@
   "title": "Overview",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Portfolio operations overview · {{date}}",
+  "filters": {
+    "scope": "Scope",
+    "allStations": "All stations",
+    "period": "Time range",
+    "7d": "7 days",
+    "30d": "30 days"
+  },
+  "sections": {
+    "current": "Current operations",
+    "stations": "Activity by station",
+    "stationHelp": "Sessions started in {{period}}; equipment status is current.",
+    "attention": "Needs attention",
+    "activity": "Activity",
+    "generatedAt": "Updated at {{time}}"
+  },
+  "attentionKinds": { "EQUIPMENT": "Equipment", "TICKET": "Tickets", "LICENSE": "Licenses" },
+  "metrics": {
+    "connectors": "Available / total connectors",
+    "charging": "Charging",
+    "needsCheck": "Needs check",
+    "sessions": "Sessions started",
+    "bookingsScheduled": "Bookings scheduled"
+  },
+  "empty": {
+    "noStations": "There are no stations in this portfolio yet.",
+    "noStationData": "There is no activity for this station.",
+    "noAttention": "Nothing needs attention.",
+    "noActivity": "There is no activity in this time range."
+  },
+  "status": {
+    "ACTIVE": "Active", "PENDING_APPROVAL": "Pending approval", "SUSPENDED": "Suspended",
+    "PENDING": "Pending", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in",
+    "CHARGING": "Charging", "COMPLETED": "Completed", "EXPIRED": "Expired", "CANCELLED": "Cancelled",
+    "OFFLINE": "Offline", "MAINTENANCE": "Maintenance", "AVAILABLE": "Available",
+    "active": "Active", "pending": "Pending approval", "suspended": "Suspended"
+  },
+  "reasons": {
+    "OFFLINE": "Charge point offline", "MAINTENANCE": "Under maintenance", "CONNECTOR_OFFLINE": "Connector offline",
+    "OPEN_TICKET": "Open ticket", "LICENSE_EXPIRED": "License expired", "LICENSE_EXPIRING": "License expiring soon"
+  },
   "loadError": "Could not load overview data",
   "dashboard": {
     "error": {
@@ -38,7 +78,10 @@
   },
   "actions": {
     "refresh": "Refresh",
-    "refreshing": "Refreshing..."
+    "refreshing": "Refreshing...",
+    "viewAll": "View all",
+    "manage": "Manage",
+    "open": "Open"
   },
   "hardwareDistribution": {
     "title": "Hardware connector distribution ({{count}} connectors)",

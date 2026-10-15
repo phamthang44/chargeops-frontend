@@ -1,29 +1,64 @@
 {
-  "title": "Overview",
-  "subtitle": "Your station activity today.",
-  "loadError": "Could not load overview data",
+  "title": "Station Operations",
+  "subtitle": "Track operational work for your assigned station.",
+  "refresh": "Refresh",
+  "refreshing": "Updating…",
+  "retry": "Retry",
+  "stationAddressUnavailable": "Station address unavailable",
+  "updatedAt": "Updated at {{time}}",
   "kpi": {
+    "section": "Today's operations",
     "bookingsToday": "BOOKINGS TODAY",
-    "bookingsDelta": "+{{count}} vs yesterday",
-    "chargersOnline": "CHARGERS ONLINE",
-    "allOnline": "All chargers online",
-    "openTickets": "OPEN TICKETS",
-    "openTicketsSub": "need attention",
-    "pendingCheckins": "PENDING CHECK-INS",
-    "pendingCheckinsSub": "confirmed, awaiting arrival"
+    "bookingsTodayHint": "Based on start time today",
+    "chargingNow": "CHARGING NOW",
+    "chargingNowHint": "Includes sessions started overnight",
+    "availableConnectors": "AVAILABLE CONNECTORS",
+    "availableConnectorsHint": "On active charge points",
+    "unclaimedTickets": "UNCLAIMED REQUESTS",
+    "unclaimedTicketsHint": "Open or in progress"
   },
-  "charger": {
-    "available": "Available",
-    "inuse": "In use",
-    "offline": "Offline"
+  "bookings": {
+    "title": "Booking schedule",
+    "all": "All bookings",
+    "upcoming": "Upcoming",
+    "charging": "Charging",
+    "startedAt": "Charging started at {{time}}",
+    "emptyUpcoming": "There are no upcoming bookings for today.",
+    "emptyCharging": "There are no active charging sessions."
   },
-  "panel": {
-    "chargers": "Charger status",
-    "manageLink": "Manage →",
-    "upcomingBookings": "Coming up",
-    "allBookingsLink": "All →",
-    "recentTickets": "Recent support tickets",
-    "allTicketsLink": "View all →",
-    "noTickets": "No recent tickets."
+  "equipment": {
+    "title": "Equipment to check",
+    "all": "Manage equipment",
+    "empty": "All station equipment is operating normally.",
+    "types": { "CHARGE_POINT": "Charge point", "CONNECTOR": "Connector" },
+    "reasons": {
+      "CHARGE_POINT_OFFLINE": "Charge point is offline",
+      "CHARGE_POINT_MAINTENANCE": "Charge point is under maintenance",
+      "CONNECTOR_OFFLINE": "Connector is offline"
+    }
+  },
+  "tickets": {
+    "title": "Support requests",
+    "all": "All requests",
+    "unclaimed": "Unclaimed",
+    "mine": "Assigned to me",
+    "notClaimed": "Not claimed",
+    "emptyUnclaimed": "There are no requests waiting to be claimed.",
+    "emptyMine": "You have no requests assigned to you."
+  },
+  "states": {
+    "noStation": "Your account is not assigned to an active station.",
+    "summaryError": "Could not load operational metrics.",
+    "bookingsError": "Could not load the booking schedule.",
+    "equipmentError": "Could not load equipment that needs attention.",
+    "ticketsError": "Could not load support requests."
+  },
+  "pagination": "Page {{page}} of {{pages}}",
+  "status": {
+    "OPERATING": "Operating", "PAUSED": "Paused", "MAINTENANCE": "Maintenance",
+    "OFFLINE": "Offline", "AVAILABLE": "Available", "ACTIVE": "Active",
+    "OPEN": "Open", "IN_PROGRESS": "In progress", "CONFIRMED": "Confirmed",
+    "CHECKED_IN": "Checked in", "CHARGING": "Charging", "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled", "EXPIRED": "Expired", "RESOLVED": "Resolved", "CLOSED": "Closed"
   }
 }

@@ -2,6 +2,46 @@
   "title": "Tổng quan",
   "subtitle": "{{date}}",
   "subtitleFormatted": "Tổng quan vận hành toàn bộ danh mục trạm · {{date}}",
+  "filters": {
+    "scope": "Phạm vi",
+    "allStations": "Tất cả trạm",
+    "period": "Khoảng thời gian",
+    "7d": "7 ngày",
+    "30d": "30 ngày"
+  },
+  "sections": {
+    "current": "Tình hình hiện tại",
+    "stations": "Hoạt động theo trạm",
+    "stationHelp": "Số phiên bắt đầu trong {{period}}; trạng thái thiết bị là hiện tại.",
+    "attention": "Cần chú ý",
+    "activity": "Hoạt động",
+    "generatedAt": "Cập nhật lúc {{time}}"
+  },
+  "attentionKinds": { "EQUIPMENT": "Thiết bị", "TICKET": "Ticket", "LICENSE": "License" },
+  "metrics": {
+    "connectors": "Cổng sẵn sàng / tổng",
+    "charging": "Đang sạc",
+    "needsCheck": "Cần kiểm tra",
+    "sessions": "Phiên bắt đầu",
+    "bookingsScheduled": "Booking có lịch"
+  },
+  "empty": {
+    "noStations": "Chưa có trạm trong danh mục.",
+    "noStationData": "Không có dữ liệu hoạt động cho trạm này.",
+    "noAttention": "Không có mục cần chú ý.",
+    "noActivity": "Chưa có hoạt động trong khoảng thời gian này."
+  },
+  "status": {
+    "ACTIVE": "Đang hoạt động", "PENDING_APPROVAL": "Chờ duyệt", "SUSPENDED": "Tạm ngưng",
+    "PENDING": "Chờ thanh toán", "CONFIRMED": "Đã xác nhận", "CHECKED_IN": "Đã check-in",
+    "CHARGING": "Đang sạc", "COMPLETED": "Hoàn tất", "EXPIRED": "Hết hạn", "CANCELLED": "Đã hủy",
+    "OFFLINE": "Ngoại tuyến", "MAINTENANCE": "Bảo trì", "AVAILABLE": "Sẵn sàng",
+    "active": "Đang hoạt động", "pending": "Chờ duyệt", "suspended": "Tạm ngưng"
+  },
+  "reasons": {
+    "OFFLINE": "Trụ ngoại tuyến", "MAINTENANCE": "Đang bảo trì", "CONNECTOR_OFFLINE": "Cổng sạc ngoại tuyến",
+    "OPEN_TICKET": "Ticket đang mở", "LICENSE_EXPIRED": "License đã hết hạn", "LICENSE_EXPIRING": "License sắp hết hạn"
+  },
   "loadError": "Không tải được dữ liệu tổng quan",
   "dashboard": {
     "error": {
@@ -38,7 +78,10 @@
   },
   "actions": {
     "refresh": "Làm mới",
-    "refreshing": "Đang cập nhật..."
+    "refreshing": "Đang cập nhật...",
+    "viewAll": "Xem tất cả",
+    "manage": "Quản lý",
+    "open": "Mở"
   },
   "hardwareDistribution": {
     "title": "Tình trạng cổng sạc hạ tầng ({{count}} cổng)",

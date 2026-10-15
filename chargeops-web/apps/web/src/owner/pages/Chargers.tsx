@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   useApi,
@@ -31,6 +32,9 @@ export function Chargers() {
   const qc = useQueryClient();
   const toast = useToast();
   const { selectedStationId, currentStation } = useOwnerStation();
+  const [searchParams] = useSearchParams();
+  const stationIdParam = searchParams.get('stationId');
+  const scopedStationId = stationIdParam || selectedStationId;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** Pending operational status change awaiting confirmation (null = dialog closed). */
   const [intent, setIntent] = useState<StatusIntent | null>(null);
@@ -39,14 +43,14 @@ export function Chargers() {
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
 
   const chargePointsQ = useQuery({
-    queryKey: ['chargePoints', 'station', selectedStationId],
-    queryFn: () => (selectedStationId ? api.chargePoints.list(selectedStationId) : Promise.resolve([])),
-    enabled: Boolean(selectedStationId),
+    queryKey: ['chargePoints', 'station', scopedStationId],
+    queryFn: () => (scopedStationId ? api.chargePoints.list(scopedStationId) : Promise.resolve([])),
+    enabled: Boolean(scopedStationId),
   });
   const connectorsQ = useQuery({
-    queryKey: ['connectors', 'station', selectedStationId],
-    queryFn: () => (selectedStationId ? api.connectors.list(undefined, selectedStationId) : Promise.resolve([])),
-    enabled: Boolean(selectedStationId),
+    queryKey: ['connectors', 'station', scopedStationId],
+    queryFn: () => (scopedStationId ? api.connectors.list(undefined, scopedStationId) : Promise.resolve([])),
+    enabled: Boolean(scopedStationId),
   });
 
   const isLoading = chargePointsQ.isLoading || connectorsQ.isLoading;
@@ -110,6 +114,14 @@ export function Chargers() {
   const downloadQr = (c: Connector) => toast(t('connectors.downloadToast', { id: c.connectorCode || c.id }), 'info');
 
   const selected = groups.find((g) => g.chargePoint.id === selectedId) ?? null;
+
+  useEffect(() => {
+    if (!stationIdParam || isLoading) return;
+    const chargePointId = searchParams.get('chargePointId');
+    const connectorId = searchParams.get('connectorId');
+    const group = groups.find((item) => item.chargePoint.id === chargePointId || item.connectors.some((connector) => connector.id === connectorId));
+    if (group) setSelectedId(group.chargePoint.id);
+  }, [stationIdParam, searchParams, groups, isLoading]);
 
   /** Status controls never mutate directly — they raise an intent for confirmation. */
   const askChargePoint = (cp: ChargePoint, target?: OperationalChargePointStatus) => {
@@ -323,7 +335,7 @@ export function Chargers() {
       <EquipmentStatusHistoryDrawer
         open={Boolean(historyTarget)}
         onClose={() => setHistoryTarget(null)}
-        stationId={selectedStationId || ''}
+        stationId={scopedStationId || ''}
         target={historyTarget}
       />
 
@@ -331,7 +343,7 @@ export function Chargers() {
         <ReportIncidentModal
           open={Boolean(incidentTarget)}
           onClose={() => setIncidentTarget(null)}
-          stationId={selectedStationId || ''}
+          stationId={scopedStationId || ''}
           chargePoint={incidentTarget.chargePoint}
           connector={incidentTarget.connector}
           onSuccess={(inc) => {
@@ -344,7 +356,7 @@ export function Chargers() {
       <ConnectorIncidentDrawer
         open={Boolean(activeIncidentId)}
         onClose={() => setActiveIncidentId(null)}
-        stationId={selectedStationId || ''}
+        stationId={scopedStationId || ''}
         incidentId={activeIncidentId}
       />
     </>

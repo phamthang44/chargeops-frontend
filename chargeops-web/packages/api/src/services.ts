@@ -12,6 +12,11 @@ import type {
   OwnerBookingListParams,
   OwnerBookingSummary,
   OwnerOperationsSummary,
+  OwnerDashboardActivity,
+  OwnerDashboardAttentionKind,
+  OwnerDashboardAttentionPage,
+  OwnerDashboardPeriod,
+  OwnerDashboardStationPage,
   AdminOperationsSummary,
   AdminStationDetail,
   AdminStationFilterParams,
@@ -74,6 +79,13 @@ import type {
   RegisterStationRequest,
   StationRegistrationDetail,
   StaffDashboard,
+  StaffDashboardSummary,
+  StaffDashboardPage,
+  StaffDashboardBookingItem,
+  StaffDashboardBookingView,
+  StaffDashboardEquipmentItem,
+  StaffDashboardTicketItem,
+  StaffDashboardTicketView,
   StaffLookupResponse,
   StaffAssignmentStatus,
   CurrentStaffContextResponse,
@@ -131,9 +143,16 @@ export interface LocationService {
 
 export interface DashboardService {
   owner(): Promise<OwnerOperationsSummary>;
+  ownerActivity(params: { stationId?: string; period: OwnerDashboardPeriod }): Promise<OwnerDashboardActivity>;
+  ownerStations(params: { stationId?: string; period: OwnerDashboardPeriod; page?: number; size?: number }): Promise<OwnerDashboardStationPage>;
+  ownerAttention(params: { stationId?: string; kind: OwnerDashboardAttentionKind; page?: number; size?: number }): Promise<OwnerDashboardAttentionPage>;
   admin(): Promise<AdminOperationsSummary>;
   /** Ops-only KPIs — no revenue/license fields exist on this DTO (see StaffDashboard). */
   staff(): Promise<StaffDashboard>;
+  staffSummary(stationId: string): Promise<StaffDashboardSummary>;
+  staffBookings(stationId: string, view: StaffDashboardBookingView, page?: number, size?: number): Promise<StaffDashboardPage<StaffDashboardBookingItem>>;
+  staffEquipment(stationId: string, page?: number, size?: number): Promise<StaffDashboardPage<StaffDashboardEquipmentItem>>;
+  staffTickets(stationId: string, view: StaffDashboardTicketView, page?: number, size?: number): Promise<StaffDashboardPage<StaffDashboardTicketItem>>;
 }
 
 export interface AnalyticsService {

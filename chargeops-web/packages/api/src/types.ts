@@ -1637,6 +1637,70 @@ export interface StaffDashboard {
   recentTickets: Pick<Ticket, 'id' | 'subject' | 'status' | 'updatedAt'>[];
 }
 
+export type StaffDashboardBookingView = 'UPCOMING' | 'CHARGING';
+export type StaffDashboardTicketView = 'UNCLAIMED' | 'MINE';
+
+export interface StaffDashboardSummary {
+  stationId: string;
+  stationName: string;
+  address: string;
+  stationStatus: string;
+  operationalStatus: string;
+  generatedAt: string;
+  date: string;
+  timezone: string;
+  bookingsToday: number;
+  chargingBookings: number;
+  availableConnectors: number;
+  unclaimedTickets: number;
+}
+
+export interface StaffDashboardPage<T> {
+  stationId: string;
+  generatedAt: string;
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface StaffDashboardBookingItem {
+  bookingId: string;
+  bookingCode: string;
+  status: string;
+  connectorId: string;
+  connectorCode: string;
+  driverDisplayName: string;
+  startAt: string;
+  endAt: string;
+  checkedInAt: string | null;
+  checkInDeadline: string | null;
+  chargingStartedAt: string | null;
+}
+
+export interface StaffDashboardEquipmentItem {
+  equipmentType: 'CHARGE_POINT' | 'CONNECTOR';
+  equipmentId: string;
+  code: string;
+  chargePointId: string;
+  connectorId: string | null;
+  chargePointStatus: string | null;
+  connectorStatus: string | null;
+  reasonCode: string;
+  activeIncidentId: string | null;
+}
+
+export interface StaffDashboardTicketItem {
+  ticketId: string;
+  ticketCode: string;
+  subject: string;
+  status: string;
+  createdAt: string;
+  handlerId: string | null;
+  handlerDisplayName: string | null;
+}
+
 export interface OwnerDashboard {
   license: { status: LicenseStatus; expiryDate: string; daysLeft: number; expiringSoon?: boolean };
   kpis: {
@@ -1676,6 +1740,59 @@ export interface OwnerOperationsSummary {
     sessionsToday: number;
     averageUtilizationPercent: number;
   };
+}
+
+export type OwnerDashboardPeriod = '7d' | '30d';
+export type OwnerDashboardAttentionKind = 'EQUIPMENT' | 'TICKET' | 'LICENSE';
+export interface OwnerDashboardActivity {
+  generatedAt: string;
+  timezone: string;
+  period: OwnerDashboardPeriod;
+  from: string;
+  to: string;
+  sessionsStarted: number;
+  bookingsScheduled: number;
+  bookingsByStatus: Record<string, number>;
+  daily: Array<{ date: string; sessionsStarted: number }>;
+}
+export interface OwnerDashboardStationRow {
+  stationId: string;
+  stationCode: string;
+  stationName: string;
+  status: string;
+  totalConnectors: number;
+  availableConnectors: number;
+  chargingConnectors: number;
+  connectorsNeedingCheck: number;
+  sessionsStarted: number;
+}
+export interface OwnerDashboardStationPage {
+  generatedAt: string;
+  period: OwnerDashboardPeriod;
+  from: string;
+  to: string;
+  items: OwnerDashboardStationRow[];
+  page: number;
+  size: number;
+  total: number;
+}
+export interface OwnerDashboardAttentionItem {
+  kind: OwnerDashboardAttentionKind;
+  entityId: string;
+  code: string;
+  stationId: string;
+  stationName: string;
+  reasonCode: string;
+  status: string;
+  occurredAt?: string | null;
+}
+export interface OwnerDashboardAttentionPage {
+  generatedAt: string;
+  kind: OwnerDashboardAttentionKind;
+  items: OwnerDashboardAttentionItem[];
+  page: number;
+  size: number;
+  total: number;
 }
 
 export interface AnalyticsKpi {

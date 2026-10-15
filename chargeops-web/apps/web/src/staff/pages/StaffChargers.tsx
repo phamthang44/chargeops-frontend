@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import {
   useApi,
   type ConnectorRuntimeStatus,
@@ -49,8 +50,11 @@ export function StaffChargers() {
   const qc = useQueryClient();
   const toast = useToast();
   const { selectedStationId, currentStation } = useStaffStation();
+  const [searchParams] = useSearchParams();
   const stationId = selectedStationId || '';
   const equipment = useStaffEquipment(selectedStationId || undefined);
+  const focusChargePointId = searchParams.get('chargePointId');
+  const focusConnectorId = searchParams.get('connectorId');
 
   const [target, setTarget] = useState<StaffStatusTarget | null>(null);
   const [historyTarget, setHistoryTarget] = useState<StaffHistoryTarget | null>(null);
@@ -59,7 +63,10 @@ export function StaffChargers() {
   >(null);
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['staff'] });
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: ['staff'] });
+    void qc.invalidateQueries({ queryKey: ['staff-dashboard'] });
+  };
 
   const changeChargePoint = useMutation({
     mutationFn: ({
@@ -110,6 +117,11 @@ export function StaffChargers() {
 
   const saving = changeChargePoint.isPending || changeConnector.isPending;
   const offlineCount = equipment.offlineConnectors.length;
+
+  useEffect(() => {
+    if (equipment.isLoading || !focusChargePointId) return;
+    document.getElementById(focusConnectorId || focusChargePointId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [equipment.isLoading, equipment.groups, focusChargePointId, focusConnectorId]);
 
   return (
     <>
@@ -167,6 +179,8 @@ export function StaffChargers() {
               <ChargePointCard
                 key={group.chargePoint.id}
                 group={group}
+                focusedChargePointId={focusChargePointId}
+                focusedConnectorId={focusConnectorId}
                 onStatus={(next) =>
                   setTarget({
                     kind: 'chargePoint',
@@ -253,6 +267,8 @@ export function StaffChargers() {
 
 function ChargePointCard({
   group,
+  focusedChargePointId,
+  focusedConnectorId,
   onStatus,
   onConnectorStatus,
   onHistory,
@@ -260,6 +276,8 @@ function ChargePointCard({
   onOpenIncident,
 }: {
   group: StaffEquipmentGroup;
+  focusedChargePointId: string | null;
+  focusedConnectorId: string | null;
   onStatus: (next: OperationalChargePointStatus) => void;
   onConnectorStatus: (
     connector: StaffEquipmentGroup['connectors'][number],
@@ -276,7 +294,7 @@ function ChargePointCard({
   const provisioned = chargePoint.provisioningStatus === 'ACTIVE';
 
   return (
-    <Card className="overflow-hidden shadow-subtle">
+    <Card id={chargePoint.id} className={`overflow-hidden shadow-subtle ${focusedChargePointId === chargePoint.id ? 'ring-2 ring-brand ring-offset-2' : ''}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-surface-2/80 px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">
@@ -344,7 +362,8 @@ function ChargePointCard({
             return (
               <div
                 key={connector.id}
-                className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-surface-2/40 ${
+                id={connector.id}
+                className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-surface-2/40 ${focusedConnectorId === connector.id ? 'bg-brand-soft/40 ring-1 ring-inset ring-brand' : ''} ${
                   hasOpenIncident ? 'border-l-2 border-bad bg-bad-soft/20' : ''
                 }`}
               >

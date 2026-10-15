@@ -1,280 +1,186 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { formatTimeVn, useApi, type StaffStationOverview } from '@chargeops/api';
-import {
-  Button,
-  IconRefreshCw,
-  KpiCard,
-  PageHeader,
-  SidePanel,
-  Skeleton,
-  type SidePanelRow,
-} from '@chargeops/ui';
-import { ApiErrorState } from '../../shared/components/ApiErrorState';
+import { useApi, type StaffDashboardBookingView, type StaffDashboardTicketView } from '@chargeops/api';
+import { Button, IconRefreshCw, KpiCard, PageHeader, Skeleton } from '@chargeops/ui';
 import { useStaffStation } from '../context/StaffStationContext';
-import { useStaffEquipment } from '../hooks/useStaffEquipment';
 
-/** Deterministic day boundaries (ISO) in Asia/Ho_Chi_Minh timezone */
-function getVietnamTodayRange(): { from: string; to: string } {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Ho_Chi_Minh',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  const dateStr = formatter.format(new Date()); // YYYY-MM-DD
-  const start = new Date(`${dateStr}T00:00:00+07:00`);
-  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-  return { from: start.toISOString(), to: end.toISOString() };
+const PAGE_SIZE = 5;
+const POLL_INTERVAL = () => (typeof document !== 'undefined' && document.visibilityState === 'visible' ? 30_000 : false);
+
+function formatTime(value?: string | null) {
+  if (!value) return '—';
+  return new Intl.DateTimeFormat(undefined, { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 }
 
-/**
- * Ops-only station overview (Ops-05). Reads the staff-scoped overview
- * (`/staff/stations/{id}`) — no revenue, licence or analytics DTO is touched by
- * this screen, so there is nothing financial to leak via devtools.
- */
+function formatDateTime(value?: string | null) {
+  if (!value) return '—';
+  return new Intl.DateTimeFormat(undefined, { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+}
+
 export function Dashboard() {
-  const { t } = useTranslation('staff');
+  const { t } = useTranslation('staffDashboard');
   const api = useApi();
   const navigate = useNavigate();
   const { selectedStationId, currentStation } = useStaffStation();
-  const equipment = useStaffEquipment(selectedStationId || undefined);
-  const range = getVietnamTodayRange();
+  const [bookingView, setBookingView] = useState<StaffDashboardBookingView>('UPCOMING');
+  const [ticketView, setTicketView] = useState<StaffDashboardTicketView>('UNCLAIMED');
+  const [bookingPage, setBookingPage] = useState(1);
+  const [equipmentPage, setEquipmentPage] = useState(1);
+  const [ticketPage, setTicketPage] = useState(1);
+  const stationId = selectedStationId;
 
-  const overviewQ = useQuery<StaffStationOverview>({
-    queryKey: ['staff', 'overview', selectedStationId],
-    queryFn: () => api.staffOperations.overview(selectedStationId as string),
-    enabled: Boolean(selectedStationId),
+  const summary = useQuery({
+    queryKey: ['staff-dashboard', 'summary', stationId],
+    queryFn: () => api.dashboard.staffSummary(stationId!),
+    enabled: Boolean(stationId), refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true,
+  });
+  const bookings = useQuery({
+    queryKey: ['staff-dashboard', 'bookings', stationId, bookingView, bookingPage],
+    queryFn: () => api.dashboard.staffBookings(stationId!, bookingView, bookingPage, PAGE_SIZE),
+    enabled: Boolean(stationId), refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true,
+  });
+  const equipment = useQuery({
+    queryKey: ['staff-dashboard', 'equipment', stationId, equipmentPage],
+    queryFn: () => api.dashboard.staffEquipment(stationId!, equipmentPage, PAGE_SIZE),
+    enabled: Boolean(stationId), refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true,
+  });
+  const tickets = useQuery({
+    queryKey: ['staff-dashboard', 'tickets', stationId, ticketView, ticketPage],
+    queryFn: () => api.dashboard.staffTickets(stationId!, ticketView, ticketPage, PAGE_SIZE),
+    enabled: Boolean(stationId), refetchInterval: POLL_INTERVAL, refetchOnWindowFocus: true,
   });
 
-  // One page of today's bookings: `total` feeds the KPI, `items` the panel.
-  const bookingsQ = useQuery({
-    queryKey: ['staff', 'bookings', 'today', selectedStationId, range.from, range.to],
-    queryFn: () =>
-      api.staffOperations.listBookings(selectedStationId as string, {
-        from: range.from,
-        to: range.to,
-        page: 0,
-        size: 5,
-      }),
-    enabled: Boolean(selectedStationId),
-  });
-
-  const isLoading = overviewQ.isLoading || bookingsQ.isLoading || equipment.isLoading;
-  const error = overviewQ.error || bookingsQ.error || equipment.error;
+  const refresh = () => {
+    void Promise.all([summary.refetch(), bookings.refetch(), equipment.refetch(), tickets.refetch()]);
+  };
+  const isRefreshing = [summary, bookings, equipment, tickets].some((query) => query.isFetching);
 
   return (
     <>
       <PageHeader
-        title={t('dashboard.title')}
-        subtitle={
-          overviewQ.data
-            ? t('dashboard.subtitle', {
-                station: overviewQ.data.name,
-                status: t(`stationStatus.${overviewQ.data.operationalStatus}`, {
-                  defaultValue: overviewQ.data.operationalStatus,
-                }),
-              })
-            : currentStation?.name || t('dashboard.subtitleFallback')
-        }
+        title={t('title')}
+        subtitle={summary.data?.stationName || currentStation?.name || t('subtitle')}
         action={
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              overviewQ.refetch();
-              bookingsQ.refetch();
-              equipment.refetch();
-            }}
-            disabled={overviewQ.isFetching || bookingsQ.isFetching}
-            icon={
-              <IconRefreshCw
-                size={13}
-                className={overviewQ.isFetching || bookingsQ.isFetching ? 'animate-spin' : ''}
-              />
-            }
-          >
-            <span>
-              {overviewQ.isFetching || bookingsQ.isFetching
-                ? t('dashboard.refreshing', { defaultValue: 'Đang cập nhật...' })
-                : t('dashboard.refresh', { defaultValue: 'Làm mới' })}
-            </span>
+          <Button variant="secondary" size="sm" onClick={refresh} disabled={isRefreshing}
+            icon={<IconRefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />}>
+            {isRefreshing ? t('refreshing') : t('refresh')}
           </Button>
         }
       />
 
-      {error ? (
-        <ApiErrorState
-          error={error}
-          eyebrow={t('dashboard.error.eyebrow', { defaultValue: 'Bảng điều khiển' })}
-          title={t('dashboard.error.title', { defaultValue: 'Không thể tải bảng điều khiển' })}
-          onRetry={() => {
-            overviewQ.refetch();
-            bookingsQ.refetch();
-            equipment.refetch();
-          }}
-          isRetrying={overviewQ.isFetching || bookingsQ.isFetching}
-        />
-      ) : isLoading ? (
-        <DashboardSkeleton />
+      {!stationId ? (
+        <StateCard message={t('states.noStation')} />
       ) : (
-        <DashboardBody
-          overview={overviewQ.data}
-          todayTotal={bookingsQ.data?.total ?? 0}
-          todayRows={bookingsQ.data?.items ?? []}
-          availableConnectors={equipment.availableConnectors.length}
-          connectorCount={equipment.connectors.length}
-          offlineConnectors={equipment.offlineConnectors}
-          onAllBookings={() => navigate('../bookings?date=today')}
-          onAllChargers={() => navigate('../chargers')}
-          onOfflineChargers={() => navigate('../chargers?status=OFFLINE')}
-        />
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted">
+            <div className="flex flex-wrap items-center gap-2">
+              <span>{summary.data?.address || currentStation?.address || t('stationAddressUnavailable')}</span>
+              {summary.data?.operationalStatus && <StatusPill value={summary.data.operationalStatus} />}
+            </div>
+            <span>{summary.data?.generatedAt ? t('updatedAt', { time: formatTime(summary.data.generatedAt) }) : ''}</span>
+          </div>
+
+          <section aria-label={t('kpi.section')} className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
+            {summary.isLoading ? Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-[104px] rounded-card" />) : summary.error ? (
+              <div className="col-span-full"><WidgetError message={t('states.summaryError')} onRetry={() => void summary.refetch()} /></div>
+            ) : <>
+              <KpiCard label={t('kpi.bookingsToday')} value={String(summary.data?.bookingsToday ?? 0)} delta={t('kpi.bookingsTodayHint')} />
+              <KpiCard label={t('kpi.chargingNow')} value={String(summary.data?.chargingBookings ?? 0)} delta={t('kpi.chargingNowHint')} />
+              <KpiCard label={t('kpi.availableConnectors')} value={String(summary.data?.availableConnectors ?? 0)} delta={t('kpi.availableConnectorsHint')} />
+              <KpiCard label={t('kpi.unclaimedTickets')} value={String(summary.data?.unclaimedTickets ?? 0)} delta={t('kpi.unclaimedTicketsHint')} />
+            </>}
+          </section>
+
+          <div className="grid gap-[13px] xl:grid-cols-2">
+            <section className="rounded-card border border-line bg-white p-4 shadow-card" aria-labelledby="staff-bookings-title">
+              <WidgetHeader id="staff-bookings-title" title={t('bookings.title')} actionLabel={t('bookings.all')} onAction={() => navigate('../bookings')} />
+              <Tabs value={bookingView} options={[
+                { value: 'UPCOMING', label: t('bookings.upcoming') }, { value: 'CHARGING', label: t('bookings.charging') },
+              ]} onChange={(value) => { setBookingView(value as StaffDashboardBookingView); setBookingPage(1); }} />
+              {bookings.isLoading ? <ListSkeleton /> : bookings.error ? <WidgetError message={t('states.bookingsError')} onRetry={() => void bookings.refetch()} /> :
+                bookings.data?.items.length ? <div className="divide-y divide-line">
+                  {bookings.data.items.map((booking) => <button key={booking.bookingId} type="button"
+                    onClick={() => navigate('../bookings')}
+                    className="flex w-full items-start justify-between gap-3 py-3 text-left hover:bg-surface/60">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 font-medium text-ink"><span>{formatTime(booking.startAt)}–{formatTime(booking.endAt)}</span><StatusPill value={booking.status} /></div>
+                      <p className="mt-1 truncate text-sm text-muted">{booking.driverDisplayName} · {booking.connectorCode}</p>
+                      {bookingView === 'CHARGING' && <p className="mt-1 text-xs text-muted">{t('bookings.startedAt', { time: formatTime(booking.chargingStartedAt) })}</p>}
+                    </div>
+                    <span className="shrink-0 text-xs text-muted">{booking.bookingCode}</span>
+                  </button>)}
+                </div> : <StateCard message={t(bookingView === 'UPCOMING' ? 'bookings.emptyUpcoming' : 'bookings.emptyCharging')} />}
+              <Pagination page={bookings.data?.page ?? bookingPage} pages={bookings.data?.totalPages ?? 0} onChange={setBookingPage} label={t('pagination', { page: bookings.data?.page ?? bookingPage, pages: bookings.data?.totalPages ?? 0 })} />
+            </section>
+
+            <section className="rounded-card border border-line bg-white p-4 shadow-card" aria-labelledby="staff-equipment-title">
+              <WidgetHeader id="staff-equipment-title" title={t('equipment.title')} actionLabel={t('equipment.all')} onAction={() => navigate('../chargers')} />
+              {equipment.isLoading ? <ListSkeleton /> : equipment.error ? <WidgetError message={t('states.equipmentError')} onRetry={() => void equipment.refetch()} /> :
+                equipment.data?.items.length ? <div className="divide-y divide-line">
+                  {equipment.data.items.map((item) => <button key={`${item.equipmentType}-${item.equipmentId}`} type="button"
+                    onClick={() => navigate(`../chargers?chargePointId=${encodeURIComponent(item.chargePointId)}${item.connectorId ? `&connectorId=${encodeURIComponent(item.connectorId)}` : ''}`)}
+                    className="flex w-full items-start justify-between gap-3 py-3 text-left hover:bg-surface/60">
+                    <div className="min-w-0"><p className="truncate font-medium text-ink">{item.code}</p>
+                      <p className="mt-1 text-sm text-muted">{t(`equipment.types.${item.equipmentType}`)} · {t(`equipment.reasons.${item.reasonCode}`, { defaultValue: item.reasonCode })}</p>
+                    </div><StatusPill value={item.chargePointStatus || item.connectorStatus || 'OFFLINE'} />
+                  </button>)}
+                </div> : <StateCard message={t('equipment.empty')} />}
+              <Pagination page={equipment.data?.page ?? equipmentPage} pages={equipment.data?.totalPages ?? 0} onChange={setEquipmentPage} label={t('pagination', { page: equipment.data?.page ?? equipmentPage, pages: equipment.data?.totalPages ?? 0 })} />
+            </section>
+
+            <section className="rounded-card border border-line bg-white p-4 shadow-card xl:col-span-2" aria-labelledby="staff-tickets-title">
+              <WidgetHeader id="staff-tickets-title" title={t('tickets.title')} actionLabel={t('tickets.all')} onAction={() => navigate('../tickets')} />
+              <Tabs value={ticketView} options={[
+                { value: 'UNCLAIMED', label: t('tickets.unclaimed') }, { value: 'MINE', label: t('tickets.mine') },
+              ]} onChange={(value) => { setTicketView(value as StaffDashboardTicketView); setTicketPage(1); }} />
+              {tickets.isLoading ? <ListSkeleton /> : tickets.error ? <WidgetError message={t('states.ticketsError')} onRetry={() => void tickets.refetch()} /> :
+                tickets.data?.items.length ? <div className="divide-y divide-line md:grid md:grid-cols-2 md:gap-x-6">
+                  {tickets.data.items.map((ticket) => <button key={ticket.ticketId} type="button" onClick={() => navigate(`../tickets/${encodeURIComponent(ticket.ticketId)}`)}
+                    className="flex w-full items-start justify-between gap-3 py-3 text-left hover:bg-surface/60">
+                    <div className="min-w-0"><p className="truncate font-medium text-ink">{ticket.subject}</p>
+                      <p className="mt-1 text-sm text-muted">{ticket.ticketCode} · {ticket.handlerDisplayName || t('tickets.notClaimed')}</p></div>
+                    <div className="shrink-0 text-right"><StatusPill value={ticket.status} /><p className="mt-1 text-xs text-muted">{formatDateTime(ticket.createdAt)}</p></div>
+                  </button>)}
+                </div> : <StateCard message={t(ticketView === 'UNCLAIMED' ? 'tickets.emptyUnclaimed' : 'tickets.emptyMine')} />}
+              <Pagination page={tickets.data?.page ?? ticketPage} pages={tickets.data?.totalPages ?? 0} onChange={setTicketPage} label={t('pagination', { page: tickets.data?.page ?? ticketPage, pages: tickets.data?.totalPages ?? 0 })} />
+            </section>
+          </div>
+        </div>
       )}
     </>
   );
 }
 
-function DashboardBody({
-  overview,
-  todayTotal,
-  todayRows,
-  availableConnectors,
-  connectorCount,
-  offlineConnectors,
-  onAllBookings,
-  onAllChargers,
-  onOfflineChargers,
-}: {
-  overview?: StaffStationOverview;
-  todayTotal: number;
-  todayRows: { bookingId: string; bookingCode?: string; startAt: string; endAt: string; driverDisplayName: string; connectorCode?: string; status: string }[];
-  availableConnectors: number;
-  connectorCount: number;
-  offlineConnectors: { id: string; code?: string; runtimeStatus: string }[];
-  onAllBookings: () => void;
-  onAllChargers: () => void;
-  onOfflineChargers: () => void;
-}) {
-  const { t } = useTranslation('staff');
-
-  const bookingRows: SidePanelRow[] =
-    todayRows.length === 0
-      ? [{ label: t('dashboard.panel.noBookings'), value: '' }]
-      : todayRows.map((b) => ({
-          label: `${b.bookingCode || b.bookingId} · ${formatTimeVn(b.startAt)}`,
-          value: b.driverDisplayName,
-        }));
-
-  const incidentRows: SidePanelRow[] =
-    offlineConnectors.length === 0
-      ? [{ label: t('dashboard.panel.noIncidents'), value: '' }]
-      : offlineConnectors.map((c) => ({
-          label: c.code || c.id,
-          value: t('runtimeStatus.OFFLINE'),
-          dotClass: 'bg-bad',
-          valueClass: 'text-bad',
-        }));
-
-  return (
-    <>
-      <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
-        <button
-          type="button"
-          onClick={onAllBookings}
-          className="text-left w-full cursor-pointer transition hover:opacity-95"
-        >
-          <KpiCard
-            label={t('dashboard.kpi.bookingsToday')}
-            value={String(todayTotal)}
-            delta={t('dashboard.kpi.bookingsTodaySub')}
-            deltaClass={todayTotal > 0 ? 'text-brand' : 'text-faint'}
-          />
-        </button>
-
-        <button
-          type="button"
-          onClick={onAllChargers}
-          className="text-left w-full cursor-pointer transition hover:opacity-95"
-        >
-          <KpiCard
-            label={t('dashboard.kpi.chargePoints')}
-            value={String(overview?.chargePointCount ?? 0)}
-            delta={
-              overview
-                ? t('dashboard.kpi.chargePointsSub', {
-                    status: t(`stationStatus.${overview.operationalStatus}`, {
-                      defaultValue: overview.operationalStatus,
-                    }),
-                  })
-                : undefined
-            }
-            deltaClass="text-faint"
-          />
-        </button>
-
-        <button
-          type="button"
-          onClick={onAllChargers}
-          className="text-left w-full cursor-pointer transition hover:opacity-95"
-        >
-          <KpiCard
-            label={t('dashboard.kpi.connectors')}
-            value={String(connectorCount)}
-            delta={t('dashboard.kpi.connectorsSub', { available: availableConnectors })}
-            deltaClass={availableConnectors === connectorCount ? 'text-good' : 'text-warn'}
-          />
-        </button>
-
-        <button
-          type="button"
-          onClick={onOfflineChargers}
-          className="text-left w-full cursor-pointer transition hover:opacity-95"
-        >
-          <KpiCard
-            label={t('dashboard.kpi.openIncidents')}
-            value={String(offlineConnectors.length)}
-            delta={
-              offlineConnectors.length > 0
-                ? t('dashboard.kpi.openIncidentsSub')
-                : t('dashboard.kpi.noIncidents')
-            }
-            deltaClass={offlineConnectors.length > 0 ? 'text-bad' : 'text-good'}
-          />
-        </button>
-      </div>
-
-      <div className="grid gap-[13px] lg:grid-cols-2">
-        <SidePanel
-          title={t('dashboard.panel.todayBookings')}
-          link={t('dashboard.panel.allBookingsLink')}
-          onLink={onAllBookings}
-          rows={bookingRows}
-        />
-        <SidePanel
-          title={t('dashboard.panel.offlineConnectors')}
-          link={t('dashboard.panel.allChargersLink')}
-          onLink={onAllChargers}
-          rows={incidentRows}
-          tone={offlineConnectors.length > 0 ? 'warn' : 'white'}
-        />
-      </div>
-    </>
-  );
+function WidgetHeader({ id, title, actionLabel, onAction }: { id: string; title: string; actionLabel: string; onAction: () => void }) {
+  return <div className="mb-3 flex items-center justify-between gap-3"><h2 id={id} className="font-semibold text-ink">{title}</h2><button type="button" onClick={onAction} className="text-sm font-medium text-brand hover:underline">{actionLabel}</button></div>;
 }
 
-function DashboardSkeleton() {
-  return (
-    <>
-      <div className="mb-4 grid grid-cols-2 gap-[13px] xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-[104px] rounded-card" />
-        ))}
-      </div>
-      <div className="grid gap-[13px] lg:grid-cols-2">
-        <Skeleton className="h-[190px] rounded-card" />
-        <Skeleton className="h-[190px] rounded-card" />
-      </div>
-    </>
-  );
+function Tabs({ value, options, onChange }: { value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }) {
+  return <div className="mb-2 flex gap-1 rounded-lg bg-surface p-1" role="tablist">{options.map((option) => <button key={option.value} type="button" role="tab" aria-selected={value === option.value} onClick={() => onChange(option.value)} className={`rounded-md px-3 py-1.5 text-sm ${value === option.value ? 'bg-white font-medium text-ink shadow-sm' : 'text-muted hover:text-ink'}`}>{option.label}</button>)}</div>;
+}
+
+function StatusPill({ value }: { value: string }) {
+  const { t } = useTranslation('staffDashboard');
+  const tone = ['OFFLINE', 'MAINTENANCE', 'OPEN', 'IN_PROGRESS'].includes(value) ? 'bg-amber-50 text-amber-800' : ['CHARGING', 'AVAILABLE', 'ACTIVE', 'CONFIRMED', 'CHECKED_IN'].includes(value) ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-700';
+  return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}>{t(`status.${value}`, { defaultValue: value.replaceAll('_', ' ') })}</span>;
+}
+
+function Pagination({ page, pages, onChange, label }: { page: number; pages: number; onChange: (page: number) => void; label: string }) {
+  if (pages <= 1) return null;
+  return <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-xs text-muted"><span>{label}</span><div className="flex gap-2"><button type="button" disabled={page <= 1} onClick={() => onChange(page - 1)} className="rounded border border-line px-2 py-1 disabled:opacity-40">‹</button><button type="button" disabled={page >= pages} onClick={() => onChange(page + 1)} className="rounded border border-line px-2 py-1 disabled:opacity-40">›</button></div></div>;
+}
+
+function StateCard({ message }: { message: string }) {
+  return <div className="rounded-lg bg-surface px-3 py-5 text-center text-sm text-muted">{message}</div>;
+}
+
+function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = useTranslation('staffDashboard');
+  return <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-rose-50 px-3 py-3 text-sm text-rose-800"><span>{message}</span><button type="button" onClick={onRetry} className="font-medium underline">{t('retry')}</button></div>;
+}
+
+function ListSkeleton() {
+  return <div className="space-y-3 py-3">{Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-12 rounded-md" />)}</div>;
 }

@@ -22,6 +22,7 @@ import {
   type SelectOption,
   Skeleton,
   StatusPill,
+  type PillTone,
 } from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useOwnerStation } from '../context/OwnerStationContext';
@@ -159,10 +160,20 @@ export function OwnerDashboard() {
           {stationRows.isLoading ? <div className="space-y-3"><Skeleton className="h-32 rounded-card" /><Skeleton className="h-32 rounded-card" /></div>
             : stationRows.data?.items.length ? <div className="space-y-3">{stationRows.data.items.map((station) => {
               const availability = station.totalConnectors > 0 ? Math.round((station.availableConnectors / station.totalConnectors) * 100) : 0;
-              const tone = station.status === 'ACTIVE' ? 'good' : station.status === 'SUSPENDED' ? 'bad' : 'warn';
+              const normStatus = String(station.status || '').toUpperCase();
+              const tone: PillTone = normStatus === 'ACTIVE'
+                ? 'good'
+                : normStatus === 'SUSPENDED' || normStatus === 'REJECTED'
+                ? 'bad'
+                : normStatus === 'PENDING' || normStatus === 'PENDING_APPROVAL'
+                ? 'warn'
+                : 'neutral';
+              const statusLabel = t(`status.${station.status}`, {
+                defaultValue: t(`status.${normStatus}`, { defaultValue: station.status }),
+              });
               return <article key={station.stationId} className="rounded-card bg-surface-2 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-semibold text-ink">{station.stationName}</h3><StatusPill tone={tone} label={t(`status.${station.status}`, { defaultValue: station.status })} /></div><p className="mt-1 text-xs text-muted">{station.stationCode}</p></div>
+                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate font-semibold text-ink">{station.stationName}</h3><StatusPill tone={tone} label={statusLabel} /></div><p className="mt-1 text-xs text-muted">{station.stationCode}</p></div>
                   <Button variant="ghost" accent="owner" size="sm" onClick={() => { setSelectedStationId(station.stationId); navigate(`/owner/stations?stationId=${station.stationId}`); }} className="text-owner">{t('actions.manage')}<IconChevronRight size={15} /></Button>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-4 border-t border-hairline pt-4 sm:grid-cols-4">
@@ -184,7 +195,7 @@ export function OwnerDashboard() {
           <div className="mb-4 flex items-start justify-between gap-3"><div className="flex items-start gap-3"><span className="rounded-ctl bg-warn-soft p-2 text-warn"><IconWrench size={18} /></span><div><h2 id="owner-attention-title" className="text-lg font-semibold text-ink">{t('sections.attention')}</h2><p className="mt-1 text-sm text-muted">{t('hero.attentionHint')}</p></div></div><span className="rounded-full bg-chip px-2 py-1 text-xs font-semibold tabular-nums text-body">{number.format(attention.data?.total ?? 0)}</span></div>
           <SegmentedControl segments={KINDS.map((value) => ({ key: value, label: t(`attentionKinds.${value}`) }))} active={kind} onChange={(value) => update('kind', value)} accent="owner" />
           {attention.isLoading ? <Skeleton className="mt-4 h-40 rounded-card" /> : attention.data?.items.length ? <div className="mt-4 divide-y divide-hairline">{attention.data.items.map((item) => <button key={`${item.kind}-${item.entityId}`} type="button" onClick={() => openAttention(item)} className="flex min-h-16 w-full items-center gap-3 py-3 text-left hover:bg-row-hover">
-            <span className="rounded-ctl bg-owner-soft p-2 text-owner"><IconBolt size={16} /></span><span className="min-w-0 flex-1"><strong className="block truncate text-sm text-ink">{item.code}</strong><span className="block truncate text-xs text-muted">{item.stationName}</span><span className="block truncate text-xs text-warn">{t(`reasons.${item.reasonCode}`, { defaultValue: item.status })}</span></span><IconChevronRight size={16} className="shrink-0 text-faint" />
+            <span className="rounded-ctl bg-owner-soft p-2 text-owner"><IconBolt size={16} /></span><span className="min-w-0 flex-1"><strong className="block truncate text-sm text-ink">{item.code}</strong><span className="block truncate text-xs text-muted">{item.stationName}</span><span className={`block truncate text-xs ${['REJECTED', 'SUSPENDED', 'LICENSE_EXPIRED'].includes(String(item.reasonCode || item.status).toUpperCase()) ? 'text-bad font-medium' : 'text-warn'}`}>{t(`reasons.${item.reasonCode}`, { defaultValue: t(`status.${item.status}`, { defaultValue: t(`status.${String(item.status || '').toUpperCase()}`, { defaultValue: item.reasonCode || item.status }) }) })}</span></span><IconChevronRight size={16} className="shrink-0 text-faint" />
           </button>)}</div> : <div className="mt-4"><Empty title={t('empty.noAttention')} /></div>}
           {!!attention.data?.total && <Button variant="ghost" accent="owner" size="sm" onClick={() => navigate(kind === 'TICKET' ? '/owner/tickets' : kind === 'LICENSE' ? '/owner/license' : '/owner/chargers')} className="mt-3 text-owner">{t('actions.viewAll')}<IconArrowRight size={15} /></Button>}
         </Card>

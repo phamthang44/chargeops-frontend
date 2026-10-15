@@ -59,6 +59,8 @@
     "OFFLINE": "Offline", "AVAILABLE": "Available", "ACTIVE": "Active",
     "OPEN": "Open", "IN_PROGRESS": "In progress", "CONFIRMED": "Confirmed",
     "CHECKED_IN": "Checked in", "CHARGING": "Charging", "COMPLETED": "Completed",
-    "CANCELLED": "Cancelled", "EXPIRED": "Expired", "RESOLVED": "Resolved", "CLOSED": "Closed"
+    "CANCELLED": "Cancelled", "EXPIRED": "Expired", "RESOLVED": "Resolved", "CLOSED": "Closed",
+    "REJECTED": "Rejected", "rejected": "Rejected", "SUSPENDED": "Suspended", "suspended": "Suspended",
+    "PENDING": "Pending approval", "pending": "Pending approval", "PENDING_APPROVAL": "Pending approval"
   }
 }

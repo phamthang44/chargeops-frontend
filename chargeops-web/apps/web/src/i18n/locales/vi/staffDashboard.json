@@ -59,6 +59,8 @@
     "OFFLINE": "Ngoại tuyến", "AVAILABLE": "Sẵn sàng", "ACTIVE": "Đang hoạt động",
     "OPEN": "Đang mở", "IN_PROGRESS": "Đang xử lý", "CONFIRMED": "Đã xác nhận",
     "CHECKED_IN": "Đã check-in", "CHARGING": "Đang sạc", "COMPLETED": "Hoàn tất",
-    "CANCELLED": "Đã hủy", "EXPIRED": "Hết hạn", "RESOLVED": "Đã xử lý", "CLOSED": "Đã đóng"
+    "CANCELLED": "Đã hủy", "EXPIRED": "Hết hạn", "RESOLVED": "Đã xử lý", "CLOSED": "Đã đóng",
+    "REJECTED": "Bị từ chối", "rejected": "Bị từ chối", "SUSPENDED": "Tạm ngưng", "suspended": "Tạm ngưng",
+    "PENDING": "Chờ duyệt", "pending": "Chờ duyệt", "PENDING_APPROVAL": "Chờ duyệt"
   }
 }

@@ -1,4 +1,57 @@
 {
+  "dashboard": {
+    "title": "Platform Operations",
+    "subtitle": "Operations coordination queue for station approvals, platform tickets, and escalated disputes.",
+    "generatedAt": "Data as of {{time}}",
+    "refresh": "Refresh",
+    "refreshing": "Updating...",
+    "refreshQueue": "Refresh queue",
+    "stale": "Could not refresh data",
+    "kpi": {
+      "approvals": "Pending approvals",
+      "platformTickets": "Platform tickets",
+      "escalatedCases": "Escalated cases",
+      "activeStations": "Active stations",
+      "clickToFocus": "Jump to queue below"
+    },
+    "queues": {
+      "approvals": "Pending station approvals",
+      "platform": "Platform tickets needing attention",
+      "escalated": "Escalated cases",
+      "emptyApprovals": "No pending station applications",
+      "emptyPlatform": "No open platform tickets needing attention",
+      "emptyEscalated": "No open escalated disputes needing review",
+      "openApproval": "Open application",
+      "openTicket": "Open ticket",
+      "openCase": "Open case",
+      "waitingSince": "Waiting since {{time}}",
+      "waitingAge": "Waiting {{age}}",
+      "unassigned": "Unassigned",
+      "unnamedHandler": "Handler name unavailable",
+      "unknownTime": "Timestamp unavailable",
+      "viewAll": "View all →",
+      "sortOldest": "Oldest first",
+      "sortNewest": "Newest first",
+      "pageInfo": "Page {{current}} of {{total}}",
+      "totalRecords": "({{count}} records)",
+      "prev": "Prev page",
+      "next": "Next page"
+    },
+    "usersOverview": {
+      "title": "Platform users",
+      "viewAll": "User management →",
+      "total": "Total accounts",
+      "drivers": "Drivers",
+      "staff": "Station staff",
+      "owners": "Station owners",
+      "evaluatedAt": "Evaluated at {{time}}"
+    },
+    "error": "Failed to load operations summary",
+    "retry": "Retry",
+    "empty": "No data available",
+    "missingTitle": "Dashboard not connected",
+    "missingDescription": "Platform operations summary endpoint (admin/dashboard/summary) has not returned data."
+  },
   "console": {
     "role": "ADMINISTRATOR",
     "searchPlaceholder": "Search bookings, chargers, stations, owners...",

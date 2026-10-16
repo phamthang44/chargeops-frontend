@@ -25,6 +25,10 @@ import type {
   RecoverConnectorIncidentRequest,
   ResolveIncidentSessionRequest,
   AdminOperationsSummary,
+  AdminDashboardApprovalItem,
+  AdminDashboardTicketItem,
+  AdminDashboardQueuePage,
+  DashboardSort,
   OwnerOperationsSummary,
   ChargePoint,
   ChargePointStatusEvent,
@@ -509,7 +513,22 @@ export function createRestServices(http: HttpClient): Services {
       ownerActivity: (params) => http.get('/owner/dashboard/activity', params),
       ownerStations: (params) => http.get('/owner/dashboard/stations', params),
       ownerAttention: (params) => http.get('/owner/dashboard/attention', params),
-      admin: () => http.get<AdminOperationsSummary>('/admin/dashboard/summary'),
+      admin: () => http.request<AdminOperationsSummary>('GET', '/admin/dashboard/summary', { headers: NO_STORE }),
+      adminApprovalsQueue: (params) =>
+        http.request<AdminDashboardQueuePage<AdminDashboardApprovalItem>>('GET', '/admin/dashboard/queues/approvals', {
+          params: { page: params?.page ?? 1, size: params?.size ?? 5, sort: params?.sort ?? 'OLDEST_FIRST' },
+          headers: NO_STORE,
+        }),
+      adminPlatformQueue: (params) =>
+        http.request<AdminDashboardQueuePage<AdminDashboardTicketItem>>('GET', '/admin/dashboard/queues/platform', {
+          params: { page: params?.page ?? 1, size: params?.size ?? 5, sort: params?.sort ?? 'OLDEST_FIRST' },
+          headers: NO_STORE,
+        }),
+      adminEscalatedQueue: (params) =>
+        http.request<AdminDashboardQueuePage<AdminDashboardTicketItem>>('GET', '/admin/dashboard/queues/escalated', {
+          params: { page: params?.page ?? 1, size: params?.size ?? 5, sort: params?.sort ?? 'OLDEST_FIRST' },
+          headers: NO_STORE,
+        }),
       staff: () => http.get('/dashboard/staff'),
       staffSummary: (stationId) => http.request('GET', `/staff/stations/${stationId}/dashboard/summary`, { headers: NO_STORE }),
       staffBookings: (stationId, view, page = 1, size = 5) =>

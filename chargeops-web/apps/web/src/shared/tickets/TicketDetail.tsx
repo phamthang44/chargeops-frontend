@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { formatDateVn } from '@chargeops/api';
 import {
   Card,
@@ -97,10 +98,24 @@ export function TicketDetail({
     isEscalated,
   } = useTicketDetail({ admin, role });
 
-  const [mobileTab, setMobileTab] = useState<'conversation' | 'records'>('conversation');
+  const [searchParams] = useSearchParams();
+  const escalationId = searchParams.get('escalationId');
+  const escalationCardRef = useRef<HTMLDivElement>(null);
+
+  const [mobileTab, setMobileTab] = useState<'conversation' | 'records'>(escalationId ? 'records' : 'conversation');
   const [reviewAction, setReviewAction] = useState<ReviewTicketEscalationPayload['action'] | null>(null);
   const [isRefundPolicyModalOpen, setIsRefundPolicyModalOpen] = useState(false);
   const [admitBooking, setAdmitBooking] = useState<OwnerBookingDetail | null>(null);
+
+  useEffect(() => {
+    if (escalationId) {
+      setMobileTab('records');
+      const timer = setTimeout(() => {
+        escalationCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [escalationId]);
 
   if (ticketQuery.error) {
     return (
@@ -419,12 +434,14 @@ export function TicketDetail({
 
           {/* Admin Refund Policy Review Card (BKG-057): For arbitrating dispute refund policy */}
           {Boolean(admin && isEscalated && tk.bookingId) && (
-            <AdminRefundPolicyReviewCard
-              ticket={tk}
-              escalation={escalation}
-              admin={admin}
-              onOpenReviewModal={() => setIsRefundPolicyModalOpen(true)}
-            />
+            <div ref={escalationCardRef}>
+              <AdminRefundPolicyReviewCard
+                ticket={tk}
+                escalation={escalation}
+                admin={admin}
+                onOpenReviewModal={() => setIsRefundPolicyModalOpen(true)}
+              />
+            </div>
           )}
 
           {/* Owner Proactive Dispute Admission Card (BKG-056): Proactive failure admission in escalation */}

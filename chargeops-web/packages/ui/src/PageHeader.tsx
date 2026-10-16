@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 export interface PageHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   /** Primary action button (indigo/emerald filled), e.g. "Đăng ký trạm mới". */
   action?: ReactNode;
 }

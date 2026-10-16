@@ -18,6 +18,10 @@ import type {
   OwnerDashboardPeriod,
   OwnerDashboardStationPage,
   AdminOperationsSummary,
+  AdminDashboardApprovalItem,
+  AdminDashboardTicketItem,
+  AdminDashboardQueuePage,
+  DashboardSort,
   AdminStationDetail,
   AdminStationFilterParams,
   AdminStationListItem,
@@ -147,6 +151,9 @@ export interface DashboardService {
   ownerStations(params: { stationId?: string; period: OwnerDashboardPeriod; page?: number; size?: number }): Promise<OwnerDashboardStationPage>;
   ownerAttention(params: { stationId?: string; kind: OwnerDashboardAttentionKind; page?: number; size?: number }): Promise<OwnerDashboardAttentionPage>;
   admin(): Promise<AdminOperationsSummary>;
+  adminApprovalsQueue(params?: { page?: number; size?: number; sort?: DashboardSort }): Promise<AdminDashboardQueuePage<AdminDashboardApprovalItem>>;
+  adminPlatformQueue(params?: { page?: number; size?: number; sort?: DashboardSort }): Promise<AdminDashboardQueuePage<AdminDashboardTicketItem>>;
+  adminEscalatedQueue(params?: { page?: number; size?: number; sort?: DashboardSort }): Promise<AdminDashboardQueuePage<AdminDashboardTicketItem>>;
   /** Ops-only KPIs — no revenue/license fields exist on this DTO (see StaffDashboard). */
   staff(): Promise<StaffDashboard>;
   staffSummary(stationId: string): Promise<StaffDashboardSummary>;

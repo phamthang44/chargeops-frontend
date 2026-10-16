@@ -1,4 +1,57 @@
 {
+  "dashboard": {
+    "title": "Điều phối nền tảng",
+    "subtitle": "Hàng đợi điều phối hồ sơ, ticket nền tảng và các vụ việc leo thang cần xử lý.",
+    "generatedAt": "Dữ liệu tính đến {{time}}",
+    "refresh": "Làm mới",
+    "refreshing": "Đang cập nhật...",
+    "refreshQueue": "Cập nhật hàng đợi",
+    "stale": "Chưa cập nhật được dữ liệu",
+    "kpi": {
+      "approvals": "Hồ sơ chờ duyệt",
+      "platformTickets": "Ticket nền tảng",
+      "escalatedCases": "Case escalation",
+      "activeStations": "Trạm hoạt động",
+      "clickToFocus": "Xem hàng đợi bên dưới"
+    },
+    "queues": {
+      "approvals": "Hồ sơ trạm chờ duyệt",
+      "platform": "Ticket nền tảng cần hỗ trợ",
+      "escalated": "Vụ việc khiếu nại leo thang",
+      "emptyApprovals": "Không có hồ sơ nào đang chờ duyệt",
+      "emptyPlatform": "Không có ticket nền tảng nào cần xử lý",
+      "emptyEscalated": "Không có vụ việc leo thang nào cần xử lý",
+      "openApproval": "Mở hồ sơ",
+      "openTicket": "Mở ticket",
+      "openCase": "Mở case",
+      "waitingSince": "Chờ từ {{time}}",
+      "waitingAge": "Chờ {{age}}",
+      "unassigned": "Chưa tiếp nhận",
+      "unnamedHandler": "Người xử lý chưa có tên",
+      "unknownTime": "Chưa có dữ liệu thời điểm",
+      "viewAll": "Xem tất cả →",
+      "sortOldest": "Cũ nhất trước",
+      "sortNewest": "Mới nhất trước",
+      "pageInfo": "Trang {{current}} / {{total}}",
+      "totalRecords": "({{count}} bản ghi)",
+      "prev": "Trang trước",
+      "next": "Trang tiếp"
+    },
+    "usersOverview": {
+      "title": "Người dùng nền tảng",
+      "viewAll": "Xem tất cả người dùng →",
+      "total": "Tổng tài khoản",
+      "drivers": "Tài xế",
+      "staff": "Nhân viên trạm",
+      "owners": "Chủ trạm",
+      "evaluatedAt": "Đánh giá lúc {{time}}"
+    },
+    "error": "Không thể tải dữ liệu tổng quan",
+    "retry": "Thử lại",
+    "empty": "Không có dữ liệu",
+    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
+    "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu."
+  },
   "console": {
     "role": "QUẢN TRỊ VIÊN",
     "searchPlaceholder": "Tìm đặt chỗ, trụ, trạm, chủ trạm…",

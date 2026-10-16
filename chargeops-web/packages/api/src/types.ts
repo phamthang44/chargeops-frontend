@@ -1833,12 +1833,72 @@ export interface AdminDashboard {
   topStations: { name: string; revenueVnd: number }[];
 }
 
+export type DashboardSort = 'OLDEST_FIRST' | 'NEWEST_FIRST';
+export type DashboardScope = 'PENDING_APPROVALS' | 'PLATFORM_TICKETS' | 'ESCALATED_CASES';
+
+export interface AdminDashboardSummary {
+  activeStations: number;
+  pendingApprovals: number;
+  platformOpenTickets: number;
+  escalatedOpenCases: number;
+  generatedAt: string; // ISO-8601 UTC
+}
+
 /** Platform operations only; contains no Owner booking or finance data. */
 export interface AdminOperationsSummary {
   activeStations: number;
   pendingApprovals: number;
   platformOpenTickets: number;
   escalatedOpenCases: number;
+  generatedAt?: string;
+}
+
+export interface AdminDashboardApprovalItem {
+  stationId: string;
+  stationCode: string;
+  stationName: string;
+  ownerDisplayName: string;
+  provinceName: string | null;
+  status: 'PENDING_APPROVAL';
+  submittedAt: string;
+}
+
+export interface AdminDashboardTicketItem {
+  ticketId: string;
+  ticketCode: string;
+  subject: string;
+  status: 'OPEN' | 'IN_PROGRESS';
+  createdAt: string;
+  reporterName: string | null;
+  stationId: string | null;
+  stationName: string | null;
+  escalationReason: string | null;
+  escalationId: string | null;
+  requestedAt: string | null;
+  assignedHandlerId: string | null;
+  assignedHandlerName: string | null;
+}
+
+export interface DashboardMeta {
+  serverTime: number;
+  apiVersion: string;
+  traceId: string;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  generatedAt: string;
+  scope: DashboardScope;
+  sort: DashboardSort;
+}
+
+export interface AdminDashboardQueuePage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  meta: DashboardMeta;
+  counts: Record<string, number>;
 }
 
 export interface UserProfile {

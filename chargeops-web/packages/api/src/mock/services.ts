@@ -95,6 +95,11 @@ import type {
   AdminUserStatusResponse,
   AdminUserRole,
   AdminUserStatusValue,
+  AdminOperationsSummary,
+  AdminDashboardApprovalItem,
+  AdminDashboardTicketItem,
+  AdminDashboardQueuePage,
+  DashboardSort,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
@@ -657,13 +662,269 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
           },
         };
       },
-      async admin() {
+      async admin(): Promise<AdminOperationsSummary> {
         await delay();
+        const pendingStations = (db.approvalQueue ?? []).filter((s: any) => s.status === 'pending' || s.status === 'PENDING_APPROVAL');
+        const platformTickets = (db.tickets ?? []).filter((t: any) => !t.stationId && ['open', 'in_progress', 'OPEN', 'IN_PROGRESS'].includes(String(t.status)));
+        const escalatedCases = (db.tickets ?? []).filter((t: any) => Boolean(t.isEscalated || (t as any).escalation || (t as any).escalationId));
         return {
-          activeStations: db.stationsDirectory.length,
-          pendingApprovals: db.approvalQueue.length,
-          platformOpenTickets: db.tickets.filter((t) => !t.stationId && ['open', 'in_progress'].includes(t.status)).length,
-          escalatedOpenCases: 0,
+          activeStations: db.stationsDirectory?.length ?? 12,
+          pendingApprovals: pendingStations.length,
+          platformOpenTickets: platformTickets.length,
+          escalatedOpenCases: Math.max(escalatedCases.length, 3),
+          generatedAt: new Date().toISOString(),
+        };
+      },
+      async adminApprovalsQueue(params): Promise<AdminDashboardQueuePage<AdminDashboardApprovalItem>> {
+        await delay();
+        const page = params?.page ?? 1;
+        const size = params?.size ?? 5;
+        const sort = params?.sort ?? 'OLDEST_FIRST';
+        const pending = (db.approvalQueue ?? [])
+          .filter((s: any) => s.status === 'pending' || s.status === 'PENDING_APPROVAL')
+          .map((s: any, idx: number) => ({
+            stationId: s.id,
+            stationCode: s.stationCode || s.id,
+            stationName: s.name,
+            ownerDisplayName: s.ownerDisplayName || s.ownerName || 'Chủ trạm EV',
+            provinceName: s.provinceName || s.city || (idx % 2 === 0 ? 'Thành phố Hà Nội' : 'Thành phố Hồ Chí Minh'),
+            status: 'PENDING_APPROVAL' as const,
+            submittedAt: s.submittedAt || s.createdAt || new Date(Date.now() - (idx + 1) * 3600000 * 5).toISOString(),
+          }));
+
+        pending.sort((a: AdminDashboardApprovalItem, b: AdminDashboardApprovalItem) => {
+          const cmp = a.submittedAt.localeCompare(b.submittedAt) || a.stationId.localeCompare(b.stationId);
+          return sort === 'OLDEST_FIRST' ? cmp : -cmp;
+        });
+
+        const totalElements = pending.length;
+        const totalPages = Math.max(1, Math.ceil(totalElements / size));
+        const start = (page - 1) * size;
+        const items = pending.slice(start, start + size);
+
+        return {
+          items,
+          total: totalElements,
+          page,
+          pageSize: size,
+          counts: {},
+          meta: {
+            serverTime: Date.now(),
+            apiVersion: '1.0.0',
+            traceId: 'mock-trace-approvals',
+            page,
+            size,
+            totalElements,
+            totalPages,
+            generatedAt: new Date().toISOString(),
+            scope: 'PENDING_APPROVALS',
+            sort,
+          },
+        };
+      },
+      async adminPlatformQueue(params): Promise<AdminDashboardQueuePage<AdminDashboardTicketItem>> {
+        await delay();
+        const page = params?.page ?? 1;
+        const size = params?.size ?? 5;
+        const sort = params?.sort ?? 'OLDEST_FIRST';
+
+        let plat = (db.tickets ?? [])
+          .filter((t: any) => !t.stationId && ['open', 'in_progress', 'OPEN', 'IN_PROGRESS'].includes(String(t.status)))
+          .map((t: any) => ({
+            ticketId: t.id,
+            ticketCode: t.ticketCode || t.id,
+            subject: t.subject || 'Hỗ trợ sự cố nạp tiền ví tài xế',
+            status: String(t.status).toUpperCase() === 'IN_PROGRESS' ? ('IN_PROGRESS' as const) : ('OPEN' as const),
+            createdAt: t.createdAt || '2026-10-15T09:00:00Z',
+            reporterName: t.reporterName || 'Tài xế Nguyễn Văn A',
+            stationId: null,
+            stationName: null,
+            escalationReason: null,
+            escalationId: null,
+            requestedAt: null,
+            assignedHandlerId: t.assignedHandlerId || null,
+            assignedHandlerName: t.assignedHandlerName || (t.assignedHandlerId ? 'Admin Chuyên trách' : null),
+          }));
+
+        if (plat.length === 0) {
+          plat = [
+            {
+              ticketId: 'tk-plt-001',
+              ticketCode: 'TK-10029',
+              subject: 'Lỗi xác thực ngân hàng khi liên kết ví tài xế',
+              status: 'OPEN',
+              createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+              reporterName: 'Trần Đình Trọng',
+              stationId: null,
+              stationName: null,
+              escalationReason: null,
+              escalationId: null,
+              requestedAt: null,
+              assignedHandlerId: null,
+              assignedHandlerName: null,
+            },
+            {
+              ticketId: 'tk-plt-002',
+              ticketCode: 'TK-10034',
+              subject: 'Yêu cầu mở khóa tài khoản sau 3 lần sai mật khẩu',
+              status: 'IN_PROGRESS',
+              createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+              reporterName: 'Hoàng Kim Chi',
+              stationId: null,
+              stationName: null,
+              escalationReason: null,
+              escalationId: null,
+              requestedAt: null,
+              assignedHandlerId: 'user-admin-02',
+              assignedHandlerName: 'Lê Văn Tuấn',
+            },
+            {
+              ticketId: 'tk-plt-003',
+              ticketCode: 'TK-10041',
+              subject: 'Thắc mắc chính sách hoàn cọc đặt chỗ giờ cao điểm',
+              status: 'OPEN',
+              createdAt: new Date(Date.now() - 3600000 * 14).toISOString(),
+              reporterName: 'Đỗ Mạnh Cường',
+              stationId: null,
+              stationName: null,
+              escalationReason: null,
+              escalationId: null,
+              requestedAt: null,
+              assignedHandlerId: null,
+              assignedHandlerName: null,
+            },
+          ];
+        }
+
+        plat.sort((a: AdminDashboardTicketItem, b: AdminDashboardTicketItem) => {
+          const cmp = a.createdAt.localeCompare(b.createdAt) || a.ticketId.localeCompare(b.ticketId);
+          return sort === 'OLDEST_FIRST' ? cmp : -cmp;
+        });
+
+        const totalElements = plat.length;
+        const totalPages = Math.max(1, Math.ceil(totalElements / size));
+        const start = (page - 1) * size;
+        const items = plat.slice(start, start + size);
+
+        return {
+          items,
+          total: totalElements,
+          page,
+          pageSize: size,
+          counts: {},
+          meta: {
+            serverTime: Date.now(),
+            apiVersion: '1.0.0',
+            traceId: 'mock-trace-platform',
+            page,
+            size,
+            totalElements,
+            totalPages,
+            generatedAt: new Date().toISOString(),
+            scope: 'PLATFORM_TICKETS',
+            sort,
+          },
+        };
+      },
+      async adminEscalatedQueue(params): Promise<AdminDashboardQueuePage<AdminDashboardTicketItem>> {
+        await delay();
+        const page = params?.page ?? 1;
+        const size = params?.size ?? 5;
+        const sort = params?.sort ?? 'OLDEST_FIRST';
+
+        const cases: AdminDashboardTicketItem[] = [
+          {
+            ticketId: 'tk-esc-001',
+            ticketCode: 'TK-88910',
+            subject: 'Yêu cầu trọng tài hủy đặt chỗ do trạm mất điện đột ngột',
+            status: 'OPEN',
+            createdAt: new Date(Date.now() - 3600000 * 18).toISOString(),
+            reporterName: 'Lê Hoàng Long',
+            stationId: 'st-01',
+            stationName: 'Trạm Sạc Landmark 81',
+            escalationReason: 'Trụ sạc ngắt kết nối giữa chừng, tài xế yêu cầu hoàn 100% cọc',
+            escalationId: 'esc-901',
+            requestedAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+            assignedHandlerId: null,
+            assignedHandlerName: null,
+          },
+          {
+            ticketId: 'tk-esc-002',
+            ticketCode: 'TK-88915',
+            subject: 'Khiếu nại phí phạt quá giờ do cảm biến đỗ xe báo sai',
+            status: 'IN_PROGRESS',
+            createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+            reporterName: 'Phạm Minh Tuấn',
+            stationId: 'st-02',
+            stationName: 'Trạm Sạc Thảo Điền Eco',
+            escalationReason: 'Cảm biến báo xe chưa rời vị trí dù đã rút súng sạc đúng giờ',
+            escalationId: 'esc-902',
+            requestedAt: new Date(Date.now() - 3600000 * 10).toISOString(),
+            assignedHandlerId: 'user-admin-01',
+            assignedHandlerName: 'Võ Thị Kim Anh',
+          },
+          {
+            ticketId: 'tk-esc-003',
+            ticketCode: 'TK-88920',
+            subject: 'Chủ trạm tranh chấp bồi thường hỏng ngàm khóa đầu súng CCS2',
+            status: 'OPEN',
+            createdAt: new Date(Date.now() - 3600000 * 30).toISOString(),
+            reporterName: 'Đặng Quốc Huy (Chủ trạm)',
+            stationId: 'st-03',
+            stationName: 'Trạm Sạc Tây Hồ Premium',
+            escalationReason: 'Tài xế làm rơi đầu súng CCS2 gãy ngàm khóa, hai bên không thống nhất chi phí sửa chữa',
+            escalationId: 'esc-903',
+            requestedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+            assignedHandlerId: null,
+            assignedHandlerName: null,
+          },
+          {
+            ticketId: 'tk-esc-004',
+            ticketCode: 'TK-88925',
+            subject: 'Không thể sạc lại sau sự cố trạm sạc quá nhiệt',
+            status: 'OPEN',
+            createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+            reporterName: 'Nguyễn Thị Mai',
+            stationId: 'st-04',
+            stationName: 'Trạm Sạc Đà Nẵng Center',
+            escalationReason: 'Hệ thống tự động trừ tiền nhưng không kích hoạt phiên sạc',
+            escalationId: 'esc-904',
+            requestedAt: new Date(Date.now() - 3600000 * 16).toISOString(),
+            assignedHandlerId: null,
+            assignedHandlerName: null,
+          },
+        ];
+
+        cases.sort((a, b) => {
+          const timeA = a.requestedAt || a.createdAt;
+          const timeB = b.requestedAt || b.createdAt;
+          const cmp = timeA.localeCompare(timeB) || a.ticketId.localeCompare(b.ticketId);
+          return sort === 'OLDEST_FIRST' ? cmp : -cmp;
+        });
+
+        const totalElements = cases.length;
+        const totalPages = Math.max(1, Math.ceil(totalElements / size));
+        const start = (page - 1) * size;
+        const items = cases.slice(start, start + size);
+
+        return {
+          items,
+          total: totalElements,
+          page,
+          pageSize: size,
+          counts: {},
+          meta: {
+            serverTime: Date.now(),
+            apiVersion: '1.0.0',
+            traceId: 'mock-trace-escalated',
+            page,
+            size,
+            totalElements,
+            totalPages,
+            generatedAt: new Date().toISOString(),
+            scope: 'ESCALATED_CASES',
+            sort,
+          },
         };
       },
       async staff() {

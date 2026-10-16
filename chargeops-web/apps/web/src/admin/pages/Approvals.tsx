@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDateVn, formatDateTimeVn, useApi, type StationApprovalSummary } from '@chargeops/api';
 import { Button, Card, IconClipboardCheck, IconInfo, IconShieldCheck, PageHeader, Skeleton, StatusPill, useToast } from '@chargeops/ui';
@@ -13,13 +14,21 @@ import { ApiErrorState } from '../../shared/components/ApiErrorState';
 /** FR12 — admin reviews pending station registrations, approve or reject. */
 export function Approvals() {
   const { t } = useTranslation('admin');
+  const [searchParams] = useSearchParams();
+  const stationIdParam = searchParams.get('stationId');
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(stationIdParam);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
+
+  useEffect(() => {
+    if (stationIdParam) {
+      setSelectedId(stationIdParam);
+    }
+  }, [stationIdParam]);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['approvals'],
@@ -30,7 +39,26 @@ export function Approvals() {
     (Array.isArray(data)
       ? data
       : (data as { items?: StationApprovalSummary[] } | undefined)?.items) ?? [];
-  const selected = rows.find((s) => s.id === selectedId) ?? rows[0] ?? null;
+
+  const fallbackDetailQ = useQuery({
+    queryKey: ['approvals', 'detail', selectedId],
+    queryFn: () => (selectedId ? api.stations.approvalDetail(selectedId) : null),
+    enabled: Boolean(selectedId && !rows.some((s) => s.id === selectedId)),
+  });
+
+  const selectedFromDetail: StationApprovalSummary | null = fallbackDetailQ.data
+    ? {
+        id: fallbackDetailQ.data.id,
+        name: fallbackDetailQ.data.name,
+        stationCode: fallbackDetailQ.data.stationCode || fallbackDetailQ.data.id,
+        ownerDisplayName: fallbackDetailQ.data.ownerDisplayName || fallbackDetailQ.data.ownerName || '—',
+        provinceName: fallbackDetailQ.data.provinceName ?? null,
+        plannedChargePointCount: fallbackDetailQ.data.plannedChargePointCount ?? 0,
+        submittedAt: fallbackDetailQ.data.submittedAt ?? new Date().toISOString(),
+      }
+    : null;
+
+  const selected = rows.find((s) => s.id === selectedId) ?? selectedFromDetail ?? rows[0] ?? null;
 
   const approve = useMutation({
     mutationFn: (id: string) => api.stations.approve(id),

@@ -31,8 +31,7 @@ export function useUserLocation() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setPermissionGranted(false);
-        // Fallback to default coordinates so discovery distance calculations still work
-        setCoords(DEFAULT_HCMC_COORDS);
+        setCoords(null);
         return;
       }
 
@@ -49,8 +48,9 @@ export function useUserLocation() {
         longitude: loc.coords.longitude,
       });
     } catch {
-      // If hardware GPS fails or times out, fallback to default center
-      setCoords(DEFAULT_HCMC_COORDS);
+      // If hardware GPS fails, user denies, or times out, keep coords as null
+      setPermissionGranted(false);
+      setCoords(null);
     } finally {
       setLoading(false);
     }

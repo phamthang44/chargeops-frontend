@@ -48,11 +48,12 @@ function buildLeafletHtml(
     summary: string;
   },
 ): string {
-  // Find initial focus
+  // Find initial focus: prefer selected station, then userCoords, then first station, then fallback center
   const selectedStation = stations.find((s) => s.id === selectedStationId);
-  const initialLat = selectedStation?.latitude ?? userCoords?.latitude ?? 10.7721;
-  const initialLng = selectedStation?.longitude ?? userCoords?.longitude ?? 106.6982;
-  const initialZoom = selectedStation ? 15 : 13;
+  const firstStation = stations.length > 0 ? stations[0] : null;
+  const initialLat = selectedStation?.latitude ?? userCoords?.latitude ?? firstStation?.latitude ?? 10.7721;
+  const initialLng = selectedStation?.longitude ?? userCoords?.longitude ?? firstStation?.longitude ?? 106.6982;
+  const initialZoom = selectedStation ? 15 : userCoords ? 13 : firstStation ? 12 : 10;
 
   const serializedStations = JSON.stringify(
     stations.map((s) => ({

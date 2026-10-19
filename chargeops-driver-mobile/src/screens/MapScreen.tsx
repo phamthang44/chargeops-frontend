@@ -49,8 +49,12 @@ export function MapScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
-  const { getAccessToken } = useAuth();
-  const { coords: userCoords } = useUserLocation();
+  const {
+    coords: userCoords,
+    loading: locationLoading,
+    refreshLocation,
+  } = useUserLocation();
+  const [locationBannerDismissed, setLocationBannerDismissed] = useState(false);
   const tabInset = useTabBarInset();
 
   const [stations, setStations] = useState<Station[]>([]);
@@ -131,6 +135,10 @@ export function MapScreen() {
       : null;
 
   const recenter = () => {
+    if (!userCoords) {
+      refreshLocation();
+      return;
+    }
     mapRef.current?.recenterToUser();
   };
 
@@ -202,11 +210,75 @@ export function MapScreen() {
           />
         </View>
 
+        {/* Location Notice Banner when GPS is not enabled */}
+        {!userCoords && !locationLoading && !locationBannerDismissed && (
+          <View
+            style={[
+              styles.locationWarningCard,
+              {
+                backgroundColor: isDark ? 'rgba(20, 29, 26, 0.95)' : 'rgba(255, 255, 255, 0.96)',
+                borderColor: isDark ? '#2D3F37' : '#FDE68A',
+              },
+            ]}
+          >
+            <View style={styles.locationWarningLeft}>
+              <View style={styles.locationIconWrap}>
+                <Ionicons name="location-outline" size={17} color="#F59E0B" />
+              </View>
+              <View style={styles.locationTextWrap}>
+                <Text
+                  style={[
+                    styles.locationWarningTitle,
+                    { color: isDark ? '#F8FAFC' : themeColors.textStrong },
+                  ]}
+                >
+                  {t('map.locationRequiredTitle', 'Chưa bật định vị')}
+                </Text>
+                <Text
+                  style={[
+                    styles.locationWarningDesc,
+                    { color: isDark ? '#94A3B8' : themeColors.textMuted },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {t(
+                    'map.locationRequiredDesc',
+                    'Bật vị trí để thấy khoảng cách chính xác và tìm trạm sạc gần bạn nhất.',
+                  )}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.locationWarningActions}>
+              <Pressable
+                style={[
+                  styles.locationEnableBtn,
+                  { backgroundColor: themeColors.primary },
+                ]}
+                onPress={refreshLocation}
+                hitSlop={4}
+              >
+                <Text style={styles.locationEnableBtnText}>
+                  {t('map.enableLocation', 'Bật vị trí')}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.locationDismissBtn}
+                onPress={() => setLocationBannerDismissed(true)}
+                hitSlop={8}
+              >
+                <Ionicons name="close" size={18} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+          </View>
+        )}
+
         {/* Floating Controls: Recenter & List View Switcher */}
         <Pressable
           style={[
             styles.recenterBtn,
             {
+              top: !userCoords && !locationLoading && !locationBannerDismissed ? 82 : spacing.md,
               backgroundColor: isDark ? '#161B1A' : '#FFFFFF',
               borderColor: isDark ? '#2A312F' : themeColors.border,
             },
@@ -214,7 +286,11 @@ export function MapScreen() {
           hitSlop={8}
           onPress={recenter}
         >
-          <Ionicons name="locate" size={20} color={themeColors.primary} />
+          <Ionicons
+            name={userCoords ? 'locate' : 'locate-outline'}
+            size={20}
+            color={userCoords ? themeColors.primary : themeColors.textMuted}
+          />
         </Pressable>
 
         {/* Floating View Switcher to List (only shown when no station is selected to avoid overlap) */}
@@ -317,5 +393,69 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
     zIndex: 25,
+  },
+  locationWarningCard: {
+    position: 'absolute',
+    top: 10,
+    left: 12,
+    right: 12,
+    zIndex: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  locationWarningLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginRight: 8,
+  },
+  locationIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(245, 158, 11, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationTextWrap: {
+    flex: 1,
+  },
+  locationWarningTitle: {
+    fontSize: 12.5,
+    fontWeight: fontWeights.bold,
+    marginBottom: 2,
+  },
+  locationWarningDesc: {
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  locationWarningActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  locationEnableBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  locationEnableBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: fontWeights.bold,
+  },
+  locationDismissBtn: {
+    padding: 4,
   },
 });

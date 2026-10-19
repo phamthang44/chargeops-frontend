@@ -148,7 +148,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={580}>
-      <div className="flex items-center justify-between border-b border-hairline pb-3.5">
+      <div className="flex items-center justify-between border-b border-line/80 pb-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
             <IconShieldAlert size={19} />
@@ -177,7 +177,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         {errorBanner && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-error/20 bg-error/5 p-3 text-[12.5px] text-error">
+          <div className="flex items-start gap-2.5 rounded-xl border border-bad-border bg-bad-soft p-3 text-[12.5px] text-bad">
             <IconAlertTriangle size={16} className="mt-0.5 shrink-0" />
             <div className="flex-1 leading-relaxed">{errorBanner}</div>
           </div>
@@ -187,7 +187,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
         <div>
           <label className="mb-1.5 block text-[12.5px] font-semibold text-ink">
             {t('prohibitedTerms.modal.termLabel', 'Từ hoặc cụm từ cấm')}{' '}
-            <span className="text-error">*</span>
+            <span className="text-bad">*</span>
           </label>
           <input
             type="text"
@@ -196,7 +196,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
             value={termText}
             onChange={(e) => setTermText(e.target.value)}
             placeholder={t('prohibitedTerms.modal.termPlaceholder')}
-            className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 transition-all font-medium"
+            className="w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint hover:border-line-hover focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all font-medium shadow-2xs"
             autoFocus={!isEdit}
           />
           <div className="mt-1 flex justify-between text-[11px] text-muted">
@@ -209,7 +209,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
         <div>
           <label className="mb-1.5 block text-[12.5px] font-semibold text-ink">
             {t('prohibitedTerms.modal.matchTypeLabel', 'Phương thức so khớp')}{' '}
-            <span className="text-error">*</span>
+            <span className="text-bad">*</span>
           </label>
           <div className="grid grid-cols-2 gap-2.5">
             <button
@@ -217,8 +217,8 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
               onClick={() => setMatchType('WORD_OR_PHRASE')}
               className={`rounded-xl border p-3 text-left transition-all ${
                 matchType === 'WORD_OR_PHRASE'
-                  ? 'border-brand bg-brand-soft/40 shadow-sm'
-                  : 'border-border bg-surface hover:bg-surface-2'
+                  ? 'border-brand bg-brand-soft/40 shadow-xs ring-1 ring-brand/20'
+                  : 'border-line bg-surface hover:border-line-hover hover:bg-surface-2'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -239,8 +239,8 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
               onClick={() => setMatchType('EXACT')}
               className={`rounded-xl border p-3 text-left transition-all ${
                 matchType === 'EXACT'
-                  ? 'border-brand bg-brand-soft/40 shadow-sm'
-                  : 'border-border bg-surface hover:bg-surface-2'
+                  ? 'border-brand bg-brand-soft/40 shadow-xs ring-1 ring-brand/20'
+                  : 'border-line bg-surface hover:border-line-hover hover:bg-surface-2'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -262,9 +262,9 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
         <div>
           <label className="mb-1.5 block text-[12.5px] font-semibold text-ink">
             {t('prohibitedTerms.modal.scopesLabel', 'Phạm vi áp dụng')}{' '}
-            <span className="text-error">*</span>
+            <span className="text-bad">*</span>
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-border bg-surface p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-line bg-surface p-3 shadow-2xs">
             {ALL_SCOPES.map((sc) => {
               const checked = scopes.includes(sc.id);
               return (
@@ -276,7 +276,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleScope(sc.id)}
-                    className="h-4 w-4 rounded border-border text-brand focus:ring-brand accent-brand cursor-pointer"
+                    className="h-4 w-4 rounded border-line text-brand focus:ring-brand accent-brand cursor-pointer"
                   />
                   <span className="text-[12.5px] font-medium text-body">
                     {t(`prohibitedTerms.${sc.labelKey}`)}
@@ -288,7 +288,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
         </div>
 
         {/* Enabled Toggle */}
-        <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2/40 px-3.5 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-line bg-surface-2/60 px-3.5 py-3 shadow-2xs">
           <div>
             <div className="text-[13px] font-semibold text-ink">
               {t('prohibitedTerms.modal.enabledLabel', 'Kích hoạt quy tắc')}
@@ -311,7 +311,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder={t('prohibitedTerms.modal.notePlaceholder')}
-            className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-[12.5px] text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 transition-all resize-none"
+            className="w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-[12.5px] text-ink placeholder:text-faint hover:border-line-hover focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 transition-all resize-none shadow-2xs"
           />
           <div className="mt-1 text-right text-[11px] text-muted">
             {note.length} / 500
@@ -319,7 +319,7 @@ export function TermUpsertModal({ open, term, onClose, onSuccess }: TermUpsertMo
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2.5 border-t border-hairline pt-3.5">
+        <div className="flex items-center justify-end gap-2.5 border-t border-line/80 pt-3.5">
           <Button type="button" variant="secondary" size="md" onClick={onClose} disabled={isSubmitting}>
             {t('prohibitedTerms.modal.cancel', 'Hủy')}
           </Button>

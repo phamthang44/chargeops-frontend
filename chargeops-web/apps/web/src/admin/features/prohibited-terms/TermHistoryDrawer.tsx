@@ -51,7 +51,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
 
   return (
     <Modal open={open} onClose={onClose} maxWidth={640}>
-      <div className="flex items-center justify-between border-b border-hairline pb-3.5">
+      <div className="flex items-center justify-between border-b border-line/80 pb-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
             <IconClock size={19} />
@@ -93,7 +93,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
             const isSystem = !change.actorId || change.action === 'SEED';
 
             return (
-              <Card key={change.id} bordered={false} className="bg-surface-2/60 p-4 rounded-xl">
+              <Card key={change.id} bordered={true} className="bg-surface p-4 rounded-xl border-line/80 shadow-2xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <StatusPill tone={meta.tone} label={meta.label} />
@@ -104,7 +104,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
                   <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-body">
                     <span className="text-muted">Tác nhân:</span>
                     {isSystem ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-warn/10 px-2 py-0.5 text-[11px] font-semibold text-warn-deep">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-warn-pill border border-warn-border/70 px-2 py-0.5 text-[11px] font-semibold text-warn-deep">
                         ⚡ {t('prohibitedTerms.history.actorSystem', 'Hệ thống')}
                       </span>
                     ) : (
@@ -116,12 +116,12 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
                 </div>
 
                 {/* Diff Viewer */}
-                <div className="mt-3 border-t border-hairline pt-2.5 text-[12px] space-y-2">
+                <div className="mt-3 border-t border-line/70 pt-2.5 text-[12px] space-y-2">
                   {after && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11.5px]">
                       <div>
                         <span className="text-muted">{t('prohibitedTerms.table.status')}: </span>
-                        <span className={`font-semibold ${after.enabled ? 'text-success' : 'text-faint'}`}>
+                        <span className={`font-semibold ${after.enabled ? 'text-good-deep' : 'text-faint'}`}>
                           {after.enabled ? t('prohibitedTerms.table.active') : t('prohibitedTerms.table.inactive')}
                         </span>
                         {before && before.enabled !== after.enabled && (
@@ -151,8 +151,8 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
                                 key={sc}
                                 className={`rounded px-1.5 py-0.5 text-[10.5px] font-medium ${
                                   isNew
-                                    ? 'bg-success/15 text-success border border-success/30 font-semibold'
-                                    : 'bg-surface text-body border border-border'
+                                    ? 'bg-good-soft text-good border border-good/30 font-semibold'
+                                    : 'bg-surface-2 text-body border border-line/70'
                                 }`}
                               >
                                 {t(`prohibitedTerms.scopes.${sc}`, { defaultValue: sc })}
@@ -163,7 +163,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
                       </div>
 
                       {after.note && (
-                        <div className="sm:col-span-2 text-[11.5px] text-muted italic bg-surface/50 p-2 rounded-lg border border-border/40">
+                        <div className="sm:col-span-2 text-[11.5px] text-muted italic bg-surface-2 p-2.5 rounded-lg border border-line/70">
                           "{after.note}"
                         </div>
                       )}
@@ -176,7 +176,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
         )}
       </div>
 
-      <div className="mt-4 flex justify-end border-t border-hairline pt-3">
+      <div className="mt-4 flex justify-end border-t border-line/80 pt-3">
         <Button variant="secondary" size="md" onClick={onClose}>
           {t('common.close', 'Đóng')}
         </Button>

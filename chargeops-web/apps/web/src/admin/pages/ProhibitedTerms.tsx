@@ -174,7 +174,7 @@ export function ProhibitedTerms() {
       </div>
 
       {/* Seed Rules Notification Banner */}
-      <div className="flex items-start gap-3 rounded-2xl border border-warn/30 bg-warn/5 p-4 text-[12.5px] text-body">
+      <div className="flex items-start gap-3 rounded-2xl border border-warn-border bg-warn-soft/70 p-4 text-[12.5px] text-body shadow-2xs">
         <IconAlertTriangle size={18} className="mt-0.5 shrink-0 text-warn-deep" />
         <div className="flex-1 leading-relaxed">
           <span className="font-semibold text-warn-deep">Thông báo chính sách: </span>
@@ -186,7 +186,7 @@ export function ProhibitedTerms() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Left Column: Data Table & Filters (col-span-8) */}
         <div className="xl:col-span-8 space-y-4">
-          <Card bordered className="bg-surface p-4 shadow-sm rounded-2xl">
+          <Card bordered className="bg-surface p-5 shadow-xs rounded-2xl border-line">
             {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="w-full sm:w-72">
@@ -198,7 +198,7 @@ export function ProhibitedTerms() {
               </div>
 
               {/* Status Segmented Tabs */}
-              <div className="flex items-center rounded-xl bg-surface-2 p-1 border border-border/60">
+              <div className="flex items-center rounded-xl bg-surface-2 p-1 border border-line shadow-2xs">
                 {(['all', 'enabled', 'disabled'] as const).map((st) => (
                   <button
                     key={st}
@@ -209,7 +209,7 @@ export function ProhibitedTerms() {
                     }}
                     className={`rounded-lg px-3 py-1 text-[11.5px] font-medium transition-all ${
                       statusFilter === st
-                        ? 'bg-surface text-ink font-semibold shadow-xs'
+                        ? 'bg-surface text-ink font-semibold shadow-2xs border border-line/60'
                         : 'text-muted hover:text-ink'
                     }`}
                   >
@@ -220,7 +220,7 @@ export function ProhibitedTerms() {
             </div>
 
             {/* Scope Filter Chips */}
-            <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-hairline pt-3">
+            <div className="mt-3.5 flex flex-wrap items-center gap-1.5 border-t border-line/70 pt-3">
               <span className="text-[11.5px] font-semibold text-muted mr-1">
                 Phạm vi:
               </span>
@@ -234,8 +234,8 @@ export function ProhibitedTerms() {
                   }}
                   className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all ${
                     scopeFilter === sc.id
-                      ? 'bg-brand text-white font-semibold'
-                      : 'bg-surface-2 text-body hover:bg-surface-3'
+                      ? 'bg-brand text-white font-semibold shadow-2xs'
+                      : 'bg-surface-2 text-body hover:bg-surface-3 border border-line/60'
                   }`}
                 >
                   {t(`prohibitedTerms.${sc.labelKey}`)}
@@ -247,7 +247,7 @@ export function ProhibitedTerms() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left text-[12.5px]">
                 <thead>
-                  <tr className="border-b border-hairline text-[11px] uppercase tracking-wider text-muted">
+                  <tr className="border-b border-line/80 text-[11px] uppercase tracking-wider text-muted">
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.term')}</th>
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.matchType')}</th>
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.scopes')}</th>
@@ -256,7 +256,7 @@ export function ProhibitedTerms() {
                     <th className="pb-3 font-semibold text-right">{t('prohibitedTerms.table.actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-hairline">
+                <tbody className="divide-y divide-line/60">
                   {isLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <tr key={i}>
@@ -318,8 +318,8 @@ export function ProhibitedTerms() {
                             <span
                               className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10.5px] font-semibold ${
                                 isWordPhrase
-                                  ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20'
-                                  : 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20'
+                                  ? 'bg-brand-soft text-brand border border-brand-line'
+                                  : 'bg-cyan-500/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30'
                               }`}
                             >
                               {isWordPhrase
@@ -334,13 +334,13 @@ export function ProhibitedTerms() {
                               {term.scopes.slice(0, 2).map((sc) => (
                                 <span
                                   key={sc}
-                                  className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-body"
+                                  className="rounded-md bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-body border border-line/70"
                                 >
                                   {t(`prohibitedTerms.scopes.${sc}`, { defaultValue: sc })}
                                 </span>
                               ))}
                               {term.scopes.length > 2 && (
-                                <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-semibold text-muted">
+                                <span className="rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-semibold text-muted border border-line/60">
                                   +{term.scopes.length - 2}
                                 </span>
                               )}
@@ -361,7 +361,7 @@ export function ProhibitedTerms() {
                                   }
                                 />
                               </div>
-                              <span className={`text-[9.5px] font-medium ${term.enabled ? 'text-success' : 'text-faint'}`}>
+                              <span className={`text-[9.5px] font-medium ${term.enabled ? 'text-good-deep' : 'text-faint'}`}>
                                 {term.enabled ? t('prohibitedTerms.table.active') : t('prohibitedTerms.table.inactive')}
                               </span>
                             </div>
@@ -386,7 +386,7 @@ export function ProhibitedTerms() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-4 border-t border-hairline pt-3 flex items-center justify-between">
+              <div className="mt-4 border-t border-line/70 pt-3 flex items-center justify-between">
                 <div className="text-[11.5px] text-muted">
                   Tổng số: <span className="font-semibold text-ink">{totalElements}</span> quy tắc
                 </div>

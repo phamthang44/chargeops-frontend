@@ -47,7 +47,9 @@
     "start": "expo start --port 8082",
     "android": "expo run:android --port 8082",
     "ios": "expo run:ios --port 8082",
-    "web": "expo start --web --port 8082"
+    "web": "expo start --web --port 8082",
+    "build:web": "expo export -p web && node scripts/post-export-web.mjs",
+    "postexport": "node scripts/post-export-web.mjs"
   },
   "private": true
 }

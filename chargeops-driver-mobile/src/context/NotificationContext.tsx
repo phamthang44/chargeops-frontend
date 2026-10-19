@@ -114,7 +114,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // 3. Global WebSocket subscription on /user/queue/notifications
   const handleNotificationHint = useCallback(
     async (hint: NotificationHint) => {
-      console.log('[NotificationProvider] Received STOMP hint:', hint);
 
       if (hint.type === 'NOTIFICATION_CREATED') {
         // Optimistic unread count increment
@@ -155,7 +154,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const handleWireReady = useCallback(() => {
     if (!session || initializing) return;
-    console.log('[NotificationProvider] STOMP wire ready/reconnected, running catch-up fetch');
     void apiGetUnreadCount(userId).then(setUnreadCount).catch(() => {});
     void apiGetNotifications(userId).then(setNotifications).catch(() => {});
   }, [session, initializing, userId]);

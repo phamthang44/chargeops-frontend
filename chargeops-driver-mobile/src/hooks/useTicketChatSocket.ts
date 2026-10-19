@@ -32,11 +32,9 @@ export function useTicketChatSocket(
     if (!ticketId || !sessionUserId) return;
 
     const topic = `/topic/tickets/${ticketId}/messages`;
-    console.log('[useTicketChatSocket] Registering listener for topic:', topic);
     const removeHandler = addTopicHandler<TicketMessage>(
       topic,
       (msg) => {
-        console.log('[useTicketChatSocket] Incoming message on topic:', topic, msg);
         if (!msg) return;
         const msgId = msg.messageId || (msg as any).id;
         if (msgId) {
@@ -48,7 +46,6 @@ export function useTicketChatSocket(
         }
       },
       () => {
-        console.log('[useTicketChatSocket] Wire connection ready for topic:', topic);
         onWireReadyRef.current?.();
       },
     );

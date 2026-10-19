@@ -197,7 +197,6 @@ export function TicketDetailScreen() {
 
   // Nhận tin nhắn chat theo thời gian thực qua WebSocket STOMP (/topic/tickets/{ticketId}/messages)
   const handleIncomingSocketMessage = useCallback((incoming: TicketMessage) => {
-    console.log('[TicketDetailScreen] Received realtime message:', incoming.messageId, incoming.authorDisplayName, incoming.body);
     setTicket(prev => {
       if (!prev) return prev;
       const currentMessages = prev.messages || [];

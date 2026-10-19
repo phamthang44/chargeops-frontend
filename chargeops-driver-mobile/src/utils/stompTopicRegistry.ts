@@ -63,9 +63,7 @@ function parseTopicMessage(topic: string, rawBody: string): any {
 function subscribeOnWire(topic: string, entry: TopicEntry): void {
   if (!wire || entry.wireUnsubscribe) return;
   try {
-    console.log('[stompTopicRegistry] Subscribing on wire to:', topic);
     entry.wireUnsubscribe = wire(topic, (rawBody) => {
-      console.log('[stompTopicRegistry] Received wire message on:', topic, rawBody);
       const message = parseTopicMessage(topic, rawBody);
       if (message === null || message === undefined) return;
       for (const handler of Array.from(entry.handlers)) {

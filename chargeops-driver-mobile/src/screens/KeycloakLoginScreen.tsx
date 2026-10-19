@@ -34,7 +34,6 @@ export function KeycloakLoginScreen() {
   const discovery = useAutoDiscovery(keycloakConfig.issuerUrl);
   const redirectUri = useMemo(() => {
     const uri = getKeycloakRedirectUri();
-    console.log('🔑 [KeycloakAuth] Active redirectUri:', uri);
     return uri;
   }, []);
   const keycloakLocale = i18n.resolvedLanguage?.toLowerCase().startsWith('en') ? 'en' : 'vi';

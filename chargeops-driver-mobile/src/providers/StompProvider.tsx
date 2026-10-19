@@ -88,13 +88,8 @@ export function StompProvider({ children }: { children: ReactNode }) {
           },
         });
       },
-      // Sanitized debug logging: never leak raw JWT access tokens
-      debug: (msg: string) => {
-        if (__DEV__) {
-          const sanitized = msg.replace(/Bearer\s+[A-Za-z0-9-_=.]+/g, 'Bearer [REDACTED]');
-          console.log('[STOMP]', sanitized);
-        }
-      },
+      // Do not print protocol frames or connection activity to the console.
+      debug: () => {},
       beforeConnect: async (pending) => {
         const token = await ensureFreshAccessToken();
         if (!token) {
@@ -107,10 +102,8 @@ export function StompProvider({ children }: { children: ReactNode }) {
         pending.connectHeaders = { Authorization: `Bearer ${token}` };
       },
       onConnect: () => {
-        console.log('[StompProvider] STOMP connected to broker:', brokerURL);
         setConnected(true);
         attachWire((topic, onRawBody) => {
-          console.log('[StompProvider] Subscribing to topic on wire:', topic);
           const subscription = instance.subscribe(topic, (message: IMessage) => {
             onRawBody(message.body);
           });
@@ -124,12 +117,10 @@ export function StompProvider({ children }: { children: ReactNode }) {
         });
       },
       onDisconnect: () => {
-        console.log('[StompProvider] STOMP disconnected');
         setConnected(false);
         detachWire();
       },
-      onWebSocketClose: (evt) => {
-        console.log('[StompProvider] WebSocket closed, code:', evt?.code, 'reason:', evt?.reason);
+      onWebSocketClose: () => {
         setConnected(false);
         detachWire();
       },

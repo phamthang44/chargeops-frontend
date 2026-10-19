@@ -10,6 +10,16 @@ const IGNORED_WARNINGS = [
 
 LogBox.ignoreLogs(IGNORED_WARNINGS);
 
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  console.warn(
+    '%cCẢNH BÁO BẢO MẬT — ChargeOps',
+    'color: #dc2626; font-size: 22px; font-weight: bold;',
+  );
+  console.warn(
+    'Không dán hoặc chạy mã lạ trong Console. Kẻ gian có thể lợi dụng việc này để chiếm tài khoản và lấy dữ liệu của bạn. Không chia sẻ token hay thông tin phiên đăng nhập. Nếu có người yêu cầu bạn dán mã vào đây, hãy dừng lại.',
+  );
+}
+
 if (Platform.OS === 'web' || typeof window !== 'undefined') {
   const originalWarn = console.warn;
   console.warn = (...args: unknown[]) => {

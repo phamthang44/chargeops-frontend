@@ -3,6 +3,7 @@
  * `createMockServices()` and `createRestServices()` both implement `Services`;
  * swapping mock → real API is a config change, not a UI change.
  */
+import type { DownloadFile } from './http';
 import type {
   OperationalBooking,
   OwnerActiveBookingParams,
@@ -185,6 +186,7 @@ export interface BookingService {
  * Scoped strictly to the authenticated Owner's stations.
  */
 export interface OwnerBookingService {
+  export(params?: Omit<OwnerBookingListParams, 'page' | 'pageSize'>): Promise<DownloadFile>;
   list(params?: OwnerBookingListParams): Promise<Page<OwnerBookingListItem>>;
   get(bookingId: string): Promise<OwnerBookingDetail>;
   summary(params?: OwnerBookingFilter): Promise<OwnerBookingSummary>;

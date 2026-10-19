@@ -8,8 +8,10 @@ let keycloakClient: KeycloakInstance | null = null;
 let keycloakInitPromise: Promise<boolean> | null = null;
 
 function keycloakConfig(): { url: string; realm: string; clientId: string } {
+  const localDev = import.meta.env.MODE === 'development'
+    && ['localhost', '127.0.0.1'].includes(window.location.hostname);
   return {
-    url: import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8080',
+    url: localDev ? 'http://localhost:8080' : (import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8080'),
     realm: import.meta.env.VITE_KEYCLOAK_REALM ?? 'chargeops',
     clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'chargeops-web',
   };

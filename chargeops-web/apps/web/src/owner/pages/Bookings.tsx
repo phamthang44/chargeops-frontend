@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { useMemo, useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useMemo, useRef, useState } from 'react';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import {
   BOOKING_STATUS,
+  ApiError,
   useApi,
   type ApiBookingStatus,
 } from '@chargeops/api';
@@ -21,29 +22,10 @@ import { BookingTable } from '../features/bookings/BookingTable';
 import { BookingCards } from '../features/bookings/BookingCards';
 import { BookingDetailDrawer } from '../features/bookings/BookingDetailDrawer';
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { downloadBookingFile, getRangeWindow } from '../features/bookings/bookingExport';
 
 const PAGE_SIZE = 10;
 type FilterKey = ApiBookingStatus | 'all';
-
-function getRangeWindow(range: BookingRange): { from?: string; to?: string } {
-  if (range === 'all') return {};
-  const now = new Date();
-  const to = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-  let fromDate: Date;
-  if (range === 'today') {
-    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  } else if (range === '7d') {
-    fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  } else if (range === '30d') {
-    fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  } else {
-    return {};
-  }
-  return {
-    from: fromDate.toISOString(),
-    to,
-  };
-}
 
 export function Bookings() {
   const { t } = useTranslation('owner');
@@ -57,6 +39,24 @@ export function Bookings() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const timeWindow = useMemo(() => getRangeWindow(range), [range]);
+  const exportLock = useRef(false);
+  const bookingFilter = {
+    status: filter === 'all' ? undefined : filter,
+    stationId: selectedStationId || undefined,
+    ...timeWindow,
+  };
+  const exportMutation = useMutation({
+    mutationFn: () => api.ownerBookings.export(bookingFilter),
+    onSuccess: (file) => downloadBookingFile(file),
+    onError: (error) => toast(t(error instanceof ApiError && error.code === 'BKG_EXPORT_LIMIT_EXCEEDED'
+      ? 'bookings.exportLimitExceeded' : 'bookings.exportFailed'), 'error'),
+    onSettled: () => { exportLock.current = false; },
+  });
+  const exportBookings = () => {
+    if (exportLock.current) return;
+    exportLock.current = true;
+    exportMutation.mutate();
+  };
 
   const summaryQuery = useQuery({
     queryKey: ['ownerBookings', 'summary', { selectedStationId, range }],
@@ -72,10 +72,7 @@ export function Bookings() {
     queryKey: ['ownerBookings', 'list', { filter, selectedStationId, range, page }],
     queryFn: () =>
       api.ownerBookings.list({
-        status: filter === 'all' ? undefined : filter,
-        stationId: selectedStationId || undefined,
-        from: timeWindow.from,
-        to: timeWindow.to,
+        ...bookingFilter,
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -135,7 +132,8 @@ export function Bookings() {
       <BookingToolbar
         range={range}
         onRange={(r) => resetTo(() => setRange(r))}
-        onExport={() => toast(t('bookings.exportToast'), 'info')}
+        onExport={exportBookings}
+        exporting={exportMutation.isPending}
       />
 
       <div className="mb-3.5">

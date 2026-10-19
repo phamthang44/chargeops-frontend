@@ -1068,6 +1068,14 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
     },
 
     ownerBookings: {
+      async export(params = {}) {
+        const result = await this.list({ ...params, page: 0, pageSize: 10_001 });
+        if (result.total > 10_000) {
+          throw new ApiError(400, 'BKG_EXPORT_LIMIT_EXCEEDED', 'Narrow the filters to at most 10,000 bookings.');
+        }
+        const { createMockBookingWorkbook } = await import('./bookingExport');
+        return createMockBookingWorkbook(result.items, params, currentLang());
+      },
       async list(params = {}) {
         await delay();
         const { status, stationId, connectorId, from, to, page = 0, pageSize = 20 } = params;
@@ -1083,13 +1091,16 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
         }
         if (from) {
           const fromMs = new Date(from).getTime();
-          rows = rows.filter((b) => new Date(b.endAt).getTime() > fromMs);
+          rows = rows.filter((b) => params.windowMode === 'START_IN_WINDOW'
+            ? new Date(b.startAt).getTime() >= fromMs : new Date(b.endAt).getTime() > fromMs);
         }
         if (to) {
           const toMs = new Date(to).getTime();
           rows = rows.filter((b) => new Date(b.startAt).getTime() < toMs);
         }
 
+        const direction = params.sort?.endsWith(',asc') ? 1 : -1;
+        rows = [...rows].sort((a, b) => direction * (a.startAt.localeCompare(b.startAt) || a.id.localeCompare(b.id)));
         const items: OwnerBookingListItem[] = rows
           .slice(page * pageSize, (page + 1) * pageSize)
           .map((b) => {

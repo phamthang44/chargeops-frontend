@@ -150,8 +150,10 @@
   "bookings": {
     "title": "Đặt chỗ",
     "subtitle": "Theo dõi và xử lý các lượt đặt chỗ tại trạm.",
-    "exportCsv": "Xuất CSV",
-    "exportToast": "Đang xuất CSV… (demo)",
+    "exportExcel": "Xuất Excel",
+    "exporting": "Đang xuất Excel…",
+    "exportFailed": "Không thể xuất Excel. Vui lòng thử lại.",
+    "exportLimitExceeded": "Mỗi lần chỉ xuất tối đa 10.000 booking. Vui lòng thu hẹp bộ lọc trạm, thời gian hoặc trạng thái.",
     "cancelSuccess": "Đã hủy {{id}} — hoàn {{refund}}",
     "cancelBtn": "Hủy thay khách",
     "canceling": "Đang hủy…",

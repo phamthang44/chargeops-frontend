@@ -552,6 +552,15 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     ownerBookings: {
+      export: (params = {}) => http.download('/owner/bookings/export', {
+        stationId: params.stationId,
+        connectorId: params.connectorId,
+        from: params.from,
+        to: params.to,
+        status: params.status,
+        windowMode: params.windowMode,
+        sort: params.sort,
+      }),
       list: async (params = {}) => {
         const query: Record<string, any> = {};
         if (params.stationId) query.stationId = params.stationId;

@@ -1,24 +1,27 @@
 import { useTranslation } from 'react-i18next';
 import type { BookingSearchField } from '@chargeops/api';
 import { IconCard, SearchInput, SegmentedControl, Select } from '@chargeops/ui';
+import type { BookingRange } from './bookingExport';
 
-export type BookingRange = 'today' | '7d' | '30d' | 'all';
+export type { BookingRange } from './bookingExport';
 
 export interface BookingToolbarProps {
   range: BookingRange;
   onRange: (r: BookingRange) => void;
   onExport: () => void;
+  exporting?: boolean;
   search?: string;
   onSearch?: (v: string) => void;
   searchIn?: BookingSearchField;
   onSearchIn?: (f: BookingSearchField) => void;
 }
 
-/** Date range segmented control + CSV export (BKG-047 / FE-15). */
+/** Date range segmented control + Excel export. */
 export function BookingToolbar({
   range,
   onRange,
   onExport,
+  exporting = false,
 }: BookingToolbarProps) {
   const { t } = useTranslation('owner');
 
@@ -33,11 +36,14 @@ export function BookingToolbar({
     <div className="mb-3 flex flex-wrap items-center gap-[9px]">
       <SegmentedControl segments={ranges} active={range} onChange={onRange} />
       <button
+        type="button"
         onClick={onExport}
-        className="ml-auto flex items-center gap-[7px] rounded-ctl border border-line bg-surface px-[13px] py-2 text-[12.5px] font-semibold text-body transition hover:border-line-hover hover:bg-canvas"
+        disabled={exporting}
+        aria-busy={exporting}
+        className="ml-auto flex items-center gap-[7px] rounded-ctl border border-line bg-surface px-[13px] py-2 text-[12.5px] font-semibold text-body transition hover:border-line-hover hover:bg-canvas disabled:cursor-wait disabled:opacity-60"
       >
         <IconCard size={14} strokeWidth={1.9} />
-        {t('bookings.exportCsv')}
+        {t(exporting ? 'bookings.exporting' : 'bookings.exportExcel')}
       </button>
     </div>
   );

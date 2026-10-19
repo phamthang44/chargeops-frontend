@@ -17,11 +17,17 @@ export class ApiError extends Error {
 /** Any plain object of primitives — undefined/empty values are skipped. */
 type Query = object;
 
+export interface DownloadFile {
+  blob: Blob;
+  filename: string;
+}
+
 interface RequestOptions {
   params?: Query;
   body?: unknown;
   headers?: Record<string, string>;
   timeoutMs?: number;
+  responseType?: 'json' | 'download';
 }
 
 const TIMEOUT_MS = 15_000;
@@ -88,6 +94,19 @@ export class HttpClient {
       throw new ApiError(res.status, code, message, messageKey, details);
     }
 
+    if (opts.responseType === 'download') {
+      if (res.headers.get('Content-Type')?.includes('json')) {
+        throw new ApiError(res.status, 'INVALID_FILE', 'The server did not return a file.');
+      }
+      let blob: Blob;
+      try {
+        blob = await res.blob();
+      } catch (e) {
+        const timedOut = e instanceof DOMException && e.name === 'TimeoutError';
+        throw new ApiError(0, timedOut ? 'TIMEOUT' : 'NETWORK', timedOut ? 'Yêu cầu quá thời gian chờ.' : 'Không thể kết nối máy chủ.');
+      }
+      return { blob, filename: downloadFilename(res.headers.get('Content-Disposition')) } as T;
+    }
     if (res.status === 204) return undefined as T;
     const body = (await res.json()) as {
       data?: T;
@@ -118,6 +137,15 @@ export class HttpClient {
   get<T>(path: string, params?: Query, opts?: Omit<RequestOptions, 'params' | 'body'>): Promise<T> {
     return this.request<T>('GET', path, { params, ...opts });
   }
+
+  download(path: string, params?: Query): Promise<DownloadFile> {
+    return this.request<DownloadFile>('GET', path, {
+      params,
+      responseType: 'download',
+      timeoutMs: 60_000,
+      headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json' },
+    });
+  }
   post<T>(path: string, body?: unknown, opts?: Omit<RequestOptions, 'body'>): Promise<T> {
     return this.request<T>('POST', path, { body, ...opts });
   }
@@ -130,4 +158,13 @@ export class HttpClient {
   delete<T>(path: string, opts?: RequestOptions): Promise<T> {
     return this.request<T>('DELETE', path, opts);
   }
+}
+
+function downloadFilename(disposition: string | null): string {
+  const encoded = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  let name = disposition?.match(/filename="([^"]+)"|filename=([^;]+)/i)?.slice(1).find(Boolean);
+  if (encoded) {
+    try { name = decodeURIComponent(encoded); } catch { /* use the ordinary filename */ }
+  }
+  return name?.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim() || 'chargeops-bookings.xlsx';
 }

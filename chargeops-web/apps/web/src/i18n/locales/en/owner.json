@@ -150,8 +150,10 @@
   "bookings": {
     "title": "Bookings",
     "subtitle": "Track and handle bookings at the station.",
-    "exportCsv": "Export CSV",
-    "exportToast": "Exporting CSV... (demo)",
+    "exportExcel": "Export Excel",
+    "exporting": "Exporting Excel…",
+    "exportFailed": "Could not export Excel. Please try again.",
+    "exportLimitExceeded": "Each export is limited to 10,000 bookings. Narrow the station, time or status filters.",
     "cancelSuccess": "Cancelled {{id}} — refunded {{refund}}",
     "cancelBtn": "Cancel for Guest",
     "canceling": "Cancelling...",

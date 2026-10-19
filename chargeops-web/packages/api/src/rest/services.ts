@@ -975,6 +975,10 @@ export function createRestServices(http: HttpClient): Services {
     },
 
     ownerFinance: {
+      analytics: async (params = {}) => {
+        const res = await http.get<import('../types').OwnerFinanceAnalytics>('/owner/finance/analytics', params);
+        return res;
+      },
       summary: async () => {
         try {
           const res: any = await http.get('/owner/finance/summary');

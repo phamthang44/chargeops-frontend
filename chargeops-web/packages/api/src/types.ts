@@ -1241,6 +1241,24 @@ export interface OwnerFinanceSummary {
   paidBookings: number;
 }
 
+export interface OwnerFinanceAnalytics {
+  environment: 'SIMULATOR';
+  currency: 'VND';
+  timezone: string;
+  period: '7d' | '30d';
+  stationId: string | null;
+  from: string;
+  to: string;
+  generatedAt: string;
+  grossVnd: number;
+  refundedVnd: number;
+  netVnd: number;
+  daily: { date: string; grossVnd: number; refundedVnd: number; netVnd: number }[];
+  stations: { stationId: string; stationCode: string; stationName: string; grossVnd: number; refundedVnd: number; netVnd: number }[];
+  stationCount: number;
+  stationLimit: number;
+}
+
 export interface OwnerRefundsSummary {
   totalPendingCount: number;
   totalSucceededCount: number;

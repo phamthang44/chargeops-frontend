@@ -26,6 +26,7 @@ import {
 } from '@chargeops/ui';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
 import { useOwnerStation } from '../context/OwnerStationContext';
+import { OwnerFinanceCharts } from '../features/revenue/OwnerFinanceCharts';
 
 const PERIODS: OwnerDashboardPeriod[] = ['7d', '30d'];
 const KINDS: OwnerDashboardAttentionKind[] = ['EQUIPMENT', 'TICKET', 'LICENSE'];
@@ -149,6 +150,15 @@ export function OwnerDashboard() {
           <KpiCard label={t('metrics.charging')} value={number.format(summary.data.hardware.chargingConnectors)} delta={t('hero.chargingNote')} deltaClass="text-muted" />
         </div>}
     </section>}
+
+    <OwnerFinanceCharts
+      stationId={stationId}
+      period={period}
+      onSelectStation={(id) => {
+        if (id) setSelectedStationId(id);
+        update('stationId', id || undefined);
+      }}
+    />
 
     <div className="grid gap-4 xl:grid-cols-12">
       <section className="xl:col-span-8" aria-labelledby="owner-stations-title">

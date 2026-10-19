@@ -6,6 +6,7 @@
  */
 import type { Services, LegalDocumentDetail, GlobalSearchGroup, GlobalSearchHit, GlobalSearchType } from '../services';
 import { ApiError } from '../http';
+import { mockOwnerFinanceAnalytics } from './ownerFinanceAnalytics';
 import type {
   AdministrativeProvince,
   AdministrativeWard,
@@ -2154,6 +2155,10 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
     },
 
     ownerFinance: {
+      async analytics(params = {}) {
+        await delay();
+        return mockOwnerFinanceAnalytics(db.ownerStations, params);
+      },
       async summary() {
         await delay();
         let grossVnd = 0;

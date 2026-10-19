@@ -348,6 +348,7 @@ export interface RefundService {
 }
 
 export interface OwnerFinanceService {
+  analytics(params?: { stationId?: string; period?: '7d' | '30d' }): Promise<import('./types').OwnerFinanceAnalytics>;
   summary(): Promise<OwnerFinanceSummary>;
   list(params?: { page?: number; pageSize?: number }): Promise<Page<OwnerFinanceBooking>>;
   get(bookingId: string): Promise<OwnerFinanceBooking>;

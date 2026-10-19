@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · ChargeOps",
   },
   description:
-    "ChargeOps giúp tài xế xe điện tìm trạm sạc, đặt chỗ trước khi đến, nhận QR check-in và thanh toán dễ dàng. Dành cho chủ trạm: quản lý trụ sạc và tăng doanh thu.",
+    "ChargeOps giúp tài xế xe điện tìm trạm, đặt khung giờ và check-in QR. Chủ trạm có thể quản lý thông tin trạm và đặt chỗ trên Web Console.",
   keywords: [
     "trạm sạc xe điện",
     "đặt chỗ sạc xe điện",
@@ -36,12 +36,12 @@ export const metadata: Metadata = {
     siteName: "ChargeOps",
     title: "ChargeOps · Đặt chỗ trạm sạc xe điện tại Việt Nam",
     description:
-      "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán trong vài chạm.",
+      "Tìm trạm sạc, đặt khung giờ và check-in bằng QR với ChargeOps.",
   },
   twitter: {
     card: "summary_large_image",
     title: "ChargeOps · Đặt chỗ trạm sạc xe điện",
-    description: "Tìm trạm sạc, đặt chỗ trước, check-in bằng QR và thanh toán dễ dàng.",
+    description: "Tìm trạm sạc, đặt khung giờ và check-in bằng QR với ChargeOps.",
   },
   icons: { icon: "/icon.svg", apple: "/apple-icon" },
   appleWebApp: { capable: true, title: "ChargeOps", statusBarStyle: "default" },

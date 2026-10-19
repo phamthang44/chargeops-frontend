@@ -3,18 +3,18 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StationDirectory } from "@/components/StationDirectory";
 import { StoreBadges } from "@/components/StoreBadges";
-import { STATIONS } from "@/components/stations";
+import type { CoverageStation } from "@/components/stations";
 import { fetchPublicStations } from "@/lib/stations-api";
 
 export const metadata: Metadata = {
   title: "Trạm sạc xe điện ChargeOps · Tìm trạm gần bạn",
   description:
-    "Danh sách trạm sạc xe điện ChargeOps tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Xem độ trống, giá đ/kWh và chuẩn sạc, rồi đặt chỗ trong ứng dụng.",
+    "Tìm kiếm trạm sạc ChargeOps, xem thông tin địa điểm, cổng sạc và khung giờ. Dữ liệu hiển thị tùy theo thông tin được trạm cung cấp.",
   alternates: { canonical: "/tram-sac" },
   openGraph: {
     title: "Trạm sạc xe điện ChargeOps · Tìm trạm gần bạn",
     description:
-      "Tìm trạm sạc xe điện gần bạn: độ trống, giá và chuẩn sạc. Đặt chỗ trong ứng dụng ChargeOps.",
+      "Tìm trạm sạc ChargeOps và xem thông tin địa điểm, cổng sạc cùng khung giờ do trạm cung cấp.",
     url: "/tram-sac",
   },
 };
@@ -38,8 +38,7 @@ export default async function StationsPage() {
               Trạm sạc xe điện <span className="text-gradient">ChargeOps</span>
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-ink-body">
-              Tìm trạm sạc gần bạn tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Xem độ
-              trống, giá và chuẩn sạc, rồi giữ khung giờ trong ứng dụng.
+              Xem danh sách trạm, thông tin địa điểm và cổng sạc hiện có. Hãy kiểm tra trạng thái mới nhất trong ứng dụng trước khi tới.
             </p>
           </div>
         </section>
@@ -52,25 +51,25 @@ export default async function StationsPage() {
               Đặt chỗ tại trạm bạn chọn
             </h2>
             <p className="max-w-xl text-ink-body">
-              Việc giữ khung giờ, check-in QR và thanh toán được thực hiện trong
-              ứng dụng ChargeOps trên điện thoại.
+              Giữ khung giờ và check-in QR được thực hiện trong ứng dụng ChargeOps. Thanh toán trong bản demo hiện được mô phỏng.
             </p>
             <StoreBadges className="justify-center" />
           </div>
         </section>
       </main>
       <SiteFooter />
-      <JsonLd />
+      <JsonLd stations={data.isLive ? data.stations : []} />
     </>
   );
 }
 
-function JsonLd() {
+function JsonLd({ stations }: { stations: CoverageStation[] }) {
+  if (stations.length === 0) return null;
   const data = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Trạm sạc xe điện ChargeOps",
-    itemListElement: STATIONS.map((s, i) => ({
+    itemListElement: stations.map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `https://chargeops.online/tram-sac/${s.slug}`,

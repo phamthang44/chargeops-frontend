@@ -25,11 +25,6 @@ export function PhoneFrame({
           float ? "animate-float-slow" : ""
         }`}
       >
-        {/* Hardware side buttons */}
-        <span className="absolute -left-[3px] top-24 h-10 w-[3px] rounded-l bg-[#3A4A43] shadow-sm" />
-        <span className="absolute -left-[3px] top-38 h-12 w-[3px] rounded-l bg-[#3A4A43] shadow-sm" />
-        <span className="absolute -right-[3px] top-28 h-16 w-[3px] rounded-r bg-[#3A4A43] shadow-sm" />
-
         {/* Inner OLED Display Container */}
         <div className="relative overflow-hidden rounded-[2.35rem] bg-black ring-1 ring-black/80">
           {/* Dynamic Island pill */}

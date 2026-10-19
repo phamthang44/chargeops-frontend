@@ -124,6 +124,41 @@ export const ACPlugIcon = (p: SVGProps<SVGSVGElement>) => (
   </Line>
 );
 
+export const ShieldCheckIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+    <path d="m9 12 2 2 4-4" />
+  </Line>
+);
+
+export const ClockIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 3" />
+  </Line>
+);
+
+export const SparklesIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="m12 3 1.9 4.8L19 9.7l-4.1 3.5 1.3 5.3-4.2-2.8-4.2 2.8 1.3-5.3L5 9.7l5.1-1.9L12 3Z" />
+  </Line>
+);
+
+export const ChartBarIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M3 3v18h18" />
+    <path d="M18 17V9" />
+    <path d="M13 17V5" />
+    <path d="M8 17v-3" />
+  </Line>
+);
+
+export const SlidersIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6" />
+  </Line>
+);
+
 /* --- Brand glyphs (monochrome, inherit color) --- */
 export const AppleGlyph = (p: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true" {...p}>

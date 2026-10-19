@@ -35,9 +35,7 @@ export async function generateMetadata({
   if (!station) return { title: "Không tìm thấy trạm sạc" };
 
   const title = `${station.name} · Trạm sạc xe điện ${station.district}, ${station.city}`;
-  const description = `${station.name} tại ${station.address}. ${
-    station.fast ? "Trạm sạc nhanh DC" : "Trạm sạc chuẩn AC"
-  }, công suất ${station.maxPowerKw ? `${station.maxPowerKw}kW` : "tiêu chuẩn"}, giá ${station.pricePerKwh}/kWh, chuẩn ${station.connectors.join(", ")}. Đặt trước khung giờ và check-in QR trong app ChargeOps.`;
+  const description = `${station.name} tại ${station.address}. Xem thông tin địa điểm và cổng sạc. Dữ liệu và khả năng đặt chỗ phụ thuộc vào thông tin do trạm cung cấp.`;
 
   return {
     title,
@@ -59,26 +57,26 @@ const CONNECTOR_SPECS: Record<
   CCS2: {
     type: "Sạc nhanh siêu tốc DC",
     power: "60kW – 150kW",
-    desc: "Chuẩn sạc nhanh phổ biến nhất tại Việt Nam và Châu Âu, sạc đầy 20%–80% chỉ trong 20–30 phút.",
-    vehicles: "VinFast VF5/6/7/8/9, Porsche Taycan, Audi e-tron, Hyundai Ioniq 5, BMW iX",
+    desc: "Chuẩn cổng sạc DC. Công suất thực tế phụ thuộc vào thiết bị và phương tiện.",
+    vehicles: "Kiểm tra khả năng tương thích với nhà vận hành trạm trước khi sử dụng.",
   },
   CHAdeMO: {
     type: "Sạc nhanh DC",
     power: "50kW – 60kW",
-    desc: "Chuẩn sạc nhanh DC theo tiêu chuẩn Nhật Bản, nguồn điện ổn định bảo vệ tuổi thọ pack pin.",
-    vehicles: "Nissan Leaf, Mitsubishi Outlander PHEV, các dòng xe nhập khẩu Nhật",
+    desc: "Chuẩn cổng sạc DC. Công suất thực tế phụ thuộc vào thiết bị và phương tiện.",
+    vehicles: "Kiểm tra khả năng tương thích với nhà vận hành trạm trước khi sử dụng.",
   },
   "Type 2 (AC)": {
     type: "Sạc tiêu chuẩn AC",
     power: "11kW – 22kW",
-    desc: "Chuẩn sạc chậm AC tiện lợi, phù hợp vừa gửi xe mua sắm, làm việc hoặc sạc qua đêm an toàn.",
-    vehicles: "Tất cả các dòng xe điện và xe lai sạc điện (PHEV) lưu hành tại Việt Nam",
+    desc: "Chuẩn cổng sạc AC. Công suất thực tế phụ thuộc vào thiết bị và phương tiện.",
+    vehicles: "Kiểm tra khả năng tương thích với nhà vận hành trạm trước khi sử dụng.",
   },
   "GB/T": {
     type: "Sạc nhanh DC / AC",
     power: "30kW – 60kW",
-    desc: "Chuẩn sạc tiêu chuẩn quốc gia cho các dòng xe điện nhập khẩu từ thị trường Trung Quốc.",
-    vehicles: "BYD Atto 3, Dolphin, Seal, Wuling Mini EV, MG4 EV",
+    desc: "Chuẩn cổng sạc được dùng trên một số thiết bị. Công suất thực tế phụ thuộc vào thiết bị và phương tiện.",
+    vehicles: "Kiểm tra khả năng tương thích với nhà vận hành trạm trước khi sử dụng.",
   },
 };
 
@@ -101,7 +99,8 @@ export default async function StationDetailPage({
   const station = (await fetchPublicStationBySlug(slug)) || getStationBySlug(slug);
   if (!station) notFound();
 
-  const isFull = station.available === 0;
+  const isSampleStation = !station.operatingState;
+  const isFull = station.total > 0 && station.available === 0;
   const others = STATIONS.filter((s) => s.slug !== station.slug).slice(0, 3);
 
   // Real GPS & Maps navigation
@@ -204,18 +203,24 @@ export default async function StationDetailPage({
 
             {/* Quick Rating & Live Badge */}
             <div className="flex items-center gap-3 shrink-0">
+              {isSampleStation ? (
+                <span className="rounded-full border border-primary/20 bg-primary-soft px-3 py-2 text-xs font-semibold text-primary-dark">
+                  Trạm mẫu · thông tin minh họa
+                </span>
+              ) : station.reviewCount > 0 ? (
               <div className="flex items-center gap-2 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
                   <StarIcon className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1">
-                    <span className="text-base font-extrabold text-ink-strong">{station.rating.toFixed(1)}</span>
+                    <span className="text-base font-extrabold text-ink-strong">{isSampleStation ? "—" : station.rating.toFixed(1)}</span>
                     <span className="text-xs text-ink-muted">/5.0</span>
                   </div>
-                  <p className="text-[11px] text-ink-muted font-medium">{station.reviewCount} đánh giá tài xế</p>
+                  <p className="text-[11px] text-ink-muted font-medium">{isSampleStation ? "Dữ liệu mẫu" : "Đánh giá tài xế"}</p>
                 </div>
               </div>
+              ) : null}
 
               <div
                 className={`rounded-2xl border px-4 py-3 shadow-sm ${
@@ -226,7 +231,7 @@ export default async function StationDetailPage({
               >
                 <p className="text-[11px] font-semibold uppercase tracking-wider">Trạng thái cổng</p>
                 <p className="text-base font-extrabold">
-                  {isFull ? "Hết chỗ tạm thời" : `${station.available}/${station.total} cổng sẵn sàng`}
+                  {station.total === 0 ? "Chưa có dữ liệu cổng" : isFull ? "Hết chỗ tạm thời" : `${station.available}/${station.total} cổng được ghi nhận`}
                 </p>
               </div>
             </div>
@@ -260,7 +265,7 @@ export default async function StationDetailPage({
                     </p>
                   </div>
                   <span className="hidden sm:inline-flex shrink-0 rounded-xl bg-primary px-3 py-1.5 text-xs font-extrabold text-white shadow-glow-emerald">
-                    {station.fast ? "SẠC NHANH DC" : "SẠC TIÊU CHUẨN"}
+                    {station.connectors.length === 0 && !station.maxPowerKw ? "THÔNG TIN ĐANG CẬP NHẬT" : station.fast ? "SẠC DC" : "SẠC AC"}
                   </span>
                 </div>
               </div>
@@ -337,15 +342,15 @@ export default async function StationDetailPage({
                 </div>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-ink-strong">
-                    {station.maxPowerKw || (station.fast ? 120 : 60)}
+                    {station.maxPowerKw || "—"}
                   </span>
                   <span className="text-sm font-semibold text-ink-muted">kW</span>
                 </div>
                 <p className="mt-3 text-xs font-semibold text-primary-dark">
-                  {station.fast ? "DC Siêu nhanh" : "AC Tiêu chuẩn"}
+                  {station.connectors.length === 0 && !station.maxPowerKw ? "Chưa có thông tin cổng" : station.fast ? "DC" : "AC"}
                 </p>
                 <p className="mt-0.5 text-[11px] text-ink-muted">
-                  Tương thích mọi hãng xe EV
+                  Đối chiếu chuẩn cổng với xe
                 </p>
               </div>
 
@@ -353,16 +358,16 @@ export default async function StationDetailPage({
               <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
                 <div className="flex items-center justify-between text-xs text-ink-muted">
                   <span>Đơn giá niêm yết</span>
-                  <span className="text-[10px] font-bold text-primary uppercase">Cố định</span>
+                  <span className="text-[10px] font-bold text-primary uppercase">Tham khảo</span>
                 </div>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-primary-dark">
                     {station.pricePerKwh}
                   </span>
-                  <span className="text-xs font-semibold text-ink-muted">/kWh</span>
+                  <span className="text-xs font-semibold text-ink-muted">/gói tham khảo</span>
                 </div>
                 <p className="mt-3 text-xs font-semibold text-ink-body">
-                  Không phụ phí ẩn
+                  Giá gói theo thời gian
                 </p>
                 <p className="mt-0.5 text-[11px] text-ink-muted">
                   Minh bạch trước khi đặt chỗ
@@ -381,10 +386,10 @@ export default async function StationDetailPage({
                   </p>
                 </div>
                 <p className="mt-3 text-xs font-semibold text-ink-body">
-                  Hỗ trợ trực tuyến 24/7
+                  Giờ hoạt động do trạm cung cấp
                 </p>
                 <p className="mt-0.5 text-[11px] text-ink-muted">
-                  Hotline kỹ thuật luôn sẵn sàng
+                  Kiểm tra thông tin trước khi tới
                 </p>
               </div>
             </div>
@@ -401,8 +406,8 @@ export default async function StationDetailPage({
                     <h2 className="text-lg font-bold text-ink-strong">
                       Chuẩn sạc tương thích & Đầu nối
                     </h2>
-                    <p className="mt-1 text-xs text-ink-muted">
-                      Trạm trang bị các đầu cắm tiêu chuẩn quốc tế, phù hợp cho đa số xe điện tại Việt Nam.
+                  <p className="mt-1 text-xs text-ink-muted">
+                      Chuẩn cổng và công suất được hiển thị theo thông tin hiện có; hãy đối chiếu với xe và xác nhận cùng trạm.
                     </p>
                   </div>
                   <span className="hidden sm:inline-flex rounded-pill bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-dark">
@@ -510,17 +515,17 @@ export default async function StationDetailPage({
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-ink-muted">
-                  ChargeOps bảo vệ tối đa quyền lợi của tài xế và đảm bảo trụ sạc luôn sẵn sàng khi bạn đến.
+                  Chính sách áp dụng được hiển thị trong quy trình đặt chỗ. Trạng thái thực tế phụ thuộc vào thông tin trạm và thiết bị.
                 </p>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-line bg-surface-alt p-3.5">
                     <span className="text-lg">⏱️</span>
                     <h3 className="mt-2 text-xs font-bold text-ink-strong">
-                      15 phút giữ chỗ miễn phí
+                      Giữ chỗ thanh toán trong 10 phút
                     </h3>
                     <p className="mt-1 text-[11px] text-ink-muted leading-relaxed">
-                      Trụ sạc được khóa riêng cho xe bạn, tính từ thời điểm khung giờ sạc bắt đầu.
+                      Hạn giữ chỗ bắt đầu khi tạo đặt chỗ. Thử thanh toán lại không kéo dài thời hạn.
                     </p>
                   </div>
 
@@ -530,17 +535,17 @@ export default async function StationDetailPage({
                       Check-in QR không chạm
                     </h3>
                     <p className="mt-1 text-[11px] text-ink-muted leading-relaxed">
-                      Quét mã QR tại trụ để mở nguồn điện. Không cần thủ tục giấy tờ hay tiền mặt.
+                      Quét mã QR của cổng đã đặt và xác nhận check-in trong ứng dụng.
                     </p>
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface-alt p-3.5">
                     <span className="text-lg">🛡️</span>
                     <h3 className="mt-2 text-xs font-bold text-ink-strong">
-                      Hoàn tiền 100% linh hoạt
+                      Xem khoản hoàn trước khi hủy
                     </h3>
                     <p className="mt-1 text-[11px] text-ink-muted leading-relaxed">
-                      Hủy trước khung giờ hoặc trong thời gian ân hạn được hoàn tiền đầy đủ vào ví.
+                      Đặt chỗ đã thanh toán, chưa check-in có thể được hoàn đủ nếu yêu cầu được xử lý trong 10 phút từ lúc xác nhận thanh toán và trước giờ bắt đầu. Giao dịch hoàn tiền hiện được mô phỏng.
                     </p>
                   </div>
                 </div>
@@ -609,7 +614,7 @@ export default async function StationDetailPage({
                     Đặt trước khung giờ sạc cho xe bạn
                   </h3>
                   <p className="mt-2 text-xs text-ink-body leading-relaxed">
-                    Đừng để hết chỗ khi đến nơi. Khóa cổng sạc độc quyền trên ứng dụng ChargeOps trước 15–30 phút.
+                    Xem thông tin trạm và chọn khung giờ trong ứng dụng. Tình trạng cổng có thể thay đổi theo dữ liệu trạm.
                   </p>
 
                   <div className="mt-4 pt-3 border-t border-primary/15">
@@ -618,7 +623,7 @@ export default async function StationDetailPage({
 
                   <div className="mt-4 flex items-center justify-between text-[11px] text-ink-muted border-t border-line/60 pt-3">
                     <span>⚡ Không cần đặt cọc trước</span>
-                    <span>✓ Miễn phí hủy trong 15p</span>
+                    <span>✓ Xem điều kiện hủy trong ứng dụng</span>
                   </div>
                 </div>
               </div>
@@ -668,11 +673,11 @@ export default async function StationDetailPage({
                             : "bg-surface-alt text-ink-strong ring-1 ring-line"
                         }`}
                       >
-                        {s.fast ? "SẠC NHANH DC" : "AC TIÊU CHUẨN"}
+                        {s.operatingState ? (s.fast ? "SẠC DC" : "SẠC AC") : "TRẠM MẪU"}
                       </span>
                     </div>
                     <span className="absolute bottom-2.5 right-3 rounded-pill bg-black/60 backdrop-blur-md px-2 py-0.5 text-[10px] font-semibold text-white">
-                      ★ {s.rating.toFixed(1)}
+                      {s.operatingState && s.reviewCount > 0 ? `★ ${s.rating.toFixed(1)}` : "Trạm mẫu"}
                     </span>
                   </div>
 
@@ -688,17 +693,17 @@ export default async function StationDetailPage({
 
                     <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3">
                       <div>
-                        <span className="text-[10px] text-ink-muted uppercase tracking-wider block">Đơn giá</span>
-                        <span className="text-sm font-extrabold text-primary-dark">{s.pricePerKwh}/kWh</span>
+                        <span className="text-[10px] text-ink-muted uppercase tracking-wider block">Giá tham khảo</span>
+                        <span className="text-sm font-extrabold text-primary-dark">{s.pricePerKwh}</span>
                       </div>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                          s.available === 0
+                          !s.operatingState || (s.total > 0 && s.available === 0)
                             ? "bg-red-50 text-red-600"
                             : "bg-primary-soft text-primary-dark"
                         }`}
                       >
-                        {s.available === 0 ? "Hết chỗ" : `Còn ${s.available}/${s.total} cổng`}
+                        {!s.operatingState ? "Dữ liệu mẫu" : s.total === 0 ? "Chưa có dữ liệu cổng" : s.available === 0 ? "Hết chỗ" : `Còn ${s.available}/${s.total} cổng`}
                       </span>
                     </div>
                   </div>
@@ -711,13 +716,7 @@ export default async function StationDetailPage({
 
       <SiteFooter />
 
-      <JsonLd
-        name={station.name}
-        address={station.address}
-        rating={station.rating}
-        reviewCount={station.reviewCount}
-        priceRange={`${station.pricePerKwh}/kWh`}
-      />
+      <JsonLd name={station.name} address={station.address} />
     </>
   );
 }
@@ -725,27 +724,15 @@ export default async function StationDetailPage({
 function JsonLd({
   name,
   address,
-  rating,
-  reviewCount,
-  priceRange,
 }: {
   name: string;
   address: string;
-  rating: number;
-  reviewCount: number;
-  priceRange: string;
 }) {
   const data = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name,
     address: { "@type": "PostalAddress", streetAddress: address, addressCountry: "VN" },
-    priceRange,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: rating,
-      reviewCount,
-    },
   };
   return (
     <script

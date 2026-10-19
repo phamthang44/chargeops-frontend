@@ -250,11 +250,11 @@ export function mapBackendToCoverageStation(
   const mappedConnectors: Connector[] =
     rawConnectors.length > 0
       ? Array.from(new Set(rawConnectors.map(mapConnectorType)))
-      : ["CCS2", "Type 2 (AC)"];
+      : [];
 
   // 2. Connector counts
-  let total = b.totalConnectorCount ?? 4;
-  let available = b.availableConnectorCount ?? total;
+  let total = b.totalConnectorCount ?? 0;
+  let available = b.availableConnectorCount ?? 0;
   if ("chargePoints" in b && Array.isArray(b.chargePoints) && b.chargePoints.length > 0) {
     let t = 0;
     let a = 0;
@@ -282,9 +282,11 @@ export function mapBackendToCoverageStation(
       ? b.priceFromVndPerKwh
       : "currentPriceVndPerKwh" in b && b.currentPriceVndPerKwh != null
       ? b.currentPriceVndPerKwh
-      : 3850;
+      : null;
 
-  const priceFormatted = `${Number(priceNumber).toLocaleString("vi-VN")}đ`;
+  const priceFormatted = priceNumber == null
+    ? "Chưa có thông tin"
+    : `${Number(priceNumber).toLocaleString("vi-VN")}đ/kWh (tham khảo)`;
 
   // 5. Operating state & hours
   const isOperatingOpen =
@@ -292,7 +294,7 @@ export function mapBackendToCoverageStation(
     ("open24Hours" in b && b.open24Hours) ||
     b.operatingState === "OPEN";
 
-  const hoursText = isOperatingOpen ? "Mở cửa 24/7" : "06:00 – 22:00";
+  const hoursText = isOperatingOpen ? "Đang mở cửa" : "Xem giờ hoạt động với trạm";
 
   // 6. Image resolution
   const primaryImg =
@@ -302,26 +304,24 @@ export function mapBackendToCoverageStation(
 
   const description =
     ("description" in b && b.description) ||
-    `Trạm sạc xe điện ${b.name} tại ${b.address}. Hỗ trợ sạc ${
-      fast ? "nhanh DC công suất cao" : "chuẩn AC"
-    }, trạng thái ${b.operatingState === "OPEN" ? "sẵn sàng phục vụ" : "vận hành linh hoạt"}. Đặt khung giờ và check-in QR qua ứng dụng di động ChargeOps.`;
+    `Trạm sạc xe điện ${b.name} tại ${b.address}. Xem thông tin cổng sạc và trạng thái được trạm cung cấp.`;
 
   return {
     id: b.id,
     slug: slugify(b.name) || b.id,
     name: b.name,
     district: extractDistrict(b.address, b.provinceName),
-    city: b.provinceName || "TP. Hồ Chí Minh",
+    city: b.provinceName || "Chưa cập nhật khu vực",
     address: b.address,
     available,
     total,
     fast,
     pricePerKwh: priceFormatted,
     connectors: mappedConnectors,
-    amenities: ["Mái che", "Wifi", "Bãi đỗ rộng", "Thanh toán trong app", ...(isOperatingOpen ? ["Mở cửa 24/7"] : [])],
+    amenities: [],
     hours: hoursText,
-    rating: 4.8,
-    reviewCount: 88,
+    rating: 0,
+    reviewCount: 0,
     description,
     primaryImageUrl: primaryImg,
     images:

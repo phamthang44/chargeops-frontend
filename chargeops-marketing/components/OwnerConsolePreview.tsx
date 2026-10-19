@@ -26,13 +26,21 @@ export function OwnerConsolePreview() {
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
-          <span className="truncate text-[11px] font-semibold text-ink-strong">
+          <span
+            className={`truncate text-[11px] font-semibold ${
+              theme === "dark" ? "text-white/90" : "text-ink-strong"
+            }`}
+          >
             Trạm Trần Thị Do (ST-1202) · Giá & giờ hoạt động
           </span>
         </div>
 
         {/* Light / Dark Mode Toggle */}
-        <div className="flex items-center gap-1 rounded-full bg-black/[0.04] p-0.5 ring-1 ring-black/5">
+        <div
+          className={`flex items-center gap-1 rounded-full p-0.5 ring-1 transition-colors duration-300 ${
+            theme === "dark" ? "bg-white/[0.06] ring-white/10" : "bg-black/[0.04] ring-black/5"
+          }`}
+        >
           <button
             type="button"
             onClick={() => setTheme("light")}

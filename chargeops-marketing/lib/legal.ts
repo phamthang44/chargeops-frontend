@@ -33,7 +33,7 @@ const termsFallback: LegalPageContent = {
     {
       title: "2. Sử dụng tài khoản an toàn & Chuẩn bảo mật",
       body: [
-        "Mật khẩu tài khoản được quản lý độc lập bởi Keycloak và băm bằng thuật toán Argon2id (salted password hashing), đảm bảo an toàn tuyệt đối.",
+        "Mật khẩu tài khoản được quản lý bởi Keycloak và được băm bằng Argon2id.",
         "Phiên làm việc và giao thức xác thực sử dụng OpenID Connect Authorization Code Flow kết hợp cơ chế PKCE S256, loại bỏ nguy cơ đánh tráo authorization code trên thiết bị di động.",
         "Người dùng tuyệt đối không chia sẻ mật khẩu, mã xác thực hoặc thông tin phiên đăng nhập cho người khác.",
       ],

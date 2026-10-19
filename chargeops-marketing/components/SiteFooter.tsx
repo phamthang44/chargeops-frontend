@@ -10,6 +10,7 @@ export function SiteFooter() {
           <p className="mt-4 max-w-xs text-xs sm:text-sm text-ink-muted leading-relaxed">
             Nền tảng hạ tầng đặt chỗ &amp; quản trị trạm sạc xe điện thông minh cho tài xế và đối tác chủ trạm tại Việt Nam.
           </p>
+
         </div>
 
         <FooterCol
@@ -22,9 +23,10 @@ export function SiteFooter() {
           ]}
         />
         <FooterCol
-          title="Đối tác"
+          title="Dành cho chủ trạm"
           links={[
-            { label: "Dành cho chủ trạm", href: "/#doi-tac" },
+            { label: "Quản trị trạm (Console)", href: "/#doi-tac" },
+            { label: "Mô phỏng doanh thu", href: "/#doi-tac" },
             { label: "Bảng giá Subscription", href: "/#bang-gia-license" },
             { label: "Đăng ký kết nối trạm", href: "mailto:phamthang3564@gmail.com" },
           ]}
@@ -41,9 +43,9 @@ export function SiteFooter() {
 
       <div className="border-t border-black/[0.04]">
         <div className="container-x flex flex-col items-center justify-between gap-3 py-6 text-xs text-ink-muted sm:flex-row">
-          <p>© {new Date().getFullYear()} ChargeOps. Đồ án tốt nghiệp chuyên ngành Kỹ thuật Phần mềm.</p>
-          <p className="inline-flex items-center gap-1.5 font-medium text-ink-strong">
-            Made with pride in Vietnam <BoltIcon className="h-3.5 w-3.5 text-primary" />
+          <p>© {new Date().getFullYear()} ChargeOps. Đồ án tốt nghiệp ngành Computing.</p>
+          <p className="inline-flex items-center gap-1.5 font-medium text-ink-heading">
+            Nền tảng tìm trạm và đặt khung giờ sạc xe điện <BoltIcon className="h-3.5 w-3.5 text-primary" />
           </p>
         </div>
       </div>
@@ -60,13 +62,13 @@ function FooterCol({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-ink-strong">{title}</h3>
-      <ul className="mt-3 space-y-2">
+      <h3 className="text-sm font-bold text-ink-heading">{title}</h3>
+      <ul className="mt-3.5 space-y-2.5">
         {links.map((l) => (
           <li key={l.label}>
             <a
               href={l.href}
-              className="text-sm text-ink-muted transition hover:text-primary-dark"
+              className="text-xs sm:text-sm text-ink-muted transition hover:text-primary-dark hover:translate-x-0.5 inline-block"
             >
               {l.label}
             </a>

@@ -2,18 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  color: #111827;
-  background: #ffffff;
+  color: #0A0D0C;
+  background: #FFFFFF;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 @layer base {
@@ -31,15 +29,14 @@ body {
   :focus-visible {
     outline: 2px solid #10b981;
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
 
-  /* Anchored sections start below the 64px sticky header. */
+  /* Anchored sections start below the floating sticky header. */
   section[id] {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 6rem;
   }
 
-  /* The skip-link moves focus here, but we don't want a ring around the page. */
   main:focus {
     outline: none;
   }
@@ -51,13 +48,14 @@ body {
   left: 1rem;
   top: -100px;
   z-index: 100;
-  border-radius: 0.75rem;
-  background: #111827;
-  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  background: #080C0A;
+  padding: 0.6rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #fff;
-  transition: top 0.2s ease;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .skip-link:focus {
   top: 1rem;
@@ -66,139 +64,150 @@ body {
 @layer components {
   /* Liquid-glass surface with specular edge refraction. */
   .glass {
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95), 0 20px 40px -15px rgba(0, 0, 0, 0.05);
   }
 
   .glass-dark {
-    background: rgba(9, 13, 12, 0.75);
-    backdrop-filter: saturate(160%) blur(20px);
-    -webkit-backdrop-filter: saturate(160%) blur(20px);
+    background: rgba(8, 12, 10, 0.80);
+    backdrop-filter: saturate(170%) blur(24px);
+    -webkit-backdrop-filter: saturate(170%) blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 24px 50px -12px rgba(0, 0, 0, 0.6);
   }
 
   /* Floating Fluid Island Nav pill */
   .island-nav {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: saturate(190%) blur(24px);
-    -webkit-backdrop-filter: saturate(190%) blur(24px);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(190%) blur(28px);
+    -webkit-backdrop-filter: saturate(190%) blur(28px);
     border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 32px -16px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(15, 23, 42, 0.035), inset 0 1px 1px rgba(255, 255, 255, 0.95);
   }
 
-  /* Double-Bezel (Doppelrand / Nested Architecture) */
+  /* Double-Bezel Standard (Doppelrand / Nested Architecture) */
   .double-bezel {
-    @apply p-1.5 sm:p-2 rounded-bezel bg-black/[0.025] ring-1 ring-black/[0.04] transition-all duration-500 ease-haptic;
+    @apply p-1 sm:p-1.5 rounded-bezel bg-black/[0.018] ring-1 ring-black/[0.035] transition-all duration-500 ease-haptic;
   }
   .double-bezel-inner {
-    @apply rounded-bezel-inner bg-white border border-black/[0.04] p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_4px_20px_-8px_rgba(0,0,0,0.03)] transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-inner bg-white border border-black/[0.035] p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_6px_24px_-12px_rgba(15,23,42,0.08)] transition-all duration-500 ease-haptic;
   }
 
+  /* Large Double-Bezel (Bento 2.0 / Hero Highlights) */
+  .double-bezel-lg {
+    @apply p-2 sm:p-2.5 rounded-bezel-lg bg-black/[0.02] ring-1 ring-black/[0.035] transition-all duration-500 ease-haptic;
+  }
+  .double-bezel-lg-inner {
+    @apply rounded-bezel-lg-inner bg-white border border-black/[0.04] p-7 sm:p-9 shadow-diffusion transition-all duration-500 ease-haptic;
+  }
+
+  /* Dark Double-Bezel */
   .double-bezel-dark {
     @apply p-1.5 sm:p-2 rounded-bezel bg-white/[0.04] ring-1 ring-white/10 transition-all duration-500 ease-haptic;
   }
   .double-bezel-dark-inner {
-    @apply rounded-bezel-inner bg-obsidian border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_-10px_rgba(0,0,0,0.6)] transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-inner bg-obsidian border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_15px_35px_-10px_rgba(0,0,0,0.7)] transition-all duration-500 ease-haptic;
+  }
+
+  .double-bezel-dark-lg {
+    @apply p-2 sm:p-2.5 rounded-bezel-lg bg-white/[0.05] ring-1 ring-white/15 transition-all duration-500 ease-haptic;
+  }
+  .double-bezel-dark-lg-inner {
+    @apply rounded-bezel-lg-inner bg-obsidian border border-white/12 p-7 sm:p-10 shadow-diffusion-dark transition-all duration-500 ease-haptic;
   }
 
   .container-x {
-    @apply mx-auto w-full max-w-6xl px-5 sm:px-6;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
   /* Nested Island Primary CTA Button */
   .btn-island-primary {
-    @apply inline-flex items-center justify-center gap-3 rounded-full bg-primary pl-6 pr-2 py-2 text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic hover:bg-primary-dark active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3.5 rounded-full bg-primary pl-6 pr-2.5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(5,150,105,0.55)] transition-all duration-500 ease-haptic hover:bg-primary-dark active:scale-[0.98];
   }
   .btn-island-primary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-haptic;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-spring;
   }
   .btn-island-primary:hover .btn-icon-bubble {
-    @apply translate-x-0.5 -translate-y-0.5 scale-105;
+    @apply translate-x-1 -translate-y-0.5 scale-105;
   }
 
   /* Nested Island Secondary CTA Button */
   .btn-island-secondary {
-    @apply inline-flex items-center justify-center gap-3 rounded-full border border-black/10 bg-white/90 pl-6 pr-2 py-2 text-sm font-semibold text-ink-strong shadow-card backdrop-blur transition-all duration-300 ease-haptic hover:border-primary/40 hover:bg-surface-alt active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3.5 rounded-full border border-black/[0.08] bg-white pl-6 pr-2.5 py-2.5 text-sm font-semibold text-ink-strong shadow-[0_6px_18px_-12px_rgba(15,23,42,0.24)] transition-all duration-500 ease-haptic hover:border-primary/30 hover:bg-surface-alt active:scale-[0.98];
   }
   .btn-island-secondary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-alt text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-haptic;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-spring;
   }
   .btn-island-secondary:hover .btn-icon-bubble {
-    @apply translate-x-0.5 -translate-y-0.5 scale-105;
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3
-      text-sm font-semibold text-white shadow-glow-emerald transition-all duration-300 ease-haptic
-      hover:bg-primary-dark active:scale-[0.98];
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line
-      bg-white px-6 py-3 text-sm font-semibold text-ink-strong transition-all duration-300 ease-haptic
-      hover:border-primary/50 hover:bg-surface-alt active:scale-[0.98];
+    @apply translate-x-1 -translate-y-0.5 scale-105;
   }
 
   .pill {
     @apply inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold;
   }
 
-  /* High-end Eyebrow tag */
+  /* High-end Eyebrow tag with micro-radar pulse */
   .eyebrow-tag {
-    @apply inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary-soft/60 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary-dark shadow-sm backdrop-blur;
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary-soft/60 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-dark shadow-sm backdrop-blur;
   }
 
-  /* Emphasis text with the cyber emerald brand gradient. */
+  /* Specular gradient text */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #059669 0%, #10b981 50%, #00e599 100%);
+    background-image: linear-gradient(135deg, #059669 0%, #10B981 50%, #00E599 100%);
+  }
+
+  .text-gradient-silver {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #CBD5E1 100%);
+  }
+}
+
+@media (max-width: 639px) {
+  .btn-island-primary,
+  .btn-island-secondary {
+    min-height: 44px;
+  }
+
+  .eyebrow-tag {
+    max-width: 100%;
+    font-size: 10px;
+    letter-spacing: 0.12em;
   }
 }
 
 @layer utilities {
   /* Subtle dotted/grid backdrop for hero + dark bands. */
   .bg-grid {
-    background-image: radial-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px);
-    background-size: 22px 22px;
+    background-image: radial-gradient(rgba(16, 185, 129, 0.10) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
   .bg-grid-light {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
-    background-size: 22px 22px;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Subtle noise/film grain simulation */
+  .bg-noise {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+    background-size: 4px 4px;
   }
 
   /* Scroll-reveal (see components/Reveal.tsx). */
   .reveal {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(20px);
     transition:
-      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
   }
   .reveal.in {
     opacity: 1;
     transform: none;
-  }
-
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  .animate-float-slow {
-    animation: float 9s ease-in-out infinite;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
   }
 }
 
@@ -209,7 +218,9 @@ body {
     transition: none;
   }
   .animate-float,
-  .animate-float-slow {
+  .animate-float-slow,
+  .animate-laser-sweep,
+  .animate-shimmer {
     animation: none;
   }
   html {

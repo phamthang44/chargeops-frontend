@@ -123,7 +123,7 @@ export function StationDirectory({
         <button
           type="button"
           onClick={() => setMobileView("list")}
-          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer ${
+          className={`min-h-11 flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-semibold transition cursor-pointer ${
             mobileView === "list"
               ? "bg-white text-ink-strong shadow-sm ring-1 ring-black/5"
               : "text-ink-muted hover:text-ink-strong"
@@ -135,7 +135,7 @@ export function StationDirectory({
         <button
           type="button"
           onClick={() => setMobileView("map")}
-          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition cursor-pointer ${
+          className={`min-h-11 flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-semibold transition cursor-pointer ${
             mobileView === "map"
               ? "bg-primary text-white shadow-glow-emerald"
               : "text-ink-muted hover:text-ink-strong"
@@ -184,7 +184,7 @@ export function StationDirectory({
                     setCity(c);
                     setSelectedStationId(null);
                   }}
-                  className={`cursor-pointer rounded-pill px-4 py-2 text-xs font-semibold transition ${
+                  className={`min-h-11 cursor-pointer rounded-pill px-4 py-2 text-xs font-semibold transition ${
                     city === c
                       ? "bg-primary text-white shadow-glass"
                       : "border border-line bg-white text-ink-body hover:border-primary/40"
@@ -200,7 +200,7 @@ export function StationDirectory({
               <button
                 type="button"
                 onClick={() => setFastOnly(!fastOnly)}
-                className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+                className={`min-h-11 inline-flex items-center gap-1.5 rounded-pill px-3.5 py-2 text-xs font-medium transition cursor-pointer ${
                   fastOnly
                     ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
                     : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
@@ -213,7 +213,7 @@ export function StationDirectory({
               <button
                 type="button"
                 onClick={() => setAvailableOnly(!availableOnly)}
-                className={`inline-flex items-center gap-1.5 rounded-pill px-3.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+                className={`min-h-11 inline-flex items-center gap-1.5 rounded-pill px-3.5 py-2 text-xs font-medium transition cursor-pointer ${
                   availableOnly
                     ? "border border-primary bg-primary-soft text-primary-dark font-semibold"
                     : "border border-line bg-surface-alt text-ink-muted hover:text-ink-body"
@@ -229,7 +229,7 @@ export function StationDirectory({
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
             <p>
               Tìm thấy <strong className="text-ink-strong">{filtered.length}</strong> trạm sạc
-              {city !== "Tất cả" ? ` tại ${city}` : " trên toàn quốc"}
+              {city !== "Tất cả" ? ` tại ${city}` : " trong danh sách hiện có"}
             </p>
 
             {/* Live API sync status indicator */}
@@ -242,10 +242,10 @@ export function StationDirectory({
               ) : (
                 <span
                   className="inline-flex items-center gap-1.5 rounded-pill bg-surface-alt px-2.5 py-1 font-medium text-ink-muted ring-1 ring-line"
-                  title="Sẵn sàng kết nối khi Backend triển khai API công khai"
+                  title="Danh sách trạm minh họa khi chưa có dữ liệu trực tuyến"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-ink-muted/50" />
-                  Chế độ xem trước (Sẵn sàng API)
+                  Dữ liệu minh họa
                 </span>
               )}
             </div>
@@ -271,7 +271,7 @@ export function StationDirectory({
           {!isLoading && (
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               {filtered.map((s) => {
-                const full = s.available === 0;
+                const full = s.total > 0 && s.available === 0;
                 const isSelected = activeStation?.id === s.id;
                 const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
                   s.name + ", " + s.address
@@ -290,7 +290,7 @@ export function StationDirectory({
                   >
                     <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
                       <div>
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
                           <h2 className="font-bold text-ink-strong group-hover:text-primary-dark transition-colors line-clamp-1">
                             {s.name}
                           </h2>
@@ -299,7 +299,7 @@ export function StationDirectory({
                               full ? "bg-danger/10 text-danger" : "bg-primary-soft text-primary-dark"
                             }`}
                           >
-                            {full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
+                            {s.total === 0 ? "Chưa có dữ liệu cổng" : full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
                           </span>
                         </div>
                         <p className="mt-1 text-xs text-ink-muted line-clamp-1">
@@ -310,7 +310,9 @@ export function StationDirectory({
                       <div className="mt-5 pt-3 border-t border-black/[0.04]">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs font-medium text-ink-body">
-                            {s.fast ? (
+                            {s.connectors.length === 0 && !s.maxPowerKw ? (
+                              <>Thông tin cổng chưa cập nhật</>
+                            ) : s.fast ? (
                               <>
                                 <BoltIcon className="h-3 w-3 text-primary" /> DC Siêu nhanh
                               </>
@@ -321,7 +323,7 @@ export function StationDirectory({
                             )}
                           </span>
                           <span className="font-mono text-xs font-bold text-primary-dark">
-                            {s.pricePerKwh}/kWh
+                            {s.pricePerKwh}
                           </span>
                         </div>
                         <div className="mt-3.5 flex items-center justify-between text-xs text-ink-muted">
@@ -330,7 +332,7 @@ export function StationDirectory({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 font-semibold text-primary hover:text-primary-dark hover:underline"
+                            className="inline-flex min-h-11 items-center gap-1 px-1 font-semibold text-primary hover:text-primary-dark hover:underline"
                             title="Mở chỉ đường trên Google Maps"
                           >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
@@ -341,7 +343,7 @@ export function StationDirectory({
 
                           <Link
                             href={`/tram-sac/${s.slug}`}
-                            className="font-semibold text-ink-strong hover:text-primary transition-colors flex items-center gap-0.5"
+                            className="inline-flex min-h-11 items-center gap-0.5 px-1 font-semibold text-ink-strong hover:text-primary transition-colors"
                           >
                             <span>Chi tiết trạm</span>
                             <span className="group-hover:translate-x-0.5 transition-transform">›</span>
@@ -409,7 +411,7 @@ export function StationDirectory({
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Mở chỉ đường trên Google Maps"
-                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-ink-body shadow-md backdrop-blur transition hover:bg-white hover:text-primary hover:scale-105"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/95 text-ink-body shadow-md backdrop-blur transition hover:bg-white hover:text-primary hover:scale-105"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -437,12 +439,14 @@ export function StationDirectory({
                     </div>
                     <span
                       className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold ${
-                        activeStation.available === 0
+                        activeStation.total > 0 && activeStation.available === 0
                           ? "bg-danger/10 text-danger"
                           : "bg-primary-soft text-primary-dark"
                       }`}
                     >
-                      {activeStation.available === 0
+                      {activeStation.total === 0
+                        ? "Chưa có dữ liệu cổng"
+                        : activeStation.available === 0
                         ? "Hết chỗ"
                         : `${activeStation.available}/${activeStation.total} trống`}
                     </span>
@@ -464,7 +468,7 @@ export function StationDirectory({
                       )}
                     </span>
                     <span className="font-mono font-bold text-primary-dark">
-                      {activeStation.pricePerKwh}/kWh
+                      {activeStation.pricePerKwh}
                     </span>
                     <span className="text-ink-muted text-[11px]">{activeStation.hours}</span>
                   </div>
@@ -500,7 +504,7 @@ export function StationDirectory({
 
             {/* Hint footnote */}
             <p className="px-2 text-[11px] leading-relaxed text-ink-muted">
-              📍 Vị trí trạm được đồng bộ theo tọa độ GPS thực tế. Bấm <strong>Chỉ đường</strong> để mở dẫn đường trực tiếp trên Google Maps.
+              📍 Vị trí theo thông tin trạm. Hãy kiểm tra lại địa chỉ trước khi đi; nút <strong>Chỉ đường</strong> sẽ mở Google Maps.
             </p>
           </div>
         </aside>

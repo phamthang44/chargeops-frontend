@@ -33,22 +33,41 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
   const [connectionStatus, setConnectionStatus] = useState<'offline' | 'connecting' | 'connected' | 'reconnecting'>('offline');
   const clientRef = useRef<Client | null>(null);
 
+  const onNavigateRef = useRef(onNavigate);
+  onNavigateRef.current = onNavigate;
+
+  const apiRef = useRef(api);
+  apiRef.current = api;
+
+  const tRef = useRef(t);
+  tRef.current = t;
+
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  const dismissToastRef = useRef(dismissToast);
+  dismissToastRef.current = dismissToast;
+
   useEffect(() => {
-    if (!authenticated) {
-      setConnectionStatus('offline');
+    let isMounted = true;
+    const isMock = import.meta.env.VITE_USE_MOCKS !== 'false' && !import.meta.env.VITE_WS_URL;
+
+    if (!authenticated || isMock) {
+      if (isMounted) setConnectionStatus('offline');
       if (clientRef.current) {
-        void clientRef.current.deactivate();
+        const client = clientRef.current;
         clientRef.current = null;
+        void client.deactivate();
       }
       return;
     }
 
     const brokerURL = resolveWsUrl();
-    setConnectionStatus('connecting');
+    if (isMounted) setConnectionStatus('connecting');
 
     const client = new Client({
       brokerURL,
@@ -57,17 +76,27 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
       heartbeatOutgoing: 10000,
       debug: () => {},
       beforeConnect: async () => {
-        const token = await getToken?.();
-        if (token) {
-          client.connectHeaders = { Authorization: `Bearer ${token}` };
+        const token = await getTokenRef.current?.();
+        if (!token) {
+          if (clientRef.current) {
+            const current = clientRef.current;
+            clientRef.current = null;
+            void current.deactivate();
+          }
+          if (isMounted) setConnectionStatus('offline');
+          return;
         }
+        client.connectHeaders = { Authorization: `Bearer ${token}` };
       },
       onConnect: () => {
+        if (!isMounted) return;
         setConnectionStatus('connected');
         void queryClient.invalidateQueries({ queryKey: ['notifications'] });
         void queryClient.invalidateQueries({ queryKey: ['tickets'] });
         void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+
         client.subscribe('/user/queue/notifications', async (message: IMessage) => {
+          if (!isMounted) return;
           try {
             const data = JSON.parse(message.body);
             // 1. Invalidate caches
@@ -82,28 +111,28 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
             // 2. If a new notification was created, fetch it to show a toast popup
             if (data.type === 'NOTIFICATION_CREATED') {
               try {
-                const res = await api.notifications.list({ context, size: 1 });
+                const res = await apiRef.current.notifications.list({ context, size: 1 });
                 const latest = Array.isArray(res) ? res[0] : res.data?.[0];
-                if (latest) {
+                if (latest && isMounted) {
                   const toastItem: NotificationItem = {
                     id: String(latest.id),
-                    title: resolveNotificationI18n(latest.title, t),
-                    subtitle: resolveNotificationI18n(latest.subtitle, t),
-                    body: resolveNotificationI18n(latest.body, t),
+                    title: resolveNotificationI18n(latest.title, tRef.current),
+                    subtitle: resolveNotificationI18n(latest.subtitle, tRef.current),
+                    body: resolveNotificationI18n(latest.body, tRef.current),
                     tone: latest.tone ?? latest.severity ?? 'warn',
                     read: false,
                     onSelect: () => {
                       if (latest.target?.type === 'OPEN_TICKET' && latest.target.ticketId) {
-                        onNavigate?.(`/tickets/${latest.target.ticketId}`);
+                        onNavigateRef.current?.(`/tickets/${latest.target.ticketId}`);
                       } else if (latest.target?.type === 'OPEN_CASE' && latest.target.escalationId) {
-                        onNavigate?.(`/tickets?escalationId=${latest.target.escalationId}`);
+                        onNavigateRef.current?.(`/tickets?escalationId=${latest.target.escalationId}`);
                       } else if (latest.target?.type === 'OPEN_STATION' && latest.target.stationId) {
                         const base = context === 'admin' ? '/admin' : context === 'owner' ? '/owner' : '';
-                        onNavigate?.(`${base}/stations/${latest.target.stationId}`);
+                        onNavigateRef.current?.(`${base}/stations/${latest.target.stationId}`);
                       } else {
-                        onNavigate?.('/tickets');
+                        onNavigateRef.current?.('/tickets');
                       }
-                      dismissToast(String(latest.id));
+                      dismissToastRef.current(String(latest.id));
                     },
                   };
 
@@ -121,19 +150,32 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
           }
         });
       },
-      onWebSocketClose: () => setConnectionStatus('reconnecting'),
-      onWebSocketError: () => setConnectionStatus('reconnecting'),
-      onStompError: () => setConnectionStatus('reconnecting'),
+      onWebSocketClose: () => {
+        if (!isMounted) return;
+        setConnectionStatus('reconnecting');
+      },
+      onWebSocketError: () => {
+        if (!isMounted) return;
+        setConnectionStatus('reconnecting');
+      },
+      onStompError: () => {
+        if (!isMounted) return;
+        setConnectionStatus('reconnecting');
+      },
     });
 
     client.activate();
     clientRef.current = client;
 
     return () => {
-      void client.deactivate();
-      clientRef.current = null;
+      isMounted = false;
+      if (clientRef.current) {
+        const current = clientRef.current;
+        clientRef.current = null;
+        void current.deactivate();
+      }
     };
-  }, [authenticated, getToken, queryClient, context, api, t, onNavigate, dismissToast]);
+  }, [authenticated, context, queryClient]);
 
   return {
     toasts,

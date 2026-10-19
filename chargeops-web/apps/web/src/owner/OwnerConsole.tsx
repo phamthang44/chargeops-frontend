@@ -1,4 +1,4 @@
-import { useMemo, type ComponentType } from 'react';
+import { useMemo, useCallback, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -176,9 +176,14 @@ function OwnerConsoleContent({
   const markAllAsRead = useMarkAllAsRead(mutationScope);
   const deleteNotif = useDeleteNotification(mutationScope);
 
+  const handleNavigate = useCallback(
+    (path: string) => navigate(`${base}${path}`),
+    [base, navigate],
+  );
+
   const { toasts, dismissToast, connectionStatus } = useNotificationRealtime({
     context: notifContext,
-    onNavigate: (path) => navigate(`${base}${path}`),
+    onNavigate: handleNavigate,
   });
 
   const notificationItems = useMemo<NotificationItem[]>(() => {

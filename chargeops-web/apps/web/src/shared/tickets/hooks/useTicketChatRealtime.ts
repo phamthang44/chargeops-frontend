@@ -22,18 +22,31 @@ export function useTicketChatRealtime({
   const queryClient = useQueryClient();
   const clientRef = useRef<Client | null>(null);
 
+  const onMessageReceivedRef = useRef(onMessageReceived);
+  onMessageReceivedRef.current = onMessageReceived;
+
+  const onConnectionStatusChangeRef = useRef(onConnectionStatusChange);
+  onConnectionStatusChangeRef.current = onConnectionStatusChange;
+
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+
   useEffect(() => {
-    if (!authenticated || !ticketId) {
-      onConnectionStatusChange?.('offline');
+    let isMounted = true;
+    const isMock = import.meta.env.VITE_USE_MOCKS !== 'false' && !import.meta.env.VITE_WS_URL;
+
+    if (!authenticated || !ticketId || isMock) {
+      if (isMounted) onConnectionStatusChangeRef.current?.('offline');
       if (clientRef.current) {
-        void clientRef.current.deactivate();
+        const client = clientRef.current;
         clientRef.current = null;
+        void client.deactivate();
       }
       return;
     }
 
     const brokerURL = resolveWsUrl();
-    onConnectionStatusChange?.('connecting');
+    if (isMounted) onConnectionStatusChangeRef.current?.('connecting');
     const destination = `/topic/tickets/${ticketId}/messages`;
 
     const client = new Client({
@@ -43,15 +56,24 @@ export function useTicketChatRealtime({
       heartbeatOutgoing: 10000,
       debug: () => {},
       beforeConnect: async () => {
-        const token = await getToken?.();
-        if (token) {
-          client.connectHeaders = { Authorization: `Bearer ${token}` };
+        const token = await getTokenRef.current?.();
+        if (!token) {
+          if (clientRef.current) {
+            const current = clientRef.current;
+            clientRef.current = null;
+            void current.deactivate();
+          }
+          if (isMounted) onConnectionStatusChangeRef.current?.('offline');
+          return;
         }
+        client.connectHeaders = { Authorization: `Bearer ${token}` };
       },
       onConnect: () => {
-        onConnectionStatusChange?.('connected');
+        if (!isMounted) return;
+        onConnectionStatusChangeRef.current?.('connected');
         void queryClient.invalidateQueries({ queryKey: ['tickets', 'messages', ticketId] });
         client.subscribe(destination, (msg: IMessage) => {
+          if (!isMounted) return;
           try {
             const data = JSON.parse(msg.body);
             const incoming: TicketMessage = {
@@ -84,23 +106,36 @@ export function useTicketChatRealtime({
             void queryClient.invalidateQueries({ queryKey: ['tickets', 'messages', ticketId] });
             void queryClient.invalidateQueries({ queryKey: ['tickets', 'get', ticketId] });
 
-            onMessageReceived?.(incoming);
+            onMessageReceivedRef.current?.(incoming);
           } catch {
             // Ignore parse errors
           }
         });
       },
-      onWebSocketClose: () => onConnectionStatusChange?.('reconnecting'),
-      onWebSocketError: () => onConnectionStatusChange?.('reconnecting'),
-      onStompError: () => onConnectionStatusChange?.('reconnecting'),
+      onWebSocketClose: () => {
+        if (!isMounted) return;
+        onConnectionStatusChangeRef.current?.('reconnecting');
+      },
+      onWebSocketError: () => {
+        if (!isMounted) return;
+        onConnectionStatusChangeRef.current?.('reconnecting');
+      },
+      onStompError: () => {
+        if (!isMounted) return;
+        onConnectionStatusChangeRef.current?.('reconnecting');
+      },
     });
 
     client.activate();
     clientRef.current = client;
 
     return () => {
-      void client.deactivate();
-      clientRef.current = null;
+      isMounted = false;
+      if (clientRef.current) {
+        const current = clientRef.current;
+        clientRef.current = null;
+        void current.deactivate();
+      }
     };
-  }, [authenticated, getToken, ticketId, roleOption, queryClient, onMessageReceived, onConnectionStatusChange]);
+  }, [authenticated, ticketId, roleOption, queryClient]);
 }

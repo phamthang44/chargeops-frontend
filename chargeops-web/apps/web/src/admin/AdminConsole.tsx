@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useMemo, type ComponentType } from 'react';
+import { useMemo, useCallback, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiProvider, createServices, resolveNotificationI18n } from '@chargeops/api';
@@ -95,9 +95,14 @@ function AdminConsoleContent({
   const markAllAsRead = useMarkAllAsRead({ context: 'admin' });
   const deleteNotif = useDeleteNotification({ context: 'admin' });
 
+  const handleNavigate = useCallback(
+    (path: string) => navigate(`${base}${path}`),
+    [base, navigate],
+  );
+
   const { toasts, dismissToast, connectionStatus } = useNotificationRealtime({
     context: 'admin',
-    onNavigate: (path) => navigate(`${base}${path}`),
+    onNavigate: handleNavigate,
   });
 
   const notificationItems = useMemo<NotificationItem[]>(() => {

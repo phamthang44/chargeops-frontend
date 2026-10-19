@@ -217,14 +217,16 @@ function buildLeafletHtml(
       center: [${initialLat}, ${initialLng}],
       zoom: ${initialZoom},
       zoomControl: false,
-      attributionControl: true
+      attributionControl: false
     });
 
     var tileLayer = L.tileLayer('${osmTileUrl}', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    map.attributionControl.addAttribution(${JSON.stringify(routeMessages.attribution)});
+    if (map.attributionControl) {
+      map.attributionControl.addAttribution(${JSON.stringify(routeMessages.attribution)});
+    }
 
     function sendToHost(type, payload) {
       var msg = JSON.stringify(Object.assign({ type: type }, payload || {}));

@@ -1616,6 +1616,7 @@
     }
   },
   "notifications": {
+    "inAppToastBrand": "ChargeOps",
     "tabs": {
       "all": "Tất cả ({{count}})",
       "unread": "Chưa đọc ({{count}})"

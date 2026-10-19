@@ -63,14 +63,15 @@ const CENTER_TAB = 'Bookings';
  * React Navigation's `createBottomTabNavigator`.
  *
  * Renders a frosted-glass floating capsule with rounded corners. The
- * center "Đặt chỗ" tab is elevated as a prominent FAB-style button
- * in the brand emerald color. Active tabs show a soft emerald pill
+ * center "Đặt chỗ" tab uses a contained emerald action button.
+ * Active tabs show a soft emerald pill
  * indicator behind the icon.
  *
  * Supports auto-hiding on scroll (Facebook style) using `useTabBarVisibility`.
  * Fully dynamic for Light / Dark mode via `usePreferences`.
  */
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
   const { themeColors, isDark } = usePreferences();
   const barOffset = useBarOffset();
   const { translateY, isHidden, showTabBar } = useTabBarVisibility();
@@ -99,6 +100,8 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
         styles.wrapper,
         {
           paddingBottom: barOffset,
+          paddingLeft: Math.max(insets.left, spacing.lg),
+          paddingRight: Math.max(insets.right, spacing.lg),
           transform: [{ translateY }, { scale }],
           opacity,
           ...Platform.select({
@@ -122,8 +125,8 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
                 boxShadow: isDark
-                  ? '0 8px 28px rgba(0,0,0,0.5), 0 0 1px rgba(255,255,255,0.08)'
-                  : '0 8px 28px rgba(107,114,128,0.2), 0 0 1px rgba(0,0,0,0.05)',
+                  ? '0 8px 32px rgba(0,0,0,0.18), 0 0 1px rgba(255,255,255,0.08)'
+                  : '0 8px 32px rgba(36,70,53,0.10), 0 0 1px rgba(0,0,0,0.04)',
               },
               default: {
                 shadowColor: isDark ? '#000' : '#6B7280',
@@ -301,6 +304,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-around',
     width: '100%',
+    maxWidth: 560,
     borderRadius: 28,
     borderWidth: 1,
     paddingHorizontal: spacing.xs,
@@ -321,6 +325,8 @@ const styles = StyleSheet.create({
   // Regular tab
   tab: {
     flex: 1,
+    minWidth: 0,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
@@ -334,7 +340,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: 10,
+    fontSize: 11,
+    lineHeight: 15,
     fontWeight: fontWeights.medium,
     textAlign: 'center',
   },
@@ -352,12 +359,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 4,
-    // Shift the FAB up to overlap the bar edge
-    marginTop: -28,
+    // Keep every touch target inside the capsule on compact mobile screens.
+    marginTop: 0,
   },
   fab: {
-    width: 56,
-    height: 56,
+    width: 40,
+    height: 40,
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -373,7 +380,8 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   centerLabel: {
-    fontSize: 10,
+    fontSize: 11,
+    lineHeight: 15,
     fontWeight: fontWeights.medium,
     textAlign: 'center',
   },

@@ -1616,6 +1616,7 @@
     }
   },
   "notifications": {
+    "inAppToastBrand": "ChargeOps",
     "tabs": {
       "all": "All ({{count}})",
       "unread": "Unread ({{count}})"

@@ -170,7 +170,9 @@ export function InAppNotificationToast({ navigationRef }: InAppNotificationToast
       style={[
         styles.container,
         {
-          top: Math.max(insets.top, 10),
+          top: Math.max(insets.top, 10) + spacing.sm,
+          left: Math.max(insets.left, spacing.lg),
+          right: Math.max(insets.right, spacing.lg),
           transform: [{ translateY }],
           opacity,
         },

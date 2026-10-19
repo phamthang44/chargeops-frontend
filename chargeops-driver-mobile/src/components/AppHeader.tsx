@@ -10,6 +10,7 @@ import {
   Text,
   View,
   ViewStyle,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -114,6 +115,8 @@ export function AppHeader({
   topRowStyle,
 }: AppHeaderProps) {
   const insets = useSafeAreaInsets();
+  const { width, fontScale } = useWindowDimensions();
+  const showSlogan = width - insets.left - insets.right >= 480 && fontScale <= 1.15;
   const { t } = useTranslation();
   const { isDark } = usePreferences();
 
@@ -129,7 +132,9 @@ export function AppHeader({
       style={[
         styles.headerBackground,
         {
-          paddingTop: Math.max(insets.top, 12) + spacing.xs,
+          paddingTop: Math.max(insets.top, 12) + spacing.sm,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
           paddingBottom: children ? 6 : spacing.xs,
           backgroundColor: isDark ? '#0D1412' : '#EAF7F1',
         },
@@ -178,7 +183,7 @@ export function AppHeader({
         </View>
 
         {/* Center: Slogan Column */}
-        {slogan !== false && slogan && slogan.length === 2 && (
+        {showSlogan && slogan !== false && slogan && slogan.length === 2 && (
           <View style={styles.sloganCol}>
             <Text
               style={[styles.sloganText, { color: isDark ? '#A7F3D0' : '#00875A' }]}
@@ -221,6 +226,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerBgIllustration: {
+    opacity: 0.38,
     position: 'absolute',
     right: -10,
     top: 0,
@@ -241,11 +247,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
   },
   headerLeftCol: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
@@ -283,6 +292,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   brandTextCol: {
+    minWidth: 0,
     justifyContent: 'center',
     flexShrink: 1,
   },
@@ -322,14 +332,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   headerActions: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
   circleActionBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

@@ -17,6 +17,7 @@ import { AppButton, GlassButton, StatusBadge } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { completeBooking, getBookingById } from '@/services/bookingService';
+import { bookingErrorMessage } from '@/i18n/bookingErrors';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
 import { formatDate, formatTime } from '@/utils/format';
@@ -90,11 +91,8 @@ export function ChargingSessionScreen() {
               const updated = await completeBooking(booking.id, {
                 expectedVersion: booking.version,
               });
-              if (updated) {
-                setBooking(updated);
-              } else {
-                setBooking((prev) => (prev ? { ...prev, status: 'COMPLETED' } : null));
-              }
+              if (!updated) throw new Error('INVALID_RESPONSE');
+              setBooking(updated);
               Alert.alert(
                 t('chargingSession.finishSuccessTitle'),
                 t('chargingSession.finishSuccessMessage'),
@@ -106,7 +104,7 @@ export function ChargingSessionScreen() {
                 ]
               );
             } catch (err: any) {
-              Alert.alert(t('common.error'), err?.message || t('chargingSession.finishError'));
+              Alert.alert(t('common.error'), bookingErrorMessage(t, err) || t('chargingSession.finishError'));
             } finally {
               setIsSubmitting(false);
             }

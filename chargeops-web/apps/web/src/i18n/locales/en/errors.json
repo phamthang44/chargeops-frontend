@@ -391,6 +391,20 @@
     "error.ticket.findingInvalid": "Station-failure technical finding is invalid for this ticket.",
     "error.ticket.codeConflict": "Ticket code already exists on the system.",
 
+    "error.content.prohibited": "Content contains prohibited language. Please revise it.",
+    "error.moderation.unavailable": "Content validation is temporarily unavailable. Please try again.",
+    "error.moderation.notFound": "Prohibited term was not found.",
+    "error.moderation.duplicate": "This term and match type already exist. Update the existing rule.",
+    "error.moderation.versionConflict": "The rule has changed. Reload and try again.",
+    "error.moderation.invalidRule": "The moderation rule is invalid.",
+
+    "CONTENT_PROHIBITED": "Content contains prohibited language. Please revise it.",
+    "MODERATION_UNAVAILABLE": "Content validation is temporarily unavailable. Please try again.",
+    "MODERATION_NOT_FOUND": "Prohibited term was not found.",
+    "MODERATION_DUPLICATE": "This term and match type already exist. Update the existing rule.",
+    "MODERATION_VERSION_CONFLICT": "The rule has changed. Reload and try again.",
+    "MODERATION_INVALID_RULE": "The moderation rule is invalid.",
+
     "error.common.unknown": "Unknown error",
     "error.common.internal": "An unexpected error occurred",
     "error.common.database": "A database error occurred",

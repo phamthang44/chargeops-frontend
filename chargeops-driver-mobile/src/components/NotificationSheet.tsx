@@ -262,6 +262,7 @@ export function NotificationSheet({
     notifications: items,
     unreadCount,
     loading,
+    actionError,
     refreshNotifications,
     markAsRead,
     markAllAsRead,
@@ -385,6 +386,12 @@ export function NotificationSheet({
             </Text>
           </Pressable>
         </View>
+
+        {actionError && (
+          <Text accessibilityRole="alert" style={{ color: '#DC2626', paddingHorizontal: spacing.md, paddingTop: spacing.sm }}>
+            {t('notifications.actionError', 'Could not save this notification change. Please try again.')}
+          </Text>
+        )}
 
         {/* Quick Read-All icon button */}
         {unreadCount > 0 && (

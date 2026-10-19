@@ -14,6 +14,7 @@ import { TicketMessageBubble } from './TicketMessageBubble';
 
 export interface TicketThreadTabProps {
   messages: TicketMessage[];
+  chatConnectionStatus?: 'offline' | 'connecting' | 'connected' | 'reconnecting';
   isLoading: boolean;
   draft: string;
   onDraftChange: (val: string) => void;
@@ -30,6 +31,7 @@ export interface TicketThreadTabProps {
 
 export function TicketThreadTab({
   messages,
+  chatConnectionStatus,
   isLoading,
   draft,
   onDraftChange,
@@ -71,6 +73,11 @@ export function TicketThreadTab({
 
   return (
     <>
+      {chatConnectionStatus === 'reconnecting' && (
+        <div role="status" className="border-b border-warn/20 bg-warn/5 px-4 py-2 text-xs text-body">
+          {t('realtime.reconnecting', 'Đang kết nối lại. Tin nhắn mới sẽ được tải khi kết nối thành công.')}
+        </div>
+      )}
       <div
         ref={scrollContainerRef}
         className="flex h-[360px] sm:h-[440px] lg:h-[500px] overflow-y-auto flex-col gap-3 sm:gap-4 p-3 sm:p-4 overscroll-contain"

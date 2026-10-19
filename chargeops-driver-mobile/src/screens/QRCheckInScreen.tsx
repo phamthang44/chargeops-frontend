@@ -20,6 +20,7 @@ import {
 } from '@/services/bookingService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
+import { bookingErrorMessage } from '@/i18n/bookingErrors';
 import { formatTime, formatTimeRange } from '@/utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'QRCheckIn'>;
@@ -133,7 +134,7 @@ export function QRCheckInScreen() {
         code: 'STATE_CONFLICT',
         connector: result.connector,
         booking: result.booking,
-        message: err?.message || 'Check-in không thành công. Vui lòng thử lại.',
+        message: bookingErrorMessage(t, err),
       });
     }
   }
@@ -141,9 +142,14 @@ export function QRCheckInScreen() {
   async function forceDemoCheckIn() {
     if (!result || result.ok || !result.booking) return;
     setCommitting(true);
-    await confirmCheckIn(result.booking.id);
-    setCommitting(false);
-    navigation.replace('ChargingSession', { bookingId: result.booking.id });
+    try {
+      await confirmCheckIn(result.booking.id);
+      navigation.replace('ChargingSession', { bookingId: result.booking.id });
+    } catch (err) {
+      setResult({ ...result, message: bookingErrorMessage(t, err) });
+    } finally {
+      setCommitting(false);
+    }
   }
 
   function errorTitle(code: CheckInErrorCode): string {

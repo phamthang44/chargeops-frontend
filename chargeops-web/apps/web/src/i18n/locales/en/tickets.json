@@ -1,5 +1,6 @@
 {
   "title": "Support & Incident Handling",
+  "realtime": { "reconnecting": "Chat is reconnecting. New messages will load when the connection returns." },
   "subtitle": "Tickets routed to your station based on assignments.",
   "subtitleAdmin": "All support tickets across the entire charging network.",
   "searchPlaceholder": "Search ticket ID, driver, subject...",

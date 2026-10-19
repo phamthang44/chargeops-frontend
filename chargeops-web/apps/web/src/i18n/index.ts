@@ -100,6 +100,7 @@ export function getApiErrorMessage(error: unknown): string {
     messageKey?: string;
     message?: string;
     details?: unknown;
+    status?: number;
   };
 
   const interpolationParams: Record<string, unknown> = {};
@@ -121,16 +122,24 @@ export function getApiErrorMessage(error: unknown): string {
     }
   }
 
-  // 2. Try translating by messageKey (e.g. error.station.invalidChargePointProvisioningTransition)
-  if (err.messageKey && i18n.exists(`messages.${err.messageKey}`, { ns: 'errors' })) {
-    const translated = i18n.t(`messages.${err.messageKey}`, {
-      ns: 'errors',
-      ...interpolationParams,
-      defaultValue: '',
-    });
+  // 2. Try translating by messageKey (e.g. error.station.invalidChargePointProvisioningTransition or error.content.prohibited)
+  if (err.messageKey) {
+    const key = i18n.exists(`messages.${err.messageKey}`, { ns: 'errors' })
+      ? `messages.${err.messageKey}`
+      : i18n.exists(`codes.${err.messageKey}`, { ns: 'errors' })
+      ? `codes.${err.messageKey}`
+      : null;
 
-    if (translated && !/\{\{\s*[\w\d_]+\s*\}\}/.test(translated)) {
-      return translated;
+    if (key) {
+      const translated = i18n.t(key, {
+        ns: 'errors',
+        ...interpolationParams,
+        defaultValue: '',
+      });
+
+      if (translated && !/\{\{\s*[\w\d_]+\s*\}\}/.test(translated)) {
+        return translated;
+      }
     }
   }
 
@@ -139,8 +148,14 @@ export function getApiErrorMessage(error: unknown): string {
     return i18n.t(`codes.${err.code}`, { ns: 'errors' });
   }
 
-  // 4. Fallback to server message or default
-  return err.message || i18n.t('error.generic', { ns: 'common' });
+  // Unknown structured API messages may expose framework/provider details.
+  if (err.code === 'NETWORK' || err.code === 'NETWORK_ERROR') return i18n.t('errorCard.hint.network', { ns: 'common' });
+  if (err.code === 'TIMEOUT' || err.status === 504) return i18n.t('errorCard.hint.timeout', { ns: 'common' });
+  if (err.code === 'AUTH_PROVIDER_UNAVAILABLE' || err.status === 401 || err.status === 403) return i18n.t('errorCard.hint.auth', { ns: 'common' });
+  if (err.status === 429) return i18n.t('errorCard.hint.rateLimit', { ns: 'common' });
+  if (typeof err.status === 'number' && err.status >= 500) return i18n.t('errorCard.hint.server', { ns: 'common' });
+  if (typeof err.status === 'number' || err.code) return i18n.t('errorCard.hint.default', { ns: 'common' });
+  return i18n.t('error.generic', { ns: 'common' });
 }
 
 export default i18n;

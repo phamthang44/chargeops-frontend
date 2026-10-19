@@ -43,7 +43,14 @@ export class ProfileApiError extends Error {
   }
 
   fieldMessage(field: string): string | undefined {
-    const failure = this.details?.[field];
+    const fields = (this.details as any)?.fields;
+    if (Array.isArray(fields) && fields.includes(field)) {
+      if (this.code === 'CONTENT_PROHIBITED' || this.messageKey === 'error.content.prohibited') {
+        return 'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.';
+      }
+      return this.message;
+    }
+    const failure = (this.details as any)?.[field];
     if (typeof failure === 'string') return failure;
     return failure?.message;
   }

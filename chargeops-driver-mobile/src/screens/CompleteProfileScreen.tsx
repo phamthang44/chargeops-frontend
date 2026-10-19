@@ -66,7 +66,11 @@ export function CompleteProfileScreen() {
           phone: reason.fieldMessage('phone'),
         });
         setFormError(
-          reason.code === 'PROFILE_001'
+          reason.code === 'CONTENT_PROHIBITED'
+            ? t('completeProfile.errors.contentProhibited', 'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.')
+            : reason.code === 'MODERATION_UNAVAILABLE'
+            ? t('completeProfile.errors.moderationUnavailable', 'Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.')
+            : reason.code === 'PROFILE_001'
             ? t('completeProfile.errors.emailConflict')
             : t('completeProfile.errors.submit'),
         );

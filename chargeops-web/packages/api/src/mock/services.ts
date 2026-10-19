@@ -100,9 +100,22 @@ import type {
   AdminDashboardTicketItem,
   AdminDashboardQueuePage,
   DashboardSort,
+  Page,
+  ProhibitedTerm,
+  ProhibitedTermInput,
+  ProhibitedTermUpdate,
+  ProhibitedTermStatusUpdate,
+  ProhibitedTermChange,
+  ProhibitedTermCheckRequest,
+  ProhibitedTermCheckResult,
+  ProhibitedTermFilterParams,
 } from '../types';
 import { STATION_SCOPED_CATEGORIES } from '../types';
 import { buildMockDb } from './seed';
+import { initialMockProhibitedTerms, initialMockTermChanges } from './prohibited-terms.data';
+
+let mockTerms: ProhibitedTerm[] = [...initialMockProhibitedTerms];
+let mockChanges: ProhibitedTermChange[] = [...initialMockTermChanges];
 
 const MOCK_PROVINCES: AdministrativeProvince[] = [
   { code: '01', name: 'Hà Nội', fullName: 'Thành phố Hà Nội' },
@@ -4350,6 +4363,239 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
           })));
 
         return groups;
+      },
+    },
+
+    prohibitedTerms: {
+      async list(params?: ProhibitedTermFilterParams): Promise<Page<ProhibitedTerm>> {
+        await delay();
+        let items = [...mockTerms];
+        if (params?.q) {
+          const q = params.q.toLowerCase().trim();
+          items = items.filter(
+            (t) => t.term.toLowerCase().includes(q) || (t.note && t.note.toLowerCase().includes(q)),
+          );
+        }
+        if (params?.scope) {
+          items = items.filter((t) => t.scopes.includes(params.scope!));
+        }
+        if (params?.enabled !== undefined) {
+          items = items.filter((t) => t.enabled === params.enabled);
+        }
+        items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+        const page = params?.page ?? 1;
+        const size = params?.size ?? 20;
+        const total = items.length;
+        const start = (page - 1) * size;
+        const pagedItems = items.slice(start, start + size);
+
+        return {
+          items: pagedItems,
+          total,
+          page,
+          pageSize: size,
+        };
+      },
+
+      async get(id: string): Promise<ProhibitedTerm> {
+        await delay();
+        const term = mockTerms.find((t) => t.id === id);
+        if (!term) {
+          throw new ApiError(404, 'MODERATION_NOT_FOUND', 'Prohibited term was not found.', 'error.moderation.notFound');
+        }
+        return term;
+      },
+
+      async create(payload: ProhibitedTermInput): Promise<ProhibitedTerm> {
+        await delay();
+        const normalized = payload.term.toLowerCase().trim();
+        const exists = mockTerms.some(
+          (t) => t.normalizedTerm === normalized && t.matchType === payload.matchType,
+        );
+        if (exists) {
+          throw new ApiError(
+            409,
+            'MODERATION_DUPLICATE',
+            'This term and match type already exist. Update the existing rule.',
+            'error.moderation.duplicate',
+          );
+        }
+
+        const now = new Date().toISOString();
+        const newTerm: ProhibitedTerm = {
+          id: `pt-${Date.now()}`,
+          term: payload.term.trim(),
+          normalizedTerm: normalized,
+          matchType: payload.matchType,
+          scopes: payload.scopes,
+          enabled: payload.enabled,
+          note: payload.note ?? null,
+          version: 0,
+          createdAt: now,
+          updatedAt: now,
+          createdBy: 'admin-current-user',
+          updatedBy: 'admin-current-user',
+        };
+
+        mockTerms.unshift(newTerm);
+        mockChanges.unshift({
+          id: `change-${Date.now()}`,
+          termId: newTerm.id,
+          action: 'CREATE',
+          actorId: 'admin-current-user',
+          changedAt: now,
+          beforeSnapshot: null,
+          afterSnapshot: JSON.stringify(newTerm),
+        });
+
+        return newTerm;
+      },
+
+      async update(id: string, payload: ProhibitedTermUpdate): Promise<ProhibitedTerm> {
+        await delay();
+        const index = mockTerms.findIndex((t) => t.id === id);
+        if (index === -1) {
+          throw new ApiError(404, 'MODERATION_NOT_FOUND', 'Prohibited term was not found.', 'error.moderation.notFound');
+        }
+
+        const current = mockTerms[index];
+        if (current.version !== payload.version) {
+          throw new ApiError(
+            409,
+            'MODERATION_VERSION_CONFLICT',
+            'The rule has changed. Reload and try again.',
+            'error.moderation.versionConflict',
+          );
+        }
+
+        const normalized = payload.term.toLowerCase().trim();
+        const duplicate = mockTerms.some(
+          (t) => t.id !== id && t.normalizedTerm === normalized && t.matchType === payload.matchType,
+        );
+        if (duplicate) {
+          throw new ApiError(
+            409,
+            'MODERATION_DUPLICATE',
+            'This term and match type already exist. Update the existing rule.',
+            'error.moderation.duplicate',
+          );
+        }
+
+        const now = new Date().toISOString();
+        const beforeSnapshot = JSON.stringify(current);
+        const updatedTerm: ProhibitedTerm = {
+          ...current,
+          term: payload.term.trim(),
+          normalizedTerm: normalized,
+          matchType: payload.matchType,
+          scopes: payload.scopes,
+          enabled: payload.enabled,
+          note: payload.note ?? null,
+          version: current.version + 1,
+          updatedAt: now,
+          updatedBy: 'admin-current-user',
+        };
+
+        mockTerms[index] = updatedTerm;
+        mockChanges.unshift({
+          id: `change-${Date.now()}`,
+          termId: id,
+          action: 'UPDATE',
+          actorId: 'admin-current-user',
+          changedAt: now,
+          beforeSnapshot,
+          afterSnapshot: JSON.stringify(updatedTerm),
+        });
+
+        return updatedTerm;
+      },
+
+      async updateStatus(id: string, payload: ProhibitedTermStatusUpdate): Promise<ProhibitedTerm> {
+        await delay();
+        const index = mockTerms.findIndex((t) => t.id === id);
+        if (index === -1) {
+          throw new ApiError(404, 'MODERATION_NOT_FOUND', 'Prohibited term was not found.', 'error.moderation.notFound');
+        }
+
+        const current = mockTerms[index];
+        if (current.version !== payload.version) {
+          throw new ApiError(
+            409,
+            'MODERATION_VERSION_CONFLICT',
+            'The rule has changed. Reload and try again.',
+            'error.moderation.versionConflict',
+          );
+        }
+
+        const now = new Date().toISOString();
+        const beforeSnapshot = JSON.stringify(current);
+        const action = payload.enabled ? 'ENABLE' : 'DISABLE';
+        const updatedTerm: ProhibitedTerm = {
+          ...current,
+          enabled: payload.enabled,
+          version: current.version + 1,
+          updatedAt: now,
+          updatedBy: 'admin-current-user',
+        };
+
+        mockTerms[index] = updatedTerm;
+        mockChanges.unshift({
+          id: `change-${Date.now()}`,
+          termId: id,
+          action,
+          actorId: 'admin-current-user',
+          changedAt: now,
+          beforeSnapshot,
+          afterSnapshot: JSON.stringify(updatedTerm),
+        });
+
+        return updatedTerm;
+      },
+
+      async history(id: string, params?: { page?: number; size?: number }): Promise<Page<ProhibitedTermChange>> {
+        await delay();
+        const changes = mockChanges
+          .filter((c) => c.termId === id)
+          .sort((a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime());
+
+        const page = params?.page ?? 1;
+        const size = params?.size ?? 20;
+        const total = changes.length;
+        const start = (page - 1) * size;
+        const paged = changes.slice(start, start + size);
+
+        return {
+          items: paged,
+          total,
+          page,
+          pageSize: size,
+        };
+      },
+
+      async check(payload: ProhibitedTermCheckRequest): Promise<ProhibitedTermCheckResult> {
+        await delay();
+        const text = payload.text ?? '';
+        const normalizedText = text.toLowerCase();
+        const activeRules = mockTerms.filter((t) => t.enabled && t.scopes.includes(payload.scope));
+
+        const matches = activeRules
+          .filter((rule) => {
+            if (rule.matchType === 'EXACT') {
+              return normalizedText.trim() === rule.normalizedTerm;
+            }
+            return normalizedText.includes(rule.normalizedTerm);
+          })
+          .map((rule) => ({
+            id: rule.id,
+            term: rule.term,
+            matchType: rule.matchType,
+          }));
+
+        return {
+          allowed: matches.length === 0,
+          matches,
+        };
       },
     },
   };

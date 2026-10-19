@@ -48,6 +48,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function MapScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
+  const { getAccessToken } = useAuth();
   const { themeColors, isDark } = usePreferences();
   const {
     coords: userCoords,
@@ -58,6 +59,8 @@ export function MapScreen() {
   const tabInset = useTabBarInset();
 
   const [stations, setStations] = useState<Station[]>([]);
+  const [stationLoadError, setStationLoadError] = useState(false);
+  const [stationLoadAttempt, setStationLoadAttempt] = useState(0);
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 350);
 
@@ -117,15 +120,21 @@ export function MapScreen() {
   useEffect(() => {
     let active = true;
     const token = getAccessToken();
-    getNearbyStations(discoveryFilter, { page: 1, size: 40 }, { accessToken: token }).then((page) => {
-      if (active) {
-        setStations(page.items);
-      }
-    });
+    getNearbyStations(discoveryFilter, { page: 1, size: 40 }, { accessToken: token })
+      .then((page) => {
+        if (active) {
+          setStations(page.items);
+          setStationLoadError(false);
+        }
+      })
+      .catch((error) => {
+        console.warn('[MapScreen] Station list could not be loaded:', error);
+        if (active) setStationLoadError(true);
+      });
     return () => {
       active = false;
     };
-  }, [discoveryFilter, getAccessToken]);
+  }, [discoveryFilter, getAccessToken, stationLoadAttempt]);
 
   const mapRef = useRef<RealStationMapRef>(null);
 
@@ -195,6 +204,14 @@ export function MapScreen() {
 
       {/* Map Content View */}
       <View style={styles.mapWrap}>
+        {stationLoadError && (
+          <View accessibilityRole="alert" style={{ position: 'absolute', top: 8, left: 12, right: 12, zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderRadius: 12, borderWidth: 1, borderColor: '#F59E0B66', backgroundColor: themeColors.surface, paddingHorizontal: 14, paddingVertical: 10 }}>
+            <Text style={{ flex: 1, color: themeColors.textStrong, fontSize: 12 }}>{t('map.stationsUnavailable')}</Text>
+            <Pressable onPress={() => setStationLoadAttempt((attempt) => attempt + 1)} accessibilityRole="button">
+              <Text style={{ color: themeColors.primary, fontSize: 12, fontWeight: '700' }}>{t('map.retryStations')}</Text>
+            </Pressable>
+          </View>
+        )}
         {/* Real Interactive Map Canvas */}
         <View style={styles.map}>
           <RealStationMap

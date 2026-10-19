@@ -30,6 +30,7 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
   const api = useApi();
   const { t } = useTranslation(context);
   const [toasts, setToasts] = useState<NotificationItem[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<'offline' | 'connecting' | 'connected' | 'reconnecting'>('offline');
   const clientRef = useRef<Client | null>(null);
 
   const dismissToast = useCallback((id: string) => {
@@ -38,6 +39,7 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
 
   useEffect(() => {
     if (!authenticated) {
+      setConnectionStatus('offline');
       if (clientRef.current) {
         void clientRef.current.deactivate();
         clientRef.current = null;
@@ -46,6 +48,7 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
     }
 
     const brokerURL = resolveWsUrl();
+    setConnectionStatus('connecting');
 
     const client = new Client({
       brokerURL,
@@ -60,6 +63,10 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
         }
       },
       onConnect: () => {
+        setConnectionStatus('connected');
+        void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        void queryClient.invalidateQueries({ queryKey: ['tickets'] });
+        void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
         client.subscribe('/user/queue/notifications', async (message: IMessage) => {
           try {
             const data = JSON.parse(message.body);
@@ -114,6 +121,9 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
           }
         });
       },
+      onWebSocketClose: () => setConnectionStatus('reconnecting'),
+      onWebSocketError: () => setConnectionStatus('reconnecting'),
+      onStompError: () => setConnectionStatus('reconnecting'),
     });
 
     client.activate();
@@ -127,6 +137,7 @@ export function useNotificationRealtime({ context = 'admin', onNavigate }: Notif
 
   return {
     toasts,
+    connectionStatus,
     dismissToast,
   };
 }

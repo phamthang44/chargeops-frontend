@@ -242,6 +242,14 @@ export async function getNearbyStations(
         headers,
       });
 
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const error = new Error(payload?.error?.message ?? payload?.message ?? `Station service returned ${response.status}`) as Error & { code?: string; status?: number; traceId?: string };
+        error.code = payload?.error?.code ?? payload?.code ?? `HTTP_${response.status}`;
+        error.status = response.status;
+        error.traceId = payload?.error?.traceId ?? payload?.traceId ?? response.headers.get('X-Trace-Id') ?? undefined;
+        throw error;
+      }
       if (response.ok) {
         const payload = await response.json();
         const rawItems: BackendStationDiscoveryItem[] | undefined =
@@ -256,9 +264,11 @@ export async function getNearbyStations(
           const totalPages = Math.max(0, Number(meta.totalPages ?? Math.ceil(total / size)) || 0);
           return { items, page, size, total, totalPages, hasNextPage: page < totalPages };
         }
+        throw Object.assign(new Error('Invalid station list response'), { code: 'INVALID_RESPONSE', status: response.status, traceId: response.headers.get('X-Trace-Id') ?? undefined });
       }
-    } catch {
-      // Graceful fallback to mock data on network error
+    } catch (error) {
+      console.warn('[StationService] Station discovery failed:', error);
+      throw error;
     }
   }
 
@@ -377,11 +387,18 @@ export async function getStationAvailability(
         if (rawAvailability && rawAvailability.stationId) {
           return rawAvailability;
         }
+        throw Object.assign(new Error('Invalid availability response'), { code: 'INVALID_RESPONSE', status: response.status, traceId: response.headers.get('X-Trace-Id') ?? undefined });
       } else {
-        console.warn(`[StationService] Availability API returned status ${response.status} for station ${stationId}`);
+        const payload = await response.json().catch(() => null);
+        const error = new Error(payload?.error?.message ?? payload?.message ?? `Availability service returned ${response.status}`) as Error & { code?: string; status?: number; traceId?: string };
+        error.code = payload?.error?.code ?? payload?.code ?? `HTTP_${response.status}`;
+        error.status = response.status;
+        error.traceId = payload?.error?.traceId ?? payload?.traceId ?? response.headers.get('X-Trace-Id') ?? undefined;
+        throw error;
       }
     } catch (err) {
-      console.warn('[StationService] Error fetching station availability, falling back to mock:', err);
+      console.warn('[StationService] Station availability failed:', err);
+      throw err;
     }
   }
 

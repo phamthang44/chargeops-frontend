@@ -1,5 +1,6 @@
 {
   "title": "Hỗ trợ & Xử lý Sự cố",
+  "realtime": { "reconnecting": "Đang kết nối lại. Tin nhắn mới sẽ được tải khi kết nối thành công." },
   "subtitle": "Phiếu hỗ trợ được định tuyến tới trạm của bạn theo phân công.",
   "subtitleAdmin": "Toàn bộ phiếu hỗ trợ trên toàn mạng lưới trạm sạc.",
   "searchPlaceholder": "Tìm mã vé, tên tài xế, tiêu đề sự cố…",

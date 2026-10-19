@@ -26,6 +26,7 @@ interface ErrorFacts {
   code?: string;
   status?: number;
   message?: string;
+  traceId?: string;
 }
 
 function extractFacts(error: unknown): ErrorFacts {
@@ -35,6 +36,7 @@ function extractFacts(error: unknown): ErrorFacts {
     code: typeof e.code === 'string' ? e.code : undefined,
     status: typeof e.status === 'number' ? e.status : undefined,
     message: typeof e.message === 'string' ? e.message : undefined,
+    traceId: typeof e.traceId === 'string' ? e.traceId : undefined,
   };
 }
 
@@ -44,6 +46,7 @@ function hintKey(code?: string, status?: number): string {
   if (status === 401 || status === 403 || code?.startsWith('AUTH_')) return 'auth';
   if (status === 504) return 'timeout';
   if (status && status >= 500) return 'server';
+  if (status === 429 || code === 'RATE_LIMITED' || code === 'UPSTREAM_QUOTA_EXCEEDED') return 'rateLimit';
   return 'default';
 }
 
@@ -73,6 +76,7 @@ export function ApiErrorCard({
     const payload = [
       `code: ${facts.code ?? 'N/A'}`,
       `status: ${facts.status ?? 'N/A'}`,
+      `traceId: ${facts.traceId ?? 'N/A'}`,
       `message: ${facts.message ?? message}`,
     ].join('\n');
     navigator.clipboard?.writeText(payload);
@@ -143,7 +147,7 @@ export function ApiErrorCard({
           </div>
         )}
 
-        {(facts.code || facts.status || facts.message) && (
+        {(facts.code || facts.status || facts.message || facts.traceId) && (
           <div className="mt-3" style={stagger(300)}>
             <details className="group/details overflow-hidden rounded-xl bg-canvas/70">
               <summary className="flex items-center justify-between gap-2 px-3 py-2 text-[11px] font-semibold text-muted transition-colors duration-300 hover:text-ink">
@@ -180,6 +184,7 @@ export function ApiErrorCard({
               <div className="space-y-1 border-t border-line/70 px-3 py-2.5 font-mono text-[11px] leading-relaxed text-faint">
                 {facts.code && <div>code: <span className="font-bold text-bad-deep">{facts.code}</span></div>}
                 {facts.status !== undefined && <div>status: <span className="font-bold text-ink">{facts.status}</span></div>}
+                {facts.traceId && <div>traceId: <span className="break-all font-bold text-ink">{facts.traceId}</span></div>}
                 {facts.message && <div className="break-all">message: {facts.message}</div>}
               </div>
             </details>

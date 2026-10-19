@@ -176,7 +176,7 @@ function OwnerConsoleContent({
   const markAllAsRead = useMarkAllAsRead(mutationScope);
   const deleteNotif = useDeleteNotification(mutationScope);
 
-  const { toasts, dismissToast } = useNotificationRealtime({
+  const { toasts, dismissToast, connectionStatus } = useNotificationRealtime({
     context: notifContext,
     onNavigate: (path) => navigate(`${base}${path}`),
   });
@@ -240,6 +240,7 @@ function OwnerConsoleContent({
 
   return (
     <>
+      {connectionStatus === 'reconnecting' && <div role="status" className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-warn/30 bg-surface px-4 py-2 text-xs font-medium text-body shadow-lg">{t('common:realtime.reconnecting')}</div>}
       <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
       <AppShell
       nav={nav}

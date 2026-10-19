@@ -5,7 +5,7 @@
  * Scoping (owner sees own stations only) is enforced server-side via the
  * Keycloak token — the client never passes an owner id.
  */
-import type { HttpClient } from '../http';
+import { ApiError, type HttpClient } from '../http';
 import { normalizeRefundPolicyContext } from './refundPolicyContext';
 import type { Services, TicketRoleOptions, GlobalSearchGroup } from '../services';
 import type {
@@ -88,6 +88,14 @@ import type {
   AdminUserSummary,
   AdminUserStatusResponse,
   Page,
+  ProhibitedTerm,
+  ProhibitedTermInput,
+  ProhibitedTermUpdate,
+  ProhibitedTermStatusUpdate,
+  ProhibitedTermChange,
+  ProhibitedTermCheckRequest,
+  ProhibitedTermCheckResult,
+  ProhibitedTermFilterParams,
 } from '../types';
 
 function generateUuidV4(): string {
@@ -809,7 +817,7 @@ export function createRestServices(http: HttpClient): Services {
             return (res ?? []).map(normalizeConnector);
           }
           if (chargePointId) {
-            const res = await http.get<Connector[]>(`/admin/charge-points/${chargePointId}/connectors`).catch(() => []);
+            const res = await http.get<Connector[]>(`/admin/charge-points/${chargePointId}/connectors`);
             return (res ?? []).map(normalizeConnector);
           }
           return [];
@@ -819,22 +827,24 @@ export function createRestServices(http: HttpClient): Services {
           return (res ?? []).map(normalizeConnector);
         }
         if (stationId) {
-          try {
-            const cps = await http
-              .get<ChargePoint[]>(`/owner/stations/${stationId}/charge-points`)
-              .catch(() => [] as ChargePoint[]);
-            if (cps.length === 0) return [];
-            const connectorResults = await Promise.all(
-              cps.map((cp) =>
-                http
-                  .get<Connector[]>(`/owner/stations/${stationId}/charge-points/${cp.id}/connectors`)
-                  .catch(() => [] as Connector[]),
-              ),
-            );
-            return connectorResults.flat().map(normalizeConnector);
-          } catch {
-            return [];
-          }
+          const cps = await http
+            .get<ChargePoint[]>(`/owner/stations/${stationId}/charge-points`)
+            .catch((error) => {
+              if (error instanceof ApiError && error.status === 404) return [] as ChargePoint[];
+              throw error;
+            });
+          if (cps.length === 0) return [];
+          const connectorResults = await Promise.all(
+            cps.map((cp) =>
+              http
+                .get<Connector[]>(`/owner/stations/${stationId}/charge-points/${cp.id}/connectors`)
+                .catch((error) => {
+                  if (error instanceof ApiError && error.status === 404) return [] as Connector[];
+                  throw error;
+                }),
+            ),
+          );
+          return connectorResults.flat().map(normalizeConnector);
         }
         return [];
       },
@@ -969,10 +979,11 @@ export function createRestServices(http: HttpClient): Services {
         try {
           const res: any = await http.get('/owner/finance/summary');
           return (res?.data ?? res) as OwnerFinanceSummary;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND' && error.code !== 'NOT_IMPLEMENTED')) throw error;
           // Fallback calculating from available ledger items
           const query = { page: 1, size: 100 };
-          const res: any = await http.get('/owner/finance/bookings', query).catch(() => ({ items: [], total: 0 }));
+          const res: any = await http.get('/owner/finance/bookings', query);
           const items: OwnerFinanceBooking[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
           let grossVnd = 0;
           let refundedVnd = 0;
@@ -1024,9 +1035,10 @@ export function createRestServices(http: HttpClient): Services {
         try {
           const res: any = await http.get('/owner/refunds/summary');
           return (res?.data ?? res) as OwnerRefundsSummary;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND' && error.code !== 'NOT_IMPLEMENTED')) throw error;
           // Fallback calculating from refund items
-          const res: any = await http.get('/owner/refunds', { page: 1, size: 100 }).catch(() => ({ items: [], total: 0 }));
+          const res: any = await http.get('/owner/refunds', { page: 1, size: 100 });
           const items: OwnerRefund[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
           let totalPendingCount = 0;
           let totalSucceededCount = 0;
@@ -1091,26 +1103,26 @@ export function createRestServices(http: HttpClient): Services {
 
     licenses: {
       issue: (stationId, input) =>
-        http
-          .post<License>(`/admin/stations/${stationId}/licenses`, input)
-          .catch(() => http.post<License>(`/stations/${stationId}/licenses`, input)),
+        http.post<License>(`/admin/stations/${stationId}/licenses`, input),
       mine: async (stationId) => {
         if (stationId) {
           return http.get<License>(`/owner/licenses/${stationId}`);
         }
         return null as any;
       },
-      history: (stationId) =>
-        http
-          .get<License[]>(`/admin/stations/${stationId}/licenses`)
-          .catch(() => http.get<License[]>(`/stations/${stationId}/licenses`)),
+      history: async (stationId) => {
+        try {
+          return await http.get<License[]>(`/admin/stations/${stationId}/licenses`);
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND')) throw error;
+          return http.get<License[]>(`/stations/${stationId}/licenses`);
+        }
+      },
       list: (params = {}) => http.get('/admin/licenses', params),
       detail: (licenseId) => http.get<License>(`/admin/licenses/${licenseId}`),
       statusEvents: (licenseId) => http.get(`/admin/licenses/${licenseId}/status-events`),
       recordRenewal: (licenseIdOrStationId, input) =>
-        http
-          .post<License>(`/admin/licenses/${licenseIdOrStationId}/renew`, input)
-          .catch(() => http.post<License>(`/stations/${licenseIdOrStationId}/licenses/renew`, input)),
+        http.post<License>(`/admin/licenses/${licenseIdOrStationId}/renew`, input),
       renew: (licenseId, input) => http.post(`/admin/licenses/${licenseId}/renew`, input),
       suspend: (stationId, licenseId, reason) => {
         const id = licenseId || stationId;
@@ -1457,7 +1469,8 @@ export function createRestServices(http: HttpClient): Services {
           const res: any = await http.get(endpoint);
           const items = Array.isArray(res) ? res : res?.data ?? [];
           return items.map((m: any) => normalizeTicketMessage(m, id));
-        } catch {
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND')) throw error;
           // Fallback: fetch ticket which includes messages list
           let endpoint = `/tickets/${id}`;
           if (options?.role === 'owner') endpoint = `/owner/tickets/${id}`;
@@ -1481,10 +1494,11 @@ export function createRestServices(http: HttpClient): Services {
           if (endpoint === '/tickets') {
             return await http.get<TicketSummary>('/tickets/summary');
           }
-        } catch {
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND' && error.code !== 'NOT_IMPLEMENTED')) throw error;
           // Fallback summary from ticket list
         }
-        const res: any = await http.get(endpoint, { page: 1, size: 100 }).catch(() => ({ items: [] }));
+        const res: any = await http.get(endpoint, { page: 1, size: 100 });
         const items: any[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
         const open = items.filter((t) => String(t.status).toLowerCase() === 'open').length;
         const inProgress = items.filter((t) => String(t.status).toLowerCase() === 'in_progress').length;
@@ -1580,17 +1594,13 @@ export function createRestServices(http: HttpClient): Services {
         return normalizeTicket(data);
       },
       events: async (id: string, options?: TicketRoleOptions) => {
-        try {
-          let endpoint = `/tickets/${id}/events`;
-          if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/events`;
-          else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/events`;
+        let endpoint = `/tickets/${id}/events`;
+        if (options?.role === 'owner') endpoint = `/owner/tickets/${id}/events`;
+        else if (options?.role === 'admin') endpoint = `/admin/tickets/${id}/events`;
 
-          const res: any = await http.get(endpoint);
-          const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
-          return items.map(normalizeTicketEvent);
-        } catch {
-          return [];
-        }
+        const res: any = await http.get(endpoint);
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        return items.map(normalizeTicketEvent);
       },
       kpis: async (stationId: string, params = {}) => {
         const res: any = await http.get(`/stations/${stationId}/ticket-kpis`, params);
@@ -1618,9 +1628,10 @@ export function createRestServices(http: HttpClient): Services {
         try {
           const res: any = await http.get('/admin/ticket-escalations/summary');
           return (res?.data ?? res) as TicketEscalationsSummary;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof ApiError) || (error.status !== 404 && error.code !== 'ENDPOINT_NOT_FOUND' && error.code !== 'NOT_IMPLEMENTED')) throw error;
           // Fallback calculating from queue
-          const res: any = await http.get('/admin/ticket-escalations', { page: 1, size: 100 }).catch(() => ({ items: [], total: 0 }));
+          const res: any = await http.get('/admin/ticket-escalations', { page: 1, size: 100 });
           const items: TicketEscalation[] = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
           let unresponsive24hCount = 0;
           let disputedFindingCount = 0;
@@ -1903,6 +1914,29 @@ export function createRestServices(http: HttpClient): Services {
         const res = await http.get<{ query: string; groups: GlobalSearchGroup[] }>('/search', params);
         return res?.groups ?? [];
       },
+    },
+
+    prohibitedTerms: {
+      list: (params) => {
+        const query: Record<string, any> = {};
+        if (params?.q) query.q = params.q;
+        if (params?.scope) query.scope = params.scope;
+        if (params?.enabled !== undefined) query.enabled = params.enabled;
+        if (params?.page) query.page = params.page;
+        if (params?.size) query.size = params.size;
+        return http.get<Page<ProhibitedTerm>>('/admin/prohibited-terms', query, { headers: NO_STORE });
+      },
+      get: (id) => http.get<ProhibitedTerm>(`/admin/prohibited-terms/${id}`, undefined, { headers: NO_STORE }),
+      create: (payload) => http.post<ProhibitedTerm>('/admin/prohibited-terms', payload),
+      update: (id, payload) => http.put<ProhibitedTerm>(`/admin/prohibited-terms/${id}`, payload),
+      updateStatus: (id, payload) => http.patch<ProhibitedTerm>(`/admin/prohibited-terms/${id}/status`, payload),
+      history: (id, params) => {
+        const query: Record<string, any> = {};
+        if (params?.page) query.page = params.page;
+        if (params?.size) query.size = params.size;
+        return http.get<Page<ProhibitedTermChange>>(`/admin/prohibited-terms/${id}/history`, query, { headers: NO_STORE });
+      },
+      check: (payload) => http.post<ProhibitedTermCheckResult>('/admin/prohibited-terms/check', payload),
     },
   };
 }

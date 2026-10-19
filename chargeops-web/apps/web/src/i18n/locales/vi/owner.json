@@ -123,9 +123,12 @@
       "badRequest": "Câu hỏi không hợp lệ hoặc vượt quá 2000 ký tự. Vui lòng kiểm tra lại.",
       "forbidden": "Chỉ tài khoản Chủ trạm (Owner) mới có quyền sử dụng Trợ lý chính sách.",
       "quotaExceeded": "Đã đạt giới hạn lượt hỏi trong ngày ({{count}} lượt/ngày). Vui lòng thử lại sau {{time}}.",
+      "rateLimited": "Bạn đang gửi yêu cầu quá nhanh. Vui lòng đợi một lát rồi thử lại.",
+      "providerQuotaExceeded": "Nhà cung cấp AI đang hết hạn mức sử dụng. Vui lòng thử lại sau.",
       "quotaCountdown": "Hết hạn ngạch hôm nay. Mở lại lúc: {{time}}",
       "timeout": "Hệ thống tra cứu đang bận hoặc phản hồi chậm. Vui lòng bấm thử lại.",
       "serviceUnavailable": "Dịch vụ trợ lý tạm thời không khả dụng. Vui lòng thử lại sau.",
+      "historyUnavailable": "Không thể tải lịch sử hội thoại. Câu hỏi hiện tại vẫn được giữ lại; hãy thử tải lịch sử lần nữa.",
       "unknown": "Không thể gửi câu hỏi: {{message}}",
       "retry": "Thử lại câu hỏi",
       "dismiss": "Đóng"

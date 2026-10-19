@@ -107,6 +107,8 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
   const [open, setOpen] = useState(false);
   const [groups, setGroups] = useState<GroupState[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [active, setActive] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -123,6 +125,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
     }
     const id = ++reqId.current;
     setLoading(true);
+    setLoadError(false);
     const debounce = setTimeout(async () => {
       let loaded: SearchGroupLoad[];
       try {
@@ -130,6 +133,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
       } catch {
         if (id !== reqId.current) return;
         setGroups([]);
+        setLoadError(true);
         setLoading(false);
         return;
       }
@@ -150,7 +154,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
       setLoading(false);
     }, 250);
     return () => clearTimeout(debounce);
-  }, [query, load, t]);
+  }, [query, load, retryCount, t]);
 
   // Outside click + Escape close the panel.
   useEffect(() => {
@@ -355,6 +359,11 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
                     </span>
                   </div>
                 ))}
+              </div>
+            ) : loadError ? (
+              <div role="alert" className="flex flex-col items-center gap-2.5 px-6 py-8 text-center">
+                <p className="text-[12px] text-muted">{t('search.error')}</p>
+                <button type="button" className="text-xs font-semibold text-owner underline-offset-2 hover:underline" onClick={() => setRetryCount((value) => value + 1)}>{t('search.retry')}</button>
               </div>
             ) : showEmpty ? (
               <div className="flex flex-col items-center gap-2.5 px-6 py-8 text-center">

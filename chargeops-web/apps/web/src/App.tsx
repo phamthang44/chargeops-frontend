@@ -5,6 +5,7 @@ import { ToastProvider } from '@chargeops/ui';
 import { RoleRouter } from './RoleRouter';
 import { ThemeProvider } from './theme';
 import i18n from './i18n';
+import { AppErrorBoundary } from './shared/components/AppErrorBoundary';
 
 /**
  * ChargeOps operator console — one app, one origin, one Keycloak client.
@@ -40,18 +41,20 @@ i18n.on('languageChanged', () => {
 
 export function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider mockUser={pickMockUser()}>
-        <AuthGate>
-          <QueryClientProvider client={queryClient}>
-            <ToastProvider>
-              <BrowserRouter>
-                <RoleRouter />
-              </BrowserRouter>
-            </ToastProvider>
-          </QueryClientProvider>
-        </AuthGate>
-      </AuthProvider>
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider mockUser={pickMockUser()}>
+          <AuthGate>
+            <QueryClientProvider client={queryClient}>
+              <ToastProvider>
+                <BrowserRouter>
+                  <RoleRouter />
+                </BrowserRouter>
+              </ToastProvider>
+            </QueryClientProvider>
+          </AuthGate>
+        </AuthProvider>
+      </ThemeProvider>
+    </AppErrorBoundary>
   );
 }

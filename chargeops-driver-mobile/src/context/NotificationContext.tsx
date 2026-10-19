@@ -28,6 +28,7 @@ export interface NotificationContextValue {
   notifications: AppNotification[];
   unreadCount: number;
   loading: boolean;
+  actionError: boolean;
   bannerNotification: AppNotification | null;
   dismissBannerNotification: () => void;
   refreshNotifications: () => Promise<void>;
@@ -48,6 +49,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [bannerNotification, setBannerNotification] = useState<AppNotification | null>(null);
+  const [actionError, setActionError] = useState(false);
 
   // 1. Instant hydration from persistent local storage on boot
   useEffect(() => {
@@ -190,71 +192,59 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = useCallback(
     async (id: string): Promise<void> => {
-      // Optimistic update
-      setNotifications((prev) => {
-        const next = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
-        setUnreadCount(next.filter((n) => !n.read).length);
-        return next;
-      });
-
-      // Also dismiss banner if it's the same notification
-      setBannerNotification((current) => (current?.id === id ? null : current));
-
+      setActionError(false);
       try {
         const updated = await apiMarkNotificationAsRead(id, userId);
         setNotifications(updated);
         setUnreadCount(updated.filter((n) => !n.read).length);
+        setBannerNotification((current) => (current?.id === id ? null : current));
       } catch (err) {
-        console.warn('[NotificationProvider] markAsRead error:', err);
+        console.warn('[NotificationProvider] markAsRead failed:', err);
+        setActionError(true);
       }
     },
     [userId],
   );
 
   const markAllAsRead = useCallback(async (): Promise<void> => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
-    setBannerNotification(null);
-
+    setActionError(false);
     try {
       const updated = await apiMarkAllNotificationsAsRead(userId);
       setNotifications(updated);
       setUnreadCount(0);
+      setBannerNotification(null);
     } catch (err) {
-      console.warn('[NotificationProvider] markAllAsRead error:', err);
+      console.warn('[NotificationProvider] markAllAsRead failed:', err);
+      setActionError(true);
     }
   }, [userId]);
 
   const deleteNotification = useCallback(
     async (id: string): Promise<void> => {
-      setNotifications((prev) => {
-        const next = prev.filter((n) => n.id !== id);
-        setUnreadCount(next.filter((n) => !n.read).length);
-        return next;
-      });
-
-      setBannerNotification((current) => (current?.id === id ? null : current));
-
+      setActionError(false);
       try {
         const updated = await apiDeleteNotification(id, userId);
         setNotifications(updated);
         setUnreadCount(updated.filter((n) => !n.read).length);
+        setBannerNotification((current) => (current?.id === id ? null : current));
       } catch (err) {
-        console.warn('[NotificationProvider] deleteNotification error:', err);
+        console.warn('[NotificationProvider] deleteNotification failed:', err);
+        setActionError(true);
       }
     },
     [userId],
   );
 
   const clearAll = useCallback(async (): Promise<void> => {
-    setNotifications([]);
-    setUnreadCount(0);
-    setBannerNotification(null);
-
+    setActionError(false);
     try {
       await clearAllNotifications(userId);
+      setNotifications([]);
+      setUnreadCount(0);
+      setBannerNotification(null);
     } catch (err) {
       console.warn('[NotificationProvider] clearAll error:', err);
+      setActionError(true);
     }
   }, [userId]);
 
@@ -263,6 +253,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       notifications,
       unreadCount,
       loading,
+      actionError,
       bannerNotification,
       dismissBannerNotification,
       refreshNotifications,
@@ -276,6 +267,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       notifications,
       unreadCount,
       loading,
+      actionError,
       bannerNotification,
       dismissBannerNotification,
       refreshNotifications,

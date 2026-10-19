@@ -54,6 +54,7 @@ export function TicketDetail({
     navigate,
     ticketQuery,
     messagesQuery,
+    chatConnectionStatus,
     currentUserId,
     draft,
     setDraft,
@@ -356,6 +357,7 @@ export function TicketDetail({
             {activeTab === 'thread' && (
               <TicketThreadTab
                 messages={messages}
+                chatConnectionStatus={chatConnectionStatus}
                 isLoading={messagesQuery.isLoading}
                 draft={draft}
                 onDraftChange={setDraft}

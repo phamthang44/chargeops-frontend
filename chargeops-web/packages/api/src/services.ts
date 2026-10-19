@@ -139,6 +139,14 @@ import type {
   AdminUserStatusResponse,
   UserProfile,
   UserProfileUpdateRequest,
+  ProhibitedTerm,
+  ProhibitedTermInput,
+  ProhibitedTermUpdate,
+  ProhibitedTermStatusUpdate,
+  ProhibitedTermChange,
+  ProhibitedTermCheckRequest,
+  ProhibitedTermCheckResult,
+  ProhibitedTermFilterParams,
 } from './types';
 
 export interface LocationService {
@@ -683,6 +691,17 @@ export interface IncidentService {
   ): Promise<ConnectorIncidentResponse>;
 }
 
+export interface ProhibitedTermsService {
+  /** Admin-only prohibited terms management. Backend is 1-based. */
+  list(params?: ProhibitedTermFilterParams): Promise<Page<ProhibitedTerm>>;
+  get(id: string): Promise<ProhibitedTerm>;
+  create(payload: ProhibitedTermInput): Promise<ProhibitedTerm>;
+  update(id: string, payload: ProhibitedTermUpdate): Promise<ProhibitedTerm>;
+  updateStatus(id: string, payload: ProhibitedTermStatusUpdate): Promise<ProhibitedTerm>;
+  history(id: string, params?: { page?: number; size?: number }): Promise<Page<ProhibitedTermChange>>;
+  check(payload: ProhibitedTermCheckRequest): Promise<ProhibitedTermCheckResult>;
+}
+
 export interface Services {
   profile: ProfileService;
   location: LocationService;
@@ -712,4 +731,5 @@ export interface Services {
   notifications: NotificationService;
   incidents: IncidentService;
   search: SearchService;
+  prohibitedTerms: ProhibitedTermsService;
 }

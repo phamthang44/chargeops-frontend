@@ -55,6 +55,23 @@ export interface AppNotification {
   actionUrl?: string | null;
 }
 
+class NotificationApiError extends Error {
+  constructor(public readonly code: string, public readonly status?: number, public readonly traceId?: string) {
+    super(code);
+    this.name = 'NotificationApiError';
+  }
+}
+
+async function assertNotificationAction(response: Response): Promise<void> {
+  if (response.ok) return;
+  const payload = await response.json().catch(() => null);
+  throw new NotificationApiError(
+    payload?.error?.code ?? payload?.code ?? `HTTP_${response.status}`,
+    response.status,
+    payload?.error?.traceId ?? payload?.traceId ?? response.headers.get('X-Trace-Id') ?? undefined,
+  );
+}
+
 function getDefaultNotificationText(key: string, params: Record<string, any>, isEn: boolean): string {
   const code = params.code ? String(params.code) : '';
   switch (key) {
@@ -452,7 +469,6 @@ export async function markAllNotificationsAsRead(userId?: string | null): Promis
   const token = resolveAccessToken();
 
   if (!isMockMode() && token) {
-    try {
       const res = await fetch(`${apiBaseUrl}/api/v1/notifications/read-all?context=driver`, {
         method: 'PATCH',
         headers: {
@@ -460,12 +476,9 @@ export async function markAllNotificationsAsRead(userId?: string | null): Promis
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) {
-        console.warn('[notificationService] markAllNotificationsAsRead HTTP status:', res.status);
-      }
-    } catch (err) {
-      console.warn('[notificationService] markAllNotificationsAsRead network error:', err);
-    }
+      await assertNotificationAction(res);
+  } else if (!isMockMode()) {
+    throw new NotificationApiError('AUTH_001', 401);
   }
 
   notificationsList = notificationsList.map((n) => ({ ...n, read: true }));
@@ -480,8 +493,9 @@ export async function markNotificationAsRead(id: string, userId?: string | null)
   const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
 
-  if (!isMockMode() && token && isUuid(id)) {
-    try {
+  if (!isMockMode()) {
+    if (!token) throw new NotificationApiError('AUTH_001', 401);
+    if (!isUuid(id)) throw new NotificationApiError('INVALID_NOTIFICATION_ID', 400);
       const res = await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/read?context=driver`, {
         method: 'PATCH',
         headers: {
@@ -489,12 +503,7 @@ export async function markNotificationAsRead(id: string, userId?: string | null)
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) {
-        console.warn('[notificationService] markNotificationAsRead HTTP status:', res.status);
-      }
-    } catch (err) {
-      console.warn('[notificationService] markNotificationAsRead network error:', err);
-    }
+      await assertNotificationAction(res);
   }
 
   notificationsList = notificationsList.map((n) => (n.id === id ? { ...n, read: true } : n));
@@ -510,8 +519,9 @@ export async function deleteNotification(id: string, userId?: string | null): Pr
   const effectiveUserId = userId ?? lastLoadedIdentity;
   const token = resolveAccessToken();
 
-  if (!isMockMode() && token && isUuid(id)) {
-    try {
+  if (!isMockMode()) {
+    if (!token) throw new NotificationApiError('AUTH_001', 401);
+    if (!isUuid(id)) throw new NotificationApiError('INVALID_NOTIFICATION_ID', 400);
       const res = await fetch(`${apiBaseUrl}/api/v1/notifications/${id}/dismiss?context=driver`, {
         method: 'PATCH',
         headers: {
@@ -519,12 +529,7 @@ export async function deleteNotification(id: string, userId?: string | null): Pr
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) {
-        console.warn('[notificationService] deleteNotification HTTP status:', res.status);
-      }
-    } catch (err) {
-      console.warn('[notificationService] deleteNotification network error:', err);
-    }
+      await assertNotificationAction(res);
   }
 
   notificationsList = notificationsList.filter((n) => n.id !== id);

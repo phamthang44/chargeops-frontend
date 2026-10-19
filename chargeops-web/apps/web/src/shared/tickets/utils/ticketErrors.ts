@@ -18,6 +18,35 @@ export function getTicketErrorMeta(error: any, t: TFunction): TicketErrorMeta {
   const messageKey = error?.messageKey || '';
   const rawMsg = String(error?.message || error || '').trim();
 
+  // 0a. PROHIBITED CONTENT
+  if (
+    code === 'CONTENT_PROHIBITED' ||
+    messageKey === 'error.content.prohibited' ||
+    rawMsg.includes('prohibited language') ||
+    rawMsg.includes('từ ngữ không được phép')
+  ) {
+    return {
+      title: t('errors.prohibitedContentTitle', 'Nội dung không hợp lệ'),
+      message: t('error.content.prohibited', 'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.'),
+      code: 'CONTENT_PROHIBITED',
+    };
+  }
+
+  // 0b. MODERATION UNAVAILABLE
+  if (
+    code === 'MODERATION_UNAVAILABLE' ||
+    messageKey === 'error.moderation.unavailable' ||
+    error?.status === 503 ||
+    rawMsg.includes('Content validation is temporarily unavailable') ||
+    rawMsg.includes('chưa thể kiểm tra nội dung')
+  ) {
+    return {
+      title: t('errors.moderationUnavailableTitle', 'Dịch vụ kiểm duyệt tạm gián đoạn'),
+      message: t('error.moderation.unavailable', 'Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.'),
+      code: 'MODERATION_UNAVAILABLE',
+    };
+  }
+
   // 1. ACCESS DENIED
   if (
     code === 'TKT_ACCESS_DENIED' ||

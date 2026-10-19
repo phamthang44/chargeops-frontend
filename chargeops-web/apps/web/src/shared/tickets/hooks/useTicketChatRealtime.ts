@@ -9,12 +9,14 @@ export interface UseTicketChatRealtimeOptions {
   ticketId?: string;
   roleOption?: string;
   onMessageReceived?: (message: TicketMessage) => void;
+  onConnectionStatusChange?: (status: 'offline' | 'connecting' | 'connected' | 'reconnecting') => void;
 }
 
 export function useTicketChatRealtime({
   ticketId,
   roleOption,
   onMessageReceived,
+  onConnectionStatusChange,
 }: UseTicketChatRealtimeOptions) {
   const { authenticated, getToken } = useAuth();
   const queryClient = useQueryClient();
@@ -22,6 +24,7 @@ export function useTicketChatRealtime({
 
   useEffect(() => {
     if (!authenticated || !ticketId) {
+      onConnectionStatusChange?.('offline');
       if (clientRef.current) {
         void clientRef.current.deactivate();
         clientRef.current = null;
@@ -30,6 +33,7 @@ export function useTicketChatRealtime({
     }
 
     const brokerURL = resolveWsUrl();
+    onConnectionStatusChange?.('connecting');
     const destination = `/topic/tickets/${ticketId}/messages`;
 
     const client = new Client({
@@ -45,6 +49,8 @@ export function useTicketChatRealtime({
         }
       },
       onConnect: () => {
+        onConnectionStatusChange?.('connected');
+        void queryClient.invalidateQueries({ queryKey: ['tickets', 'messages', ticketId] });
         client.subscribe(destination, (msg: IMessage) => {
           try {
             const data = JSON.parse(msg.body);
@@ -84,6 +90,9 @@ export function useTicketChatRealtime({
           }
         });
       },
+      onWebSocketClose: () => onConnectionStatusChange?.('reconnecting'),
+      onWebSocketError: () => onConnectionStatusChange?.('reconnecting'),
+      onStompError: () => onConnectionStatusChange?.('reconnecting'),
     });
 
     client.activate();
@@ -93,5 +102,5 @@ export function useTicketChatRealtime({
       void client.deactivate();
       clientRef.current = null;
     };
-  }, [authenticated, getToken, ticketId, roleOption, queryClient, onMessageReceived]);
+  }, [authenticated, getToken, ticketId, roleOption, queryClient, onMessageReceived, onConnectionStatusChange]);
 }

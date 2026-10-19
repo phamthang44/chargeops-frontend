@@ -13,6 +13,8 @@
     "clear": "Clear search",
     "loading": "Searching…",
     "empty": "No results found.",
+    "error": "Search is temporarily unavailable. Please try again.",
+    "retry": "Retry search",
     "minChars": "Type at least 2 characters to start searching.",
     "hintNav": "navigate",
     "hintOpen": "open",
@@ -26,6 +28,22 @@
       "APPROVAL": "Approvals",
       "LEGAL_DOCUMENT": "Legal",
       "USER": "Users"
+    }
+  },
+  "imageUpload": {
+    "choose": "Drop an image here or choose a file",
+    "formats": "PNG, JPG, or WebP (up to {{size}} MB)",
+    "uploading": "Uploading image… {{progress}}%",
+    "cancel": "Cancel upload",
+    "errors": {
+      "invalidType": "Choose an image in JPG, PNG, or WebP format.",
+      "tooLarge": "This image exceeds the {{size}} MB limit.",
+      "timeout": "The image service took too long to respond. Try again.",
+      "network": "Could not connect to the image service. Check your connection.",
+      "cancelled": "Image upload cancelled.",
+      "rateLimit": "The image service is busy. Wait a moment and try again.",
+      "signature": "The image could not be authorized for upload. Refresh and try again.",
+      "generic": "Image upload failed. Please try again."
     }
   },
   "legal": {

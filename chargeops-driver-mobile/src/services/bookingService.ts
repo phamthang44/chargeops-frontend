@@ -73,14 +73,18 @@ export class BookingApiError extends Error {
   details?: any;
   userMessage?: string;
   messageKey?: string;
+  status?: number;
+  traceId?: string;
 
-  constructor(code: string, message?: string, details?: any, messageKey?: string) {
+  constructor(code: string, message?: string, details?: any, messageKey?: string, status?: number, traceId?: string) {
     super(message || code);
     this.name = 'BookingApiError';
     this.code = code;
     this.details = details;
     this.userMessage = message;
     this.messageKey = messageKey;
+    this.status = status;
+    this.traceId = traceId;
   }
 }
 
@@ -459,18 +463,25 @@ export async function getActiveBookings(accessToken?: string | null): Promise<Bo
       if (token) headers.Authorization = `Bearer ${token}`;
 
       const requestStartedAt = Date.now();
-      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/active`, { headers });
+      const res = await fetch(`${apiBaseUrl}/api/v1/bookings/active`, { headers, signal: AbortSignal.timeout(15_000) });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        const errObj = json?.error ?? json;
+        throw new BookingApiError(errObj?.code ?? `HTTP_${res.status}`, errObj?.message, errObj?.details, errObj?.messageKey, res.status, errObj?.traceId ?? json?.traceId ?? res.headers.get('X-Trace-Id') ?? undefined);
+      }
       if (res.ok) {
-        const json = await res.json();
         syncBookingServerClock(json?.meta?.serverTime, requestStartedAt, Date.now());
         const content: DriverBookingListItem[] =
           json?.data?.content ?? json?.data ?? json?.content ?? json;
         if (Array.isArray(content)) {
           return content.map(mapListItemToBooking);
         }
+        throw new BookingApiError('INVALID_RESPONSE', 'Invalid active bookings response', undefined, undefined, res.status, res.headers.get('X-Trace-Id') ?? undefined);
       }
     } catch (err) {
-      console.warn('Network error fetching active bookings, falling back to local store:', err);
+      if (err instanceof BookingApiError) throw err;
+      const timeout = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+      throw new BookingApiError(timeout ? 'TIMEOUT' : 'NETWORK_ERROR', err instanceof Error ? err.message : undefined);
     }
   }
 
@@ -1756,6 +1767,27 @@ export async function resolveCheckIn(
 }
 
 /** Commit the check-in the driver just confirmed: CONFIRMED -> CHECKED_IN (FR07 / BKG-041). */
+async function readConfirmedBooking(id: string, token: string | null, expectedStatus: BookingStatus): Promise<Booking> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(`${apiBaseUrl}/api/v1/bookings/${encodeURIComponent(id)}`, { headers });
+  const payload = await response.json().catch(() => null);
+  const errorBody = payload?.error ?? payload;
+  const traceId = errorBody?.traceId ?? payload?.traceId ?? response.headers.get('X-Trace-Id') ?? undefined;
+  if (!response.ok) {
+    throw new BookingApiError(errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message, errorBody?.details, errorBody?.messageKey, response.status, traceId);
+  }
+  const detail: BookingDetailItem | undefined = payload?.data ?? payload;
+  if (!detail || !(detail.bookingId || (detail as any).id)) {
+    throw new BookingApiError('INVALID_RESPONSE', undefined, undefined, undefined, response.status, traceId);
+  }
+  const booking = mapDetailItemToBooking(detail);
+  if (booking.status !== expectedStatus) {
+    throw new BookingApiError('STATE_NOT_CONFIRMED', undefined, { expectedStatus, actualStatus: booking.status }, undefined, response.status, traceId);
+  }
+  return booking;
+}
+
 export async function confirmCheckIn(
   bookingId: string,
   options?: {
@@ -1790,18 +1822,18 @@ export async function confirmCheckIn(
       });
 
       if (res.ok) {
-        const updated = await getBookingById(bookingId, token);
-        return updated;
+        return await readConfirmedBooking(bookingId, token, 'CHECKED_IN');
       }
 
       const errJson = await res.json().catch(() => null);
       const errObj = errJson?.error || errJson;
       const code = errObj?.code || `HTTP_${res.status}`;
       const message = errObj?.message || 'Không thể thực hiện check-in.';
-      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey);
+      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey, res.status, errObj?.traceId ?? errJson?.traceId ?? res.headers.get('X-Trace-Id') ?? undefined);
     } catch (err) {
       if (err instanceof BookingApiError) throw err;
-      console.warn('Network error confirming check-in, falling back to local store:', err);
+      const timeout = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+      throw new BookingApiError(timeout ? 'TIMEOUT' : 'NETWORK_ERROR', err instanceof Error ? err.message : undefined);
     }
   }
 
@@ -1903,18 +1935,18 @@ export async function completeBooking(
       });
 
       if (res.ok) {
-        const updated = await getBookingById(id, token);
-        return updated;
+        return await readConfirmedBooking(id, token, 'COMPLETED');
       }
 
       const errJson = await res.json().catch(() => null);
       const errObj = errJson?.error || errJson;
       const code = errObj?.code || `HTTP_${res.status}`;
       const message = errObj?.message || 'Không thể kết thúc phiên sạc.';
-      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey);
+      throw new BookingApiError(code, message, errObj?.details, errObj?.messageKey, res.status, errObj?.traceId ?? errJson?.traceId ?? res.headers.get('X-Trace-Id') ?? undefined);
     } catch (err) {
       if (err instanceof BookingApiError) throw err;
-      console.warn('Network error completing booking, falling back to local store:', err);
+      const timeout = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+      throw new BookingApiError(timeout ? 'TIMEOUT' : 'NETWORK_ERROR', err instanceof Error ? err.message : undefined);
     }
   }
 

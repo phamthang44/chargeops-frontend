@@ -32,7 +32,7 @@ export function paymentErrorMessage(t: TFunction, error: unknown): string {
       const httpStatus = (error as any).status;
       if (httpStatus === 404) code = 'SYS_404';
       else if (httpStatus === 401) code = 'AUTH_001';
-      else if (httpStatus === 403) code = 'AUTH_003';
+      else if (httpStatus === 403) code = 'AUTH_004';
       else if (httpStatus === 409) code = 'SYS_409';
       else if (httpStatus === 503) code = 'PAY_CHECKOUT_UNAVAILABLE';
       else if (httpStatus >= 500) code = 'SYS_001';
@@ -119,9 +119,9 @@ export function paymentErrorMessage(t: TFunction, error: unknown): string {
       case 'AUTH_001':
       case 'UNAUTHORIZED':
         return t('payment.errors.AUTH_001', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-      case 'AUTH_003':
+      case 'AUTH_004':
       case 'ACCESS_DENIED':
-        return t('payment.errors.AUTH_003', 'Bạn không có quyền thực hiện giao dịch này.');
+        return t('payment.errors.AUTH_004', 'Bạn không có quyền thực hiện giao dịch này.');
       case 'NETWORK_ERROR':
         return t('payment.errors.NETWORK_ERROR', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng.');
       case 'TIMEOUT':

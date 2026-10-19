@@ -391,6 +391,20 @@
     "error.ticket.findingInvalid": "Kết luận sự cố kỹ thuật không phù hợp với phiếu hỗ trợ này.",
     "error.ticket.codeConflict": "Mã phiếu hỗ trợ đã tồn tại trên hệ thống.",
 
+    "error.content.prohibited": "Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.",
+    "error.moderation.unavailable": "Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.",
+    "error.moderation.notFound": "Không tìm thấy quy tắc từ cấm.",
+    "error.moderation.duplicate": "Từ này và cách khớp đã tồn tại. Hãy cập nhật quy tắc hiện có.",
+    "error.moderation.versionConflict": "Quy tắc đã thay đổi. Vui lòng tải lại.",
+    "error.moderation.invalidRule": "Quy tắc từ cấm không hợp lệ.",
+
+    "CONTENT_PROHIBITED": "Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.",
+    "MODERATION_UNAVAILABLE": "Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.",
+    "MODERATION_NOT_FOUND": "Không tìm thấy quy tắc từ cấm.",
+    "MODERATION_DUPLICATE": "Từ này và cách khớp đã tồn tại. Hãy cập nhật quy tắc hiện có.",
+    "MODERATION_VERSION_CONFLICT": "Quy tắc đã thay đổi. Vui lòng tải lại.",
+    "MODERATION_INVALID_RULE": "Quy tắc từ cấm không hợp lệ.",
+
     "error.common.unknown": "Đã có lỗi không xác định xảy ra.",
     "error.common.internal": "Đã xảy ra lỗi hệ thống bất ngờ.",
     "error.common.database": "Đã xảy ra lỗi cơ sở dữ liệu.",

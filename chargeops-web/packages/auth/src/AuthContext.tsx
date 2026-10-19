@@ -83,7 +83,8 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
       })
       .catch((reason: unknown) => {
         if (cancelled) return;
-        setError(reason instanceof Error ? reason.message : 'Unable to connect to Keycloak.');
+        console.warn('Keycloak initialization failed:', reason);
+        setError('AUTH_PROVIDER_UNAVAILABLE');
         setAuthenticated(false);
         setInitializing(false);
       });
@@ -104,8 +105,9 @@ export function AuthProvider({ mockUser, redirectMs = 650, children }: AuthProvi
       await keycloak.updateToken(30);
       return keycloak.token ?? null;
     } catch {
-      // Non-destructive fallback: return cached token and avoid destroying active session/UI state
-      return keycloak.token ?? null;
+      // Keep a cached token only while it is still valid; expired tokens turn
+      // transient provider outages into misleading API 401 responses.
+      return keycloak.isTokenExpired(5) ? null : keycloak.token ?? null;
     }
   }, [keycloak, realMode]);
 

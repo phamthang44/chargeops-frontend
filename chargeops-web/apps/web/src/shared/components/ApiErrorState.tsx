@@ -3,15 +3,12 @@ import { ApiErrorCard, type ApiErrorCardProps } from './ApiErrorCard';
 import { ResourceRetryButton, ResourceStateCard } from './ResourceStateCard';
 
 /** Codes/statuses that mean "this resource (or endpoint) simply isn't there". */
-const MISSING_STATUSES = new Set([404, 405, 501]);
-const MISSING_CODES = new Set(['HTTP_404', 'HTTP_405', 'HTTP_501', 'NOT_IMPLEMENTED', 'ENDPOINT_NOT_FOUND']);
+const MISSING_CODES = new Set(['NOT_IMPLEMENTED', 'ENDPOINT_NOT_FOUND', 'API_ROUTE_NOT_FOUND']);
 
 export function isMissingResourceError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const e = error as { status?: unknown; code?: unknown; message?: unknown };
-  if (typeof e.status === 'number' && MISSING_STATUSES.has(e.status)) return true;
+  const e = error as { code?: unknown };
   if (typeof e.code === 'string' && MISSING_CODES.has(e.code)) return true;
-  if (typeof e.message === 'string' && /\bnot\s+found\b/i.test(e.message)) return true;
   return false;
 }
 
@@ -34,7 +31,7 @@ export interface ApiErrorStateProps {
 
 /**
  * Single entry point for query failures:
- * - resource/endpoint missing (404/405/501, "not found") → calm ResourceStateCard
+ * - explicitly missing resource/endpoint → calm ResourceStateCard
  * - anything else → ApiErrorCard (friendly message, retry, technical details)
  */
 export function ApiErrorState({

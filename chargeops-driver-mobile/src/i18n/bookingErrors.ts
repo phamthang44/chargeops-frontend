@@ -106,14 +106,19 @@ export function bookingErrorMessage(t: TFunction, error: unknown): string {
       if (msgKeyTranslated && msgKeyTranslated !== error.messageKey) return msgKeyTranslated;
     }
 
-    if (error.userMessage) return error.userMessage;
+    // Do not expose an unrecognized backend or provider message. It may include
+    // framework details and is often English-only for Vietnamese sessions.
+    return t('booking.errors.GENERIC', {
+      defaultValue: 'Không thể hoàn tất đặt chỗ. Vui lòng thử lại.',
+    });
   }
 
   if (error instanceof Error) {
     const key = `booking.errors.${error.message}`;
     const translated = t(key);
     if (translated && translated !== key) return translated;
-    if (error.message && error.message !== 'GENERIC') return error.message;
+    // Plain transport errors are not localized by their source; use the app's
+    // bilingual generic message unless their code matched a translation above.
   }
 
   return t('booking.errors.GENERIC', {

@@ -23,6 +23,7 @@ import { BookingCards } from '../features/bookings/BookingCards';
 import { BookingDetailDrawer } from '../features/bookings/BookingDetailDrawer';
 import { useOwnerStation } from '../context/OwnerStationContext';
 import { downloadBookingFile, getRangeWindow } from '../features/bookings/bookingExport';
+import { ApiErrorState } from '../../shared/components/ApiErrorState';
 
 const PAGE_SIZE = 10;
 type FilterKey = ApiBookingStatus | 'all';
@@ -127,6 +128,7 @@ export function Bookings() {
     <>
       <PageHeader title={t('bookings.title')} subtitle={t('bookings.subtitle')} />
 
+      {summaryQuery.isError && <ApiErrorState error={summaryQuery.error} compact onRetry={() => void summaryQuery.refetch()} />}
       {summaryQuery.data && <BookingSummaryStrip summary={summaryQuery.data} />}
 
       <BookingToolbar
@@ -141,7 +143,9 @@ export function Bookings() {
       </div>
 
       <Card className="overflow-hidden">
-        {listQuery.isLoading || !data ? (
+        {listQuery.isError && !data ? (
+          <ApiErrorState error={listQuery.error} onRetry={() => void listQuery.refetch()} />
+        ) : listQuery.isLoading || !data ? (
           <div className="p-4">
             <Skeleton className="mb-2 h-9 w-full" />
             {Array.from({ length: 6 }, (_, i) => (

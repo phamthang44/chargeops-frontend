@@ -13,6 +13,8 @@
     "clear": "Xóa tìm kiếm",
     "loading": "Đang tìm…",
     "empty": "Không tìm thấy kết quả.",
+    "error": "Tìm kiếm tạm thời không khả dụng. Vui lòng thử lại.",
+    "retry": "Thử tìm lại",
     "minChars": "Nhập ít nhất 2 ký tự để bắt đầu tìm kiếm.",
     "hintNav": "di chuyển",
     "hintOpen": "mở",
@@ -26,6 +28,22 @@
       "APPROVAL": "Duyệt trạm",
       "LEGAL_DOCUMENT": "Pháp lý",
       "USER": "Người dùng"
+    }
+  },
+  "imageUpload": {
+    "choose": "Kéo ảnh vào đây hoặc chọn tệp",
+    "formats": "PNG, JPG hoặc WebP (tối đa {{size}} MB)",
+    "uploading": "Đang tải ảnh… {{progress}}%",
+    "cancel": "Hủy tải ảnh",
+    "errors": {
+      "invalidType": "Vui lòng chọn ảnh định dạng JPG, PNG hoặc WebP.",
+      "tooLarge": "Ảnh vượt quá giới hạn {{size}} MB.",
+      "timeout": "Dịch vụ ảnh phản hồi quá lâu. Vui lòng thử lại.",
+      "network": "Không thể kết nối dịch vụ ảnh. Vui lòng kiểm tra kết nối.",
+      "cancelled": "Đã hủy tải ảnh.",
+      "rateLimit": "Dịch vụ ảnh đang bận. Vui lòng đợi một lát rồi thử lại.",
+      "signature": "Không thể xác thực quyền tải ảnh. Vui lòng làm mới rồi thử lại.",
+      "generic": "Tải ảnh lên thất bại. Vui lòng thử lại."
     }
   },
   "legal": {

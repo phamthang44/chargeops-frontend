@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
-import { uploadAvatarToImageKit } from '@/services/mediaService';
+import { MediaUploadError, uploadAvatarToImageKit } from '@/services/mediaService';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import {
   calculateInitialOffset,
@@ -288,7 +288,16 @@ export function AvatarUploadModal({
         t('profile.avatarUpload.successNewAvatar', 'Đã cập nhật ảnh đại diện mới.'),
       );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Tải ảnh lên thất bại.';
+      const uploadError = err instanceof MediaUploadError ? err : null;
+      const message = uploadError?.code === 'TIMEOUT'
+        ? t('profile.avatarUpload.errors.timeout')
+        : uploadError?.code === 'NETWORK_ERROR'
+          ? t('profile.avatarUpload.errors.network')
+          : uploadError?.status === 413
+            ? t('profile.avatarUpload.errors.tooLarge')
+            : uploadError?.status === 429
+              ? t('profile.avatarUpload.errors.quota')
+              : t('profile.avatarUpload.errors.generic');
       setError(message);
       setUploading(false);
     }

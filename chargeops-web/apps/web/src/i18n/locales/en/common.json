@@ -16,6 +16,12 @@
   "total": "Total",
   "notes": "Notes",
   "system": "System",
+  "realtime": { "reconnecting": "Live updates are reconnecting. The latest data will refresh when connected." },
+  "fatalError": {
+    "title": "This page ran into a problem",
+    "body": "Your data is safe. Reload the page to try again.",
+    "retry": "Reload page"
+  },
   "copied": "Copied to clipboard",
   "copiedCode": "Copied code {{code}}",
   "equipmentHistory": {
@@ -82,6 +88,7 @@
       "network": "Cannot reach the server. Check your network connection and try again.",
       "timeout": "The server took too long to respond. Please try again shortly.",
       "server": "The server is temporarily unavailable. Please try again in a few seconds.",
+      "rateLimit": "Too many requests or the connected provider is busy. Please wait a moment before trying again.",
       "auth": "Your session has expired or you lack permission. Please sign in again.",
       "default": "The system could not complete this request. Please retry — if the issue persists, contact your administrator."
     }

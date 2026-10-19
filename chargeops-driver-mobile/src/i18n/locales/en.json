@@ -267,6 +267,9 @@
     "showingCount": "Showing {{shown}} of {{total}}"
   },
   "map": {
+    "stationsUnavailable": "Station data is temporarily unavailable. You can retry or view the map with the last loaded stations.",
+    "retryStations": "Retry",
+    "tilesUnavailable": "Map tiles are temporarily unavailable. You can still use the station list.",
     "title": "Map",
     "searchPlaceholder": "Search nearby stations",
     "portsFree": "{{count}} ports free",
@@ -280,6 +283,7 @@
       "noLocation": "We couldn't determine your current location. Turn on location and try again.",
       "notConfigured": "Directions haven't been configured yet.",
       "notFound": "We couldn't find a route. Please try again.",
+      "unavailable": "Directions are temporarily unavailable. Please try again later.",
       "summary": "Route found: {{distance}} km · about {{duration}} min. Please follow road signs."
     },
     "legend": {
@@ -378,6 +382,8 @@
       "phoneRequired": "Please enter a phone number.",
       "phoneInvalid": "Enter a valid Vietnamese phone number.",
       "emailConflict": "This email is already linked to another ChargeOps profile.",
+      "contentProhibited": "Content contains prohibited language. Please revise it.",
+      "moderationUnavailable": "Content validation is temporarily unavailable. Please try again.",
       "submit": "We could not update your profile. Check the information and try again."
     }
   },
@@ -414,6 +420,13 @@
       "uploadNewPhoto": "Upload New Photo"
     },
     "avatarUpload": {
+      "errors": {
+        "generic": "The image could not be uploaded. Please try again.",
+        "network": "Could not connect to the image service. Check your connection and try again.",
+        "timeout": "The image service took too long to respond. Please try again.",
+        "tooLarge": "This image is too large. Choose a smaller image.",
+        "quota": "The image service is temporarily rate limited. Please try again later."
+      },
       "successNewAvatar": "New profile picture has been updated.",
       "successFromUrl": "Profile picture updated from URL.",
       "successRemoveAvatar": "Profile picture removed, reset to default avatar.",
@@ -940,7 +953,8 @@
       "BKG_STATE_CONFLICT": "Booking state has changed and cannot be paid.",
       "AUTH_001": "Session expired. Please log in again.",
       "AUTH_002": "Session expired. Please log in again.",
-      "AUTH_003": "You do not have permission to perform this payment action.",
+      "AUTH_003": "Your authentication token is invalid. Please sign in again.",
+      "AUTH_004": "You do not have permission to perform this payment action.",
       "validation.request.formatInvalid": "Invalid payment request format. Please try again.",
       "validation.failed": "Validation failed. Please check the entered fields.",
       "validation.input.invalid": "Invalid input data provided.",
@@ -973,6 +987,10 @@
     "errors": {
       "GENERIC": "Unable to complete booking. Please try again.",
       "NETWORK_ERROR": "Network connection error. Please check your connection.",
+      "TIMEOUT": "The service took too long to respond. Check your connection and try again.",
+      "AUTH_PROVIDER_UNAVAILABLE": "Sign-in service is temporarily unavailable. Please try again shortly.",
+      "INVALID_RESPONSE": "The server returned an unreadable response. Please try again.",
+      "STATE_NOT_CONFIRMED": "The server has not confirmed this booking update yet. Refresh the booking before trying again.",
       "PRICE_CHANGED": "Pricing or booking policy has changed.",
       "RANGE_TAKEN": "This time slot was just booked by someone else. Please choose another slot.",
       "CONNECTOR_BUSY": "Connector is currently busy.",
@@ -1570,6 +1588,8 @@
       "assignmentInvalid": "The selected handler cannot process this support ticket.",
       "findingInvalid": "The station-failure finding is invalid for this support ticket.",
       "codeConflict": "The support ticket code already exists.",
+      "contentProhibited": "Content contains prohibited language. Please revise it.",
+      "moderationUnavailable": "Content validation is temporarily unavailable. Please try again.",
       "generic": "An error occurred while processing this support ticket."
     }
   },
@@ -1639,6 +1659,7 @@
     "delete": "Delete",
     "viewDetail": "View detail",
     "markAllRead": "Mark all as read",
+    "actionError": "Could not save this notification change. Please try again.",
     "clearAll": "Clear all notifications",
     "time": {
       "justNow": "Just now",

@@ -7,12 +7,59 @@
     "refreshing": "Updating...",
     "refreshQueue": "Refresh queue",
     "stale": "Could not refresh data",
+    "error": "Failed to load operations summary",
+    "retry": "Retry",
+    "empty": "No data available",
+    "missingTitle": "Dashboard not connected",
+    "missingDescription": "Platform operations summary endpoint (admin/dashboard/summary) has not returned data.",
+    "ops": {
+      "platformOpenTickets": "Open platform tickets",
+      "escalatedOpenCases": "Station cases for review",
+      "escalatedOpenCasesHint": "A Driver or Owner has requested administrative review.",
+      "escalatedBadge": "Needs review",
+      "openTickets": "Open support"
+    },
     "kpi": {
       "approvals": "Pending approvals",
       "platformTickets": "Platform tickets",
       "escalatedCases": "Escalated cases",
       "activeStations": "Active stations",
-      "clickToFocus": "Jump to queue below"
+      "clickToFocus": "Jump to queue below",
+      "activeStationsDelta": "+{{count}} this week",
+      "pendingApprovals": "PENDING APPROVALS",
+      "pendingApprovalsDelta": "{{count}} new submissions today",
+      "bookingsToday": "BOOKINGS TODAY",
+      "bookingsDelta": "+{{pct}}% vs yesterday",
+      "revenueMonth": "REVENUE IN JUNE",
+      "revenueDelta": "+{{pct}}% vs May"
+    },
+    "charts": {
+      "trendTitle": "Platform-wide Bookings & Revenue · 14 days",
+      "trendLegend": {
+        "bookings": "Bookings",
+        "revenue": "Revenue"
+      },
+      "stationRevenue": "Revenue by Station · Jun",
+      "stationRevenueLink": "Analytics →"
+    },
+    "actionQueue": {
+      "title": "Action Queue",
+      "link": "Station Approvals →",
+      "pendingStations": "Pending station registrations",
+      "expiringLicenses": "Licenses expiring soon",
+      "expiringLicensesVal": "{{count}} · {{days}} days",
+      "expiredLicenses": "Expired licenses",
+      "reportedFaults": "Reported charger faults"
+    },
+    "queue": {
+      "pendingApprovals": "Pending station approvals",
+      "platformTickets": "Platform support tickets",
+      "escalatedCases": "Escalated case reviews",
+      "noPendingStations": "No pending station approvals",
+      "noPlatformTickets": "No open platform tickets",
+      "noEscalatedCases": "No escalated cases",
+      "seeAll": "See all →",
+      "actionNeeded": "Action needed"
     },
     "queues": {
       "approvals": "Pending station approvals",
@@ -45,12 +92,7 @@
       "staff": "Station staff",
       "owners": "Station owners",
       "evaluatedAt": "Evaluated at {{time}}"
-    },
-    "error": "Failed to load operations summary",
-    "retry": "Retry",
-    "empty": "No data available",
-    "missingTitle": "Dashboard not connected",
-    "missingDescription": "Platform operations summary endpoint (admin/dashboard/summary) has not returned data."
+    }
   },
   "console": {
     "role": "ADMINISTRATOR",
@@ -415,61 +457,7 @@
       "empty": "No bookings match the filters."
     }
   },
-  "dashboard": {
-    "error": "Failed to load overview data",
-    "missingTitle": "Dashboard is not connected yet",
-    "missingDescription": "Platform overview endpoint (admin/dashboard/summary) has no data yet.",
-    "refresh": "Refresh",
-    "refreshing": "Refreshing...",
-    "usersOverview": {
-      "title": "Platform Users"
-    },
-    "ops": {
-      "platformOpenTickets": "Open platform tickets",
-      "escalatedOpenCases": "Station cases for review",
-      "escalatedOpenCasesHint": "A Driver or Owner has requested administrative review.",
-      "escalatedBadge": "Needs review",
-      "openTickets": "Open support"
-    },
-    "kpi": {
-      "activeStations": "ACTIVE STATIONS",
-      "activeStationsDelta": "+{{count}} this week",
-      "pendingApprovals": "PENDING APPROVALS",
-      "pendingApprovalsDelta": "{{count}} new submissions today",
-      "bookingsToday": "BOOKINGS TODAY",
-      "bookingsDelta": "+{{pct}}% vs yesterday",
-      "revenueMonth": "REVENUE IN JUNE",
-      "revenueDelta": "+{{pct}}% vs May"
-    },
-    "charts": {
-      "trendTitle": "Platform-wide Bookings & Revenue · 14 days",
-      "trendLegend": {
-        "bookings": "Bookings",
-        "revenue": "Revenue"
-      },
-      "stationRevenue": "Revenue by Station · Jun",
-      "stationRevenueLink": "Analytics →"
-    },
-    "actionQueue": {
-      "title": "Action Queue",
-      "link": "Station Approvals →",
-      "pendingStations": "Pending station registrations",
-      "expiringLicenses": "Licenses expiring soon",
-      "expiringLicensesVal": "{{count}} · {{days}} days",
-      "expiredLicenses": "Expired licenses",
-      "reportedFaults": "Reported charger faults"
-    },
-    "queue": {
-      "pendingApprovals": "Pending station approvals",
-      "platformTickets": "Platform support tickets",
-      "escalatedCases": "Escalated case reviews",
-      "noPendingStations": "No pending station approvals",
-      "noPlatformTickets": "No open platform tickets",
-      "noEscalatedCases": "No escalated cases",
-      "seeAll": "See all →",
-      "actionNeeded": "Action needed"
-    }
-  },
+
   "licenses": {
     "title": "Licenses",
     "toastRenewal": "Recorded license renewal for {{name}}",
@@ -1541,5 +1529,117 @@
       "copyCode": "Copy station code",
       "copied": "Station code copied"
     }
+  },
+  "prohibitedTerms": {
+    "nav": {
+      "label": "Prohibited Terms",
+      "title": "Prohibited Terms & Moderation Policy"
+    },
+    "title": "Prohibited Terms & Moderation",
+    "eyebrow": "Content Moderation Engine",
+    "subtitle": "Word filtering rules across display names, station names, ticket details, and support messages.",
+    "seedDisabledBanner": "Starter seed rules are currently DISABLED for administrator review. Only ENABLED rules are evaluated on the gateway.",
+    "cacheSyncNote": "Changes take effect within 5 seconds.",
+    "createBtn": "Add Term",
+    "searchPlaceholder": "Search by term or note...",
+    "filter": {
+      "all": "All",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "table": {
+      "term": "Term / Phrase",
+      "matchType": "Match Type",
+      "scopes": "Protected Scopes",
+      "status": "Status",
+      "note": "Note",
+      "updatedAt": "Last Updated",
+      "actions": "Actions",
+      "empty": "No prohibited terms match the current filters.",
+      "exactBadge": "Exact",
+      "phraseBadge": "Word / Phrase",
+      "toggleEnable": "Enable Rule",
+      "toggleDisable": "Disable Rule",
+      "edit": "Edit",
+      "history": "Change History",
+      "active": "Enabled",
+      "inactive": "Disabled"
+    },
+    "scopes": {
+      "DISPLAY_NAME": "Display Name",
+      "STATION_NAME": "Station Name",
+      "TICKET_SUBJECT": "Ticket Subject",
+      "TICKET_DESCRIPTION": "Ticket Description",
+      "TICKET_MESSAGE": "Ticket Message"
+    },
+    "matchTypes": {
+      "EXACT": "Exact Match",
+      "EXACT_DESC": "Compares normalized full string after Unicode NFKC and whitespace collapsing.",
+      "WORD_OR_PHRASE": "Word or Phrase",
+      "WORD_OR_PHRASE_DESC": "Matches literal word/phrase at Unicode Letter/Number word boundaries."
+    },
+    "sandbox": {
+      "title": "Policy Test Sandbox",
+      "eyebrow": "Interactive Sandbox",
+      "subtitle": "Test content against active enabled rules in real time.",
+      "targetScope": "Target Scope",
+      "inputLabel": "Test Input",
+      "inputPlaceholder": "Enter text to evaluate (max 2,000 characters)...",
+      "runBtn": "Test Policy",
+      "running": "Evaluating...",
+      "hotkey": "⌘ + Enter",
+      "resultTitle": "Diagnostic Output (Admin Only)",
+      "allowed": "Allowed — No prohibited terms detected",
+      "rejected": "Content Prohibited by Moderation Policy",
+      "matchesCount": "{{count}} matching rule(s) detected:",
+      "ruleId": "Rule ID: {{id}}",
+      "ruleTerm": "Violating Term: \"{{term}}\"",
+      "cacheWarning": "Notice: Sandbox evaluates ENABLED saved rules only. Unsaved drafts are not applied; changes take effect within 5 seconds."
+    },
+    "modal": {
+      "createTitle": "Add Prohibited Term Rule",
+      "editTitle": "Edit Prohibited Term Rule",
+      "termLabel": "Prohibited Term or Phrase",
+      "termPlaceholder": "Enter term or phrase (1 - 100 characters)...",
+      "matchTypeLabel": "Match Type",
+      "scopesLabel": "Protected Scopes (select at least 1)",
+      "enabledLabel": "Enable rule immediately after saving",
+      "noteLabel": "Internal Note (optional)",
+      "notePlaceholder": "Reason for rule or business context (max 500 characters)...",
+      "cancel": "Cancel",
+      "submitCreate": "Create Rule",
+      "submitEdit": "Save Changes",
+      "conflictWarning": "The rule has changed on the server. Reload and try again.",
+      "duplicateWarning": "This term and match type already exist. Please update scopes on the existing rule.",
+      "scopesRequired": "Please select at least one protected scope."
+    },
+    "history": {
+      "title": "Rule Audit History",
+      "subtitle": "Chronological record of rule modifications and status transitions",
+      "actorSystem": "System",
+      "actorAdmin": "Administrator",
+      "empty": "No audit change records found for this term.",
+      "action": {
+        "CREATE": "Rule Created",
+        "UPDATE": "Rule Updated",
+        "ENABLE": "Rule Enabled",
+        "DISABLE": "Rule Disabled",
+        "SEED": "System Seed Initialized"
+      },
+      "snapshotBefore": "Before Change",
+      "snapshotAfter": "After Change",
+      "scopes": "Scopes",
+      "status": "Status",
+      "matchType": "Match Type",
+      "note": "Note"
+    },
+    "toast": {
+      "created": "Prohibited term rule created successfully.",
+      "updated": "Prohibited term rule updated successfully.",
+      "enabled": "Rule enabled. Changes take effect within 5 seconds.",
+      "disabled": "Rule disabled. Changes take effect within 5 seconds.",
+      "error": "Failed to update moderation rule."
+    }
   }
 }
+

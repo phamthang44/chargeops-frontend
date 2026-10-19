@@ -8,6 +8,8 @@ export class ApiError extends Error {
     message: string,
     public readonly messageKey?: string,
     public readonly details?: unknown,
+    public readonly traceId?: string,
+    public readonly retryAfter?: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -50,11 +52,10 @@ export class HttpClient {
     if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
     const language = this.cfg.getLanguage?.();
     if (language) headers['Accept-Language'] = language;
-    const token = await this.cfg.getToken?.();
-    if (token) headers.Authorization = `Bearer ${token}`;
-
     let res: Response;
     try {
+      const token = await this.cfg.getToken?.();
+      if (token) headers.Authorization = `Bearer ${token}`;
       res = await fetch(url, {
         method,
         headers,
@@ -62,8 +63,9 @@ export class HttpClient {
         signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
       });
     } catch (e) {
-      const timedOut = e instanceof DOMException && e.name === 'TimeoutError';
-      throw new ApiError(0, timedOut ? 'TIMEOUT' : 'NETWORK', timedOut ? 'Yêu cầu quá thời gian chờ.' : 'Không thể kết nối máy chủ.');
+      const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
+      const authFailure = e instanceof Error && /keycloak|token|auth/i.test(e.message);
+      throw new ApiError(0, timedOut ? 'TIMEOUT' : authFailure ? 'AUTH_PROVIDER_UNAVAILABLE' : 'NETWORK', e instanceof Error ? e.message : String(e));
     }
 
     if (!res.ok) {
@@ -71,27 +73,34 @@ export class HttpClient {
       let message = `Lỗi máy chủ (${res.status}).`;
       let messageKey: string | undefined;
       let details: unknown;
+      let traceId: string | undefined;
       try {
-        const problem = (await res.json()) as {
-          error?: { code?: string; messageKey?: string; message?: string; details?: unknown };
+        const raw = await res.text();
+        const problem = (raw ? JSON.parse(raw) : null) as {
+          error?: { code?: string; messageKey?: string; message?: string; details?: unknown; traceId?: string };
           code?: string;
           message?: string;
           detail?: string;
+          traceId?: string;
+          requestId?: string;
         };
         if (problem?.error) {
           code = problem.error.code ?? code;
           message = problem.error.message ?? message;
           messageKey = problem.error.messageKey;
           details = problem.error.details;
+          traceId = problem.error.traceId ?? problem.traceId ?? problem.requestId;
         } else if (problem) {
           code = problem.code ?? code;
           message = problem.message ?? problem.detail ?? message;
           details = problem;
+          traceId = problem.traceId ?? problem.requestId;
         }
       } catch {
         /* non-JSON error body — keep defaults */
       }
-      throw new ApiError(res.status, code, message, messageKey, details);
+      traceId ??= res.headers.get('X-Trace-Id') ?? res.headers.get('X-Request-Id') ?? undefined;
+      throw new ApiError(res.status, code, message, messageKey, details, traceId, res.headers.get('Retry-After') ?? undefined);
     }
 
     if (opts.responseType === 'download') {
@@ -108,11 +117,17 @@ export class HttpClient {
       return { blob, filename: downloadFilename(res.headers.get('Content-Disposition')) } as T;
     }
     if (res.status === 204) return undefined as T;
-    const body = (await res.json()) as {
+    let body: {
       data?: T;
       meta?: { page?: number; size?: number; totalElements?: number; totalPages?: number };
       error?: unknown;
     };
+    try {
+      body = (await res.json()) as typeof body;
+    } catch (e) {
+      const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
+      throw new ApiError(res.status, timedOut ? 'TIMEOUT' : 'INVALID_RESPONSE', e instanceof Error ? e.message : String(e), undefined, undefined, res.headers.get('X-Trace-Id') ?? undefined);
+    }
     if (body && typeof body === 'object' && 'data' in body && body.data !== undefined) {
       if (
         Array.isArray(body.data) &&

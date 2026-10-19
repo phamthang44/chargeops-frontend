@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
 import { getKeycloakClient, isKeycloakEnabled } from './keycloak-client';
@@ -39,10 +39,12 @@ export function SsoRedirectOverlay() {
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {
+  const { t } = useTranslation('auth');
   const { authenticated, error, initializing } = useAuth();
   const realMode = isKeycloakEnabled();
   const keycloak = getKeycloakClient();
   const loginStarted = useRef(false);
+  const [loginFailed, setLoginFailed] = useState(false);
 
   useEffect(() => {
     if (initializing || authenticated || error || !realMode || !keycloak || loginStarted.current) return;
@@ -50,6 +52,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     loginStarted.current = true;
     void keycloak.login({ redirectUri: window.location.href }).catch(() => {
       loginStarted.current = false;
+      setLoginFailed(true);
     });
   }, [initializing, authenticated, error, realMode, keycloak]);
 
@@ -57,10 +60,13 @@ export function AuthGate({ children }: { children: ReactNode }) {
     return <SsoRedirectOverlay />;
   }
 
-  if (error && !authenticated) {
+  if ((error || loginFailed) && !authenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-canvas p-8 text-center text-muted">
-        {error}
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-canvas p-8 text-center text-muted">
+        <p>{t('sso.unavailable')}</p>
+        <button type="button" onClick={() => window.location.reload()} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-2">
+          {t('sso.retry')}
+        </button>
       </div>
     );
   }

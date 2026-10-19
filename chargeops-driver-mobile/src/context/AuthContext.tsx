@@ -79,8 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Rotates the refresh token against Keycloak. Concurrent callers share one
-   * in-flight request; a failed refresh signs the user out (matching the
-   * pre-existing timer behaviour) unless the session changed underneath us.
+   * in-flight request. A definitive invalid refresh grant clears the session;
+   * transient provider/network failures preserve it for a later retry.
    */
   const performRefresh = useCallback((): Promise<AuthSession | null> => {
     if (refreshPromiseRef.current) return refreshPromiseRef.current;
@@ -105,13 +105,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionRef.current = next;
         setSession(next);
         return next;
-      } catch {
+      } catch (error) {
+        const providerError = error as { code?: unknown; status?: unknown };
+        const code = typeof providerError?.code === 'string' ? providerError.code.toLowerCase() : '';
+        const invalidGrant = ['invalid_grant', 'invalid_token', 'refresh_token_expired'].includes(code);
         if (
+          invalidGrant &&
           generation === refreshGenerationRef.current &&
           sessionRef.current?.tokens.refreshToken === base.tokens.refreshToken
         ) {
           sessionRef.current = null;
           setSession(null);
+        } else {
+          console.warn('Keycloak refresh temporarily failed; session retained for retry.', {
+            code: code || undefined,
+            status: typeof providerError?.status === 'number' ? providerError.status : undefined,
+          });
         }
         return null;
       } finally {
@@ -133,7 +142,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return current.tokens.accessToken;
     }
     const refreshed = await performRefresh();
-    return refreshed?.tokens.accessToken ?? null;
+    if (refreshed) return refreshed.tokens.accessToken;
+    const stillValid = sessionRef.current;
+    return stillValid && (!stillValid.tokens.expiresAt || stillValid.tokens.expiresAt > Date.now())
+      ? stillValid.tokens.accessToken
+      : null;
   }, [performRefresh]);
 
   useEffect(() => {

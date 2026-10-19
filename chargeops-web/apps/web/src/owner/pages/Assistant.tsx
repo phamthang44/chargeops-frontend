@@ -226,6 +226,8 @@ export function Assistant() {
   // History and conversation state
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [conversationsLoading, setConversationsLoading] = useState(false);
+  const [conversationsError, setConversationsError] = useState(false);
+  const [conversationReload, setConversationReload] = useState(0);
   const [conversationsHasMore, setConversationsHasMore] = useState(false);
   const [conversationsCursor, setConversationsCursor] = useState<string | null>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
@@ -251,10 +253,12 @@ export function Assistant() {
   useEffect(() => {
     let active = true;
     setConversationsLoading(true);
+    setConversationsError(false);
     api.policies
       .conversations(undefined, 30)
       .then((res) => {
         if (!active) return;
+        setConversationsError(false);
         setConversations(res.items);
         setConversationsHasMore(res.hasMore);
         setConversationsCursor(res.nextCursor ?? null);
@@ -273,6 +277,7 @@ export function Assistant() {
       })
       .catch((err) => {
         console.warn('Could not load conversations list:', err);
+        if (active) setConversationsError(true);
       })
       .finally(() => {
         if (active) setConversationsLoading(false);
@@ -281,7 +286,7 @@ export function Assistant() {
     return () => {
       active = false;
     };
-  }, [api, userStorageKey]);
+  }, [api, userStorageKey, conversationReload]);
 
   // 2. Load messages whenever currentConversationId changes
   useEffect(() => {
@@ -365,7 +370,7 @@ export function Assistant() {
           setErrorState({
             code: err instanceof ApiError ? err.code : 'UNKNOWN',
             status: err instanceof ApiError ? err.status : 500,
-            message: err instanceof Error ? err.message : t('assistant.errors.serviceUnavailable'),
+            message: t('assistant.errors.serviceUnavailable'),
           });
         }
       })
@@ -546,7 +551,7 @@ export function Assistant() {
         const details = err.details as any;
         resetAt = details?.resetAt || details?.error?.details?.resetAt;
 
-        if (status === 429 || code === 'ASSISTANT_QUOTA_EXCEEDED') {
+        if (code === 'ASSISTANT_QUOTA_EXCEEDED') {
           if (resetAt) {
             setQuotaLockedUntil(resetAt);
           }
@@ -555,6 +560,12 @@ export function Assistant() {
             count: details?.maxDailyQueries ?? 10,
             time: formattedReset || 'hôm sau / tomorrow',
           });
+        } else if (code === 'ASSISTANT_RATE_LIMITED' || code === 'ASSISTANT_PROVIDER_RATE_LIMITED' || code === 'RATE_LIMITED') {
+          errorMsg = t('assistant.errors.rateLimited');
+        } else if (code === 'ASSISTANT_UPSTREAM_QUOTA_EXCEEDED' || code === 'UPSTREAM_QUOTA_EXCEEDED') {
+          errorMsg = t('assistant.errors.providerQuotaExceeded');
+        } else if (status === 429) {
+          errorMsg = t('assistant.errors.rateLimited');
         } else if (status === 400 || code === 'VALIDATION_ERROR') {
           errorMsg = t('assistant.errors.badRequest');
         } else if (status === 403 || code === 'AUTH_004' || code === 'FORBIDDEN') {
@@ -564,10 +575,10 @@ export function Assistant() {
         } else if (status >= 500) {
           errorMsg = t('assistant.errors.serviceUnavailable');
         } else {
-          errorMsg = err.message || t('assistant.errors.unknown', { message: code });
+          errorMsg = t('assistant.errors.serviceUnavailable');
         }
       } else if (err instanceof Error) {
-        errorMsg = err.message;
+        errorMsg = t(err.name === 'AbortError' ? 'assistant.errors.timeout' : 'assistant.errors.serviceUnavailable');
       }
 
       setErrorState({
@@ -637,7 +648,16 @@ export function Assistant() {
               <span>{t('assistant.history')}</span>
             </div>
 
-            {conversations.length === 0 && !conversationsLoading && (
+            {conversationsError && (
+              <div role="alert" className="mx-2 my-3 rounded-xl border border-bad/20 bg-bad/5 px-3 py-3 text-center">
+                <p className="text-xs text-body">{t('assistant.errors.historyUnavailable')}</p>
+                <button type="button" className="mt-2 text-xs font-semibold text-brand hover:underline" onClick={() => setConversationReload((value) => value + 1)}>
+                  {t('assistant.errors.retry')}
+                </button>
+              </div>
+            )}
+
+            {conversations.length === 0 && !conversationsLoading && !conversationsError && (
               <div className="px-3 py-6 text-center text-[12px] text-faint">
                 {t('assistant.noHistory')}
               </div>

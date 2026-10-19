@@ -210,6 +210,21 @@ export function useCreateTicket() {
         // Navigate immediately to ticket thread
         navigation.replace('TicketDetail', { ticketId: created.ticketId });
       } catch (err: any) {
+        const fields = (err?.details as any)?.fields;
+        if (Array.isArray(fields) && fields.length > 0) {
+          const fieldErrors: TicketFormErrors = {};
+          if (fields.includes('subject')) {
+            fieldErrors.subject = t('ticket.errors.contentProhibited', 'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.');
+          }
+          if (fields.includes('description')) {
+            fieldErrors.description = t('ticket.errors.contentProhibited', 'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.');
+          }
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+          const firstField = fields.find((f: string) => f === 'subject' || f === 'description');
+          if (firstField) {
+            onInvalid?.(firstField as TicketFormErrorKey);
+          }
+        }
         const localizedMsg = getLocalizedTicketErrorMessage(err, t);
         Alert.alert(t('common.error', 'Lỗi'), localizedMsg);
       } finally {

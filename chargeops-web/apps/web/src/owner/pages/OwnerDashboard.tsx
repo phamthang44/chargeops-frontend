@@ -77,7 +77,7 @@ export function OwnerDashboard() {
   const attention = useQuery({ queryKey: ['owner-dashboard', 'attention', stationId, kind], queryFn: () => api.dashboard.ownerAttention({ stationId, kind, page: 1, size: 5 }) });
   const bookings = useQuery({
     queryKey: ['owner-dashboard', 'bookings', stationId],
-    queryFn: () => api.ownerBookings.list({ stationId, status: 'confirmed' as any, from: new Date().toISOString(), sort: 'startAt,asc', windowMode: 'START_IN_WINDOW', pageSize: 5 }),
+    queryFn: () => api.ownerBookings.list({ stationId, status: 'CONFIRMED', from: new Date().toISOString(), sort: 'startAt,asc', windowMode: 'START_IN_WINDOW', pageSize: 5 }),
   });
 
   const locale = i18n.language.startsWith('en') ? 'en-US' : 'vi-VN';
@@ -217,7 +217,7 @@ export function OwnerDashboard() {
       <section className="xl:col-span-4" aria-labelledby="owner-bookings-title">
         <Card className="h-full p-4 sm:p-6">
           <div className="mb-4 flex items-start justify-between gap-3"><div className="flex items-start gap-3"><span className="rounded-ctl bg-owner-soft p-2 text-owner"><IconCalendar size={18} /></span><div><h2 id="owner-bookings-title" className="text-lg font-semibold text-ink">{t('panel.upcomingBookings')}</h2><p className="mt-1 text-sm text-muted">{t('hero.confirmedOnly')}</p></div></div></div>
-          {bookings.isLoading ? <div className="space-y-3"><Skeleton className="h-16 rounded-card" /><Skeleton className="h-16 rounded-card" /></div> : bookings.data?.items.length ? <div className="divide-y divide-hairline">{bookings.data.items.map((booking) => <button key={booking.bookingId} type="button" className="flex min-h-16 w-full items-center gap-3 py-3 text-left hover:bg-row-hover" onClick={() => { if (stationId) setSelectedStationId(stationId); navigate(`/owner/bookings?bookingId=${booking.bookingId}${stationId ? `&stationId=${stationId}` : ''}`); }}>
+          {bookings.isLoading ? <div className="space-y-3"><Skeleton className="h-16 rounded-card" /><Skeleton className="h-16 rounded-card" /></div> : bookings.isError ? <ApiErrorState error={bookings.error} compact onRetry={() => void bookings.refetch()} /> : bookings.data?.items.length ? <div className="divide-y divide-hairline">{bookings.data.items.map((booking) => <button key={booking.bookingId} type="button" className="flex min-h-16 w-full items-center gap-3 py-3 text-left hover:bg-row-hover" onClick={() => { if (stationId) setSelectedStationId(stationId); navigate(`/owner/bookings?bookingId=${booking.bookingId}${stationId ? `&stationId=${stationId}` : ''}`); }}>
             <span className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-ctl bg-owner-soft text-owner-deep"><strong className="text-sm leading-none">{new Intl.DateTimeFormat(locale, { day: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(booking.startAt))}</strong><span className="text-xs uppercase">{new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(booking.startAt))}</span></span>
             <span className="min-w-0 flex-1"><strong className="block truncate text-sm text-ink">{booking.bookingCode || booking.bookingId}</strong><span className="block truncate text-xs text-muted">{dateTime(booking.startAt)}</span><span className="block truncate text-xs text-muted">{booking.driverDisplayName}</span></span><IconChevronRight size={16} className="shrink-0 text-faint" />
           </button>)}</div> : <Empty title={t('panel.noUpcoming')} />}

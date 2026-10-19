@@ -7,12 +7,59 @@
     "refreshing": "Đang cập nhật...",
     "refreshQueue": "Cập nhật hàng đợi",
     "stale": "Chưa cập nhật được dữ liệu",
+    "error": "Không thể tải dữ liệu tổng quan",
+    "retry": "Thử lại",
+    "empty": "Không có dữ liệu",
+    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
+    "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu.",
+    "ops": {
+      "platformOpenTickets": "Ticket nền tảng đang mở",
+      "escalatedOpenCases": "Case trạm cần xem xét",
+      "escalatedOpenCasesHint": "Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.",
+      "escalatedBadge": "Cần xem xét",
+      "openTickets": "Mở hỗ trợ"
+    },
     "kpi": {
       "approvals": "Hồ sơ chờ duyệt",
       "platformTickets": "Ticket nền tảng",
       "escalatedCases": "Case escalation",
       "activeStations": "Trạm hoạt động",
-      "clickToFocus": "Xem hàng đợi bên dưới"
+      "clickToFocus": "Xem hàng đợi bên dưới",
+      "activeStationsDelta": "+{{count}} trong tuần này",
+      "pendingApprovals": "CHỜ DUYỆT",
+      "pendingApprovalsDelta": "{{count}} hồ sơ mới hôm nay",
+      "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+      "bookingsDelta": "+{{pct}}% so với hôm qua",
+      "revenueMonth": "DOANH THU THÁNG 6",
+      "revenueDelta": "+{{pct}}% so với tháng 5"
+    },
+    "charts": {
+      "trendTitle": "Đặt chỗ & doanh thu toàn nền tảng · 14 ngày",
+      "trendLegend": {
+        "bookings": "Đặt chỗ",
+        "revenue": "Doanh thu"
+      },
+      "stationRevenue": "Doanh thu theo trạm · T6",
+      "stationRevenueLink": "Phân tích →"
+    },
+    "actionQueue": {
+      "title": "Cần xử lý",
+      "link": "Duyệt trạm →",
+      "pendingStations": "Hồ sơ trạm chờ duyệt",
+      "expiringLicenses": "Giấy phép sắp hết hạn",
+      "expiringLicensesVal": "{{count}} · {{days}} ngày",
+      "expiredLicenses": "Giấy phép đã hết hạn",
+      "reportedFaults": "Trụ lỗi được báo cáo"
+    },
+    "queue": {
+      "pendingApprovals": "Hồ sơ trạm chờ duyệt",
+      "platformTickets": "Ticket nền tảng cần hỗ trợ",
+      "escalatedCases": "Vụ việc khiếu nại leo thang",
+      "noPendingStations": "Không có trạm chờ duyệt",
+      "noPlatformTickets": "Không có ticket nền tảng",
+      "noEscalatedCases": "Không có vụ việc leo thang",
+      "seeAll": "Xem tất cả →",
+      "actionNeeded": "Cần xem xét"
     },
     "queues": {
       "approvals": "Hồ sơ trạm chờ duyệt",
@@ -45,12 +92,7 @@
       "staff": "Nhân viên trạm",
       "owners": "Chủ trạm",
       "evaluatedAt": "Đánh giá lúc {{time}}"
-    },
-    "error": "Không thể tải dữ liệu tổng quan",
-    "retry": "Thử lại",
-    "empty": "Không có dữ liệu",
-    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
-    "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu."
+    }
   },
   "console": {
     "role": "QUẢN TRỊ VIÊN",
@@ -415,61 +457,7 @@
       "empty": "Không có lượt đặt nào khớp bộ lọc."
     }
   },
-  "dashboard": {
-    "error": "Không thể tải dữ liệu tổng quan",
-    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
-    "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu.",
-    "refresh": "Làm mới",
-    "refreshing": "Đang cập nhật...",
-    "usersOverview": {
-      "title": "Người dùng nền tảng"
-    },
-    "ops": {
-      "platformOpenTickets": "Ticket nền tảng đang mở",
-      "escalatedOpenCases": "Case trạm cần xem xét",
-      "escalatedOpenCasesHint": "Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.",
-      "escalatedBadge": "Cần xem xét",
-      "openTickets": "Mở hỗ trợ"
-    },
-    "kpi": {
-      "activeStations": "TRẠM HOẠT ĐỘNG",
-      "activeStationsDelta": "+{{count}} trong tuần này",
-      "pendingApprovals": "CHỜ DUYỆT",
-      "pendingApprovalsDelta": "{{count}} hồ sơ mới hôm nay",
-      "bookingsToday": "ĐẶT CHỖ HÔM NAY",
-      "bookingsDelta": "+{{pct}}% so với hôm qua",
-      "revenueMonth": "DOANH THU THÁNG 6",
-      "revenueDelta": "+{{pct}}% so với tháng 5"
-    },
-    "charts": {
-      "trendTitle": "Đặt chỗ & doanh thu toàn nền tảng · 14 ngày",
-      "trendLegend": {
-        "bookings": "Đặt chỗ",
-        "revenue": "Doanh thu"
-      },
-      "stationRevenue": "Doanh thu theo trạm · T6",
-      "stationRevenueLink": "Phân tích →"
-    },
-    "actionQueue": {
-      "title": "Cần xử lý",
-      "link": "Duyệt trạm →",
-      "pendingStations": "Hồ sơ trạm chờ duyệt",
-      "expiringLicenses": "Giấy phép sắp hết hạn",
-      "expiringLicensesVal": "{{count}} · {{days}} ngày",
-      "expiredLicenses": "Giấy phép đã hết hạn",
-      "reportedFaults": "Trụ lỗi được báo cáo"
-    },
-    "queue": {
-      "pendingApprovals": "Hồ sơ trạm chờ duyệt",
-      "platformTickets": "Ticket nền tảng cần hỗ trợ",
-      "escalatedCases": "Vụ việc khiếu nại leo thang",
-      "noPendingStations": "Không có trạm chờ duyệt",
-      "noPlatformTickets": "Không có ticket nền tảng",
-      "noEscalatedCases": "Không có vụ việc leo thang",
-      "seeAll": "Xem tất cả →",
-      "actionNeeded": "Cần xem xét"
-    }
-  },
+
   "licenses": {
     "title": "Giấy phép",
     "toastRenewal": "Đã ghi nhận gia hạn License cho {{name}}",
@@ -1541,5 +1529,117 @@
       "copyCode": "Sao chép mã trạm",
       "copied": "Đã sao chép mã trạm"
     }
+  },
+  "prohibitedTerms": {
+    "nav": {
+      "label": "Từ cấm & Kiểm duyệt",
+      "title": "Quản lý từ cấm & Chính sách kiểm duyệt nội dung"
+    },
+    "title": "Quản lý từ cấm & Kiểm duyệt",
+    "eyebrow": "Nền tảng kiểm duyệt",
+    "subtitle": "Quy tắc lọc từ ngữ vi phạm cho tên người dùng, tên trạm, nội dung ticket và tin nhắn hỗ trợ.",
+    "seedDisabledBanner": "Các quy tắc khởi tạo từ hạt giống (Seed rules) hiện đang ở trạng thái TẮT để quản trị viên rà soát. Chỉ các quy tắc ĐANG BẬT mới được áp dụng trên gateway.",
+    "cacheSyncNote": "Thay đổi có hiệu lực trong tối đa 5 giây.",
+    "createBtn": "Thêm từ cấm",
+    "searchPlaceholder": "Tìm theo từ cấm hoặc ghi chú...",
+    "filter": {
+      "all": "Tất cả",
+      "enabled": "Đang bật",
+      "disabled": "Đã tắt"
+    },
+    "table": {
+      "term": "Từ / Cụm từ",
+      "matchType": "Cách khớp",
+      "scopes": "Phạm vi áp dụng",
+      "status": "Trạng thái",
+      "note": "Ghi chú",
+      "updatedAt": "Cập nhật gần nhất",
+      "actions": "Thao tác",
+      "empty": "Không tìm thấy quy tắc từ cấm nào phù hợp.",
+      "exactBadge": "Chính xác",
+      "phraseBadge": "Từ / Cụm từ",
+      "toggleEnable": "Bật quy tắc",
+      "toggleDisable": "Tắt quy tắc",
+      "edit": "Chỉnh sửa",
+      "history": "Xem lịch sử thay đổi",
+      "active": "Đang bật",
+      "inactive": "Đã tắt"
+    },
+    "scopes": {
+      "DISPLAY_NAME": "Tên hiển thị",
+      "STATION_NAME": "Tên trạm",
+      "TICKET_SUBJECT": "Tiêu đề ticket",
+      "TICKET_DESCRIPTION": "Mô tả ticket",
+      "TICKET_MESSAGE": "Tin nhắn chat"
+    },
+    "matchTypes": {
+      "EXACT": "Chính xác tuyệt đối",
+      "EXACT_DESC": "So khớp toàn bộ chuỗi sau khi chuẩn hóa Unicode/khoảng trắng.",
+      "WORD_OR_PHRASE": "Từ hoặc Cụm từ",
+      "WORD_OR_PHRASE_DESC": "So khớp từ hoặc cụm từ tại ranh giới từ ký tự/chữ số."
+    },
+    "sandbox": {
+      "title": "Thử nghiệm chính sách",
+      "eyebrow": "Interactive Sandbox",
+      "subtitle": "Kiểm thử trực tiếp nội dung trên các quy tắc đang bật.",
+      "targetScope": "Phạm vi kiểm tra",
+      "inputLabel": "Nội dung kiểm thử",
+      "inputPlaceholder": "Nhập nội dung cần kiểm tra (tối đa 2.000 ký tự)...",
+      "runBtn": "Kiểm tra quy tắc",
+      "running": "Đang kiểm tra...",
+      "hotkey": "⌘ + Enter",
+      "resultTitle": "Kết quả chẩn đoán (Admin Only)",
+      "allowed": "Hợp lệ — Không phát hiện từ cấm",
+      "rejected": "Vi phạm chính sách kiểm duyệt",
+      "matchesCount": "Phát hiện {{count}} quy tắc vi phạm:",
+      "ruleId": "Mã quy tắc: {{id}}",
+      "ruleTerm": "Từ vi phạm: \"{{term}}\"",
+      "cacheWarning": "Lưu ý: Sandbox chỉ đánh giá các quy tắc ĐANG BẬT. Thay đổi mới lưu có hiệu lực trong tối đa 5 giây."
+    },
+    "modal": {
+      "createTitle": "Thêm quy tắc từ cấm mới",
+      "editTitle": "Chỉnh sửa quy tắc từ cấm",
+      "termLabel": "Từ hoặc cụm từ cấm",
+      "termPlaceholder": "Nhập từ hoặc cụm từ (1 - 100 ký tự)...",
+      "matchTypeLabel": "Phương thức so khớp",
+      "scopesLabel": "Phạm vi áp dụng (chọn ít nhất 1)",
+      "enabledLabel": "Kích hoạt quy tắc ngay sau khi lưu",
+      "noteLabel": "Ghi chú nội bộ (tùy chọn)",
+      "notePlaceholder": "Lý do thêm từ cấm, ngữ cảnh nghiệp vụ (tối đa 500 ký tự)...",
+      "cancel": "Hủy",
+      "submitCreate": "Tạo quy tắc",
+      "submitEdit": "Lưu thay đổi",
+      "conflictWarning": "Quy tắc đã bị sửa đổi bởi một quản trị viên khác. Vui lòng tải lại dữ liệu mới nhất.",
+      "duplicateWarning": "Từ này và cách khớp đã tồn tại trong hệ thống. Vui lòng cập nhật phạm vi trên quy tắc hiện có.",
+      "scopesRequired": "Vui lòng chọn ít nhất một phạm vi áp dụng."
+    },
+    "history": {
+      "title": "Lịch sử thay đổi quy tắc",
+      "subtitle": "Chi tiết các lần cập nhật và biến động trạng thái",
+      "actorSystem": "Hệ thống",
+      "actorAdmin": "Quản trị viên",
+      "empty": "Chưa có sự kiện lịch sử nào được ghi nhận.",
+      "action": {
+        "CREATE": "Tạo mới quy tắc",
+        "UPDATE": "Cập nhật nội dung",
+        "ENABLE": "Bật quy tắc",
+        "DISABLE": "Tắt quy tắc",
+        "SEED": "Khởi tạo hệ thống (Seed)"
+      },
+      "snapshotBefore": "Trước khi đổi",
+      "snapshotAfter": "Sau khi đổi",
+      "scopes": "Phạm vi",
+      "status": "Trạng thái",
+      "matchType": "Cách khớp",
+      "note": "Ghi chú"
+    },
+    "toast": {
+      "created": "Đã tạo quy tắc từ cấm thành công.",
+      "updated": "Đã cập nhật quy tắc từ cấm thành công.",
+      "enabled": "Đã bật quy tắc. Thay đổi có hiệu lực trong tối đa 5 giây.",
+      "disabled": "Đã tắt quy tắc. Thay đổi có hiệu lực trong tối đa 5 giây.",
+      "error": "Đã có lỗi xảy ra khi cập nhật quy tắc."
+    }
   }
 }
+

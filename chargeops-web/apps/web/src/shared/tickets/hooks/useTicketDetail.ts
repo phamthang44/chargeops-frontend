@@ -46,6 +46,7 @@ export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions 
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [isAssignDrawerOpen, setIsAssignDrawerOpen] = useState(false);
   const [isEscalateModalOpen, setIsEscalateModalOpen] = useState(false);
+  const [chatConnectionStatus, setChatConnectionStatus] = useState<'offline' | 'connecting' | 'connected' | 'reconnecting'>('offline');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesLength = useRef<number>(0);
@@ -66,6 +67,7 @@ export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions 
   useTicketChatRealtime({
     ticketId: id,
     roleOption,
+    onConnectionStatusChange: setChatConnectionStatus,
   });
 
   // Danh tính người xem — dùng để nhận diện "tin của mình" theo authorId,
@@ -273,6 +275,7 @@ export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions 
     navigate,
     ticketQuery,
     messagesQuery,
+    chatConnectionStatus,
     staffQuery,
     currentUserId: profileQuery.data?.id,
     draft,

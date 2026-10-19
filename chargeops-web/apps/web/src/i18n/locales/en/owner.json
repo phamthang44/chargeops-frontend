@@ -123,9 +123,12 @@
       "badRequest": "Invalid question or exceeds 2000 characters. Please verify and try again.",
       "forbidden": "Only Station Owner accounts have access to the Policy Assistant.",
       "quotaExceeded": "Daily query quota reached ({{count}} queries/day). Please try again after {{time}}.",
+      "rateLimited": "Too many assistant requests. Please wait a moment before trying again.",
+      "providerQuotaExceeded": "The connected AI provider has reached its usage limit. Please try again later.",
       "quotaCountdown": "Quota exhausted for today. Resets at: {{time}}",
       "timeout": "The policy lookup system is busy or timed out. Please try again.",
       "serviceUnavailable": "The assistant service is temporarily unavailable. Please try again later.",
+      "historyUnavailable": "Could not load conversation history. Your current question is still available; try loading history again.",
       "unknown": "Could not submit inquiry: {{message}}",
       "retry": "Retry inquiry",
       "dismiss": "Dismiss"

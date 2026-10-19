@@ -55,13 +55,15 @@ export class TicketServiceError extends Error {
   code?: string;
   messageKey?: string;
   status?: number;
+  details?: any;
 
-  constructor(message: string, code?: string, messageKey?: string, status?: number) {
+  constructor(message: string, code?: string, messageKey?: string, status?: number, details?: any) {
     super(message);
     this.name = 'TicketServiceError';
     this.code = code;
     this.messageKey = messageKey;
     this.status = status;
+    this.details = details;
   }
 }
 
@@ -69,6 +71,33 @@ export function getLocalizedTicketErrorMessage(err: any, t: any): string {
   const code = (err?.code || '').toUpperCase();
   const key = err?.messageKey || '';
   const msg = String(err?.message || err || '').trim();
+
+  // 0a. CONTENT PROHIBITED
+  if (
+    code === 'CONTENT_PROHIBITED' ||
+    key === 'error.content.prohibited' ||
+    msg.includes('Content contains prohibited language') ||
+    msg.includes('từ ngữ không được phép')
+  ) {
+    return t(
+      'ticket.errors.contentProhibited',
+      'Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.'
+    );
+  }
+
+  // 0b. MODERATION UNAVAILABLE
+  if (
+    code === 'MODERATION_UNAVAILABLE' ||
+    key === 'error.moderation.unavailable' ||
+    err?.status === 503 ||
+    msg.includes('Content validation is temporarily unavailable') ||
+    msg.includes('chưa thể kiểm tra nội dung')
+  ) {
+    return t(
+      'ticket.errors.moderationUnavailable',
+      'Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.'
+    );
+  }
 
   if (
     code === 'TKT_ACCESS_DENIED' ||
@@ -164,7 +193,8 @@ function buildTicketError(res: Response, errJson: any, fallbackMessage: string):
   const code = errJson?.error?.code || errJson?.code;
   const messageKey = errJson?.error?.messageKey || errJson?.messageKey;
   const message = errJson?.error?.message || errJson?.message || fallbackMessage;
-  return new TicketServiceError(message, code, messageKey, res.status);
+  const details = errJson?.error?.details || errJson?.details;
+  return new TicketServiceError(message, code, messageKey, res.status, details);
 }
 
 

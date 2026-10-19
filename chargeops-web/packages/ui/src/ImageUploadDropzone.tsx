@@ -1,5 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Button } from './Button';
+import { useTranslation } from 'react-i18next';
+
+class ImageUploadError extends Error {
+  constructor(public readonly code: string, public readonly status?: number) {
+    super(code);
+    this.name = 'ImageUploadError';
+  }
+}
 
 export interface ImageUploadResult {
   url: string;
@@ -33,19 +40,21 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
   maxSizeMb = 5,
   className = '',
 }) => {
+  const { t } = useTranslation('ui');
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const validateAndUpload = async (file: File) => {
     setErrorMessage(null);
 
     // Validate type
     if (!file.type.startsWith('image/')) {
-      const err = 'Chỉ chấp nhận các tệp hình ảnh (JPG, PNG, WebP).';
+      const err = t('imageUpload.errors.invalidType');
       setErrorMessage(err);
       onError?.(new Error(err));
       return;
@@ -53,7 +62,7 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
 
     // Validate size
     if (file.size > maxSizeMb * 1024 * 1024) {
-      const err = `Dung lượng tệp vượt quá ${maxSizeMb}MB.`;
+      const err = t('imageUpload.errors.tooLarge', { size: maxSizeMb });
       setErrorMessage(err);
       onError?.(new Error(err));
       return;
@@ -85,7 +94,9 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
 
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        xhrRef.current = xhr;
         xhr.open('POST', 'https://upload.imagekit.io/api/v1/files/upload');
+        xhr.timeout = 30_000;
 
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
@@ -111,25 +122,45 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
               reject(new Error('Phản hồi từ ImageKit không hợp lệ.'));
             }
           } else {
-            let detail = 'Tải ảnh lên ImageKit thất bại';
+            let code = 'PROVIDER_REJECTED';
             try {
               const errRes = JSON.parse(xhr.responseText);
-              detail = errRes.message || detail;
+              code = errRes.code || code;
             } catch {}
-            reject(new Error(detail));
+            reject(new ImageUploadError(code, xhr.status));
           }
         };
 
-        xhr.onerror = () => reject(new Error('Lỗi kết nối mạng khi tải ảnh lên.'));
+        xhr.onerror = () => reject(new ImageUploadError('NETWORK_ERROR'));
+        xhr.ontimeout = () => reject(new ImageUploadError('TIMEOUT'));
+        xhr.onabort = () => reject(new ImageUploadError('CANCELLED'));
         xhr.send(formData);
       });
     } catch (err: any) {
-      const msg = err?.message || 'Tải ảnh thất bại.';
+      const status = typeof err?.status === 'number' ? err.status : undefined;
+      const code = typeof err?.code === 'string' ? err.code : '';
+      const msg = code === 'TIMEOUT'
+        ? t('imageUpload.errors.timeout')
+        : code === 'NETWORK_ERROR'
+          ? t('imageUpload.errors.network')
+          : code === 'CANCELLED'
+            ? t('imageUpload.errors.cancelled')
+            : status === 413
+              ? t('imageUpload.errors.tooLarge', { size: maxSizeMb })
+              : status === 429
+                ? t('imageUpload.errors.rateLimit')
+                : status === 401 || status === 403
+                  ? t('imageUpload.errors.signature')
+                  : t('imageUpload.errors.generic');
       setErrorMessage(msg);
-      onError?.(err instanceof Error ? err : new Error(msg));
+      onError?.(err instanceof Error ? err : new ImageUploadError('UPLOAD_FAILED'));
       setIsUploading(false);
+    } finally {
+      xhrRef.current = null;
     }
   };
+
+  const cancelUpload = () => xhrRef.current?.abort();
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -189,7 +220,7 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
               />
             </div>
             <span className="text-xs font-semibold text-ink">
-              Đang tải lên ImageKit... {progress}%
+              {t('imageUpload.uploading', { progress })}
             </span>
           </div>
         ) : (
@@ -205,16 +236,20 @@ export const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({
               </svg>
             </div>
             <div>
-              <span className="text-sm font-semibold text-ink">
-                Kéo thả ảnh vào đây hoặc bấm để chọn ảnh
-              </span>
+              <span className="text-sm font-semibold text-ink">{t('imageUpload.choose')}</span>
               <p className="text-xs text-muted mt-0.5">
-                PNG, JPG hoặc WebP (Tối đa {maxSizeMb}MB)
+                {t('imageUpload.formats', { size: maxSizeMb })}
               </p>
             </div>
           </div>
         )}
       </div>
+
+      {isUploading && (
+        <button type="button" onClick={cancelUpload} className="self-end px-2 py-1 text-xs font-semibold text-muted hover:text-ink">
+          {t('imageUpload.cancel')}
+        </button>
+      )}
 
       {errorMessage && (
         <div className="text-xs text-bad font-medium px-1 flex items-center gap-1">

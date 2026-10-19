@@ -2282,3 +2282,76 @@ export interface StaffInvitationListParams {
   size?: number;
 }
 
+/* ---------- Prohibited terms & Moderation (V1) ---------- */
+
+export type ContentScope =
+  | 'DISPLAY_NAME'
+  | 'STATION_NAME'
+  | 'TICKET_SUBJECT'
+  | 'TICKET_DESCRIPTION'
+  | 'TICKET_MESSAGE';
+
+export type TermMatchType = 'EXACT' | 'WORD_OR_PHRASE';
+
+export interface ProhibitedTermInput {
+  term: string;
+  matchType: TermMatchType;
+  scopes: ContentScope[];
+  enabled: boolean;
+  note?: string | null;
+}
+
+export interface ProhibitedTermUpdate extends ProhibitedTermInput {
+  version: number;
+}
+
+export interface ProhibitedTermStatusUpdate {
+  enabled: boolean;
+  version: number;
+}
+
+export interface ProhibitedTerm extends ProhibitedTermInput {
+  id: string;
+  normalizedTerm: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}
+
+export interface ProhibitedTermChange {
+  id: string;
+  termId: string;
+  action: 'CREATE' | 'UPDATE' | 'ENABLE' | 'DISABLE' | 'SEED';
+  actorId?: string | null;
+  changedAt: string;
+  beforeSnapshot?: string | null; // Raw JSON string of ProhibitedTermResponse
+  afterSnapshot: string;          // Raw JSON string of ProhibitedTermResponse
+}
+
+export interface ProhibitedTermCheckRequest {
+  scope: ContentScope;
+  text: string;
+}
+
+export interface ProhibitedTermCheckMatch {
+  id: string;
+  term: string;
+  matchType: TermMatchType;
+}
+
+export interface ProhibitedTermCheckResult {
+  allowed: boolean;
+  matches: ProhibitedTermCheckMatch[];
+}
+
+export interface ProhibitedTermFilterParams {
+  q?: string;
+  scope?: ContentScope;
+  enabled?: boolean;
+  /** 1-based pagination on backend. */
+  page?: number;
+  size?: number;
+}
+

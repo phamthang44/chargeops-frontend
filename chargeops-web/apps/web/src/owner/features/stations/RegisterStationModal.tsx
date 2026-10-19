@@ -137,7 +137,15 @@ export function RegisterStationModal({ open, onClose, registration }: { open: bo
     onError: (e) => {
       const details = (e as { details?: unknown }).details;
       const errors: Partial<Record<keyof FormState, string>> = {};
-      if (details && typeof details === 'object' && !Array.isArray(details)) {
+
+      const fields = (details as { fields?: string[] })?.fields;
+      if (Array.isArray(fields)) {
+        for (const field of fields) {
+          if (Object.prototype.hasOwnProperty.call(EMPTY, field)) {
+            errors[field as keyof FormState] = getApiErrorMessage(e);
+          }
+        }
+      } else if (details && typeof details === 'object' && !Array.isArray(details)) {
         for (const [field, failure] of Object.entries(details)) {
           if (Object.prototype.hasOwnProperty.call(EMPTY, field) && failure && typeof failure === 'object') {
             errors[field as keyof FormState] = getApiErrorMessage(failure);

@@ -9,6 +9,13 @@ export interface ImageKitAuthParams {
   urlEndpoint: string;
 }
 
+export class MediaUploadError extends Error {
+  constructor(public readonly code: string, public readonly status?: number, public readonly traceId?: string) {
+    super(code);
+    this.name = 'MediaUploadError';
+  }
+}
+
 interface ApiResult<T> {
   data?: T;
   error?: {
@@ -37,20 +44,31 @@ export interface UploadAvatarOptions {
  * Endpoint: GET /api/v1/media/imagekit-auth
  */
 export async function getImageKitAuth(accessToken: string): Promise<ImageKitAuthParams> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/media/imagekit-auth`, {
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Không thể lấy chữ ký tải ảnh (HTTP ${response.status}).`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  let response: Response;
+  try {
+    response = await fetch(`${apiBaseUrl}/api/v1/media/imagekit-auth`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    throw new MediaUploadError(error instanceof Error && error.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR');
+  } finally {
+    clearTimeout(timeout);
   }
 
-  const payload = (await response.json()) as ApiResult<ImageKitAuthParams>;
-  if (payload.error || !payload.data) {
-    throw new Error(payload.error?.message || 'Không thể lấy thông tin xác thực ảnh.');
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new MediaUploadError(payload?.error?.code ?? payload?.code ?? 'SIGNATURE_UNAVAILABLE', response.status, payload?.error?.traceId ?? payload?.traceId ?? response.headers.get('X-Trace-Id') ?? undefined);
+  }
+
+  const payload = (await response.json().catch(() => null)) as ApiResult<ImageKitAuthParams> | null;
+  if (payload?.error || !payload?.data) {
+    throw new MediaUploadError(payload?.error?.code ?? 'INVALID_RESPONSE', response.status, response.headers.get('X-Trace-Id') ?? undefined);
   }
 
   return payload.data;
@@ -99,6 +117,7 @@ export async function uploadAvatarToImageKit({
   return new Promise<ImageKitUploadResult>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://upload.imagekit.io/api/v1/files/upload');
+    xhr.timeout = 30_000;
 
     if (xhr.upload && onProgress) {
       xhr.upload.onprogress = (event) => {
@@ -120,21 +139,23 @@ export async function uploadAvatarToImageKit({
             size: res.size,
           });
         } catch {
-          reject(new Error('Phản hồi từ máy chủ tải ảnh không hợp lệ.'));
+          reject(new MediaUploadError('INVALID_RESPONSE', xhr.status));
         }
       } else {
-        let msg = 'Tải ảnh đại diện lên thất bại.';
+        let code = 'PROVIDER_REJECTED';
         try {
           const errRes = JSON.parse(xhr.responseText);
-          if (errRes.message) msg = errRes.message;
+          code = errRes.code ?? code;
         } catch {}
-        reject(new Error(msg));
+        reject(new MediaUploadError(code, xhr.status));
       }
     };
 
     xhr.onerror = () => {
-      reject(new Error('Lỗi kết nối mạng trong quá trình tải ảnh lên.'));
+      reject(new MediaUploadError('NETWORK_ERROR'));
     };
+    xhr.ontimeout = () => reject(new MediaUploadError('TIMEOUT'));
+    xhr.onabort = () => reject(new MediaUploadError('CANCELLED'));
 
     xhr.send(formData);
   });

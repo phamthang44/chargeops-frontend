@@ -267,6 +267,9 @@
     "showingCount": "Đang hiển thị {{shown}}/{{total}}"
   },
   "map": {
+    "stationsUnavailable": "Dữ liệu trạm tạm thời chưa tải được. Bạn có thể thử lại hoặc xem các trạm đã tải trước đó.",
+    "retryStations": "Thử lại",
+    "tilesUnavailable": "Bản đồ tạm thời không tải được. Bạn vẫn có thể xem danh sách trạm.",
     "title": "Bản đồ",
     "searchPlaceholder": "Tìm trạm sạc gần bạn",
     "portsFree": "{{count}} cổng trống",
@@ -280,6 +283,7 @@
       "noLocation": "Chưa xác định được vị trí hiện tại. Vui lòng bật định vị rồi thử lại.",
       "notConfigured": "Tính năng chỉ đường chưa được cấu hình.",
       "notFound": "Chưa tìm được đường đi. Vui lòng thử lại sau.",
+      "unavailable": "Dịch vụ chỉ đường tạm thời gián đoạn. Vui lòng thử lại sau.",
       "summary": "Đã tìm được đường đi: {{distance}} km · khoảng {{duration}} phút. Hãy tuân thủ biển báo giao thông."
     },
     "legend": {
@@ -378,6 +382,8 @@
       "phoneRequired": "Vui lòng nhập số điện thoại.",
       "phoneInvalid": "Số điện thoại Việt Nam không hợp lệ.",
       "emailConflict": "Email này đang được liên kết với một hồ sơ ChargeOps khác.",
+      "contentProhibited": "Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.",
+      "moderationUnavailable": "Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.",
       "submit": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra thông tin và thử lại."
     }
   },
@@ -414,6 +420,13 @@
       "uploadNewPhoto": "Tải lên ảnh mới"
     },
     "avatarUpload": {
+      "errors": {
+        "generic": "Không thể tải ảnh lên. Vui lòng thử lại.",
+        "network": "Không thể kết nối dịch vụ ảnh. Vui lòng kiểm tra mạng và thử lại.",
+        "timeout": "Dịch vụ ảnh phản hồi quá lâu. Vui lòng thử lại.",
+        "tooLarge": "Ảnh có dung lượng quá lớn. Vui lòng chọn ảnh nhỏ hơn.",
+        "quota": "Dịch vụ ảnh đang giới hạn yêu cầu. Vui lòng thử lại sau."
+      },
       "successNewAvatar": "Đã cập nhật ảnh đại diện mới.",
       "successFromUrl": "Đã cập nhật ảnh đại diện từ liên kết.",
       "successRemoveAvatar": "Đã gỡ ảnh đại diện, chuyển về avatar mặc định.",
@@ -940,7 +953,8 @@
       "BKG_STATE_CONFLICT": "Đơn đặt chỗ đã thay đổi trạng thái và không thể thanh toán.",
       "AUTH_001": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
       "AUTH_002": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.",
-      "AUTH_003": "Bạn không có quyền thực hiện thao tác thanh toán này.",
+      "AUTH_003": "Thông tin xác thực không hợp lệ. Vui lòng đăng nhập lại.",
+      "AUTH_004": "Bạn không có quyền thực hiện thao tác thanh toán này.",
       "validation.request.formatInvalid": "Dữ liệu yêu cầu thanh toán không đúng định dạng. Vui lòng thử lại.",
       "validation.failed": "Dữ liệu nhập vào chưa chính xác. Vui lòng kiểm tra lại.",
       "validation.input.invalid": "Dữ liệu cung cấp không hợp lệ.",
@@ -973,6 +987,10 @@
     "errors": {
       "GENERIC": "Không thể hoàn tất đặt chỗ. Vui lòng thử lại.",
       "NETWORK_ERROR": "Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối.",
+      "TIMEOUT": "Dịch vụ phản hồi quá lâu. Vui lòng kiểm tra kết nối rồi thử lại.",
+      "AUTH_PROVIDER_UNAVAILABLE": "Dịch vụ đăng nhập đang tạm thời gián đoạn. Vui lòng thử lại sau.",
+      "INVALID_RESPONSE": "Máy chủ trả về dữ liệu không đọc được. Vui lòng thử lại.",
+      "STATE_NOT_CONFIRMED": "Máy chủ chưa xác nhận thay đổi này. Vui lòng tải lại đơn đặt chỗ trước khi thử lại.",
       "PRICE_CHANGED": "Giá hoặc chính sách đặt chỗ đã thay đổi.",
       "RANGE_TAKEN": "Khung giờ này vừa được người khác đặt trước. Vui lòng chọn khung giờ khác.",
       "CONNECTOR_BUSY": "Cổng sạc hiện đang bận.",
@@ -1570,6 +1588,8 @@
       "assignmentInvalid": "Người xử lý được chọn không hợp lệ.",
       "findingInvalid": "Kết luận kỹ thuật không hợp lệ.",
       "codeConflict": "Mã phiếu hỗ trợ đã tồn tại.",
+      "contentProhibited": "Nội dung chứa từ ngữ không được phép. Vui lòng chỉnh sửa.",
+      "moderationUnavailable": "Tạm thời chưa thể kiểm tra nội dung. Vui lòng thử lại.",
       "generic": "Đã xảy ra lỗi khi xử lý phiếu hỗ trợ."
     }
   },
@@ -1639,6 +1659,7 @@
     "delete": "Xóa",
     "viewDetail": "Xem chi tiết",
     "markAllRead": "Đã đọc hết",
+    "actionError": "Không thể lưu thay đổi thông báo. Vui lòng thử lại.",
     "clearAll": "Xóa tất cả thông báo",
     "time": {
       "justNow": "Vừa xong",

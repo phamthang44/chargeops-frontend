@@ -45,6 +45,8 @@ function buildLeafletHtml(
     noLocation: string;
     notConfigured: string;
     notFound: string;
+    unavailable: string;
+    tilesUnavailable: string;
     summary: string;
   },
 ): string {
@@ -250,6 +252,10 @@ function buildLeafletHtml(
       notice.style.display = message ? 'block' : 'none';
     }
 
+    tileLayer.on('tileerror', function() {
+      setRouteNotice(${JSON.stringify(routeMessages.tilesUnavailable)});
+    });
+
     function requestRoute(destination) {
       var requestId = ++routeRequestId;
       if (routeLine) {
@@ -273,13 +279,14 @@ function buildLeafletHtml(
 
       fetch(url)
         .then(function(response) {
-          if (!response.ok) throw new Error('Mapbox trả về HTTP ' + response.status);
+          if (!response.ok) throw Object.assign(new Error('Directions provider unavailable'), { status: response.status });
           return response.json();
         })
         .then(function(result) {
           if (requestId !== routeRequestId) return;
           if (result.code !== 'Ok' || !result.routes || !result.routes.length) {
-            throw new Error(result.message || 'Mapbox không tìm thấy tuyến đường phù hợp.');
+            setRouteNotice(${JSON.stringify(routeMessages.notFound)});
+            return;
           }
 
           var route = result.routes[0];
@@ -302,8 +309,8 @@ function buildLeafletHtml(
         })
         .catch(function(error) {
           if (requestId !== routeRequestId) return;
-          console.warn('Mapbox Directions request failed:', error);
-          setRouteNotice(${JSON.stringify(routeMessages.notFound)});
+          console.warn('Mapbox Directions request failed:', { status: error && error.status });
+          setRouteNotice(${JSON.stringify(routeMessages.unavailable)});
         });
     }
 
@@ -494,6 +501,8 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
           noLocation: t('map.directions.noLocation'),
           notConfigured: t('map.directions.notConfigured'),
           notFound: t('map.directions.notFound'),
+          unavailable: t('map.directions.unavailable'),
+          tilesUnavailable: t('map.tilesUnavailable'),
           summary: t('map.directions.summary', {
             distance: '__DISTANCE__',
             duration: '__DURATION__',

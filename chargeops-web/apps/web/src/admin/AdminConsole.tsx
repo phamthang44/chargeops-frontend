@@ -17,6 +17,7 @@ import {
   IconPin,
   IconPlusCircle,
   IconShield,
+  IconShieldAlert,
   IconUsers,
   IconWrench,
   NotificationBell,
@@ -33,6 +34,7 @@ import { Users } from './pages/Users';
 import { Licenses } from './pages/Licenses';
 import { PolicyKB } from './pages/PolicyKB';
 import { Observability } from './pages/Observability';
+import { ProhibitedTerms } from './pages/ProhibitedTerms';
 import { TicketsRoute } from '../shared/tickets/TicketsRoute';
 import { SettingsPage } from '../shared/settings/SettingsPage';
 import { HeaderSearch, type GlobalSearchLoad } from '../shared/search/HeaderSearch';
@@ -59,6 +61,7 @@ const PAGES: Record<string, ComponentType> = {
   users: Users,
   observability: Observability,
   kb: PolicyKB,
+  'prohibited-terms': ProhibitedTerms,
   tickets: () => <TicketsRoute admin />,
 };
 
@@ -92,7 +95,7 @@ function AdminConsoleContent({
   const markAllAsRead = useMarkAllAsRead({ context: 'admin' });
   const deleteNotif = useDeleteNotification({ context: 'admin' });
 
-  const { toasts, dismissToast } = useNotificationRealtime({
+  const { toasts, dismissToast, connectionStatus } = useNotificationRealtime({
     context: 'admin',
     onNavigate: (path) => navigate(`${base}${path}`),
   });
@@ -146,6 +149,7 @@ function AdminConsoleContent({
 
   return (
     <>
+      {connectionStatus === 'reconnecting' && <div role="status" className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-warn/30 bg-surface px-4 py-2 text-xs font-medium text-body shadow-lg">{t('common:realtime.reconnecting')}</div>}
       <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
       <AppShell
       nav={NAV}
@@ -224,6 +228,12 @@ export function AdminConsole({ base }: { base: string }) {
       { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
       { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
       { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
+      {
+        key: 'prohibited-terms',
+        label: t('prohibitedTerms.nav.label', 'Từ cấm'),
+        icon: <IconShieldAlert size={17} />,
+        title: t('prohibitedTerms.nav.title', 'Quản lý từ cấm & Kiểm duyệt'),
+      },
     ],
     [t],
   );

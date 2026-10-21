@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { Booking } from '@/types';
@@ -24,6 +24,14 @@ export function BookingStationCard({
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
+  const handleOpenDirections = () => {
+    const destination = encodeURIComponent(
+      `${booking.stationName}, ${booking.stationAddress || ''}`
+    );
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+    Linking.openURL(url).catch(() => {});
+  };
+
   return (
     <>
       <SectionHeading
@@ -35,10 +43,56 @@ export function BookingStationCard({
 
       <BezelCard tone={themeColors.primary} contentStyle={styles.card}>
         {booking.stationImageUrl ? (
-          <Image source={{ uri: booking.stationImageUrl }} style={styles.stationImage} resizeMode="cover" />
+          <View style={styles.imageWrap}>
+            <Image source={{ uri: booking.stationImageUrl }} style={styles.stationImage} resizeMode="cover" />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.directionsOverlayBtn, { backgroundColor: 'rgba(15, 23, 42, 0.85)' }]}
+              onPress={handleOpenDirections}
+            >
+              <Ionicons name="navigate" size={13} color="#34D399" />
+              <Text style={styles.directionsBtnText}>{t('stationDetail.directions', 'Chỉ đường')}</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
-          <View style={[styles.stationImageFallback, { backgroundColor: themeColors.surfaceAlt }]}>
-            <Ionicons name="flash" size={30} color={themeColors.primary} />
+          <View
+            style={[
+              styles.stationBanner,
+              {
+                backgroundColor: isDark ? '#0D1E18' : '#F0FDF4',
+                borderColor: isDark ? '#1F3B30' : '#BBF7D0',
+              },
+            ]}
+          >
+            <View style={styles.bannerDecorRow}>
+              <View style={[styles.bannerBadge, { backgroundColor: isDark ? '#164E3A' : '#DCFCE7' }]}>
+                <Ionicons name="flash" size={13} color={isDark ? '#6EE7B7' : '#059669'} />
+                <Text style={[styles.bannerBadgeText, { color: isDark ? '#6EE7B7' : '#065F46' }]}>
+                  {booking.powerKw ? `${booking.powerKw} kW • ` : ''}{booking.connectorType || 'DC Sạc nhanh'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={[
+                  styles.bannerActionBtn,
+                  { backgroundColor: isDark ? '#1A382C' : '#FFFFFF', borderColor: isDark ? '#2E5846' : '#86EFAC' },
+                ]}
+                onPress={handleOpenDirections}
+              >
+                <Ionicons name="navigate" size={13} color={isDark ? '#34D399' : '#059669'} />
+                <Text style={[styles.bannerActionBtnText, { color: isDark ? '#34D399' : '#059669' }]}>
+                  {t('stationDetail.directions', 'Chỉ đường')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.bannerVisualCenter}>
+              <View style={[styles.visualIconCircle, { backgroundColor: isDark ? '#133526' : '#BBF7D0' }]}>
+                <Ionicons name="car-sport" size={24} color={isDark ? '#34D399' : '#059669'} />
+              </View>
+              <Text style={[styles.bannerHintText, { color: isDark ? '#6EE7B7' : '#065F46' }]}>
+                {t('bookingDetail.stationReadyHint', 'Trạm sạc thông minh ChargeOps Hub')}
+              </Text>
+            </View>
           </View>
         )}
 
@@ -118,13 +172,87 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.md,
   },
-  stationImage: { width: '100%', height: 156, borderRadius: radius.md },
-  stationImageFallback: {
+  imageWrap: {
     width: '100%',
-    height: 132,
+    height: 156,
     borderRadius: radius.md,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  stationImage: { width: '100%', height: '100%' },
+  directionsOverlayBtn: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.4)',
+  },
+  directionsBtnText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: fontWeights.bold,
+  },
+  stationBanner: {
+    width: '100%',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  bannerDecorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  bannerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radius.full,
+  },
+  bannerBadgeText: {
+    fontSize: 11.5,
+    fontWeight: fontWeights.bold,
+    letterSpacing: 0.2,
+  },
+  bannerActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  bannerActionBtnText: {
+    fontSize: 11.5,
+    fontWeight: fontWeights.bold,
+  },
+  bannerVisualCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingTop: 2,
+  },
+  visualIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  bannerHintText: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.medium,
   },
   stationCopy: { gap: spacing.xs },
   stationName: { fontSize: fontSizes.heading, lineHeight: lineHeights.heading, fontWeight: fontWeights.bold },

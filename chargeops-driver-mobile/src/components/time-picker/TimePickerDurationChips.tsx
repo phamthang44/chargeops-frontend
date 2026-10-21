@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useWebMouseDragScroll } from '@/hooks/useWebMouseDragScroll';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 
 interface TimePickerDurationChipsProps {
@@ -24,6 +25,8 @@ export const TimePickerDurationChips = React.memo(function TimePickerDurationChi
   t,
   durationLabel,
 }: TimePickerDurationChipsProps) {
+  const scrollRef = useWebMouseDragScroll<ScrollView>();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -41,8 +44,10 @@ export const TimePickerDurationChips = React.memo(function TimePickerDurationChi
       </View>
 
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.scroll}
         contentContainerStyle={styles.scrollRow}
       >
         {durationChoices.map((min) => {
@@ -115,6 +120,16 @@ const styles = StyleSheet.create({
   boundsText: {
     fontSize: 12,
     fontWeight: fontWeights.medium,
+  },
+  scroll: {
+    flexGrow: 0,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+        } as any)
+      : {}),
   },
   scrollRow: {
     flexDirection: 'row',

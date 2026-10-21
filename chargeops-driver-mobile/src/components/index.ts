@@ -67,3 +67,4 @@ export * from './time-picker';
 export * from './ticket';
 export * from './booking-success';
 export * from './bookings';
+export { DraggableScrollView, type DraggableScrollViewProps } from './common/DraggableScrollView';

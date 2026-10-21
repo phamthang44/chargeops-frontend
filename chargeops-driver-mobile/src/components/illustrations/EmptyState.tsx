@@ -24,7 +24,7 @@ interface EmptyStateProps {
 export function EmptyState({ variant, size = 148 }: EmptyStateProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 148 148">
-      <Circle cx={74} cy={76} r={56} fill={colors.primarySoft} opacity={0.5} />
+      <Circle cx={74} cy={74} r={56} fill={colors.primarySoft} opacity={0.5} />
       {variant === 'bookings' && <Bookings />}
       {variant === 'search' && <Search />}
       {variant === 'notifications' && <Notifications />}
@@ -46,17 +46,45 @@ function spark(x: number, y: number, s: number, opacity = 0.7) {
 function Bookings() {
   return (
     <>
-      {spark(30, 40, 14, 0.8)}
-      {spark(104, 34, 10, 0.6)}
-      <Rect x={60} y={44} width={7} height={14} rx={3.5} fill="#6B7280" />
-      <Rect x={90} y={44} width={7} height={14} rx={3.5} fill="#6B7280" />
-      <Rect x={44} y={52} width={68} height={58} rx={12} fill={colors.surface} stroke={LINE} strokeWidth={4} />
-      <Path d="M44 70 V64 a12 12 0 0 1 12 -12 H100 a12 12 0 0 1 12 12 V70 Z" fill={colors.primarySoft} />
-      <Path d="M44 70 H112" stroke={LINE} strokeWidth={4} />
-      <Rect x={56} y={82} width={44} height={5} rx={2.5} fill={FAINT} />
-      <Rect x={56} y={94} width={30} height={5} rx={2.5} fill={FAINT} />
-      <Circle cx={104} cy={104} r={16} fill={colors.primary} stroke={colors.surface} strokeWidth={3.5} />
-      <Path d={BOLT} transform="translate(92,92) scale(0.24)" fill={colors.textInverse} />
+      {spark(28, 34, 12, 0.75)}
+      {spark(108, 34, 12, 0.75)}
+      {/* Calendar Top Rings / Hangers - symmetric at x=53 and x=85 */}
+      <Rect x={53} y={38} width={6} height={12} rx={3} fill="#6B7280" />
+      <Rect x={85} y={38} width={6} height={12} rx={3} fill="#6B7280" />
+      {/* Calendar Card Body: x=39, y=44, width=66, height=56 (Balanced with badge) */}
+      <Rect
+        x={39}
+        y={44}
+        width={66}
+        height={56}
+        rx={12}
+        fill={colors.surface}
+        stroke={LINE}
+        strokeWidth={3.5}
+      />
+      {/* Calendar Header Band */}
+      <Path
+        d="M39 62 V56 a12 12 0 0 1 12 -12 H93 a12 12 0 0 1 12 12 V62 Z"
+        fill={colors.primarySoft}
+      />
+      <Path d="M39 62 H105" stroke={LINE} strokeWidth={3.5} />
+      {/* Calendar Internal Notes Rows */}
+      <Rect x={50} y={72} width={44} height={5} rx={2.5} fill={FAINT} />
+      <Rect x={50} y={83} width={28} height={5} rx={2.5} fill={FAINT} />
+      {/* Corner Status Badge (Power Bolt): cx=96, cy=94, r=14.5 */}
+      <Circle
+        cx={96}
+        cy={94}
+        r={14.5}
+        fill={colors.primary}
+        stroke={colors.surface}
+        strokeWidth={3}
+      />
+      <Path
+        d={BOLT}
+        transform="translate(84.7, 83) scale(0.22)"
+        fill={colors.textInverse}
+      />
     </>
   );
 }

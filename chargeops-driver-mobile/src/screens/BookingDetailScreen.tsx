@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { TaskColumns } from '@/components/common/TaskColumns';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,6 +30,7 @@ import {
 import { Reveal } from '@/components/common/Reveal';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useBookingDetail } from '@/hooks/useBookingDetail';
+import { useTaskLayout } from '@/hooks/useTaskLayout';
 import type { RootStackParamList } from '@/navigation/types';
 import { fontSizes, fontWeights, spacing } from '@/theme';
 
@@ -40,6 +42,7 @@ export function BookingDetailScreen() {
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const { split } = useTaskLayout();
 
   const {
     booking,
@@ -131,83 +134,141 @@ export function BookingDetailScreen() {
           />
         }
       >
-        <TaskColumns main={<>
-{/* 1. Hero Status & Timing Card */}
-        <Reveal delay={0} style={styles.revealGroup}>
-          <BookingHeroCard
-            booking={booking}
-            tone={tone}
-            accent={accent}
-            statusNote={statusNote}
-            copiedField={copiedField}
-            onCopy={handleCopy}
-            isConfirmed={isConfirmed}
-            windowStarted={windowStarted}
-            msToCheckInClose={msToCheckInClose}
-            isWithinGrace={isWithinGrace}
-            graceRemainingMs={graceRemainingMs}
-            isCharging={isCharging}
-          />
-        </Reveal>
+        <TaskColumns
+          main={
+            <>
+              {/* 1. Hero Status & Timing Card */}
+              <Reveal delay={0} style={styles.revealGroup}>
+                <BookingHeroCard
+                  booking={booking}
+                  tone={tone}
+                  accent={accent}
+                  statusNote={statusNote}
+                  copiedField={copiedField}
+                  onCopy={handleCopy}
+                  isConfirmed={isConfirmed}
+                  windowStarted={windowStarted}
+                  msToCheckInClose={msToCheckInClose}
+                  isWithinGrace={isWithinGrace}
+                  graceRemainingMs={graceRemainingMs}
+                  isCharging={isCharging}
+                />
+              </Reveal>
 
-        {/* 2. Timeline Stepper */}
-        <Reveal delay={70} style={styles.revealGroup}>
-          <SectionHeading
-            icon="git-commit-outline"
-            title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
-            color={themeColors.primary}
-            textColor={themeColors.textStrong}
-          />
-          <BookingTimelineStepper booking={booking} />
-        </Reveal>
+              {/* On phone: Timeline Stepper sits directly beneath Hero card */}
+              {!split && (
+                <Reveal delay={70} style={styles.revealGroup}>
+                  <SectionHeading
+                    icon="git-commit-outline"
+                    title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
+                    color={themeColors.primary}
+                    textColor={themeColors.textStrong}
+                  />
+                  <BookingTimelineStepper booking={booking} />
+                </Reveal>
+              )}
 
-        {/* 3. Checkout QR for Pending payment */}
-        {isPending && (
-          <Reveal delay={140} style={styles.revealGroup}>
-            <CheckoutQRCard booking={booking} />
-          </Reveal>
-        )}
+              {/* Checkout QR for Pending payment */}
+              {isPending && (
+                <Reveal delay={140} style={styles.revealGroup}>
+                  <CheckoutQRCard booking={booking} />
+                </Reveal>
+              )}
 
-        {/* 4. Station & Connector Specifications Card */}
-        <Reveal delay={210} style={styles.revealGroup}>
-          <BookingStationCard
-            booking={booking}
-            copiedField={copiedField}
-            onCopy={handleCopy}
-          />
-        </Reveal>
+              {/* Station & Connector Specifications Card */}
+              <Reveal delay={split ? 70 : 210} style={styles.revealGroup}>
+                <BookingStationCard
+                  booking={booking}
+                  copiedField={copiedField}
+                  onCopy={handleCopy}
+                />
+              </Reveal>
+            </>
+          }
+          aside={
+            <>
+              {/* On Tablet / In-Car screen: Timeline Stepper sits prominently at the top of the right column */}
+              {split && (
+                <Reveal delay={70} style={styles.revealGroup}>
+                  <SectionHeading
+                    icon="git-commit-outline"
+                    title={t('bookingDetail.timelineTitle', 'Tiến trình đặt chỗ')}
+                    color={themeColors.primary}
+                    textColor={themeColors.textStrong}
+                  />
+                  <BookingTimelineStepper booking={booking} />
+                </Reveal>
+              )}
 
-        </>} aside={<>
-{/* 5. Pricing Breakdown & Accounting Card */}
-        <Reveal delay={280} style={styles.revealGroup}>
-          <BookingPaymentCard
-            booking={booking}
-            hasAccountingDiscrepancy={hasAccountingDiscrepancy}
-            durationText={durationText}
-          />
-        </Reveal>
+              {/* Pricing Breakdown & Accounting Card */}
+              <Reveal delay={split ? 140 : 280} style={styles.revealGroup}>
+                <BookingPaymentCard
+                  booking={booking}
+                  hasAccountingDiscrepancy={hasAccountingDiscrepancy}
+                  durationText={durationText}
+                />
+              </Reveal>
 
-        {/* 6. Refund Status Card (if cancelled or refund issued) */}
-        {(isCancelled || (booking.refunds && booking.refunds.length > 0)) && (
-          <Reveal delay={350} style={styles.revealGroup}>
-            <RefundStatusCard booking={booking} />
-          </Reveal>
-        )}
+              {/* Refund Status Card (if cancelled or refund issued) */}
+              {(isCancelled || (booking.refunds && booking.refunds.length > 0)) && (
+                <Reveal delay={350} style={styles.revealGroup}>
+                  <RefundStatusCard booking={booking} />
+                </Reveal>
+              )}
 
-        {/* 7. Refund Policy Guarantee Card (if active) */}
-        {!isCancelled && (
-          <Reveal delay={350} style={styles.revealGroup}>
-            <BookingRefundPolicyCard
-              isConfirmed={isConfirmed}
-              refundableAmount={refundableAmount}
-            />
-          </Reveal>
-        )}
-      </>} />
+              {/* Refund Policy Guarantee Card (if active) */}
+              {!isCancelled && (
+                <Reveal delay={350} style={styles.revealGroup}>
+                  <BookingRefundPolicyCard
+                    isConfirmed={isConfirmed}
+                    refundableAmount={refundableAmount}
+                  />
+                </Reveal>
+              )}
+
+              {/* Information & Guidance Card when booking is terminal (cancelled/expired) with no refund */}
+              {(isCancelled || isExpired) && (!booking.refunds || booking.refunds.length === 0) && (
+                <Reveal delay={350} style={styles.revealGroup}>
+                  <View
+                    style={[
+                      styles.terminalSupportCard,
+                      {
+                        backgroundColor: themeColors.surface,
+                        borderColor: themeColors.border,
+                      },
+                    ]}
+                  >
+                    <View style={styles.terminalSupportHeader}>
+                      <Ionicons
+                        name="information-circle-outline"
+                        size={18}
+                        color={isExpired ? themeColors.error : themeColors.textMuted}
+                      />
+                      <Text style={[styles.terminalSupportTitle, { color: themeColors.textStrong }]}>
+                        {t('bookingDetail.supportInfoTitle', 'Thông tin phiên đặt chỗ')}
+                      </Text>
+                    </View>
+                    <Text style={[styles.terminalSupportBody, { color: themeColors.textMuted }]}>
+                      {isExpired
+                        ? t(
+                            'bookingDetail.expiredExplanation',
+                            'Phiên đặt chỗ đã kết thúc do xe không đến trạm check-in trước thời hạn. Cổng sạc đã được tự động mở lại cho các tài xế khác trên hệ thống.',
+                          )
+                        : t(
+                            'bookingDetail.cancelledExplanation',
+                            'Phiên đặt chỗ đã được hủy theo yêu cầu. Bạn có thể chọn đặt lại trạm này hoặc tìm kiếm trạm khác trên bản đồ.',
+                          )}
+                    </Text>
+                  </View>
+                </Reveal>
+              )}
+            </>
+          }
+        />
       </ScrollView>
 
-      {/* Sticky Action Footer */}
-      <View style={taskStyles.footer}><BookingActionFooter
+      {/* Sticky Action Footer (Docked edge-to-edge with matched tablet max-width) */}
+      <BookingActionFooter
         booking={booking}
         isConfirmed={isConfirmed}
         isPending={isPending}
@@ -219,6 +280,7 @@ export function BookingDetailScreen() {
         checkInReason={checkInReason}
         canCancel={canCancel}
         canReportIssue={canReportIssue}
+        isTabletOrSplit={split}
         onCheckIn={() => navigation.navigate('QRCheckIn', { bookingId: booking.id })}
         onOpenCancel={() => setShowCancel(true)}
         onPayNow={() => navigation.navigate('PaymentProcessing', { bookingId: booking.id })}
@@ -231,7 +293,10 @@ export function BookingDetailScreen() {
             defaultCategory: 'CHARGING_ISSUE',
           });
         }}
-      /></View>
+        onRebook={() => {
+          navigation.navigate('StationDetail', { stationId: booking.stationId });
+        }}
+      />
 
       {/* Cancellation Bottom Sheet */}
       <CancelBookingSheet
@@ -264,6 +329,24 @@ const styles = StyleSheet.create({
   headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 1 },
   content: { padding: spacing.lg, gap: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   revealGroup: { gap: spacing.lg },
+  terminalSupportCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: spacing.xs + 2,
+  },
+  terminalSupportHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 4,
+  },
+  terminalSupportTitle: {
+    fontSize: fontSizes.body,
+    fontWeight: fontWeights.bold,
+  },
+  terminalSupportBody: {
+    fontSize: fontSizes.caption,
+    lineHeight: 18,
+  },
 });
 
-const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

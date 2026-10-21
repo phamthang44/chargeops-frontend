@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import { useWebMouseDragScroll } from '@/hooks/useWebMouseDragScroll';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { ConnectorType } from '@/types';
 import type { DiscoveryFilterState } from './StationFilterDrawer';
@@ -31,6 +32,7 @@ export function StationFilterCapsuleBar({
 }: StationFilterCapsuleBarProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const scrollRef = useWebMouseDragScroll<ScrollView>();
 
   const activeCount =
     filters.connectorTypes.length +
@@ -44,6 +46,7 @@ export function StationFilterCapsuleBar({
 
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.chipRow}
@@ -429,7 +432,16 @@ export function StationFilterCapsuleBar({
 }
 
 const styles = StyleSheet.create({
-  chipScroll: { flexGrow: 0 },
+  chipScroll: {
+    flexGrow: 0,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+        } as any)
+      : {}),
+  },
   chipRow: {
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,

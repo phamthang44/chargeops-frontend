@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -20,6 +21,7 @@ import { GlassButton } from '@/components/GlassButton';
 import { TicketCard } from '@/components/ticket/TicketCard';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useNotificationSocket } from '@/hooks/useNotificationSocket';
+import { useWebMouseDragScroll } from '@/hooks/useWebMouseDragScroll';
 import type { RootStackParamList } from '@/navigation/types';
 import { getTickets } from '@/services/ticketService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
@@ -45,6 +47,7 @@ export function MyTicketsScreen() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const tabsScrollRef = useWebMouseDragScroll<FlatList<any>>();
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -119,6 +122,7 @@ export function MyTicketsScreen() {
       {/* Filter Tabs Horizontal Scroll */}
       <View style={[styles.tabsWrapper, { backgroundColor: themeColors.surface, borderBottomColor: themeColors.border }]}>
         <FlatList
+          ref={tabsScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           data={filterTabs}
@@ -232,6 +236,13 @@ const styles = StyleSheet.create({
   },
   tabsWrapper: {
     borderBottomWidth: StyleSheet.hairlineWidth,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+        } as any)
+      : {}),
   },
   tabsContent: {
     paddingHorizontal: spacing.md,

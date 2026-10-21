@@ -103,7 +103,7 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
         ? 'current'
         : booking.checkedInAt || ['CHECKED_IN', 'CHARGING', 'COMPLETED'].includes(booking.status)
         ? 'completed'
-        : isCancelled || isExpired
+        : (isCancelled || isExpired) && booking.paymentConfirmedAt
         ? 'cancelled'
         : 'upcoming',
     },
@@ -117,8 +117,6 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
         ? 'current'
         : booking.status === 'COMPLETED'
         ? 'completed'
-        : isCancelled || isExpired
-        ? 'cancelled'
         : 'upcoming',
     },
     {
@@ -129,8 +127,6 @@ export function BookingTimelineStepper({ booking }: BookingTimelineStepperProps)
       timestamp: booking.completedAt ? formatTime(booking.completedAt) : null,
       state: booking.status === 'COMPLETED'
         ? 'completed'
-        : isCancelled || isExpired
-        ? 'cancelled'
         : 'upcoming',
     },
   ];

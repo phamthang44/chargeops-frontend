@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useWebMouseDragScroll } from '@/hooks/useWebMouseDragScroll';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 
 export type TimeFilterPeriod = 'ALL' | 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT';
@@ -35,10 +36,14 @@ export const TimePickerPeriodTabs = React.memo(function TimePickerPeriodTabs({
   themeColors,
   t,
 }: TimePickerPeriodTabsProps) {
+  const scrollRef = useWebMouseDragScroll<ScrollView>();
+
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
       contentContainerStyle={styles.container}
     >
       {PERIODS.map((period) => {
@@ -102,6 +107,16 @@ export const TimePickerPeriodTabs = React.memo(function TimePickerPeriodTabs({
 });
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+        } as any)
+      : {}),
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',

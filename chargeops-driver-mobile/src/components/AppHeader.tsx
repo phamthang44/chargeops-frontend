@@ -143,7 +143,7 @@ export function AppHeader({
           paddingLeft: insets.left,
           paddingRight: insets.right,
           paddingBottom: children ? 6 : spacing.xs,
-          backgroundColor: isDark ? '#0D1412' : '#EAF7F1',
+          backgroundColor: isDark ? '#0A120F' : '#EAF7F1',
         },
         style,
       ]}
@@ -151,12 +151,19 @@ export function AppHeader({
       {/* Right-anchored background illustration */}
       {showIllustration && (
         <Image
-          source={require('../../assets/header-background.png')}
-          style={styles.headerBgIllustration}
-          resizeMode="contain"
+          source={
+            isDark
+              ? require('../../assets/header-background-dark.png')
+              : require('../../assets/header-background.png')
+          }
+          style={[
+            styles.headerBgIllustration,
+            { width: Math.max(580, containerWidth * 0.6) },
+            isDark ? styles.darkIllustration : styles.lightIllustration,
+          ]}
+          resizeMode="cover"
         />
       )}
-      {isDark && showIllustration && <View style={styles.darkOverlay} />}
 
       {/* Row 1: Brand & Role (Left) + Slogan (Center) + Actions (Right) */}
       <View style={[styles.headerTopRow, isShortHeight && styles.shortTopRow, topRowStyle]}>
@@ -233,22 +240,24 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerBgIllustration: {
-    opacity: 0.38,
     position: 'absolute',
     right: -10,
     top: 0,
     bottom: 0,
-    width: 580,
     height: '100%',
-  },
-  darkOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(10, 20, 16, 0.65)',
     pointerEvents: 'none',
+    ...(Platform.OS === 'web'
+      ? ({
+          maskImage: 'linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 40%)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 40%)',
+        } as any)
+      : {}),
   },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFill,
-    pointerEvents: 'none',
+  lightIllustration: {
+    opacity: 0.45,
+  },
+  darkIllustration: {
+    opacity: 0.85,
   },
   headerTopRow: {
     flexDirection: 'row',

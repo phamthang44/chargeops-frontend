@@ -137,7 +137,11 @@ export function StationHeroGallery({
         ) : (
           <View style={[styles.slide, { width, height }]}>
             <Image
-              source={require('../../../assets/header-background.png')}
+              source={
+                isDark
+                  ? require('../../../assets/header-background-dark.png')
+                  : require('../../../assets/header-background.png')
+              }
               style={styles.heroImage}
               resizeMode="cover"
             />

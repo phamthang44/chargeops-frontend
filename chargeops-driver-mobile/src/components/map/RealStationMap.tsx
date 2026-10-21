@@ -94,8 +94,9 @@ function buildLeafletHtml(
     .dark-map .leaflet-tile-pane {
       filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
     }
-    .leaflet-control-zoom {
-      display: none !important; /* Mobile EV app style: clean view without bulky zoom buttons */
+    .leaflet-control-zoom,
+    .leaflet-control-attribution {
+      display: none !important; /* Clean EV mobile view without bulky controls or attribution overlay */
     }
     .route-notice {
       position: absolute;
@@ -220,7 +221,7 @@ function buildLeafletHtml(
       center: [${initialLat}, ${initialLng}],
       zoom: ${initialZoom},
       zoomControl: false,
-      attributionControl: true
+      attributionControl: false
     });
 
     var tileLayer = L.tileLayer('${osmTileUrl}', {

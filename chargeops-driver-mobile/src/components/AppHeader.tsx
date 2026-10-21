@@ -150,19 +150,26 @@ export function AppHeader({
     >
       {/* Right-anchored background illustration */}
       {showIllustration && (
-        <Image
-          source={
-            isDark
-              ? require('../../assets/header-background-dark.png')
-              : require('../../assets/header-background.png')
-          }
+        <View
+          pointerEvents="none"
           style={[
             styles.headerBgIllustration,
             { width: Math.max(580, containerWidth * 0.6) },
-            isDark ? styles.darkIllustration : styles.lightIllustration,
           ]}
-          resizeMode="cover"
-        />
+        >
+          <Image
+            source={
+              isDark
+                ? require('../../assets/header-background-dark.png')
+                : require('../../assets/header-background.png')
+            }
+            style={[
+              styles.imageFull,
+              isDark ? styles.darkIllustration : styles.lightIllustration,
+            ]}
+            resizeMode="cover"
+          />
+        </View>
       )}
 
       {/* Row 1: Brand & Role (Left) + Slogan (Center) + Actions (Right) */}
@@ -225,7 +232,7 @@ export function AppHeader({
       </View>
 
       {/* Optional In-Header Children (Search bar, quick filters, segmented tabs, etc.) */}
-      {children}
+      {children ? <View style={styles.headerChildren}>{children}</View> : null}
     </View>
   );
 }
@@ -245,13 +252,17 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     height: '100%',
-    pointerEvents: 'none',
+    zIndex: 0,
     ...(Platform.OS === 'web'
       ? ({
           maskImage: 'linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 40%)',
           WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 40%)',
         } as any)
       : {}),
+  },
+  imageFull: {
+    width: '100%',
+    height: '100%',
   },
   lightIllustration: {
     opacity: 0.45,
@@ -260,6 +271,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   headerTopRow: {
+    zIndex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -267,6 +279,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
+  },
+  headerChildren: {
+    zIndex: 1,
   },
   shortTopRow: {
     paddingTop: 0,

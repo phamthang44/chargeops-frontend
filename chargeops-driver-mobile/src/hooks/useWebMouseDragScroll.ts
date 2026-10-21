@@ -154,8 +154,14 @@ export function useWebMouseDragScroll<T = any>(
 
       stopMomentum();
 
+      if (resetWasDraggedTimer) {
+        clearTimeout(resetWasDraggedTimer);
+        resetWasDraggedTimer = null;
+      }
+
       isPointerDown = true;
       hasDragged = false;
+      wasDragged = false;
       startX = e.clientX;
       startScrollLeft = node.scrollLeft;
       activePointerId = e.pointerId;
@@ -164,11 +170,10 @@ export function useWebMouseDragScroll<T = any>(
       lastTime = performance.now();
       velocity = 0;
 
-      try {
-        node.setPointerCapture(e.pointerId);
-      } catch {
-        // pointer capture fallback
-      }
+      // NOTE: Do NOT call node.setPointerCapture here!
+      // Unconditional pointer capture on pointerdown redirects the ensuing pointerup
+      // away from child elements (e.g. Pressable filter buttons), causing browsers
+      // to cancel the click event on children. We only capture pointer once a drag actually begins.
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -184,6 +189,16 @@ export function useWebMouseDragScroll<T = any>(
           clearTimeout(resetWasDraggedTimer);
           resetWasDraggedTimer = null;
         }
+
+        // Capture pointer only when genuine dragging starts
+        if (activePointerId !== null) {
+          try {
+            node.setPointerCapture(activePointerId);
+          } catch {
+            // pointer capture fallback
+          }
+        }
+
         node.style.cursor = 'grabbing';
         node.style.userSelect = 'none';
         node.style.webkitUserSelect = 'none';
@@ -243,6 +258,8 @@ export function useWebMouseDragScroll<T = any>(
           };
           momentumFrameId = requestAnimationFrame(glide);
         }
+      } else {
+        wasDragged = false;
       }
     };
 

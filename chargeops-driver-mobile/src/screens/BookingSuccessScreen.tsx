@@ -1,4 +1,5 @@
-import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { TaskColumns } from '@/components/common/TaskColumns';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -32,7 +33,8 @@ export function BookingSuccessScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Celebration Hero Section */}
+        <TaskColumns main={<>
+{/* Celebration Hero Section */}
         <BookingSuccessHero />
 
         {/* Booking Code Voucher / Ticket Badge */}
@@ -42,18 +44,20 @@ export function BookingSuccessScreen() {
           onCopy={handleCopyCode}
         />
 
-        {/* Transaction Summary Card */}
+        </>} aside={<>
+{/* Transaction Summary Card */}
         <BookingSuccessTransactionCard booking={booking} />
 
         {/* Check-in Guide Stepper Card */}
         <BookingSuccessGuideCard />
+      </>} />
       </ScrollView>
 
       {/* Footer CTAs */}
-      <BookingSuccessFooter
+      <View style={taskStyles.footer}><BookingSuccessFooter
         onViewDetail={viewDetail}
         onGoHome={goHome}
-      />
+      /></View>
     </SafeAreaView>
   );
 }
@@ -69,3 +73,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

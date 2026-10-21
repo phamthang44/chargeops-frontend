@@ -1,3 +1,4 @@
+import { TaskColumns } from '@/components/common/TaskColumns';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -115,7 +116,8 @@ export function BookingConfirmationScreen() {
       <BookingConfirmationHeader onBack={handleBack} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 2. Top Error Banner */}
+        <TaskColumns main={<>
+{/* 2. Top Error Banner */}
         {error && (
           <BookingConfirmationErrorBanner
             error={error}
@@ -174,7 +176,8 @@ export function BookingConfirmationScreen() {
           }}
         />
 
-        {/* 7. Charging Fee Invoice Breakdown */}
+        </>} aside={<>
+{/* 7. Charging Fee Invoice Breakdown */}
         <BookingConfirmationInvoiceCard
           quote={quote}
           previewCode={previewCode}
@@ -186,16 +189,17 @@ export function BookingConfirmationScreen() {
           method={method}
           onSelectMethod={selectPaymentMethod}
         />
+      </>} />
       </ScrollView>
 
       {/* 9. Sticky Bottom Action Footer */}
-      <BookingConfirmationFooter
+      <View style={taskStyles.footer}><BookingConfirmationFooter
         totalPrice={quote.totalPrice}
         submitting={submitting}
         loading={loading}
         backendPreview={backendPreview}
         onSubmit={() => submitBooking()}
-      />
+      /></View>
 
       {/* 10. Overlapping Booking Warning BottomSheet (BR-BOK-08) */}
       <OverlappingBookingModal
@@ -254,3 +258,5 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
 });
+
+const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

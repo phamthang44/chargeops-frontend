@@ -1,3 +1,4 @@
+import { TaskColumns } from '@/components/common/TaskColumns';
 import { Ionicons } from '@expo/vector-icons';
 import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -176,7 +177,8 @@ export function ChargingSessionScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Status Hero Card */}
+          <TaskColumns main={<>
+{/* Status Hero Card */}
           <View style={[styles.heroCard, { backgroundColor: heroCardBg, borderColor: themeColors.border }]}>
             <View style={styles.heroBadgeRow}>
               <StatusBadge
@@ -208,7 +210,8 @@ export function ChargingSessionScreen() {
             </View>
           </View>
 
-          {/* Station & Hardware Specs Card */}
+          </>} aside={<>
+{/* Station & Hardware Specs Card */}
           <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
             <View style={styles.cardHeaderRow}>
               <Ionicons name="location-outline" size={20} color={themeColors.primary} />
@@ -291,12 +294,13 @@ export function ChargingSessionScreen() {
               {t('chargingSession.autoNote')}
             </Text>
           </View>
-        </ScrollView>
+        </>} />
+      </ScrollView>
       )}
 
       {/* Sticky Bottom Actions */}
       {!isLoading && booking && (
-        <View style={[styles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+        <View style={[styles.footer, taskStyles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
           {isCompleted ? (
             <AppButton
               label={t('chargingSession.goHome')}
@@ -485,3 +489,5 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
 });
+
+const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

@@ -220,7 +220,7 @@ function buildLeafletHtml(
       center: [${initialLat}, ${initialLng}],
       zoom: ${initialZoom},
       zoomControl: false,
-      attributionControl: false
+      attributionControl: true
     });
 
     var tileLayer = L.tileLayer('${osmTileUrl}', {
@@ -414,10 +414,17 @@ function buildLeafletHtml(
           iconSize: [0, 0],
           iconAnchor: [0, 0]
         }));
-        map.flyTo([curStation.latitude, curStation.longitude], Math.max(map.getZoom(), 15), {
-          duration: 1.0,
-          easeLinearity: 0.25
-        });
+        // A retained tab has a zero-size iframe while a stack screen covers it.
+        // Leaflet flyTo divides by viewport size; do not animate in that state.
+        var viewport = map.getSize();
+        var container = map.getContainer();
+        if (viewport.x > 0 && viewport.y > 0 && container.clientWidth > 0 && container.clientHeight > 0 &&
+            Number.isFinite(curStation.latitude) && Number.isFinite(curStation.longitude)) {
+          map.flyTo([curStation.latitude, curStation.longitude], Math.max(map.getZoom(), 15), {
+            duration: 1.0,
+            easeLinearity: 0.25
+          });
+        }
       }
 
       if (notifyHost) {
@@ -529,6 +536,14 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
       }
     };
 
+    // Updates sent before the iframe/WebView is ready can be dropped. Replay
+    // the latest state after load without recreating the map on layout changes.
+    const syncMapOnLoad = () => {
+      postToMap({ type: 'UPDATE_STATIONS', stations });
+      if (userCoords) postToMap({ type: 'UPDATE_USER_COORDS', coords: userCoords });
+      if (selectedStationId) postToMap({ type: 'SELECT_STATION', stationId: selectedStationId });
+    };
+
     useImperativeHandle(ref, () => ({
       recenterToUser: () => {
         postToMap({ type: 'FLY_TO_USER' });
@@ -562,9 +577,7 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
 
     // Sync stations updates
     useEffect(() => {
-      if (stations && stations.length > 0) {
-        postToMap({ type: 'UPDATE_STATIONS', stations });
-      }
+      postToMap({ type: 'UPDATE_STATIONS', stations });
     }, [stations]);
 
     // Sync theme
@@ -603,6 +616,7 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
         <View style={[styles.container, style]}>
           <iframe
             ref={iframeRef}
+            onLoad={syncMapOnLoad}
             srcDoc={htmlContent}
             style={{ width: '100%', height: '100%', border: 'none', display: 'block', margin: 0, padding: 0 } as any}
             title="ChargeOps Interactive Map"
@@ -622,6 +636,7 @@ export const RealStationMap = forwardRef<RealStationMapRef, RealStationMapProps>
           originWhitelist={['*']}
           source={{ html: htmlContent }}
           onMessage={handleMapMessage}
+          onLoadEnd={syncMapOnLoad}
           style={styles.nativeWebview}
           javaScriptEnabled={true}
           domStorageEnabled={true}

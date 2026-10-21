@@ -565,7 +565,7 @@ function HistorySkeleton() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: {
+  content: { width: '100%', maxWidth: 840, alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
   },

@@ -5,6 +5,7 @@ import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 import {
   TabBarVisibilityProvider,
   useTabBarScroll,
@@ -43,7 +44,13 @@ function useBarOffset() {
  * out from under the bar.
  */
 export function useTabBarInset() {
-  return useBarOffset() + FLOATING_TAB_BAR_HEIGHT + spacing.md;
+  const barOffset = useBarOffset();
+  const insets = useSafeAreaInsets();
+  const { usesNavigationRail } = useAdaptiveLayout();
+  // The rail is in layout flow: only the bottom safe area/gutter is needed.
+  return usesNavigationRail
+    ? Math.max(insets.bottom, spacing.lg)
+    : barOffset + FLOATING_TAB_BAR_HEIGHT + spacing.md;
 }
 
 /** Mapping from route name to icon pair [outline, filled]. */

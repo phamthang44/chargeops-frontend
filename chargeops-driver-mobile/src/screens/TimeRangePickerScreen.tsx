@@ -1,5 +1,6 @@
+import { TaskColumns } from '@/components/common/TaskColumns';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -82,7 +83,8 @@ export function TimeRangePickerScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Section 1: Station & Connector Quick Summary */}
+        <TaskColumns main={<>
+{/* Section 1: Station & Connector Quick Summary */}
         {connector && station && (
           <TimePickerStationBrief
             station={station}
@@ -132,7 +134,8 @@ export function TimeRangePickerScreen() {
           onTapSlot={tapSlot}
         />
 
-        {/* Section 5: Price & Energy Quote Card */}
+        </>} aside={<>
+{/* Section 5: Price & Energy Quote Card */}
         {quote && startAt && (
           <TimePickerQuoteCard
             quote={quote}
@@ -144,10 +147,11 @@ export function TimeRangePickerScreen() {
 
         {/* Section 6: Cancellation / Refund Policy Card */}
         <StationPolicyCard cancellationPolicy={station?.cancellationPolicy} />
+      </>} />
       </ScrollView>
 
       {/* Section 7: Sticky Floating Bottom Action Bar */}
-      <TimePickerStickyBar
+      <View style={taskStyles.footer}><TimePickerStickyBar
         hasSel={hasSel}
         meetsMinDuration={meetsMinDuration}
         minDurationMin={minDurationMin}
@@ -165,7 +169,7 @@ export function TimeRangePickerScreen() {
         themeColors={themeColors}
         t={t}
         durationLabel={durationLabel}
-      />
+      /></View>
 
       {/* Interactive Booking Help Guide Modal */}
       <TimePickerHelpModal
@@ -186,3 +190,5 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl + 24,
   },
 });
+
+const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

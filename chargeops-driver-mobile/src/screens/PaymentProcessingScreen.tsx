@@ -3,7 +3,7 @@ import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-n
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components';
@@ -99,7 +99,7 @@ export function PaymentProcessingScreen() {
     const f = FAILURE_META[phase];
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
-        <View style={styles.content}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <View style={[styles.resultIcon, { backgroundColor: `${f.color}1A` }]}>
             <Ionicons name={f.icon} size={44} color={f.color} />
           </View>
@@ -124,7 +124,7 @@ export function PaymentProcessingScreen() {
               </View>
             </View>
           )}
-        </View>
+        </ScrollView>
 
         <View style={styles.footer}>
           {f.retry ? (
@@ -147,7 +147,7 @@ export function PaymentProcessingScreen() {
   // ---- Processing spinner state ----
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
-      <View style={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <View style={[styles.spinnerOuter, { backgroundColor: isDark ? '#152A4A' : '#EFF6FF' }]}>
           <ActivityIndicator color={themeColors.primary} size="large" />
         </View>
@@ -166,7 +166,7 @@ export function PaymentProcessingScreen() {
             </View>
           </View>
         )}
-      </View>
+      </ScrollView>
 
       <Text style={[styles.lockHint, { color: themeColors.textMuted }]}>{t('paymentProcessing.doNotClose')}</Text>
     </SafeAreaView>
@@ -175,8 +175,11 @@ export function PaymentProcessingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  scroll: { flex: 1 },
   content: {
-    flex: 1,
+    width: '100%', maxWidth: 560, alignSelf: 'center',
+    flexGrow: 1,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
@@ -240,6 +243,7 @@ const styles = StyleSheet.create({
   },
 
   footer: {
+    width: '100%', maxWidth: 560, alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     gap: spacing.sm,

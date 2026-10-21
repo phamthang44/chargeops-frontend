@@ -3,14 +3,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
 
 import { FloatingTabBar } from '@/components/FloatingTabBar';
+import { NavigationRail } from '@/components/NavigationRail';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 import { TabBarVisibilityProvider } from '@/context/TabBarVisibilityContext';
 import { BookingHistoryScreen } from '@/screens/BookingHistoryScreen';
 import { BookingsScreen } from '@/screens/BookingsScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { StationListScreen } from '@/screens/StationListScreen';
-import { fontSizes } from '@/theme';
 import type { BottomTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
@@ -18,21 +19,22 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 /**
  * Bottom tabs (5): Bản đồ / Tìm trạm / Đặt chỗ / Lịch sử / Hồ sơ
  *
- * Uses the custom `FloatingTabBar` — a frosted-glass floating pill with an
- * elevated emerald FAB for the center "Đặt chỗ" tab. Supports auto-hiding on
- * scroll (Facebook style) via `TabBarVisibilityProvider`.
+ * Keeps one navigator and the same route keys while switching between the
+ * phone's floating bottom bar and an in-flow rail on expanded windows.
  */
 export function BottomTabs() {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const { usesNavigationRail } = useAdaptiveLayout();
 
   return (
     <TabBarVisibilityProvider>
       <Tab.Navigator
         initialRouteName="Map"
-        tabBar={(props) => <FloatingTabBar {...props} />}
+        tabBar={(props) => usesNavigationRail ? <NavigationRail {...props} /> : <FloatingTabBar {...props} />}
         screenOptions={{
           headerShown: false,
+          tabBarPosition: usesNavigationRail ? 'left' : 'bottom',
         }}
       >
         <Tab.Screen

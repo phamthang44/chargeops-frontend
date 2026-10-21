@@ -267,6 +267,8 @@
     "showingCount": "Đang hiển thị {{shown}}/{{total}}"
   },
   "map": {
+    "resultsTitle": "Trạm trên bản đồ",
+    "resultsCount": "{{count}} trạm đã tải",
     "stationsUnavailable": "Dữ liệu trạm tạm thời chưa tải được. Bạn có thể thử lại hoặc xem các trạm đã tải trước đó.",
     "retryStations": "Thử lại",
     "tilesUnavailable": "Bản đồ tạm thời không tải được. Bạn vẫn có thể xem danh sách trạm.",

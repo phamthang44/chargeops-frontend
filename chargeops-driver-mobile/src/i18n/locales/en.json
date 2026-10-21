@@ -267,6 +267,8 @@
     "showingCount": "Showing {{shown}} of {{total}}"
   },
   "map": {
+    "resultsTitle": "Stations on the map",
+    "resultsCount": "Stations loaded: {{count}}",
     "stationsUnavailable": "Station data is temporarily unavailable. You can retry or view the map with the last loaded stations.",
     "retryStations": "Retry",
     "tilesUnavailable": "Map tiles are temporarily unavailable. You can still use the station list.",

@@ -1,3 +1,4 @@
+import { TaskColumns } from '@/components/common/TaskColumns';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
@@ -130,7 +131,8 @@ export function BookingDetailScreen() {
           />
         }
       >
-        {/* 1. Hero Status & Timing Card */}
+        <TaskColumns main={<>
+{/* 1. Hero Status & Timing Card */}
         <Reveal delay={0} style={styles.revealGroup}>
           <BookingHeroCard
             booking={booking}
@@ -175,7 +177,8 @@ export function BookingDetailScreen() {
           />
         </Reveal>
 
-        {/* 5. Pricing Breakdown & Accounting Card */}
+        </>} aside={<>
+{/* 5. Pricing Breakdown & Accounting Card */}
         <Reveal delay={280} style={styles.revealGroup}>
           <BookingPaymentCard
             booking={booking}
@@ -200,10 +203,11 @@ export function BookingDetailScreen() {
             />
           </Reveal>
         )}
+      </>} />
       </ScrollView>
 
       {/* Sticky Action Footer */}
-      <BookingActionFooter
+      <View style={taskStyles.footer}><BookingActionFooter
         booking={booking}
         isConfirmed={isConfirmed}
         isPending={isPending}
@@ -227,7 +231,7 @@ export function BookingDetailScreen() {
             defaultCategory: 'CHARGING_ISSUE',
           });
         }}
-      />
+      /></View>
 
       {/* Cancellation Bottom Sheet */}
       <CancelBookingSheet
@@ -261,3 +265,5 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   revealGroup: { gap: spacing.lg },
 });
+
+const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import {
-  Dimensions,
   Image,
   Pressable,
   StyleSheet,
@@ -24,9 +23,8 @@ interface MapStationPeekSheetProps {
   onQuickBook: (stationId: string) => void;
   onClose: () => void;
   bottomOffset?: number;
+  presentation?: 'floating' | 'inline';
 }
-
-const SCREEN_W = Dimensions.get('window').width;
 
 function etaMinutes(distanceKm?: number): number {
   if (!distanceKm) return 5;
@@ -44,6 +42,7 @@ export function MapStationPeekSheet({
   onQuickBook,
   onClose,
   bottomOffset = 84,
+  presentation = 'floating',
 }: MapStationPeekSheetProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
@@ -87,10 +86,8 @@ export function MapStationPeekSheet({
   return (
     <View
       style={[
-        styles.wrapper,
-        {
-          bottom: bottomOffset,
-        },
+        presentation === 'inline' ? styles.inlineWrapper : styles.wrapper,
+        presentation === 'floating' && { bottom: bottomOffset },
       ]}
     >
       <Pressable
@@ -364,6 +361,7 @@ export function MapStationPeekSheet({
 }
 
 const styles = StyleSheet.create({
+  inlineWrapper: { width: '100%' },
   wrapper: {
     position: 'absolute',
     left: spacing.lg,

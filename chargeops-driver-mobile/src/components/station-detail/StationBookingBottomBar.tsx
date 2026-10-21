@@ -18,6 +18,7 @@ interface StationBookingBottomBarProps {
   bookButtonLabel: string;
   onBook: () => void;
   insetsBottom: number;
+  embedded?: boolean;
 }
 
 export function StationBookingBottomBar({
@@ -28,6 +29,7 @@ export function StationBookingBottomBar({
   bookButtonLabel,
   onBook,
   insetsBottom,
+  embedded = false,
 }: StationBookingBottomBarProps) {
   const { t, i18n } = useTranslation();
   const { themeColors, isDark } = usePreferences();
@@ -38,6 +40,7 @@ export function StationBookingBottomBar({
     <View
       style={[
         styles.bottomBar,
+        embedded && { position: 'relative' },
         {
           backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
           borderTopColor: isDark ? 'rgba(51, 65, 85, 0.8)' : '#E2E8F0',

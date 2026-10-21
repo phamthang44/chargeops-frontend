@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Dimensions,
   Linking,
   Pressable,
   RefreshControl,
@@ -12,6 +11,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -37,11 +37,10 @@ import type { RootStackParamList } from '@/navigation/types';
 import { getReviewsByStation, getStationDetail } from '@/services/stationService';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { ChargePoint, Connector, Review, Station } from '@/types';
+import { getStationDetailLayout } from '@/utils/stationPaneLayout';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'StationDetail'>;
 type Route = RouteProp<RootStackParamList, 'StationDetail'>;
-
-const { width } = Dimensions.get('window');
 
 /**
  * "Chi tiết trạm sạc" screen — refactored for clean code & modular architecture.
@@ -52,6 +51,12 @@ export function StationDetailScreen() {
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width, height, fontScale } = useWindowDimensions();
+  const panes = getStationDetailLayout({
+    width: width - insets.left - insets.right,
+    height: height - insets.top - insets.bottom,
+    fontScale,
+  });
   const { isFavorite, toggleFavorite, themeColors, isDark } = usePreferences();
   const { getAccessToken } = useAuth();
 
@@ -368,95 +373,120 @@ export function StationDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={themeColors.primary}
-            colors={[themeColors.primary]}
+      <View style={[styles.contentLayout, panes.split && styles.contentColumns, { paddingLeft: insets.left, paddingRight: insets.right }]}>
+        <ScrollView
+          testID="station-information-scroll"
+          style={panes.split ? { width: panes.informationWidth, height: '100%', flexGrow: 0, flexShrink: 0 } : { flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={themeColors.primary}
+              colors={[themeColors.primary]}
+            />
+          }
+        >
+          {/* Hero Gallery with Floating Back, Title Pill & Favorite Buttons */}
+          <StationHeroGallery
+            title={t('stationDetail.title')}
+            imageUrl={station.imageUrl}
+            images={station.images}
+            slide={slide}
+            onScroll={onGalleryScroll}
+            isFav={fav}
+            onToggleFav={() => toggleFavorite(params.stationId)}
+            onBack={() => navigation.goBack()}
+            insetsTop={insets.top}
+            height={panes.galleryHeight}
           />
-        }
-      >
-        {/* Hero Gallery with Floating Back, Title Pill & Favorite Buttons */}
-        <StationHeroGallery
-          title={t('stationDetail.title')}
-          imageUrl={station.imageUrl}
-          images={station.images}
-          slide={slide}
-          onScroll={onGalleryScroll}
-          isFav={fav}
-          onToggleFav={() => toggleFavorite(params.stationId)}
-          onBack={() => navigation.goBack()}
-          insetsTop={insets.top}
-        />
 
-        {/* Content Sheet Overlapping Hero with seamless background extending to bottom */}
+          {/* Content Sheet Overlapping Hero with seamless background extending to bottom */}
+          <View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: themeColors.surface,
+                paddingBottom: panes.split ? spacing.xl + insets.bottom : 140 + insets.bottom,
+              },
+            ]}
+          >
+            {/* Station Name, Code, Address & Directions */}
+            <StationHeaderInfo
+              station={station}
+              statusMeta={statusMeta}
+              distanceKm={displayDistance}
+              areaLabel={areaLabel}
+              onOpenDirections={openDirections}
+              onCallStation={callStation}
+            />
+
+            {/* Operational Status Callout when PAUSED or MAINTENANCE */}
+            <StationNoticeBanner
+              isPaused={isPaused}
+              isMaintenance={isMaintenance}
+              reason={station.operationalStatusReason}
+            />
+
+            {/* Symmetrical 3-Column Bento Metric Card */}
+            <StationBentoMetrics
+              availableConnectors={station.availableConnectors}
+              totalConnectors={station.totalConnectors}
+              maxPowerKw={maxPowerKw}
+              minRatePerKwh={station.minRatePerKwh}
+              connectorTypes={connectorTypesList}
+            />
+
+            {/* Amenities Horizontal Strip */}
+            <StationAmenitiesList amenities={station.amenities} />
+
+            {/* Cancellation & Refund Policy */}
+            <StationPolicyCard cancellationPolicy={station.cancellationPolicy} />
+
+            {/* Charge Points (with Zone) & Connectors Grid */}
+            {!panes.split && <ChargePointGroupList
+              groups={groups}
+              selectedConnectorId={selectedConnectorId}
+              onSelectConnector={setSelectedConnectorId}
+            />}
+
+            {/* Driver Reviews */}
+            <StationReviewsSection station={station} reviews={reviews} />
+          </View>
+        </ScrollView>
+
         <View
+          testID="station-booking-pane"
           style={[
-            styles.sheet,
-            {
-              backgroundColor: themeColors.surface,
-              paddingBottom: 140 + insets.bottom,
-            },
+            panes.split ? styles.bookingColumn : styles.bookingOverlay,
+            { backgroundColor: themeColors.surface },
+            panes.split && { borderLeftColor: themeColors.border },
           ]}
         >
-          {/* Station Name, Code, Address & Directions */}
-          <StationHeaderInfo
-            station={station}
-            statusMeta={statusMeta}
-            distanceKm={displayDistance}
-            areaLabel={areaLabel}
-            onOpenDirections={openDirections}
-            onCallStation={callStation}
-          />
+        {panes.split && (
+          <ScrollView
+            testID="station-connectors-scroll"
+            style={{ flex: 1 }}
+            contentContainerStyle={[styles.connectorContent, { paddingTop: insets.top + spacing.lg }]}
+            showsVerticalScrollIndicator
+          >
+            <ChargePointGroupList groups={groups} selectedConnectorId={selectedConnectorId} onSelectConnector={setSelectedConnectorId} />
+          </ScrollView>
+        )}
 
-          {/* Operational Status Callout when PAUSED or MAINTENANCE */}
-          <StationNoticeBanner
-            isPaused={isPaused}
-            isMaintenance={isMaintenance}
-            reason={station.operationalStatusReason}
-          />
-
-          {/* Symmetrical 3-Column Bento Metric Card */}
-          <StationBentoMetrics
-            availableConnectors={station.availableConnectors}
-            totalConnectors={station.totalConnectors}
-            maxPowerKw={maxPowerKw}
-            minRatePerKwh={station.minRatePerKwh}
-            connectorTypes={connectorTypesList}
-          />
-
-          {/* Amenities Horizontal Strip */}
-          <StationAmenitiesList amenities={station.amenities} />
-
-          {/* Cancellation & Refund Policy */}
-          <StationPolicyCard cancellationPolicy={station.cancellationPolicy} />
-
-          {/* Charge Points (with Zone) & Connectors Grid */}
-          <ChargePointGroupList
-            groups={groups}
-            selectedConnectorId={selectedConnectorId}
-            onSelectConnector={setSelectedConnectorId}
-          />
-
-          {/* Driver Reviews */}
-          <StationReviewsSection station={station} reviews={reviews} />
+        <StationBookingBottomBar
+          selectedConn={selectedConn}
+          canBook={canBook}
+          gateHint={gateHint}
+          isClosedBySchedule={isClosedBySchedule}
+          bookButtonLabel={bookButtonLabel}
+          onBook={handleBook}
+          insetsBottom={insets.bottom}
+          embedded
+        />
         </View>
-      </ScrollView>
-
-      {/* Floating Bottom Sticky Bar */}
-      <StationBookingBottomBar
-        selectedConn={selectedConn}
-        canBook={canBook}
-        gateHint={gateHint}
-        isClosedBySchedule={isClosedBySchedule}
-        bookButtonLabel={bookButtonLabel}
-        onBook={handleBook}
-        insetsBottom={insets.bottom}
-      />
+      </View>
 
       {/* Call Confirmation In-App Modal */}
       <CallConfirmationModal
@@ -470,6 +500,11 @@ export function StationDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  contentLayout: { flex: 1, minHeight: 0 },
+  contentColumns: { flexDirection: 'row' },
+  bookingColumn: { flex: 1, minWidth: 0, borderLeftWidth: 1 },
+  bookingOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0 },
+  connectorContent: { padding: spacing.lg, paddingBottom: spacing.xl },
   container: {
     flex: 1,
   },

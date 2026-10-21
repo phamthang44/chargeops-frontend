@@ -7,10 +7,12 @@ import {
   Linking,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import {
@@ -28,9 +30,11 @@ import {
   type DiscoveryFilterState,
 } from '@/components';
 import { RealStationMap, type RealStationMapRef } from '@/components/map';
+import { MapStationResults } from '@/components/discovery/MapStationResults';
 import { useAuth } from '@/context/AuthContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import type { RootStackParamList } from '@/navigation/types';
 import { useNotifications } from '@/context/NotificationContext';
@@ -39,6 +43,7 @@ import { getNearbyStations, type StationFilter } from '@/services/stationService
 import { executeQuickBook } from '@/utils/quickBook';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { Station } from '@/types';
+import { getDiscoveryPaneLayout } from '@/utils/stationPaneLayout';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -57,9 +62,14 @@ export function MapScreen() {
   } = useUserLocation();
   const [locationBannerDismissed, setLocationBannerDismissed] = useState(false);
   const tabInset = useTabBarInset();
+  const adaptive = useAdaptiveLayout();
+  const { fontScale } = useWindowDimensions();
+  const panes = getDiscoveryPaneLayout({ width: adaptive.tabContentWidth, height: adaptive.availableHeight, fontScale });
+  const split = adaptive.usesNavigationRail && panes.split;
 
   const [stations, setStations] = useState<Station[]>([]);
   const [stationLoadError, setStationLoadError] = useState(false);
+  const [stationLoading, setStationLoading] = useState(true);
   const [stationLoadAttempt, setStationLoadAttempt] = useState(0);
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 350);
@@ -119,6 +129,7 @@ export function MapScreen() {
 
   useEffect(() => {
     let active = true;
+    setStationLoading(true);
     const token = getAccessToken();
     getNearbyStations(discoveryFilter, { page: 1, size: 40 }, { accessToken: token })
       .then((page) => {
@@ -130,6 +141,9 @@ export function MapScreen() {
       .catch((error) => {
         console.warn('[MapScreen] Station list could not be loaded:', error);
         if (active) setStationLoadError(true);
+      })
+      .finally(() => {
+        if (active) setStationLoading(false);
       });
     return () => {
       active = false;
@@ -163,48 +177,93 @@ export function MapScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      {/* Top Header */}
-      <AppHeader
-        title="Charge"
-        accent="Ops"
-        icon="flash"
-        slogan={[t('stationList.slogan1', 'Sạc xanh hơn'), t('stationList.slogan2', 'Hành trình xa hơn')]}
-        trailing={
-          <>
-            <HeaderActionBtn
-              icon="settings-outline"
-              onPress={() => setSettingsOpen(true)}
-              accessibilityLabel={t('settings.title')}
-            />
-            <HeaderActionBtn
-              icon="notifications-outline"
-              badgeCount={unreadCount}
-              onPress={() => setNotifOpen(true)}
-              accessibilityLabel={t('stationList.notificationsTitle')}
-            />
-          </>
-        }
+    <View style={[styles.container, split && styles.splitContainer, { backgroundColor: themeColors.background }]}>
+      <View
+        testID="discovery-panel"
+        style={[split && { width: panes.panelWidth, height: '100%', borderRightWidth: 1, borderRightColor: themeColors.border }]}
       >
-        {/* Modern Capsule Search Bar */}
-        <StationSearchBar
-          value={query}
-          onChangeText={setQuery}
-          placeholder={t('map.searchPlaceholder', 'Tìm trạm trên bản đồ...')}
-        />
+        {/* Top Header */}
+        <AppHeader
+          title="Charge"
+          accent="Ops"
+          icon="flash"
+          slogan={[t('stationList.slogan1', 'Sạc xanh hơn'), t('stationList.slogan2', 'Hành trình xa hơn')]}
+          trailing={
+            <>
+              <HeaderActionBtn
+                icon="settings-outline"
+                onPress={() => setSettingsOpen(true)}
+                accessibilityLabel={t('settings.title')}
+              />
+              <HeaderActionBtn
+                icon="notifications-outline"
+                badgeCount={unreadCount}
+                onPress={() => setNotifOpen(true)}
+                accessibilityLabel={t('stationList.notificationsTitle')}
+              />
+            </>
+          }
+        >
+          {/* Modern Capsule Search Bar */}
+          <StationSearchBar
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('map.searchPlaceholder', 'Tìm trạm trên bản đồ...')}
+          />
 
-        {/* Quick Filter Capsule Bar */}
-        <StationFilterCapsuleBar
-          filters={filterState}
-          onUpdateFilters={setFilterState}
-          onOpenDrawer={() => setDrawerOpen(true)}
-          onClearAll={handleClearFilters}
-        />
-      </AppHeader>
+          {/* Quick Filter Capsule Bar */}
+          <StationFilterCapsuleBar
+            filters={filterState}
+            onUpdateFilters={setFilterState}
+            onOpenDrawer={() => setDrawerOpen(true)}
+            onClearAll={handleClearFilters}
+          />
+        </AppHeader>
+
+        {split && (
+          <ScrollView
+            testID="discovery-results-scroll"
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.panelContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {selectedStation && (
+              <View style={{ gap: spacing.xs }}>
+                <MapStationPeekSheet
+                  presentation="inline"
+                  station={selectedStation}
+                  onOpenDetail={(id) => navigation.navigate('StationDetail', { stationId: id, distanceKm: selectedStation.distanceKm })}
+                  onDirections={(st) => mapRef.current?.navigateToStation(st)}
+                  onQuickBook={(id) => executeQuickBook(id, navigation)}
+                  onClose={() => setSelected(null)}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => navigation.navigate('StationDetail', { stationId: selectedStation.id, distanceKm: selectedStation.distanceKm })}
+                  style={styles.detailLink}
+                >
+                  <Text style={{ color: themeColors.primary, fontWeight: fontWeights.semibold }}>{t('map.viewDetail')}</Text>
+                </Pressable>
+              </View>
+            )}
+            <MapStationResults
+              stations={stations}
+              selectedId={selectedStation?.id}
+              loading={stationLoading}
+              error={stationLoadError}
+              onRetry={() => setStationLoadAttempt((attempt) => attempt + 1)}
+              onSelect={(station) => {
+                setSelected(stations.findIndex((item) => item.id === station.id));
+                mapRef.current?.flyToStation(station);
+              }}
+            />
+          </ScrollView>
+        )}
+      </View>
 
       {/* Map Content View */}
       <View style={styles.mapWrap}>
-        {stationLoadError && (
+        {stationLoadError && !split && (
           <View accessibilityRole="alert" style={{ position: 'absolute', top: 8, left: 12, right: 12, zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderRadius: 12, borderWidth: 1, borderColor: '#F59E0B66', backgroundColor: themeColors.surface, paddingHorizontal: 14, paddingVertical: 10 }}>
             <Text style={{ flex: 1, color: themeColors.textStrong, fontSize: 12 }}>{t('map.stationsUnavailable')}</Text>
             <Pressable onPress={() => setStationLoadAttempt((attempt) => attempt + 1)} accessibilityRole="button">
@@ -311,7 +370,7 @@ export function MapScreen() {
         </Pressable>
 
         {/* Floating View Switcher to List (only shown when no station is selected to avoid overlap) */}
-        {!selectedStation && (
+        {!selectedStation && !split && (
           <FloatingViewSwitch
             currentView="map"
             onToggle={() => navigation.navigate('Tabs', { screen: 'StationList' })}
@@ -320,7 +379,7 @@ export function MapScreen() {
         )}
 
         {/* Bottom Peek Sheet */}
-        {selectedStation && (
+        {selectedStation && !split && (
           <MapStationPeekSheet
             station={selectedStation}
             onOpenDetail={(id) => navigation.navigate('StationDetail', { stationId: id, distanceKm: selectedStation.distanceKm })}
@@ -364,6 +423,9 @@ export function MapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  splitContainer: { flexDirection: 'row' },
+  panelContent: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.lg },
+  detailLink: { minHeight: 48, paddingHorizontal: spacing.sm, justifyContent: 'center' },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',

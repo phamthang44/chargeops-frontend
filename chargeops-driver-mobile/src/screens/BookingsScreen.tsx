@@ -171,5 +171,5 @@ export function BookingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loader: { marginTop: spacing.xl },
-  content: { padding: spacing.lg, paddingTop: 0, gap: spacing.md },
+  content: { width: '100%', maxWidth: 840, alignSelf: 'center', padding: spacing.lg, paddingTop: 0, gap: spacing.md },
 });

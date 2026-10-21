@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 import { spacing } from '@/theme';
 
 export interface HeaderActionBtnProps {
@@ -116,23 +117,29 @@ export function AppHeader({
 }: AppHeaderProps) {
   const insets = useSafeAreaInsets();
   const { width, fontScale } = useWindowDimensions();
-  const showSlogan = width - insets.left - insets.right >= 480 && fontScale <= 1.15;
+  const [containerWidth, setContainerWidth] = useState(width);
+  const { isShortHeight } = useAdaptiveLayout();
+  const showSlogan = !isShortHeight && containerWidth - insets.left - insets.right >= 480 && fontScale <= 1.15;
   const { t } = useTranslation();
   const { isDark } = usePreferences();
 
   // Only show the EV car illustration when children (e.g. search bar, filters) are present,
   // or when explicitly forced via withIllustration={true}. Compact headers stay clean.
-  const showIllustration = withIllustration !== undefined ? withIllustration : Boolean(children);
+  const showIllustration = !isShortHeight && (withIllustration !== undefined ? withIllustration : Boolean(children));
   const roleLabel = role;
   const displayTitle = title ?? 'Charge';
   const displayAccent = accent ?? (title ? undefined : 'Ops');
 
   return (
     <View
+      onLayout={(event) => {
+        const nextWidth = event.nativeEvent.layout.width;
+        if (nextWidth > 0 && nextWidth !== containerWidth) setContainerWidth(nextWidth);
+      }}
       style={[
         styles.headerBackground,
         {
-          paddingTop: Math.max(insets.top, 12) + spacing.sm,
+          paddingTop: isShortHeight ? Math.max(insets.top, spacing.xs) : Math.max(insets.top, 12) + spacing.sm,
           paddingLeft: insets.left,
           paddingRight: insets.right,
           paddingBottom: children ? 6 : spacing.xs,
@@ -152,7 +159,7 @@ export function AppHeader({
       {isDark && showIllustration && <View style={styles.darkOverlay} />}
 
       {/* Row 1: Brand & Role (Left) + Slogan (Center) + Actions (Right) */}
-      <View style={[styles.headerTopRow, topRowStyle]}>
+      <View style={[styles.headerTopRow, isShortHeight && styles.shortTopRow, topRowStyle]}>
         {/* Left: Squircle Icon + Title Block */}
         <View style={styles.headerLeftCol}>
           {leading ? <View style={styles.leadingContainer}>{leading}</View> : null}
@@ -251,6 +258,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
+  },
+  shortTopRow: {
+    paddingTop: 0,
+    paddingBottom: spacing.xs,
   },
   headerLeftCol: {
     flex: 1,

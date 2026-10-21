@@ -89,10 +89,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   titleGroup: {
+    maxWidth: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs + 4,
@@ -105,6 +108,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
+    flexShrink: 1,
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,
   },

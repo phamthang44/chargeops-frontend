@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
@@ -27,6 +27,7 @@ interface StationHeroGalleryProps {
   onToggleFav: () => void;
   onBack: () => void;
   insetsTop: number;
+  height?: number;
 }
 
 export function StationHeroGallery({
@@ -39,10 +40,13 @@ export function StationHeroGallery({
   onToggleFav,
   onBack,
   insetsTop,
+  height = 260,
 }: StationHeroGalleryProps) {
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
-  const { width } = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
+  const [width, setWidth] = useState(windowWidth);
+  const carouselRef = useRef<ScrollView>(null);
 
   const displayImages =
     images && images.length > 0
@@ -52,6 +56,13 @@ export function StationHeroGallery({
         : [];
 
   const [currentSlide, setCurrentSlide] = useState(slide ?? 0);
+  const currentSlideRef = useRef(currentSlide);
+  currentSlideRef.current = slide ?? currentSlide;
+
+  // Only realign after the container changes size, never during a swipe.
+  useEffect(() => {
+    carouselRef.current?.scrollTo({ x: currentSlideRef.current * width, animated: false });
+  }, [width]);
 
   useEffect(() => {
     if (slide !== undefined && slide !== currentSlide) {
@@ -76,7 +87,14 @@ export function StationHeroGallery({
   );
 
   return (
-    <View style={[styles.hero, { backgroundColor: isDark ? '#121615' : '#E2E8F0' }]}>
+    <View
+      testID="station-hero-gallery"
+      onLayout={(event) => {
+        const nextWidth = event.nativeEvent.layout.width;
+        if (nextWidth > 0 && nextWidth !== width) setWidth(nextWidth);
+      }}
+      style={[styles.hero, { height, backgroundColor: isDark ? '#121615' : '#E2E8F0' }]}
+    >
       {/* Floating back & favorite buttons */}
       <View style={[styles.floatingHeader, { top: insetsTop + spacing.sm }]}>
         <GlassButton accessibilityLabel={t('common.back')} onPress={onBack}>
@@ -97,6 +115,7 @@ export function StationHeroGallery({
 
       {/* Hero Carousel */}
       <ScrollView
+        ref={carouselRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -106,7 +125,7 @@ export function StationHeroGallery({
       >
         {displayImages.length > 0 ? (
           displayImages.map((imgUri, i) => (
-            <View key={i} style={[styles.slide, { width }]}>
+            <View key={i} style={[styles.slide, { width, height }]}>
               <Image
                 source={{ uri: getStationHeroUrl(imgUri, 750) }}
                 style={styles.heroImage}
@@ -116,7 +135,7 @@ export function StationHeroGallery({
             </View>
           ))
         ) : (
-          <View style={[styles.slide, { width }]}>
+          <View style={[styles.slide, { width, height }]}>
             <Image
               source={require('../../../assets/header-background.png')}
               style={styles.heroImage}

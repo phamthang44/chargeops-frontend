@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, GlassButton, StatusBadge } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useTaskLayout } from '@/hooks/useTaskLayout';
 import type { RootStackParamList } from '@/navigation/types';
 import { completeBooking, getBookingById } from '@/services/bookingService';
 import { bookingErrorMessage } from '@/i18n/bookingErrors';
@@ -36,6 +37,7 @@ export function ChargingSessionScreen() {
   const { params } = useRoute<Route>();
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
+  const { split } = useTaskLayout();
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -298,32 +300,37 @@ export function ChargingSessionScreen() {
       </ScrollView>
       )}
 
-      {/* Sticky Bottom Actions */}
+      {/* Sticky Bottom Actions (Docked edge-to-edge with matched tablet max-width) */}
       {!isLoading && booking && (
-        <View style={[styles.footer, taskStyles.footer, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
-          {isCompleted ? (
-            <AppButton
-              label={t('chargingSession.goHome')}
-              variant="primary"
-              onPress={handleGoHome}
-            />
-          ) : (
-            <>
-              <AppButton
-                label={t('chargingSession.finish')}
-                variant="danger"
-                onPress={handleFinishSession}
-                loading={isSubmitting}
-                disabled={isSubmitting}
-              />
+        <View style={[styles.footerWrapper, { backgroundColor: themeColors.surface, borderTopColor: themeColors.border }]}>
+          <View style={[styles.footerContent, split && styles.footerContentSplit]}>
+            {isCompleted ? (
               <AppButton
                 label={t('chargingSession.goHome')}
-                variant="secondary"
+                variant="primary"
                 onPress={handleGoHome}
-                disabled={isSubmitting}
+                style={split ? styles.btnSplit : undefined}
               />
-            </>
-          )}
+            ) : (
+              <>
+                <AppButton
+                  label={t('chargingSession.finish')}
+                  variant="danger"
+                  onPress={handleFinishSession}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  style={split ? styles.btnSplit : undefined}
+                />
+                <AppButton
+                  label={t('chargingSession.goHome')}
+                  variant="secondary"
+                  onPress={handleGoHome}
+                  disabled={isSubmitting}
+                  style={split ? styles.btnSplit : undefined}
+                />
+              </>
+            )}
+          </View>
         </View>
       )}
     </SafeAreaView>
@@ -481,13 +488,33 @@ const styles = StyleSheet.create({
   },
 
   // Footer
-  footer: {
+  footerWrapper: {
+    width: '100%',
+    borderTopWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    elevation: 12,
+  },
+  footerContent: {
+    width: '100%',
+    maxWidth: 1120,
+    alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
-    borderTopWidth: 1,
     gap: spacing.sm,
   },
+  footerContentSplit: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  btnSplit: {
+    minWidth: 180,
+    maxWidth: 280,
+  },
 });
-
-const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

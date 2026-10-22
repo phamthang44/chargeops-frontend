@@ -24,6 +24,7 @@ interface TimePickerStickyBarProps {
   themeColors: any;
   t: (key: string, options?: any) => string;
   durationLabel: (min: number) => string;
+  isTabletOrSplit?: boolean;
 }
 
 export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
@@ -44,6 +45,7 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
   themeColors,
   t,
   durationLabel,
+  isTabletOrSplit = false,
 }: TimePickerStickyBarProps) {
   const insets = useSafeAreaInsets();
 
@@ -58,7 +60,7 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
         },
       ]}
     >
-      <View style={styles.contentRow}>
+      <View style={[styles.contentRow, isTabletOrSplit && styles.contentRowSplit]}>
         {/* Left info */}
         <View style={styles.infoCol}>
           {!hasSel ? (
@@ -168,6 +170,7 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
           onPress={onContinue}
           style={({ pressed }) => [
             styles.ctaButton,
+            isTabletOrSplit && styles.ctaButtonSplit,
             {
               backgroundColor: canContinue ? themeColors.primary : themeColors.surfaceAlt,
               borderColor: canContinue ? 'transparent' : themeColors.border,
@@ -194,14 +197,13 @@ export const TimePickerStickyBar = React.memo(function TimePickerStickyBar({
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     borderTopWidth: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md + 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    elevation: 12,
   },
   hintContainer: {
     flexDirection: 'row',
@@ -235,10 +237,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentRow: {
+    width: '100%',
+    maxWidth: 1120,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
+  },
+  contentRowSplit: {
+    paddingVertical: spacing.md,
+    gap: spacing.xl,
   },
   infoCol: {
     flex: 1,
@@ -312,6 +323,10 @@ const styles = StyleSheet.create({
     height: 52,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.full,
+  },
+  ctaButtonSplit: {
+    minWidth: 220,
+    maxWidth: 320,
   },
   ctaButtonShadow: {
     shadowColor: '#059669',

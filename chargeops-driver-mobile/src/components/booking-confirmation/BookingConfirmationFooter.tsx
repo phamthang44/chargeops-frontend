@@ -15,6 +15,7 @@ export interface BookingConfirmationFooterProps {
   loading: boolean;
   backendPreview: BackendPricePreviewResponse | null;
   onSubmit: () => void;
+  isTabletOrSplit?: boolean;
 }
 
 export function BookingConfirmationFooter({
@@ -23,6 +24,7 @@ export function BookingConfirmationFooter({
   loading,
   backendPreview,
   onSubmit,
+  isTabletOrSplit = false,
 }: BookingConfirmationFooterProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
@@ -35,7 +37,7 @@ export function BookingConfirmationFooter({
   return (
     <View
       style={[
-        styles.footer,
+        styles.footerWrapper,
         {
           backgroundColor: themeColors.surface,
           borderTopColor: themeColors.border,
@@ -43,21 +45,22 @@ export function BookingConfirmationFooter({
         },
       ]}
     >
-      <View style={styles.footerRow}>
-        <View>
+      <View style={[styles.footerContent, isTabletOrSplit && styles.footerContentSplit]}>
+        <View style={styles.amountBlock}>
           <Text style={[styles.footerLabel, { color: themeColors.textMuted }]}>
             {t('bookingConfirmation.totalPayment')}
           </Text>
-          <Text style={[styles.footerAmount, { color: themeColors.textStrong }]}>
+          <Text style={[styles.footerAmount, { color: themeColors.primaryDark }]}>
             {formatVnd(totalPrice)}
           </Text>
         </View>
+
         <AppButton
           label={t('bookingConfirmation.payBtn', { amount: formatVnd(totalPrice) })}
           loading={submitting}
           disabled={submitting || loading || isPricingInvalid}
           onPress={onSubmit}
-          style={styles.payBtn}
+          style={isTabletOrSplit ? styles.payBtnSplit : styles.payBtn}
         />
       </View>
     </View>
@@ -65,13 +68,48 @@ export function BookingConfirmationFooter({
 }
 
 const styles = StyleSheet.create({
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+  footerWrapper: {
+    width: '100%',
     borderTopWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    elevation: 12,
   },
-  footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
-  footerLabel: { fontSize: fontSizes.caption },
-  footerAmount: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
-  payBtn: { flex: 1 },
+  footerContent: {
+    width: '100%',
+    maxWidth: 1120,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  footerContentSplit: {
+    paddingVertical: spacing.md,
+    gap: spacing.xl,
+  },
+  amountBlock: {
+    gap: 3,
+  },
+  footerLabel: {
+    fontSize: fontSizes.caption,
+    fontWeight: fontWeights.medium,
+  },
+  footerAmount: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  payBtn: {
+    flex: 1,
+  },
+  payBtnSplit: {
+    flex: 0,
+    minWidth: 260,
+    maxWidth: 360,
+  },
 });

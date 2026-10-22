@@ -29,6 +29,7 @@ import {
 } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useBookingConfirmation } from '@/hooks/useBookingConfirmation';
+import { useTaskLayout } from '@/hooks/useTaskLayout';
 import type { RootStackParamList } from '@/navigation/types';
 import { getLatestPendingBooking } from '@/services/bookingService';
 import { fontSizes, fontWeights, spacing } from '@/theme';
@@ -39,6 +40,7 @@ export function BookingConfirmationScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const { split } = useTaskLayout();
 
   const {
     params,
@@ -192,14 +194,15 @@ export function BookingConfirmationScreen() {
       </>} />
       </ScrollView>
 
-      {/* 9. Sticky Bottom Action Footer */}
-      <View style={taskStyles.footer}><BookingConfirmationFooter
+      {/* 9. Sticky Bottom Action Footer (Docked edge-to-edge with matched tablet max-width) */}
+      <BookingConfirmationFooter
         totalPrice={quote.totalPrice}
         submitting={submitting}
         loading={loading}
         backendPreview={backendPreview}
         onSubmit={() => submitBooking()}
-      /></View>
+        isTabletOrSplit={split}
+      />
 
       {/* 10. Overlapping Booking Warning BottomSheet (BR-BOK-08) */}
       <OverlappingBookingModal
@@ -258,5 +261,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
 });
-
-const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

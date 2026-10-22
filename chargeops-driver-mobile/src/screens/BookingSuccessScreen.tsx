@@ -11,6 +11,7 @@ import {
 } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
 import { useBookingSuccess } from '@/hooks/useBookingSuccess';
+import { useTaskLayout } from '@/hooks/useTaskLayout';
 import { spacing } from '@/theme';
 
 /**
@@ -20,6 +21,7 @@ import { spacing } from '@/theme';
  */
 export function BookingSuccessScreen() {
   const { themeColors } = usePreferences();
+  const { split } = useTaskLayout();
   const { booking, copied, handleCopyCode, goHome, viewDetail } = useBookingSuccess();
 
   if (!booking) {
@@ -53,11 +55,12 @@ export function BookingSuccessScreen() {
       </>} />
       </ScrollView>
 
-      {/* Footer CTAs */}
-      <View style={taskStyles.footer}><BookingSuccessFooter
+      {/* Footer CTAs (Docked edge-to-edge with matched tablet max-width) */}
+      <BookingSuccessFooter
         onViewDetail={viewDetail}
         onGoHome={goHome}
-      /></View>
+        isTabletOrSplit={split}
+      />
     </SafeAreaView>
   );
 }
@@ -73,5 +76,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

@@ -15,6 +15,7 @@ import {
   TimePickerStickyBar,
 } from '@/components';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useTaskLayout } from '@/hooks/useTaskLayout';
 import { useTimeRangePicker } from '@/hooks/useTimeRangePicker';
 import { spacing } from '@/theme';
 
@@ -25,6 +26,7 @@ import { spacing } from '@/theme';
 export function TimeRangePickerScreen() {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
+  const { split } = useTaskLayout();
 
   const {
     dates,
@@ -150,8 +152,8 @@ export function TimeRangePickerScreen() {
       </>} />
       </ScrollView>
 
-      {/* Section 7: Sticky Floating Bottom Action Bar */}
-      <View style={taskStyles.footer}><TimePickerStickyBar
+      {/* Section 7: Sticky Floating Bottom Action Bar (Docked edge-to-edge with matched tablet max-width) */}
+      <TimePickerStickyBar
         hasSel={hasSel}
         meetsMinDuration={meetsMinDuration}
         minDurationMin={minDurationMin}
@@ -169,7 +171,8 @@ export function TimeRangePickerScreen() {
         themeColors={themeColors}
         t={t}
         durationLabel={durationLabel}
-      /></View>
+        isTabletOrSplit={split}
+      />
 
       {/* Interactive Booking Help Guide Modal */}
       <TimePickerHelpModal
@@ -190,5 +193,3 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl + 24,
   },
 });
-
-const taskStyles = StyleSheet.create({ footer: { width: '100%', maxWidth: 720, alignSelf: 'center' } });

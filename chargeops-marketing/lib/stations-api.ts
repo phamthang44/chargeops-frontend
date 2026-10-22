@@ -27,6 +27,8 @@ export interface BackendStationAsset {
   id?: string;
   assetUrl?: string;
   assetType?: string;
+  isPrimary?: boolean;
+  altText?: string;
   caption?: string;
   displayOrder?: number;
 }
@@ -286,7 +288,7 @@ export function mapBackendToCoverageStation(
 
   const priceFormatted = priceNumber == null
     ? "Chưa có thông tin"
-    : `${Number(priceNumber).toLocaleString("vi-VN")}đ/kWh (tham khảo)`;
+    : `${Number(priceNumber).toLocaleString("vi-VN")}đ`;
 
   // 5. Operating state & hours
   const isOperatingOpen =
@@ -296,11 +298,32 @@ export function mapBackendToCoverageStation(
 
   const hoursText = isOperatingOpen ? "Đang mở cửa" : "Xem giờ hoạt động với trạm";
 
-  // 6. Image resolution
+  // 6. Image & Assets resolution
+  const rawAssets: BackendStationAsset[] =
+    "assets" in b && Array.isArray(b.assets) ? b.assets : [];
+
+  const primaryAsset = rawAssets.find((a) => a.isPrimary) || rawAssets[0];
   const primaryImg =
     b.primaryImageUrl ||
-    ("assets" in b && Array.isArray(b.assets) && b.assets[0]?.assetUrl) ||
+    primaryAsset?.assetUrl ||
     null;
+
+  const assetImages = rawAssets
+    .map((a) => a.assetUrl)
+    .filter((url): url is string => Boolean(url && url.trim()));
+
+  const defaultStationPhotos = [
+    "/stations/hub-exterior.jpg",
+    "/stations/charger-close.jpg",
+    "/stations/mall-indoor.jpg",
+  ];
+
+  const resolvedImages =
+    assetImages.length > 0
+      ? assetImages
+      : primaryImg
+      ? [primaryImg, ...defaultStationPhotos.slice(1)]
+      : defaultStationPhotos;
 
   const description =
     ("description" in b && b.description) ||
@@ -317,21 +340,16 @@ export function mapBackendToCoverageStation(
     total,
     fast,
     pricePerKwh: priceFormatted,
+    priceNumber,
     connectors: mappedConnectors,
     amenities: [],
     hours: hoursText,
     rating: 0,
     reviewCount: 0,
     description,
-    primaryImageUrl: primaryImg,
-    images:
-      "assets" in b && Array.isArray(b.assets) && b.assets.length > 0
-        ? b.assets
-            .map((a: BackendStationAsset) => a.assetUrl)
-            .filter((url): url is string => Boolean(url))
-        : primaryImg
-        ? [primaryImg]
-        : ["/screens/charging.jpg", "/screens/slot-picker.jpg", "/screens/home.jpg"],
+    primaryImageUrl: primaryImg || resolvedImages[0],
+    images: resolvedImages,
+    assets: rawAssets,
     maxPowerKw: powerKw > 0 ? powerKw : null,
     operatingState: b.operatingState,
     operationalStatus: b.operationalStatus,
@@ -481,7 +499,12 @@ export async function fetchPublicStationBySlug(
   const found = listRes.stations.find(
     (s) => s.slug === slugOrId || s.id === slugOrId
   );
-  if (found) return found;
+  if (found) {
+    // If found in public list, fetch full station detail by id to retrieve assets, chargePoints, and operatingHours!
+    const fullDetail = await fetchPublicStationDetail(found.id);
+    if (fullDetail) return fullDetail;
+    return found;
+  }
 
   // Fallback
   return STATIONS.find((s) => s.slug === slugOrId || s.id === slugOrId);

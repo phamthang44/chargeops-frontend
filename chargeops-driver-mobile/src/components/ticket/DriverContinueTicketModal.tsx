@@ -99,7 +99,7 @@ export function DriverContinueTicketModal({
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.55)' },
-  card: { borderRadius: 18, padding: 20, gap: 14 },
+  card: { maxWidth: 560, width: '100%', alignSelf: 'center', borderRadius: 18, padding: 20, gap: 14 },
   heading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 18, fontWeight: '700', flex: 1 },
   description: { fontSize: 13, lineHeight: 20 },

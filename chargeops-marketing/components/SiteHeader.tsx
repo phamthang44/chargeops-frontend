@@ -124,17 +124,19 @@ export function SiteHeader() {
               </nav>
 
               <div className="flex items-center gap-2">
-                <Link
-                  href="/#tai-ung-dung"
+                <a
+                  href="https://driver.chargeops.online/?demo=true"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-island-primary hidden lg:inline-flex text-xs font-semibold py-1.5 pl-4 pr-1.5"
                 >
-                  <span>Tải ứng dụng</span>
+                  <span>Dùng thử Driver</span>
                   <span className="btn-icon-bubble !h-7 !w-7">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
                   </span>
-                </Link>
+                </a>
 
                 {/* Mobile menu toggle */}
                 <button
@@ -174,18 +176,20 @@ export function SiteHeader() {
                     {item.label}
                   </Link>
                 ))}
-                <Link
-                  href="/#tai-ung-dung"
+                <a
+                  href="https://driver.chargeops.online/?demo=true"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => setOpen(false)}
                   className="btn-island-primary mt-2 justify-between py-2.5 pl-5 pr-2.5 text-sm"
                 >
-                  <span>Tải ứng dụng ngay</span>
+                  <span>Dùng thử Driver Web</span>
                   <span className="btn-icon-bubble">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
                   </span>
-                </Link>
+                </a>
               </nav>
             </div>
           </div>

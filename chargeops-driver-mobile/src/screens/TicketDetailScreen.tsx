@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 40,
   },
-  keyboardView: { flex: 1 },
+  keyboardView: { flex: 1, width: '100%', maxWidth: 840, alignSelf: 'center' },
   messagesList: {
     padding: spacing.md,
     paddingBottom: spacing.lg,

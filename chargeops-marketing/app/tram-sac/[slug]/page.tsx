@@ -575,8 +575,9 @@ export default async function StationDetailPage({
                     <iframe
                       src={mapEmbedUrl}
                       title={`Bản đồ trạm sạc ${station.name}`}
-                      className="h-full w-full border-0 select-none"
+                      className="h-[calc(100%+38px)] w-full border-0 select-none -mb-[38px]"
                       loading="lazy"
+                      tabIndex={-1}
                     />
                   </div>
 
@@ -617,7 +618,21 @@ export default async function StationDetailPage({
                     Xem thông tin trạm và chọn khung giờ trong ứng dụng. Tình trạng cổng có thể thay đổi theo dữ liệu trạm.
                   </p>
 
-                  <div className="mt-4 pt-3 border-t border-primary/15">
+                  <div className="mt-4 pt-3 border-t border-primary/15 flex flex-col gap-2.5">
+                    <a
+                      href="https://driver.chargeops.online/?demo=true"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-strong px-4 py-2.5 text-xs font-bold text-white shadow-card transition hover:bg-black hover:scale-[1.01]"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4 text-emerald-400">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                      </svg>
+                      <span>Thử đặt chỗ trên Driver Web</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3 w-3 opacity-70">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </a>
                     <StoreBadges />
                   </div>
 

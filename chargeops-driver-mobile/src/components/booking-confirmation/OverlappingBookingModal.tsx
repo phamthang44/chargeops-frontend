@@ -28,7 +28,7 @@ export function OverlappingBookingModal({
   if (!overlappingBooking) return null;
 
   return (
-    <BottomSheet
+    <BottomSheet scrollable
       visible={visible}
       onClose={onConfirm}
       title={t('bookingConfirm.overlapTitle')}

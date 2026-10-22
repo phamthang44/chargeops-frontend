@@ -25,7 +25,7 @@ const SECTION_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 };
 
 export function LegalDocumentSheet({ visible, type: initialType, onClose }: LegalDocumentSheetProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { themeColors } = usePreferences();
   const [activeType, setActiveType] = useState<LegalDocType>(initialType);
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +81,7 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
               activeType === 'terms' && styles.activeTabText,
             ]}
           >
-            Điều khoản dịch vụ
+            {t('common.terms')}
           </Text>
         </Pressable>
 
@@ -107,7 +107,7 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
               activeType === 'privacy' && styles.activeTabText,
             ]}
           >
-            Chính sách bảo mật
+            {t('common.privacy')}
           </Text>
         </Pressable>
       </View>
@@ -118,18 +118,19 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Tìm từ khóa trong điều khoản..."
+          placeholder={t('legalSheet.searchPlaceholder')}
+          accessibilityLabel={t('legalSheet.searchPlaceholder')}
           placeholderTextColor={themeColors.textMuted}
           style={[styles.searchInput, { color: themeColors.textStrong }]}
         />
         {Boolean(searchQuery) && (
-          <Pressable onPress={() => setSearchQuery('')}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('legalSheet.clearSearch')} hitSlop={12} onPress={() => setSearchQuery('')}>
             <Ionicons name="close-circle" size={16} color={themeColors.textMuted} />
           </Pressable>
         )}
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Trust & Security Banner */}
         <View style={[styles.securityBanner, { backgroundColor: themeColors.primarySoft, borderColor: themeColors.border }]}>
           <View style={styles.bannerHeader}>
@@ -137,8 +138,8 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
               <Ionicons name="shield-checkmark" size={18} color={themeColors.primaryDark} />
             </View>
             <View style={styles.bannerTitleWrap}>
-              <Text style={[styles.bannerTitle, { color: themeColors.textStrong }]}>Hạ tầng & Bảo mật dữ liệu</Text>
-              <Text style={[styles.bannerSub, { color: themeColors.textMuted }]}>Cập nhật ngày {doc.updatedAt}</Text>
+              <Text style={[styles.bannerTitle, { color: themeColors.textStrong }]}>{t('legalSheet.securityTitle')}</Text>
+              <Text style={[styles.bannerSub, { color: themeColors.textMuted }]}>{t('legalSheet.updatedAt', { date: doc.updatedAt })}</Text>
             </View>
           </View>
 
@@ -168,7 +169,7 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
         {filteredSections.length === 0 ? (
           <View style={[styles.introCard, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border, alignItems: 'center' }]}>
             <Text style={[styles.introText, { color: themeColors.textMuted }]}>
-              Không tìm thấy điều khoản nào chứa "{searchQuery}"
+              {t('legalSheet.noResults', { query: searchQuery })}
             </Text>
           </View>
         ) : (
@@ -199,9 +200,9 @@ export function LegalDocumentSheet({ visible, type: initialType, onClose }: Lega
 
       {/* Sticky Confirm Action Footer */}
       <View style={styles.footer}>
-        <Pressable onPress={onClose} style={[styles.confirmBtn, { backgroundColor: themeColors.primary }]}>
+        <Pressable accessibilityRole="button" onPress={onClose} style={[styles.confirmBtn, { backgroundColor: themeColors.primary }]}>
           <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-          <Text style={styles.confirmBtnText}>Tôi đã hiểu & Đồng ý</Text>
+          <Text style={styles.confirmBtnText}>{t('legalSheet.acknowledge')}</Text>
         </Pressable>
       </View>
     </BottomSheet>
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    height: 40,
+    minHeight: 48,
     borderRadius: radius.md,
     borderWidth: 1,
     marginBottom: spacing.sm,
@@ -232,6 +233,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   tabBtn: {
+    minHeight: 48,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -256,16 +258,22 @@ const styles = StyleSheet.create({
     }),
   },
   tabText: {
+    flexShrink: 1,
+    textAlign: 'center',
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.medium,
   },
   activeTabText: {
     fontWeight: fontWeights.bold,
   },
+  scroll: {
+    flexShrink: 1,
+    minHeight: 0,
+    maxHeight: 460,
+  },
   scrollContent: {
     gap: spacing.md,
     paddingBottom: spacing.md,
-    maxHeight: 460,
   },
   securityBanner: {
     padding: spacing.md,
@@ -367,7 +375,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   confirmBtn: {
-    height: 48,
+    minHeight: 48,
+    padding: spacing.sm,
     borderRadius: radius.md,
     flexDirection: 'row',
     alignItems: 'center',
@@ -375,6 +384,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   confirmBtnText: {
+    flexShrink: 1,
+    textAlign: 'center',
     color: '#FFFFFF',
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,

@@ -99,9 +99,13 @@ export function AppButton({
         isDisabled && styles.disabled,
         { transform: [{ scale }] },
         style,
+        typeof customHeight === 'number' && { height: undefined, minHeight: Math.max(48, customHeight) },
       ]}
     >
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
         onPress={onPress}
         disabled={isDisabled}
         onPressIn={handlePressIn}
@@ -109,7 +113,9 @@ export function AppButton({
         style={[
           styles.base,
           customRadius !== undefined && { borderRadius: customRadius },
-          customHeight !== undefined && { height: customHeight },
+          customHeight !== undefined && (typeof customHeight === 'number'
+            ? { minHeight: Math.max(48, customHeight) }
+            : { height: customHeight }),
         ]}
       >
         {loading ? (
@@ -146,13 +152,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.md
   },
   base: {
-    height: 48,
+    minHeight: 48,
+    paddingVertical: spacing.sm,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
   contentRow: {
+    maxWidth: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -166,6 +174,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
+    flexShrink: 1,
+    textAlign: 'center',
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
   },

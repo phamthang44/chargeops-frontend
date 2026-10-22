@@ -1,10 +1,11 @@
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
+import { getAvatarPreviewSize } from '@/utils/overlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
   Linking,
   Modal,
@@ -28,8 +29,6 @@ interface AvatarViewerModalProps {
   onEdit?: () => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const AVATAR_VIEW_SIZE = Math.min(SCREEN_WIDTH - 48, 340);
 
 export function AvatarViewerModal({
   visible,
@@ -38,6 +37,14 @@ export function AvatarViewerModal({
   displayName,
   onEdit,
 }: AvatarViewerModalProps) {
+  const { availableWidth, availableHeight } = useAdaptiveLayout();
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+  const previewSize = Math.max(0, Math.min(
+    getAvatarPreviewSize(availableWidth, availableHeight),
+    stageSize.width - spacing.md * 2,
+    stageSize.height,
+  ));
+  const previewStyle = { width: previewSize, height: previewSize };
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { themeColors } = usePreferences();
@@ -143,6 +150,8 @@ export function AvatarViewerModal({
         {Boolean(avatarUrl) && (
           <View style={styles.modePillRow}>
             <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: viewMode === 'circle' }}
               style={[
                 styles.modePill,
                 viewMode === 'circle' && styles.modePillActive,
@@ -165,6 +174,8 @@ export function AvatarViewerModal({
             </Pressable>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: viewMode === 'full' }}
               style={[
                 styles.modePill,
                 viewMode === 'full' && styles.modePillActive,
@@ -189,12 +200,16 @@ export function AvatarViewerModal({
         )}
 
         {/* Center Stage: The Avatar */}
-        <View style={styles.centerStage}>
+        <View style={styles.centerStage} onLayout={({ nativeEvent: { layout } }) => {
+          setStageSize(previous => previous.width === layout.width && previous.height === layout.height
+            ? previous : { width: layout.width, height: layout.height });
+        }}>
           {avatarUrl ? (
             <View
               style={[
                 styles.avatarFrame,
-                viewMode === 'circle' ? styles.avatarCircleFrame : styles.avatarFullFrame,
+                previewStyle,
+                viewMode === 'circle' ? { borderRadius: previewSize / 2 } : styles.avatarFullFrame,
               ]}
             >
               <Image
@@ -212,7 +227,7 @@ export function AvatarViewerModal({
               )}
             </View>
           ) : (
-            <View style={[styles.avatarFrame, styles.avatarCircleFrame, styles.initialsFrame]}>
+            <View style={[styles.avatarFrame, previewStyle, { borderRadius: previewSize / 2 }, styles.initialsFrame]}>
               <Text style={styles.initialsText}>{displayInitials}</Text>
             </View>
           )}
@@ -222,6 +237,7 @@ export function AvatarViewerModal({
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}>
           {onEdit && (
             <Pressable
+              accessibilityRole="button"
               style={[styles.actionBtn, { backgroundColor: themeColors.primary }]}
               onPress={handleEditPress}
             >
@@ -234,7 +250,7 @@ export function AvatarViewerModal({
             </Pressable>
           )}
 
-          <Pressable style={styles.closeBtn} onPress={onClose}>
+          <Pressable accessibilityRole="button" style={styles.closeBtn} onPress={onClose}>
             <Text style={styles.closeBtnText}>{t('common.close', 'Đóng')}</Text>
           </Pressable>
         </View>
@@ -277,9 +293,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   iconCircleBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -293,6 +309,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   modePill: {
+    minHeight: 48,
+    flexShrink: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -308,6 +326,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   modePillText: {
+    flexShrink: 1,
     fontSize: 13,
     fontWeight: fontWeights.medium,
     color: 'rgba(255, 255, 255, 0.65)',
@@ -323,8 +342,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   avatarFrame: {
-    width: AVATAR_VIEW_SIZE,
-    height: AVATAR_VIEW_SIZE,
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: '#090D16',
@@ -342,9 +359,6 @@ const styles = StyleSheet.create({
       },
     }),
     elevation: 10,
-  },
-  avatarCircleFrame: {
-    borderRadius: AVATAR_VIEW_SIZE / 2,
   },
   avatarFullFrame: {
     borderRadius: 20,
@@ -371,12 +385,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bottomBar: {
+    width: '100%', maxWidth: 560, alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
     alignItems: 'center',
     zIndex: 10,
   },
   actionBtn: {
+    minHeight: 48,
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
@@ -387,11 +403,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   actionBtnText: {
+    flexShrink: 1,
+    textAlign: 'center',
     color: '#FFFFFF',
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,
   },
   closeBtn: {
+    minHeight: 48,
+    justifyContent: 'center',
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.lg,
   },

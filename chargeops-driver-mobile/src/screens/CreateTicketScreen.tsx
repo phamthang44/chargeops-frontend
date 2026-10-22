@@ -186,11 +186,11 @@ export function CreateTicketScreen() {
         </ScrollView>
 
         {/* Action Submit Footer */}
-        <TicketSubmitFooter
+        <View style={styles.actionWidth}><TicketSubmitFooter
           submitting={submitting}
           errorCount={submitAttempted ? errorCount : 0}
           onSubmit={handleSubmitPress}
-        />
+        /></View>
       </KeyboardAvoidingView>
     </View>
   );
@@ -198,11 +198,12 @@ export function CreateTicketScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  actionWidth: { width: '100%', maxWidth: 720, alignSelf: 'center', },
   keyboardView: { flex: 1 },
-  summaryWrap: {
+  summaryWrap: { width: '100%', maxWidth: 720, alignSelf: 'center',
     paddingHorizontal: spacing.md,
   },
-  scrollContent: {
+  scrollContent: { width: '100%', maxWidth: 720, alignSelf: 'center',
     padding: spacing.md,
     gap: spacing.md,
     paddingBottom: spacing.xl,

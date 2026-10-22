@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
@@ -48,6 +49,7 @@ export function AvatarUploadModal({
   currentAvatarUrl,
   displayName,
 }: AvatarUploadModalProps) {
+  const overlay = useOverlayLayout();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { themeColors, isDark } = usePreferences();
@@ -394,17 +396,19 @@ export function AvatarUploadModal({
       statusBarTranslucent
       onRequestClose={uploading ? undefined : resetModalState}
     >
-      <View style={styles.root}>
+      <View style={[styles.root, overlay.rootStyle]}>
         <BlurView intensity={32} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
         <Pressable style={StyleSheet.absoluteFill} onPress={uploading ? undefined : resetModalState} />
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
+          style={[styles.keyboardView, { flex: 1, justifyContent: overlay.isDialog ? 'center' : 'flex-end' }]}
         >
           <View
             style={[
               styles.sheet,
+              overlay.sheetStyle,
+              { minHeight: Math.min(560, overlay.maxHeight) },
               {
                 backgroundColor: themeColors.surface,
                 paddingBottom: insets.bottom + spacing.md,

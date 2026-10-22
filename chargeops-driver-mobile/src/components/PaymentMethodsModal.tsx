@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
@@ -42,6 +43,7 @@ const COMMON_BANKS = [
 ];
 
 export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalProps) {
+  const overlay = useOverlayLayout();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const {
@@ -160,7 +162,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, overlay.rootStyle]}>
         <BlurView
           intensity={28}
           tint={isDark ? 'dark' : 'regular'}
@@ -171,6 +173,7 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
         <View
           style={[
             styles.sheet,
+            overlay.sheetStyle,
             {
               backgroundColor: themeColors.surface,
               paddingBottom: Math.max(insets.bottom + spacing.md, spacing.lg),
@@ -191,6 +194,8 @@ export function PaymentMethodsModal({ visible, onClose }: PaymentMethodsModalPro
               </Text>
             </View>
             <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={t('common.close')}
               onPress={onClose}
               hitSlop={8}
               style={[styles.closeBtn, { backgroundColor: themeColors.surfaceAlt }]}

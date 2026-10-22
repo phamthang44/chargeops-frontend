@@ -27,6 +27,7 @@ import {
 } from '@/services/profileService';
 import { setStationApiTokenProvider } from '@/services/stationService';
 import { resetNotificationStore, setNotificationIdentity } from '@/services/notificationService';
+import { makeMockSession, usersMock } from '@/mock/users.mock';
 
 export type ProfileStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -162,6 +163,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let alive = true;
 
     async function bootstrapSession() {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        const search = window.location.search;
+        const params = new URLSearchParams(search);
+        if (
+          params.get('demo') === 'true' ||
+          params.get('demo') === '1' ||
+          params.get('mock') === 'true' ||
+          params.get('demo') === 'driver'
+        ) {
+          const mockDriver = usersMock[0];
+          const mockSession = makeMockSession(mockDriver);
+          sessionRef.current = mockSession;
+          setStationApiTokenProvider(() => mockSession.tokens.accessToken);
+          setNotificationIdentity(mockSession.user.id);
+          setSession(mockSession);
+          setProfile(profileFromMockSession(mockSession));
+          setProfileStatus('ready');
+          if (alive) setInitializing(false);
+          return;
+        }
+      }
+
       if (Platform.OS !== 'web' || hasKeycloakAuthorizationResponse()) {
         if (alive) setInitializing(false);
         return;

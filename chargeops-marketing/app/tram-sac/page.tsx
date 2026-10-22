@@ -51,9 +51,24 @@ export default async function StationsPage() {
               Đặt chỗ tại trạm bạn chọn
             </h2>
             <p className="max-w-xl text-ink-body">
-              Giữ khung giờ và check-in QR được thực hiện trong ứng dụng ChargeOps. Thanh toán trong bản demo hiện được mô phỏng.
+              Giữ khung giờ và check-in QR được thực hiện trong ứng dụng ChargeOps. Bạn có thể mở ngay bản Driver Web để trải nghiệm trực tiếp.
             </p>
-            <StoreBadges className="justify-center" />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="https://driver.chargeops.online/?demo=true"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-island-primary text-xs py-2.5 px-5"
+              >
+                <span>Dùng thử Driver Web ngay</span>
+                <span className="btn-icon-bubble">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                </span>
+              </a>
+              <StoreBadges className="justify-center" />
+            </div>
           </div>
         </section>
       </main>

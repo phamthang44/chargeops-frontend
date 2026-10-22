@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
@@ -202,6 +203,7 @@ export function SettingsModal({
   onOpenTickets,
   onOpenNotifications,
 }: SettingsModalProps) {
+  const overlay = useOverlayLayout();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -282,7 +284,7 @@ export function SettingsModal({
   return (
     <>
       <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
-        <View style={styles.root}>
+        <View style={[styles.root, overlay.rootStyle]}>
           {/* Modern blur backdrop with interactive dismiss */}
           <BlurView intensity={32} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
           <Pressable
@@ -294,8 +296,10 @@ export function SettingsModal({
           />
 
           <View
+            testID="settings-sheet"
             style={[
               styles.sheet,
+              overlay.sheetStyle,
               {
                 backgroundColor: themeColors.surface,
                 paddingBottom: insets.bottom + spacing.lg,

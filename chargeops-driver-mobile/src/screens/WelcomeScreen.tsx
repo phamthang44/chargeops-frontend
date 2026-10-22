@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, BrandMark, FeatureArt, LegalDocumentSheet, SettingsModal, type FeatureName } from '@/components';
@@ -28,7 +28,7 @@ export function WelcomeScreen() {
   const { signIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
-  const mockActive = isMockMode();
+  const mockActive = isMockMode() || Platform.OS === 'web';
 
   function handleQuickMockLogin() {
     const mockDriver = usersMock[0];

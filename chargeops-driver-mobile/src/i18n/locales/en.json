@@ -1,4 +1,12 @@
 {
+  "legalSheet": {
+    "searchPlaceholder": "Search this document...",
+    "clearSearch": "Clear search",
+    "securityTitle": "Infrastructure & Data Security",
+    "updatedAt": "Updated on {{date}}",
+    "noResults": "No content found containing \"{{query}}\"",
+    "acknowledge": "I understand & Agree"
+  },
   "common": {
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
@@ -1136,7 +1144,7 @@
     "viewDetail": "View booking details",
     "home": "Back to Home",
     "goHome": "Back to Home",
-    "refundNote": "100% refund policy applies if cancelled 30 minutes ahead.",
+    "refundNote": "See booking details for the cancellation deadline and current refund amount under this booking’s policy.",
     "connector": "Connector"
   },
   "bookingDetail": {
@@ -1267,6 +1275,11 @@
     "continuePay": "Continue payment"
   },
   "qrCheckIn": {
+    "chargePointShort": "Charger:",
+    "connectorShort": "Port:",
+    "bookedLocation": "Your booked charging location:",
+    "chargePoint": "Charge point",
+    "activateNow": "⚡ Activate check-in now",
     "title": "QR Check-in",
     "scanHint": "Position the QR code on the charger within the frame to check in.",
     "simulate": "Enter charger ID",

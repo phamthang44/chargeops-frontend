@@ -79,16 +79,21 @@ function Hero() {
           </h1>
 
           <p className="mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-ink-body">
-            Xem thông tin trạm, giá gói và khung giờ trước khi đặt. Khi tới trạm, dùng mã QR để check-in theo hướng dẫn trong ứng dụng.
+            Chủ động hành trình xe điện: Tìm trạm sạc gần nhất, xem giá gói minh bạch và đặt trước khung giờ để không phải chờ đợi. Khi tới nơi, chỉ cần quét mã QR để bắt đầu nạp năng lượng.
           </p>
 
           {/* Island CTA Buttons (Button-in-Button Architecture) */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-            <a href="#tai-ung-dung" className="btn-island-primary w-full justify-between sm:w-auto">
-              <span>Tải ứng dụng ngay</span>
+            <a
+              href="https://driver.chargeops.online/?demo=true"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-island-primary w-full justify-between sm:w-auto"
+            >
+              <span>Trải nghiệm Driver Web</span>
               <span className="btn-icon-bubble">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </span>
             </a>
@@ -404,18 +409,21 @@ function DownloadCta() {
               <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-primary-light/15 blur-3xl" />
               <div className="relative">
                 <span className="pill bg-white/10 text-primary-light font-bold mb-4">
-                  ỨNG DỤNG CHO iOS &amp; ANDROID
+                  DÙNG THỬ TRỰC TIẾP TRÊN WEB
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance mt-3">
-                  Tìm trạm và chọn khung giờ cùng ChargeOps
+                  Trải nghiệm ứng dụng tài xế ChargeOps ngay hôm nay
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base text-white/80 leading-relaxed">
-                  Tải ứng dụng ChargeOps để đặt khung giờ sạc đầu tiên của bạn. Hoặc để lại email để chúng tôi thông báo khi mở trạm mới tại khu vực của bạn.
+                  Không phải chờ tải app hay đăng ký rườm rà. Thử ngay trọn vẹn luồng tìm trạm, giữ trước khung giờ và check-in sạc bằng mã QR với tài khoản tài xế mẫu có sẵn.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center gap-6">
-                  <StoreBadges />
                   <QrDownload />
+                  <div className="pt-2 text-center">
+                    <p className="text-xs text-white/50 mb-3">Ứng dụng di động bản chính thức (iOS &amp; Android)</p>
+                    <StoreBadges />
+                  </div>
                   <div className="w-full max-w-md pt-2">
                     <WaitlistForm compact />
                   </div>

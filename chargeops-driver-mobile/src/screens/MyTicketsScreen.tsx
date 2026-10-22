@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: fontSizes.caption,
   },
-  listContent: {
+  listContent: { width: '100%', maxWidth: 840, alignSelf: 'center',
     padding: spacing.md,
     gap: spacing.xs,
     paddingBottom: spacing.xxl,

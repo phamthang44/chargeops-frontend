@@ -4,10 +4,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, StatusBadge } from '@/components';
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
 import { usePreferences } from '@/context/PreferencesContext';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -42,6 +43,11 @@ export function QRCheckInScreen() {
   const [committing, setCommitting] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const handled = useRef(false);
+  const { availableWidth, availableHeight } = useAdaptiveLayout();
+  const dialog = availableWidth >= 600 && availableHeight >= 360;
+  const [scannerSize, setScannerSize] = useState({ width: 0, height: 0 });
+  const [hintHeight, setHintHeight] = useState(40);
+  const frameSize = Math.max(0, Math.min(240, scannerSize.width - spacing.xl * 2, scannerSize.height - (hintHeight + spacing.md * 2) * 2));
 
   useEffect(() => {
     let active = true;
@@ -214,6 +220,8 @@ export function QRCheckInScreen() {
         <Pressable
           onPress={() => navigation.goBack()}
           hitSlop={12}
+          accessibilityRole="button"
+          style={styles.closeButton}
           accessibilityLabel={t('qrCheckIn.close')}
         >
           <Ionicons name="close" size={28} color="#FFFFFF" />
@@ -224,6 +232,7 @@ export function QRCheckInScreen() {
 
       {/* Target Booking Info Banner — Displays exact Station, Charge Point, and Connector */}
       {expected && (
+        <View style={styles.bannerContainer}>
         <View style={[styles.targetBanner, { backgroundColor: '#131917', borderColor: 'rgba(16, 185, 129, 0.35)' }]}>
           <View style={styles.targetBannerTop}>
             <View style={styles.targetDot} />
@@ -233,13 +242,13 @@ export function QRCheckInScreen() {
           </View>
           <View style={styles.targetPillRow}>
             <View style={styles.targetBadge}>
-              <Text style={styles.targetBadgeLabel}>Trụ:</Text>
+              <Text style={styles.targetBadgeLabel}>{t('qrCheckIn.chargePointShort')}</Text>
               <Text style={styles.targetBadgeVal}>
                 {expected.chargePointCode || expected.chargePointName || 'N/A'}
               </Text>
             </View>
             <View style={[styles.targetBadge, styles.targetBadgeHighlight]}>
-              <Text style={styles.targetBadgeLabel}>Cổng:</Text>
+              <Text style={styles.targetBadgeLabel}>{t('qrCheckIn.connectorShort')}</Text>
               <Text style={styles.targetBadgeValHighlight}>
                 {expected.connectorCode || expected.connectorName}
               </Text>
@@ -249,10 +258,14 @@ export function QRCheckInScreen() {
             </Text>
           </View>
         </View>
+        </View>
       )}
 
       {/* Camera / Scanner area */}
-      <View style={styles.scannerArea}>
+      <View style={styles.scannerArea} onLayout={({ nativeEvent: { layout } }) => {
+        setScannerSize(previous => previous.width === layout.width && previous.height === layout.height
+          ? previous : { width: layout.width, height: layout.height });
+      }}>
         {!permission ? (
           <ActivityIndicator color={themeColors.primary} size="large" />
         ) : permission.granted ? (
@@ -265,21 +278,21 @@ export function QRCheckInScreen() {
                 result || scanning ? undefined : ({ data }) => void handleScan(data)
               }
             />
-            <View style={styles.frame}>
+            <View style={[styles.frame, { width: frameSize, height: frameSize }]}>
               <View style={[styles.corner, styles.cornerTL, { borderColor: themeColors.primary }]} />
               <View style={[styles.corner, styles.cornerTR, { borderColor: themeColors.primary }]} />
               <View style={[styles.corner, styles.cornerBL, { borderColor: themeColors.primary }]} />
               <View style={[styles.corner, styles.cornerBR, { borderColor: themeColors.primary }]} />
               {scanning && <ActivityIndicator color={themeColors.primary} size="large" />}
             </View>
-            <View style={styles.hintBlock}>
+            <View style={styles.hintBlock} onLayout={({ nativeEvent: { layout } }) => setHintHeight(layout.height)}>
               <Text style={styles.scanHint}>
                 {scanning ? t('qrCheckIn.scanning') : t('qrCheckIn.scanHint')}
               </Text>
             </View>
           </>
         ) : (
-          <View style={styles.permissionBlock}>
+          <ScrollView style={styles.permissionScroll} contentContainerStyle={styles.permissionBlock}>
             <View style={[styles.permissionIcon, { backgroundColor: themeColors.surfaceAlt }]}>
               <Ionicons name="camera-outline" size={40} color={themeColors.textStrong} />
             </View>
@@ -290,14 +303,14 @@ export function QRCheckInScreen() {
               onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())}
               style={styles.permissionBtn}
             />
-          </View>
+          </ScrollView>
         )}
       </View>
 
       {/* Confirmation bottom sheet */}
       {result?.ok && (
-        <View style={styles.sheetOverlay}>
-          <View style={[styles.sheet, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+        <View style={[styles.sheetOverlay, dialog && styles.dialogOverlay]}>
+          <ScrollView style={[styles.sheet, dialog && styles.dialogSheet, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]} contentContainerStyle={styles.sheetContent}>
             <View style={[styles.checkRing, { backgroundColor: themeColors.primarySoft }]}>
               <Ionicons name="qr-code-outline" size={30} color={themeColors.primary} />
             </View>
@@ -367,14 +380,14 @@ export function QRCheckInScreen() {
               <Ionicons name="information-circle-outline" size={15} color={themeColors.textMuted} />
               <Text style={[styles.autoStop, { color: themeColors.textMuted }]}>{t('qrCheckIn.autoStop')}</Text>
             </View>
-          </View>
+          </ScrollView>
         </View>
       )}
 
       {/* Rejected scan bottom sheet */}
       {result && !result.ok && (
-        <View style={styles.sheetOverlay}>
-          <View style={[styles.sheet, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+        <View style={[styles.sheetOverlay, dialog && styles.dialogOverlay]}>
+          <ScrollView style={[styles.sheet, dialog && styles.dialogSheet, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]} contentContainerStyle={styles.sheetContent}>
             <View style={[styles.errorRing, { backgroundColor: `${themeColors.error}1A` }]}>
               <Ionicons name="alert" size={30} color={themeColors.error} />
             </View>
@@ -383,22 +396,22 @@ export function QRCheckInScreen() {
             {result.code === 'WRONG_CONNECTOR' && result.booking && (
               <View style={[styles.targetBox, { backgroundColor: themeColors.surfaceAlt, borderColor: themeColors.border }]}>
                 <Text style={[styles.targetBoxTitle, { color: themeColors.primary }]}>
-                  Vị trí sạc trong lượt đặt của bạn:
+                  {t('qrCheckIn.bookedLocation')}
                 </Text>
                 <View style={styles.targetBoxRow}>
-                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Trụ sạc:</Text>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>{t('qrCheckIn.chargePoint')}:</Text>
                   <Text style={[styles.targetBoxValCode, { color: '#FFFFFF', backgroundColor: '#1E293B' }]}>
                     {result.booking.chargePointCode || result.booking.chargePointName || 'N/A'}
                   </Text>
                 </View>
                 <View style={styles.targetBoxRow}>
-                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Cổng sạc:</Text>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>{t('qrCheckIn.connector')}:</Text>
                   <Text style={[styles.targetBoxValHighlight, { color: themeColors.primary }]}>
                     {result.booking.connectorCode || result.booking.connectorName}
                   </Text>
                 </View>
                 <View style={styles.targetBoxRow}>
-                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>Trạm sạc:</Text>
+                  <Text style={[styles.targetBoxLabel, { color: themeColors.textMuted }]}>{t('qrCheckIn.station')}:</Text>
                   <Text style={[styles.targetBoxVal, { color: themeColors.textStrong }]} numberOfLines={1}>
                     {result.booking.stationName}
                   </Text>
@@ -412,7 +425,7 @@ export function QRCheckInScreen() {
             )}
             {result.code === 'TOO_EARLY' && result.booking && (
               <AppButton
-                label="⚡ Kích hoạt check-in ngay"
+                label={t('qrCheckIn.activateNow')}
                 loading={committing}
                 onPress={forceDemoCheckIn}
                 style={{ alignSelf: 'stretch' }}
@@ -423,7 +436,7 @@ export function QRCheckInScreen() {
               variant={result.code === 'TOO_EARLY' ? 'secondary' : 'primary'}
               onPress={retry}
             />
-          </View>
+          </ScrollView>
         </View>
 
       )}
@@ -435,14 +448,18 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   topBar: {
-    height: 56,
+    width: '100%',
+    maxWidth: 960,
+    alignSelf: 'center',
+    minHeight: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
   },
-  topTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
-  topSpacer: { width: 28 },
+  closeButton: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+  topTitle: { flex: 1, textAlign: 'center', fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
+  topSpacer: { width: 48 },
 
   scannerArea: {
     flex: 1,
@@ -452,8 +469,6 @@ const styles = StyleSheet.create({
   },
 
   frame: {
-    width: 240,
-    height: 240,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -465,14 +480,19 @@ const styles = StyleSheet.create({
 
   hintBlock: {
     position: 'absolute',
-    bottom: spacing.xxl,
+    bottom: spacing.md,
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
   },
   scanHint: { fontSize: fontSizes.body, color: '#FFFFFF', textAlign: 'center' },
 
+  permissionScroll: { flex: 1, width: '100%' },
   permissionBlock: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
@@ -485,7 +505,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  permissionTitle: { fontSize: fontSizes.title, fontWeight: fontWeights.bold },
+  permissionTitle: { textAlign: 'center', fontSize: fontSizes.title, fontWeight: fontWeights.bold },
   permissionBody: { fontSize: fontSizes.body, textAlign: 'center', lineHeight: lineHeights.body },
   permissionBtn: { alignSelf: 'stretch', marginTop: spacing.sm },
 
@@ -494,10 +514,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
+  dialogOverlay: { justifyContent: 'center', padding: spacing.md },
+  dialogSheet: { borderRadius: 24 },
   sheet: {
+    width: '100%',
+    maxWidth: 640,
+    maxHeight: '100%',
+    flexGrow: 0,
+    flexShrink: 1,
+    alignSelf: 'center',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderTopWidth: 1,
+  },
+  sheetContent: {
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
@@ -515,12 +545,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
   },
-  sheetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
-  sheetLabel: { fontSize: fontSizes.caption },
+  sheetRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  sheetLabel: { flexShrink: 1, fontSize: fontSizes.caption },
   sheetValue: { flex: 1, fontSize: fontSizes.body, fontWeight: fontWeights.bold, textAlign: 'right' },
 
   autoStopRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  autoStop: { fontSize: fontSizes.caption },
+  autoStop: { flex: 1, fontSize: fontSizes.caption },
   errorBody: { fontSize: fontSizes.body, textAlign: 'center', lineHeight: lineHeights.body },
   countdownPill: {
     flexDirection: 'row',
@@ -535,8 +565,8 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
   },
 
+  bannerContainer: { width: '100%', maxWidth: 888, alignSelf: 'center', paddingHorizontal: spacing.lg },
   targetBanner: {
-    marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -619,6 +649,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   targetBoxRow: {
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -628,6 +660,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.caption,
   },
   targetBoxVal: {
+    flexShrink: 1,
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
   },

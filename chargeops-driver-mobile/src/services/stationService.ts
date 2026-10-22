@@ -60,8 +60,12 @@ export const apiBaseUrl = resolveDevUrl(
   (Platform.OS === 'android' ? 'http://10.0.2.2:8081' : 'http://localhost:8081')
 );
 
-/** Checks whether mock data mode is enabled via environment variable. */
-export const isMockMode = (): boolean => process.env.EXPO_PUBLIC_USE_MOCKS === 'true';
+/** Checks whether mock data mode is enabled via environment variable or active mock session. */
+export const isMockMode = (): boolean => {
+  if (process.env.EXPO_PUBLIC_USE_MOCKS === 'true') return true;
+  const token = resolveAccessToken();
+  return Boolean(token && token.startsWith('mock-'));
+};
 
 let activeAccessTokenGetter: (() => string | null) | null = null;
 const connectorCache = new Map<string, Connector>();

@@ -255,6 +255,12 @@ export function computeRefund(booking: Booking, now: number = getBookingNowMs())
 // In-memory store (newest first). Seeded from the mock only in mock mode.
 const store: Booking[] = isMockMode() ? [...bookingsMock] : [];
 
+function ensureStoreSeeded(): void {
+  if (store.length === 0 && isMockMode()) {
+    store.push(...bookingsMock);
+  }
+}
+
 function simulateNetwork<T>(data: T, delayMs = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
 }
@@ -266,6 +272,7 @@ function simulateNetwork<T>(data: T, delayMs = 250): Promise<T> {
  * booking in a state the clock has already invalidated.
  */
 function reconcileLapsed(now = Date.now()): void {
+  ensureStoreSeeded();
   for (const b of store) {
     if (b.status === 'PENDING' && b.expiresAt && new Date(b.expiresAt).getTime() <= now) {
       b.status = 'EXPIRED';

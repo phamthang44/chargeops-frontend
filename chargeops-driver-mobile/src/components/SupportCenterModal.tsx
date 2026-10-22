@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -103,6 +104,7 @@ export function SupportCenterModal({
   onClose,
   initialTab = 'guide',
 }: SupportCenterModalProps) {
+  const overlay = useOverlayLayout();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -151,13 +153,14 @@ export function SupportCenterModal({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.root}>
+      <View style={[styles.root, overlay.rootStyle]}>
         <BlurView intensity={28} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
         <View
           style={[
             styles.sheet,
+            overlay.sheetStyle,
             {
               backgroundColor: themeColors.surface,
               paddingBottom: insets.bottom + spacing.lg,

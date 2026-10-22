@@ -1,4 +1,12 @@
 {
+  "legalSheet": {
+    "searchPlaceholder": "Tìm từ khóa trong tài liệu...",
+    "clearSearch": "Xóa từ khóa tìm kiếm",
+    "securityTitle": "Hạ tầng & Bảo mật dữ liệu",
+    "updatedAt": "Cập nhật ngày {{date}}",
+    "noResults": "Không tìm thấy nội dung chứa \"{{query}}\"",
+    "acknowledge": "Tôi đã hiểu & Đồng ý"
+  },
   "common": {
     "terms": "Điều khoản dịch vụ",
     "privacy": "Chính sách bảo mật",
@@ -1136,7 +1144,7 @@
     "viewDetail": "Xem chi tiết đặt chỗ",
     "home": "Quay lại Trang chủ",
     "goHome": "Quay lại Trang chủ",
-    "refundNote": "Áp dụng chính sách hoàn tiền 100% nếu hủy trước 30 phút.",
+    "refundNote": "Xem chi tiết đặt chỗ để biết hạn hủy và số tiền hoàn hiện tại theo chính sách của lượt đặt.",
     "connector": "Cổng sạc"
   },
   "bookingDetail": {
@@ -1267,6 +1275,11 @@
     "continuePay": "Tiếp tục thanh toán"
   },
   "qrCheckIn": {
+    "chargePointShort": "Trụ:",
+    "connectorShort": "Cổng:",
+    "bookedLocation": "Vị trí sạc trong lượt đặt của bạn:",
+    "chargePoint": "Trụ sạc",
+    "activateNow": "⚡ Kích hoạt check-in ngay",
     "title": "Quét QR Check-in",
     "scanHint": "Đưa mã QR trên trụ sạc vào khung hình để check-in.",
     "simulate": "Nhập mã trụ sạc",

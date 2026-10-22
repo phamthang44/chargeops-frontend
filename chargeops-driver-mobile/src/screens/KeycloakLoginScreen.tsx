@@ -212,7 +212,7 @@ export function KeycloakLoginScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  body: { flexGrow: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xxl, gap: spacing.lg },
+  body: { width: '100%', maxWidth: 720, alignSelf: 'center',  flexGrow: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xxl, gap: spacing.lg },
   brandMark: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', borderRadius: radius.lg, backgroundColor: colors.primarySoft },
   eyebrow: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, color: colors.primary },
   title: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: lineHeights.display },
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   formError: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption, color: colors.error },
   securityBadge: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, backgroundColor: colors.primarySoft, borderRadius: radius.md, padding: spacing.md },
   securityText: { flex: 1, fontSize: fontSizes.caption, color: colors.textBody, lineHeight: lineHeights.caption },
-  footer: { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm, gap: spacing.md },
+  footer: { width: '100%', maxWidth: 720, alignSelf: 'center',  paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm, gap: spacing.md },
   cta: { height: 52, borderRadius: radius.lg },
   mockLoginBtn: {
     alignItems: 'center',

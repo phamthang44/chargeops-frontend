@@ -471,6 +471,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
@@ -508,6 +509,8 @@ const styles = StyleSheet.create({
 
   scroll: {
     maxHeight: 460,
+    flexShrink: 1,
+    minHeight: 0,
   },
   list: {
     gap: spacing.sm,

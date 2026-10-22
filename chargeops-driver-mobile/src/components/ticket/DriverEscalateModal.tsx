@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,7 @@ export function DriverEscalateModal({
   onSubmit,
   isSubmitting,
 }: DriverEscalateModalProps) {
+  const overlay = useOverlayLayout();
   const { t } = useTranslation();
   const { themeColors, isDark } = usePreferences();
 
@@ -78,7 +80,7 @@ export function DriverEscalateModal({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        style={styles.backdrop}
+        style={[styles.backdrop, overlay.rootStyle]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.backdropPressable} onPress={onClose} />
@@ -86,6 +88,7 @@ export function DriverEscalateModal({
         <View
           style={[
             styles.sheetContainer,
+            overlay.sheetStyle,
             {
               backgroundColor: themeColors.surface,
               borderColor: themeColors.border,

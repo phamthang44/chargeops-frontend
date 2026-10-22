@@ -67,7 +67,7 @@ export function CancelBookingSheet({ visible, booking, onClose, onConfirmed }: C
   const isUnpaid = refund.tier === 'UNPAID';
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={t('cancelBooking.title')}>
+    <BottomSheet scrollable visible={visible} onClose={onClose} title={t('cancelBooking.title')}>
       <Text style={[styles.subtitle, { color: themeColors.textMuted }]}>
         {isUnpaid ? t('cancelBooking.unpaidSubtitle') : t('cancelBooking.subtitle')}
       </Text>

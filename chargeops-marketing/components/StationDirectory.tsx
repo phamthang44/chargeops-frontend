@@ -399,9 +399,10 @@ export function StationDirectory({
                 <iframe
                   key={activeStation?.id ?? city}
                   src={mapEmbedUrl}
-                  title="Bản đồ trạm sạc OpenStreetMap"
-                  className="h-full w-full border-0 select-none"
+                  title="Bản đồ trạm sạc"
+                  className="h-[calc(100%+38px)] w-full border-0 select-none -mb-[38px]"
                   loading="lazy"
+                  tabIndex={-1}
                 />
 
                 {/* Floating Navigation Shortcut */}

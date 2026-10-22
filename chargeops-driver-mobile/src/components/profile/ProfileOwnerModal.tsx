@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.xl,
   },
-  modalCard: {
+  modalCard: { maxWidth: 560, alignSelf: 'center',
     width: '100%',
     borderRadius: radius.lg,
     padding: spacing.xl,

@@ -30,7 +30,7 @@ export function PriceChangedModal({
   if (!pendingPricePreview) return null;
 
   return (
-    <BottomSheet
+    <BottomSheet scrollable
       visible={visible}
       onClose={onDecline}
       title={t('bookingConfirmation.priceChangedTitle')}

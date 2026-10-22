@@ -306,6 +306,8 @@ export function MapStationPeekSheet({
         {/* Actions Row */}
         <View style={[styles.actionRow, { borderTopColor: isDark ? '#1F2625' : '#F3F4F6' }]}>
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('stationList.directions', 'Chỉ đường')}
             style={[
               styles.btnSecondary,
               {
@@ -324,6 +326,8 @@ export function MapStationPeekSheet({
           </Pressable>
 
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={actionLabel}
             style={[
               styles.btnPrimary,
               {
@@ -494,10 +498,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    height: 38,
+    minHeight: 48,
+    minWidth: 48,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
   },
   btnSecondaryText: {
+    flexShrink: 1,
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
     lineHeight: 18,
@@ -509,7 +517,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    height: 38,
+    minHeight: 48,
+    minWidth: 48,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
     shadowColor: '#10B981',
     shadowOffset: { width: 0, height: 2 },
@@ -518,6 +529,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   btnPrimaryText: {
+    flexShrink: 1,
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
     color: '#FFFFFF',

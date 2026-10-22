@@ -1,3 +1,5 @@
+import { useAdaptiveLayout } from '@/hooks/useAdaptiveLayout';
+import { getPortraitGuideSize } from '@/utils/overlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions, type CameraCapturedPicture } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +11,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -42,6 +45,8 @@ interface CameraPortraitModalProps {
  *  - Full permission handling with Settings deep-link
  */
 export function CameraPortraitModal({ visible, onClose, onCapture }: CameraPortraitModalProps) {
+  const { availableWidth, availableHeight } = useAdaptiveLayout();
+  const guideSize = getPortraitGuideSize(availableWidth, availableHeight);
   const insets = useSafeAreaInsets();
   const { themeColors } = usePreferences();
 
@@ -138,7 +143,7 @@ export function CameraPortraitModal({ visible, onClose, onCapture }: CameraPortr
         <Ionicons name="close" size={26} color="#FFFFFF" />
       </Pressable>
 
-      <View style={styles.permissionContent}>
+      <ScrollView contentContainerStyle={styles.permissionContent}>
         <View style={styles.permissionIconWrap}>
           <Ionicons name="camera-outline" size={56} color={themeColors.primary} />
         </View>
@@ -180,7 +185,7 @@ export function CameraPortraitModal({ visible, onClose, onCapture }: CameraPortr
             </Text>
           </Pressable>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 
@@ -222,7 +227,7 @@ export function CameraPortraitModal({ visible, onClose, onCapture }: CameraPortr
       <View style={styles.guideWrapper} pointerEvents="none">
         {/* The oval lives in its own container so only IT is centered */}
         <View style={styles.ovalContainer}>
-          <View style={styles.faceOval} />
+          <View style={[styles.faceOval, guideSize, { borderRadius: guideSize.width / 2 }]} />
           <Text style={styles.guideHint}>Đặt khuôn mặt vào vòng tròn</Text>
         </View>
       </View>
@@ -324,6 +329,8 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   permissionContent: {
+    flexGrow: 1, justifyContent: 'center', paddingVertical: 64,
+    width: '100%', maxWidth: 560, alignSelf: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
     gap: spacing.md,

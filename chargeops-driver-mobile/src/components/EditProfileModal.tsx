@@ -1,3 +1,4 @@
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useEffect, useMemo, useState } from 'react';
@@ -38,6 +39,7 @@ interface FormErrors {
 
 /** Edit backend-owned profile fields while keeping identity security in Keycloak. */
 export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
+  const overlay = useOverlayLayout();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { profile, session, completeProfile } = useAuth();
@@ -107,17 +109,19 @@ export function EditProfileModal({ visible, onClose }: EditProfileModalProps) {
       statusBarTranslucent
       onRequestClose={submitting ? undefined : onClose}
     >
-      <View style={styles.root}>
+      <View style={[styles.root, overlay.rootStyle]}>
         <BlurView intensity={28} tint={isDark ? 'dark' : 'regular'} style={StyleSheet.absoluteFill} />
         <Pressable style={StyleSheet.absoluteFill} onPress={submitting ? undefined : onClose} />
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
+          style={[styles.keyboardView, { flex: 1, justifyContent: overlay.isDialog ? 'center' : 'flex-end' }]}
         >
           <View
+            testID="edit-profile-sheet"
             style={[
               styles.sheet,
+              overlay.sheetStyle,
               {
                 backgroundColor: themeColors.surface,
                 paddingBottom: insets.bottom + spacing.lg,

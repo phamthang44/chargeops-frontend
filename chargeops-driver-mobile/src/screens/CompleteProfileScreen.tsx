@@ -305,7 +305,7 @@ function toE164VietnamesePhone(value: string): string {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
-  content: {
+  content: { width: '100%', maxWidth: 720, alignSelf: 'center',
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,

@@ -3,7 +3,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, OtpInput } from '@/components';
@@ -78,7 +78,7 @@ export function OtpVerificationScreen() {
       </View>
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.body}>
+        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>{t('otp.title')}</Text>
           <Text style={styles.subtitle}>
             <Trans
@@ -105,7 +105,7 @@ export function OtpVerificationScreen() {
           <Pressable onPress={() => navigation.goBack()} hitSlop={6}>
             <Text style={styles.changeLink}>{t('otp.changeNumber')}</Text>
           </Pressable>
-        </View>
+        </ScrollView>
 
         <View style={styles.footer}>
           <AppButton
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   headerBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold, color: colors.textStrong },
-  body: { flex: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing.lg },
+  body: { width: '100%', maxWidth: 720, alignSelf: 'center', flexGrow: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing.lg },
   title: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, color: colors.textStrong, lineHeight: lineHeights.display },
   subtitle: { fontSize: fontSizes.body, color: colors.textMuted, lineHeight: lineHeights.body },
   target: { color: colors.textStrong, fontWeight: fontWeights.semibold },
@@ -144,5 +144,5 @@ const styles = StyleSheet.create({
   resendMuted: { fontSize: fontSizes.body, color: colors.textMuted, fontWeight: fontWeights.medium },
   resendLink: { fontSize: fontSizes.body, color: colors.primary, fontWeight: fontWeights.semibold },
   changeLink: { fontSize: fontSizes.body, color: colors.primary, fontWeight: fontWeights.medium },
-  footer: { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm },
+  footer: { width: '100%', maxWidth: 720, alignSelf: 'center',  paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm },
 });

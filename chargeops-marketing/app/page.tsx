@@ -17,7 +17,6 @@ import { ProblemComparison } from "@/components/ProblemComparison";
 import { JourneyTimeline } from "@/components/JourneyTimeline";
 import { InteractiveSlotScheduler } from "@/components/InteractiveSlotScheduler";
 import { LiveChargingTelemetry } from "@/components/LiveChargingTelemetry";
-import { OwnerRevenueCalculator } from "@/components/OwnerRevenueCalculator";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -387,11 +386,6 @@ function OwnerBand() {
             </BrowserFrame>
           </Reveal>
         </div>
-
-        {/* Interactive Owner Revenue & ROI Simulator */}
-        <Reveal delay={160}>
-          <OwnerRevenueCalculator />
-        </Reveal>
       </div>
     </section>
   );

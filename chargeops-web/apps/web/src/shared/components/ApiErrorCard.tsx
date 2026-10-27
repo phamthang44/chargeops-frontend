@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { retryDeadline } from '@chargeops/api';
 import { useTranslation } from 'react-i18next';
 import {
   IconAlertCircle,
@@ -67,6 +68,15 @@ export function ApiErrorCard({
 }: ApiErrorCardProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+  useEffect(() => {
+    const deadline = retryDeadline(error);
+    const tick = () => setRemaining(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    tick();
+    if (!deadline) return;
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [error]);
 
   const facts = extractFacts(error);
   const message = getApiErrorMessage(error);
@@ -122,10 +132,10 @@ export function ApiErrorCard({
             <button
               type="button"
               onClick={onRetry}
-              disabled={isRetrying}
+              disabled={isRetrying || remaining > 0}
               className="group/retry inline-flex shrink-0 items-center gap-2 rounded-full border border-bad/25 bg-bad-soft py-1.5 pl-4 pr-1.5 text-[11.5px] font-bold text-bad-deep transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-bad-soft-hover hover:shadow-xs active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60"
             >
-              <span>{isRetrying ? t('errorCard.retrying', { defaultValue: 'Đang thử lại…' }) : t('retry')}</span>
+              <span>{remaining > 0 ? t('security.retryIn', { count: remaining }) : isRetrying ? t('errorCard.retrying', { defaultValue: 'Đang thử lại…' }) : t('retry')}</span>
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-bad/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/retry:rotate-180 group-hover/retry:scale-110">
                 <IconRefreshCw size={12} className={isRetrying ? 'animate-spin' : ''} />
               </span>

@@ -816,7 +816,15 @@
     "today": "Hôm nay",
     "tomorrow": "Ngày mai",
     "monthFormat": "Tháng {{month}}",
-    "weekdays": ["CN", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7"],
+    "weekdays": [
+      "CN",
+      "Th 2",
+      "Th 3",
+      "Th 4",
+      "Th 5",
+      "Th 6",
+      "Th 7"
+    ],
     "bookingNoticeTitle": "Quy định đặt chỗ trước tối đa 48 giờ",
     "bookingNoticeDesc": "Chọn ngày bắt đầu: hôm nay hoặc ngày mai. Khung giờ có thể kết thúc sang ngày kế tiếp nếu trạm mở 24/7.",
     "nextDayTag": "(ngày mai)",
@@ -1610,11 +1618,21 @@
   },
   "notification": {
     "booking": {
-      "confirmed": { "title": "Đặt chỗ đã được xác nhận" },
-      "cancelled": { "title": "Đặt chỗ đã bị hủy" },
-      "no_show": { "title": "Đặt chỗ đã kết thúc do không check-in" },
-      "completed": { "title": "Đặt chỗ đã hoàn thành" },
-      "reminder": { "title": "Sắp đến giờ đặt chỗ" },
+      "confirmed": {
+        "title": "Đặt chỗ đã được xác nhận"
+      },
+      "cancelled": {
+        "title": "Đặt chỗ đã bị hủy"
+      },
+      "no_show": {
+        "title": "Đặt chỗ đã kết thúc do không check-in"
+      },
+      "completed": {
+        "title": "Đặt chỗ đã hoàn thành"
+      },
+      "reminder": {
+        "title": "Sắp đến giờ đặt chỗ"
+      },
       "state_message": "Booking {{code}}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành."
     },
     "refund": {
@@ -1682,5 +1700,11 @@
       "hoursAgo": "{{count}} giờ trước",
       "daysAgo": "{{count}} ngày trước"
     }
+  },
+  "security": {
+    "title": "Tạm giới hạn thao tác",
+    "wait": "Bạn thao tác quá nhanh. Vui lòng thử lại sau {{seconds}} giây.",
+    "unavailable": "Bộ bảo vệ tạm gián đoạn. Vui lòng thử lại sau {{seconds}} giây.",
+    "retryIn": "Thử lại sau {{count}} giây"
   }
 }

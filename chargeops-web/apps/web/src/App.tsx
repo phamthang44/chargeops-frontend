@@ -5,6 +5,7 @@ import { ToastProvider } from '@chargeops/ui';
 import { RoleRouter } from './RoleRouter';
 import { ThemeProvider } from './theme';
 import i18n from './i18n';
+import { shouldRetryApiError } from '@chargeops/api';
 import { AppErrorBoundary } from './shared/components/AppErrorBoundary';
 
 /**
@@ -29,7 +30,7 @@ function pickMockUser() {
 }
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
+  defaultOptions: { queries: { staleTime: 30_000, retry: shouldRetryApiError, refetchOnWindowFocus: false } },
 });
 
 // Cached API data (station province/ward names, location lists…) is localized

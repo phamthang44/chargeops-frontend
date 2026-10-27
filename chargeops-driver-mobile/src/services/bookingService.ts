@@ -1,3 +1,4 @@
+import { securityFetch, securityRetryDetails } from '../utils/securityRateLimit';
 import { bookingsMock } from '@/mock/bookings.mock';
 import { occupancyMock } from '@/mock/occupancy.mock';
 import { chargePointsMock, connectorsMock, stationsMock } from '@/mock/stations.mock';
@@ -988,7 +989,7 @@ export async function createBooking(
 
     let response: Response;
     try {
-      response = await fetch(`${apiBaseUrl}/api/v1/bookings`, {
+      response = await securityFetch(`${apiBaseUrl}/api/v1/bookings`, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -1027,7 +1028,9 @@ export async function createBooking(
       const message = errObj?.message;
       const details = errObj?.details;
       const messageKey = errObj?.messageKey;
-      throw new BookingApiError(code, message, details, messageKey);
+      throw new BookingApiError(code, message,
+        response.status === 429 || code === 'SEC_003' ? securityRetryDetails(response, details) : details,
+        messageKey, response.status, errObj?.traceId);
     }
 
     const payload = await response.json();

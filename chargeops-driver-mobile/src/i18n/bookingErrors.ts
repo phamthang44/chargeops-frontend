@@ -50,6 +50,10 @@ export function extractBookingErrorCode(error: unknown): string | null {
  * Extracts structured validation errors and reasons when available.
  */
 export function bookingErrorMessage(t: TFunction, error: unknown): string {
+  const security = error as { code?: string; status?: number; details?: { retryAfterSeconds?: number } } | null;
+  if (security?.status === 429 || ['SEC_001', 'SEC_002', 'SEC_003'].includes(security?.code ?? '')) {
+    return t(security?.code === 'SEC_003' ? 'security.unavailable' : 'security.wait', { seconds: security?.details?.retryAfterSeconds ?? 5 });
+  }
   if (error instanceof BookingApiError) {
     if (error.code === 'SYS_003' && error.details && typeof error.details === 'object') {
       const fieldNames = Object.keys(error.details).join(', ');

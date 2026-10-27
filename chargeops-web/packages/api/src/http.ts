@@ -1,4 +1,5 @@
 import type { ApiConfig } from './config';
+import { retryDeadline, courtesyIdentity } from './rateLimit';
 
 /** Normalized API failure — one error shape for the whole UI regardless of transport. */
 export class ApiError extends Error {
@@ -40,10 +41,12 @@ const TIMEOUT_MS = 15_000;
  * and error normalization (expects Spring-style problem JSON on failures).
  */
 export class HttpClient {
+  private readonly cooldowns = new Map<string, { until: number; error: ApiError }>();
   constructor(private readonly cfg: ApiConfig) {}
 
   async request<T>(method: string, path: string, opts: RequestOptions = {}): Promise<T> {
     const url = new URL(this.cfg.baseUrl + path, window.location.origin);
+    let cooldownKey = '';
     for (const [k, v] of Object.entries(opts.params ?? {}) as [string, unknown][]) {
       if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
     }
@@ -56,6 +59,10 @@ export class HttpClient {
     try {
       const token = await this.cfg.getToken?.();
       if (token) headers.Authorization = `Bearer ${token}`;
+      cooldownKey = `${courtesyIdentity(headers.Authorization ?? headers.authorization)}:${method}:${url.pathname}`;
+      const cooling = this.cooldowns.get(cooldownKey);
+      if (cooling && cooling.until > Date.now()) throw cooling.error;
+      this.cooldowns.delete(cooldownKey);
       res = await fetch(url, {
         method,
         headers,
@@ -63,6 +70,7 @@ export class HttpClient {
         signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
       });
     } catch (e) {
+      if (e instanceof ApiError) throw e;
       const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
       const authFailure = e instanceof Error && /keycloak|token|auth/i.test(e.message);
       throw new ApiError(0, timedOut ? 'TIMEOUT' : authFailure ? 'AUTH_PROVIDER_UNAVAILABLE' : 'NETWORK', e instanceof Error ? e.message : String(e));
@@ -100,7 +108,13 @@ export class HttpClient {
         /* non-JSON error body — keep defaults */
       }
       traceId ??= res.headers.get('X-Trace-Id') ?? res.headers.get('X-Request-Id') ?? undefined;
-      throw new ApiError(res.status, code, message, messageKey, details, traceId, res.headers.get('Retry-After') ?? undefined);
+      const error = new ApiError(res.status, code, message, messageKey, details, traceId, res.headers.get('Retry-After') ?? undefined);
+      const until = retryDeadline(error);
+      if (until > Date.now()) {
+        if (this.cooldowns.size >= 200) this.cooldowns.delete(this.cooldowns.keys().next().value!);
+        this.cooldowns.set(cooldownKey, { until, error });
+      }
+      throw error;
     }
 
     if (opts.responseType === 'download') {

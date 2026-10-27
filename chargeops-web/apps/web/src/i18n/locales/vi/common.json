@@ -16,7 +16,9 @@
   "total": "Tổng số",
   "notes": "Ghi chú",
   "system": "Hệ thống",
-  "realtime": { "reconnecting": "Đang kết nối lại cập nhật trực tiếp. Dữ liệu mới sẽ được tải khi kết nối thành công." },
+  "realtime": {
+    "reconnecting": "Đang kết nối lại cập nhật trực tiếp. Dữ liệu mới sẽ được tải khi kết nối thành công."
+  },
   "fatalError": {
     "title": "Trang gặp sự cố",
     "body": "Dữ liệu của bạn vẫn an toàn. Hãy tải lại trang để thử lại.",
@@ -119,11 +121,21 @@
   },
   "notification": {
     "booking": {
-      "confirmed": { "title": "Đặt chỗ đã được xác nhận" },
-      "cancelled": { "title": "Đặt chỗ đã bị hủy" },
-      "no_show": { "title": "Đặt chỗ đã kết thúc do không check-in" },
-      "completed": { "title": "Đặt chỗ đã hoàn thành" },
-      "reminder": { "title": "Sắp đến giờ đặt chỗ" },
+      "confirmed": {
+        "title": "Đặt chỗ đã được xác nhận"
+      },
+      "cancelled": {
+        "title": "Đặt chỗ đã bị hủy"
+      },
+      "no_show": {
+        "title": "Đặt chỗ đã kết thúc do không check-in"
+      },
+      "completed": {
+        "title": "Đặt chỗ đã hoàn thành"
+      },
+      "reminder": {
+        "title": "Sắp đến giờ đặt chỗ"
+      },
       "state_message": "Booking {{code}}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành."
     },
     "refund": {
@@ -218,6 +230,12 @@
         "subtitle": "Giả lập cắm sạc xe điện, đồng hồ điện tử & kiểm thử OCPP"
       }
     }
+  },
+  "security": {
+    "title": "Tạm giới hạn thao tác",
+    "wait": "Bạn thao tác quá nhanh. Vui lòng thử lại sau {{seconds}} giây.",
+    "unavailable": "Bộ bảo vệ tạm gián đoạn. Vui lòng thử lại sau {{seconds}} giây.",
+    "retryIn": "Thử lại sau {{count}} giây",
+    "ready": "Bạn có thể thử lại thao tác."
   }
 }
-

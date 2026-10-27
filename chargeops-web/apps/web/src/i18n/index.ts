@@ -1,3 +1,4 @@
+import { retryDeadline } from '@chargeops/api';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -104,6 +105,11 @@ export function getApiErrorMessage(error: unknown): string {
   };
 
   const interpolationParams: Record<string, unknown> = {};
+  if (err.status === 429 || ['SEC_001', 'SEC_002', 'SEC_003'].includes(err.code ?? '')) {
+    const seconds = Math.max(0, Math.ceil((retryDeadline(error) - Date.now()) / 1000));
+    if (!seconds) return i18n.t('security.ready', { ns: 'common' });
+    return i18n.t(err.code === 'SEC_003' ? 'security.unavailable' : 'security.wait', { ns: 'common', seconds });
+  }
   if (typeof err.details === 'object' && err.details !== null && !Array.isArray(err.details)) {
     Object.assign(interpolationParams, err.details);
   } else if (typeof err.details === 'string') {

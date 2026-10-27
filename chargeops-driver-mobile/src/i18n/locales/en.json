@@ -816,7 +816,15 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "monthFormat": "Month {{month}}",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
     "bookingNoticeTitle": "48-Hour Advance Booking Policy",
     "bookingNoticeDesc": "Choose start date: today or tomorrow. Booking time window can extend to the next day if the station operates 24/7.",
     "nextDayTag": "(tomorrow)",
@@ -1610,11 +1618,21 @@
   },
   "notification": {
     "booking": {
-      "confirmed": { "title": "Booking confirmed" },
-      "cancelled": { "title": "Booking cancelled" },
-      "no_show": { "title": "Booking ended due to no-show" },
-      "completed": { "title": "Booking completed" },
-      "reminder": { "title": "Upcoming booking reminder" },
+      "confirmed": {
+        "title": "Booking confirmed"
+      },
+      "cancelled": {
+        "title": "Booking cancelled"
+      },
+      "no_show": {
+        "title": "Booking ended due to no-show"
+      },
+      "completed": {
+        "title": "Booking completed"
+      },
+      "reminder": {
+        "title": "Upcoming booking reminder"
+      },
       "state_message": "Booking {{code}}. Please open booking to view current status."
     },
     "refund": {
@@ -1682,5 +1700,11 @@
       "hoursAgo": "{{count}}h ago",
       "daysAgo": "{{count}}d ago"
     }
+  },
+  "security": {
+    "title": "Action temporarily limited",
+    "wait": "Too many requests. Please try again in {{seconds}} seconds.",
+    "unavailable": "The protection service is temporarily unavailable. Please try again in {{seconds}} seconds.",
+    "retryIn": "Retry in {{count}} seconds"
   }
 }

@@ -1,3 +1,4 @@
+import { securityFetch, securityRetryDetails } from '../utils/securityRateLimit';
 import type {
   CreateTicketPayload,
   Ticket,
@@ -71,6 +72,9 @@ export function getLocalizedTicketErrorMessage(err: any, t: any): string {
   const code = (err?.code || '').toUpperCase();
   const key = err?.messageKey || '';
   const msg = String(err?.message || err || '').trim();
+  if (err?.status === 429 || ['SEC_001', 'SEC_002', 'SEC_003'].includes(code)) {
+    return t(code === 'SEC_003' ? 'security.unavailable' : 'security.wait', { seconds: err?.details?.retryAfterSeconds ?? 5 });
+  }
 
   // 0a. CONTENT PROHIBITED
   if (
@@ -193,7 +197,8 @@ function buildTicketError(res: Response, errJson: any, fallbackMessage: string):
   const code = errJson?.error?.code || errJson?.code;
   const messageKey = errJson?.error?.messageKey || errJson?.messageKey;
   const message = errJson?.error?.message || errJson?.message || fallbackMessage;
-  const details = errJson?.error?.details || errJson?.details;
+  const rawDetails = errJson?.error?.details || errJson?.details;
+  const details = res.status === 429 || code === 'SEC_003' ? securityRetryDetails(res, rawDetails) : rawDetails;
   return new TicketServiceError(message, code, messageKey, res.status, details);
 }
 
@@ -213,7 +218,7 @@ export async function createTicket(
     };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(`${apiBaseUrl}/api/v1/tickets`, {
+    const res = await securityFetch(`${apiBaseUrl}/api/v1/tickets`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
@@ -522,7 +527,7 @@ export async function replyTicket(
     };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/messages`, {
+    const res = await securityFetch(`${apiBaseUrl}/api/v1/tickets/${ticketId}/messages`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ body }),

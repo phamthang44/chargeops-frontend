@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next';
+import { retryDeadline } from '@chargeops/api';
 
 export interface TicketErrorMeta {
   title: string;
@@ -17,6 +18,10 @@ export function getTicketErrorMeta(error: any, t: TFunction): TicketErrorMeta {
   const code = (error?.code || '').toUpperCase();
   const messageKey = error?.messageKey || '';
   const rawMsg = String(error?.message || error || '').trim();
+  if (error?.status === 429 || ['SEC_001', 'SEC_002', 'SEC_003'].includes(code)) {
+    const seconds = Math.max(0, Math.ceil((retryDeadline(error) - Date.now()) / 1000));
+    return { title: t('common:security.title'), message: t(code === 'SEC_003' ? 'common:security.unavailable' : 'common:security.wait', { seconds }), code };
+  }
 
   // 0a. PROHIBITED CONTENT
   if (

@@ -10,6 +10,7 @@ export * from './format';
 export * from './status';
 export * from './services';
 export * from './domainPolicies';
+export * from './rateLimit';
 export * from './react';
 export { ApiError, HttpClient } from './http';
 export { resolveConfig, type ApiConfig } from './config';

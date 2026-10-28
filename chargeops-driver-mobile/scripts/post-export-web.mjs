@@ -15,21 +15,21 @@ if (!fs.existsSync(distDir)) {
   process.exit(1);
 }
 
-// 1. Move dist/assets/node_modules -> dist/assets/vendor
+// 1. Move dist/assets/node_modules -> dist/assets/compiled
 // Cloudflare Pages / Wrangler automatically ignores and skips uploading any folder named "node_modules".
 const oldAssetDir = path.join(distDir, 'assets', 'node_modules');
-const newAssetDir = path.join(distDir, 'assets', 'vendor');
+const newAssetDir = path.join(distDir, 'assets', 'compiled');
 
 if (fs.existsSync(oldAssetDir)) {
   if (fs.existsSync(newAssetDir)) {
     fs.rmSync(newAssetDir, { recursive: true, force: true });
   }
   fs.renameSync(oldAssetDir, newAssetDir);
-  console.log('[post-export-web] Renamed dist/assets/node_modules -> dist/assets/vendor');
+  console.log('[post-export-web] Renamed dist/assets/node_modules -> dist/assets/compiled');
 } else if (fs.existsSync(newAssetDir)) {
-  console.log('[post-export-web] dist/assets/vendor already exists, skipping rename.');
+  console.log('[post-export-web] dist/assets/compiled already exists, skipping rename.');
 } else {
-  console.warn('[post-export-web] Neither dist/assets/node_modules nor dist/assets/vendor found.');
+  console.warn('[post-export-web] Neither dist/assets/node_modules nor dist/assets/compiled found.');
 }
 
 // 2. Replace references in generated bundles and HTML
@@ -59,7 +59,7 @@ for (const filePath of allFiles) {
   ) {
     const content = fs.readFileSync(filePath, 'utf8');
     if (content.includes('assets/node_modules/')) {
-      const updated = content.replaceAll('assets/node_modules/', 'assets/vendor/');
+      const updated = content.replaceAll('assets/node_modules/', 'assets/compiled/');
       fs.writeFileSync(filePath, updated, 'utf8');
       replacedCount++;
       console.log(`[post-export-web] Patched asset references in: ${path.relative(distDir, filePath)}`);
@@ -70,8 +70,8 @@ for (const filePath of allFiles) {
 console.log(`[post-export-web] Patched ${replacedCount} file(s).`);
 
 // 3. Create _redirects in dist/ and public/
-// Rewrite old requests to new vendor path, and fallback SPA routes to /index.html 200
-const redirectsContent = `/assets/node_modules/* /assets/vendor/:splat 200\n/* /index.html 200\n`;
+// Rewrite old requests to the compiled asset path and fallback SPA routes to /index.html 200
+const redirectsContent = `/assets/node_modules/* /assets/compiled/:splat 200\n/* /index.html 200\n`;
 
 fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
 console.log('[post-export-web] Created dist/_redirects');

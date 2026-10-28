@@ -1,2 +1,2 @@
-/assets/node_modules/* /assets/vendor/:splat 200
+/assets/node_modules/* /assets/compiled/:splat 200
 /* /index.html 200

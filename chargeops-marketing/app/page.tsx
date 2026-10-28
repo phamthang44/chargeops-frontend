@@ -21,6 +21,7 @@ import { LiveChargingTelemetry } from "@/components/LiveChargingTelemetry";
 import { HeroVideoPreview } from "@/components/HeroVideoPreview";
 import { WalkthroughTheater } from "@/components/WalkthroughTheater";
 import { mediaAsset } from "@/lib/media";
+import { getWalkthroughVideoUrl } from "@/lib/walkthrough-media";
 import { EngineeringArchitecture } from "@/components/EngineeringArchitecture";
 import { SystemCapabilities } from "@/components/SystemCapabilities";
 import { HeroFloatTelemetry } from "@/components/HeroFloatTelemetry";
@@ -70,10 +71,7 @@ function Hero() {
   const videoSrc = mediaAsset(`videos/driver-booking-flow-${language}.webm`);
   const posterSrc = mediaAsset(`screens/app-home-${language}.png`);
 
-  const walkthroughVideoSrc =
-    locale === "en"
-      ? process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_EN_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-en.mp4")
-      : process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_VI_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-vi.mp4");
+  const walkthroughVideoSrc = getWalkthroughVideoUrl(locale);
   const walkthroughAudioSrc = process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_AUDIO_URL || undefined;
 
   return (
@@ -266,10 +264,7 @@ function FeaturesBento() {
 function WalkthroughSection() {
   const { t } = useTranslation();
   const { locale } = useLocale();
-  const walkthroughVideoSrc =
-    locale === "en"
-      ? process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_EN_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-en.mp4")
-      : process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_VI_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-vi.mp4");
+  const walkthroughVideoSrc = getWalkthroughVideoUrl(locale);
   const walkthroughAudioSrc = process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_AUDIO_URL || undefined;
 
   return (

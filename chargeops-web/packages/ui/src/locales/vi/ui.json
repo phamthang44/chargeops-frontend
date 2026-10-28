@@ -1,5 +1,13 @@
 {
   "menu": "Menu",
+  "toast": {
+    "titles": {
+      "success": "Thành công",
+      "error": "Thông báo lỗi",
+      "warning": "Cảnh báo",
+      "info": "Thông tin"
+    }
+  },
   "avatarMenu": {
     "settings": "Cài đặt",
     "logout": "Đăng xuất",

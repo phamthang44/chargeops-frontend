@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { IconAlertCircle, IconAlertTriangle, IconCheckCircle, IconInfo, IconX } from './icons';
 
 export type ToastTone = 'success' | 'error' | 'info' | 'warning';
@@ -160,14 +161,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const DEFAULT_TITLES: Record<ToastTone, string> = {
-  error: 'Thông báo lỗi',
-  warning: 'Cảnh báo',
-  success: 'Thành công',
-  info: 'Thông tin',
-};
-
 function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: () => void }) {
+  const { t } = useTranslation('ui');
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remainingRef = useRef(item.durationMs);
@@ -232,7 +227,7 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: () => void
     },
   }[item.tone];
 
-  const titleText = item.title || DEFAULT_TITLES[item.tone];
+  const titleText = item.title || t(`toast.titles.${item.tone}`);
 
   return (
     <div

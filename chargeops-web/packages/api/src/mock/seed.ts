@@ -305,6 +305,8 @@ export function buildMockDb(): MockDb {
   // NB: ST-1042 is deliberately NOT here — it already has provisioned charge
   // points, which under FR14 can only happen after approval (step 2 → step 3).
   const approvalQueue: Station[] = [
+    // Matching demo fixture for the Owner → Admin station-registration video.
+    { id: 'ST-1061', stationCode: 'ST-1061', name: 'Trạm Tây Hồ EVGo', city: 'Hà Nội', address: '19 Lạc Long Quân', addressLine: '19 Lạc Long Quân', ownerName: 'EVGo Co.', ownerDisplayName: 'EVGo Co.', provinceName: 'Hà Nội', plannedChargePointCount: 4, chargerCount: 4, onlineCount: 0, status: 'pending', licenseSubmitted: false, licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-10-28' },
     { id: 'ST-1044', stationCode: 'ST-1044', name: 'Trạm Tây Hồ', city: 'Hà Nội', address: '19 Lạc Long Quân', ownerName: 'CityVolt', chargerCount: 3, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
     { id: 'ST-1041', stationCode: 'ST-1041', name: 'Trạm Đống Đa', city: 'Hà Nội', address: '45 Tây Sơn', ownerName: 'GreenVolt', chargerCount: 2, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-27' },
     { id: 'ST-1039', stationCode: 'ST-1039', name: 'Trạm Thủ Đức', city: 'TP.HCM', address: '88 Võ Văn Ngân', ownerName: 'SaigonCharge', chargerCount: 6, onlineCount: 0, status: 'pending', licenseSummary: null, rejectionReason: null, bookingsToday: 0, revenueWeekVnd: 0, utilizationPct: 0, submittedAt: '2026-06-26' },

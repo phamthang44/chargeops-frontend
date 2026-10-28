@@ -1,4 +1,5 @@
 import { STATIONS, type CoverageStation, type Connector } from "@/components/stations";
+import { mediaAsset } from "@/lib/media";
 
 /**
  * Backend DTO types aligned with Spring Boot controllers:
@@ -313,9 +314,9 @@ export function mapBackendToCoverageStation(
     .filter((url): url is string => Boolean(url && url.trim()));
 
   const defaultStationPhotos = [
-    "/stations/hub-exterior.jpg",
-    "/stations/charger-close.jpg",
-    "/stations/mall-indoor.jpg",
+    mediaAsset("stations/hub-exterior.jpg"),
+    mediaAsset("stations/charger-close.jpg"),
+    mediaAsset("stations/mall-indoor.jpg"),
   ];
 
   const resolvedImages =

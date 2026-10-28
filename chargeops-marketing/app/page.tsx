@@ -20,6 +20,7 @@ import { InteractiveRefundScrubber } from "@/components/InteractiveRefundScrubbe
 import { LiveChargingTelemetry } from "@/components/LiveChargingTelemetry";
 import { HeroVideoPreview } from "@/components/HeroVideoPreview";
 import { WalkthroughTheater } from "@/components/WalkthroughTheater";
+import { mediaAsset } from "@/lib/media";
 import { EngineeringArchitecture } from "@/components/EngineeringArchitecture";
 import { SystemCapabilities } from "@/components/SystemCapabilities";
 import { HeroFloatTelemetry } from "@/components/HeroFloatTelemetry";
@@ -28,7 +29,7 @@ import {
   BoltIcon,
   CheckIcon,
 } from "@/components/Icons";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, useLocale } from "@/lib/i18n";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -63,6 +64,17 @@ export default function Home() {
 /* ----------------------------- Hero ----------------------------- */
 function Hero() {
   const { t } = useTranslation();
+  const { locale } = useLocale();
+
+  const language = locale === "en" ? "en" : "vi";
+  const videoSrc = mediaAsset(`videos/driver-booking-flow-${language}.webm`);
+  const posterSrc = mediaAsset(`screens/app-home-${language}.png`);
+
+  const walkthroughVideoSrc =
+    locale === "en"
+      ? process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_EN_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-en.mp4")
+      : process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_VI_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-vi.mp4");
+  const walkthroughAudioSrc = process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_AUDIO_URL || undefined;
 
   return (
     <section className="relative overflow-hidden pt-5 pb-12 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-28">
@@ -106,7 +118,13 @@ function Hero() {
               </span>
             </a>
 
-            <WalkthroughTheater variant="button" theme="dark" triggerButtonText={t.hero.ctaSecondary} />
+            <WalkthroughTheater
+              videoSrc={walkthroughVideoSrc}
+              audioSrc={walkthroughAudioSrc}
+              variant="button"
+              theme="dark"
+              triggerButtonText={t.hero.ctaSecondary}
+            />
           </div>
 
           {/* Micro Trust Strip */}
@@ -123,9 +141,10 @@ function Hero() {
         <Reveal delay={120} className="relative flex justify-center lg:justify-end">
           <div className="relative">
             <HeroVideoPreview
-              posterSrc="/screens/app-home-new.png"
+              videoSrc={videoSrc}
+              posterSrc={posterSrc}
               alt={t.hero.videoPosterAlt}
-              hasVideo={false}
+              hasVideo={true}
             />
 
             {/* Floating Liquid Telemetry Cards (Motion.dev spring floating physics) */}
@@ -246,6 +265,12 @@ function FeaturesBento() {
 /* -------------------- Walkthrough Showcase Section -------------- */
 function WalkthroughSection() {
   const { t } = useTranslation();
+  const { locale } = useLocale();
+  const walkthroughVideoSrc =
+    locale === "en"
+      ? process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_EN_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-en.mp4")
+      : process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_VIDEO_VI_URL || mediaAsset("videos/chargeops-master-walkthrough-80s-v2-vi.mp4");
+  const walkthroughAudioSrc = process.env.NEXT_PUBLIC_CHARGEOPS_WALKTHROUGH_AUDIO_URL || undefined;
 
   return (
     <section id="video-demo" className="py-16 sm:py-24 lg:py-32 bg-[#090D0B] border-y border-white/[0.06] relative overflow-hidden">
@@ -268,13 +293,15 @@ function WalkthroughSection() {
 
         <Reveal delay={80}>
           <WalkthroughTheater
+            videoSrc={walkthroughVideoSrc}
+            audioSrc={walkthroughAudioSrc}
             variant="banner"
-            posterSrc="/stations/futuristic-hub.jpg"
+            posterSrc={mediaAsset("stations/futuristic-hub.jpg")}
           />
         </Reveal>
 
-        {/* 4 Quick Value Highlights - Dark Double-Bezel Cards */}
-        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {/* Product highlights across the Driver and Owner chapters */}
+        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-3">
           {t.walkthrough.highlights.map((item) => (
             <div
               key={item.tag}

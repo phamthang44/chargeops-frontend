@@ -6,11 +6,12 @@ import { PhoneFrame } from "./PhoneFrame";
 import { BoltIcon, CheckIcon } from "./Icons";
 import { SPRINGS, EASINGS } from "@/lib/motionTokens";
 import { useTranslation } from "@/lib/i18n";
+import { mediaAsset } from "@/lib/media";
 
 const STAGE_SCREENS = [
-  { screenSrc: "/screens/app-map-new.png", screenAlt: "App Map" },
-  { screenSrc: "/screens/app-bookings-new.png", screenAlt: "App Bookings" },
-  { screenSrc: "/screens/app-home-new.png", screenAlt: "App Session" },
+  { screenSrc: mediaAsset("screens/app-map-new.png"), screenAlt: "App Map" },
+  { screenSrc: mediaAsset("screens/app-bookings-new.png"), screenAlt: "App Bookings" },
+  { screenSrc: mediaAsset("screens/app-home-new.png"), screenAlt: "App Session" },
 ];
 
 export function JourneyTimeline() {

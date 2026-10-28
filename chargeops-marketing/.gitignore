@@ -9,3 +9,11 @@ npm-debug.log*
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+
+# Cloudflare R2 hosted media & recording artifacts
+temp-recordings/
+public/videos/
+public/screens/
+public/stations/
+public/stage-walkthrough.html
+scripts/

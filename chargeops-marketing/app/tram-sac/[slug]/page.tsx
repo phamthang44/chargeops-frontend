@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { STATIONS, getStationBySlug } from "@/components/stations";
 import { fetchPublicStationBySlug, fetchPublicStations } from "@/lib/stations-api";
 import { StationDetailView } from "@/components/StationDetailView";
+import { mediaAsset } from "@/lib/media";
 
 type Params = { slug: string };
 
@@ -68,9 +69,9 @@ export default async function StationDetailPage({
 
   // Gallery images priority: backend assets > primaryImageUrl > curated real EV photography
   const defaultStationPhotos = [
-    "/stations/hub-exterior.jpg",
-    "/stations/charger-close.jpg",
-    "/stations/mall-indoor.jpg",
+    mediaAsset("stations/hub-exterior.jpg"),
+    mediaAsset("stations/charger-close.jpg"),
+    mediaAsset("stations/mall-indoor.jpg"),
   ];
   const gallery =
     station.images && station.images.length > 0

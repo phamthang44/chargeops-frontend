@@ -23,6 +23,7 @@ import {
   SparklesIcon,
 } from "@/components/Icons";
 import { useTranslation } from "@/lib/i18n";
+import { mediaAsset } from "@/lib/media";
 
 const CONNECTOR_SPECS: Record<
   Connector,
@@ -722,7 +723,7 @@ export function StationDetailView({
             const coverImg =
               s.primaryImageUrl ||
               s.images?.[0] ||
-              "/stations/hub-exterior.jpg";
+              mediaAsset("stations/hub-exterior.jpg");
 
             const otherPrice = s.priceNumber
               ? `${Number(s.priceNumber).toLocaleString("vi-VN")}đ`
@@ -738,7 +739,7 @@ export function StationDetailView({
                   {/* Photo Header */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0C1210]">
                     <Image
-                      src={coverImg}
+                      src={mediaAsset(coverImg)}
                       alt={`${s.name} - Trạm sạc xe điện`}
                       fill
                       className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"

@@ -33,9 +33,9 @@ export function HeroFloatTelemetry() {
             ? undefined
             : { scale: 1.04, y: -4, transition: SPRINGS.haptic }
         }
-        className="absolute -left-6 sm:-left-12 top-10 z-20 hidden sm:flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#0E1512]/90 p-3.5 shadow-diffusion backdrop-blur-xl text-white cursor-pointer"
+        className="absolute right-[calc(100%+0.75rem)] lg:right-[calc(100%+1.25rem)] top-8 z-20 hidden lg:flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#0E1512]/92 p-3 shadow-diffusion backdrop-blur-xl text-white cursor-pointer transition-transform hover:border-emerald-500/30 whitespace-nowrap"
       >
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 shadow-sm">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 shadow-sm shrink-0">
           <CalendarIcon className="h-5 w-5" />
         </span>
         <div>
@@ -45,12 +45,12 @@ export function HeroFloatTelemetry() {
               {t.hero.telemetryReservedBadge}
             </p>
           </div>
-          <p className="text-sm font-extrabold text-white">{t.hero.telemetryReservedSlot}</p>
-          <p className="text-[11px] text-white/60">{t.hero.telemetryReservedLocation}</p>
+          <p className="text-xs sm:text-sm font-extrabold text-white">{t.hero.telemetryReservedSlot}</p>
+          <p className="text-[10px] sm:text-[11px] text-white/60">{t.hero.telemetryReservedLocation}</p>
         </div>
       </motion.div>
 
-      {/* Float Card 2: Live Charging Telemetry */}
+      {/* Float Card 2: Live Charging Telemetry (Positioned cleanly below/right of the phone screen so the bottom payment CTA is 100% visible) */}
       <motion.div
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20, y: 10 }}
         animate={
@@ -72,9 +72,9 @@ export function HeroFloatTelemetry() {
             ? undefined
             : { scale: 1.04, y: 4, transition: SPRINGS.haptic }
         }
-        className="absolute -right-4 sm:-right-8 bottom-14 z-20 hidden sm:flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#0E1512]/90 p-3.5 shadow-diffusion backdrop-blur-xl text-white cursor-pointer"
+        className="absolute -bottom-10 -right-6 sm:-right-12 lg:-right-20 z-20 hidden md:flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#0E1512]/92 p-3 shadow-diffusion backdrop-blur-xl text-white cursor-pointer transition-transform hover:border-emerald-500/30 whitespace-nowrap"
       >
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 shadow-sm">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 shadow-sm shrink-0">
           <BatteryIcon className="h-5 w-5" />
         </span>
         <div>

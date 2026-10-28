@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { SPRINGS } from "@/lib/motionTokens";
 import { useTranslation } from "@/lib/i18n";
+import { mediaAsset } from "@/lib/media";
 
 interface HeroVideoPreviewProps {
   videoSrc?: string;
@@ -25,7 +26,7 @@ interface HeroVideoPreviewProps {
  */
 export function HeroVideoPreview({
   videoSrc,
-  posterSrc = "/screens/app-home-new.png",
+  posterSrc = mediaAsset("screens/app-home-new.png"),
   alt,
   className = "",
   hasVideo = false,
@@ -39,6 +40,7 @@ export function HeroVideoPreview({
 
   useEffect(() => {
     if (hasVideo && videoSrc && videoRef.current) {
+      videoRef.current.load();
       videoRef.current
         .play()
         .then(() => setIsPlaying(true))
@@ -74,24 +76,10 @@ export function HeroVideoPreview({
                 transition: SPRINGS.buoyant,
               }
         }
-        className="relative w-[275px] sm:w-[315px] rounded-[3.25rem] p-2 sm:p-2.5 bg-gradient-to-b from-[#2E3C35] via-[#16221C] to-[#0A100D] ring-1 ring-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(0,0,0,0.9)] cursor-pointer"
+        className="relative w-[300px] sm:w-[345px] lg:w-[370px] rounded-[2rem] p-[4px] bg-gradient-to-b from-[#2E3C35] via-[#16221C] to-[#0A100D] ring-1 ring-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(0,0,0,0.9)] cursor-pointer"
       >
-        {/* Inner OLED Display Container */}
-        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.6rem] bg-black ring-1 ring-white/10">
-          {/* Dynamic Island pill */}
-          <div className="absolute left-1/2 top-3 z-30 flex h-5 w-24 -translate-x-1/2 items-center justify-between rounded-full bg-black px-2.5 ring-1 ring-white/10 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-[#0a1510] ring-1 ring-primary/40 animate-pulse" />
-            <span className="h-1.5 w-1.5 rounded-full bg-[#121e18]" />
-          </div>
-
-          {/* Micro Status Tag: Driver App Preview */}
-          <div className="absolute top-10 left-1/2 z-20 -translate-x-1/2 pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/80 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-400 backdrop-blur-md ring-1 ring-white/15 shadow-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-              {hasVideo ? t.hero.videoTagDemo : t.hero.videoTagInterface}
-            </span>
-          </div>
-
+        {/* Inner OLED Display Container (Mathematically concentric curve: R_inner = R_outer - padding = 32px - 4px = 28px) */}
+        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[calc(2rem-4px)] bg-black ring-1 ring-white/10">
           {/* Retina Poster Display */}
           <Image
             src={posterSrc}
@@ -123,10 +111,10 @@ export function HeroVideoPreview({
           )}
 
           {/* Precision Specular Glare */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.14]" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.06]" />
 
           {/* Bottom Home Indicator */}
-          <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 h-1 w-28 rounded-full bg-white/40 backdrop-blur" />
+          <div className="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-16 rounded-full bg-white/25 backdrop-blur" />
         </div>
       </motion.div>
     </div>

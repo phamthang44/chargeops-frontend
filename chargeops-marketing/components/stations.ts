@@ -1,3 +1,5 @@
+import { mediaAsset } from "@/lib/media";
+
 /**
  * Sample station data for the public, read-only "Trạm sạc" bridge.
  * Mirrors the shape of the driver app's mock stations — this is the discovery
@@ -64,8 +66,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "06:00 – 22:00",
     rating: 4.8,
     reviewCount: 126,
-    primaryImageUrl: "/stations/hub-exterior.jpg",
-    images: ["/stations/hub-exterior.jpg", "/stations/charger-close.jpg", "/stations/mall-indoor.jpg"],
+    primaryImageUrl: mediaAsset("stations/hub-exterior.jpg"),
+    images: [mediaAsset("stations/hub-exterior.jpg"), mediaAsset("stations/charger-close.jpg"), mediaAsset("stations/mall-indoor.jpg")],
     description:
       "Trạm sạc nhanh DC ngay trung tâm Quận 1, trong khu mua sắm Vincom Đồng Khởi. Thuận tiện vừa sạc vừa nghỉ ngơi, mua sắm.",
   },
@@ -89,8 +91,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "Mở cửa 24/7",
     rating: 4.7,
     reviewCount: 203,
-    primaryImageUrl: "/stations/mall-indoor.jpg",
-    images: ["/stations/mall-indoor.jpg", "/stations/charger-close.jpg", "/stations/hub-exterior.jpg"],
+    primaryImageUrl: mediaAsset("stations/mall-indoor.jpg"),
+    images: [mediaAsset("stations/mall-indoor.jpg"), mediaAsset("stations/charger-close.jpg"), mediaAsset("stations/hub-exterior.jpg")],
     description:
       "Cụm trụ sạc lớn dưới tầng hầm Landmark 81, hoạt động 24/7. Phù hợp cho cả tài xế cá nhân và dịch vụ.",
   },
@@ -114,8 +116,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "08:00 – 22:00",
     rating: 4.6,
     reviewCount: 88,
-    primaryImageUrl: "/stations/charger-close.jpg",
-    images: ["/stations/charger-close.jpg", "/stations/hub-exterior.jpg", "/stations/mall-indoor.jpg"],
+    primaryImageUrl: mediaAsset("stations/charger-close.jpg"),
+    images: [mediaAsset("stations/charger-close.jpg"), mediaAsset("stations/hub-exterior.jpg"), mediaAsset("stations/mall-indoor.jpg")],
     description:
       "Trạm sạc AC giá tốt tại khu Phú Mỹ Hưng, gần trung tâm thương mại Crescent Mall. Lý tưởng khi đỗ xe lâu.",
   },
@@ -139,8 +141,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "07:00 – 22:00",
     rating: 4.7,
     reviewCount: 142,
-    primaryImageUrl: "/stations/hub-exterior.jpg",
-    images: ["/stations/hub-exterior.jpg", "/stations/charger-close.jpg", "/stations/mall-indoor.jpg"],
+    primaryImageUrl: mediaAsset("stations/hub-exterior.jpg"),
+    images: [mediaAsset("stations/hub-exterior.jpg"), mediaAsset("stations/charger-close.jpg"), mediaAsset("stations/mall-indoor.jpg")],
     description:
       "Trạm sạc nhanh trung tâm Hà Nội, trong tòa Vincom Bà Triệu. Sạc nhanh DC, vị trí dễ tiếp cận.",
   },
@@ -164,8 +166,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "06:00 – 23:00",
     rating: 4.5,
     reviewCount: 67,
-    primaryImageUrl: "/stations/mall-indoor.jpg",
-    images: ["/stations/mall-indoor.jpg", "/stations/hub-exterior.jpg", "/stations/charger-close.jpg"],
+    primaryImageUrl: mediaAsset("stations/mall-indoor.jpg"),
+    images: [mediaAsset("stations/mall-indoor.jpg"), mediaAsset("stations/hub-exterior.jpg"), mediaAsset("stations/charger-close.jpg")],
     description:
       "Trạm sạc nhanh tại Lotte Center Hà Nội. Hiện đang đầy chỗ, đặt trước trong ứng dụng để giữ khung giờ.",
   },
@@ -189,8 +191,8 @@ export const STATIONS: CoverageStation[] = [
     hours: "07:00 – 22:00",
     rating: 4.8,
     reviewCount: 54,
-    primaryImageUrl: "/stations/charger-close.jpg",
-    images: ["/stations/charger-close.jpg", "/stations/hub-exterior.jpg", "/stations/mall-indoor.jpg"],
+    primaryImageUrl: mediaAsset("stations/charger-close.jpg"),
+    images: [mediaAsset("stations/charger-close.jpg"), mediaAsset("stations/hub-exterior.jpg"), mediaAsset("stations/mall-indoor.jpg")],
     description:
       "Trạm sạc giá tốt bên bờ Đông sông Hàn, Đà Nẵng. Nhiều trụ trống, phù hợp cho khách du lịch và người dân.",
   },

@@ -2,6 +2,7 @@
 
 import { ReactNode, useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import { mediaAsset } from "@/lib/media";
 
 export interface PhoneMockupProps {
   src?: string;
@@ -28,7 +29,7 @@ export interface PhoneMockupProps {
  * - Future-proof video support (<video> only plays when hasVideo && videoSrc, zero 404s)
  */
 export function PhoneMockup({
-  src = "/screens/app-home-new.png",
+  src = mediaAsset("screens/app-home-new.png"),
   videoSrc,
   hasVideo = false,
   alt = "ChargeOps Driver Mobile App",
@@ -56,19 +57,14 @@ export function PhoneMockup({
       {/* Ambient emerald backlight aura */}
       <div className="pointer-events-none absolute -inset-5 rounded-[4rem] bg-gradient-to-tr from-primary/25 via-emerald-500/10 to-transparent blur-3xl opacity-75 animate-pulse" />
 
-      {/* Titanium Outer Shell (Double-Bezel Hardware Architecture) */}
+      {/* Titanium Outer Shell (Ultra-thin 4px Concentric Bezel) */}
       <div
-        className={`relative w-[270px] sm:w-[310px] rounded-[3.25rem] p-2 sm:p-2.5 bg-gradient-to-b from-[#2E3C35] via-[#16221C] to-[#0A100D] ring-1 ring-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(0,0,0,0.9)] transition-transform duration-700 ease-haptic ${
+        className={`relative w-[270px] sm:w-[310px] rounded-[2rem] p-[4px] bg-gradient-to-b from-[#2E3C35] via-[#16221C] to-[#0A100D] ring-1 ring-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(0,0,0,0.9)] transition-transform duration-700 ease-haptic ${
           float ? "animate-float-slow" : ""
         }`}
       >
         {/* Inner OLED Display Container */}
-        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.6rem] bg-black ring-1 ring-white/10">
-          {/* Dynamic Island Pill */}
-          <div className="absolute left-1/2 top-3 z-30 flex h-5 w-24 -translate-x-1/2 items-center justify-between rounded-full bg-black px-2.5 ring-1 ring-white/10 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-[#0a1510] ring-1 ring-primary/40 animate-pulse" />
-            <span className="h-1.5 w-1.5 rounded-full bg-[#121e18]" />
-          </div>
+        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[calc(2rem-4px)] bg-black ring-1 ring-white/10">
 
           {/* Optional Overlay Tag / Badge */}
           {(tag || badge) && (

@@ -49,3 +49,12 @@ design-console/
 # Design exports & internal project documents
 designs/
 documents/
+
+# Cloudflare R2 hosted media & recording artifacts
+chargeops-marketing/temp-recordings/
+chargeops-marketing/public/videos/
+chargeops-marketing/public/screens/
+chargeops-marketing/public/stations/
+chargeops-marketing/public/stage-walkthrough.html
+chargeops-marketing/scripts/
+

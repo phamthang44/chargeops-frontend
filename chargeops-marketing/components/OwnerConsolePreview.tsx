@@ -3,104 +3,145 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslation } from "@/lib/i18n";
+import { mediaAsset } from "@/lib/media";
+
+type ConsoleTab = "approvals" | "registration" | "pricing";
 
 /**
- * Interactive preview of the real ChargeOps Operator Web Console (Giá & giờ hoạt động).
- * Features real screenshots in both Light and Dark modes with instant switching.
+ * Interactive preview of ChargeOps Web Console & Admin Management.
+ * Allows toggling between:
+ * 1. Admin Station Approvals & License Verification
+ * 2. Owner Station Registration Flow
+ * 3. Owner Tariff & Operating Hours Configuration (Light/Dark mode)
  */
 export function OwnerConsolePreview() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const [activeTab, setActiveTab] = useState<ConsoleTab>("approvals");
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
+  const tabLabels = {
+    approvals: locale === "vi" ? "Admin Duyệt trạm & License" : "Admin Station Approvals",
+    registration: locale === "vi" ? "Owner Đăng ký trạm mới" : "Owner Station Registration",
+    pricing: locale === "vi" ? "Cấu hình Giá & Trụ sạc" : "Pricing & Charging Ports",
+  };
+
   return (
-    <div
-      className={`relative w-full overflow-hidden transition-colors duration-300 ${
-        theme === "dark" ? "bg-[#17181D]" : "bg-[#FAFBFB]"
-      }`}
-    >
-      {/* Station context & Theme Switcher control bar */}
-      <div
-        className={`flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5 text-xs transition-colors duration-300 ${
-          theme === "dark"
-            ? "border-white/10 bg-[#121316] text-white/80"
-            : "border-black/[0.06] bg-white text-ink-muted"
-        }`}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
-          <span
-            className={`truncate text-[11px] font-semibold ${
-              theme === "dark" ? "text-white/90" : "text-ink-strong"
+    <div className="relative w-full overflow-hidden bg-[#0D1210] transition-colors duration-300">
+      {/* Navigation Tabs Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 bg-[#121A16] px-3 sm:px-4 py-2.5 text-xs">
+        {/* Module Switcher Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setActiveTab("approvals")}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
+              activeTab === "approvals"
+                ? "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/40 shadow-sm"
+                : "text-white/60 hover:bg-white/[0.06] hover:text-white"
             }`}
           >
-            {t.owner.consoleStationContext}
-          </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span>{tabLabels.approvals}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("registration")}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
+              activeTab === "registration"
+                ? "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/40 shadow-sm"
+                : "text-white/60 hover:bg-white/[0.06] hover:text-white"
+            }`}
+          >
+            <span>{tabLabels.registration}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("pricing")}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
+              activeTab === "pricing"
+                ? "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/40 shadow-sm"
+                : "text-white/60 hover:bg-white/[0.06] hover:text-white"
+            }`}
+          >
+            <span>{tabLabels.pricing}</span>
+          </button>
         </div>
 
-        {/* Light / Dark Mode Toggle */}
-        <div
-          className={`flex items-center gap-1 rounded-full p-0.5 ring-1 transition-colors duration-300 ${
-            theme === "dark" ? "bg-white/[0.06] ring-white/10" : "bg-black/[0.04] ring-black/5"
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => setTheme("light")}
-            aria-label={t.owner.lightMode}
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
-              theme === "light"
-                ? "bg-white text-ink-strong shadow-sm ring-1 ring-black/5"
-                : "text-ink-muted hover:text-ink-strong"
-            }`}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-3.5 w-3.5 text-amber-500">
-              <circle cx="12" cy="12" r="4" />
-              <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41" />
-            </svg>
-            <span>{t.owner.lightMode}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setTheme("dark")}
-            aria-label={t.owner.darkMode}
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
-              theme === "dark"
-                ? "bg-[#23242B] text-white shadow-sm ring-1 ring-white/15"
-                : "text-ink-muted hover:text-ink-strong"
-            }`}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-3.5 w-3.5 text-sky-400">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>
-            <span>{t.owner.darkMode}</span>
-          </button>
-        </div>
+        {/* Theme Switcher (only for pricing view) */}
+        {activeTab === "pricing" && (
+          <div className="flex items-center gap-1 rounded-full p-0.5 ring-1 ring-white/10 bg-white/[0.06]">
+            <button
+              type="button"
+              onClick={() => setTheme("light")}
+              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
+                theme === "light"
+                  ? "bg-white text-ink-strong shadow-sm"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              Light
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme("dark")}
+              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
+                theme === "dark"
+                  ? "bg-[#23242B] text-white shadow-sm ring-1 ring-white/20"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              Dark
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Screenshot display with instant cross-fade */}
-      <div className="relative aspect-[909/912] w-full select-none overflow-hidden bg-black/[0.02]">
-        {/* Light Screenshot */}
-        <Image
-          src="/screens/owner-pricing-light.png"
-          alt="Giao diện cấu hình giá và giờ hoạt động trạm sạc ChargeOps Console (Giao diện sáng)"
-          width={909}
-          height={912}
-          priority
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
-            theme === "light" ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-          }`}
-        />
-        {/* Dark Screenshot */}
-        <Image
-          src="/screens/owner-pricing-dark.png"
-          alt="Giao diện cấu hình giá và giờ hoạt động trạm sạc ChargeOps Console (Giao diện tối)"
-          width={909}
-          height={912}
-          priority
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
-            theme === "dark" ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-          }`}
-        />
+      {/* Screen Display Frame */}
+      <div className="relative aspect-[16/9] w-full select-none overflow-hidden bg-black/40">
+        {activeTab === "approvals" && (
+          <Image
+            src={mediaAsset(`screens/admin-approvals-${locale === "vi" ? "vi" : "en"}.png`)}
+            alt="Màn hình thẩm định hồ sơ và duyệt trạm của Admin ChargeOps"
+            width={1600}
+            height={900}
+            priority
+            className="h-full w-full object-cover transition-opacity duration-300 animate-fade-in"
+          />
+        )}
+
+        {activeTab === "registration" && (
+          <Image
+            src={mediaAsset(`screens/owner-registration-${locale === "vi" ? "vi" : "en"}.png`)}
+            alt="Màn hình đăng ký trạm sạc mới của Chủ trạm ChargeOps"
+            width={1600}
+            height={900}
+            priority
+            className="h-full w-full object-cover transition-opacity duration-300 animate-fade-in"
+          />
+        )}
+
+        {activeTab === "pricing" && (
+          <div className="relative h-full w-full flex items-center justify-center bg-[#17181D]">
+            <Image
+              src={mediaAsset("screens/owner-pricing-light.png")}
+              alt="Cấu hình biểu giá và giờ hoạt động (Giao diện sáng)"
+              fill
+              className={`object-contain transition-opacity duration-300 ${
+                theme === "light" ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+            />
+            <Image
+              src={mediaAsset("screens/owner-pricing-dark.png")}
+              alt="Cấu hình biểu giá và giờ hoạt động (Giao diện tối)"
+              fill
+              className={`object-contain transition-opacity duration-300 ${
+                theme === "dark" ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { BoltIcon } from "@/components/Icons";
+import { mediaAsset } from "@/lib/media";
 
 interface StationPhotoShowcaseProps {
   stationName: string;
@@ -25,13 +26,13 @@ export function StationPhotoShowcase({
     images && images.length > 0
       ? images
       : [
-          "/stations/futuristic-hub.jpg",
-          "/stations/hub-exterior.jpg",
-          "/stations/charger-close.jpg",
-          "/stations/mall-indoor.jpg",
+          mediaAsset("stations/futuristic-hub.jpg"),
+          mediaAsset("stations/hub-exterior.jpg"),
+          mediaAsset("stations/charger-close.jpg"),
+          mediaAsset("stations/mall-indoor.jpg"),
         ];
 
-  const currentImage = photoList[activeIdx] || photoList[0];
+  const currentImage = mediaAsset(photoList[activeIdx] || photoList[0]);
 
   return (
     <div className="space-y-3">
@@ -112,7 +113,7 @@ export function StationPhotoShowcase({
               >
                 <div className="relative h-full w-full overflow-hidden rounded-[calc(1rem-0.15rem)]">
                   <Image
-                    src={img}
+                    src={mediaAsset(img)}
                     alt={`${stationName} thumbnail ${idx + 1}`}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"

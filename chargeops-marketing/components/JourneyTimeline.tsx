@@ -1,98 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { motion, AnimatePresence } from "motion/react";
 import { PhoneFrame } from "./PhoneFrame";
-import { BoltIcon, CalendarIcon, QrIcon, CheckIcon, MapPinIcon } from "./Icons";
+import { BoltIcon, CheckIcon } from "./Icons";
+import { SPRINGS, EASINGS } from "@/lib/motionTokens";
+import { useTranslation } from "@/lib/i18n";
 
-interface Stage {
-  step: string;
-  badge: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  features: string[];
-  screenSrc: string;
-  screenAlt: string;
-}
-
-const STAGES: Stage[] = [
-  {
-    step: "01",
-    badge: "ĐỊNH VỊ THÔNG MINH",
-    title: "Tìm & Kiểm tra trạm sạc quanh bạn",
-    subtitle: "Xem thông tin trạm và cổng sạc được hiển thị trong ứng dụng",
-    description:
-      "Tìm trạm theo khu vực, xem thông tin cổng sạc, giá và tình trạng được ghi nhận để chọn điểm đến phù hợp.",
-    features: [
-      "Tìm trạm theo khu vực",
-      "Xem loại cổng sạc và thông tin trạm",
-      "Mở chỉ đường tới địa điểm trạm",
-    ],
-    screenSrc: "/screens/app-map-new.png",
-    screenAlt: "Bản đồ tìm kiếm trạm sạc ChargeOps",
-  },
-  {
-    step: "02",
-    badge: "ĐIỀU PHỐI ĐỘC QUYỀN",
-    title: "Chọn khung giờ và xem giá",
-    subtitle: "Chọn khung giờ và xem giá trước khi xác nhận",
-    description:
-      "Chọn gói thời gian và khung giờ còn khả dụng, xem lại thông tin rồi xác nhận đặt chỗ trong ứng dụng.",
-    features: [
-      "Xem giá gói trước khi đặt",
-      "Theo dõi trạng thái và hạn giữ chỗ trong ứng dụng",
-      "Xem khoản hoàn áp dụng trước khi xác nhận hủy",
-    ],
-    screenSrc: "/screens/app-bookings-new.png",
-    screenAlt: "Màn hình đặt khung giờ sạc xe điện",
-  },
-  {
-    step: "03",
-    badge: "XÁC THỰC MỘT CHẠM",
-    title: "Quét mã QR để check-in",
-    subtitle: "Xác nhận đúng điểm sạc và đặt chỗ",
-    description:
-      "Khi tới trạm, quét mã QR của cổng đã đặt và xác nhận check-in trong ứng dụng. Việc quét mã chưa đồng nghĩa phiên sạc đã bắt đầu.",
-    features: [
-      "Ứng dụng kiểm tra thông tin đặt chỗ và mã QR",
-      "Trạng thái check-in được ghi nhận trong ứng dụng",
-      "Phiên sạc và điều khiển thiết bị phụ thuộc vào trạm được kết nối",
-    ],
-    screenSrc: "/screens/app-home-new.png",
-    screenAlt: "Màn hình điều khiển phiên sạc đang diễn ra",
-  },
+const STAGE_SCREENS = [
+  { screenSrc: "/screens/app-map-new.png", screenAlt: "App Map" },
+  { screenSrc: "/screens/app-bookings-new.png", screenAlt: "App Bookings" },
+  { screenSrc: "/screens/app-home-new.png", screenAlt: "App Session" },
 ];
 
 export function JourneyTimeline() {
+  const { t, locale } = useTranslation();
   const [activeStage, setActiveStage] = useState<number>(0);
-  const current = STAGES[activeStage];
+
+  const stages = t.journey.stages.map((stage, idx) => ({
+    ...stage,
+    screenSrc: STAGE_SCREENS[idx]?.screenSrc || STAGE_SCREENS[0].screenSrc,
+    screenAlt: STAGE_SCREENS[idx]?.screenAlt || STAGE_SCREENS[0].screenAlt,
+  }));
+
+  const current = stages[activeStage] || stages[0];
 
   return (
     <div className="w-full">
-      {/* Stage Selector Tabs */}
+      {/* Stage Selector Tabs with Fluid layoutId Spring Pill */}
       <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12 sm:mb-16">
-        {STAGES.map((s, idx) => {
+        {stages.map((s, idx) => {
           const isActive = idx === activeStage;
           return (
             <button
               key={s.step}
               type="button"
               onClick={() => setActiveStage(idx)}
-              className={`cursor-pointer inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ease-haptic ${
+              className={`relative cursor-pointer inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-xs sm:text-sm font-bold transition-colors duration-300 ${
                 isActive
-                  ? "bg-primary text-white shadow-glow-emerald scale-[1.02]"
-                  : "border border-black/10 bg-white text-ink-body hover:border-primary/40 hover:bg-surface-alt active:scale-[0.98]"
+                  ? "text-white"
+                  : "border border-white/10 bg-[#121A16] text-white/70 hover:border-emerald-500/40 hover:bg-[#16221C] hover:text-white"
               }`}
             >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTimelinePill"
+                  className="absolute inset-0 rounded-full bg-emerald-500 shadow-glow-emerald"
+                  transition={SPRINGS.layout}
+                />
+              )}
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono ${
-                  isActive ? "bg-white/20 text-white" : "bg-black/5 text-ink-muted"
+                className={`relative z-10 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono ${
+                  isActive ? "bg-black/25 text-white" : "bg-white/10 text-white/60"
                 }`}
               >
                 {s.step}
               </span>
-              <span>{s.title.split("&")[0].trim()}</span>
+              <span className="relative z-10">{s.title.split("&")[0].trim()}</span>
             </button>
           );
         })}
@@ -103,18 +67,28 @@ export function JourneyTimeline() {
         {/* Left Interactive Phone Frame Container (5 cols) */}
         <div className="lg:col-span-5 flex justify-center order-2 lg:order-1">
           <div className="relative">
-            <PhoneFrame
-              src={current.screenSrc}
-              alt={current.screenAlt}
-              priority
-              float
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStage}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: EASINGS.decelerate }}
+              >
+                <PhoneFrame
+                  src={current.screenSrc}
+                  alt={current.screenAlt}
+                  priority
+                  float
+                />
+              </motion.div>
+            </AnimatePresence>
 
             {/* Dynamic Step Floating Indicator */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full border border-black/10 bg-white/95 px-4 py-1.5 shadow-lg backdrop-blur-xl">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-mono text-xs font-bold text-ink-heading uppercase tracking-wider">
-                BƯỚC {current.step} / 03 · {current.badge}
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-[#0E1512]/95 px-4 py-1.5 shadow-lg backdrop-blur-xl">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+                {locale === "vi" ? "BƯỚC" : "STEP"} {current.step} / 03 · {current.badge}
               </span>
             </div>
           </div>
@@ -124,43 +98,53 @@ export function JourneyTimeline() {
         <div className="lg:col-span-7 order-1 lg:order-2 flex flex-col justify-center">
           <div className="double-bezel">
             <div className="double-bezel-inner !p-7 sm:!p-9">
-              <span className="eyebrow-tag">
-                <BoltIcon className="h-3.5 w-3.5 text-primary" /> {current.badge}
-              </span>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeStage}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.3, ease: EASINGS.decelerate }}
+                >
+                  <span className="eyebrow-tag">
+                    <BoltIcon className="h-3.5 w-3.5 text-primary" /> {current.badge}
+                  </span>
 
-              <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-ink-heading">
-                {current.title}
-              </h3>
-              <p className="mt-2 text-sm sm:text-base font-semibold text-primary-dark">
-                {current.subtitle}
-              </p>
+                  <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                    {current.title}
+                  </h3>
+                  <p className="mt-2 text-sm sm:text-base font-semibold text-emerald-400">
+                    {current.subtitle}
+                  </p>
 
-              <p className="mt-4 text-sm sm:text-base leading-relaxed text-ink-body">
-                {current.description}
-              </p>
+                  <p className="mt-4 text-sm sm:text-base leading-relaxed text-white/70">
+                    {current.description}
+                  </p>
 
-              <div className="mt-7 space-y-3 border-t border-black/[0.05] pt-6">
-                {current.features.map((feat) => (
-                  <div key={feat} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-dark">
-                      <CheckIcon className="h-3 w-3" />
-                    </span>
-                    <span className="text-sm font-semibold text-ink-heading">{feat}</span>
+                  <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
+                    {current.features.map((feat) => (
+                      <div key={feat} className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                          <CheckIcon className="h-3 w-3" />
+                        </span>
+                        <span className="text-sm font-semibold text-white/90">{feat}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              </AnimatePresence>
 
               {/* Progress Stepper Action */}
-              <div className="mt-8 pt-4 flex items-center justify-between">
+              <div className="mt-8 pt-4 flex items-center justify-between border-t border-white/10">
                 <div className="flex gap-2">
-                  {STAGES.map((_, i) => (
+                  {stages.map((_, i) => (
                     <button
                       key={i}
                       type="button"
-                      aria-label={`Chuyển tới bước ${i + 1}`}
+                      aria-label={locale === "vi" ? `Chuyển tới bước ${i + 1}` : `Go to step ${i + 1}`}
                       onClick={() => setActiveStage(i)}
                       className={`h-2 rounded-full transition-all duration-300 ${
-                        i === activeStage ? "w-8 bg-primary" : "w-2 bg-black/15 hover:bg-black/30"
+                        i === activeStage ? "w-8 bg-emerald-500" : "w-2 bg-white/20 hover:bg-white/40"
                       }`}
                     />
                   ))}
@@ -171,17 +155,17 @@ export function JourneyTimeline() {
                     type="button"
                     disabled={activeStage === 0}
                     onClick={() => setActiveStage((p) => Math.max(0, p - 1))}
-                    aria-label="Bước trước"
-                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-ink-body transition hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    aria-label={locale === "vi" ? "Bước trước" : "Previous step"}
+                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     ←
                   </button>
                   <button
                     type="button"
-                    disabled={activeStage === STAGES.length - 1}
-                    onClick={() => setActiveStage((p) => Math.min(STAGES.length - 1, p + 1))}
-                    aria-label="Bước tiếp theo"
-                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white text-ink-body transition hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={activeStage === stages.length - 1}
+                    onClick={() => setActiveStage((p) => Math.min(stages.length - 1, p + 1))}
+                    aria-label={locale === "vi" ? "Bước tiếp theo" : "Next step"}
+                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     →
                   </button>

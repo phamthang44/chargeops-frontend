@@ -108,47 +108,47 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
     <>
       {/* Top Reading Progress Bar */}
       <div
-        className="fixed inset-x-0 top-0 z-50 h-[3px] bg-line/40 print:hidden"
+        className="fixed inset-x-0 top-0 z-50 h-[3px] bg-white/10 print:hidden"
         aria-hidden="true"
       >
         <div
-          className="h-full bg-gradient-to-r from-primary via-primary-light to-primary transition-all duration-150 ease-out"
+          className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 transition-all duration-150 ease-out"
           style={{ width: `${readProgress}%` }}
         />
       </div>
 
       <SiteHeader />
 
-      <main className="min-h-screen bg-surface-alt pt-20 sm:pt-24 pb-24 text-ink-body antialiased">
+      <main className="min-h-screen bg-[#070A08] text-white pt-24 sm:pt-28 pb-24 antialiased">
         {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-line bg-white print:border-none print:pb-0">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary-soft/40 blur-3xl" />
-          <div className="pointer-events-none absolute left-10 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-surface-alt/60 blur-2xl" />
+        <section className="relative overflow-hidden border-b border-white/10 bg-[#0B100D] print:border-none print:pb-0">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute left-10 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-emerald-500/5 blur-2xl" />
 
           <div className="container-x relative py-12 sm:py-16">
             {/* Breadcrumb */}
             <nav
               aria-label="Breadcrumb"
-              className="flex items-center gap-1.5 text-xs font-medium text-ink-muted print:hidden"
+              className="flex items-center gap-1.5 text-xs font-medium text-white/60 print:hidden"
             >
-              <Link href="/" className="transition hover:text-primary-dark">
+              <Link href="/" className="transition hover:text-emerald-400">
                 Trang chủ
               </Link>
               <ChevronRightIcon className="h-3 w-3 opacity-60" />
-              <span className="text-ink-muted">Pháp lý & Chính sách</span>
+              <span className="text-white/60">Pháp lý & Chính sách</span>
               <ChevronRightIcon className="h-3 w-3 opacity-60" />
-              <span className="text-ink-strong">{isTerms ? "Điều khoản dịch vụ" : "Chính sách bảo mật"}</span>
+              <span className="text-emerald-400 font-semibold">{isTerms ? "Điều khoản dịch vụ" : "Chính sách bảo mật"}</span>
             </nav>
 
             {/* Document Switcher Segmented Tabs */}
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4 print:hidden">
-              <div className="inline-flex rounded-pill border border-line bg-surface-alt p-1 shadow-sm">
+              <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-glass backdrop-blur-md">
                 <Link
                   href="/dieu-khoan"
-                  className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-semibold transition ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition ${
                     isTerms
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-ink-body hover:text-ink-strong"
+                      ? "bg-emerald-500 text-white font-bold shadow-glow-emerald"
+                      : "text-white/70 hover:text-white"
                   }`}
                 >
                   <DocumentIcon className="h-3.5 w-3.5" />
@@ -156,10 +156,10 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                 </Link>
                 <Link
                   href="/chinh-sach-bao-mat"
-                  className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-semibold transition ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition ${
                     !isTerms
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-ink-body hover:text-ink-strong"
+                      ? "bg-emerald-500 text-white font-bold shadow-glow-emerald"
+                      : "text-white/70 hover:text-white"
                   }`}
                 >
                   <ShieldCheckIcon className="h-3.5 w-3.5" />
@@ -172,7 +172,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                 <button
                   type="button"
                   onClick={() => handleCopyLink()}
-                  className="inline-flex items-center gap-1.5 rounded-pill border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-ink-body shadow-sm transition hover:border-primary/40 hover:text-primary-dark"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-white/90 shadow-sm transition hover:border-emerald-500/40 hover:bg-white/10 hover:text-emerald-400"
                   title="Sao chép liên kết trang"
                 >
                   <LinkIcon className="h-3.5 w-3.5" />
@@ -181,7 +181,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-1.5 rounded-pill border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-ink-body shadow-sm transition hover:border-primary/40 hover:text-primary-dark"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-white/90 shadow-sm transition hover:border-emerald-500/40 hover:bg-white/10 hover:text-emerald-400"
                   title="In hoặc xuất file PDF"
                 >
                   <PrinterIcon className="h-3.5 w-3.5" />
@@ -192,33 +192,33 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
 
             {/* Title & Eyebrow */}
             <div className="mt-8 max-w-4xl">
-              <div className="inline-flex items-center gap-2 rounded-pill bg-primary-soft/70 px-3 py-1 text-xs font-semibold text-primary-dark ring-1 ring-primary/20">
-                <SparklesIcon className="h-3.5 w-3.5 text-primary" />
+              <span className="eyebrow-tag">
+                <SparklesIcon className="h-3.5 w-3.5 text-emerald-400" />
                 <span>{content.eyebrow}</span>
-              </div>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight text-ink-strong sm:text-5xl">
+              </span>
+              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-5xl leading-[1.24] sm:leading-[1.26]">
                 {content.title}
               </h1>
-              <p className="mt-4 text-base leading-relaxed text-ink-body sm:text-lg">
+              <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
                 {content.description}
               </p>
             </div>
 
             {/* Metadata Pills */}
-            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line/60 pt-6 text-xs text-ink-muted">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1 font-medium text-ink-body">
-                <ClockIcon className="h-3.5 w-3.5 text-primary" />
-                Cập nhật lần cuối: <strong className="text-ink-strong">{content.updatedAt}</strong>
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6 text-xs text-white/60">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] border border-white/10 px-3 py-1 font-medium text-white/80">
+                <ClockIcon className="h-3.5 w-3.5 text-emerald-400" />
+                Cập nhật lần cuối: <strong className="text-white ml-1">{content.updatedAt}</strong>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1 font-medium text-ink-body">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] border border-white/10 px-3 py-1 font-medium text-white/80">
                 <span>Ước tính:</span>
-                <strong className="text-ink-strong">~{readingTime} phút đọc</strong>
+                <strong className="text-white ml-1">~{readingTime} phút đọc</strong>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-primary-soft/60 px-2.5 py-1 font-medium text-primary-dark ring-1 ring-primary/20">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 font-medium text-emerald-400">
                 <CheckIcon className="h-3.5 w-3.5" />
                 {isTerms ? "Quy chuẩn Booking v4.9" : "Chuẩn mã hóa Argon2id & RS256"}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1 font-medium text-ink-muted">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] border border-white/10 px-3 py-1 font-medium text-white/60">
                 {content.sections.length} điều khoản chính thức
               </span>
             </div>
@@ -230,37 +230,37 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
           <div className="grid gap-8 lg:grid-cols-[290px_1fr] xl:gap-10">
             {/* Desktop Sticky Table of Contents */}
             <aside className="hidden lg:block print:hidden">
-              <div className="sticky top-20 rounded-2xl border border-line bg-white p-5 shadow-card">
+              <div className="sticky top-24 rounded-2xl border border-white/10 bg-[#0E1512] p-5 shadow-diffusion-dark">
                 {/* TOC Header */}
-                <div className="flex items-center justify-between border-b border-line pb-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary-soft text-primary-dark">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-400">
                       <DocumentIcon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-wider text-ink-strong">
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
                       Mục lục tài liệu
                     </span>
                   </div>
-                  <span className="rounded-full bg-surface-alt px-2 py-0.5 text-[11px] font-semibold text-ink-muted">
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/70">
                     {filteredSections.length}/{content.sections.length}
                   </span>
                 </div>
 
                 {/* Quick Search */}
                 <div className="relative mt-3">
-                  <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+                  <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm trong điều khoản..."
-                    className="w-full rounded-xl border border-line bg-surface-alt py-1.5 pl-8 pr-3 text-xs text-ink-strong outline-none transition placeholder:text-ink-muted focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-white/10 bg-[#121A16] py-1.5 pl-8 pr-3 text-xs text-white outline-none transition placeholder:text-white/40 focus:border-emerald-500/50 focus:bg-[#16201B] focus:ring-1 focus:ring-emerald-500/30"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-ink-muted hover:text-ink-strong"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-white/50 hover:text-white"
                     >
                       ×
                     </button>
@@ -268,7 +268,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                 </div>
 
                 {/* TOC Navigation Links */}
-                <nav className="mt-3 max-h-[calc(100vh-320px)] space-y-1 overflow-y-auto pr-1 text-xs">
+                <nav className="mt-3 max-h-[calc(100vh-320px)] space-y-1 overflow-y-auto pr-1 text-xs no-scrollbar">
                   {filteredSections.map((section, idx) => {
                     const secSlug = slug(section.title);
                     const isActive = activeSection === secSlug;
@@ -278,15 +278,15 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                         href={`#${secSlug}`}
                         className={`group flex items-start gap-2.5 rounded-xl px-3 py-2 font-medium transition ${
                           isActive
-                            ? "bg-primary-soft text-primary-dark shadow-sm ring-1 ring-primary/20"
-                            : "text-ink-body hover:bg-surface-alt hover:text-ink-strong"
+                            ? "bg-emerald-500/15 text-emerald-400 shadow-sm ring-1 ring-emerald-500/30 font-semibold"
+                            : "text-white/70 hover:bg-white/[0.04] hover:text-white"
                         }`}
                       >
                         <span
                           className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${
                             isActive
-                              ? "bg-primary text-white"
-                              : "bg-surface-alt text-ink-muted group-hover:text-ink-body"
+                              ? "bg-emerald-500 text-white"
+                              : "bg-white/10 text-white/60 group-hover:text-white"
                           }`}
                         >
                           {String(idx + 1).padStart(2, "0")}
@@ -299,22 +299,22 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                   })}
 
                   {filteredSections.length === 0 && (
-                    <p className="py-4 text-center text-xs text-ink-muted">
+                    <p className="py-4 text-center text-xs text-white/50">
                       Không tìm thấy nội dung khớp với từ khóa.
                     </p>
                   )}
                 </nav>
 
                 {/* Support & Contact Callout */}
-                <div className="mt-5 border-t border-line pt-4">
-                  <div className="rounded-xl bg-surface-alt p-3 text-[11px] leading-relaxed text-ink-muted">
-                    <p className="font-semibold text-ink-strong">Cần hỗ trợ pháp lý?</p>
+                <div className="mt-5 border-t border-white/10 pt-4">
+                  <div className="rounded-xl bg-[#121A16] border border-white/10 p-3 text-[11px] leading-relaxed text-white/70">
+                    <p className="font-semibold text-white">Cần hỗ trợ pháp lý?</p>
                     <p className="mt-1">
                       Mọi câu hỏi về điều khoản và dữ liệu cá nhân, vui lòng liên hệ:
                     </p>
                     <a
                       href="mailto:support@chargeops.online"
-                      className="mt-1.5 inline-block font-semibold text-primary-dark hover:underline"
+                      className="mt-1.5 inline-block font-semibold text-emerald-400 hover:underline"
                     >
                       support@chargeops.online
                     </a>
@@ -325,29 +325,29 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
 
             {/* Mobile TOC Quick-Jump Bar */}
             <div className="lg:hidden print:hidden">
-              <div className="rounded-xl border border-line bg-white p-3 shadow-card">
+              <div className="rounded-xl border border-white/10 bg-[#0E1512] p-3 shadow-diffusion-dark">
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="flex w-full items-center justify-between text-xs font-semibold text-ink-strong"
+                  className="flex w-full items-center justify-between text-xs font-semibold text-white"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <DocumentIcon className="h-4 w-4 text-primary" />
+                    <DocumentIcon className="h-4 w-4 text-emerald-400" />
                     <span>Mục lục điều khoản ({content.sections.length} phần)</span>
                   </span>
-                  <span className="text-primary-dark">
+                  <span className="text-emerald-400">
                     {mobileMenuOpen ? "Đóng ▲" : "Xem nhanh ▼"}
                   </span>
                 </button>
 
                 {mobileMenuOpen && (
-                  <nav className="mt-3 space-y-1 border-t border-line pt-3 text-xs">
+                  <nav className="mt-3 space-y-1 border-t border-white/10 pt-3 text-xs">
                     {content.sections.map((section, idx) => (
                       <a
                         key={section.title}
                         href={`#${slug(section.title)}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block rounded-lg px-2.5 py-1.5 font-medium text-ink-body hover:bg-primary-soft hover:text-primary-dark"
+                        className="block rounded-lg px-2.5 py-1.5 font-medium text-white/70 hover:bg-emerald-500/15 hover:text-emerald-400"
                       >
                         {String(idx + 1).padStart(2, "0")}. {stripNumberPrefix(section.title)}
                       </a>
@@ -365,15 +365,15 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                   <article
                     key={section.title}
                     id={secSlug}
-                    className="scroll-mt-24 rounded-2xl border border-line bg-white p-6 shadow-card transition duration-200 hover:border-primary/20 hover:shadow-glass sm:p-8"
+                    className="scroll-mt-28 rounded-2xl border border-white/10 bg-[#0E1512] p-6 shadow-diffusion-dark transition duration-300 hover:border-emerald-500/30 sm:p-8"
                   >
                     {/* Section Header */}
-                    <div className="flex items-start justify-between gap-4 border-b border-line/70 pb-4">
+                    <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
                       <div className="flex items-start gap-3">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-xs font-bold text-primary-dark ring-1 ring-primary/20">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/30">
                           {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <h2 className="text-lg font-bold text-ink-strong sm:text-xl">
+                        <h2 className="text-lg font-bold text-white sm:text-xl">
                           {section.title}
                         </h2>
                       </div>
@@ -382,12 +382,12 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                       <button
                         type="button"
                         onClick={() => handleCopyLink(secSlug)}
-                        className="group shrink-0 rounded-lg p-1.5 text-ink-muted transition hover:bg-surface-alt hover:text-primary-dark print:hidden"
+                        className="group shrink-0 rounded-lg p-1.5 text-white/40 transition hover:bg-white/5 hover:text-emerald-400 print:hidden"
                         title="Sao chép liên kết mục này"
                         aria-label={`Sao chép liên kết ${section.title}`}
                       >
                         {copiedId === secSlug ? (
-                          <span className="text-xs font-bold text-primary-dark">✓ Đã chép</span>
+                          <span className="text-xs font-bold text-emerald-400">✓ Đã chép</span>
                         ) : (
                           <LinkIcon className="h-4 w-4 opacity-50 group-hover:opacity-100" />
                         )}
@@ -395,7 +395,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                     </div>
 
                     {/* Section Paragraphs & Smart Callout Rendering */}
-                    <div className="mt-5 space-y-4 text-sm leading-relaxed text-ink-body sm:text-[15px]">
+                    <div className="mt-5 space-y-4 text-sm leading-relaxed text-white/80 sm:text-[15px]">
                       {section.body.map((line, lineIdx) => {
                         const isBookingGracePeriod =
                           line.includes("10 phút") && (line.includes("ân hạn") || line.includes("hoàn 100%"));
@@ -408,13 +408,13 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                           return (
                             <div
                               key={lineIdx}
-                              className="rounded-xl border border-primary/30 bg-primary-soft/40 p-4 text-ink-strong shadow-sm"
+                              className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-white shadow-sm"
                             >
-                              <div className="flex items-center gap-2 font-semibold text-primary-dark">
+                              <div className="flex items-center gap-2 font-semibold text-emerald-400">
                                 <CheckIcon className="h-4 w-4" />
                                 <span>Quy chế ân hạn hủy & Hoàn tiền (Booking Rules v4.9)</span>
                               </div>
-                              <p className="mt-1.5 text-sm leading-relaxed text-ink-body">
+                              <p className="mt-1.5 text-sm leading-relaxed text-white/80">
                                 {line}
                               </p>
                             </div>
@@ -425,13 +425,13 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                           return (
                             <div
                               key={lineIdx}
-                              className="rounded-xl border border-primary/30 bg-emerald-50/50 p-4 text-ink-strong shadow-sm"
+                              className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-white shadow-sm"
                             >
-                              <div className="flex items-center gap-2 font-semibold text-emerald-800">
-                                <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
+                              <div className="flex items-center gap-2 font-semibold text-emerald-400">
+                                <ShieldCheckIcon className="h-4 w-4 text-emerald-400" />
                                 <span>Cam kết bảo mật & Chuẩn mã hóa dữ liệu</span>
                               </div>
-                              <p className="mt-1.5 text-sm leading-relaxed text-ink-body">
+                              <p className="mt-1.5 text-sm leading-relaxed text-white/80">
                                 {line}
                               </p>
                             </div>
@@ -442,13 +442,13 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
                           return (
                             <div
                               key={lineIdx}
-                              className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-ink-strong shadow-sm"
+                              className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-white shadow-sm"
                             >
-                              <div className="flex items-center gap-2 font-semibold text-amber-900">
-                                <ClockIcon className="h-4 w-4 text-amber-600" />
+                              <div className="flex items-center gap-2 font-semibold text-amber-400">
+                                <ClockIcon className="h-4 w-4 text-amber-400" />
                                 <span>Thời hạn check-in QR & Xử lý vắng mặt</span>
                               </div>
-                              <p className="mt-1.5 text-sm leading-relaxed text-ink-body">
+                              <p className="mt-1.5 text-sm leading-relaxed text-white/80">
                                 {line}
                               </p>
                             </div>
@@ -467,24 +467,24 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
               })}
 
               {/* Bottom Notice Card */}
-              <div className="rounded-2xl border border-line bg-gradient-to-r from-surface to-surface-alt p-6 text-center text-xs text-ink-muted shadow-sm sm:p-8">
-                <p className="font-semibold text-ink-strong">
+              <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-[#0E1512] to-[#080D0B] p-6 text-center text-xs text-white/70 shadow-diffusion-dark sm:p-8">
+                <p className="font-bold text-white text-sm">
                   Văn bản có giá trị pháp lý đầy đủ và ràng buộc trong hệ sinh thái ChargeOps.
                 </p>
-                <p className="mt-1">
+                <p className="mt-1 text-white/60">
                   Mọi sửa đổi, bổ sung quy chế sẽ được thông báo công khai trước khi có hiệu lực áp dụng.
                 </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                <div className="mt-5 flex flex-wrap justify-center gap-3">
                   <button
                     type="button"
                     onClick={handlePrint}
-                    className="inline-flex items-center gap-1.5 rounded-pill border border-line bg-white px-4 py-2 text-xs font-semibold text-ink-body shadow-sm hover:border-primary/40 hover:text-primary-dark"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:border-emerald-500/40 hover:bg-white/10"
                   >
                     <PrinterIcon className="h-3.5 w-3.5" /> In bản lưu trữ PDF
                   </button>
                   <Link
                     href="/"
-                    className="inline-flex items-center gap-1.5 rounded-pill bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-dark"
+                    className="btn-primary text-xs py-2 px-5"
                   >
                     Quay lại Trang chủ
                   </Link>

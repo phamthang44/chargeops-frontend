@@ -85,6 +85,19 @@ export const ChevronRightIcon = (p: SVGProps<SVGSVGElement>) => (
   </Line>
 );
 
+export const ChevronDownIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Line>
+);
+
+export const GlobeIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" />
+  </Line>
+);
+
 export const BuildingIcon = (p: SVGProps<SVGSVGElement>) => (
   <Line {...p}>
     <rect x="4" y="2" width="16" height="20" rx="2" />
@@ -156,6 +169,51 @@ export const ChartBarIcon = (p: SVGProps<SVGSVGElement>) => (
 export const SlidersIcon = (p: SVGProps<SVGSVGElement>) => (
   <Line {...p}>
     <path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6" />
+  </Line>
+);
+
+export const UmbrellaIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M22 12A10 10 0 0 0 2 12c0 .5.5 1 1 1h8v6a2 2 0 1 0 4 0" />
+    <path d="M12 2v2" />
+  </Line>
+);
+
+export const ParkingIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="4" />
+    <path d="M9 17V7h4.5a3 3 0 0 1 0 6H9" />
+  </Line>
+);
+
+export const RestroomIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <circle cx="12" cy="5" r="2" />
+    <path d="M8 21v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6" />
+    <path d="M7 10h10" />
+  </Line>
+);
+
+export const WifiIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+    <path d="M8.5 16.05a6 6 0 0 1 7 0" />
+    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+    <circle cx="12" cy="19.5" r="1" fill="currentColor" />
+  </Line>
+);
+
+export const Clock24Icon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 3" />
+  </Line>
+);
+
+export const SmartphoneIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <rect x="5" y="2" width="14" height="20" rx="3" />
+    <path d="M12 18h.01" />
   </Line>
 );
 

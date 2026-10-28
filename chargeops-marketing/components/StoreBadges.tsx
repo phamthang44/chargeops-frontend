@@ -31,15 +31,15 @@ function Badge({
     <a
       href="/#tai-ung-dung"
       aria-label={`Tải ${line2}`}
-      className="group inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-ink-strong/10 bg-ink-strong px-5 py-2.5
-        text-white shadow-card transition hover:-translate-y-0.5 hover:shadow-glass"
+      className="group inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-[#121A16] px-5 py-2.5
+        text-white shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#16221C] hover:border-emerald-500/40 hover:shadow-glow-emerald"
     >
-      <span className="text-white/95">{glyph}</span>
+      <span className="text-white/95 group-hover:text-emerald-400 transition-colors">{glyph}</span>
       <span className="leading-tight">
-        <span className="block text-[10px] uppercase tracking-wide text-white/70">
+        <span className="block text-[10px] uppercase tracking-wide text-white/60">
           {line1}
         </span>
-        <span className="block text-base font-semibold tracking-tight">
+        <span className="block text-base font-semibold tracking-tight text-white">
           {line2}
         </span>
       </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * No-backend waitlist capture. By design it does NOT pretend to register a real
@@ -9,6 +10,7 @@ import { useState, type FormEvent } from "react";
  * POST `email` to a form service (Formspree / Resend) or your API.
  */
 export function WaitlistForm({ compact = false }: { compact?: boolean }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
 
@@ -22,11 +24,11 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
   if (done) {
     return (
       <p
-        className="pill bg-primary-soft text-primary-dark"
+        className="pill bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20"
         role="status"
         aria-live="polite"
       >
-        ✓ Cảm ơn bạn! Chúng tôi sẽ báo khi ứng dụng ra mắt.
+        {t.download.waitlistSuccess}
       </p>
     );
   }
@@ -34,20 +36,23 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
   return (
     <form
       onSubmit={onSubmit}
-      className={`flex w-full gap-2 ${compact ? "max-w-md" : "max-w-lg"}`}
+      className={`flex flex-col sm:flex-row w-full gap-2 ${compact ? "max-w-md" : "max-w-lg"}`}
     >
       <input
         type="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email của bạn"
-        aria-label="Email"
-        className="min-w-0 flex-1 rounded-xl border border-line bg-white px-4 py-3 text-sm
-          outline-none transition placeholder:text-ink-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+        placeholder={t.download.waitlistPlaceholder}
+        aria-label={t.download.waitlistPlaceholder}
+        className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#121A16] px-4 py-3 text-sm text-white
+          outline-none transition placeholder:text-white/40 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
       />
-      <button type="submit" className="btn-primary whitespace-nowrap">
-        Nhận thông báo
+      <button
+        type="submit"
+        className="cursor-pointer rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-white px-5 py-3 text-sm font-bold shadow-glow-emerald transition-all duration-300 ease-haptic whitespace-nowrap"
+      >
+        {t.download.waitlistButton}
       </button>
     </form>
   );

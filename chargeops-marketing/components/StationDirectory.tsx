@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CITIES, STATIONS, type CoverageStation } from "./stations";
 import { BoltIcon, ACPlugIcon, MapPinIcon } from "./Icons";
 import { fetchPublicStations } from "@/lib/stations-api";
+import { useTranslation } from "@/lib/i18n";
 
 interface StationDirectoryProps {
   initialStations?: CoverageStation[];
@@ -15,6 +16,7 @@ export function StationDirectory({
   initialStations = STATIONS,
   initialIsLive = false,
 }: StationDirectoryProps) {
+  const { t, locale } = useTranslation();
   const [stationList, setStationList] = useState<CoverageStation[]>(initialStations);
   const [isLive, setIsLive] = useState<boolean>(initialIsLive);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -119,30 +121,33 @@ export function StationDirectory({
   return (
     <div className="container-x py-8 sm:py-10">
       {/* Mobile View Switcher (Visible only below lg breakpoint) */}
-      <div className="mb-6 flex lg:hidden items-center rounded-2xl bg-surface-alt p-1 border border-line shadow-sm">
+      <div className="mb-6 flex lg:hidden items-center rounded-2xl bg-white/[0.04] p-1 border border-white/10 shadow-sm backdrop-blur-md">
         <button
           type="button"
           onClick={() => setMobileView("list")}
           className={`min-h-11 flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-semibold transition cursor-pointer ${
             mobileView === "list"
-              ? "bg-white text-ink-strong shadow-sm ring-1 ring-black/5"
-              : "text-ink-muted hover:text-ink-strong"
+              ? "bg-[#0E1512] text-white shadow-sm ring-1 ring-white/10"
+              : "text-white/60 hover:text-white"
           }`}
         >
-          <span>📋</span>
-          <span>Danh sách trạm ({filtered.length})</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-4 w-4 text-emerald-400">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          <span>{locale === "en" ? `Station List (${filtered.length})` : `Danh sách trạm (${filtered.length})`}</span>
         </button>
         <button
           type="button"
           onClick={() => setMobileView("map")}
           className={`min-h-11 flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-semibold transition cursor-pointer ${
             mobileView === "map"
-              ? "bg-primary text-white shadow-glow-emerald"
-              : "text-ink-muted hover:text-ink-strong"
+              ? "bg-emerald-500 text-white shadow-glow-emerald font-bold"
+              : "text-white/60 hover:text-white"
           }`}
         >
-          <span>🗺️</span>
-          <span>Bản đồ & Chỉ đường</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-4 w-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934a1.12 1.12 0 01-1.006 0L9.503 3.31a1.125 1.125 0 00-1.006 0L3.623 5.748A1.125 1.125 0 003 6.754v11.53c0 .836.88 1.38 1.628 1.006l3.869-1.934a1.12 1.12 0 011.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+          </svg>
         </button>
       </div>
 
@@ -156,20 +161,20 @@ export function StationDirectory({
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm theo tên trạm, quận hoặc địa chỉ…"
-                aria-label="Tìm trạm sạc"
-                className="w-full rounded-2xl border border-line bg-white px-4 py-3.5 pl-11 text-sm outline-none transition placeholder:text-ink-muted focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm"
+                placeholder={t.stationDirectory.searchPlaceholder}
+                aria-label={t.stationDirectory.searchPlaceholder}
+                className="w-full rounded-2xl border border-white/10 bg-[#0E1512] px-4 py-3.5 pl-11 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-sm"
               />
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
                 <MapPinIcon className="h-4 w-4" />
               </span>
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-ink-muted hover:text-ink-strong cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
                 >
-                  Xóa
+                  {locale === "en" ? "Clear" : "Xóa"}
                 </button>
               )}
             </div>
@@ -186,11 +191,11 @@ export function StationDirectory({
                   }}
                   className={`min-h-11 cursor-pointer rounded-pill px-4 py-2 text-xs font-semibold transition ${
                     city === c
-                      ? "bg-primary text-white shadow-glass"
-                      : "border border-line bg-white text-ink-body hover:border-primary/40"
+                      ? "bg-primary text-white shadow-glow-emerald"
+                      : "border border-white/10 bg-[#0E1512] text-white/70 hover:border-emerald-500/40 hover:bg-[#121A16] hover:text-white"
                   }`}
                 >
-                  {c}
+                  {c === "Tất cả" ? t.common.all : c}
                 </button>
               ))}
             </div>
@@ -207,7 +212,7 @@ export function StationDirectory({
                 }`}
               >
                 <BoltIcon className="h-3.5 w-3.5" />
-                Sạc nhanh DC
+                {t.stationDirectory.filterFastOnly}
               </button>
 
               <button
@@ -220,7 +225,7 @@ export function StationDirectory({
                 }`}
               >
                 <span className="h-2 w-2 rounded-full bg-primary" />
-                Đang còn chỗ
+                {t.stationDirectory.filterAvailableOnly}
               </button>
             </div>
           </div>
@@ -228,8 +233,17 @@ export function StationDirectory({
           {/* Status indicator bar */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
             <p>
-              Tìm thấy <strong className="text-ink-strong">{filtered.length}</strong> trạm sạc
-              {city !== "Tất cả" ? ` tại ${city}` : " trong danh sách hiện có"}
+              {locale === "en" ? (
+                <>
+                  Found <strong className="text-white">{filtered.length}</strong> stations
+                  {city !== "Tất cả" ? ` in ${city}` : " in current list"}
+                </>
+              ) : (
+                <>
+                  Tìm thấy <strong className="text-white">{filtered.length}</strong> trạm sạc
+                  {city !== "Tất cả" ? ` tại ${city}` : " trong danh sách hiện có"}
+                </>
+              )}
             </p>
 
             {/* Live API sync status indicator */}
@@ -237,15 +251,15 @@ export function StationDirectory({
               {isLive ? (
                 <span className="inline-flex items-center gap-1.5 rounded-pill bg-primary-soft px-2.5 py-1 font-semibold text-primary-dark">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  Dữ liệu trực tuyến (API kết nối)
+                  {locale === "en" ? "Live Online (API Sync)" : "Dữ liệu trực tuyến (API kết nối)"}
                 </span>
               ) : (
                 <span
                   className="inline-flex items-center gap-1.5 rounded-pill bg-surface-alt px-2.5 py-1 font-medium text-ink-muted ring-1 ring-line"
-                  title="Danh sách trạm minh họa khi chưa có dữ liệu trực tuyến"
+                  title={locale === "en" ? "Sample station list" : "Danh sách trạm minh họa"}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-ink-muted/50" />
-                  Dữ liệu minh họa
+                  {t.common.simulatedData}
                 </span>
               )}
             </div>
@@ -257,7 +271,7 @@ export function StationDirectory({
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-card border border-line bg-white p-5 shadow-card space-y-3"
+                  className="animate-pulse rounded-card border border-white/10 bg-[#0E1512] p-5 shadow-card space-y-3"
                 >
                   <div className="h-5 w-3/4 rounded bg-surface-alt" />
                   <div className="h-4 w-1/2 rounded bg-surface-alt" />
@@ -291,61 +305,65 @@ export function StationDirectory({
                     <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
                       <div>
                         <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
-                          <h2 className="font-bold text-ink-strong group-hover:text-primary-dark transition-colors line-clamp-1">
+                          <h2 className="font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
                             {s.name}
                           </h2>
                           <span
                             className={`pill shrink-0 text-[11px] font-bold ${
-                              full ? "bg-danger/10 text-danger" : "bg-primary-soft text-primary-dark"
+                              full ? "bg-red-500/15 text-red-400 border border-red-500/20" : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                             }`}
                           >
-                            {s.total === 0 ? "Chưa có dữ liệu cổng" : full ? "Hết chỗ" : `${s.available}/${s.total} trống`}
+                            {s.total === 0
+                              ? (locale === "en" ? "No plug data" : "Chưa có dữ liệu cổng")
+                              : full
+                              ? (locale === "en" ? "Full" : "Hết chỗ")
+                              : (locale === "en" ? `${s.available}/${s.total} available` : `${s.available}/${s.total} trống`)}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-ink-muted line-clamp-1">
+                        <p className="mt-1 text-xs text-white/60 line-clamp-1">
                           {s.district}, {s.city}
                         </p>
                       </div>
 
-                      <div className="mt-5 pt-3 border-t border-black/[0.04]">
+                      <div className="mt-5 pt-3 border-t border-white/10">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="pill inline-flex items-center gap-1 bg-surface-alt text-xs font-medium text-ink-body">
+                          <span className="pill inline-flex items-center gap-1 bg-[#16221C] border border-white/10 text-xs font-medium text-white/80">
                             {s.connectors.length === 0 && !s.maxPowerKw ? (
-                              <>Thông tin cổng chưa cập nhật</>
+                              <>{locale === "en" ? "Connector info pending" : "Thông tin cổng chưa cập nhật"}</>
                             ) : s.fast ? (
                               <>
-                                <BoltIcon className="h-3 w-3 text-primary" /> DC Siêu nhanh
+                                <BoltIcon className="h-3 w-3 text-emerald-400" /> {locale === "en" ? "DC Fast" : "DC Siêu nhanh"}
                               </>
                             ) : (
                               <>
-                                <ACPlugIcon className="h-3 w-3 text-ink-muted" /> AC Tiêu chuẩn
+                                <ACPlugIcon className="h-3 w-3 text-white/50" /> {locale === "en" ? "AC Standard" : "AC Tiêu chuẩn"}
                               </>
                             )}
                           </span>
-                          <span className="font-mono text-xs font-bold text-primary-dark">
+                          <span className="font-mono text-xs font-bold text-emerald-400">
                             {s.pricePerKwh}
                           </span>
                         </div>
-                        <div className="mt-3.5 flex items-center justify-between text-xs text-ink-muted">
+                        <div className="mt-3.5 flex items-center justify-between text-xs text-white/60">
                           <a
                             href={directionsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex min-h-11 items-center gap-1 px-1 font-semibold text-primary hover:text-primary-dark hover:underline"
-                            title="Mở chỉ đường trên Google Maps"
+                            className="inline-flex min-h-11 items-center gap-1 px-1 font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
+                            title={locale === "en" ? "Open directions on Google Maps" : "Mở chỉ đường trên Google Maps"}
                           >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
                               <path d="M3 11l19-9-9 19-2-8-8-2z" />
                             </svg>
-                            <span>Chỉ đường</span>
+                            <span>{locale === "en" ? "Directions" : "Chỉ đường"}</span>
                           </a>
 
                           <Link
                             href={`/tram-sac/${s.slug}`}
                             className="inline-flex min-h-11 items-center gap-0.5 px-1 font-semibold text-ink-strong hover:text-primary transition-colors"
                           >
-                            <span>Chi tiết trạm</span>
+                            <span>{locale === "en" ? "Details" : "Chi tiết trạm"}</span>
                             <span className="group-hover:translate-x-0.5 transition-transform">›</span>
                           </Link>
                         </div>
@@ -356,9 +374,9 @@ export function StationDirectory({
               })}
 
               {filtered.length === 0 && (
-                <div className="col-span-2 rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-ink-muted">
-                  <p className="font-medium text-ink-strong">Không tìm thấy trạm sạc phù hợp</p>
-                  <p className="mt-1">Thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc.</p>
+                <div className="col-span-2 rounded-2xl border border-dashed border-white/15 bg-[#0E1512] p-10 text-center text-sm text-white/60">
+                  <p className="font-medium text-white">{t.stationDirectory.noStationsMatched}</p>
+                  <p className="mt-1">{locale === "en" ? "Try changing your search keywords or clearing filters." : "Thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc."}</p>
                   <button
                     type="button"
                     onClick={() => {
@@ -367,9 +385,9 @@ export function StationDirectory({
                       setFastOnly(false);
                       setAvailableOnly(false);
                     }}
-                    className="mt-4 inline-flex items-center rounded-pill bg-primary-soft px-4 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-soft/80 cursor-pointer"
+                    className="mt-4 inline-flex items-center rounded-pill bg-emerald-500/15 px-4 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/25 cursor-pointer"
                   >
-                    Đặt lại bộ lọc
+                    {t.stationDirectory.resetFilters}
                   </button>
                 </div>
               )}
@@ -380,26 +398,26 @@ export function StationDirectory({
         {/* Right Column: Live Interactive Map & Station Spotlight Card */}
         <aside className={mobileView === "list" ? "hidden lg:block" : "block"}>
           <div className="sticky top-24 space-y-4">
-            <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0E1512] shadow-card">
               {/* Map Header */}
-              <div className="flex items-center justify-between border-b border-line bg-surface-alt px-4 py-3">
+              <div className="flex items-center justify-between border-b border-white/10 bg-[#121A16] px-4 py-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
-                  <span className="truncate text-xs font-bold text-ink-strong">
-                    {activeStation ? activeStation.name : "Bản đồ mạng lưới trạm sạc"}
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="truncate text-xs font-bold text-white">
+                    {activeStation ? activeStation.name : (locale === "en" ? "Station Network Map" : "Bản đồ mạng lưới trạm sạc")}
                   </span>
                 </div>
-                <span className="shrink-0 rounded-pill bg-white px-2.5 py-0.5 text-[10px] font-semibold text-primary-dark ring-1 ring-line">
-                  {city !== "Tất cả" ? city : "Vị trí thực tế"}
+                <span className="shrink-0 rounded-pill bg-[#16221C] px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-white/10">
+                  {city !== "Tất cả" ? city : (locale === "en" ? "Real Coordinates" : "Vị trí thực tế")}
                 </span>
               </div>
 
               {/* Interactive OpenStreetMap embed */}
-              <div className="relative h-[290px] sm:h-[320px] w-full bg-[#E5E3DF] overflow-hidden">
+              <div className="relative h-[290px] sm:h-[320px] w-full bg-[#16221C] overflow-hidden">
                 <iframe
                   key={activeStation?.id ?? city}
                   src={mapEmbedUrl}
-                  title="Bản đồ trạm sạc"
+                  title={locale === "en" ? "Charging station map" : "Bản đồ trạm sạc"}
                   className="h-[calc(100%+38px)] w-full border-0 select-none -mb-[38px]"
                   loading="lazy"
                   tabIndex={-1}
@@ -411,8 +429,8 @@ export function StationDirectory({
                     href={googleMapsDirectionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Mở chỉ đường trên Google Maps"
-                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/95 text-ink-body shadow-md backdrop-blur transition hover:bg-white hover:text-primary hover:scale-105"
+                    title={locale === "en" ? "Open directions on Google Maps" : "Mở chỉ đường trên Google Maps"}
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0E1512]/95 text-white/80 shadow-md backdrop-blur transition hover:bg-[#16221C] hover:text-emerald-400 hover:scale-105 border border-white/10"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -424,7 +442,7 @@ export function StationDirectory({
 
               {/* Station Spotlight Card */}
               {activeStation ? (
-                <div className="p-4 sm:p-5 bg-white">
+                <div className="p-4 sm:p-5 bg-[#0E1512]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <Link
@@ -446,10 +464,12 @@ export function StationDirectory({
                       }`}
                     >
                       {activeStation.total === 0
-                        ? "Chưa có dữ liệu cổng"
+                        ? (locale === "en" ? "No plug data" : "Chưa có dữ liệu cổng")
                         : activeStation.available === 0
-                        ? "Hết chỗ"
-                        : `${activeStation.available}/${activeStation.total} trống`}
+                        ? (locale === "en" ? "Full" : "Hết chỗ")
+                        : (locale === "en"
+                            ? `${activeStation.available}/${activeStation.total} available`
+                            : `${activeStation.available}/${activeStation.total} trống`)}
                     </span>
                   </div>
 
@@ -459,12 +479,12 @@ export function StationDirectory({
                       {activeStation.fast ? (
                         <>
                           <BoltIcon className="h-3.5 w-3.5 text-primary" />
-                          <span>DC Siêu nhanh</span>
+                          <span>{locale === "en" ? "DC Fast" : "DC Siêu nhanh"}</span>
                         </>
                       ) : (
                         <>
                           <ACPlugIcon className="h-3.5 w-3.5 text-ink-muted" />
-                          <span>AC Tiêu chuẩn</span>
+                          <span>{locale === "en" ? "AC Standard" : "AC Tiêu chuẩn"}</span>
                         </>
                       )}
                     </span>
@@ -485,27 +505,34 @@ export function StationDirectory({
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
                         <path d="M3 11l19-9-9 19-2-8-8-2z" />
                       </svg>
-                      <span>Chỉ đường</span>
+                      <span>{locale === "en" ? "Directions" : "Chỉ đường"}</span>
                     </a>
 
                     <Link
                       href={`/tram-sac/${activeStation.slug}`}
                       className="flex items-center justify-center gap-1 rounded-xl border border-line bg-surface-alt px-3 py-2.5 text-xs font-semibold text-ink-strong transition hover:border-primary/40 hover:bg-white active:scale-[0.98]"
                     >
-                      <span>Chi tiết trạm ›</span>
+                      <span>{locale === "en" ? "Station Details ›" : "Chi tiết trạm ›"}</span>
                     </Link>
                   </div>
                 </div>
               ) : (
                 <div className="p-5 text-center text-xs text-ink-muted">
-                  Chọn một trạm sạc từ danh sách để xem vị trí và chỉ đường.
+                  {locale === "en"
+                    ? "Select a station from the list to view its location and directions."
+                    : "Chọn một trạm sạc từ danh sách để xem vị trí và chỉ đường."}
                 </div>
               )}
             </div>
 
             {/* Hint footnote */}
-            <p className="px-2 text-[11px] leading-relaxed text-ink-muted">
-              📍 Vị trí theo thông tin trạm. Hãy kiểm tra lại địa chỉ trước khi đi; nút <strong>Chỉ đường</strong> sẽ mở Google Maps.
+            <p className="px-2 text-[11px] leading-relaxed text-white/50 flex items-start gap-1.5">
+              <MapPinIcon className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {locale === "en"
+                  ? "Station locations are based on provider records. Please verify before departure; Directions opens Google Maps."
+                  : "Vị trí theo thông tin trạm. Hãy kiểm tra lại địa chỉ trước khi đi; nút Chỉ đường sẽ mở Google Maps."}
+              </span>
             </p>
           </div>
         </aside>

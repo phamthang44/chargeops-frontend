@@ -1,11 +1,11 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CoverageSection } from "@/components/CoverageSection";
 import { StoreBadges } from "@/components/StoreBadges";
 import { WaitlistForm } from "@/components/WaitlistForm";
-import { PhoneFrame } from "@/components/PhoneFrame";
 import { QrDownload } from "@/components/QrDownload";
 import { Reveal } from "@/components/Reveal";
 import { BackToTop } from "@/components/BackToTop";
@@ -16,22 +16,27 @@ import { EcosystemStrip } from "@/components/EcosystemStrip";
 import { ProblemComparison } from "@/components/ProblemComparison";
 import { JourneyTimeline } from "@/components/JourneyTimeline";
 import { InteractiveSlotScheduler } from "@/components/InteractiveSlotScheduler";
+import { InteractiveRefundScrubber } from "@/components/InteractiveRefundScrubber";
 import { LiveChargingTelemetry } from "@/components/LiveChargingTelemetry";
+import { HeroVideoPreview } from "@/components/HeroVideoPreview";
+import { WalkthroughTheater } from "@/components/WalkthroughTheater";
+import { EngineeringArchitecture } from "@/components/EngineeringArchitecture";
+import { SystemCapabilities } from "@/components/SystemCapabilities";
+import { HeroFloatTelemetry } from "@/components/HeroFloatTelemetry";
 import {
-  MapPinIcon,
-  CalendarIcon,
   QrIcon,
-  BatteryIcon,
-  RefundIcon,
   BoltIcon,
   CheckIcon,
 } from "@/components/Icons";
+import { useTranslation } from "@/lib/i18n";
 
 export default function Home() {
+  const { t } = useTranslation();
+
   return (
     <>
       <a href="#top" className="skip-link">
-        Bỏ qua tới nội dung
+        {t.common.skipToContent}
       </a>
       <SiteHeader />
       <main id="top" tabIndex={-1} className="pt-20 sm:pt-24">
@@ -39,11 +44,13 @@ export default function Home() {
         <EcosystemStrip />
         <ProblemComparison />
         <JourneySection />
-        <CoverageSection />
         <FeaturesBento />
-        <Stats />
+        <WalkthroughSection />
+        <CoverageSection />
         <OwnerBand />
         <OwnerPricing />
+        <EngineeringArchitecture />
+        <SystemCapabilities />
         <DownloadCta />
       </main>
       <SiteFooter />
@@ -55,6 +62,8 @@ export default function Home() {
 
 /* ----------------------------- Hero ----------------------------- */
 function Hero() {
+  const { t } = useTranslation();
+
   return (
     <section className="relative overflow-hidden pt-5 pb-12 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-28">
       {/* Soft, on-brand backdrop that keeps the product preview in focus. */}
@@ -69,16 +78,16 @@ function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              TÌM TRẠM VÀ ĐẶT KHUNG GIỜ SẠC
+              {t.hero.eyebrow}
             </span>
           </div>
 
-          <h1 className="mt-5 max-w-[15ch] text-[clamp(2.125rem,9vw,3rem)] font-extrabold leading-[1.08] tracking-[-0.045em] text-balance text-ink-heading sm:mt-6 sm:text-5xl lg:text-[3.5rem]">
-            Tìm trạm sạc và chọn khung giờ phù hợp
+          <h1 className="mt-5 max-w-2xl text-[clamp(2.125rem,7vw,3.25rem)] font-extrabold leading-[1.24] sm:leading-[1.24] lg:leading-[1.26] tracking-tight text-balance text-white sm:mt-6 sm:text-5xl lg:text-[3.5rem]">
+            {t.hero.titlePart1}<span className="text-gradient">{t.hero.titleHighlight}</span>
           </h1>
 
-          <p className="mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-ink-body">
-            Chủ động hành trình xe điện: Tìm trạm sạc gần nhất, xem giá gói minh bạch và đặt trước khung giờ để không phải chờ đợi. Khi tới nơi, chỉ cần quét mã QR để bắt đầu nạp năng lượng.
+          <p className="mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-white/70">
+            {t.hero.description}
           </p>
 
           {/* Island CTA Buttons (Button-in-Button Architecture) */}
@@ -89,7 +98,7 @@ function Hero() {
               rel="noopener noreferrer"
               className="btn-island-primary w-full justify-between sm:w-auto"
             >
-              <span>Trải nghiệm Driver Web</span>
+              <span>{t.hero.ctaPrimary}</span>
               <span className="btn-icon-bubble">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
@@ -97,85 +106,50 @@ function Hero() {
               </span>
             </a>
 
-            <Link href="/tram-sac" className="btn-island-secondary w-full justify-between sm:w-auto">
-              <span>Khám phá trạm sạc</span>
-              <span className="btn-icon-bubble">
-                <MapPinIcon className="h-4 w-4" />
-              </span>
-            </Link>
+            <WalkthroughTheater variant="button" theme="dark" triggerButtonText={t.hero.ctaSecondary} />
           </div>
 
           {/* Micro Trust Strip */}
-          <div className="mt-9 flex flex-wrap items-center gap-3 pt-3 border-t border-black/[0.04] text-xs sm:text-[13px] text-ink-muted">
-            <span className="font-semibold text-ink-heading">Dành cho tài xế và đơn vị vận hành trạm sạc</span>
-            <span className="text-ink-muted/50">·</span>
-            <span>Tìm trạm, đặt chỗ và quản lý thông tin vận hành</span>
+          <div className="mt-9 flex flex-wrap items-center gap-3 pt-3 border-t border-white/10 text-xs sm:text-[13px] text-white/60">
+            <span className="font-semibold text-white">{t.hero.trustRole}</span>
+            <span className="text-white/30">·</span>
+            <Link href="/tram-sac" className="text-emerald-400 font-medium hover:underline">
+              {t.hero.trustStationsLink}
+            </Link>
           </div>
         </Reveal>
 
-        {/* Machined Titanium Phone Mockup with Dual-Bezel Floating Telemetry */}
+        {/* Machined Titanium Phone Mockup with 8-12s Looping Preview & Floating Liquid Telemetry */}
         <Reveal delay={120} className="relative flex justify-center lg:justify-end">
           <div className="relative">
-            <PhoneFrame
-              src="/screens/app-home-new.png"
-              alt="Màn hình tìm và đặt chỗ trạm sạc ChargeOps"
-              priority
-              float
+            <HeroVideoPreview
+              posterSrc="/screens/app-home-new.png"
+              alt={t.hero.videoPosterAlt}
+              hasVideo={false}
             />
 
-            {/* Float Card 1: Slot Reserved Confirmation */}
-            <div className="absolute -left-6 sm:-left-12 top-10 z-20 hidden sm:flex items-center gap-3.5 rounded-2xl border border-black/5 bg-white/95 p-3.5 shadow-diffusion backdrop-blur-xl animate-float">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary-dark shadow-sm">
-                <CalendarIcon className="h-5 w-5" />
-              </span>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary-dark">
-                    Đã giữ chỗ riêng cho xe bạn
-                  </p>
-                </div>
-                <p className="text-sm font-extrabold text-ink-heading">14:00 – 15:00 · Trụ DC 120kW</p>
-                <p className="text-[11px] text-ink-muted">Vincom Đồng Khởi · Trụ #02</p>
-              </div>
-            </div>
-
-            {/* Float Card 2: Live Charging Telemetry */}
-            <div className="absolute -right-4 sm:-right-8 bottom-14 z-20 hidden sm:flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#080C0A]/95 p-3.5 shadow-diffusion-dark backdrop-blur-xl text-white animate-float-slow">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-glow-emerald">
-                <BatteryIcon className="h-5 w-5" />
-              </span>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                    <p className="text-[10px] font-semibold text-primary-light uppercase tracking-wider">
-                    Phiên sạc minh họa
-                  </p>
-                </div>
-                <p className="text-sm font-extrabold text-white font-mono">68% · 128 kW · còn 14 phút</p>
-                <p className="text-[11px] text-white/60">Thông số trên màn hình là dữ liệu minh họa</p>
-              </div>
-            </div>
+            {/* Floating Liquid Telemetry Cards (Motion.dev spring floating physics) */}
+            <HeroFloatTelemetry />
           </div>
         </Reveal>
       </div>
     </section>
-  );
-}
+)}
 
 /* ----------------------- Journey Section ------------------------ */
 function JourneySection() {
+  const { t } = useTranslation();
+
   return (
-    <section id="cach-hoat-dong" className="bg-[#FAFBFB] py-16 sm:py-24 lg:py-32 border-y border-black/[0.05]">
+    <section id="cach-hoat-dong" className="bg-[#090D0B] py-16 sm:py-24 lg:py-32 border-y border-white/[0.06]">
       <div className="container-x">
         <Reveal className="mx-auto max-w-2xl text-center mb-14">
-          <span className="eyebrow-tag">TRẢI NGHIỆM ĐƠN GIẢN</span>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-ink-heading sm:text-4xl lg:text-5xl">
-            Sạc xe chuẩn xác <span className="text-gradient">với 3 bước chủ động</span>
+          <span className="eyebrow-tag">{t.journey.eyebrow}</span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-white sm:text-4xl lg:text-5xl leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+            {t.journey.titlePart1}<span className="text-gradient">{t.journey.titleHighlight}</span>
           </h2>
-          <p className="mt-3 text-ink-body text-sm sm:text-base leading-relaxed">
-            Quy trình được tối ưu hóa cho tài xế xe điện bận rộn: không chờ đợi, không thao tác phức tạp,
-            để bạn có thể xem thông tin và lựa chọn khung giờ trước khi tới trạm.
+          <p className="mt-3 text-white/70 text-sm sm:text-base leading-relaxed">
+            {t.journey.description}
           </p>
         </Reveal>
 
@@ -189,16 +163,18 @@ function JourneySection() {
 
 /* ------------------- Asymmetrical Bento Grid Features ----------- */
 function FeaturesBento() {
+  const { t } = useTranslation();
+
   return (
-    <section id="tinh-nang" className="py-16 sm:py-24 lg:py-32">
+    <section id="tinh-nang" className="py-16 sm:py-24 lg:py-32 bg-[#070A08]">
       <div className="container-x">
         <Reveal className="max-w-2xl">
-          <span className="eyebrow-tag">CÁC TÍNH NĂNG CHÍNH</span>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-ink-heading sm:text-4xl lg:text-5xl">
-            Những việc bạn có thể làm với ChargeOps
+          <span className="eyebrow-tag">{t.bento.eyebrow}</span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-white sm:text-4xl lg:text-5xl leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+            {t.bento.title}
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-ink-body leading-relaxed">
-            Các màn hình bên dưới giới thiệu luồng và giao diện của ứng dụng. Một số dữ liệu hiển thị là nội dung minh họa.
+          <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed">
+            {t.bento.description}
           </p>
         </Reveal>
 
@@ -214,68 +190,41 @@ function FeaturesBento() {
 
           {/* Bento Tile 2: Instant Laser QR Check-in (Span 4) */}
           <Reveal delay={80} className="flex lg:col-span-4">
-            <div className="double-bezel-dark w-full flex flex-col">
-              <div className="double-bezel-dark-inner flex-1 flex flex-col justify-between text-white !p-5 sm:!p-8">
+            <div className="double-bezel w-full flex flex-col">
+              <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
                 <div>
-                  <span className="pill bg-white/10 text-primary-light font-bold">
-                    <QrIcon className="h-3.5 w-3.5" /> Check-in bằng mã QR
+                  <span className="pill bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20">
+                    <QrIcon className="h-3.5 w-3.5" /> {t.bento.qr.badge}
                   </span>
                   <h3 className="mt-4 text-xl sm:text-2xl font-bold text-white">
-                    Quét mã QR để bắt đầu sạc
+                    {t.bento.qr.title}
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-white/70 leading-relaxed">
-                    Quét mã QR của cổng đã đặt và xác nhận check-in trong ứng dụng. Hệ thống kiểm tra thông tin đặt chỗ trước khi tiếp tục.
+                    {t.bento.qr.description}
                   </p>
                 </div>
 
                 {/* Laser QR Visual Card with animated sweep */}
-                <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-5 text-center">
-                  <div className="mx-auto relative flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 text-primary-light ring-1 ring-primary/40 shadow-glow-emerald">
+                <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#121A16] p-5 text-center">
+                  <div className="mx-auto relative flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 shadow-sm">
                     <QrIcon className="h-9 w-9" />
                     {/* Animated Laser Scanning Line */}
                     <div className="pointer-events-none absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-glow-laser animate-laser-sweep" />
                   </div>
-                  <p className="mt-3.5 font-mono text-xs font-bold text-primary-light tracking-wider">
-                    QUÉT MÃ ĐỂ BẮT ĐẦU
+                  <p className="mt-3.5 font-mono text-xs font-bold text-emerald-400 tracking-wider">
+                    {t.bento.qr.sweepTag}
                   </p>
-                  <p className="text-[10px] font-mono text-white/50 mt-1">Giao diện minh họa</p>
+                  <p className="text-[10px] font-mono text-white/40 mt-1">{t.bento.qr.sampleTag}</p>
                 </div>
               </div>
             </div>
           </Reveal>
 
-          {/* Bento Tile 3: 100% Refund Policy (Span 4) */}
+          {/* Bento Tile 3: 100% Refund Policy & Grace Period Scrubber (Span 4) */}
           <Reveal delay={120} className="flex lg:col-span-4">
             <div className="double-bezel w-full flex flex-col">
               <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
-                <div>
-                  <span className="pill bg-primary-soft text-primary-dark font-bold">
-                    <RefundIcon className="h-3.5 w-3.5" /> Minh bạch tài chính
-                  </span>
-                  <h3 className="mt-4 text-xl sm:text-2xl font-bold text-ink-heading">
-                    Chính sách hủy và hoàn tiền
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-ink-body leading-relaxed">
-                    Đặt chỗ đã thanh toán có thể được hoàn đủ giá gói nếu hủy trước hạn áp dụng. Thanh toán và hoàn tiền hiện được mô phỏng.
-                  </p>
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-black/[0.05] bg-surface-alt p-4 space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between font-bold">
-                    <span className="text-ink-heading">Trong 10 phút từ khi thanh toán</span>
-                    <span className="rounded-full bg-primary text-white px-2.5 py-0.5 text-[11px] shadow-sm">
-                      Có thể hoàn đủ*
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-ink-body">
-                    <span>Hết thời gian ân hạn</span>
-                    <span className="font-semibold text-ink-heading">Hoàn 0% do đổi ý</span>
-                  </div>
-                  <div className="flex items-center justify-between text-ink-muted">
-                    <span>*Trước hạn hủy và giờ bắt đầu</span>
-                    <span>Ứng dụng hiển thị trước khi xác nhận</span>
-                  </div>
-                </div>
+                <InteractiveRefundScrubber />
               </div>
             </div>
           </Reveal>
@@ -294,37 +243,49 @@ function FeaturesBento() {
   );
 }
 
-/* ----------------------------- Stats ---------------------------- */
-function Stats() {
-  const items = [
-    { value: "Tìm", label: "xem thông tin trạm sạc" },
-    { value: "Đặt", label: "chọn gói và khung giờ" },
-    { value: "QR", label: "check-in theo đặt chỗ" },
-    { value: "Theo dõi", label: "xem trạng thái đặt chỗ" },
-  ];
+/* -------------------- Walkthrough Showcase Section -------------- */
+function WalkthroughSection() {
+  const { t } = useTranslation();
 
   return (
-    <section className="py-6 sm:py-8">
-      <div className="container-x">
-        <Reveal>
-          <div className="double-bezel-dark">
-            <div className="double-bezel-dark-inner relative overflow-hidden bg-gradient-to-r from-[#080C0A] via-[#101915] to-[#080C0A] !p-5 sm:!p-8 lg:!p-12">
-              <div className="pointer-events-none absolute inset-0 bg-grid-light opacity-25" />
-              <div className="relative grid grid-cols-2 gap-8 lg:grid-cols-4 text-center">
-                {items.map((it) => (
-                  <div key={it.label} className="py-2">
-                    <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight font-mono">
-                      {it.value}
-                    </div>
-                    <div className="mt-2 text-xs sm:text-sm text-white/70 max-w-[20ch] mx-auto leading-snug">
-                      {it.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+    <section id="video-demo" className="py-16 sm:py-24 lg:py-32 bg-[#090D0B] border-y border-white/[0.06] relative overflow-hidden">
+      {/* Soft ambient emerald radial aura */}
+      <div className="pointer-events-none absolute -top-40 right-1/4 h-96 w-96 rounded-full bg-emerald-500/[0.07] blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 left-1/4 h-96 w-96 rounded-full bg-emerald-500/[0.06] blur-[120px]" />
+
+      <div className="container-x relative">
+        <Reveal className="max-w-3xl mb-12">
+          <span className="eyebrow-tag">
+            <BoltIcon className="h-3.5 w-3.5 text-primary" /> {t.walkthrough.eyebrow}
+          </span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-white sm:text-4xl lg:text-5xl leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+            {t.walkthrough.title}
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed max-w-2xl">
+            {t.walkthrough.description}
+          </p>
         </Reveal>
+
+        <Reveal delay={80}>
+          <WalkthroughTheater
+            variant="banner"
+            posterSrc="/stations/futuristic-hub.jpg"
+          />
+        </Reveal>
+
+        {/* 4 Quick Value Highlights - Dark Double-Bezel Cards */}
+        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {t.walkthrough.highlights.map((item) => (
+            <div
+              key={item.tag}
+              className="rounded-2xl border border-white/10 bg-[#0E1512] p-5 shadow-sm space-y-1 transition-all duration-300 hover:border-emerald-500/40 hover:shadow-glow-emerald"
+            >
+              <span className="text-xs font-mono font-bold text-emerald-400">{item.tag}</span>
+              <p className="text-sm font-bold text-white">{item.title}</p>
+              <p className="text-xs text-white/60 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -332,42 +293,54 @@ function Stats() {
 
 /* ------------------------- Owner band --------------------------- */
 function OwnerBand() {
+  const { t } = useTranslation();
+
   return (
-    <section id="doi-tac" className="relative overflow-hidden py-16 sm:py-24 lg:py-32 bg-[#FAFBFB] border-y border-black/[0.05]">
+    <section id="doi-tac" className="relative overflow-hidden py-16 sm:py-24 lg:py-32 bg-[#090D0B] border-y border-white/[0.06]">
       <div className="container-x relative">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
           <Reveal>
             <span className="eyebrow-tag">
-              <BoltIcon className="h-3.5 w-3.5 text-primary" /> DÀNH CHO ĐỐI TÁC CHỦ TRẠM
+              <BoltIcon className="h-3.5 w-3.5 text-emerald-400" /> {t.owner.eyebrow}
             </span>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-ink-heading sm:text-4xl lg:text-5xl">
-              Sở hữu trạm sạc? Quản lý thông tin trên Web Console
+            <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance text-white sm:text-4xl lg:text-5xl leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+              {t.owner.title}
             </h2>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-ink-body">
-              Dùng ChargeOps để quản lý thông tin trạm, cổng sạc, giá và lịch đặt chỗ trên Web Console.
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-white/70">
+              {t.owner.description}
             </p>
 
             <div className="mt-7 space-y-3">
-              {[
-                "Cấu hình giá và khung giờ áp dụng cho trạm",
-                "Theo dõi trụ sạc và lịch đặt chỗ theo trạng thái được ghi nhận",
-                "Xem thông tin thanh toán và hoàn tiền trong quy trình mô phỏng",
-              ].map((t) => (
-                <div key={t} className="flex items-start gap-3 text-sm text-ink-body font-medium">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+              {t.owner.features.map((featureText) => (
+                <div key={featureText} className="flex items-start gap-3 text-sm text-white/80 font-medium">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
                     <CheckIcon className="h-2.5 w-2.5" />
                   </span>
-                  <span>{t}</span>
+                  <span>{featureText}</span>
                 </div>
               ))}
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a
-                href="mailto:phamthang3564@gmail.com?subject=Đăng ký hợp tác trạm sạc ChargeOps"
+                href="https://console.chargeops.online"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn-island-primary"
               >
-                <span>Đăng ký trạm của bạn</span>
+                <span>{t.owner.openConsole}</span>
+                <span className="btn-icon-bubble">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
+                </span>
+              </a>
+
+              <a
+                href="mailto:support@chargeops.online?subject=Đăng ký hợp tác trạm sạc ChargeOps"
+                className="btn-island-secondary"
+              >
+                <span>{t.owner.contactPartner}</span>
                 <span className="btn-icon-bubble">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
                     <path d="M7 17L17 7M17 7H7M17 7V17" />
@@ -380,7 +353,7 @@ function OwnerBand() {
           <Reveal delay={100} className="w-full">
             <BrowserFrame
               url="https://console.chargeops.online/owner/pricing"
-              title="ChargeOps Console — Cấu hình biểu giá & Quản trị trạm"
+              title={t.owner.consoleTitle}
             >
               <OwnerConsolePreview />
             </BrowserFrame>
@@ -393,29 +366,31 @@ function OwnerBand() {
 
 /* ------------------------ Download CTA -------------------------- */
 function DownloadCta() {
+  const { t } = useTranslation();
+
   return (
-    <section id="tai-ung-dung" className="py-16 sm:py-24 lg:py-32">
+    <section id="tai-ung-dung" className="py-16 sm:py-24 lg:py-32 bg-[#070A08]">
       <div className="container-x">
         <Reveal>
-          <div className="double-bezel-dark max-w-4xl mx-auto">
-            <div className="double-bezel-dark-inner relative overflow-hidden bg-gradient-to-b from-[#121B17] via-[#0E1512] to-[#080C0A] p-8 sm:p-14 text-center">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
-              <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-primary-light/15 blur-3xl" />
+          <div className="double-bezel max-w-4xl mx-auto">
+            <div className="double-bezel-inner relative overflow-hidden bg-gradient-to-b from-[#0E1512] via-[#121A16] to-[#070A08] p-8 sm:p-14 text-center border border-emerald-500/30">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
               <div className="relative">
-                <span className="pill bg-white/10 text-primary-light font-bold mb-4">
-                  DÙNG THỬ TRỰC TIẾP TRÊN WEB
+                <span className="pill bg-emerald-500/15 text-emerald-400 font-bold mb-4 border border-emerald-500/20">
+                  {t.download.eyebrow}
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance mt-3">
-                  Trải nghiệm ứng dụng tài xế ChargeOps ngay hôm nay
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance mt-3 leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+                  {t.download.title}
                 </h2>
-                <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base text-white/80 leading-relaxed">
-                  Không phải chờ tải app hay đăng ký rườm rà. Thử ngay trọn vẹn luồng tìm trạm, giữ trước khung giờ và check-in sạc bằng mã QR với tài khoản tài xế mẫu có sẵn.
+                <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base text-white/70 leading-relaxed">
+                  {t.download.description}
                 </p>
 
                 <div className="mt-8 flex flex-col items-center gap-6">
                   <QrDownload />
                   <div className="pt-2 text-center">
-                    <p className="text-xs text-white/50 mb-3">Ứng dụng di động bản chính thức (iOS &amp; Android)</p>
+                    <p className="text-xs text-white/60 mb-3">{t.download.officialMobileApp}</p>
                     <StoreBadges />
                   </div>
                   <div className="w-full max-w-md pt-2">

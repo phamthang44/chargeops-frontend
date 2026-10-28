@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { BoltIcon } from "@/components/Icons";
 
 interface StationPhotoShowcaseProps {
   stationName: string;
@@ -24,6 +25,7 @@ export function StationPhotoShowcase({
     images && images.length > 0
       ? images
       : [
+          "/stations/futuristic-hub.jpg",
           "/stations/hub-exterior.jpg",
           "/stations/charger-close.jpg",
           "/stations/mall-indoor.jpg",
@@ -34,7 +36,7 @@ export function StationPhotoShowcase({
   return (
     <div className="space-y-3">
       {/* Main Double-Bezel Featured Showcase */}
-      <div className="group relative overflow-hidden rounded-[2rem] bg-black/[0.04] p-1.5 sm:p-2 ring-1 ring-black/[0.08] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-[0_25px_50px_-15px_rgba(0,0,0,0.12)]">
+      <div className="group relative overflow-hidden rounded-[2rem] bg-white/[0.04] p-1.5 sm:p-2 ring-1 ring-white/10 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-diffusion-dark hover:ring-emerald-500/30">
         <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden rounded-[calc(2rem-0.5rem)] bg-[#0C1210]">
           <Image
             src={currentImage}
@@ -51,18 +53,20 @@ export function StationPhotoShowcase({
 
           {/* Top Floating Badge Bar */}
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-bold text-white/95 ring-1 ring-white/20 shadow-lg">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-bold text-white/95 ring-1 ring-white/20 shadow-lg">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               Hình ảnh thực tế tại trạm
             </span>
 
             {maxPowerKw ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-extrabold text-white shadow-glow-emerald">
-                ⚡ Sạc siêu tốc {maxPowerKw}kW
+                <BoltIcon className="h-3.5 w-3.5 text-white" />
+                <span>Sạc siêu tốc {maxPowerKw}kW</span>
               </span>
             ) : fast ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-extrabold text-white shadow-glow-emerald">
-                ⚡ Sạc nhanh DC
+                <BoltIcon className="h-3.5 w-3.5 text-white" />
+                <span>Sạc nhanh DC</span>
               </span>
             ) : null}
           </div>
@@ -102,8 +106,8 @@ export function StationPhotoShowcase({
                 onClick={() => setActiveIdx(idx)}
                 className={`group relative h-16 w-24 sm:h-20 sm:w-32 shrink-0 overflow-hidden rounded-2xl p-1 transition-all duration-300 ${
                   isActive
-                    ? "bg-primary ring-2 ring-primary ring-offset-2 scale-100 shadow-md"
-                    : "bg-black/[0.04] ring-1 ring-black/[0.06] opacity-70 hover:opacity-100 hover:scale-[1.02]"
+                    ? "bg-emerald-500 ring-2 ring-emerald-500 ring-offset-2 ring-offset-[#070A08] scale-100 shadow-glow-emerald"
+                    : "bg-white/[0.04] ring-1 ring-white/10 opacity-70 hover:opacity-100 hover:scale-[1.02] hover:ring-white/30"
                 }`}
               >
                 <div className="relative h-full w-full overflow-hidden rounded-[calc(1rem-0.15rem)]">

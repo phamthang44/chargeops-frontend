@@ -1,4 +1,7 @@
+"use client";
+
 import { BrandMark } from "./Logo";
+import { useTranslation } from "@/lib/i18n";
 
 const DRIVER_DEMO_URL = "https://driver.chargeops.online/?demo=true";
 
@@ -8,6 +11,7 @@ const DRIVER_DEMO_URL = "https://driver.chargeops.online/?demo=true";
  * so prospective users and drivers can experience the full product flow without installation.
  */
 export function QrDownload() {
+  const { t } = useTranslation();
   const N = 15;
   const cells = Array.from({ length: N * N }, (_, i) => {
     const r = Math.floor(i / N);
@@ -21,15 +25,15 @@ export function QrDownload() {
   });
 
   return (
-    <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 backdrop-blur-xl text-left shadow-2xl transition hover:border-primary/40">
+    <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-[#0E1512] p-5 sm:p-6 text-left shadow-diffusion transition hover:border-emerald-500/40">
       <div className="flex flex-col sm:flex-row items-center gap-6">
         {/* Scannable / Clickable QR Card */}
         <a
           href={DRIVER_DEMO_URL}
           target="_blank"
           rel="noopener noreferrer"
-          title="Nhấp để mở bản dùng thử tài xế"
-          className="group/qr relative flex shrink-0 flex-col items-center justify-center rounded-2xl bg-white p-3 shadow-glow-emerald ring-2 ring-primary/20 transition-all duration-300 hover:scale-105 hover:ring-primary"
+          title={t.download.qrScanTitle}
+          className="group/qr relative flex shrink-0 flex-col items-center justify-center rounded-2xl bg-[#121A16] p-3 ring-1 ring-white/10 transition-all duration-300 hover:scale-105 hover:ring-emerald-500 shadow-sm"
         >
           <div
             className="relative grid h-32 w-32 gap-[2px] rounded-xl bg-white p-1"
@@ -57,29 +61,29 @@ export function QrDownload() {
             </span>
           </div>
 
-          <span className="mt-2 text-[10px] font-bold tracking-tight text-ink-muted group-hover/qr:text-primary transition-colors flex items-center gap-1">
+          <span className="mt-2 text-[10px] font-bold tracking-tight text-white/60 group-hover/qr:text-emerald-400 transition-colors flex items-center gap-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3 w-3">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2zm0-10h2v8h-2z" />
             </svg>
-            Quét mã để mở trên đt
+            {t.download.qrScanHint}
           </span>
         </a>
 
         {/* Action & Context */}
         <div className="flex-1 flex flex-col justify-between text-left">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 ring-1 ring-emerald-500/30">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Trải nghiệm tức thì
+              {t.download.qrBadge}
             </span>
-            <span className="text-[11px] text-white/50">Tài khoản: Nguyễn Văn An</span>
+            <span className="text-[11px] text-white/50">{t.download.qrAccount}</span>
           </div>
 
           <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-            Thử nghiệm Driver Web không cần cài đặt
+            {t.download.qrTitle}
           </h3>
           <p className="mt-1 text-xs sm:text-sm text-white/70 leading-relaxed">
-            Tự tay trải nghiệm tìm trạm sạc, chọn khung giờ, đặt chỗ mô phỏng và xem mã QR check-in như một tài xế thực thụ.
+            {t.download.qrDescription}
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -92,7 +96,7 @@ export function QrDownload() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
-              <span>Vào bản dùng thử ngay</span>
+              <span>{t.download.qrCta}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5 opacity-80">
                 <path d="M7 17L17 7M17 7H7M17 7V17" />
               </svg>

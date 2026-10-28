@@ -7,8 +7,8 @@ html {
 }
 
 body {
-  color: #0A0D0C;
-  background: #FFFFFF;
+  color: #F8FAFC;
+  background: #070A08;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -40,6 +40,11 @@ body {
   main:focus {
     outline: none;
   }
+
+  /* Vietnamese diacritics safeguard: prevent multi-line stacked tones and circumflexes from colliding */
+  h1, h2, h3, h4 {
+    line-height: 1.25;
+  }
 }
 
 /* Skip-to-content link — visible only when focused. */
@@ -49,12 +54,13 @@ body {
   top: -100px;
   z-index: 100;
   border-radius: 9999px;
-  background: #080C0A;
+  background: #0E1512;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.6rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #fff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
   transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .skip-link:focus {
@@ -64,44 +70,67 @@ body {
 @layer components {
   /* Liquid-glass surface with specular edge refraction. */
   .glass {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(14, 21, 18, 0.82);
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95), 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 40px -15px rgba(0, 0, 0, 0.7);
   }
 
   .glass-dark {
-    background: rgba(8, 12, 10, 0.80);
+    background: rgba(8, 12, 10, 0.85);
     backdrop-filter: saturate(170%) blur(24px);
     -webkit-backdrop-filter: saturate(170%) blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 24px 50px -12px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 24px 50px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Liquid Glass 2.0 (VisionOS / Refractive Specular Architecture) */
+  .liquid-glass-refract {
+    background: linear-gradient(135deg, rgba(20, 30, 25, 0.85) 0%, rgba(10, 16, 13, 0.92) 100%);
+    backdrop-filter: saturate(190%) blur(32px);
+    -webkit-backdrop-filter: saturate(190%) blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.4),
+      0 20px 45px -15px rgba(0, 0, 0, 0.8);
+  }
+
+  .liquid-glass-dark-refract {
+    background: linear-gradient(135deg, rgba(14, 22, 18, 0.88) 0%, rgba(7, 12, 10, 0.95) 100%);
+    backdrop-filter: saturate(180%) blur(32px);
+    -webkit-backdrop-filter: saturate(180%) blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0.5px rgba(255, 255, 255, 0.05),
+      0 30px 60px -15px rgba(0, 0, 0, 0.9);
   }
 
   /* Floating Fluid Island Nav pill */
   .island-nav {
-    background: rgba(255, 255, 255, 0.86);
-    backdrop-filter: saturate(190%) blur(28px);
-    -webkit-backdrop-filter: saturate(190%) blur(28px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 32px -16px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(15, 23, 42, 0.035), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    background: rgba(11, 16, 13, 0.85);
+    backdrop-filter: saturate(180%) blur(28px);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
   /* Double-Bezel Standard (Doppelrand / Nested Architecture) */
   .double-bezel {
-    @apply p-1 sm:p-1.5 rounded-bezel bg-black/[0.018] ring-1 ring-black/[0.035] transition-all duration-500 ease-haptic;
+    @apply p-1 sm:p-1.5 rounded-bezel bg-white/[0.04] ring-1 ring-white/10 transition-all duration-500 ease-haptic;
   }
   .double-bezel-inner {
-    @apply rounded-bezel-inner bg-white border border-black/[0.035] p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_6px_24px_-12px_rgba(15,23,42,0.08)] transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-inner bg-[#0D1411] border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_15px_35px_-10px_rgba(0,0,0,0.7)] transition-all duration-500 ease-haptic;
   }
 
   /* Large Double-Bezel (Bento 2.0 / Hero Highlights) */
   .double-bezel-lg {
-    @apply p-2 sm:p-2.5 rounded-bezel-lg bg-black/[0.02] ring-1 ring-black/[0.035] transition-all duration-500 ease-haptic;
+    @apply p-2 sm:p-2.5 rounded-bezel-lg bg-white/[0.05] ring-1 ring-white/15 transition-all duration-500 ease-haptic;
   }
   .double-bezel-lg-inner {
-    @apply rounded-bezel-lg-inner bg-white border border-black/[0.04] p-7 sm:p-9 shadow-diffusion transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-lg-inner bg-[#0D1411] border border-white/12 p-7 sm:p-9 shadow-diffusion-dark transition-all duration-500 ease-haptic;
   }
 
   /* Dark Double-Bezel */
@@ -109,26 +138,34 @@ body {
     @apply p-1.5 sm:p-2 rounded-bezel bg-white/[0.04] ring-1 ring-white/10 transition-all duration-500 ease-haptic;
   }
   .double-bezel-dark-inner {
-    @apply rounded-bezel-inner bg-obsidian border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_15px_35px_-10px_rgba(0,0,0,0.7)] transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-inner bg-[#0D1411] border border-white/10 p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_15px_35px_-10px_rgba(0,0,0,0.7)] transition-all duration-500 ease-haptic;
   }
 
   .double-bezel-dark-lg {
     @apply p-2 sm:p-2.5 rounded-bezel-lg bg-white/[0.05] ring-1 ring-white/15 transition-all duration-500 ease-haptic;
   }
   .double-bezel-dark-lg-inner {
-    @apply rounded-bezel-lg-inner bg-obsidian border border-white/12 p-7 sm:p-10 shadow-diffusion-dark transition-all duration-500 ease-haptic;
+    @apply rounded-bezel-lg-inner bg-[#0D1411] border border-white/12 p-7 sm:p-10 shadow-diffusion-dark transition-all duration-500 ease-haptic;
   }
 
   .container-x {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
+  /* Standard Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-glow-emerald transition-all duration-300 ease-haptic hover:bg-emerald-400 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white/90 backdrop-blur transition-all duration-300 ease-haptic hover:border-emerald-500/40 hover:bg-white/10 active:scale-[0.98];
+  }
+
   /* Nested Island Primary CTA Button */
   .btn-island-primary {
-    @apply inline-flex items-center justify-center gap-3.5 rounded-full bg-primary pl-6 pr-2.5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(5,150,105,0.55)] transition-all duration-500 ease-haptic hover:bg-primary-dark active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3.5 rounded-full bg-emerald-500 pl-6 pr-2.5 py-2.5 text-sm font-bold text-white shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all duration-500 ease-haptic hover:bg-emerald-400 active:scale-[0.98];
   }
   .btn-island-primary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-transform duration-300 ease-spring;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-black/25 text-white transition-transform duration-300 ease-spring;
   }
   .btn-island-primary:hover .btn-icon-bubble {
     @apply translate-x-1 -translate-y-0.5 scale-105;
@@ -136,13 +173,18 @@ body {
 
   /* Nested Island Secondary CTA Button */
   .btn-island-secondary {
-    @apply inline-flex items-center justify-center gap-3.5 rounded-full border border-black/[0.08] bg-white pl-6 pr-2.5 py-2.5 text-sm font-semibold text-ink-strong shadow-[0_6px_18px_-12px_rgba(15,23,42,0.24)] transition-all duration-500 ease-haptic hover:border-primary/30 hover:bg-surface-alt active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-3.5 rounded-full border border-white/15 bg-white/5 pl-6 pr-2.5 py-2.5 text-sm font-semibold text-white/90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 ease-haptic hover:border-emerald-500/40 hover:bg-white/10 active:scale-[0.98];
   }
   .btn-island-secondary .btn-icon-bubble {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted text-primary-dark ring-1 ring-black/5 transition-transform duration-300 ease-spring;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-emerald-400 ring-1 ring-white/10 transition-transform duration-300 ease-spring;
   }
   .btn-island-secondary:hover .btn-icon-bubble {
     @apply translate-x-1 -translate-y-0.5 scale-105;
+  }
+
+  .btn-island-primary:not(:has(.btn-icon-bubble)),
+  .btn-island-secondary:not(:has(.btn-icon-bubble)) {
+    @apply px-6;
   }
 
   .pill {
@@ -151,18 +193,18 @@ body {
 
   /* High-end Eyebrow tag with micro-radar pulse */
   .eyebrow-tag {
-    @apply inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary-soft/60 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-dark shadow-sm backdrop-blur;
+    @apply inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-400 shadow-sm backdrop-blur;
   }
 
   /* Specular gradient text */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #059669 0%, #10B981 50%, #00E599 100%);
+    background-image: linear-gradient(135deg, #00F2FE 0%, #10B981 50%, #00E599 100%);
   }
 
   .text-gradient-silver {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(180deg, #FFFFFF 0%, #CBD5E1 100%);
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #94A3B8 100%);
   }
 }
 
@@ -182,12 +224,12 @@ body {
 @layer utilities {
   /* Subtle dotted/grid backdrop for hero + dark bands. */
   .bg-grid {
-    background-image: radial-gradient(rgba(16, 185, 129, 0.10) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
   .bg-grid-light {
     background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-size: 28px 28px;
   }
 
   /* Subtle noise/film grain simulation */

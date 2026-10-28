@@ -1,50 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { MotionReveal } from "./MotionReveal";
 
 /**
- * Scroll-reveal wrapper. Content is in the SSR DOM at all times (good for SEO);
- * the `reveal` class only animates it in. A <noscript> rule in the layout forces
- * visibility when JS is disabled, so nothing is ever permanently hidden.
+ * Reveal wrapper powered by Motion.dev for 120fps GPU-accelerated reveals.
+ * Maintains backwards compatibility with all previous Reveal imports.
  */
 export function Reveal({
   children,
   delay = 0,
-  as: Tag = "div",
-  className,
+  as = "div",
+  className = "",
 }: {
   children: ReactNode;
   delay?: number;
-  as?: "div" | "section" | "li" | "span";
+  as?: "div" | "section" | "article" | "li" | "span";
   className?: string;
 }) {
-  const ref = useRef<HTMLElement | null>(null);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const Comp = Tag as "div";
   return (
-    <Comp
-      ref={ref as React.Ref<HTMLDivElement>}
-      className={`reveal ${shown ? "in" : ""} ${className ?? ""}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <MotionReveal delay={delay} as={as} className={className}>
       {children}
-    </Comp>
+    </MotionReveal>
   );
 }

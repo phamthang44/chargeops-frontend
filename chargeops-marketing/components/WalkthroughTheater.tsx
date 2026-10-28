@@ -451,20 +451,6 @@ export function WalkthroughTheater({
                   </div>
                 )}
 
-                {/* On-screen Active Chapter Pill */}
-                <div className="pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-2.5 rounded-full bg-black/85 px-3.5 py-1.5 text-xs font-semibold text-white/95 backdrop-blur-xl ring-1 ring-white/20 shadow-xl">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-mono text-emerald-300 uppercase tracking-wider text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 ring-1 ring-emerald-400/30">
-                      {currentChapter.role}
-                    </span>
-                    <span className="text-white/30">·</span>
-                    <span className="truncate max-w-[200px] sm:max-w-none text-white/95">
-                      {currentChapter.title}
-                    </span>
-                  </span>
-                </div>
-
                 {/* Specular Center Play Overlay when Paused */}
                 {videoSrc && !isPlaying && (
                   <button

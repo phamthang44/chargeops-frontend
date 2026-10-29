@@ -235,9 +235,16 @@ export function LanguageSwitcher({
   // Popover positioning (upward vs downward)
   const popoverPositionClasses = opensUpward
     ? variant === "footer"
-      ? "bottom-full mb-3 left-1/2 -translate-x-1/2 origin-bottom"
+      ? "bottom-full mb-3 origin-bottom"
       : "bottom-full mb-3 left-0 origin-bottom-left"
     : "top-full mt-3 right-0 origin-top-right";
+  const popoverStyle =
+    variant === "footer"
+      ? {
+          left: "calc(50% - min(11rem, calc(50vw - 1rem)))",
+          width: "min(22rem, calc(100vw - 2rem))",
+        }
+      : undefined;
 
   return (
     <div ref={containerRef} className={containerClasses}>
@@ -310,10 +317,11 @@ export function LanguageSwitcher({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: opensUpward ? 6 : -6 }}
             transition={SPRINGS.layout}
-            className={`absolute w-80 sm:w-88 z-50 ${popoverPositionClasses}`}
+            style={popoverStyle}
+            className={`absolute w-80 sm:w-88 max-w-[calc(100vw_-_2rem)] z-50 ${popoverPositionClasses}`}
           >
             {/* Double-Bezel Hardware Frame */}
-            <div className="double-bezel shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]">
+            <div className="double-bezel w-full shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]">
               <div className="double-bezel-inner !p-4 bg-[#0A0F0D]/95 border border-white/15 backdrop-blur-2xl space-y-4">
                 {/* Popover Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-white/10">

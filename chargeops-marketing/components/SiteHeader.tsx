@@ -161,8 +161,10 @@ export function SiteHeader() {
             {/* Mobile menu panel */}
             <div
               id="mobile-menu"
-              className={`overflow-hidden transition-all duration-500 ease-haptic lg:hidden ${
-                open ? "max-h-96 opacity-100 pt-3 mt-2 border-t border-white/10" : "max-h-0 opacity-0"
+              className={`overflow-x-hidden overflow-y-auto overscroll-contain transition-all duration-500 ease-haptic lg:hidden ${
+                open
+                  ? "max-h-[calc(100dvh_-_5rem)] opacity-100 pt-3 mt-2 border-t border-white/10"
+                  : "max-h-0 opacity-0"
               }`}
             >
               <nav className="flex flex-col gap-1 pb-1" aria-label="Di động">

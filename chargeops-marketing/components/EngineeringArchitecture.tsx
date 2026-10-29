@@ -135,10 +135,10 @@ export function EngineeringArchitecture() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
                 transition={SPRINGS.layout}
-                className="grid gap-8 lg:grid-cols-12 items-center"
+                className="grid min-w-0 gap-8 items-center lg:grid-cols-12"
               >
                 {/* Left Column: Narrative & Technical Metrics */}
-                <div className="lg:col-span-6 space-y-6">
+                <div className="min-w-0 space-y-6 lg:col-span-6">
                   <div>
                     <span className="pill bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20 text-xs">
                       {activePillar.badge}
@@ -155,16 +155,16 @@ export function EngineeringArchitecture() {
                   </div>
 
                   {/* Technical Specifications Grid */}
-                  <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="grid min-w-0 grid-cols-2 gap-3 pt-2">
                     {activePillar.specs.map((spec) => (
                       <div
                         key={spec.label}
-                        className="rounded-xl border border-white/10 bg-[#121A16] p-3 space-y-0.5"
+                        className="min-w-0 space-y-0.5 rounded-xl border border-white/10 bg-[#121A16] p-3"
                       >
-                        <p className="text-[10px] uppercase font-mono tracking-wider text-white/40">
+                        <p className="break-words text-[10px] uppercase font-mono tracking-wider text-white/40">
                           {spec.label}
                         </p>
-                        <p className="text-xs sm:text-sm font-bold text-white font-mono">
+                        <p className="break-words text-xs sm:text-sm font-bold text-white font-mono">
                           {spec.value}
                         </p>
                       </div>
@@ -173,25 +173,25 @@ export function EngineeringArchitecture() {
                 </div>
 
                 {/* Right Column: Verified Code Architecture Preview */}
-                <div className="lg:col-span-6">
+                <div className="min-w-0 lg:col-span-6">
                   <div className="rounded-2xl border border-white/10 bg-[#070A08] overflow-hidden shadow-2xl">
                     {/* Terminal Header Bar */}
-                    <div className="flex items-center justify-between border-b border-white/10 bg-[#0E1512] px-4 py-2.5">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex min-w-0 items-center gap-2 border-b border-white/10 bg-[#0E1512] px-3 py-2.5 sm:px-4">
+                      <div className="flex shrink-0 items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]/80" />
                         <span className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]/80" />
                         <span className="h-2.5 w-2.5 rounded-full bg-[#27C93F]/80" />
                       </div>
-                      <span className="text-[11px] font-mono text-white/50">
+                      <span className="min-w-0 flex-1 truncate text-center text-[10px] font-mono text-white/50 sm:text-[11px]">
                         chargeops-backend / internal / core
                       </span>
-                      <span className="text-[10px] font-mono text-emerald-400">Verified</span>
+                      <span className="shrink-0 whitespace-nowrap text-[10px] font-mono text-emerald-400">Verified</span>
                     </div>
 
                     {/* Terminal Code Snippet */}
-                    <div className="p-4 sm:p-5 overflow-x-auto text-[11px] sm:text-xs font-mono text-white/80 leading-relaxed">
-                      <pre>
-                        <code>{activeCode}</code>
+                    <div className="min-w-0 max-w-full overflow-x-auto overscroll-x-contain p-4 text-[11px] font-mono text-white/80 leading-relaxed sm:p-5 sm:text-xs">
+                      <pre className="whitespace-pre-wrap break-words">
+                        <code className="break-words">{activeCode}</code>
                       </pre>
                     </div>
                   </div>

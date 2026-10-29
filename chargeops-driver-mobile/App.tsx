@@ -1,4 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import '@/i18n'; // initialize i18n before any screen renders
@@ -10,6 +12,12 @@ import { StompProvider } from '@/providers/StompProvider';
 
 function AppContent() {
   const { isDark } = usePreferences();
+  const [iconsLoaded, iconFontError] = useFonts(Ionicons.font);
+
+  if (!iconsLoaded && !iconFontError) {
+    return null;
+  }
+
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />

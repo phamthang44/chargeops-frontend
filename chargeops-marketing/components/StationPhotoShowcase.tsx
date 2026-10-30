@@ -36,9 +36,9 @@ export function StationPhotoShowcase({
 
   return (
     <div className="space-y-3">
-      {/* Main Double-Bezel Featured Showcase */}
-      <div className="group relative overflow-hidden rounded-[2rem] bg-white/[0.04] p-1.5 sm:p-2 ring-1 ring-white/10 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-diffusion-dark hover:ring-emerald-500/30">
-        <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden rounded-[calc(2rem-0.5rem)] bg-[#0C1210]">
+      {/* Featured Showcase */}
+      <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#0C1210] shadow-box transition-all duration-500 hover:border-emerald-500/30">
+        <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden">
           <Image
             src={currentImage}
             alt={`${stationName} - Hình ảnh thực tế trụ sạc`}
@@ -54,7 +54,7 @@ export function StationPhotoShowcase({
 
           {/* Top Floating Badge Bar */}
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-bold text-white/95 ring-1 ring-white/20 shadow-lg">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-xl px-3.5 py-1.5 text-[11px] font-bold text-white/95 border border-white/20 shadow-lg">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               Hình ảnh thực tế tại trạm
             </span>
@@ -87,7 +87,7 @@ export function StationPhotoShowcase({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-white/95 ring-1 ring-white/30">
+              <span className="rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-white/95 border border-white/30">
                 Ảnh {activeIdx + 1} / {photoList.length}
               </span>
             </div>
@@ -105,26 +105,24 @@ export function StationPhotoShowcase({
                 key={idx}
                 type="button"
                 onClick={() => setActiveIdx(idx)}
-                className={`group relative h-16 w-24 sm:h-20 sm:w-32 shrink-0 overflow-hidden rounded-2xl p-1 transition-all duration-300 ${
+                className={`group relative h-16 w-24 sm:h-20 sm:w-32 shrink-0 overflow-hidden rounded-xl border transition-all duration-200 ${
                   isActive
-                    ? "bg-emerald-500 ring-2 ring-emerald-500 ring-offset-2 ring-offset-[#070A08] scale-100 shadow-glow-emerald"
-                    : "bg-white/[0.04] ring-1 ring-white/10 opacity-70 hover:opacity-100 hover:scale-[1.02] hover:ring-white/30"
+                    ? "border-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.35)] scale-100"
+                    : "border-white/10 opacity-70 hover:opacity-100 hover:border-white/30"
                 }`}
               >
-                <div className="relative h-full w-full overflow-hidden rounded-[calc(1rem-0.15rem)]">
-                  <Image
-                    src={mediaAsset(img)}
-                    alt={`${stationName} thumbnail ${idx + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="128px"
-                  />
-                  <div
-                    className={`absolute inset-0 transition-opacity ${
-                      isActive ? "bg-transparent" : "bg-black/25 group-hover:bg-transparent"
-                    }`}
-                  />
-                </div>
+                <Image
+                  src={mediaAsset(img)}
+                  alt={`${stationName} thumbnail ${idx + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="128px"
+                />
+                <div
+                  className={`absolute inset-0 transition-opacity ${
+                    isActive ? "bg-transparent" : "bg-black/25 group-hover:bg-transparent"
+                  }`}
+                />
               </button>
             );
           })}

@@ -16,4 +16,6 @@ public/videos/
 public/screens/
 public/stations/
 public/stage-walkthrough.html
+public/stage-*.png
+*.mp3
 scripts/

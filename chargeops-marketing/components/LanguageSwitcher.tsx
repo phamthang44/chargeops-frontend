@@ -320,9 +320,8 @@ export function LanguageSwitcher({
             style={popoverStyle}
             className={`absolute w-80 sm:w-88 max-w-[calc(100vw_-_2rem)] z-50 ${popoverPositionClasses}`}
           >
-            {/* Double-Bezel Hardware Frame */}
-            <div className="double-bezel w-full shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]">
-              <div className="double-bezel-inner !p-4 bg-[#0A0F0D]/95 border border-white/15 backdrop-blur-2xl space-y-4">
+            {/* Popover Frame */}
+            <div className="w-full rounded-2xl bg-[#0A0F0D]/95 border border-white/15 backdrop-blur-2xl p-4 space-y-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]">
                 {/* Popover Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-white/10">
                   <div className="flex items-center gap-2.5">
@@ -465,7 +464,6 @@ export function LanguageSwitcher({
                   <span>{t.languageSetup.syncNotice}</span>
                 </div>
               </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

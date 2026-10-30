@@ -126,8 +126,7 @@ export function EngineeringArchitecture() {
         </div>
 
         {/* Detailed Showcase Pane (Asymmetric Split: Explanation & Code Specification) */}
-        <div className="double-bezel">
-          <div className="double-bezel-inner !p-6 sm:!p-10 bg-[#0B100D] border border-white/10">
+        <div className="rounded-[2rem] border border-white/10 bg-[#0B100D] p-6 sm:p-10 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activePillar.id}
@@ -200,7 +199,6 @@ export function EngineeringArchitecture() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 }

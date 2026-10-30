@@ -10,7 +10,6 @@ import { QrDownload } from "@/components/QrDownload";
 import { Reveal } from "@/components/Reveal";
 import { BackToTop } from "@/components/BackToTop";
 import { OwnerPricing } from "@/components/OwnerPricing";
-import { BrowserFrame } from "@/components/BrowserFrame";
 import { OwnerConsolePreview } from "@/components/OwnerConsolePreview";
 import { EcosystemStrip } from "@/components/EcosystemStrip";
 import { ProblemComparison } from "@/components/ProblemComparison";
@@ -198,60 +197,52 @@ function FeaturesBento() {
       <div className="mt-10 grid grid-cols-1 gap-5 items-stretch sm:mt-12 sm:gap-6 lg:mt-14 lg:grid-cols-12">
           {/* Bento Tile 1: Interactive Slot Scheduler (Span 8) */}
           <Reveal className="flex lg:col-span-8">
-            <div className="double-bezel w-full flex flex-col">
-              <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
-                <InteractiveSlotScheduler />
-              </div>
+            <div className="w-full rounded-[2rem] border border-white/10 bg-[#0D1411]/95 p-5 sm:p-8 flex flex-col justify-between shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-white/20">
+              <InteractiveSlotScheduler />
             </div>
           </Reveal>
 
           {/* Bento Tile 2: Instant Laser QR Check-in (Span 4) */}
           <Reveal delay={80} className="flex lg:col-span-4">
-            <div className="double-bezel w-full flex flex-col">
-              <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
-                <div>
-                  <span className="pill bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20">
-                    <QrIcon className="h-3.5 w-3.5" /> {t.bento.qr.badge}
-                  </span>
-                  <h3 className="mt-4 text-xl sm:text-2xl font-bold text-white">
-                    {t.bento.qr.title}
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-white/70 leading-relaxed">
-                    {t.bento.qr.description}
-                  </p>
-                </div>
+            <div className="w-full rounded-[2rem] border border-white/10 bg-[#0D1411]/95 p-5 sm:p-8 flex flex-col justify-between shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-white/20">
+              <div>
+                <span className="pill bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20">
+                  <QrIcon className="h-3.5 w-3.5" /> {t.bento.qr.badge}
+                </span>
+                <h3 className="mt-4 text-xl sm:text-2xl font-bold text-white">
+                  {t.bento.qr.title}
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-white/70 leading-relaxed">
+                  {t.bento.qr.description}
+                </p>
+              </div>
 
-                {/* Laser QR Visual Card with animated sweep */}
-                <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#121A16] p-5 text-center">
-                  <div className="mx-auto relative flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 shadow-sm">
-                    <QrIcon className="h-9 w-9" />
-                    {/* Animated Laser Scanning Line */}
-                    <div className="pointer-events-none absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-glow-laser animate-laser-sweep" />
-                  </div>
-                  <p className="mt-3.5 font-mono text-xs font-bold text-emerald-400 tracking-wider">
-                    {t.bento.qr.sweepTag}
-                  </p>
-                  <p className="text-[10px] font-mono text-white/40 mt-1">{t.bento.qr.sampleTag}</p>
+              {/* Laser QR Visual Card with animated sweep */}
+              <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#121A16] p-5 text-center shadow-inner">
+                <div className="mx-auto relative flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 shadow-sm">
+                  <QrIcon className="h-9 w-9" />
+                  {/* Animated Laser Scanning Line */}
+                  <div className="pointer-events-none absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-glow-laser animate-laser-sweep" />
                 </div>
+                <p className="mt-3.5 font-mono text-xs font-bold text-emerald-400 tracking-wider">
+                  {t.bento.qr.sweepTag}
+                </p>
+                <p className="text-[10px] font-mono text-white/40 mt-1">{t.bento.qr.sampleTag}</p>
               </div>
             </div>
           </Reveal>
 
           {/* Bento Tile 3: 100% Refund Policy & Grace Period Scrubber (Span 4) */}
           <Reveal delay={120} className="flex lg:col-span-4">
-            <div className="double-bezel w-full flex flex-col">
-              <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
-                <InteractiveRefundScrubber />
-              </div>
+            <div className="w-full rounded-[2rem] border border-white/10 bg-[#0D1411]/95 p-5 sm:p-8 flex flex-col justify-between shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-white/20">
+              <InteractiveRefundScrubber />
             </div>
           </Reveal>
 
           {/* Bento Tile 4: Live Telemetry & Battery Safety (Span 8) */}
           <Reveal delay={160} className="flex lg:col-span-8">
-            <div className="double-bezel w-full flex flex-col">
-              <div className="double-bezel-inner flex-1 flex flex-col justify-between !p-5 sm:!p-8">
-                <LiveChargingTelemetry />
-              </div>
+            <div className="w-full rounded-[2rem] border border-white/10 bg-[#0D1411]/95 p-5 sm:p-8 flex flex-col justify-between shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-white/20">
+              <LiveChargingTelemetry />
             </div>
           </Reveal>
         </div>
@@ -373,12 +364,7 @@ function OwnerBand() {
           </Reveal>
 
           <Reveal delay={100} className="w-full">
-            <BrowserFrame
-              url="https://console.chargeops.online/owner/pricing"
-              title={t.owner.consoleTitle}
-            >
-              <OwnerConsolePreview />
-            </BrowserFrame>
+            <OwnerConsolePreview />
           </Reveal>
         </div>
       </div>
@@ -394,30 +380,28 @@ function DownloadCta() {
     <section id="tai-ung-dung" className="py-16 sm:py-24 lg:py-32 bg-[#070A08]">
       <div className="container-x">
         <Reveal>
-          <div className="double-bezel max-w-4xl mx-auto">
-            <div className="double-bezel-inner relative overflow-hidden bg-gradient-to-b from-[#0E1512] via-[#121A16] to-[#070A08] p-8 sm:p-14 text-center border border-emerald-500/30">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="relative">
-                <span className="pill bg-emerald-500/15 text-emerald-400 font-bold mb-4 border border-emerald-500/20">
-                  {t.download.eyebrow}
-                </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance mt-3 leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
-                  {t.download.title}
-                </h2>
-                <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base text-white/70 leading-relaxed">
-                  {t.download.description}
-                </p>
+          <div className="max-w-4xl mx-auto relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-[#0E1512] via-[#121A16] to-[#070A08] p-8 sm:p-14 text-center border border-emerald-500/30 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_50px_-10px_rgba(16,185,129,0.2)]">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="relative">
+              <span className="pill bg-emerald-500/15 text-emerald-400 font-bold mb-4 border border-emerald-500/20">
+                {t.download.eyebrow}
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance mt-3 leading-[1.24] sm:leading-[1.26] lg:leading-[1.28]">
+                {t.download.title}
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base text-white/70 leading-relaxed">
+                {t.download.description}
+              </p>
 
-                <div className="mt-8 flex flex-col items-center gap-6">
-                  <QrDownload />
-                  <div className="pt-2 text-center">
-                    <p className="text-xs text-white/60 mb-3">{t.download.officialMobileApp}</p>
-                    <StoreBadges />
-                  </div>
-                  <div className="w-full max-w-md pt-2">
-                    <WaitlistForm compact />
-                  </div>
+              <div className="mt-8 flex flex-col items-center gap-6">
+                <QrDownload />
+                <div className="pt-2 text-center">
+                  <p className="text-xs text-white/60 mb-3">{t.download.officialMobileApp}</p>
+                  <StoreBadges />
+                </div>
+                <div className="w-full max-w-md pt-2">
+                  <WaitlistForm compact />
                 </div>
               </div>
             </div>

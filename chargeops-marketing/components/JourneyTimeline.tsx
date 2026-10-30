@@ -97,80 +97,78 @@ export function JourneyTimeline() {
 
         {/* Right Stage Narrative Details (7 cols) */}
         <div className="lg:col-span-7 order-1 lg:order-2 flex flex-col justify-center">
-          <div className="double-bezel">
-            <div className="double-bezel-inner !p-7 sm:!p-9">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeStage}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.3, ease: EASINGS.decelerate }}
-                >
-                  <span className="eyebrow-tag">
-                    <BoltIcon className="h-3.5 w-3.5 text-primary" /> {current.badge}
-                  </span>
+          <div className="rounded-[2rem] border border-white/10 bg-[#0D1411]/95 p-7 sm:p-9 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.75)]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStage}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: EASINGS.decelerate }}
+              >
+                <span className="eyebrow-tag">
+                  <BoltIcon className="h-3.5 w-3.5 text-primary" /> {current.badge}
+                </span>
 
-                  <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                    {current.title}
-                  </h3>
-                  <p className="mt-2 text-sm sm:text-base font-semibold text-emerald-400">
-                    {current.subtitle}
-                  </p>
+                <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                  {current.title}
+                </h3>
+                <p className="mt-2 text-sm sm:text-base font-semibold text-emerald-400">
+                  {current.subtitle}
+                </p>
 
-                  <p className="mt-4 text-sm sm:text-base leading-relaxed text-white/70">
-                    {current.description}
-                  </p>
+                <p className="mt-4 text-sm sm:text-base leading-relaxed text-white/70">
+                  {current.description}
+                </p>
 
-                  <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
-                    {current.features.map((feat) => (
-                      <div key={feat} className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                          <CheckIcon className="h-3 w-3" />
-                        </span>
-                        <span className="text-sm font-semibold text-white/90">{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Progress Stepper Action */}
-              <div className="mt-8 pt-4 flex items-center justify-between border-t border-white/10">
-                <div className="flex gap-2">
-                  {stages.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      aria-label={locale === "vi" ? `Chuyển tới bước ${i + 1}` : `Go to step ${i + 1}`}
-                      onClick={() => setActiveStage(i)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        i === activeStage ? "w-8 bg-emerald-500" : "w-2 bg-white/20 hover:bg-white/40"
-                      }`}
-                    />
+                <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
+                  {current.features.map((feat) => (
+                    <div key={feat} className="flex items-start gap-3">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                        <CheckIcon className="h-3 w-3" />
+                      </span>
+                      <span className="text-sm font-semibold text-white/90">{feat}</span>
+                    </div>
                   ))}
                 </div>
+              </motion.div>
+            </AnimatePresence>
 
-                <div className="flex gap-2">
+            {/* Progress Stepper Action */}
+            <div className="mt-8 pt-4 flex items-center justify-between border-t border-white/10">
+              <div className="flex gap-2">
+                {stages.map((_, i) => (
                   <button
+                    key={i}
                     type="button"
-                    disabled={activeStage === 0}
-                    onClick={() => setActiveStage((p) => Math.max(0, p - 1))}
-                    aria-label={locale === "vi" ? "Bước trước" : "Previous step"}
-                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    disabled={activeStage === stages.length - 1}
-                    onClick={() => setActiveStage((p) => Math.min(stages.length - 1, p + 1))}
-                    aria-label={locale === "vi" ? "Bước tiếp theo" : "Next step"}
-                    className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    →
-                  </button>
-                </div>
+                    aria-label={locale === "vi" ? `Chuyển tới bước ${i + 1}` : `Go to step ${i + 1}`}
+                    onClick={() => setActiveStage(i)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      i === activeStage ? "w-8 bg-emerald-500" : "w-2 bg-white/20 hover:bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={activeStage === 0}
+                  onClick={() => setActiveStage((p) => Math.max(0, p - 1))}
+                  aria-label={locale === "vi" ? "Bước trước" : "Previous step"}
+                  className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  disabled={activeStage === stages.length - 1}
+                  onClick={() => setActiveStage((p) => Math.min(stages.length - 1, p + 1))}
+                  aria-label={locale === "vi" ? "Bước tiếp theo" : "Next step"}
+                  className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#121A16] text-white/80 transition hover:border-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  →
+                </button>
               </div>
             </div>
           </div>

@@ -68,7 +68,7 @@ export function LiquidGlassCard({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group relative rounded-[2rem] p-1.5 sm:p-2 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ring-1 ${outerBorder} ${className}`}
+      className={`group relative rounded-[2rem] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${className}`}
       style={{
         transform:
           interactive && isHovered
@@ -87,9 +87,9 @@ export function LiquidGlassCard({
         }}
       />
 
-      {/* Inner Machined Crystal Core */}
+      {/* Crystal Core */}
       <div
-        className={`relative overflow-hidden rounded-[calc(2rem-0.375rem)] p-6 sm:p-8 ${innerBg} ${blurAmount} border transition-all duration-500`}
+        className={`relative overflow-hidden rounded-[2rem] p-6 sm:p-8 ${innerBg} ${blurAmount} border transition-all duration-500`}
         style={{
           borderColor:
             variant === "dark"

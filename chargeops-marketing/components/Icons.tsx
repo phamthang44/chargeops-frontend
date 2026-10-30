@@ -217,6 +217,19 @@ export const SmartphoneIcon = (p: SVGProps<SVGSVGElement>) => (
   </Line>
 );
 
+export const SunIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+  </Line>
+);
+
+export const MoonIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Line {...p}>
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+  </Line>
+);
+
 /* --- Brand glyphs (monochrome, inherit color) --- */
 export const AppleGlyph = (p: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true" {...p}>

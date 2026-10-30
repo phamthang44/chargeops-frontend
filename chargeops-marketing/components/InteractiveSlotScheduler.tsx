@@ -107,7 +107,7 @@ export function InteractiveSlotScheduler() {
                   isPast
                     ? "opacity-30 bg-[#0E1512] border border-white/5 cursor-not-allowed"
                     : isSelected
-                    ? "bg-[#1A2620] border-2 border-emerald-400 ring-2 ring-emerald-500/20 shadow-glow-emerald"
+                    ? "bg-[#1A2620] border border-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.35)]"
                     : "bg-[#16221C] border border-white/10 hover:border-emerald-500/40 hover:bg-[#1C2C24]"
                 }`}
               >

@@ -51,10 +51,9 @@ export function BrowserMockup({
   }, [hasVideo, videoSrc]);
 
   return (
-    <div className={`double-bezel shadow-2xl ${className}`}>
-      <div className="relative overflow-hidden rounded-[calc(2rem-0.375rem)] border border-white/10 bg-[#0E1512] shadow-sm">
-        {/* Window Titlebar */}
-        <div className="flex items-center justify-between border-b border-white/10 bg-[#0B100D] px-4 py-3 backdrop-blur">
+    <div className={`relative overflow-hidden rounded-[2rem] border border-emerald-500/25 bg-[#0E1512] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_-5px_rgba(16,185,129,0.12)] ${className}`}>
+      {/* Window Titlebar */}
+        <div className="flex items-center justify-between border-b border-emerald-500/15 bg-[#090E0C] px-4 py-3 backdrop-blur">
           {/* macOS Traffic Lights */}
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-[#FF5F56] shadow-sm ring-1 ring-black/10" />
@@ -63,7 +62,7 @@ export function BrowserMockup({
           </div>
 
           {/* Address Bar */}
-          <div className="mx-2 flex max-w-sm flex-1 items-center justify-center gap-2 rounded-lg border border-white/10 bg-[#16221C] px-3.5 py-1 text-[11px] font-medium text-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] sm:max-w-md">
+          <div className="mx-2 flex max-w-sm flex-1 items-center justify-center gap-2 rounded-lg border border-emerald-500/20 bg-[#121B16] px-3.5 py-1 text-[11px] font-medium text-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] sm:max-w-md">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -129,6 +128,5 @@ export function BrowserMockup({
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08]" />
         </div>
       </div>
-    </div>
   );
 }

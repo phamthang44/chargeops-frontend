@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { CITIES, STATIONS, type CoverageStation } from "./stations";
 import { BoltIcon, ACPlugIcon, MapPinIcon } from "./Icons";
 import { fetchPublicStations } from "@/lib/stations-api";
 import { useTranslation } from "@/lib/i18n";
+import { EASINGS, SPRINGS } from "@/lib/motionTokens";
 
 interface StationDirectoryProps {
   initialStations?: CoverageStation[];
@@ -17,6 +19,7 @@ export function StationDirectory({
   initialIsLive = false,
 }: StationDirectoryProps) {
   const { t, locale } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
   const [stationList, setStationList] = useState<CoverageStation[]>(initialStations);
   const [isLive, setIsLive] = useState<boolean>(initialIsLive);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -281,10 +284,15 @@ export function StationDirectory({
             </div>
           )}
 
-          {/* Station cards grid */}
+          {/* Station cards grid with 120fps fluid layout reordering */}
           {!isLoading && (
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              {filtered.map((s) => {
+            <motion.div
+              layout
+              transition={shouldReduceMotion ? { duration: 0 } : SPRINGS.layout}
+              className="mt-6 grid gap-5 sm:grid-cols-2"
+            >
+              <AnimatePresence mode="popLayout">
+                {filtered.map((s, index) => {
                 const full = s.total > 0 && s.available === 0;
                 const isSelected = activeStation?.id === s.id;
                 const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
@@ -292,89 +300,116 @@ export function StationDirectory({
                 )}`;
 
                 return (
-                  <div
+                  <motion.div
                     key={s.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.94, y: 16 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.92,
+                      transition: { duration: 0.18, ease: EASINGS.accelerate },
+                    }}
+                    transition={{
+                      duration: 0.35,
+                      delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.2),
+                      ease: EASINGS.decelerate,
+                      layout: SPRINGS.layout,
+                    }}
+                    whileHover={
+                      shouldReduceMotion
+                        ? undefined
+                        : {
+                            y: -4,
+                            transition: { duration: 0.2, ease: EASINGS.standard },
+                          }
+                    }
                     onClick={() => setSelectedStationId(s.id)}
                     onMouseEnter={() => setSelectedStationId(s.id)}
-                    className={`double-bezel group block transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                    className={`group rounded-2xl p-5 flex flex-col justify-between h-full cursor-pointer transition-all duration-300 border ${
                       isSelected
-                        ? "ring-2 ring-primary border-primary shadow-lg"
-                        : ""
+                        ? "border-emerald-500 bg-[#121A16] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.8),0_0_25px_-5px_rgba(16,185,129,0.25)]"
+                        : "border-white/10 bg-[#0D1411]/95 shadow-[0_12px_30px_-10px_rgba(0,0,0,0.6)] hover:border-white/20 hover:shadow-[0_16px_36px_-10px_rgba(0,0,0,0.7)]"
                     }`}
                   >
-                    <div className="double-bezel-inner !p-5 flex flex-col justify-between h-full">
-                      <div>
-                        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
-                          <h2 className="font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
-                            {s.name}
-                          </h2>
-                          <span
-                            className={`pill shrink-0 text-[11px] font-bold ${
-                              full ? "bg-red-500/15 text-red-400 border border-red-500/20" : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                            }`}
-                          >
-                            {s.total === 0
-                              ? (locale === "en" ? "No plug data" : "Chưa có dữ liệu cổng")
-                              : full
-                              ? (locale === "en" ? "Full" : "Hết chỗ")
-                              : (locale === "en" ? `${s.available}/${s.total} available` : `${s.available}/${s.total} trống`)}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-xs text-white/60 line-clamp-1">
-                          {s.district}, {s.city}
-                        </p>
+                    <div>
+                      <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
+                        <h2 className="font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
+                          {s.name}
+                        </h2>
+                        <span
+                          className={`pill shrink-0 text-[11px] font-bold ${
+                            full ? "bg-red-500/15 text-red-400 border border-red-500/20" : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                          }`}
+                        >
+                          {s.total === 0
+                            ? (locale === "en" ? "No plug data" : "Chưa có dữ liệu cổng")
+                            : full
+                            ? (locale === "en" ? "Full" : "Hết chỗ")
+                            : (locale === "en" ? `${s.available}/${s.total} available` : `${s.available}/${s.total} trống`)}
+                        </span>
                       </div>
+                      <p className="mt-1 text-xs text-white/60 line-clamp-1">
+                        {s.district}, {s.city}
+                      </p>
+                    </div>
 
-                      <div className="mt-5 pt-3 border-t border-white/10">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="pill inline-flex items-center gap-1 bg-[#16221C] border border-white/10 text-xs font-medium text-white/80">
-                            {s.connectors.length === 0 && !s.maxPowerKw ? (
-                              <>{locale === "en" ? "Connector info pending" : "Thông tin cổng chưa cập nhật"}</>
-                            ) : s.fast ? (
-                              <>
-                                <BoltIcon className="h-3 w-3 text-emerald-400" /> {locale === "en" ? "DC Fast" : "DC Siêu nhanh"}
-                              </>
-                            ) : (
-                              <>
-                                <ACPlugIcon className="h-3 w-3 text-white/50" /> {locale === "en" ? "AC Standard" : "AC Tiêu chuẩn"}
-                              </>
-                            )}
-                          </span>
-                          <span className="font-mono text-xs font-bold text-emerald-400">
-                            {s.pricePerKwh}
-                          </span>
-                        </div>
-                        <div className="mt-3.5 flex items-center justify-between text-xs text-white/60">
-                          <a
-                            href={directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex min-h-11 items-center gap-1 px-1 font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
-                            title={locale === "en" ? "Open directions on Google Maps" : "Mở chỉ đường trên Google Maps"}
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
-                              <path d="M3 11l19-9-9 19-2-8-8-2z" />
-                            </svg>
-                            <span>{locale === "en" ? "Directions" : "Chỉ đường"}</span>
-                          </a>
+                    <div className="mt-5 pt-3 border-t border-white/10">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="pill inline-flex items-center gap-1 bg-[#16221C] border border-white/10 text-xs font-medium text-white/80">
+                          {s.connectors.length === 0 && !s.maxPowerKw ? (
+                            <>{locale === "en" ? "Connector info pending" : "Thông tin cổng chưa cập nhật"}</>
+                          ) : s.fast ? (
+                            <>
+                              <BoltIcon className="h-3 w-3 text-emerald-400" /> {locale === "en" ? "DC Fast" : "DC Siêu nhanh"}
+                            </>
+                          ) : (
+                            <>
+                              <ACPlugIcon className="h-3 w-3 text-white/50" /> {locale === "en" ? "AC Standard" : "AC Tiêu chuẩn"}
+                            </>
+                          )}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-emerald-400">
+                          {s.pricePerKwh}
+                        </span>
+                      </div>
+                      <div className="mt-3.5 flex items-center justify-between text-xs text-white/60">
+                        <a
+                          href={directionsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex min-h-11 items-center gap-1 px-1 font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
+                          title={locale === "en" ? "Open directions on Google Maps" : "Mở chỉ đường trên Google Maps"}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5">
+                            <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                          </svg>
+                          <span>{locale === "en" ? "Directions" : "Chỉ đường"}</span>
+                        </a>
 
-                          <Link
-                            href={`/tram-sac/${s.slug}`}
-                            className="inline-flex min-h-11 items-center gap-0.5 px-1 font-semibold text-ink-strong hover:text-primary transition-colors"
-                          >
-                            <span>{locale === "en" ? "Details" : "Chi tiết trạm"}</span>
-                            <span className="group-hover:translate-x-0.5 transition-transform">›</span>
-                          </Link>
-                        </div>
+                        <Link
+                          href={`/tram-sac/${s.slug}`}
+                          className="inline-flex min-h-11 items-center gap-0.5 px-1 font-semibold text-ink-strong hover:text-primary transition-colors"
+                        >
+                          <span>{locale === "en" ? "Details" : "Chi tiết trạm"}</span>
+                          <span className="group-hover:translate-x-0.5 transition-transform">›</span>
+                        </Link>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
 
               {filtered.length === 0 && (
-                <div className="col-span-2 rounded-2xl border border-dashed border-white/15 bg-[#0E1512] p-10 text-center text-sm text-white/60">
+                <motion.div
+                  key="empty-directory"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.25, ease: EASINGS.decelerate }}
+                  className="col-span-2 rounded-2xl border border-dashed border-white/15 bg-[#0E1512] p-10 text-center text-sm text-white/60"
+                >
                   <p className="font-medium text-white">{t.stationDirectory.noStationsMatched}</p>
                   <p className="mt-1">{locale === "en" ? "Try changing your search keywords or clearing filters." : "Thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc."}</p>
                   <button
@@ -389,9 +424,10 @@ export function StationDirectory({
                   >
                     {t.stationDirectory.resetFilters}
                   </button>
-                </div>
+                </motion.div>
               )}
-            </div>
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
 

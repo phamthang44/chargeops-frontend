@@ -56,21 +56,18 @@ export function OwnerFinanceCharts({ stationId, period, onSelectStation }: Owner
       {/* Section Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-ctl bg-owner-soft p-1.5 text-owner">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-owner-soft text-owner">
               <IconCard size={16} />
             </span>
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-owner">
-              {t('finance.eyebrow')}
-            </p>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-owner-border/70 bg-owner-soft/80 px-2 py-0.5 text-[10.5px] font-semibold text-owner-deep">
+            <h2 id="owner-finance-title" className="text-base sm:text-lg font-semibold text-ink">
+              {t('finance.title')}
+            </h2>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-owner-border/70 bg-owner-soft/80 px-2.5 py-0.5 text-[11px] font-medium text-owner-deep">
               <span className="h-1.5 w-1.5 rounded-full bg-owner animate-pulse" />
               {t('finance.simulatorBadge')}
             </span>
           </div>
-          <h2 id="owner-finance-title" className="text-xl font-bold tracking-tight text-ink">
-            {t('finance.title')}
-          </h2>
           <p className="max-w-3xl text-xs sm:text-sm text-muted leading-relaxed">
             {t('finance.description')}
           </p>

@@ -186,113 +186,104 @@ export function Transactions() {
             <div className="mb-5 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
                 {/* Metric 1: Gross Platform Revenue */}
-                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-                  <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-                    <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                          {t('transactions.metrics.gross', 'TỔNG THU')}
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-brand" />
-                      </div>
-                      <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
-                        {formatVndCompact(s.grossVnd)}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                      <span className="text-body font-semibold flex items-center gap-1 text-good">
-                        <span>↑</span>
-                        <span>{t('transactions.metrics.payCountVal', { count: s.payCount })}</span>
+                <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                        {t('transactions.metrics.gross', 'TỔNG THU')}
                       </span>
-                      <span className="text-faint">{t('transactions.types.payment', 'Thanh toán')}</span>
+                      <span className="h-2 w-2 rounded-full bg-brand" />
                     </div>
+                    <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
+                      {formatVndCompact(s.grossVnd)}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+                    <span className="text-body font-semibold flex items-center gap-1 text-good">
+                      <span>↑</span>
+                      <span>{t('transactions.metrics.payCountVal', { count: s.payCount })}</span>
+                    </span>
+                    <span className="text-faint">{t('transactions.types.payment', 'Thanh toán')}</span>
                   </div>
                 </div>
 
                 {/* Metric 2: Total Refunded */}
-                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-                  <div className="rounded-[20px] border border-line group-hover:border-bad/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-                    <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                          {t('transactions.metrics.refunded', 'ĐÃ HOÀN TRẢ')}
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-bad" />
-                      </div>
-                      <div className="text-[23px] font-extrabold text-bad-deep tracking-tight font-mono">
-                        {formatVndCompact(s.refundedVnd)}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                      <span className="text-bad font-semibold">
-                        {t('transactions.metrics.refundCountVal', { count: s.refundCount })}
+                <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-bad/40 hover:shadow-md">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                        {t('transactions.metrics.refunded', 'ĐÃ HOÀN TRẢ')}
                       </span>
-                      <span className="text-faint">
-                        {s.grossVnd > 0 ? `${((s.refundedVnd / s.grossVnd) * 100).toFixed(1)}%` : '0%'}
-                      </span>
+                      <span className="h-2 w-2 rounded-full bg-bad" />
                     </div>
+                    <div className="text-[23px] font-extrabold text-bad-deep tracking-tight font-mono">
+                      {formatVndCompact(s.refundedVnd)}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+                    <span className="text-bad font-semibold">
+                      {t('transactions.metrics.refundCountVal', { count: s.refundCount })}
+                    </span>
+                    <span className="text-faint">
+                      {s.grossVnd > 0 ? `${((s.refundedVnd / s.grossVnd) * 100).toFixed(1)}%` : '0%'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 3: Net Revenue */}
-                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-                  <div className="rounded-[20px] border border-line group-hover:border-good/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-                    <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                          {t('transactions.metrics.net', 'DOANH THU RÒNG')}
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-good" />
-                      </div>
-                      <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
-                        {formatVndCompact(s.netVnd)}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                      <span className="text-good font-semibold">
-                        {t('transactions.metrics.netDelta', 'Thu ròng khả dụng')}
+                <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                        {t('transactions.metrics.net', 'DOANH THU RÒNG')}
                       </span>
-                      <span className="text-faint font-mono">
-                        {formatVnd(s.netVnd)}
-                      </span>
+                      <span className="h-2 w-2 rounded-full bg-good" />
                     </div>
+                    <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
+                      {formatVndCompact(s.netVnd)}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+                    <span className="text-good font-semibold">
+                      {t('transactions.metrics.netDelta', 'Thu ròng khả dụng')}
+                    </span>
+                    <span className="text-faint font-mono">
+                      {formatVnd(s.netVnd)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Metric 4: Average Ticket Value */}
-                <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-                  <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-                    <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                          {t('transactions.metrics.avg', 'GIÁ TRỊ TB / ĐƠN')}
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-purple-500" />
-                      </div>
-                      <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
-                        {formatVndCompact(s.avgVnd)}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                      <span className="text-muted font-medium">
-                        {t('transactions.metrics.avgDelta', 'Mỗi phiên sạc')}
+                <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                        {t('transactions.metrics.avg', 'GIÁ TRỊ TB / ĐƠN')}
                       </span>
-                      <span className="text-faint font-mono">
-                        {formatVnd(s.avgVnd)}
-                      </span>
+                      <span className="h-2 w-2 rounded-full bg-purple-500" />
                     </div>
+                    <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
+                      {formatVndCompact(s.avgVnd)}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+                    <span className="text-muted font-medium">
+                      {t('transactions.metrics.avgDelta', 'Mỗi phiên sạc')}
+                    </span>
+                    <span className="text-faint font-mono">
+                      {formatVnd(s.avgVnd)}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Payment Gateway Breakdown Strip (Single-border Card) */}
-              <div className="rounded-[20px] bg-surface-2/80 shadow-2xs">
-                <div className="rounded-[20px] border border-line bg-surface p-4 sm:p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3.5">
+              <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3.5">
                     <div>
                       <h4 className="text-[13.5px] font-bold text-ink">
                         {t('transactions.methods.title', 'Theo phương thức thanh toán')}
@@ -357,12 +348,11 @@ export function Transactions() {
                     })}
                   </div>
                 </div>
-              </div>
             </div>
           ) : (
             <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-[105px] rounded-[20px]" />
+                <Skeleton key={i} className="h-[105px] rounded-2xl" />
               ))}
             </div>
           )}

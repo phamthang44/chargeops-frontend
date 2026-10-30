@@ -145,103 +145,95 @@ export function OwnerRefundsTab() {
 
   return (
     <>
-      {/* 1. Bento KPI Cards (single-outline cards) */}
+      {/* 1. Bento KPI Cards (clean single-border cards) */}
       {s ? (
         <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
           {/* Card 1: Pending */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-warn/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.refunds.kpi.pending', 'ĐANG CHỜ XỬ LÝ')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-warn" />
-                </div>
-                <div className="text-[23px] font-extrabold text-warn-deep tracking-tight font-mono">
-                  {s.totalPendingCount}
-                </div>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-warn/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.refunds.kpi.pending', 'ĐANG CHỜ XỬ LÝ')}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-warn" />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-warn font-semibold">{t('finance.refunds.kpi.pendingNotice', 'Nghĩa vụ mở')}</span>
-                <span className="text-faint">{formatVndCompact(s.pendingRefundAmountVnd)}</span>
+              <div className="text-[23px] font-extrabold text-warn-deep tracking-tight font-mono">
+                {s.totalPendingCount}
               </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-warn font-semibold">{t('finance.refunds.kpi.pendingNotice', 'Nghĩa vụ mở')}</span>
+              <span className="text-faint">{formatVndCompact(s.pendingRefundAmountVnd)}</span>
             </div>
           </div>
 
           {/* Card 2: Succeeded */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-good/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.refunds.kpi.succeeded', 'ĐÃ HOÀN TẤT')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-good" />
-                </div>
-                <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
-                  {s.totalSucceededCount}
-                </div>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.refunds.kpi.succeeded', 'ĐÃ HOÀN TẤT')}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-good" />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-good font-semibold">{t('finance.refunds.kpi.succeededNotice', 'Thành công')}</span>
-                <span className="text-faint">{formatVndCompact(s.totalRefundAmountVnd)}</span>
+              <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
+                {s.totalSucceededCount}
               </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-good font-semibold">{t('finance.refunds.kpi.succeededNotice', 'Thành công')}</span>
+              <span className="text-faint">{formatVndCompact(s.totalRefundAmountVnd)}</span>
             </div>
           </div>
 
           {/* Card 3: Action Required (Failed Attempts) */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-bad/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.refunds.kpi.actionRequired', 'CẦN OWNER RETRY')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-bad animate-ping" />
-                </div>
-                <div className={`text-[23px] font-extrabold tracking-tight font-mono ${s.requiresOwnerActionCount > 0 ? 'text-bad' : 'text-ink'}`}>
-                  {s.requiresOwnerActionCount}
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className={s.requiresOwnerActionCount > 0 ? 'text-bad font-semibold' : 'text-muted'}>
-                  {s.requiresOwnerActionCount > 0 ? t('finance.refunds.kpi.needsIntervention', 'Cần can thiệp') : t('finance.refunds.kpi.noErrors', 'Không có lỗi')}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-bad/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.refunds.kpi.actionRequired', 'CẦN OWNER RETRY')}
                 </span>
-                <span className="text-faint">{s.totalFailedAttemptsCount} {t('finance.refunds.kpi.failedAttemptsSuffix', 'lần thử lỗi')}</span>
+                <span className="h-2 w-2 rounded-full bg-bad animate-ping" />
               </div>
+              <div className={`text-[23px] font-extrabold tracking-tight font-mono ${s.requiresOwnerActionCount > 0 ? 'text-bad' : 'text-ink'}`}>
+                {s.requiresOwnerActionCount}
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className={s.requiresOwnerActionCount > 0 ? 'text-bad font-semibold' : 'text-muted'}>
+                {s.requiresOwnerActionCount > 0 ? t('finance.refunds.kpi.needsIntervention', 'Cần can thiệp') : t('finance.refunds.kpi.noErrors', 'Không có lỗi')}
+              </span>
+              <span className="text-faint">{s.totalFailedAttemptsCount} {t('finance.refunds.kpi.failedAttemptsSuffix', 'lần thử lỗi')}</span>
             </div>
           </div>
 
           {/* Card 4: Total Refund Amount */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.refunds.kpi.totalAmount', 'TỔNG TIỀN HOÀN')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-brand" />
-                </div>
-                <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
-                  {formatVndCompact(s.totalRefundAmountVnd)}
-                </div>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.refunds.kpi.totalAmount', 'TỔNG TIỀN HOÀN')}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-brand" />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-body font-semibold">{t('finance.refunds.kpi.allStationsNotice', 'Toàn bộ trạm')}</span>
-                <span className="text-faint">{formatVnd(s.totalRefundAmountVnd)}</span>
+              <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
+                {formatVndCompact(s.totalRefundAmountVnd)}
               </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-body font-semibold">{t('finance.refunds.kpi.allStationsNotice', 'Toàn bộ trạm')}</span>
+              <span className="text-faint">{formatVnd(s.totalRefundAmountVnd)}</span>
             </div>
           </div>
         </div>
       ) : (
         <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[105px] rounded-[20px]" />
+            <Skeleton key={i} className="h-[105px] rounded-2xl" />
           ))}
         </div>
       )}

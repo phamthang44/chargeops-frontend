@@ -105,14 +105,10 @@ export function Dashboard() {
   return (
     <div className="space-y-6 pb-12">
       {/* =========================================================================
-          HERO: Station Operational Beacon & Live HUD (Doppelrand Architecture)
+          HERO: Station Operational Beacon & Live HUD (Clean Single-Border Architecture)
           ========================================================================= */}
-      <header className="relative overflow-hidden rounded-[2rem] border border-line/80 bg-gradient-to-b from-surface via-surface to-surface-2/60 p-2 shadow-sm transition-all">
-        {/* Ambient background glow orb */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-brand/5 blur-3xl" />
-        <div className="pointer-events-none absolute -left-12 -bottom-12 h-64 w-64 rounded-full bg-good/5 blur-3xl" />
-
-        <div className="relative flex flex-col justify-between gap-6 rounded-[calc(2rem-0.5rem)] border border-white/80 bg-surface/90 px-6 py-6 backdrop-blur-md dark:border-white/5 sm:px-8 sm:py-7 lg:flex-row lg:items-center">
+      <header className="relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-xs sm:p-7">
+        <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
           <div className="min-w-0 space-y-3">
             {/* Eyebrow with Live Pulsing Radar Beacon */}
             <div className="flex flex-wrap items-center gap-2.5">
@@ -171,17 +167,15 @@ export function Dashboard() {
       ) : (
         <>
           {/* =========================================================================
-              KPI OPERATIONAL COMMAND TIER (4-Card Asymmetrical Doppelrand Bento)
+              KPI OPERATIONAL COMMAND TIER (4-Card Asymmetrical Single-Border Bento)
               ========================================================================= */}
           <section aria-label={t('kpi.section')} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {summary.isLoading ? (
               Array.from({ length: 4 }, (_, index) => (
-                <div key={index} className="rounded-[1.75rem] border border-line/70 bg-surface p-2 shadow-xs">
-                  <div className="h-28 rounded-[calc(1.75rem-0.5rem)] bg-surface-2 p-4">
-                    <Skeleton className="h-4 w-24 rounded-md" />
-                    <Skeleton className="mt-3 h-8 w-16 rounded-md" />
-                    <Skeleton className="mt-2 h-3 w-32 rounded-md" />
-                  </div>
+                <div key={index} className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="mt-3 h-8 w-16 rounded-md" />
+                  <Skeleton className="mt-2 h-3 w-32 rounded-md" />
                 </div>
               ))
             ) : summary.error ? (
@@ -224,22 +218,21 @@ export function Dashboard() {
           </section>
 
           {/* =========================================================================
-              OPERATIONAL HUB: Live Stream & Attention Matrix (Double-Bezel Bento Grid)
+              OPERATIONAL HUB: Live Stream & Attention Matrix (Clean Single-Border Bento Grid)
               ========================================================================= */}
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             {/* PANEL 1: LỊCH ĐẶT CHỖ (Booking Stream) */}
             <section
               aria-labelledby="staff-bookings-title"
-              className="group relative overflow-hidden rounded-[2rem] border border-line/80 bg-gradient-to-b from-surface via-surface to-surface-2/60 p-2 shadow-sm transition-all xl:col-span-6"
+              className="overflow-hidden rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs xl:col-span-6"
             >
-              <div className="h-full rounded-[calc(2rem-0.5rem)] border border-white/80 bg-surface p-5 sm:p-6 dark:border-white/5">
-                <PanelHeader
-                  id="staff-bookings-title"
-                  title={t('bookings.title')}
-                  actionLabel={t('bookings.all')}
-                  onAction={() => navigate('../bookings')}
-                  icon={<IconCalendar size={18} className="text-brand" />}
-                />
+              <PanelHeader
+                id="staff-bookings-title"
+                title={t('bookings.title')}
+                actionLabel={t('bookings.all')}
+                onAction={() => navigate('../bookings')}
+                icon={<IconCalendar size={18} className="text-brand" />}
+              />
 
                 <div className="mt-4">
                   <CapsuleTabs
@@ -323,22 +316,20 @@ export function Dashboard() {
                     })}
                   />
                 </div>
-              </div>
             </section>
 
             {/* PANEL 2: THIẾT BỊ CẦN KIỂM TRA (Equipment Diagnostics) */}
             <section
               aria-labelledby="staff-equipment-title"
-              className="group relative overflow-hidden rounded-[2rem] border border-line/80 bg-gradient-to-b from-surface via-surface to-surface-2/60 p-2 shadow-sm transition-all xl:col-span-6"
+              className="overflow-hidden rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs xl:col-span-6"
             >
-              <div className="h-full rounded-[calc(2rem-0.5rem)] border border-white/80 bg-surface p-5 sm:p-6 dark:border-white/5">
-                <PanelHeader
-                  id="staff-equipment-title"
-                  title={t('equipment.title')}
-                  actionLabel={t('equipment.all')}
-                  onAction={() => navigate('../chargers')}
-                  icon={<IconWrench size={18} className="text-warn" />}
-                />
+              <PanelHeader
+                id="staff-equipment-title"
+                title={t('equipment.title')}
+                actionLabel={t('equipment.all')}
+                onAction={() => navigate('../chargers')}
+                icon={<IconWrench size={18} className="text-warn" />}
+              />
 
                 <div className="mt-4 min-h-[352px]">
                   {equipment.isLoading ? (
@@ -405,22 +396,20 @@ export function Dashboard() {
                     })}
                   />
                 </div>
-              </div>
             </section>
 
             {/* PANEL 3: YÊU CẦU HỖ TRỢ (Support Tickets Triage Matrix) */}
             <section
               aria-labelledby="staff-tickets-title"
-              className="group relative overflow-hidden rounded-[2rem] border border-line/80 bg-gradient-to-b from-surface via-surface to-surface-2/60 p-2 shadow-sm transition-all xl:col-span-12"
+              className="overflow-hidden rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs xl:col-span-12"
             >
-              <div className="h-full rounded-[calc(2rem-0.5rem)] border border-white/80 bg-surface p-5 sm:p-6 dark:border-white/5">
-                <PanelHeader
-                  id="staff-tickets-title"
-                  title={t('tickets.title')}
-                  actionLabel={t('tickets.all')}
-                  onAction={() => navigate('../tickets')}
-                  icon={<IconLifebuoy size={18} className="text-brand" />}
-                />
+              <PanelHeader
+                id="staff-tickets-title"
+                title={t('tickets.title')}
+                actionLabel={t('tickets.all')}
+                onAction={() => navigate('../tickets')}
+                icon={<IconLifebuoy size={18} className="text-brand" />}
+              />
 
                 <div className="mt-4">
                   <CapsuleTabs
@@ -500,7 +489,6 @@ export function Dashboard() {
                     })}
                   />
                 </div>
-              </div>
             </section>
           </div>
         </>
@@ -510,7 +498,7 @@ export function Dashboard() {
 }
 
 /* =========================================================================
-   COMPONENTS: High-End Visual Primitives (Doppelrand, Micro-HUD, Island Controls)
+   COMPONENTS: Clean Single-Border Visual Primitives (Micro-HUD, Island Controls)
    ========================================================================= */
 
 interface KpiTileProps {
@@ -560,39 +548,32 @@ function KpiTile({ label, value, hint, icon, tone, pulse = false }: KpiTileProps
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-[1.75rem] border border-line/80 bg-gradient-to-b from-surface via-surface to-surface-2/60 p-1.5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${style.border}`}
+      className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${style.border}`}
     >
-      {/* Top right subtle ambient glow */}
-      <div
-        className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${style.glow} blur-xl transition-opacity duration-300 group-hover:opacity-100 opacity-60`}
-      />
-
-      <div className="relative flex h-full flex-col justify-between rounded-[calc(1.75rem-0.375rem)] border border-white/70 bg-surface p-5 dark:border-white/5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-            {label}
-          </span>
-          <span
-            className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-2xs transition-transform duration-300 group-hover:scale-105 ${style.iconBg}`}
-          >
-            {icon}
-          </span>
-        </div>
-
-        <div className="my-3 flex items-baseline gap-2">
-          <span className="font-mono text-3xl font-extrabold tracking-tight tabular-nums text-ink sm:text-4xl">
-            {value}
-          </span>
-          {pulse && (
-            <span className="relative flex h-2.5 w-2.5 mb-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-good opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-good" />
-            </span>
-          )}
-        </div>
-
-        <p className="text-[11.5px] font-medium text-muted/90 truncate">{hint}</p>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+          {label}
+        </span>
+        <span
+          className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-2xs transition-transform duration-300 group-hover:scale-105 ${style.iconBg}`}
+        >
+          {icon}
+        </span>
       </div>
+
+      <div className="my-3 flex items-baseline gap-2">
+        <span className="font-mono text-3xl font-extrabold tracking-tight tabular-nums text-ink sm:text-4xl">
+          {value}
+        </span>
+        {pulse && (
+          <span className="relative flex h-2.5 w-2.5 mb-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-good opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-good" />
+          </span>
+        )}
+      </div>
+
+      <p className="text-[11.5px] font-medium text-muted/90 truncate">{hint}</p>
     </div>
   );
 }

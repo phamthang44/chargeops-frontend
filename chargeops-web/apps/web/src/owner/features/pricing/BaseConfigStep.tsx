@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { SYSTEM_BOOKING_RULES } from '@chargeops/api';
-import { IconBolt, IconClock, IconShieldCheck } from '@chargeops/ui';
+import { IconAlertTriangle, IconBolt, IconClock, IconInfoCircle, IconShieldCheck } from '@chargeops/ui';
 import { StepHeader } from './StepHeader';
 
 /** Allowed minimum booking durations (Commercial preference chosen by Station Owner: 30 | 60 | 90 mins). */
@@ -85,7 +85,7 @@ export function BaseConfigStep({
 
           {/* Warning for unverified 90m duration */}
           <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
-            <span>⚠️</span>
+            <IconAlertTriangle size={14} className="shrink-0 text-amber-500" />
             <span>
               {t('pricing.steps.step1.lockedWarning', {
                 defaultValue: 'Mốc 90 phút chưa được kiểm chứng vận hành thực tế nên tạm thời bị khóa.',
@@ -94,36 +94,39 @@ export function BaseConfigStep({
           </div>
 
           {/* Dynamic Example Hint */}
-          <div className="mt-2.5 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted border border-hairline">
-            💡 <b>{t('pricing.steps.step1.flexiblePolicyTitle', { defaultValue: 'Quy cách tính giờ linh hoạt:' })}</b>{' '}
-            {t('pricing.steps.step1.flexiblePolicyPrefix', { defaultValue: 'Tài xế chọn giờ bắt đầu bất kỳ (ví dụ' })}{' '}
-            <span className="font-mono text-ink">09:51</span>).{' '}
-            {t('pricing.steps.step1.flexiblePolicyWithMin', { defaultValue: 'Với mức tối thiểu' })}{' '}
-            <span className="font-semibold text-ink">
-              {minBookingDurationMin} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
-            </span>{' '}
-            {t('pricing.steps.step1.flexiblePolicyAndStep', { defaultValue: 'và bước nhảy' })}{' '}
-            <span className="font-semibold text-ink">
-              {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
-            </span>
-            , {t('pricing.steps.step1.flexiblePolicySuggests', { defaultValue: 'ứng dụng đề xuất các gói sạc:' })}{' '}
-            <span className="font-mono text-owner-deep font-semibold">
-              {minBookingDurationMin}
-              {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'} (
-              {t('pricing.steps.step1.flexiblePolicyUntil', { defaultValue: 'đến' })}{' '}
-              {minBookingDurationMin === 30 ? '10:21' : minBookingDurationMin === 60 ? '10:51' : '11:21'})
-            </span>
-            {minBookingDurationMin < 180 && (
-              <span className="font-mono text-muted">
-                , {minBookingDurationMin + 30}
-                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}, {minBookingDurationMin + 60}
-                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}... (
-                {t('pricing.steps.step1.flexiblePolicyMax', { defaultValue: 'tối đa' })}{' '}
-                {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES}
-                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'})
+          <div className="mt-2.5 flex items-start gap-2 rounded-[8px] border border-hairline bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted">
+            <IconInfoCircle size={15} className="mt-0.5 shrink-0 text-owner-deep" />
+            <div>
+              <b>{t('pricing.steps.step1.flexiblePolicyTitle', { defaultValue: 'Quy cách tính giờ linh hoạt:' })}</b>{' '}
+              {t('pricing.steps.step1.flexiblePolicyPrefix', { defaultValue: 'Tài xế chọn giờ bắt đầu bất kỳ (ví dụ' })}{' '}
+              <span className="font-mono text-ink">09:51</span>).{' '}
+              {t('pricing.steps.step1.flexiblePolicyWithMin', { defaultValue: 'Với mức tối thiểu' })}{' '}
+              <span className="font-semibold text-ink">
+                {minBookingDurationMin} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
+              </span>{' '}
+              {t('pricing.steps.step1.flexiblePolicyAndStep', { defaultValue: 'và bước nhảy' })}{' '}
+              <span className="font-semibold text-ink">
+                {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
               </span>
-            )}
-            .
+              , {t('pricing.steps.step1.flexiblePolicySuggests', { defaultValue: 'ứng dụng đề xuất các gói sạc:' })}{' '}
+              <span className="font-mono text-owner-deep font-semibold">
+                {minBookingDurationMin}
+                {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'} (
+                {t('pricing.steps.step1.flexiblePolicyUntil', { defaultValue: 'đến' })}{' '}
+                {minBookingDurationMin === 30 ? '10:21' : minBookingDurationMin === 60 ? '10:51' : '11:21'})
+              </span>
+              {minBookingDurationMin < 180 && (
+                <span className="font-mono text-muted">
+                  , {minBookingDurationMin + 30}
+                  {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}, {minBookingDurationMin + 60}
+                  {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}... (
+                  {t('pricing.steps.step1.flexiblePolicyMax', { defaultValue: 'tối đa' })}{' '}
+                  {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES}
+                  {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'})
+                </span>
+              )}
+              .
+            </div>
           </div>
         </div>
 

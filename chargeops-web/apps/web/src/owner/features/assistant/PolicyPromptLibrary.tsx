@@ -389,10 +389,8 @@ export function PolicyPromptLibraryModal({
       />
 
       {/* Modal Container */}
-      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col rounded-[2rem] bg-surface/95 shadow-2xl">
-        {/* Inner Core Enclosure */}
-        <div className="flex flex-1 flex-col overflow-hidden rounded-[2rem] border border-line bg-canvas shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-          {/* Header */}
+      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-line bg-canvas shadow-2xl">
+        {/* Header */}
           <div className="flex flex-col gap-3.5 border-b border-line bg-surface/70 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
@@ -493,12 +491,10 @@ export function PolicyPromptLibraryModal({
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex flex-col justify-between rounded-2xl bg-surface-2/40 transition-all duration-300 hover:bg-surface-2/80 hover:shadow-xs"
+                      className="group relative flex h-full flex-col justify-between rounded-2xl border border-line bg-surface p-3.5 shadow-2xs transition-all duration-300 hover:border-brand/50 hover:shadow-xs"
                     >
-                      {/* Inner Core */}
-                      <div className="flex h-full flex-col justify-between rounded-2xl border border-line/80 group-hover:border-brand/50 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-                        <div>
-                          {/* Card Top: Tag + Category + ID */}
+                      <div>
+                        {/* Card Top: Tag + Category + ID */}
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <div className="flex items-center gap-1.5">
                               <span className="text-[13px]">{item.categoryIcon}</span>
@@ -552,7 +548,6 @@ export function PolicyPromptLibraryModal({
                             </div>
                           </button>
                         </div>
-                      </div>
                     </div>
                   );
                 })}
@@ -568,7 +563,6 @@ export function PolicyPromptLibraryModal({
                 : '💡 Mẹo: Xem trực tiếp khung “Đáp án chuẩn v4.9” để tra cứu ngay mà không tốn token gọi AI.'}
             </span>
           </div>
-        </div>
       </div>
     </div>
   );

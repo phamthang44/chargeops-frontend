@@ -106,17 +106,10 @@ export function StaffBookings() {
 
       <section
         aria-label={t('bookings.filter.eyebrow')}
-        className="mb-4 rounded-panel bg-surface-2/70 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+        className="relative mb-4 rounded-2xl border border-line bg-surface px-4 pb-4 pt-3.5 shadow-2xs"
         style={{ animation: 'riseIn .6s cubic-bezier(0.32,0.72,0,1) both' }}
       >
-        <div className="relative rounded-[8px] border border-hairline bg-surface px-4 pb-4 pt-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          {/* Clipped ambient glow — glass plate resting in a machined tray */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]" aria-hidden="true">
-            <div className="absolute -top-24 right-[-5rem] h-56 w-56 rounded-full bg-owner/[0.08] blur-3xl" />
-            <div className="absolute bottom-[-7rem] left-[-6rem] h-48 w-48 rounded-full bg-brand/[0.05] blur-3xl" />
-          </div>
-
-          {/* Header band — eyebrow · live count · reset island */}
+        {/* Header band — eyebrow · live count · reset island */}
           <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-owner-border bg-owner-soft px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.18em] text-owner-deep">
               <IconCalendar size={10} strokeWidth={2.6} />
@@ -188,7 +181,6 @@ export function StaffBookings() {
               </div>
             </div>
           </div>
-        </div>
       </section>
 
       {bookingsQ.error ? (

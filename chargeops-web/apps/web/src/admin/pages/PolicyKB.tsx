@@ -468,64 +468,56 @@ export function PolicyKB() {
         />
       </div>
 
-      {/* KPI Metric Strip - Single-border cards */}
+      {/* KPI Metric Strip - Clean Single-border cards */}
       <div className="mb-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {/* Metric 1: Total Docs */}
-        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-brand/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-105">
-              <IconBook size={20} />
-            </div>
-            <div>
-              <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.totalDocs', 'Tổng số văn kiện')}</div>
-              <div className="font-mono text-[22px] font-black tracking-tight text-ink">{allDocs.length}</div>
-            </div>
+        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-105">
+            <IconBook size={20} />
+          </div>
+          <div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.totalDocs', 'Tổng số văn kiện')}</div>
+            <div className="font-mono text-[22px] font-black tracking-tight text-ink">{allDocs.length}</div>
           </div>
         </div>
 
         {/* Metric 2: Active Docs */}
-        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-good/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-good-soft text-good transition-transform duration-300 group-hover:scale-105">
-              <IconShieldCheck size={20} />
-            </div>
-            <div>
-              <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.activeDocs', 'Đang hiệu lực')}</div>
-              <div className="font-mono text-[22px] font-black tracking-tight text-good-deep">
-                {allDocs.filter((d) => d.active).length}
-              </div>
+        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-good-soft text-good transition-transform duration-300 group-hover:scale-105">
+            <IconShieldCheck size={20} />
+          </div>
+          <div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.activeDocs', 'Đang hiệu lực')}</div>
+            <div className="font-mono text-[22px] font-black tracking-tight text-good-deep">
+              {allDocs.filter((d) => d.active).length}
             </div>
           </div>
         </div>
 
         {/* Metric 3: Booking & Pricing Category Docs */}
-        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-amber-400/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-transform duration-300 group-hover:scale-105">
-              <IconBolt size={20} />
+        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-md">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-transform duration-300 group-hover:scale-105">
+            <IconBolt size={20} />
+          </div>
+          <div>
+            <div className="text-[11.5px] font-medium text-muted">
+              {t('policyKB.categories.booking', 'Đặt chỗ & Biểu giá')}
             </div>
-            <div>
-              <div className="text-[11.5px] font-medium text-muted">
-                {t('policyKB.categories.booking', 'Đặt chỗ & Biểu giá')}
-              </div>
-              <div className="font-mono text-[22px] font-black tracking-tight text-ink">
-                {allDocs.filter((d) => matchDocumentCategory(d.slug, 'booking', d.docType)).length}
-              </div>
+            <div className="font-mono text-[22px] font-black tracking-tight text-ink">
+              {allDocs.filter((d) => matchDocumentCategory(d.slug, 'booking', d.docType)).length}
             </div>
           </div>
         </div>
 
         {/* Metric 4: Owner & License Docs */}
-        <div className="group rounded-2xl bg-surface-2/40 shadow-xs transition duration-300 hover:shadow-md">
-          <div className="flex items-center gap-3.5 rounded-2xl border border-line/40 group-hover:border-emerald-400/30 bg-surface p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-105">
-              <IconHome size={20} />
-            </div>
-            <div>
-              <div className="text-[11.5px] font-medium text-muted">{t('policyKB.audiences.OWNER', 'Chủ trạm & License')}</div>
-              <div className="font-mono text-[22px] font-black tracking-tight text-ink">
-                {allDocs.filter((d) => matchDocumentCategory(d.slug, 'license', d.docType)).length}
-              </div>
+        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:shadow-md">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-105">
+            <IconHome size={20} />
+          </div>
+          <div>
+            <div className="text-[11.5px] font-medium text-muted">{t('policyKB.audiences.OWNER', 'Chủ trạm & License')}</div>
+            <div className="font-mono text-[22px] font-black tracking-tight text-ink">
+              {allDocs.filter((d) => matchDocumentCategory(d.slug, 'license', d.docType)).length}
             </div>
           </div>
         </div>
@@ -746,10 +738,9 @@ export function PolicyKB() {
                 return (
                   <div
                     key={doc.id}
-                    className="group rounded-[1.75rem] bg-surface-2/30 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group flex flex-col justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md lg:flex-row lg:items-start"
                   >
-                    <div className="flex flex-col justify-between gap-4 rounded-[1.75rem] border border-line/40 group-hover:border-brand/40 bg-surface p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] lg:flex-row lg:items-start">
-                      <div className="flex-1">
+                    <div className="flex-1">
                         {/* Top Micro-Pills Row */}
                         <div className="mb-2.5 flex flex-wrap items-center gap-2">
                           <span
@@ -890,7 +881,6 @@ export function PolicyKB() {
                         </Button>
                       </div>
                     </div>
-                  </div>
                 );
               })}
             </div>

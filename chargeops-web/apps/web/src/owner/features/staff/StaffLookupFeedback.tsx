@@ -89,18 +89,16 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
   // 1. In-flight Live Searching Shimmer State
   if (isSearching) {
     return (
-      <div className="group relative rounded-2xl bg-surface-2 animate-fadeIn">
-        <div className="flex items-center gap-3 rounded-2xl border border-line/60 bg-surface p-3.5 shadow-xs">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-owner-soft text-owner">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-owner border-t-transparent" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="text-[12.5px] font-semibold text-ink flex items-center gap-2">
-              <span>{t('staff.lookup.searching', { defaultValue: 'Đang kiểm tra thông tin tài khoản…' })}</span>
-            </div>
-            <div className="mt-1 text-[11px] text-faint">
-              Truy vấn dịch vụ định danh và xác thực điều kiện phân công
-            </div>
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 shadow-xs animate-fadeIn">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-owner-soft text-owner">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-owner border-t-transparent" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[12.5px] font-semibold text-ink flex items-center gap-2">
+            <span>{t('staff.lookup.searching', { defaultValue: 'Đang kiểm tra thông tin tài khoản…' })}</span>
+          </div>
+          <div className="mt-1 text-[11px] text-faint">
+            Truy vấn dịch vụ định danh và xác thực điều kiện phân công
           </div>
         </div>
       </div>
@@ -130,69 +128,67 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
     };
 
     return (
-      <div className="group relative rounded-2xl bg-bad/5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-bad/35 animate-fadeIn">
-        <div className="relative rounded-2xl border border-bad/20 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-          {/* Header row: Icon, Category Badge, Code Chip & Retry Action */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0 flex-wrap">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad/15 text-bad-deep border border-bad/20">
-                <IconAlertCircle size={15} />
-              </div>
-              <span className="text-[12.5px] font-bold text-bad-deep">
-                {category}
-              </span>
-              {errorCode && (
-                <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-bad-deep bg-bad-soft border border-bad/25 px-2 py-0.5 rounded-md shadow-2xs">
-                  {errorCode}
-                </span>
-              )}
+      <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs animate-fadeIn">
+        {/* Header row: Icon, Category Badge, Code Chip & Retry Action */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad/15 text-bad-deep border border-bad/20">
+              <IconAlertCircle size={15} />
             </div>
+            <span className="text-[12.5px] font-bold text-bad-deep">
+              {category}
+            </span>
+            {errorCode && (
+              <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-bad-deep bg-bad-soft border border-bad/25 px-2 py-0.5 rounded-md shadow-2xs">
+                {errorCode}
+              </span>
+            )}
+          </div>
 
-            {onRetry && (
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              disabled={isRetrying}
+              className="inline-flex items-center gap-1.5 rounded-full bg-bad-soft hover:bg-bad/20 active:scale-95 px-3 py-1 text-[11px] font-bold text-bad-deep border border-bad/25 transition-all duration-200 cursor-pointer disabled:opacity-50 shrink-0"
+            >
+              <IconRefreshCw
+                size={11}
+                className={isRetrying ? 'animate-spin' : 'transition-transform duration-300 group-hover:rotate-180'}
+              />
+              <span>{isRetrying ? 'Đang thử lại…' : t('common.retry', { defaultValue: 'Thử lại' })}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Primary Translated Message */}
+        <div className="mt-2.5 pl-9">
+          <p className="text-[12px] font-medium text-ink leading-relaxed">
+            {primaryMessage}
+          </p>
+
+          {/* Resolution Hint / Troubleshooting Box */}
+          {hint && (
+            <div className="mt-2 flex items-start gap-2 rounded-xl bg-canvas p-2.5 text-[11.5px] text-muted border border-line/60">
+              <IconInfoCircle size={14} className="text-faint shrink-0 mt-0.5" />
+              <span className="leading-relaxed">{hint}</span>
+            </div>
+          )}
+
+          {/* Technical Copy Bar */}
+          {errorCode && (
+            <div className="mt-2.5 flex items-center justify-between text-[10.5px] text-faint">
+              <span>Cần chuyển tiếp bộ phận hỗ trợ kỹ thuật?</span>
               <button
                 type="button"
-                onClick={onRetry}
-                disabled={isRetrying}
-                className="inline-flex items-center gap-1.5 rounded-full bg-bad-soft hover:bg-bad/20 active:scale-95 px-3 py-1 text-[11px] font-bold text-bad-deep border border-bad/25 transition-all duration-200 cursor-pointer disabled:opacity-50 shrink-0"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1 font-medium hover:text-ink transition-colors cursor-pointer text-muted hover:underline"
               >
-                <IconRefreshCw
-                  size={11}
-                  className={isRetrying ? 'animate-spin' : 'transition-transform duration-300 group-hover:rotate-180'}
-                />
-                <span>{isRetrying ? 'Đang thử lại…' : t('common.retry', { defaultValue: 'Thử lại' })}</span>
+                <IconCopy size={11} />
+                <span>{copied ? 'Đã sao chép chi tiết!' : 'Sao chép mã lỗi'}</span>
               </button>
-            )}
-          </div>
-
-          {/* Primary Translated Message */}
-          <div className="mt-2.5 pl-9">
-            <p className="text-[12px] font-medium text-ink leading-relaxed">
-              {primaryMessage}
-            </p>
-
-            {/* Resolution Hint / Troubleshooting Box */}
-            {hint && (
-              <div className="mt-2 flex items-start gap-2 rounded-xl bg-canvas p-2.5 text-[11.5px] text-muted border border-line/60">
-                <IconInfoCircle size={14} className="text-faint shrink-0 mt-0.5" />
-                <span className="leading-relaxed">{hint}</span>
-              </div>
-            )}
-
-            {/* Technical Copy Bar */}
-            {errorCode && (
-              <div className="mt-2.5 flex items-center justify-between text-[10.5px] text-faint">
-                <span>Cần chuyển tiếp bộ phận hỗ trợ kỹ thuật?</span>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="inline-flex items-center gap-1 font-medium hover:text-ink transition-colors cursor-pointer text-muted hover:underline"
-                >
-                  <IconCopy size={11} />
-                  <span>{copied ? 'Đã sao chép chi tiết!' : 'Sao chép mã lỗi'}</span>
-                </button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -205,30 +201,28 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
     <div className="animate-fadeIn transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
       {/* ELIGIBLE */}
       {data.status === 'ELIGIBLE' && (
-        <div className="group relative rounded-2xl bg-good/5 hover:ring-good/40 transition-all duration-200">
-          <div className="flex items-start gap-3.5 rounded-2xl border border-good/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm min-w-0">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-good text-[14px] font-bold text-white shadow-xs">
-              {(data.displayName || data.email || 'U').charAt(0).toUpperCase()}
-              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-surface p-0.5">
-                <span className="block h-full w-full rounded-full bg-good animate-pulse" />
+        <div className="flex items-start gap-3.5 rounded-2xl border border-good/30 bg-surface p-3.5 shadow-xs min-w-0">
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-good text-[14px] font-bold text-white shadow-xs">
+            {(data.displayName || data.email || 'U').charAt(0).toUpperCase()}
+            <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-surface p-0.5">
+              <span className="block h-full w-full rounded-full bg-good animate-pulse" />
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="truncate text-[14px] font-bold text-ink max-w-[200px] sm:max-w-none">
+                {data.displayName || data.email}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-good-soft px-2.5 py-0.5 text-[11px] font-bold text-good-deep border border-good/25 whitespace-nowrap shadow-2xs">
+                <IconCheck size={11} strokeWidth={3} /> {t('staff.assign.userFound', { defaultValue: 'Đã xác thực tài khoản' })}
               </span>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="truncate text-[14px] font-bold text-ink max-w-[200px] sm:max-w-none">
-                  {data.displayName || data.email}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-good-soft px-2.5 py-0.5 text-[11px] font-bold text-good-deep border border-good/25 whitespace-nowrap shadow-2xs">
-                  <IconCheck size={11} strokeWidth={3} /> {t('staff.assign.userFound', { defaultValue: 'Đã xác thực tài khoản' })}
-                </span>
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] text-muted">
-                <span className="break-all font-mono text-ink/80">{data.email}</span>
-                {data.maskedPhone && <span>• {data.maskedPhone}</span>}
-                <span className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-semibold text-body border border-line/60">
-                  {t('staff.assign.driverRole', { defaultValue: 'Tài xế / Người dùng' })}
-                </span>
-              </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] text-muted">
+              <span className="break-all font-mono text-ink/80">{data.email}</span>
+              {data.maskedPhone && <span>• {data.maskedPhone}</span>}
+              <span className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-semibold text-body border border-line/60">
+                {t('staff.assign.driverRole', { defaultValue: 'Tài xế / Người dùng' })}
+              </span>
             </div>
           </div>
         </div>
@@ -236,92 +230,82 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* NOT_FOUND */}
       {data.status === 'NOT_FOUND' && (
-        <div className="group relative rounded-2xl bg-warn/5">
-          <div className="rounded-2xl border border-warn/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2.5 font-bold text-warn-deep">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
-                <IconAlertCircle size={15} />
-              </div>
-              <span className="text-[13px]">{t('staff.lookup.notFound')}</span>
+        <div className="rounded-2xl border border-warn/30 bg-surface p-3.5 shadow-xs">
+          <div className="flex items-center gap-2.5 font-bold text-warn-deep">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
+              <IconAlertCircle size={15} />
             </div>
-            <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
-              {t('staff.lookup.notFoundHelp')}
-            </p>
-            <div className="mt-2.5 ml-9.5 rounded-xl bg-warn-soft/40 p-2.5 text-[11px] text-warn-deep border border-warn/15 flex items-start gap-2">
-              <IconInfoCircle size={13} className="shrink-0 mt-0.5 text-warn-deep" />
-              <span className="leading-relaxed">
-                Nhân viên có thể tải ứng dụng hoặc truy cập cổng thông tin ChargeOps để đăng ký tài khoản miễn phí bằng email này.
-              </span>
-            </div>
+            <span className="text-[13px]">{t('staff.lookup.notFound')}</span>
+          </div>
+          <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
+            {t('staff.lookup.notFoundHelp')}
+          </p>
+          <div className="mt-2.5 ml-9.5 rounded-xl bg-warn-soft/40 p-2.5 text-[11px] text-warn-deep border border-warn/15 flex items-start gap-2">
+            <IconInfoCircle size={13} className="shrink-0 mt-0.5 text-warn-deep" />
+            <span className="leading-relaxed">
+              Nhân viên có thể tải ứng dụng hoặc truy cập cổng thông tin ChargeOps để đăng ký tài khoản miễn phí bằng email này.
+            </span>
           </div>
         </div>
       )}
 
       {/* SELF_ASSIGNMENT */}
       {data.status === 'SELF_ASSIGNMENT' && (
-        <div className="group relative rounded-2xl bg-bad/5">
-          <div className="rounded-2xl border border-bad/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2.5 font-bold text-bad-deep">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
-                <IconAlertTriangle size={15} />
-              </div>
-              <span className="text-[13px]">{t('staff.lookup.selfAssignment')}</span>
+        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+          <div className="flex items-center gap-2.5 font-bold text-bad-deep">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
+              <IconAlertTriangle size={15} />
             </div>
-            <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
-              {t('staff.lookup.selfAssignmentHelp')}
-            </p>
+            <span className="text-[13px]">{t('staff.lookup.selfAssignment')}</span>
           </div>
+          <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
+            {t('staff.lookup.selfAssignmentHelp')}
+          </p>
         </div>
       )}
 
       {/* ALREADY_ASSIGNED */}
       {data.status === 'ALREADY_ASSIGNED' && (
-        <div className="group relative rounded-2xl bg-warn/5">
-          <div className="rounded-2xl border border-warn/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2.5 font-bold text-warn-deep">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
-                <IconAlertTriangle size={15} />
-              </div>
-              <span className="text-[13px]">{t('staff.lookup.alreadyAssigned')}</span>
+        <div className="rounded-2xl border border-warn/30 bg-surface p-3.5 shadow-xs">
+          <div className="flex items-center gap-2.5 font-bold text-warn-deep">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
+              <IconAlertTriangle size={15} />
             </div>
-            <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
-              {t('staff.lookup.alreadyAssignedHelp')}
-            </p>
+            <span className="text-[13px]">{t('staff.lookup.alreadyAssigned')}</span>
           </div>
+          <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
+            {t('staff.lookup.alreadyAssignedHelp')}
+          </p>
         </div>
       )}
 
       {/* ROLE_NOT_ALLOWED */}
       {data.status === 'ROLE_NOT_ALLOWED' && (
-        <div className="group relative rounded-2xl bg-bad/5">
-          <div className="rounded-2xl border border-bad/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2.5 font-bold text-bad-deep">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
-                <IconShieldAlert size={15} />
-              </div>
-              <span className="text-[13px]">{t('staff.lookup.roleNotAllowed')}</span>
+        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+          <div className="flex items-center gap-2.5 font-bold text-bad-deep">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
+              <IconShieldAlert size={15} />
             </div>
-            <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
-              {t('staff.lookup.roleNotAllowedHelp')}
-            </p>
+            <span className="text-[13px]">{t('staff.lookup.roleNotAllowed')}</span>
           </div>
+          <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
+            {t('staff.lookup.roleNotAllowedHelp')}
+          </p>
         </div>
       )}
 
       {/* ACCOUNT_INACTIVE */}
       {data.status === 'ACCOUNT_INACTIVE' && (
-        <div className="group relative rounded-2xl bg-bad/5">
-          <div className="rounded-2xl border border-bad/25 bg-surface/95 p-3.5 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2.5 font-bold text-bad-deep">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
-                <IconAlertTriangle size={15} />
-              </div>
-              <span className="text-[13px]">{t('staff.lookup.accountInactive')}</span>
+        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+          <div className="flex items-center gap-2.5 font-bold text-bad-deep">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
+              <IconAlertTriangle size={15} />
             </div>
-            <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
-              {t('staff.lookup.accountInactiveHelp')}
-            </p>
+            <span className="text-[13px]">{t('staff.lookup.accountInactive')}</span>
           </div>
+          <p className="mt-2 pl-9.5 text-[11.5px] text-muted leading-relaxed">
+            {t('staff.lookup.accountInactiveHelp')}
+          </p>
         </div>
       )}
     </div>

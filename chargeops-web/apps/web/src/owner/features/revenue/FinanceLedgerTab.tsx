@@ -101,106 +101,98 @@ export function FinanceLedgerTab() {
 
   return (
     <>
-      {/* 1. Bento KPI Showcase (single-outline cards) */}
+      {/* 1. Bento KPI Showcase (clean single-border cards) */}
       {s ? (
         <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
           {/* Card 1: Gross Collected */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-brand/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.kpis.gross', 'TỔNG THU GHI NHẬN')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-brand" />
-                </div>
-                <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
-                  {formatVndCompact(s.grossVnd)}
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-body font-semibold text-good flex items-center gap-1">
-                  <span>↑</span>
-                  <span>{s.paidBookings} {t('finance.kpis.paidBookingsSuffix', 'đơn sạc')}</span>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.kpis.gross', 'TỔNG THU GHI NHẬN')}
                 </span>
-                <span className="text-faint">{formatVnd(s.grossVnd)}</span>
+                <span className="h-2 w-2 rounded-full bg-brand" />
               </div>
+              <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
+                {formatVndCompact(s.grossVnd)}
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-body font-semibold text-good flex items-center gap-1">
+                <span>↑</span>
+                <span>{s.paidBookings} {t('finance.kpis.paidBookingsSuffix', 'đơn sạc')}</span>
+              </span>
+              <span className="text-faint">{formatVnd(s.grossVnd)}</span>
             </div>
           </div>
 
           {/* Card 2: Total Refunded */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-bad/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.kpis.refunded', 'ĐÃ HOÀN TRẢ')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-bad" />
-                </div>
-                <div className="text-[23px] font-extrabold text-bad-deep tracking-tight font-mono">
-                  {formatVndCompact(s.refundedVnd)}
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-bad font-semibold">
-                  {s.grossVnd > 0 ? `${((s.refundedVnd / s.grossVnd) * 100).toFixed(1)}%` : '0%'}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-bad/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.kpis.refunded', 'ĐÃ HOÀN TRẢ')}
                 </span>
-                <span className="text-faint">{formatVnd(s.refundedVnd)}</span>
+                <span className="h-2 w-2 rounded-full bg-bad" />
               </div>
+              <div className="text-[23px] font-extrabold text-bad-deep tracking-tight font-mono">
+                {formatVndCompact(s.refundedVnd)}
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-bad font-semibold">
+                {s.grossVnd > 0 ? `${((s.refundedVnd / s.grossVnd) * 100).toFixed(1)}%` : '0%'}
+              </span>
+              <span className="text-faint">{formatVnd(s.refundedVnd)}</span>
             </div>
           </div>
 
           {/* Card 3: Pending Obligations */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-warn/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.kpis.pending', 'NGHĨA VỤ HOÀN CHỜ')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-warn" />
-                </div>
-                <div className="text-[23px] font-extrabold text-warn-deep tracking-tight font-mono">
-                  {formatVndCompact(s.pendingRefundVnd)}
-                </div>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-warn/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.kpis.pending', 'NGHĨA VỤ HOÀN CHỜ')}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-warn" />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-warn font-semibold">{t('finance.kpis.pendingNotice', 'Đang xử lý')}</span>
-                <span className="text-faint">{formatVnd(s.pendingRefundVnd)}</span>
+              <div className="text-[23px] font-extrabold text-warn-deep tracking-tight font-mono">
+                {formatVndCompact(s.pendingRefundVnd)}
               </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-warn font-semibold">{t('finance.kpis.pendingNotice', 'Đang xử lý')}</span>
+              <span className="text-faint">{formatVnd(s.pendingRefundVnd)}</span>
             </div>
           </div>
 
           {/* Card 4: Net Recorded Amount */}
-          <div className="group relative rounded-[20px] bg-surface-2/80 shadow-2xs transition-all duration-300 hover:shadow-md">
-            <div className="rounded-[20px] border border-line group-hover:border-good/30 bg-surface p-4 flex flex-col justify-between h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-                    {t('finance.kpis.net', 'THU RÒNG GHI NHẬN')}
-                  </span>
-                  <span className="h-2 w-2 rounded-full bg-good" />
-                </div>
-                <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
-                  {formatVndCompact(s.netVnd)}
-                </div>
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
+            <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                  {t('finance.kpis.net', 'THU RÒNG GHI NHẬN')}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-good" />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-                <span className="text-good font-semibold">{t('finance.kpis.netNotice', 'Thu ròng đối soát')}</span>
-                <span className="text-faint">{formatVnd(s.netVnd)}</span>
+              <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
+                {formatVndCompact(s.netVnd)}
               </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
+              <span className="text-good font-semibold">{t('finance.kpis.netNotice', 'Thu ròng đối soát')}</span>
+              <span className="text-faint">{formatVnd(s.netVnd)}</span>
             </div>
           </div>
         </div>
       ) : (
         <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[105px] rounded-[20px]" />
+            <Skeleton key={i} className="h-[105px] rounded-2xl" />
           ))}
         </div>
       )}

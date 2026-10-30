@@ -322,17 +322,17 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
         )}
       </div>
 
-      {/* ---- Panel: frosted tray (blur lives here) around a solid scroll core ---- */}
+      {/* ---- Panel: clean single-border dropdown ---- */}
       {open && (
         <div
           id="header-search-panel"
           role="listbox"
           aria-label={placeholder ?? t('search.placeholder')}
-          className="absolute left-0 top-full z-45 mt-2 w-[404px] max-w-[calc(100vw_-_2rem)] rounded-[20px] border border-line bg-surface/85 p-[5px] shadow-[0_1px_2px_rgba(16,17,26,.05),0_28px_64px_-20px_rgba(16,17,26,.25)] backdrop-blur-xl"
+          className="absolute left-0 top-full z-45 mt-2 w-[404px] max-w-[calc(100vw_-_2rem)] overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_12px_32px_rgba(16,17,26,.15)]"
           style={{ animation: `dropIn .3s ${EASE}` }}
         >
           <div
-            className={`max-h-[min(64vh,460px)] overflow-y-auto overscroll-contain rounded-[15px] bg-surface-2 py-1.5 transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line ${
+            className={`max-h-[min(64vh,460px)] overflow-y-auto overscroll-contain py-1.5 transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line ${
               loading && model.total > 0 ? 'pointer-events-none opacity-60' : ''
             }`}
           >

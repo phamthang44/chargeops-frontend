@@ -1,5 +1,4 @@
 import {
-  getConnectorsByStation,
   getStationAvailability,
   getStationDetail,
   isRangeBusy,
@@ -34,14 +33,12 @@ export async function executeQuickBook(
 
     // 1. Fetch connectors for this station (via getStationDetail to guarantee real backend data)
     const detail = await getStationDetail(stationId, { accessToken: token });
-    const connectors = detail?.connectors && detail.connectors.length > 0
-      ? detail.connectors
-      : await getConnectorsByStation(stationId, { accessToken: token });
-
-    if (!connectors || connectors.length === 0) {
+    if (!detail || !detail.connectors || detail.connectors.length === 0) {
       navigation.navigate('StationDetail', { stationId });
       return;
     }
+
+    const connectors = detail.connectors;
 
     // 2. Prioritize AVAILABLE connectors, sorted by powerKw descending
     const available = connectors.filter((c) => c.runtimeStatus === 'AVAILABLE' || (c as any).status === 'AVAILABLE');

@@ -110,8 +110,9 @@ import type {
   ProhibitedTermCheckRequest,
   ProhibitedTermCheckResult,
   ProhibitedTermFilterParams,
+  StationAmenitiesResponse,
 } from '../types';
-import { STATION_SCOPED_CATEGORIES } from '../types';
+import { STATION_SCOPED_CATEGORIES, AMENITY_CATALOG } from '../types';
 import { buildMockDb } from './seed';
 import { initialMockProhibitedTerms, initialMockTermChanges } from './prohibited-terms.data';
 
@@ -1667,13 +1668,21 @@ export function createMockServices(scope: { ownerView: boolean; getLanguage?: ()
         if (!['pending', 'PENDING_APPROVAL'].includes(st.status) || st.version !== version) throw new Error('Registration changed. Reload and try again.');
         Object.assign(db.ownerStations.find((s) => s.id === id)!, { status: 'WITHDRAWN', version: version + 1 });
       },
+      async getAmenities(id) {
+        await delay();
+        const st = db.ownerStations.find((s) => s.id === id);
+        if (!st) throw new Error(`Không tìm thấy trạm ${id}`);
+        return { stationId: id, amenities: [...(st.amenities ?? [])] };
+      },
       async updateAmenities(id, amenities) {
         await delay();
         // Owner may only edit their own stations (BR-STA-02) — scoped to ownerStations.
         const st = db.ownerStations.find((s) => s.id === id);
         if (!st) throw new Error(`Không tìm thấy trạm ${id}`);
-        st.amenities = [...amenities];
-        return { ...st };
+        const unique = Array.from(new Set(amenities));
+        const ordered = AMENITY_CATALOG.filter((code) => unique.includes(code));
+        st.amenities = ordered;
+        return { stationId: id, amenities: [...ordered] };
       },
       async changeOperationalStatus(stationId, input) {
         await delay();

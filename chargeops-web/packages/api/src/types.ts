@@ -795,6 +795,11 @@ export const AMENITY_EMOJI: Record<Amenity, string> = {
   shop: '🛍️',
 };
 
+export interface StationAmenitiesResponse {
+  stationId: string;
+  amenities: Amenity[];
+}
+
 export interface RegisterStationRequest {
   name: string;
   addressLine: string;

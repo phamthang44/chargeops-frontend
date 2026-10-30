@@ -1168,6 +1168,12 @@
         "empty": "Chưa có dữ liệu lịch sử trạng thái được ghi nhận cho trạm này.",
         "performedBy": "Thực hiện bởi:",
         "system": "Hệ thống"
+      },
+      "amenities": {
+        "title": "Tiện ích tại trạm",
+        "subtitle": "Chủ trạm có thể tự chọn tiện ích để hiển thị cho tài xế trên ứng dụng di động.",
+        "loading": "Đang tải tiện ích…",
+        "error": "Không thể tải tiện ích của trạm."
       }
     },
     "gallery": {
@@ -1185,19 +1191,19 @@
       "viewLicenseAndRenew": "Xem chi tiết License & Gia hạn"
     },
     "amenities": {
-      "wifi": "Wifi miễn phí",
-      "food": "Đồ ăn",
+      "wifi": "Wi-Fi",
+      "food": "Ăn uống",
       "coffee": "Cà phê",
       "parking": "Bãi đỗ xe",
-      "security": "An ninh 24/7",
+      "security": "An ninh",
       "restroom": "Nhà vệ sinh",
-      "lounge": "Phòng chờ",
+      "lounge": "Khu nghỉ chờ",
       "atm": "ATM",
       "carwash": "Rửa xe",
-      "shop": "Cửa hàng tiện lợi"
+      "shop": "Cửa hàng"
     },
     "amenitiesModal": {
-      "title": "Tiện ích của trạm",
+      "title": "Tiện ích tại trạm",
       "subtitle": "Chọn các tiện ích có tại {{name}} để hiển thị cho tài xế.",
       "hint": "Tài xế sẽ thấy các tiện ích này trên trang chi tiết trạm trong ứng dụng.",
       "cancel": "Hủy",

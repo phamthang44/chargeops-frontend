@@ -89,20 +89,35 @@ export function StationDetailDrawer({
   const [editOpen, setEditOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
+  const stationId = station?.id;
+
+  // Hydrate amenities from Owner GET endpoint
+  const amenitiesQ = useQuery({
+    queryKey: ['stations', 'amenities', stationId],
+    queryFn: () => (stationId ? api.stations.getAmenities(stationId) : Promise.reject('No ID')),
+    enabled: Boolean(stationId) && open,
+  });
+
   // Local state for amenities editing in tab 3
   const [selectedAmenities, setSelectedAmenities] = useState<Amenity[]>([]);
   const [amenitiesDirty, setAmenitiesDirty] = useState(false);
 
-  // Sync amenities when station changes
+  // Sync amenities when query data arrives, without overwriting dirty draft
   useEffect(() => {
-    if (station?.amenities) {
-      setSelectedAmenities(station.amenities);
+    if (!amenitiesDirty && amenitiesQ.data?.amenities) {
+      setSelectedAmenities(amenitiesQ.data.amenities);
+    }
+  }, [amenitiesQ.data, amenitiesDirty]);
+
+  // Reset draft/dirty when stationId or open state changes
+  useEffect(() => {
+    setAmenitiesDirty(false);
+    if (amenitiesQ.data?.amenities) {
+      setSelectedAmenities(amenitiesQ.data.amenities);
     } else {
       setSelectedAmenities([]);
     }
-  }, [station]);
-
-  const stationId = station?.id;
+  }, [stationId, open]);
   const isPending = station?.status === 'PENDING_APPROVAL' || station?.status === 'pending';
   const registrationQ = useQuery({
     queryKey: ['stations', 'registration', stationId],
@@ -167,11 +182,16 @@ export function StationDetailDrawer({
 
   // Update amenities mutation
   const updateAmenitiesMutation = useMutation({
-    mutationFn: (amenities: Amenity[]) =>
-      stationId ? api.stations.updateAmenities(stationId, amenities) : Promise.reject('No ID'),
-    onSuccess: () => {
+    mutationFn: ({ targetStationId, amenities }: { targetStationId: string; amenities: Amenity[] }) =>
+      api.stations.updateAmenities(targetStationId, amenities),
+    onSuccess: (data, variables) => {
+      qc.setQueryData(['stations', 'amenities', variables.targetStationId], data);
+      qc.invalidateQueries({ queryKey: ['stations', 'amenities', variables.targetStationId] });
       qc.invalidateQueries({ queryKey: ['stations'] });
-      setAmenitiesDirty(false);
+      if (variables.targetStationId === stationId) {
+        setSelectedAmenities(data.amenities);
+        setAmenitiesDirty(false);
+      }
       toast(t('stations.amenitiesUpdateSuccess', { defaultValue: 'Cập nhật tiện ích thành công!' }), 'success');
     },
     onError: () => {
@@ -343,7 +363,7 @@ export function StationDetailDrawer({
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         {t('stations.drawer.operatingNormal', { defaultValue: 'Đang vận hành bình thường' })}
                       </span>
                     )}
@@ -693,7 +713,7 @@ export function StationDetailDrawer({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-[13.5px] font-bold text-ink">
-                    {t('stations.drawer.amenities.title', { defaultValue: 'Tiện ích xung quanh trạm' })}
+                    {t('stations.drawer.amenities.title', { defaultValue: 'Tiện ích tại trạm' })}
                   </div>
                   <div className="text-[11.5px] text-muted">
                     {t('stations.drawer.amenities.subtitle', { defaultValue: 'Chủ trạm có thể tự chọn tiện ích để hiển thị cho tài xế trên ứng dụng di động.' })}
@@ -703,35 +723,59 @@ export function StationDetailDrawer({
                   <Button
                     accent="owner"
                     size="sm"
-                    disabled={updateAmenitiesMutation.isPending}
-                    onClick={() => updateAmenitiesMutation.mutate(selectedAmenities)}
+                    disabled={updateAmenitiesMutation.isPending || amenitiesQ.isLoading || amenitiesQ.isError}
+                    onClick={() => stationId && updateAmenitiesMutation.mutate({ targetStationId: stationId, amenities: selectedAmenities })}
                   >
                     {updateAmenitiesMutation.isPending ? t('common:saving', { defaultValue: 'Đang lưu…' }) : t('common:save', { defaultValue: 'Lưu thay đổi' })}
                   </Button>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2">
-                {AMENITY_CATALOG.map((amenity) => {
-                  const isChecked = selectedAmenities.includes(amenity);
-                  return (
-                    <button
-                      key={amenity}
-                      type="button"
-                      onClick={() => toggleAmenity(amenity)}
-                      className={`flex items-center gap-2 rounded-[8px] border p-2.5 text-left text-[12.5px] transition-colors cursor-pointer ${
-                        isChecked
-                          ? 'border-owner bg-owner-soft/50 font-semibold text-owner-deep'
-                          : 'border-line bg-surface hover:bg-surface-2 text-body'
-                      }`}
-                    >
-                      <span className="text-[15px]">{AMENITY_EMOJI[amenity]}</span>
-                      <span className="flex-1 truncate">{t(`stations.amenities.${amenity}`, { defaultValue: amenity })}</span>
-                      {isChecked && <IconCheck size={14} className="text-owner shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
+              {amenitiesQ.isLoading ? (
+                <div className="py-6 flex items-center justify-center text-[12.5px] text-muted">
+                  {t('stations.drawer.amenities.loading', { defaultValue: 'Đang tải tiện ích…' })}
+                </div>
+              ) : amenitiesQ.isError ? (
+                <div className="py-4 flex flex-col items-center gap-2 text-center">
+                  <div className="text-[12.5px] text-danger">
+                    {t('stations.drawer.amenities.error', { defaultValue: 'Không thể tải tiện ích của trạm.' })}
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => amenitiesQ.refetch()}
+                  >
+                    {t('common:retry', { defaultValue: 'Thử lại' })}
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2">
+                  {AMENITY_CATALOG.map((amenity) => {
+                    const isChecked = selectedAmenities.includes(amenity);
+                    const isMutating = updateAmenitiesMutation.isPending;
+                    return (
+                      <button
+                        key={amenity}
+                        type="button"
+                        aria-pressed={isChecked}
+                        disabled={isMutating}
+                        onClick={() => toggleAmenity(amenity)}
+                        className={`flex items-center gap-2 rounded-[8px] border p-2.5 text-left text-[12.5px] transition-colors ${
+                          isMutating ? 'opacity-50 cursor-not-allowed ' : 'cursor-pointer '
+                        }${
+                          isChecked
+                            ? 'border-owner bg-owner-soft/50 font-semibold text-owner-deep'
+                            : 'border-line bg-surface hover:bg-surface-2 text-body'
+                        }`}
+                      >
+                        <span className="text-[15px]">{AMENITY_EMOJI[amenity]}</span>
+                        <span className="flex-1 truncate">{t(`stations.amenities.${amenity}`, { defaultValue: amenity })}</span>
+                        {isChecked && <IconCheck size={14} className="text-owner shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </Card>
           </div>
         )}

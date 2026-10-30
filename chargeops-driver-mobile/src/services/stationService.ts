@@ -334,8 +334,9 @@ export async function getStationDetail(
           return { station, chargePoints, connectors };
         }
       }
+      return null;
     } catch {
-      // Fallback to mock
+      return null;
     }
   }
 

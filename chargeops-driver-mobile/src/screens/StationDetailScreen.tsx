@@ -103,16 +103,22 @@ export function StationDetailScreen() {
           const firstAvail = detail.connectors.find((c) => c.runtimeStatus === 'AVAILABLE');
           return firstAvail ? firstAvail.id : null;
         });
-      } else if (!hasLoadedRef.current) {
+      } else {
+        hasLoadedRef.current = false;
         setStation(null);
+        setChargePoints([]);
+        setConnectors([]);
+        setSelectedConnectorId(null);
+        setReviews([]);
       }
     } catch {
       if (seq !== requestSeqRef.current) return;
-      // Initial failure shows the error screen; later failures keep the data
-      // already on screen (socket/poll refetches must not blank the view).
-      if (!hasLoadedRef.current) {
-        setStation(null);
-      }
+      hasLoadedRef.current = false;
+      setStation(null);
+      setChargePoints([]);
+      setConnectors([]);
+      setSelectedConnectorId(null);
+      setReviews([]);
     }
   }, [params.stationId, getAccessToken]);
 

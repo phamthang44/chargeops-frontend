@@ -11,6 +11,7 @@ import type {
   StationOperatingState,
   StationOperationalStatus,
 } from '@/types';
+import { normalizeStationAmenities } from '../utils/stationAmenities.ts';
 
 /**
  * Backend DTO types returned by Spring Boot API
@@ -108,6 +109,7 @@ export interface BackendStationDiscoveryDetail {
   availableConnectorCount?: number;
   maxPowerKw?: number;
   connectorTypes?: (ConnectorType | string)[];
+  amenities?: string[];
 }
 
 export interface BackendCancellationPolicyResponse {
@@ -453,6 +455,7 @@ export function adaptStationDiscoveryDetail(dto: BackendStationDiscoveryDetail):
     connectorTypes: dto.connectorTypes ? (Array.from(dto.connectorTypes) as ConnectorType[]) : undefined,
     cancellationPolicy: adaptCancellationPolicy(dto.cancellationPolicy),
     minRatePerKwh: price,
+    amenities: normalizeStationAmenities(dto.amenities),
   };
 }
 

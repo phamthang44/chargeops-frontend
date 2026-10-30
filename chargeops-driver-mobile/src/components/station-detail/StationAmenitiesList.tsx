@@ -6,19 +6,28 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { usePreferences } from '@/context/PreferencesContext';
 import { fontSizes, fontWeights, radius, spacing } from '@/theme';
 import type { AmenityCode } from '@/types';
+import { normalizeStationAmenities } from '@/utils/stationAmenities';
 
 const AMENITY_ICON: Partial<Record<AmenityCode, React.ComponentProps<typeof Ionicons>['name']>> = {
-  RESTROOM: 'water-outline',
-  restroom: 'water-outline',
-  CAFE: 'cafe-outline',
-  food: 'cafe-outline',
-  WIFI: 'wifi-outline',
+  // Canonical 10
   wifi: 'wifi-outline',
-  PARKING: 'car-outline',
+  food: 'restaurant-outline',
+  coffee: 'cafe-outline',
   parking: 'car-outline',
+  security: 'shield-checkmark-outline',
+  restroom: 'water-outline',
+  lounge: 'bed-outline',
+  atm: 'cash-outline',
+  carwash: 'sparkles-outline',
+  shop: 'basket-outline',
+  // Legacy aliases
+  WIFI: 'wifi-outline',
+  CAFE: 'cafe-outline',
+  RESTROOM: 'water-outline',
+  PARKING: 'car-outline',
   CONVENIENCE_STORE: 'basket-outline',
   SHOPPING: 'cart-outline',
-  security: 'shield-checkmark-outline',
+  shopping: 'cart-outline',
 };
 
 interface StationAmenitiesListProps {
@@ -29,7 +38,8 @@ export function StationAmenitiesList({ amenities }: StationAmenitiesListProps) {
   const { t } = useTranslation();
   const { themeColors } = usePreferences();
 
-  if (!amenities || amenities.length === 0) return null;
+  const normalized = normalizeStationAmenities(amenities);
+  if (normalized.length === 0) return null;
 
   return (
     <ScrollView
@@ -38,7 +48,7 @@ export function StationAmenitiesList({ amenities }: StationAmenitiesListProps) {
       contentContainerStyle={styles.amenityRow}
       style={styles.amenityScroll}
     >
-      {amenities.map((a) => (
+      {normalized.map((a) => (
         <View
           key={a}
           style={[

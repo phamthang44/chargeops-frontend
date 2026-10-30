@@ -7,17 +7,24 @@ export type ConnectorType = 'CCS2' | 'CHADEMO' | 'TYPE2' | 'GBT';
 
 /** Station amenities (mapped to an icon + i18n label in the UI). */
 export type Amenity =
+  | 'wifi'
+  | 'food'
+  | 'coffee'
+  | 'parking'
+  | 'security'
+  | 'restroom'
+  | 'lounge'
+  | 'atm'
+  | 'carwash'
+  | 'shop'
+  // Legacy aliases
   | 'RESTROOM'
   | 'CAFE'
   | 'WIFI'
   | 'PARKING'
   | 'CONVENIENCE_STORE'
   | 'SHOPPING'
-  | 'wifi'
-  | 'food'
-  | 'parking'
-  | 'security'
-  | 'restroom';
+  | 'shopping';
 
 /** Type alias for Amenity compatibility across components */
 export type AmenityCode = Amenity;

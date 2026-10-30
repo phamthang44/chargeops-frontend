@@ -41,6 +41,7 @@ import type {
   PricingConfig,
   ProvisioningStatus,
   Station,
+  StationAmenitiesResponse,
   StationRegistrationDetail,
   StationOperationalStatusResponse,
   StationStaffMember,
@@ -900,7 +901,8 @@ export function createRestServices(http: HttpClient): Services {
       registration: (id) => http.get<StationRegistrationDetail>(`/owner/stations/${id}/registration`),
       updateRegistration: (id, version, input) => http.put<StationRegistrationDetail>(`/owner/stations/${id}/registration?version=${version}`, input),
       withdrawRegistration: (id, version) => http.delete(`/owner/stations/${id}/registration?version=${version}`),
-      updateAmenities: (id, amenities) => http.put(`/stations/${id}/amenities`, { amenities }),
+      getAmenities: (id) => http.get<StationAmenitiesResponse>(`/owner/stations/${id}/amenities`),
+      updateAmenities: (id, amenities) => http.put<StationAmenitiesResponse>(`/owner/stations/${id}/amenities`, { amenities }),
       changeOperationalStatus: (stationId, input) =>
         http.patch<StationOperationalStatusResponse>(`/owner/stations/${stationId}/operational-status`, input),
       approvals: (params = {}) => http.get('/admin/station-approvals', params),

@@ -108,6 +108,7 @@ import type {
   StaffInvitationRequest,
   StaffInvitationListParams,
   Amenity,
+  StationAmenitiesResponse,
   ChangeStationOperationalStatusRequest,
   Station,
   StationApprovalDetail,
@@ -288,8 +289,10 @@ export interface StationService {
   registration(id: string): Promise<StationRegistrationDetail>;
   updateRegistration(id: string, version: number, input: RegisterStationRequest): Promise<StationRegistrationDetail>;
   withdrawRegistration(id: string, version: number): Promise<void>;
+  /** Owner: get amenities advertised on one of their own stations. */
+  getAmenities(id: string): Promise<StationAmenitiesResponse>;
   /** Owner: set the amenities advertised on one of their own stations (BR-STA-02). */
-  updateAmenities(id: string, amenities: Amenity[]): Promise<Station>;
+  updateAmenities(id: string, amenities: Amenity[]): Promise<StationAmenitiesResponse>;
   /** Owner: change operational status (OPERATING, PAUSED, MAINTENANCE). */
   changeOperationalStatus(
     stationId: string,

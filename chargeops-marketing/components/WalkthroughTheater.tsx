@@ -18,8 +18,8 @@ interface WalkthroughTheaterProps {
 const CHAPTER_METAS = [
   {
     id: "driver",
-    time: "00:03",
-    seconds: 3,
+    time: "00:08",
+    seconds: 8,
     previewImages: {
       vi: mediaAsset("screens/app-map-new.png") || "/screens/app-map-new.png",
       en: mediaAsset("screens/app-map-new.png") || "/screens/app-map-new.png",
@@ -27,8 +27,8 @@ const CHAPTER_METAS = [
   },
   {
     id: "owner-registration",
-    time: "00:20",
-    seconds: 20.5,
+    time: "00:26",
+    seconds: 26,
     previewImages: {
       vi: mediaAsset("screens/owner-registration-vi.png") || "/screens/owner-registration-vi.png",
       en: mediaAsset("screens/owner-registration-en.png") || "/screens/owner-registration-en.png",
@@ -36,8 +36,8 @@ const CHAPTER_METAS = [
   },
   {
     id: "admin-approval",
-    time: "00:33",
-    seconds: 33,
+    time: "00:38",
+    seconds: 38,
     previewImages: {
       vi: mediaAsset("screens/admin-approvals-vi.png") || "/screens/admin-approvals-vi.png",
       en: mediaAsset("screens/admin-approvals-en.png") || "/screens/admin-approvals-en.png",
@@ -45,8 +45,8 @@ const CHAPTER_METAS = [
   },
   {
     id: "owner-operations",
-    time: "00:46",
-    seconds: 46.5,
+    time: "00:50",
+    seconds: 50,
     previewImages: {
       vi: mediaAsset("screens/owner-pricing-dark.png") || "/screens/owner-pricing-dark.png",
       en: mediaAsset("screens/owner-pricing-dark.png") || "/screens/owner-pricing-dark.png",
@@ -61,10 +61,10 @@ const CHAPTER_METAS = [
  * 1. Double-Bezel (Doppelrand) Architecture: Outer glowing shell + concentric inner dark sapphire core
  * 2. Floating Liquid-Glass Island Control Dock: Concentric master play/pause, haptic -10s/+10s skip buttons, time capsule, soundwave equalizer, and volume dock
  * 3. 4-Chapter Bento Cards with Real 16:9 Thumbnail Previews:
- *    - Chapter 0 (00:03): Driver App Booking
- *    - Chapter 1 (00:20): Owner Station Registration
- *    - Chapter 2 (00:33): Admin License Verification & Approval
- *    - Chapter 3 (00:46): Owner Station Operations & Tariffs
+ *    - Chapter 0 (00:08): Driver App Booking
+ *    - Chapter 1 (00:26): Owner Station Registration
+ *    - Chapter 2 (00:38): Admin License Verification & Approval
+ *    - Chapter 3 (00:50): Owner Station Operations & Tariffs
  * 4. Specular Ambient Backlight Halo behind the cinema viewport
  * 5. Dynamic Chapter Navigation & live progress illumination
  */

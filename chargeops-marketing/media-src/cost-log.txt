@@ -1,0 +1,14 @@
+Higgsfield credits for the home redesign (cap: 40). 2026-11-16.
+
+gpt_image_2_6 @2k, 0.5 each
+  12 images: hero, slide1-3, booking, about1-2, hanoi, danang,
+  charger (transparent), apphand (transparent), illos (3x3 sheet)   6.0
+  (8 went through first; 4 hit rate_limit_reached and were rerun)
+  booking2 edit (wordmark fix attempt, not used)                    0.5
+kling3_0_turbo 5s 720p 1:1, 7.5 each
+  clip1-3 from png/slide1-3                                        22.5
+                                                                  -----
+Total                                                             29.0
+
+The wordmark typo on booking.png was fixed locally (cv2 inpaint), not with credits.
+The account is shared with other sessions, so its balance alone does not show this spend.

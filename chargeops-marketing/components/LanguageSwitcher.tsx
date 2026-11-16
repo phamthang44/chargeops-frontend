@@ -84,18 +84,97 @@ interface LanguageSwitcherProps {
   className?: string;
   variant?: "floating" | "footer" | "drawer" | "popover";
   direction?: "up" | "down";
+  /** "dark" for the dark sub-pages (default); "light" for the light home page. */
+  tone?: "dark" | "light";
 }
+
+/* Class sets per tone. Only colour, border, shadow and type change; layout is shared. */
+const TONES = {
+  dark: {
+    font: "",
+    trigger:
+      "border-white/15 bg-[#0E1512]/90 text-white/85 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.85)] hover:border-white/30 hover:bg-[#121A16] hover:text-white",
+    triggerOpen: "border-emerald-500/50 bg-[#0E1512] text-white shadow-glow-emerald ring-1 ring-emerald-500/40",
+    triggerSize: "gap-2 px-3 py-1.5 text-xs",
+    globe: "text-emerald-400",
+    chevron: "text-white/40 group-hover:text-white/70",
+    chevronOpen: "text-emerald-400",
+    frame:
+      "rounded-2xl bg-[#0A0F0D]/95 border border-white/15 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]",
+    drawer: "border-white/10 bg-[#0E1512]/90",
+    pill: "bg-white/5 border-white/10 text-emerald-400",
+    divider: "border-white/10",
+    headIcon: "rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 shadow-glow-emerald",
+    title: "font-extrabold text-white",
+    subtitle: "text-white/50",
+    close: "bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white",
+    label: "text-white/40",
+    option: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] text-white/70 hover:text-white",
+    optionActive: "border-emerald-500/60 bg-[#121A16] shadow-glow-emerald ring-1 ring-emerald-500/30",
+    flagWrap: "bg-black/40 border border-white/10",
+    name: "text-white",
+    badgeVi: "bg-emerald-500/15 border-emerald-500/30 text-emerald-400",
+    badgeEn: "bg-cyan-500/15 border-cyan-500/30 text-cyan-400",
+    region: "text-white/50",
+    check: "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 shadow-glow-emerald",
+    radio: "border-white/20 group-hover:border-white/40",
+    panel: "bg-white/[0.03] border border-white/5",
+    panelTitle: "text-white/60",
+    panelKey: "text-white/40",
+    panelVal: "text-white/90",
+    panelAccent: "text-emerald-400",
+    foot: "text-white/45",
+    dot: "bg-emerald-400",
+  },
+  light: {
+    font: "font-display",
+    trigger:
+      "border-hm-ink/10 bg-white/90 text-hm-ink shadow-[0_14px_34px_-14px_rgba(11,43,36,0.45)] backdrop-blur-xl hover:border-hm-brand/30 hover:bg-hm-mint",
+    triggerOpen: "border-hm-brand/50 bg-white text-hm-ink ring-1 ring-hm-brand/30 shadow-[0_14px_34px_-14px_rgba(11,43,36,0.45)]",
+    triggerSize: "h-11 gap-2 px-4 text-[13px]",
+    globe: "text-hm-deep",
+    chevron: "text-hm-body/50 group-hover:text-hm-ink",
+    chevronOpen: "text-hm-deep",
+    frame: "rounded-[20px] rounded-tr-[40px] bg-white border border-hm-ink/10 shadow-[0_30px_70px_-24px_rgba(11,43,36,0.45)]",
+    drawer: "border-hm-ink/10 bg-white",
+    pill: "border-hm-brand/30 bg-hm-mint text-hm-deep",
+    divider: "border-hm-ink/10",
+    headIcon: "rounded-full bg-hm-mint text-hm-deep",
+    title: "font-bold text-hm-ink",
+    subtitle: "text-hm-body",
+    close: "bg-hm-paper hover:bg-hm-mint border border-hm-ink/10 text-hm-body hover:text-hm-ink",
+    label: "text-hm-body/70",
+    option: "border-hm-ink/10 bg-white hover:border-hm-ink/20 hover:bg-hm-paper text-hm-body hover:text-hm-ink",
+    optionActive: "border-hm-brand bg-hm-mint/60 ring-1 ring-hm-brand/25",
+    flagWrap: "bg-white border border-hm-ink/10",
+    name: "text-hm-ink",
+    badgeVi: "bg-hm-mint border-hm-brand/30 text-hm-deep",
+    badgeEn: "bg-hm-mist border-hm-ink/10 text-hm-ink2",
+    region: "text-hm-body",
+    check: "bg-hm-brand text-white",
+    radio: "border-hm-ink/25 group-hover:border-hm-ink/45",
+    panel: "bg-hm-paper border border-hm-ink/5",
+    panelTitle: "text-hm-body",
+    panelKey: "text-hm-body/70",
+    panelVal: "text-hm-ink",
+    panelAccent: "text-hm-deep",
+    foot: "text-hm-body/80",
+    dot: "bg-hm-brand",
+  },
+} as const;
 
 export function LanguageSwitcher({
   className = "",
   variant = "floating",
   direction,
+  tone = "dark",
 }: LanguageSwitcherProps) {
   const { locale, setLocale } = useLocale();
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
+  const T = TONES[tone];
 
   // Floating & footer variants open upwards to avoid screen clipping
   const opensUpward = direction ? direction === "up" : variant === "floating" || variant === "footer";
@@ -132,92 +211,89 @@ export function LanguageSwitcher({
 
   const isVi = locale === "vi";
 
+  const options: {
+    code: Locale;
+    flag: (cls: string) => React.ReactNode;
+    name: string;
+    badge: string;
+    badgeClass: string;
+    region: string;
+  }[] = [
+    {
+      code: "vi",
+      flag: (cls) => <VietnamFlag className={cls} />,
+      name: t.languageSetup.viName,
+      badge: t.languageSetup.viBadge,
+      badgeClass: T.badgeVi,
+      region: t.languageSetup.viRegion,
+    },
+    {
+      code: "en",
+      flag: (cls) => <GlobalFlag className={cls} />,
+      name: t.languageSetup.enName,
+      badge: t.languageSetup.enBadge,
+      badgeClass: T.badgeEn,
+      region: t.languageSetup.enRegion,
+    },
+  ];
+
   /* =========================================================================
      1. DRAWER VARIANT (Inlined for Mobile Navigation Drawer)
      ========================================================================= */
   if (variant === "drawer") {
     return (
-      <div className={`w-full rounded-2xl border border-white/10 bg-[#0E1512]/90 p-3.5 ${className}`}>
+      <div className={`w-full rounded-2xl border p-3.5 ${T.drawer} ${T.font} ${className}`}>
         {/* Drawer Header */}
-        <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+        <div className={`mb-3 flex items-center justify-between gap-2 border-b pb-2.5 ${T.divider}`}>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className={`flex h-7 w-7 shrink-0 items-center justify-center ${T.headIcon}`}>
               <GlobeIcon className="h-4 w-4" />
             </div>
-            <div>
-              <span className="text-xs font-bold text-white block">
-                {t.languageSetup.menuTitle}
-              </span>
-              <span className="text-[10px] text-white/50 block">
-                {t.languageSetup.languagesLabel}
-              </span>
+            <div className="min-w-0">
+              <span className={`block truncate text-xs ${T.title}`}>{t.languageSetup.menuTitle}</span>
+              <span className={`block truncate text-[10px] ${T.subtitle}`}>{t.languageSetup.languagesLabel}</span>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            {isVi ? "VI · 🇻🇳" : "EN · 🇺🇸"}
+          <span
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${T.pill}`}
+          >
+            <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${T.dot}`} />
+            {isVi ? "VI" : "EN"}
+            {isVi ? <VietnamFlag className="h-2.5 w-4" /> : <GlobalFlag className="h-2.5 w-4" />}
           </span>
         </div>
 
         {/* 2 Language Option Cards */}
         <div className="grid grid-cols-2 gap-2">
-          {/* Vietnamese Button */}
-          <button
-            type="button"
-            onClick={() => handleSelect("vi")}
-            className={`cursor-pointer text-left p-2.5 rounded-xl border transition-all duration-200 relative ${
-              isVi
-                ? "border-emerald-500/50 bg-[#121A16] ring-1 ring-emerald-500/30 shadow-glow-emerald"
-                : "border-white/10 bg-white/[0.03] hover:border-white/20 text-white/70"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <VietnamFlag className="h-4 w-6" />
-              {isVi && (
-                <span className="h-4 w-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                  <CheckIcon className="h-2.5 w-2.5" />
-                </span>
-              )}
-            </div>
-            <span className="text-xs font-bold text-white block">
-              {t.languageSetup.viName}
-            </span>
-            <span className="text-[10px] text-white/50 line-clamp-1 block">
-              {t.languageSetup.viBadge}
-            </span>
-          </button>
-
-          {/* English Button */}
-          <button
-            type="button"
-            onClick={() => handleSelect("en")}
-            className={`cursor-pointer text-left p-2.5 rounded-xl border transition-all duration-200 relative ${
-              !isVi
-                ? "border-emerald-500/50 bg-[#121A16] ring-1 ring-emerald-500/30 shadow-glow-emerald"
-                : "border-white/10 bg-white/[0.03] hover:border-white/20 text-white/70"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <GlobalFlag className="h-4 w-6" />
-              {!isVi && (
-                <span className="h-4 w-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                  <CheckIcon className="h-2.5 w-2.5" />
-                </span>
-              )}
-            </div>
-            <span className="text-xs font-bold text-white block">
-              {t.languageSetup.enName}
-            </span>
-            <span className="text-[10px] text-white/50 line-clamp-1 block">
-              {t.languageSetup.enBadge}
-            </span>
-          </button>
+          {options.map((o) => {
+            const active = locale === o.code;
+            return (
+              <button
+                key={o.code}
+                type="button"
+                onClick={() => handleSelect(o.code)}
+                aria-pressed={active}
+                className={`relative min-w-0 cursor-pointer rounded-xl border p-2.5 text-left transition-all duration-200 ${
+                  active ? T.optionActive : T.option
+                }`}
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  {o.flag("h-4 w-6")}
+                  {active && (
+                    <span className={`flex h-4 w-4 items-center justify-center rounded-full ${T.check}`}>
+                      <CheckIcon className="h-2.5 w-2.5" />
+                    </span>
+                  )}
+                </div>
+                <span className={`block truncate text-xs font-bold ${T.name}`}>{o.name}</span>
+                <span className={`line-clamp-1 block text-[10px] ${T.region}`}>{o.badge}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Sync notice */}
-        <p className="mt-2 text-[10px] text-white/40 text-center">
-          {t.languageSetup.syncNotice}
-        </p>
+        <p className={`mt-2 text-center text-[10px] ${T.foot}`}>{t.languageSetup.syncNotice}</p>
       </div>
     );
   }
@@ -229,8 +305,8 @@ export function LanguageSwitcher({
   // Container styling based on variant
   const containerClasses =
     variant === "floating"
-      ? `fixed bottom-6 left-6 z-40 hidden sm:block ${className}`
-      : `relative inline-block ${className}`;
+      ? `fixed bottom-6 left-6 z-40 hidden sm:block ${T.font} ${className}`
+      : `relative inline-block ${T.font} ${className}`;
 
   // Popover positioning (upward vs downward)
   const popoverPositionClasses = opensUpward
@@ -280,26 +356,20 @@ export function LanguageSwitcher({
           aria-haspopup="dialog"
           aria-controls={menuId}
           aria-label={t.languageSetup.triggerButtonLabel}
-          className={`group flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md shadow-[0_8px_24px_-8px_rgba(0,0,0,0.85)] transition-all duration-300 cursor-pointer ${
-            isOpen
-              ? "border-emerald-500/50 bg-[#0E1512] text-white shadow-glow-emerald ring-1 ring-emerald-500/40"
-              : "border-white/15 bg-[#0E1512]/90 text-white/85 hover:border-white/30 hover:bg-[#121A16] hover:text-white"
+          className={`group flex cursor-pointer items-center whitespace-nowrap rounded-full border font-semibold backdrop-blur-md transition-all duration-300 ${T.triggerSize} ${
+            isOpen ? T.triggerOpen : T.trigger
           }`}
         >
-          <span className="text-emerald-400 group-hover:scale-110 transition-transform">
+          <span className={`transition-transform group-hover:scale-110 ${T.globe}`}>
             <GlobeIcon className="h-3.5 w-3.5" />
           </span>
 
           {isVi ? <VietnamFlag className="h-3.5 w-5" /> : <GlobalFlag className="h-3.5 w-5" />}
 
-          <span className="font-bold tracking-wide text-xs">
-            {isVi ? "VI" : "EN"}
-          </span>
+          <span className="font-bold tracking-wide">{isVi ? "VI" : "EN"}</span>
 
           <span
-            className={`text-white/40 group-hover:text-white/70 transition-transform duration-300 ${
-              isOpen ? "rotate-180 text-emerald-400" : "rotate-0"
-            }`}
+            className={`transition-transform duration-300 ${isOpen ? `rotate-180 ${T.chevronOpen}` : `rotate-0 ${T.chevron}`}`}
           >
             <ChevronDownIcon className="h-3 w-3" />
           </span>
@@ -321,149 +391,103 @@ export function LanguageSwitcher({
             className={`absolute w-80 sm:w-88 max-w-[calc(100vw_-_2rem)] z-50 ${popoverPositionClasses}`}
           >
             {/* Popover Frame */}
-            <div className="w-full rounded-2xl bg-[#0A0F0D]/95 border border-white/15 backdrop-blur-2xl p-4 space-y-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.12)]">
-                {/* Popover Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shadow-glow-emerald">
-                      <GlobeIcon className="h-4.5 w-4.5" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-extrabold text-white tracking-tight">
-                        {t.languageSetup.menuTitle}
-                      </h4>
-                      <p className="text-[11px] text-white/50 line-clamp-1">
-                        {t.languageSetup.menuSubtitle}
-                      </p>
-                    </div>
+            <div className={`w-full space-y-4 p-4 ${T.frame}`}>
+              {/* Popover Header */}
+              <div className={`flex items-center justify-between gap-3 border-b pb-3 ${T.divider}`}>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center ${T.headIcon}`}>
+                    <GlobeIcon className="h-4.5 w-4.5" />
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    aria-label={t.languageSetup.closeMenu}
-                    className="h-6 w-6 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors cursor-pointer text-xs"
-                  >
-                    ✕
-                  </button>
+                  <div className="min-w-0">
+                    <h4 className={`truncate text-sm tracking-tight ${T.title}`}>{t.languageSetup.menuTitle}</h4>
+                    <p className={`line-clamp-1 text-[11px] ${T.subtitle}`}>{t.languageSetup.menuSubtitle}</p>
+                  </div>
                 </div>
 
-                {/* Language Selection Radio Cards */}
-                <div>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-2 px-1">
-                    {t.languageSetup.languagesLabel}
-                  </span>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  aria-label={t.languageSetup.closeMenu}
+                  className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-xs transition-colors ${T.close}`}
+                >
+                  ✕
+                </button>
+              </div>
 
-                  <div className="space-y-2">
-                    {/* Option 1: Vietnamese */}
-                    <button
-                      type="button"
-                      onClick={() => handleSelect("vi")}
-                      className={`w-full group cursor-pointer text-left p-3 rounded-xl border transition-all duration-200 relative flex items-center justify-between ${
-                        isVi
-                          ? "border-emerald-500/60 bg-[#121A16] shadow-glow-emerald ring-1 ring-emerald-500/30"
-                          : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] text-white/70 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-1 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center">
-                          <VietnamFlag className="h-5 w-7.5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-bold text-white">
-                              {t.languageSetup.viName}
-                            </span>
-                            <span className="px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-bold text-emerald-400">
-                              {t.languageSetup.viBadge}
-                            </span>
+              {/* Language Selection Radio Cards */}
+              <div>
+                <span className={`mb-2 block px-1 text-[10px] font-bold uppercase tracking-wider ${T.label}`}>
+                  {t.languageSetup.languagesLabel}
+                </span>
+
+                <div className="space-y-2">
+                  {options.map((o) => {
+                    const active = locale === o.code;
+                    return (
+                      <button
+                        key={o.code}
+                        type="button"
+                        onClick={() => handleSelect(o.code)}
+                        aria-pressed={active}
+                        className={`group relative flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all duration-200 ${
+                          active ? T.optionActive : T.option
+                        }`}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className={`flex shrink-0 items-center justify-center rounded-lg p-1 ${T.flagWrap}`}>
+                            {o.flag("h-5 w-7.5")}
                           </div>
-                          <span className="text-xs text-white/50 block">
-                            {t.languageSetup.viRegion}
-                          </span>
-                        </div>
-                      </div>
-
-                      {isVi ? (
-                        <div className="h-6 w-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-glow-emerald">
-                          <CheckIcon className="h-3.5 w-3.5" />
-                        </div>
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border border-white/20 group-hover:border-white/40 transition-colors" />
-                      )}
-                    </button>
-
-                    {/* Option 2: English */}
-                    <button
-                      type="button"
-                      onClick={() => handleSelect("en")}
-                      className={`w-full group cursor-pointer text-left p-3 rounded-xl border transition-all duration-200 relative flex items-center justify-between ${
-                        !isVi
-                          ? "border-emerald-500/60 bg-[#121A16] shadow-glow-emerald ring-1 ring-emerald-500/30"
-                          : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] text-white/70 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-1 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center">
-                          <GlobalFlag className="h-5 w-7.5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-bold text-white">
-                              {t.languageSetup.enName}
-                            </span>
-                            <span className="px-1.5 py-0.2 rounded bg-cyan-500/15 border border-cyan-500/30 text-[9px] font-bold text-cyan-400">
-                              {t.languageSetup.enBadge}
-                            </span>
+                          <div className="min-w-0">
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              <span className={`truncate text-sm font-bold ${T.name}`}>{o.name}</span>
+                              <span
+                                className={`shrink-0 whitespace-nowrap rounded border px-1.5 py-px text-[9px] font-bold ${o.badgeClass}`}
+                              >
+                                {o.badge}
+                              </span>
+                            </div>
+                            <span className={`block truncate text-xs ${T.region}`}>{o.region}</span>
                           </div>
-                          <span className="text-xs text-white/50 block">
-                            {t.languageSetup.enRegion}
-                          </span>
                         </div>
-                      </div>
 
-                      {!isVi ? (
-                        <div className="h-6 w-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-glow-emerald">
-                          <CheckIcon className="h-3.5 w-3.5" />
-                        </div>
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border border-white/20 group-hover:border-white/40 transition-colors" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Regional Context Panel */}
-                <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 space-y-2 text-[11px]">
-                  <span className="font-bold text-white/60 tracking-wider uppercase text-[10px] block">
-                    {t.languageSetup.regionalContextTitle}
-                  </span>
-                  <div className="flex items-center justify-between text-white/70">
-                    <span className="text-white/40">{t.languageSetup.networkRegion}</span>
-                    <span className="font-semibold text-white/90">
-                      {isVi ? "Toàn quốc (VN)" : "Nationwide (VN)"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-white/70">
-                    <span className="text-white/40">{t.languageSetup.currency}</span>
-                    <span className="font-semibold text-emerald-400 font-mono">
-                      VND (₫) · PayOS / QR
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-white/70">
-                    <span className="text-white/40">{t.languageSetup.timezone}</span>
-                    <span className="font-semibold text-white/90 font-mono">
-                      ICT (UTC+07:00)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Popover Footer Notice */}
-                <div className="flex items-center gap-2 pt-1 text-[10.5px] text-white/45">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                  <span>{t.languageSetup.syncNotice}</span>
+                        {active ? (
+                          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${T.check}`}>
+                            <CheckIcon className="h-3.5 w-3.5" />
+                          </div>
+                        ) : (
+                          <div className={`h-4 w-4 shrink-0 rounded-full border transition-colors ${T.radio}`} />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Regional Context Panel */}
+              <div className={`space-y-2 rounded-xl p-3 text-[11px] ${T.panel}`}>
+                <span className={`block text-[10px] font-bold uppercase tracking-wider ${T.panelTitle}`}>
+                  {t.languageSetup.regionalContextTitle}
+                </span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={T.panelKey}>{t.languageSetup.networkRegion}</span>
+                  <span className={`text-right font-semibold ${T.panelVal}`}>{isVi ? "Toàn quốc (VN)" : "Nationwide (VN)"}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={T.panelKey}>{t.languageSetup.currency}</span>
+                  <span className={`text-right font-mono font-semibold ${T.panelAccent}`}>VND (₫) · PayOS / QR</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={T.panelKey}>{t.languageSetup.timezone}</span>
+                  <span className={`text-right font-mono font-semibold ${T.panelVal}`}>ICT (UTC+07:00)</span>
+                </div>
+              </div>
+
+              {/* Popover Footer Notice */}
+              <div className={`flex items-center gap-2 pt-1 text-[10.5px] ${T.foot}`}>
+                <span className={`h-1.5 w-1.5 shrink-0 animate-pulse rounded-full ${T.dot}`} />
+                <span>{t.languageSetup.syncNotice}</span>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

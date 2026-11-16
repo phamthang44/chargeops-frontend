@@ -12,6 +12,8 @@
     "record:walkthrough": "node scripts/record-walkthrough-80s.mjs"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
+    "lenis": "^1.3.27",
     "motion": "^14.7.1",
     "next": "^16.2.9",
     "react": "19.0.0",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

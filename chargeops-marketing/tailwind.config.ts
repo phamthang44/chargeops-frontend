@@ -43,6 +43,17 @@ const config: Config = {
         warning: "#F59E0B",
         danger: "#EF4444",
         info: "#3B82F6",
+        /* Home page (light, editorial) palette */
+        hm: {
+          ink: "#0B2B24",
+          ink2: "#143D33",
+          brand: "#10B981",
+          deep: "#0B8A62",
+          mint: "#DDF6EB",
+          mist: "#E9F0EC",
+          paper: "#F6FAF8",
+          body: "#3E5B53",
+        },
       },
       borderRadius: {
         card: "16px",
@@ -54,6 +65,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
         mono: [
           "SFMono-Regular",
           "Menlo",

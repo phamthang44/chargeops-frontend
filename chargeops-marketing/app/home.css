@@ -1,0 +1,290 @@
+/* Home page styles (light editorial theme). Scoped under .home-root where possible. */
+
+body:has(.home-root) {
+  background: #ffffff;
+  color: #0b2b24;
+}
+
+/* The home page renders its own light-toned floating switcher (.home-lang),
+   so the dark global one from the root layout is hidden here. */
+body:has(.home-root) .lang-floating {
+  display: none !important;
+}
+/* Below lg the sticky app bar owns the bottom edge: sit the switcher above it. */
+@media (max-width: 1023px) {
+  .home-lang {
+    bottom: 150px;
+    left: 16px;
+  }
+}
+
+.home-root {
+  font-family: var(--font-display), system-ui, sans-serif;
+  color: #0b2b24;
+  background: #ffffff;
+}
+
+.home-root :focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* ---------- Type scale ---------- */
+.home-root .t-xl {
+  font-size: clamp(2.375rem, 1.5rem + 3.7vw, 4.5rem);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.home-root .t-lg {
+  font-size: clamp(2rem, 1.35rem + 2.5vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.home-root .t-md {
+  font-size: clamp(1.625rem, 1.15rem + 1.7vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.home-root .t-body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.home-root .t-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+/* ---------- Pill button: icon circle slides to the far edge on hover ---------- */
+.pill {
+  --pill-ease: cubic-bezier(0, 0.55, 0.45, 1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 72px;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  isolation: isolate;
+  font-family: var(--font-display), system-ui, sans-serif;
+  transition: background-color 0.4s var(--pill-ease), border-color 0.4s var(--pill-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.pill__icon {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 9999px;
+  transition: left 0.4s var(--pill-ease), background-color 0.4s var(--pill-ease), color 0.4s var(--pill-ease);
+}
+.pill__label {
+  display: block;
+  margin-left: 62px;
+  padding: 0 32px 0 24px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  white-space: nowrap;
+  transition: transform 0.4s var(--pill-ease), color 0.4s var(--pill-ease);
+}
+@media (hover: hover) {
+  .pill:hover .pill__icon {
+    left: calc(100% - 66px);
+  }
+  .pill:hover .pill__label {
+    transform: translateX(-62px);
+  }
+}
+.pill:focus-visible .pill__icon {
+  left: calc(100% - 66px);
+}
+.pill:focus-visible .pill__label {
+  transform: translateX(-62px);
+}
+@media (max-width: 767px) {
+  .pill--full {
+    display: flex;
+    width: 100%;
+  }
+  .pill--full .pill__label {
+    width: calc(100% - 62px);
+    padding: 0 8px;
+    text-align: center;
+  }
+}
+
+.pill--light {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+.pill--light .pill__icon {
+  background: #ffffff;
+  color: #0b2b24;
+}
+.pill--light .pill__label {
+  color: #ffffff;
+}
+.pill--light:hover {
+  background: #ffffff;
+}
+.pill--light:hover .pill__icon {
+  background: #10b981;
+  color: #ffffff;
+}
+.pill--light:hover .pill__label {
+  color: #0b2b24;
+}
+
+.pill--dark {
+  background: rgba(11, 43, 36, 0.9);
+  border-color: #0b2b24;
+}
+.pill--dark .pill__icon {
+  background: #10b981;
+  color: #ffffff;
+}
+.pill--dark .pill__label {
+  color: #ffffff;
+}
+.pill--dark:hover {
+  background: #0b8a62;
+  border-color: transparent;
+}
+.pill--dark:hover .pill__icon {
+  background: #ffffff;
+  color: #0b2b24;
+}
+
+.pill--white {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+.pill--white .pill__icon {
+  background: #10b981;
+  color: #ffffff;
+}
+.pill--white .pill__label {
+  color: #0b2b24;
+}
+.pill--white:hover {
+  background: #ddf6eb;
+  border-color: #ddf6eb;
+}
+.pill--white:hover .pill__icon {
+  background: #0b2b24;
+}
+
+.small-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.small-pill--dark {
+  background: #0b2b24;
+  color: #fff;
+}
+.small-pill--dark:hover {
+  background: #0b8a62;
+}
+.small-pill--light {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.small-pill--light:hover {
+  background: #fff;
+  color: #0b2b24;
+}
+
+/* ---------- Asymmetric frame (big rounded top-right corner) ---------- */
+.frame-tr {
+  border-radius: 16px 64px 16px 16px;
+}
+@media (min-width: 1024px) {
+  .frame-tr {
+    border-radius: 20px 128px 20px 20px;
+  }
+}
+
+/* ---------- Map ---------- */
+.home-map .leaflet-container {
+  font-family: var(--font-display), system-ui, sans-serif;
+  background: #e9f0ec;
+}
+/* Calm the OSM standard palette so markers and cards stay the loudest thing. */
+.home-map .leaflet-tile-pane {
+  filter: saturate(0.55) contrast(0.92) brightness(1.04);
+}
+.home-map .leaflet-control-attribution {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 8px 0 0 0;
+}
+.co-pin {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  background: #0b2b24;
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(11, 43, 36, 0.35);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+}
+.co-pin svg {
+  width: 18px;
+  height: 18px;
+}
+.co-pin--fast {
+  background: #10b981;
+}
+.leaflet-marker-icon:hover .co-pin,
+.leaflet-marker-icon:focus .co-pin {
+  transform: scale(1.15);
+}
+.home-map .leaflet-popup-content-wrapper {
+  border-radius: 18px;
+  box-shadow: 0 18px 40px -12px rgba(11, 43, 36, 0.35);
+}
+.home-map .leaflet-popup-content {
+  margin: 16px 18px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #0b2b24;
+}
+.home-map .leaflet-popup-content a {
+  color: #0b8a62;
+  font-weight: 600;
+}
+
+/* Hide scrollbars on horizontal tracks without hiding content. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill,
+  .pill__icon,
+  .pill__label {
+    transition: none !important;
+  }
+}

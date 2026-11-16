@@ -19,3 +19,8 @@ public/stage-walkthrough.html
 public/stage-*.png
 *.mp3
 scripts/
+
+# Higgsfield raw outputs (large); scripts + cost log stay tracked
+media-src/png/
+media-src/prev/
+media-src/raw/

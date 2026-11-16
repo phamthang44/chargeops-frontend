@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import "./globals.css";
@@ -8,6 +8,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+/* Home page display face: geometric grotesk with full Vietnamese coverage. */
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -57,7 +65,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={plusJakartaSans.variable}>
+    <html lang="vi" className={`${plusJakartaSans.variable} ${beVietnamPro.variable}`}>
       <head>
         <noscript>
           <style>{`.reveal{opacity:1 !important;transform:none !important;}`}</style>
@@ -66,7 +74,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <I18nProvider>
           {children}
-          <LanguageSwitcher variant="floating" />
+          <LanguageSwitcher variant="floating" className="lang-floating" />
         </I18nProvider>
       </body>
     </html>

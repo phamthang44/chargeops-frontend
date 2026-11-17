@@ -955,8 +955,7 @@ const styles = StyleSheet.create({
   streamLabel: {
     fontSize: 12.5,
     fontWeight: fontWeights.bold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: 0,
   },
   inputBar: {
     flexDirection: 'row',

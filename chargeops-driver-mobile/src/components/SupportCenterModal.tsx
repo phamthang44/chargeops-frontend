@@ -878,8 +878,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   ticketActionBtn: {
     flexDirection: 'row',

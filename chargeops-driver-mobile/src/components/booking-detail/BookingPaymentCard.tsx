@@ -168,8 +168,7 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   totalValue: { marginTop: spacing.xs, fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
   totalMeta: { alignItems: 'flex-end', gap: spacing.xs },

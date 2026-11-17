@@ -118,8 +118,7 @@ const styles = StyleSheet.create({
   prominentLocationSub: {
     fontSize: 9.5,
     fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   prominentLocationTitle: {
     fontSize: 14.5,

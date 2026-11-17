@@ -417,14 +417,13 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.micro,
     lineHeight: 12,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   eyebrowCount: {
     fontSize: fontSizes.micro,
     lineHeight: 12,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
   },
   title: {
     fontSize: fontSizes.heading,
@@ -491,8 +490,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.micro,
     lineHeight: 12,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   reasonText: {
     fontSize: 13,

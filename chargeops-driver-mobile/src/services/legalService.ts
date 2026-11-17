@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { legalDocument, type LegalDocType, type LegalDocument, type LegalSection } from '@/content/legal';
 import { resolveDevUrl } from '@/utils/networkHost';
+import { isMockMode } from '@/services/stationService';
 
 const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
 
@@ -73,6 +74,9 @@ export async function fetchLegalDocument(
   const locale = lang.toLowerCase().startsWith('en') ? 'en' : 'vi';
   const baseSlug = type === 'terms' ? 'terms-of-service' : 'privacy-policy';
   const slug = locale === 'en' ? `${baseSlug}-en` : baseSlug;
+
+  // Mock data / demo session: there is no backend to ask, so skip the 4s network wait.
+  if (isMockMode()) return fallback;
 
   try {
     const controller = new AbortController();

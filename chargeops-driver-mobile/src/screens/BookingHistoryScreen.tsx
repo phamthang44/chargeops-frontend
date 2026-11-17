@@ -585,8 +585,7 @@ const styles = StyleSheet.create({
   summaryEyebrow: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.7,
+    letterSpacing: 0,
   },
   summaryValue: { fontSize: fontSizes.display, fontWeight: fontWeights.bold, marginTop: 2 },
   summaryIcon: {

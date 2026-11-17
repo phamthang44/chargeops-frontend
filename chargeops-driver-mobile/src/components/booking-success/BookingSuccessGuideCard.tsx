@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   stepNumBadge: {
     fontSize: fontSizes.caption - 1,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   stepItemTitle: {
     fontSize: fontSizes.body,

@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   liveTagHero: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  liveTagText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: '#10B981', letterSpacing: 1 },
+  liveTagText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, color: '#10B981', letterSpacing: 0 },
   powerBadge: {
     flexDirection: 'row',
     alignItems: 'center',

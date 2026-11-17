@@ -323,8 +323,7 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   title: {
     fontSize: fontSizes.display,

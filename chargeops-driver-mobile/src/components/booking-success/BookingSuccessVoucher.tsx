@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   voucherLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1,
+    letterSpacing: 0,
   },
   copiedPill: {
     flexDirection: 'row',
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.8,
+    letterSpacing: 0,
   },
   copyButton: {
     flexDirection: 'row',

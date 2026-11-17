@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@/context/PreferencesContext';
+import { useOverlayLayout } from '@/hooks/useOverlayLayout';
 import { fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 import type { ConnectorType } from '@/types';
 
@@ -77,6 +78,8 @@ export function StationFilterDrawer({
 }: StationFilterDrawerProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  // Phones keep the bottom sheet; wide windows get a centred dialog like the app's other modals.
+  const overlay = useOverlayLayout();
   const { themeColors, isDark } = usePreferences();
   const rise = useRef(new Animated.Value(0)).current;
 
@@ -146,7 +149,7 @@ export function StationFilterDrawer({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.root}>
+      <View style={[styles.root, overlay.isDialog && overlay.rootStyle]}>
         <BlurView
           intensity={30}
           tint={isDark ? 'dark' : 'regular'}
@@ -163,15 +166,18 @@ export function StationFilterDrawer({
               paddingBottom: insets.bottom + spacing.md,
               transform: [{ translateY: rise }],
             },
+            overlay.isDialog && [overlay.sheetStyle, styles.sheetDialog],
           ]}
         >
-          {/* Handle */}
-          <View
-            style={[
-              styles.handle,
-              { backgroundColor: isDark ? '#2A312F' : '#E5E7EB' },
-            ]}
-          />
+          {/* Handle (bottom sheet only; the centred dialog has nothing to drag) */}
+          {!overlay.isDialog && (
+            <View
+              style={[
+                styles.handle,
+                { backgroundColor: isDark ? '#2A312F' : '#E5E7EB' },
+              ]}
+            />
+          )}
 
           {/* Header */}
           <View style={styles.header}>
@@ -542,6 +548,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 12,
   },
+  sheetDialog: { borderWidth: 1, borderRadius: radius.xl },
   handle: {
     width: 40,
     height: 4,

@@ -81,16 +81,6 @@ export function ProfileUserCard({
           </View>
           <Text style={[styles.userEmail, { color: themeColors.textMuted }]}>{userEmail}</Text>
 
-          <View
-            style={[
-              styles.goldBadge,
-              { borderColor: themeColors.primary, backgroundColor: themeColors.primarySoft },
-            ]}
-          >
-            <Text style={[styles.goldBadgeText, { color: themeColors.primaryDark }]}>
-              {t('profile.goldMember')}
-            </Text>
-          </View>
         </View>
 
         <Pressable
@@ -191,6 +181,6 @@ const styles = StyleSheet.create({
   goldBadgeText: {
     fontSize: 10,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
 });

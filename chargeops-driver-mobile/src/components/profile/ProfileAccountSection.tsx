@@ -33,7 +33,7 @@ export function ProfileAccountSection({
   return (
     <Card style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="person-outline" size={20} color={themeColors.primary} />
+        <Ionicons name="person-outline" size={20} color={themeColors.textBody} />
         <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
           {t('profile.account.sectionTitle')}
         </Text>
@@ -41,8 +41,8 @@ export function ProfileAccountSection({
 
       {/* Avatar Settings Row */}
       <Pressable style={styles.menuRow} onPress={onPressAvatar}>
-        <View style={[styles.menuIconTile, { backgroundColor: themeColors.primarySoft }]}>
-          <Ionicons name="image-outline" size={20} color={themeColors.primary} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="image-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -61,8 +61,8 @@ export function ProfileAccountSection({
 
       {/* Phone Row */}
       <Pressable style={styles.menuRow} onPress={onPressPhone}>
-        <View style={[styles.menuIconTile, { backgroundColor: themeColors.primarySoft }]}>
-          <Ionicons name="call-outline" size={20} color={themeColors.primary} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="call-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -79,8 +79,8 @@ export function ProfileAccountSection({
 
       {/* Email Row */}
       <View style={styles.menuRow}>
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#172554' : '#EFF6FF' }]}>
-          <Ionicons name="mail-outline" size={20} color={themeColors.info} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="mail-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -101,8 +101,8 @@ export function ProfileAccountSection({
         disabled={openingSecurityAction !== null}
         onPress={() => onPressSecurity('password')}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#3B1D0B' : '#FFF7ED' }]}>
-          <Ionicons name="key-outline" size={20} color="#F97316" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="key-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -127,17 +127,14 @@ export function ProfileAccountSection({
         disabled={openingSecurityAction !== null}
         onPress={() => onPressSecurity('twoFactor')}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }]}>
-          <Ionicons name="shield-checkmark-outline" size={20} color="#6366F1" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="shield-checkmark-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <View style={styles.menuTitleRow}>
             <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
               {t('profile.security.twoFactorTitle')}
             </Text>
-            <View style={[styles.providerBadge, { backgroundColor: themeColors.surfaceAlt }]}>
-              <Text style={[styles.providerBadgeText, { color: themeColors.textMuted }]}>Keycloak</Text>
-            </View>
           </View>
           <Text style={[styles.menuSub, { color: themeColors.textMuted }]}>
             {t('profile.security.twoFactorSubtitle')}

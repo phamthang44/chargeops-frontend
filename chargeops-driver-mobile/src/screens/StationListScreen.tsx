@@ -230,5 +230,6 @@ export function StationListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   list: { flex: 1 },
-  content: { paddingHorizontal: spacing.lg, gap: spacing.md },
+  // Same reading width as the Bookings and History tabs, so cards don't stretch on desktop.
+  content: { width: '100%', maxWidth: 840, alignSelf: 'center', paddingHorizontal: spacing.lg, gap: spacing.md },
 });

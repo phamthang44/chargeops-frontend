@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
   },
   chargeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   liveTag: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  liveText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0.5 },
+  liveText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0 },
   portInfo: { fontSize: fontSizes.caption, fontWeight: fontWeights.medium },
 });

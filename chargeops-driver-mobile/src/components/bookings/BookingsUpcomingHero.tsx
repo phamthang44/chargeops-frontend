@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroEyebrow: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 1 },
+  heroEyebrow: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0 },
   heroChip: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -299,8 +299,7 @@ const styles = StyleSheet.create({
   errorStatusPillText: {
     fontSize: fontSizes.micro,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   errorCardTitle: {
     fontSize: fontSizes.heading,
@@ -329,8 +328,7 @@ const styles = StyleSheet.create({
   errorParamLabel: {
     fontSize: fontSizes.micro,
     fontWeight: fontWeights.semibold,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   errorCopiedBadge: {
     fontSize: fontSizes.micro,

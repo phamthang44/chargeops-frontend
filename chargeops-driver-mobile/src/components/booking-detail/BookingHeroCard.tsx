@@ -273,8 +273,7 @@ const styles = StyleSheet.create({
   codeLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   copiedBadge: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold },
   codePill: {
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     maxWidth: '100%',
   },
-  code: { flexShrink: 1, fontSize: fontSizes.body, fontWeight: fontWeights.bold, letterSpacing: 0.6 },
+  code: { flexShrink: 1, fontSize: fontSizes.body, fontWeight: fontWeights.bold, letterSpacing: 0 },
   statusBadge: { flexShrink: 1, paddingHorizontal: spacing.sm },
   statusSummary: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   statusIcon: {
@@ -316,7 +315,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.kpi,
     lineHeight: lineHeights.kpi,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1.2,
+    letterSpacing: 0,
     fontVariant: ['tabular-nums'],
   },
   countdownSub: {
@@ -391,8 +390,7 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   metricValue: {
     marginTop: spacing.xs,
@@ -410,8 +408,7 @@ const styles = StyleSheet.create({
   metricTotalLabel: {
     fontSize: fontSizes.micro,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0,
   },
   metricTotalValue: {
     fontSize: fontSizes.heading,

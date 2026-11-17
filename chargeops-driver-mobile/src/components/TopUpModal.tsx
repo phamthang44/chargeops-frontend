@@ -191,8 +191,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     marginTop: spacing.xs,
   },
   presetGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

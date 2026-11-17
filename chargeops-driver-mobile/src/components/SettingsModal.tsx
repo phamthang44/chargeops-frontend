@@ -793,8 +793,7 @@ const styles = StyleSheet.create({
   eyebrowTagText: {
     fontSize: 9.5,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   title: {
     fontSize: 21,
@@ -838,8 +837,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
     fontWeight: fontWeights.bold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0,
   },
   sectionHint: {
     fontSize: 12.5,

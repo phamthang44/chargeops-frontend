@@ -57,9 +57,8 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 11.5,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.8,
+    letterSpacing: 0,
     marginTop: 2,
-    textTransform: 'uppercase',
   },
   headerRightAction: {
     width: 40,

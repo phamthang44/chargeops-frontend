@@ -39,7 +39,7 @@ export function ProfileAppSettingsSection({
   return (
     <Card style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="settings-outline" size={20} color={themeColors.primary} />
+        <Ionicons name="settings-outline" size={20} color={themeColors.textBody} />
         <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
           {t('profile.appSettings.sectionTitle')}
         </Text>
@@ -50,8 +50,8 @@ export function ProfileAppSettingsSection({
         style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
         onPress={onPressQuickGuide ?? onPressHelpCenter}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#064E3B' : '#ECFDF5' }]}>
-          <Ionicons name="book-outline" size={20} color={themeColors.primary} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="book-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <View style={styles.menuTitleRow}>
@@ -78,8 +78,8 @@ export function ProfileAppSettingsSection({
         style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
         onPress={onPressNotifications}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#431407' : '#FFF7ED' }]}>
-          <Ionicons name="notifications-outline" size={20} color="#F97316" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="notifications-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -99,8 +99,8 @@ export function ProfileAppSettingsSection({
         style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
         onPress={onPressLanguage}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#2E1065' : '#F5F3FF' }]}>
-          <Ionicons name="language-outline" size={20} color="#8B5CF6" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="language-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -120,8 +120,8 @@ export function ProfileAppSettingsSection({
         style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
         onPress={onPressAppearance}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#312E81' : '#EEF2FF' }]}>
-          <Ionicons name="contrast-outline" size={20} color="#6366F1" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="contrast-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -141,8 +141,8 @@ export function ProfileAppSettingsSection({
         style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: `${themeColors.primary}0A` }]}
         onPress={onPressHelpCenter}
       >
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#172554' : '#EFF6FF' }]}>
-          <Ionicons name="help-buoy-outline" size={20} color="#3B82F6" />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="help-buoy-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   guidePillText: {
     fontSize: 9.5,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
   },
   menuSub: {
     fontSize: fontSizes.caption,

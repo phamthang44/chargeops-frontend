@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   stationCodeText: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   statusPill: {
     flexDirection: 'row',
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   callSubLabel: {
     fontSize: 10,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   callPhoneNum: {
     fontSize: 15,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   descTitle: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   descText: {
     fontSize: 13.5,

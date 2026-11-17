@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
-import { StationsView } from "@/components/StationsView";
+import { SubpageShell } from "@/components/home/SubpageShell";
+import { StationsList } from "@/components/home/StationsList";
 import type { CoverageStation } from "@/components/stations";
 import { fetchPublicStations } from "@/lib/stations-api";
 
@@ -22,14 +21,10 @@ export default async function StationsPage() {
   const data = await fetchPublicStations();
 
   return (
-    <>
-      <SiteHeader />
-      <main className="min-h-screen bg-[#070A08] text-white pt-24 sm:pt-28">
-        <StationsView stations={data.stations} isLive={data.isLive} />
-      </main>
-      <SiteFooter />
+    <SubpageShell>
+      <StationsList initialStations={data.stations} initialIsLive={data.isLive} />
       <JsonLd stations={data.isLive ? data.stations : []} />
-    </>
+    </SubpageShell>
   );
 }
 

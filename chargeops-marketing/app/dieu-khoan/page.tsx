@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { LegalPage } from "@/components/LegalPage";
+import { SubpageShell } from "@/components/home/SubpageShell";
+import { LegalDoc } from "@/components/home/LegalDoc";
 import { getLegalPage } from "@/lib/legal";
 
 export const revalidate = 3600;
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 
 export default async function TermsPage() {
   const content = await getLegalPage("terms");
-  return <LegalPage content={content} />;
+  return (
+    <SubpageShell>
+      <LegalDoc content={content} />
+    </SubpageShell>
+  );
 }

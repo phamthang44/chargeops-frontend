@@ -16,6 +16,7 @@ import {
   type Variants,
 } from "motion/react";
 import type Lenis from "lenis";
+import { usePathname } from "next/navigation";
 import { useLocale } from "@/lib/i18n";
 import { HOME_COPY, type HomeCopy } from "@/lib/home/content";
 
@@ -64,12 +65,22 @@ export function useAnchorScroll() {
   const { lenis } = useHomeState();
   return (href: string) => {
     if (!href.startsWith("#")) return false;
-    const el = document.querySelector(href);
+    // getElementById, not querySelector: legal section ids start with a digit ("#4-…").
+    const el = document.getElementById(decodeURIComponent(href.slice(1)));
     if (!el) return false;
     if (lenis.current) lenis.current.scrollTo(el as HTMLElement, { offset: -24, duration: 1.4 });
     else el.scrollIntoView({ behavior: "smooth", block: "start" });
     return true;
   };
+}
+
+/**
+ * Section anchors (#ban-do, #cau-hoi…) only exist on the home page; on any
+ * other page they must point back to "/#…".
+ */
+export function useHomeHref() {
+  const pathname = usePathname();
+  return (href: string) => (href.startsWith("#") && pathname !== "/" ? `/${href}` : href);
 }
 
 /* ------------------------------------------------------------------ */

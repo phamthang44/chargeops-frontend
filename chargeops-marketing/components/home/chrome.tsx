@@ -21,6 +21,7 @@ import {
   PillButton,
   Wordmark,
   useAnchorScroll,
+  useHomeHref,
   useHomeCopy,
   useHomeState,
   useScrollLock,
@@ -149,6 +150,7 @@ function NavDropdown({
 }) {
   const c = useHomeCopy();
   const anchorScroll = useAnchorScroll();
+  const homeHref = useHomeHref();
   const group = c.nav.groups[index];
   const open = openIndex === index;
   const closeTimer = useRef<number | undefined>(undefined);
@@ -189,7 +191,7 @@ function NavDropdown({
             {group.links.map((l) => (
               <a
                 key={l.label}
-                href={l.href}
+                href={homeHref(l.href)}
                 {...(l.external
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
@@ -316,6 +318,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const c = useHomeCopy();
   const lock = useScrollLock();
   const anchorScroll = useAnchorScroll();
+  const homeHref = useHomeHref();
   const [expanded, setExpanded] = useState<number | null>(0);
 
   useEffect(() => {
@@ -328,7 +331,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   }, [open]);
 
   const go = (href: string, e: React.MouseEvent) => {
-    if (href.startsWith("#")) {
+    if (href.startsWith("#") && document.querySelector(href)) {
       e.preventDefault();
       onClose();
       lock(false);
@@ -424,7 +427,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                         {g.links.map((l) => (
                           <li key={l.label}>
                             <a
-                              href={l.href}
+                              href={homeHref(l.href)}
                               {...(l.external
                                 ? {
                                     target: "_blank",

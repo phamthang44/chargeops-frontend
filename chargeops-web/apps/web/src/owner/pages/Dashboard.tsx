@@ -216,7 +216,7 @@ function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
                     count: offlineCps,
                     defaultValue: `${offlineCps} trụ ngoại tuyến/bảo trì`,
                   })
-                : t('kpi.allOnline', { defaultValue: 'Tất cả trụ đang hoạt động' })
+                : t('kpi.allOnline', { defaultValue: 'No stations are reported offline' })
             }
             deltaClass={offlineCps > 0 ? 'text-bad' : 'text-good'}
           />

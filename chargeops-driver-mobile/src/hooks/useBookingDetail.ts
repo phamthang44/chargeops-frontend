@@ -327,12 +327,12 @@ export function useBookingDetail(bookingId: string) {
     if (isCheckedIn && booking.checkedInAt) {
       return t('bookingDetail.checkedInNote', { time: formatTime(booking.checkedInAt) });
     }
-    if (isCharging) return t('chargingSession.autoNote', 'Sạc sẽ tự động ngắt khi đầy pin.');
+    if (isCharging) return t('chargingSession.autoNote', 'ChargeOps shows the booking status; it does not verify live charging or stop the charger when the battery is full.');
     if (isCompleted) return t('bookingDetail.completedNote');
     if (isCancelled) {
       if (booking.cancelReason === 'NO_SHOW') return t('bookingDetail.reasonNoShow');
       if (booking.cancelReason === 'PAYMENT_TIMEOUT') return t('bookingDetail.reasonTimeout');
-      if (booking.cancelReason === 'STATION_FAILURE') return t('bookingDetail.reasonStationFailure', 'Đã hủy do sự cố kỹ thuật tại trạm sạc (Hoàn đủ 100%)');
+      if (booking.cancelReason === 'STATION_FAILURE') return t('bookingDetail.reasonStationFailure', 'Cancelled after a station incident. Check the refund record for its current status.');
       if ((booking.refundAmount ?? refundableAmount) > 0) {
         return t('bookingDetail.refundedNote', { amount: formatVnd(booking.refundAmount ?? refundableAmount) });
       }

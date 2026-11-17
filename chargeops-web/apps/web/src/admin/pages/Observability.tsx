@@ -55,7 +55,7 @@ export function Observability() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
             </span>
-            <span>{t('observability.gatewayOnline', 'Gateway & Telemetry Online')}</span>
+            <span>{t('observability.gatewayOnline', 'Grafana dashboard · system health unverified')}</span>
           </div>
         </div>
       </div>

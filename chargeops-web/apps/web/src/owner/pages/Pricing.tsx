@@ -24,7 +24,8 @@ import { getApiErrorMessage } from '../../i18n';
 /**
  * Pricing & Hours (FR11). All four steps edit a single local draft; "Lưu thay
  * đổi" triggers the Confirmation Modal with change comparison before saving.
- * Changes only affect NEW bookings — existing bookings keep their snapshotted price (POL-06).
+ * The first commercial configuration starts immediately; later edits start next Monday.
+ * New bookings use the version effective for their requested time; confirmed bookings keep their snapshot.
  */
 export function Pricing() {
   const { t } = useTranslation('owner');
@@ -56,7 +57,7 @@ export function Pricing() {
       qc.invalidateQueries({ queryKey: ['pricing', selectedStationId] });
       qc.invalidateQueries({ queryKey: ['pricing-history', selectedStationId] });
       setConfirmModalOpen(false);
-      toast(t('pricing.saveSuccess', { defaultValue: 'Cập nhật cấu hình và áp dụng thành công!' }), 'success');
+      toast(t('pricing.saveSuccess', { defaultValue: 'Đã lưu cấu hình giá và giờ hoạt động.' }), 'success');
     },
     onError: (e) => {
       const code = (e as any)?.code || '';
@@ -286,7 +287,7 @@ export function Pricing() {
               onClick={() => setConfirmModalOpen(true)}
               disabled={save.isPending}
             >
-              {t('pricing.saveBtn', { defaultValue: 'Lưu & áp dụng ngay' })}
+              {t('pricing.saveBtn', { defaultValue: 'Lưu thay đổi' })}
             </Button>
           </div>
         </div>

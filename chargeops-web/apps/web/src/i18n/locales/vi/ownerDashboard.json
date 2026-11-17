@@ -152,7 +152,7 @@
     "allApproved": "Đã duyệt toàn bộ",
     "chargersOnline": "Trụ sạc trực tuyến",
     "chargersOffline": "{{count}} trụ ngoại tuyến/bảo trì",
-    "allOnline": "Tất cả trụ đang hoạt động",
+    "allOnline": "Không có trạm nào đang được báo ngoại tuyến",
     "connectorsAvailable": "Cổng khả dụng",
     "connectorsDelta": "{{charging}} đang sạc · {{offline}} ngoại tuyến",
     "sessionsToday": "Phiên sạc hôm nay",

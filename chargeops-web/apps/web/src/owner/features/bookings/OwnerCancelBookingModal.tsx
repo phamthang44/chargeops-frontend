@@ -172,16 +172,16 @@ export function OwnerCancelBookingModal({
           <div>
             <div className="font-semibold mb-0.5">
               {isPaid
-                ? t('bookings.ownerCancelModal.paidTitle', 'Đã thu tiền gói sạc — Tự động hoàn 100%')
+                ? t('bookings.ownerCancelModal.paidTitle', 'Package paid — 100% refund obligation')
                 : t('bookings.ownerCancelModal.unpaidTitle', 'Đặt chỗ chưa thanh toán')}
             </div>
             <p>
               {isPaid
                 ? t(
                     'bookings.ownerCancelModal.paidWarning',
-                    `Khoản thu sẽ được lập tức xác lập nghĩa vụ hoàn đủ 100% giá gói (${formatVnd(
+                    `A 100% package-price refund obligation (${formatVnd(
                       refundAmount
-                    )}) vào tài khoản mô phỏng của tài xế. Cổng sạc sẽ được giải phóng.`
+                    )}) will be established. Refund execution is tracked separately in the Simulator; this does not confirm a bank transfer. The connector will be released.`
                   )
                 : t(
                     'bookings.ownerCancelModal.unpaidWarning',

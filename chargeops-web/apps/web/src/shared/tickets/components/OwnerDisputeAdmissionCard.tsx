@@ -94,7 +94,7 @@ export function OwnerDisputeAdmissionCard({
           <p className="text-[11px] text-muted leading-relaxed">
             {t(
               'escalation.ownerAdmission.refundEstablishedDesc',
-              'Hệ thống đã ghi nhận trách nhiệm kỹ thuật và tự động xử lý hoàn tiền cho tài xế. Không cần thao tác thêm.'
+              'A refund record is linked to this booking. Track its status under Finance & Refunds; retry only when the record allows it.'
             )}
           </p>
         </div>

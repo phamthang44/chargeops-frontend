@@ -253,7 +253,7 @@ export function AdminRefundPolicyModal({
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[13px] text-good-deep flex items-center gap-1.5">
                   <IconCheckCircle size={15} />
-                  <span>{t('escalation.refundPolicy.modal.grantTitle', 'Hoàn đủ 100% gói')}</span>
+                  <span>{t('escalation.refundPolicy.modal.grantTitle', 'Establish 100% refund obligation')}</span>
                 </span>
                 <span className="rounded-full h-3.5 w-3.5 border border-good flex items-center justify-center">
                   {outcome === 'GRANT_FULL_REFUND' && <span className="h-2 w-2 rounded-full bg-good" />}

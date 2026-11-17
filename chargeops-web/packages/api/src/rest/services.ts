@@ -42,6 +42,7 @@ import type {
   ProvisioningStatus,
   Station,
   StationAmenitiesResponse,
+  StationScheduleHistoryItem,
   StationRegistrationDetail,
   StationOperationalStatusResponse,
   StationStaffMember,
@@ -1362,21 +1363,29 @@ export function createRestServices(http: HttpClient): Services {
       history: async (stationId) => {
         const res: any = await http.get(`/owner/stations/${stationId}/pricing/schedule-history`);
         const list = Array.isArray(res) ? res : res?.data ?? [];
-        return list.map((item: any) => ({
-          scheduleId: String(item.scheduleId),
-          effectiveFrom: String(item.effectiveFrom),
-          effectiveTo: item.effectiveTo ? String(item.effectiveTo) : null,
-          status: item.status === 'ACTIVE' ? 'ACTIVE' : 'EXPIRED',
-          open24Hours: Boolean(item.open24Hours),
-          hours: (item.hours ?? []).map((hour: any) => ({
-            day: STATION_DAY_TO_UI[String(hour.day)] ?? String(hour.day),
-            open: item.open24Hours ? '00:00' : hhmm(hour.openTime),
-            close: item.open24Hours ? '00:00' : hhmm(hour.closeTime),
-            open24: Boolean(hour.enabled),
-          })),
-          changedByName: String(item.changedByName || 'Hệ thống'),
-          changedAt: String(item.changedAt || item.effectiveFrom),
-        }));
+        return list.map((item: any) => {
+          const status = String(item.status ?? '').toUpperCase();
+          const supportedStatuses = ['ACTIVE', 'PENDING', 'EXPIRED', 'CANCELLED'];
+          return {
+            scheduleId: String(item.scheduleId),
+            effectiveFrom: String(item.effectiveFrom),
+            effectiveTo: item.effectiveTo ? String(item.effectiveTo) : null,
+            status: (supportedStatuses.includes(status)
+              ? status
+              : 'UNKNOWN') as StationScheduleHistoryItem['status'],
+            open24Hours: Boolean(item.open24Hours),
+            hours: (item.hours ?? []).map((hour: any) => ({
+              day: STATION_DAY_TO_UI[String(hour.day)] ?? String(hour.day),
+              open: item.open24Hours ? '00:00' : hhmm(hour.openTime),
+              close: item.open24Hours ? '00:00' : hhmm(hour.closeTime),
+              open24: Boolean(hour.enabled),
+            })),
+            changedByName: String(item.changedByName || 'Hệ thống'),
+            changedAt: String(item.changedAt || item.effectiveFrom),
+            cancelledAt: item.cancelledAt ? String(item.cancelledAt) : null,
+            cancelledByName: item.cancelledByName ? String(item.cancelledByName) : null,
+          };
+        });
       },
     },
 

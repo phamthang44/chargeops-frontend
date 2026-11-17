@@ -103,7 +103,7 @@ export function TicketCard({ ticket, onPress }: TicketCardProps) {
         <View style={[styles.refundBadge, { backgroundColor: isDark ? '#113322' : '#ECFDF5' }]}>
           <Ionicons name="cash-outline" size={15} color="#10B981" />
           <Text style={[styles.refundText, { color: '#10B981' }]}>
-            {t('ticket.card.refundApplied', 'Đã hoàn tiền đơn sạc liên quan')}
+            {t('ticket.card.refundApplied', 'Refund record linked to this booking')}
           </Text>
         </View>
       )}

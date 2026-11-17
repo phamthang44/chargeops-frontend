@@ -28,7 +28,7 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
       <div className="rounded-lg border border-dashed border-hairline p-4 text-center text-[12.5px] text-muted">
         {t(
           'refunds.timeline.empty',
-          'Chưa có lần thực thi nào trước đó. Khoản hoàn tiền đang ở trạng thái sơ khởi (chờ Admin xử lý).'
+          'No refund execution attempts have been recorded yet.'
         )}
       </div>
     );
@@ -55,10 +55,10 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
           <IconAlertTriangle size={15} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <span className="font-semibold text-amber-800 dark:text-amber-200 block">
-              Bảo lưu quyền hoàn tiền của khách hàng:
+              {t('refunds.timeline.failedTitle', 'Failed attempt: review the refund record')}
             </span>
             <span className="text-muted leading-relaxed block">
-              Lần thực thi chưa thành công chỉ phản ánh sự cố kết nối tạm thời. Quyền lợi hoàn tiền 100% của khách hàng vẫn được bảo lưu ở trạng thái Chờ xử lý. Quản trị viên có thể gửi lại yêu cầu hoặc ghi nhận đối soát chuyển khoản ngân hàng.
+              {t('refunds.timeline.failedDesc', 'This attempt did not succeed. Check the failure reason and current refund record before retrying; the attempt history does not confirm that funds were transferred.')}
             </span>
           </div>
         </div>
@@ -111,7 +111,9 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                           : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
                       }`}
                     >
-                      {isSimulator ? 'SIMULATOR' : 'MANUAL_RECORD'}
+                      {isSimulator
+                        ? t('refunds.timeline.modeSimulator', 'Simulator')
+                        : t('refunds.timeline.modeManual', 'Manual record')}
                     </span>
                     {attempt.executionTrigger === 'SYSTEM_POLICY' ? (
                       <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
@@ -126,7 +128,9 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
 
                   <StatusPill
                     tone={isSuccess ? 'good' : 'bad'}
-                    label={isSuccess ? 'SUCCEEDED' : 'FAILED'}
+                    label={isSuccess
+                      ? t('refunds.timeline.statusSucceeded', 'Đã ghi nhận thành công')
+                      : t('refunds.timeline.statusFailed', 'Lần thử không thành công')}
                   />
                 </div>
 

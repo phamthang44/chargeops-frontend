@@ -344,9 +344,7 @@ export function Dashboard() {
                         <IconCheckCircle size={24} />
                       </div>
                       <h3 className="mt-3.5 text-sm font-bold text-ink">{t('equipment.empty')}</h3>
-                      <p className="mt-1 max-w-xs text-xs text-muted">
-                        Tất cả các trụ và cổng sạc tại trạm đều đang vận hành ổn định.
-                      </p>
+                      <p className="mt-1 max-w-xs text-xs text-muted">{t('equipment.emptyDesc')}</p>
                     </div>
                   )}
                 </div>

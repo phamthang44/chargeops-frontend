@@ -39,9 +39,9 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
   const getReasonLabel = (reason?: string) => {
     switch (reason) {
       case 'VOLUNTARY_GRACE':
-        return t('bookingDetail.refundReasonGrace', 'Hoàn 100% (Ân hạn hủy tự nguyện)');
+        return t('bookingDetail.refundReasonGrace', 'Nghĩa vụ hoàn 100% giá gói (hủy trong hạn đã lưu)');
       case 'STATION_FAILURE':
-        return t('bookingDetail.refundReasonStationFailure', 'Hoàn tiền do sự cố trạm sạc');
+        return t('bookingDetail.refundReasonStationFailure', 'Nghĩa vụ hoàn do sự cố trạm sạc');
       case 'EXCESS_PAYMENT':
         return t('bookingDetail.refundReasonExcess', 'Hoàn số tiền thanh toán thừa');
       case 'UNAPPLIED_PAYMENT':
@@ -56,9 +56,9 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
       return t('bookingDetail.refundStatusReconciling', 'Đang tra soát hoàn tiền');
     }
     if (isPending) {
-      return t('bookingDetail.refundStatusProcessing', 'Đang xử lý hoàn tiền');
+      return t('bookingDetail.refundStatusProcessing', 'Hồ sơ hoàn đang chờ xử lý');
     }
-    return t('bookingDetail.refundStatusSucceeded', 'Đã hoàn tiền thành công');
+      return t('bookingDetail.refundStatusSucceeded', 'Hoàn thành công trong Simulator');
   };
 
   const getStatusBadge = () => {
@@ -66,33 +66,33 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
       return t('bookingDetail.refundBadgeReconciling', 'Đang tra soát');
     }
     if (isPending) {
-      return t('bookingDetail.refundBadgeProcessing', 'Đang hoàn tiền');
+      return t('bookingDetail.refundBadgeProcessing', 'Chờ xử lý');
     }
-    return t('bookingDetail.refundBadgeSucceeded', 'Đã hoàn tiền');
+    return t('bookingDetail.refundBadgeSucceeded', 'Simulator: thành công');
   };
 
   const getStatusDesc = () => {
     if (isNeedsRec) {
       return t(
         'bookingDetail.refundDescReconciling',
-        'Khoản tiền đang được bộ phận tài chính đối soát với đối tác thanh toán. Quyền lợi hoàn tiền của bạn vẫn được bảo lưu nguyên vẹn.',
+        'Hồ sơ hoàn đang được đối soát; trạng thái này chưa xác nhận giao dịch hoàn thành công.',
       );
     }
     if (isPending) {
       if (refund?.executionPolicy === 'AUTO_FIRST_ATTEMPT') {
         return t(
           'bookingDetail.refundDescAutoProcessing',
-          'Yêu cầu hoàn tiền đã được tạo và đang được hệ thống xử lý tự động về phương thức thanh toán ban đầu của bạn.',
+          'Simulator đang xử lý yêu cầu hoàn trong bản demo; chưa có kết quả thành công.',
         );
       }
       return t(
         'bookingDetail.refundDescProcessing',
-        'Yêu cầu hoàn tiền đã được ghi nhận và đang chờ xử lý hoàn về phương thức thanh toán ban đầu của bạn.',
+        'Hồ sơ hoàn đang chờ xử lý; trạng thái này chưa xác nhận tiền đã về tài khoản.',
       );
     }
     return t(
       'bookingDetail.refundDescSucceeded',
-      'Số tiền đã được hoàn trả thành công về phương thức thanh toán ban đầu của bạn.',
+      'Yêu cầu hoàn thành công trong Simulator. Kết quả này không xác nhận có giao dịch ngân hàng thật.',
     );
   };
 
@@ -131,7 +131,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
 
       <View style={[styles.amountRow, { borderTopColor: `${toneColor}24` }]}>
         <Text style={[styles.amountLabel, { color: themeColors.textMuted }]}>
-          {t('bookingDetail.refundedTotal', 'Số tiền hoàn trả')}
+          {t('bookingDetail.refundedTotal', 'Số tiền trong hồ sơ hoàn')}
         </Text>
         <Text style={[styles.amountValue, { color: toneColor }]}>
           {formatVnd(refundAmount)}

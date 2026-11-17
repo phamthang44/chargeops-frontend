@@ -63,6 +63,7 @@
       "closeDescription": "Đóng quy trình hỗ trợ với lý do và ghi chú xử lý rõ ràng.",
       "resultLabel": "Kết quả xem xét:",
       "noteLabel": "Ghi chú biên bản:",
+      "savedOutcome": "Đã lưu kết quả xem xét của Admin.",
       "closureReason": "Lý do kết thúc",
       "note": "Ghi chú xem xét của Admin",
       "cancel": "Hủy",
@@ -99,11 +100,11 @@
         "bookingLabel": "Mã đặt chỗ liên quan:",
         "amountLabel": "Giá trị gói sạc:",
         "obligationLabel": "Nghĩa vụ hoàn tiền:",
-        "succeeded": "Đã hoàn thành công",
+        "succeeded": "Simulator: thành công",
         "pending": "Đang xử lý",
         "notEstablished": "Chưa xác lập nghĩa vụ hoàn",
         "latestDecision": "Quyết định gần nhất",
-        "fullRefundPill": "Hoàn đủ 100% gói",
+        "fullRefundPill": "Nghĩa vụ hoàn 100% giá gói",
         "insufficientPill": "Chưa đủ căn cứ",
         "byActor": "bởi {{name}}"
       },
@@ -112,7 +113,7 @@
         "mandateTitle": "Thẩm quyền phán quyết chính sách",
         "mandateDesc": "Quản trị viên rà soát dựa trên biên bản kỹ thuật và dữ liệu đo đạc của trạm. Quyết định đủ căn cứ xác lập nghĩa vụ hoàn đủ gói dù Chủ trạm không đồng ý; không chứng minh attempt đã thành công.",
         "outcomeLabel": "Kết quả rà soát chính sách",
-        "grantTitle": "Hoàn đủ 100% gói",
+        "grantTitle": "Xác lập nghĩa vụ hoàn 100% giá gói",
         "insufficientTitle": "Chưa đủ căn cứ",
         "affectedAtLabel": "Thời điểm xác nhận sự cố trạm",
         "reasonLabel": "Căn cứ phán quyết (Lý do giải trình)",
@@ -177,8 +178,8 @@
         "PENDING": "Chờ thanh toán",
         "PAID": "Đã thanh toán",
         "FAILED": "Thanh toán lỗi",
-        "PARTIALLY_REFUNDED": "Hoàn một phần",
-        "REFUNDED": "Đã hoàn tiền"
+        "PARTIALLY_REFUNDED": "Đã ghi nhận hoàn một phần",
+        "REFUNDED": "Đã ghi nhận hoàn"
       },
       "receipt": "Receipt đã chấp nhận",
       "receiptEmpty": "Chưa có receipt được hệ thống chấp nhận",
@@ -204,13 +205,13 @@
     },
     "ownerAdmission": {
       "title": "Chủ trạm nhận trách nhiệm",
-      "subtitle": "Giải quyết tranh chấp bằng cam kết hoàn đủ 100%",
+      "subtitle": "Nhận trách nhiệm và xác lập nghĩa vụ hoàn 100% giá gói",
       "refundEstablished": "Đã xác lập nghĩa vụ hoàn đủ 100% gói sạc",
-      "refundEstablishedDesc": "Hệ thống đã ghi nhận trách nhiệm kỹ thuật và tự động xử lý hoàn tiền cho tài xế. Không cần thao tác thêm.",
+      "refundEstablishedDesc": "Đã có hồ sơ hoàn liên quan. Theo dõi trạng thái tại mục Tài chính & Hoàn tiền; nếu cần thử lại, thực hiện theo trạng thái và hướng dẫn của hồ sơ.",
       "bookingAmountLabel": "Gói sạc liên quan:",
       "bookingStatusLabel": "Trạng thái đơn:",
-      "notice": "Hồ sơ đang trong luồng xem xét của Admin. Chủ trạm có quyền chủ động nhận trách nhiệm để thiết lập hoàn đủ 100% cho tài xế mà không cần chờ Admin ra phán quyết.",
-      "actionBtn": "Nhận trách nhiệm lỗi trạm & Hoàn tiền 100%",
+      "notice": "Hồ sơ đang trong luồng xem xét của Admin. Chủ trạm có thể nhận trách nhiệm và xác lập nghĩa vụ hoàn 100% giá gói; kết quả thực thi được theo dõi riêng trong Simulator.",
+      "actionBtn": "Nhận trách nhiệm & xác lập nghĩa vụ hoàn 100%",
       "notEligible": "Đơn sạc chưa đủ điều kiện nhận lỗi trạm."
     }
   },
@@ -350,7 +351,7 @@
       "status": "Trạng thái"
     },
     "unassigned": "Chờ tiếp nhận",
-    "refund100": "Hoàn 100%",
+    "refund100": "Có hồ sơ hoàn",
     "daysLeft": "{{count}} ngày",
     "daysLeft_one": "{{count}} ngày",
     "daysLeft_other": "{{count}} ngày",
@@ -443,7 +444,7 @@
       "escalatedLockedDesc": "Trạm tạm dừng ghi kết luận kỹ thuật trong thời gian Admin xem xét. Sau khi trả lại trạm, việc xử lý được tiếp tục."
     },
     "refund": {
-      "title": "Chính sách bồi hoàn cọc",
+      "title": "Hồ sơ hoàn tiền",
       "autoGranted": "Đã có hồ sơ hoàn tiền",
       "autoGrantedBadge": "Có hồ sơ hoàn tiền",
       "desc": "Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận phiếu hỗ trợ không phải bằng chứng đã chuyển tiền.",

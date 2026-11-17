@@ -108,10 +108,10 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
               })}
             </div>
             <div>
-              • <b>{t('pricing.steps.step4.philosophyScheduleBold', { defaultValue: 'Lịch hoạt động áp dụng cho lượt đặt mới:' })}</b>{' '}
+              • <b>{t('pricing.steps.step4.philosophyScheduleBold', { defaultValue: 'Giá và giờ hoạt động theo mốc hiệu lực:' })}</b>{' '}
               {t('pricing.steps.step4.philosophyScheduleText', {
                 defaultValue:
-                  'Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu; các lịch đặt đã xác nhận trước đó vẫn giữ nguyên vẹn thời gian và mức giá ban đầu.',
+                  'Lượt đặt mới dùng phiên bản có hiệu lực cho khung thời gian được chọn. Lượt đã xác nhận giữ nguyên giá và lịch đã chốt.',
               })}
             </div>
           </div>

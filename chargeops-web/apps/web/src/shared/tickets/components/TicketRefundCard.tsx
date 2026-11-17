@@ -16,7 +16,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
     <Card className="rounded-card p-4 shadow-sm">
       <div className="mb-2 flex items-center gap-1.5 text-[13px] font-bold text-ink">
         <IconCheckCircle size={15} className="text-good-deep" />
-        <span>{t('detail.refund.title', 'Chính sách bồi hoàn cọc')}</span>
+        <span>{t('detail.refund.title', 'Refund record')}</span>
       </div>
 
       {hasRefund ? (
@@ -27,7 +27,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           <p className="mt-1 text-muted leading-relaxed">
             {t(
               'detail.refund.desc',
-              'Khoản hoàn được hạch toán trong Sổ đối chiếu tài chính của Chủ trạm. Hệ thống tự động hoàn tiền theo chính sách quy định.'
+              'A refund record exists for this booking. Check its status; this ticket does not confirm that funds were transferred.'
             )}
           </p>
           <div className="mt-2.5 space-y-1">
@@ -45,7 +45,7 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
         <div className="rounded-xl bg-surface-2/60 p-3 text-[11.5px] leading-relaxed text-muted">
           {t(
             'detail.refund.policyNotice',
-            'Biên bản kỹ thuật ghi nhận sự cố không tự động chuyển tiền. Nghĩa vụ hoàn tiền 100% được xác lập khi Chủ trạm nhận trách nhiệm (BKG-056) hoặc Admin ra phán quyết chính sách tranh chấp (BKG-057).'
+            'A technical finding or incident alone does not create a refund. An eligible refund obligation must be established through the responsible Owner process or an Admin decision in the exact escalated case; execution is tracked separately.'
           )}
         </div>
       )}

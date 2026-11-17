@@ -117,7 +117,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
                   {t('payment.methodLabel', 'Phương thức')}
                 </Text>
                 <Text style={[styles.infoValue, { color: themeColors.textStrong }]}>
-                  {t('payment.SIMULATOR', 'Cổng thanh toán trực tuyến')}
+                  {t('payment.SIMULATOR', 'Thanh toán demo (Simulator)')}
                 </Text>
               </View>
             </View>
@@ -266,7 +266,7 @@ export function CheckoutQRCard({ booking }: CheckoutQRCardProps) {
           <Text style={[styles.noticeText, { color: themeColors.textStrong }]}>
             {t(
               'payment.simulatorNote',
-              'Quét mã QR bằng ứng dụng ngân hàng bất kỳ để thanh toán cho phiên sạc. Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận.',
+              'This is a payment demo. The Simulator records confirmation; no money is transferred through a bank.',
             )}
           </Text>
         </View>

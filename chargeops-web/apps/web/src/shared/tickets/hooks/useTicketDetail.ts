@@ -217,7 +217,7 @@ export function useTicketDetail({ admin = false, role }: UseTicketDetailOptions 
       return api.ticketEscalations.review(id, payload);
     },
     onSuccess: () => {
-      toast('Đã lưu kết quả xem xét của Admin.', 'success');
+      toast(t('escalation.review.savedOutcome', 'Admin review outcome saved.'), 'success');
       invalidateAll();
       qc.invalidateQueries({ queryKey: ['tickets', 'escalation', id] });
     },

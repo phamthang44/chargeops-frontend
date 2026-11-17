@@ -84,7 +84,7 @@ export function ChargerStatusGuide() {
                   {t('chargers.statusGuide.chargingTitle', 'Đang sạc (In Use)')}
                 </span>
                 <span className="text-muted leading-relaxed">
-                  {t('chargers.statusGuide.chargingDesc', 'Xe đang cắm súng và nạp điện. Trụ ghi nhận công suất & sản lượng kWh thực tế.')}
+                  {t('chargers.statusGuide.chargingDesc', 'The booking is in charging status. This screen does not show live energy or SoC measurements.')}
                 </span>
               </div>
               <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">

@@ -54,7 +54,7 @@ export function TicketSessionSelector({
           </Text>
           <Text style={[styles.sessionHelpText, { color: themeColors.textMuted }]}>
             {category === 'CHARGING_ISSUE'
-              ? t('ticket.create.selectSessionHelp', 'Sự cố sạc pin yêu cầu liên kết với phiên sạc để kỹ thuật viên kiểm tra trụ sạc và kích hoạt bồi hoàn cọc 100%.')
+              ? t('ticket.create.selectSessionHelp', 'Link this charging issue to a session for technical review. A technical finding does not decide or execute a refund.')
               : t('ticket.create.selectStationHelp', 'Lỗi đặt chỗ yêu cầu liên kết với trạm sạc hoặc phiên đặt chỗ liên quan.')}
           </Text>
         </View>

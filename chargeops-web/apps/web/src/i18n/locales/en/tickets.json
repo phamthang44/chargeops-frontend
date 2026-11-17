@@ -63,6 +63,7 @@
       "closeDescription": "Close the support process with a clear reason and review note.",
       "resultLabel": "Review result:",
       "noteLabel": "Review note:",
+      "savedOutcome": "Admin review outcome saved.",
       "closureReason": "Closure reason",
       "note": "Admin review note",
       "cancel": "Cancel",
@@ -99,11 +100,11 @@
         "bookingLabel": "Associated booking code:",
         "amountLabel": "Package value:",
         "obligationLabel": "Refund obligation:",
-        "succeeded": "Refund succeeded",
+        "succeeded": "Succeeded in Simulator",
         "pending": "Processing",
         "notEstablished": "Refund obligation not established",
         "latestDecision": "Latest decision",
-        "fullRefundPill": "Grant 100% full refund",
+        "fullRefundPill": "100% package-price refund obligation",
         "insufficientPill": "Insufficient evidence",
         "byActor": "by {{name}}"
       },
@@ -112,7 +113,7 @@
         "mandateTitle": "Arbitration Review Authority",
         "mandateDesc": "Admin adjudicates based on technical findings and telemetry. Substantiated grants establish a full-package obligation even if the Owner objects; they do not prove a successful attempt.",
         "outcomeLabel": "Policy Review Outcome",
-        "grantTitle": "Grant 100% Full Refund",
+        "grantTitle": "Establish 100% Package-Price Refund Obligation",
         "insufficientTitle": "Insufficient Evidence",
         "affectedAtLabel": "Technical Incident Timestamp",
         "reasonLabel": "Adjudication Grounds (Audit Justification)",
@@ -177,8 +178,8 @@
         "PENDING": "Awaiting payment",
         "PAID": "Paid",
         "FAILED": "Payment failed",
-        "PARTIALLY_REFUNDED": "Partially refunded",
-        "REFUNDED": "Refunded"
+        "PARTIALLY_REFUNDED": "Partial refund recorded",
+        "REFUNDED": "Refund recorded"
       },
       "receipt": "Accepted receipt",
       "receiptEmpty": "No receipt accepted by the system yet",
@@ -204,13 +205,13 @@
     },
     "ownerAdmission": {
       "title": "Owner Admit Responsibility",
-      "subtitle": "Resolve dispute by committing to 100% full package refund",
+      "subtitle": "Accept responsibility and establish a 100% package-price refund obligation",
       "refundEstablished": "100% package refund obligation established",
-      "refundEstablishedDesc": "System has recorded technical responsibility and automatically processed refund to driver. No further action needed.",
+      "refundEstablishedDesc": "A related refund record exists. Track its status under Finance & Refunds; if a retry is needed, follow the record's status and instructions.",
       "bookingAmountLabel": "Associated package:",
       "bookingStatusLabel": "Booking status:",
-      "notice": "This ticket is under Admin dispute review. The Station Owner can proactively admit responsibility to establish a 100% refund for the driver without waiting for Admin arbitration.",
-      "actionBtn": "Admit Station Failure & Refund 100%",
+      "notice": "This ticket is under Admin dispute review. The Station Owner can admit responsibility and establish a 100% package-price refund obligation; execution is tracked separately in the Simulator.",
+      "actionBtn": "Accept responsibility & establish 100% refund obligation",
       "notEligible": "Booking is not eligible for station failure admission."
     }
   },
@@ -350,7 +351,7 @@
       "status": "STATUS"
     },
     "unassigned": "Pending Claim",
-    "refund100": "100% Refund",
+    "refund100": "Refund record",
     "daysLeft": "{{count}} days",
     "daysLeft_one": "1 day",
     "daysLeft_other": "{{count}} days",
@@ -443,7 +444,7 @@
       "escalatedLockedDesc": "Station findings are paused during Admin review. Station support can continue after the case is returned."
     },
     "refund": {
-      "title": "Deposit Refund Policy",
+      "title": "Refund records",
       "autoGranted": "Refund record exists",
       "autoGrantedBadge": "Refund record exists",
       "desc": "Check each refund record for its current status. A ticket finding does not prove money was transferred.",

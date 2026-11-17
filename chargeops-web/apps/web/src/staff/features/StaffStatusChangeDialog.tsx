@@ -195,7 +195,7 @@ export function StaffStatusChangeDialog({
           <p className="text-[11.5px] leading-relaxed">
             {t(
               'statusDialog.incidentBlockedBody',
-              'Hệ thống không cho phép bật lại cổng khi còn sự cố mở (lỗi STAFF_OP_004). Vui lòng sử dụng tính năng "Khắc phục sự cố" để hoàn tất quy trình phục hồi trước.',
+              'The connector cannot be set to available while an incident is still open. Complete the incident recovery process first.',
             )}
           </p>
         </div>

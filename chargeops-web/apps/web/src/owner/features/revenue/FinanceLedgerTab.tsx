@@ -13,6 +13,8 @@ import {
   Skeleton,
   StatusPill,
   Button,
+  MetricCard,
+  MetricStrip,
   useToast,
 } from '@chargeops/ui';
 import {
@@ -101,92 +103,31 @@ export function FinanceLedgerTab() {
 
   return (
     <>
-      {/* 1. Bento KPI Showcase (clean single-border cards) */}
       {s ? (
-        <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
-          {/* Card 1: Gross Collected */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-brand/40">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[12px] font-medium text-muted">
-                  {t('finance.kpis.gross', 'TỔNG THU GHI NHẬN')}
-                </span>
-              </div>
-              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
-                {formatVndCompact(s.grossVnd)}
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-              <span className="text-body font-semibold text-good flex items-center gap-1">
-                <span>↑</span>
-                <span>{s.paidBookings} {t('finance.kpis.paidBookingsSuffix', 'đơn sạc')}</span>
-              </span>
-              <span className="text-faint">{formatVnd(s.grossVnd)}</span>
-            </div>
-          </div>
-
-          {/* Card 2: Total Refunded */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-bad/40">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[12px] font-medium text-muted">
-                  {t('finance.kpis.refunded', 'ĐÃ HOÀN TRẢ')}
-                </span>
-              </div>
-              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
-                {formatVndCompact(s.refundedVnd)}
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-              <span className="text-bad font-semibold">
-                {s.grossVnd > 0 ? `${((s.refundedVnd / s.grossVnd) * 100).toFixed(1)}%` : '0%'}
-              </span>
-              <span className="text-faint">{formatVnd(s.refundedVnd)}</span>
-            </div>
-          </div>
-
-          {/* Card 3: Pending Obligations */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-warn/40">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[12px] font-medium text-muted">
-                  {t('finance.kpis.pending', 'NGHĨA VỤ HOÀN CHỜ')}
-                </span>
-              </div>
-              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
-                {formatVndCompact(s.pendingRefundVnd)}
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-              <span className="text-warn font-semibold">{t('finance.kpis.pendingNotice', 'Đang xử lý')}</span>
-              <span className="text-faint">{formatVnd(s.pendingRefundVnd)}</span>
-            </div>
-          </div>
-
-          {/* Card 4: Net Recorded Amount */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-good/40">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[12px] font-medium text-muted">
-                  {t('finance.kpis.net', 'THU RÒNG GHI NHẬN')}
-                </span>
-              </div>
-              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
-                {formatVndCompact(s.netVnd)}
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between text-[11px] border-t border-hairline pt-2.5">
-              <span className="text-good font-semibold">{t('finance.kpis.netNotice', 'Thu ròng đối soát')}</span>
-              <span className="text-faint">{formatVnd(s.netVnd)}</span>
-            </div>
-          </div>
-        </div>
+        <MetricStrip className="mb-5">
+          <MetricCard
+            label={t('finance.kpis.gross', 'Tổng thu ghi nhận')}
+            value={formatVndCompact(s.grossVnd)}
+            sub={`${formatVnd(s.grossVnd)} · ${s.paidBookings} ${t('finance.kpis.paidBookingsSuffix', 'đơn sạc')}`}
+          />
+          <MetricCard
+            label={t('finance.kpis.refunded', 'Đã hoàn trả')}
+            value={formatVndCompact(s.refundedVnd)}
+            sub={`${formatVnd(s.refundedVnd)} · ${s.grossVnd > 0 ? ((s.refundedVnd / s.grossVnd) * 100).toFixed(1) : '0'}%`}
+          />
+          <MetricCard
+            label={t('finance.kpis.pending', 'Nghĩa vụ hoàn chờ')}
+            value={formatVndCompact(s.pendingRefundVnd)}
+            sub={formatVnd(s.pendingRefundVnd)}
+          />
+          <MetricCard
+            label={t('finance.kpis.net', 'Thu ròng ghi nhận')}
+            value={formatVndCompact(s.netVnd)}
+            sub={formatVnd(s.netVnd)}
+          />
+        </MetricStrip>
       ) : (
-        <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[105px] rounded-card" />
-          ))}
-        </div>
+        <Skeleton className="mb-5 h-[84px] rounded-card" />
       )}
 
       {/* 2. Search Toolbar */}
@@ -253,7 +194,7 @@ export function FinanceLedgerTab() {
                       >
                         {/* Booking Code with Copy */}
                         <div className="flex items-center gap-1.5 min-w-0 pr-2">
-                          <span className="font-mono text-[11.5px] font-bold text-brand truncate">
+                          <span className="tabular-nums text-[11.5px] font-bold text-brand truncate">
                             {bookingCode}
                           </span>
                           <button
@@ -276,7 +217,7 @@ export function FinanceLedgerTab() {
                         </div>
 
                         {/* Date & Time */}
-                        <div className="text-[11.5px] text-faint font-mono">
+                        <div className="text-[11.5px] text-faint tabular-nums">
                           {b.paidAt ? (
                             <>
                               <div>{formatDateVn(b.paidAt)}</div>
@@ -288,28 +229,28 @@ export function FinanceLedgerTab() {
                         </div>
 
                         {/* Collected Amount */}
-                        <div className="text-right font-mono font-bold text-[13px] text-good">
+                        <div className="text-right tabular-nums font-bold text-[13px] text-good">
                           +{formatVnd(b.collectedAmount)}
                         </div>
 
                         {/* Refunded Amount */}
-                        <div className="text-right font-mono text-[12.5px] text-bad">
+                        <div className="text-right tabular-nums text-[12.5px] text-bad">
                           {b.refundedAmount > 0 ? `−${formatVnd(b.refundedAmount)}` : '0₫'}
                         </div>
 
                         {/* Net Amount */}
-                        <div className="text-right font-mono font-bold text-[13px] text-ink">
+                        <div className="text-right tabular-nums font-bold text-[13px] text-ink">
                           +{formatVnd(b.netRecordedAmount)}
                         </div>
 
                         {/* Refund Status */}
                         <div className="text-center">
                           {b.refundStatus === 'SUCCEEDED' ? (
-                            <StatusPill tone="good" label="SUCCEEDED" />
+                            <StatusPill tone="good" label={t('finance.refunds.tabs.succeeded', 'Đã hoàn tất')} />
                           ) : b.refundStatus === 'PENDING' ? (
-                            <StatusPill tone="warn" label="PENDING" />
+                            <StatusPill tone="warn" label={t('finance.refunds.tabs.pending', 'Chờ xử lý')} />
                           ) : (
-                            <span className="text-[11px] text-faint font-mono">—</span>
+                            <span className="text-[11px] text-faint tabular-nums">—</span>
                           )}
                         </div>
 

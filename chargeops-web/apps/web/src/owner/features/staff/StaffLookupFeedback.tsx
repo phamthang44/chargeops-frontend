@@ -139,7 +139,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
               {category}
             </span>
             {errorCode && (
-              <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-bad-deep bg-bad-soft border border-bad/25 px-2 py-0.5 rounded-md shadow-2xs">
+              <span className="inline-flex items-center gap-1 tabular-nums text-[11.5px] font-bold text-bad-deep bg-bad-soft border border-bad/25 px-2 py-0.5 rounded-md shadow-2xs">
                 {errorCode}
               </span>
             )}
@@ -218,7 +218,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
               </span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] text-muted">
-              <span className="break-all font-mono text-ink/80">{data.email}</span>
+              <span className="break-all tabular-nums text-ink/80">{data.email}</span>
               {data.maskedPhone && <span>• {data.maskedPhone}</span>}
               <span className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-semibold text-body border border-line/60">
                 {t('staff.assign.driverRole', { defaultValue: 'Tài xế / Người dùng' })}

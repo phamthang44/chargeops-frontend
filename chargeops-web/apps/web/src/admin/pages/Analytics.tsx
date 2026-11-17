@@ -118,7 +118,7 @@ function Body({ data }: { data: AnalyticsOverview }) {
                   style={{ height: `${Math.max(4, (m.vnd / maxRev) * 100)}%` }}
                   title={`${m.month}: ${formatVndCompact(m.vnd)}`}
                 />
-                <span className="font-mono text-[8.5px] text-disabled">{m.month}</span>
+                <span className="tabular-nums text-[11px] text-disabled">{m.month}</span>
               </div>
             ))}
           </div>
@@ -156,7 +156,7 @@ function Body({ data }: { data: AnalyticsOverview }) {
                     background: p.sessions > maxPeak * 0.7 ? '#5b54e8' : '#c8c5f6',
                   }}
                 />
-                <span className="h-2.5 font-mono text-[8px] text-disabled">{p.hour % 6 === 0 ? p.hour : ''}</span>
+                <span className="h-2.5 tabular-nums text-[11px] text-disabled">{p.hour % 6 === 0 ? p.hour : ''}</span>
               </div>
             ))}
           </div>

@@ -75,7 +75,7 @@ export function IssueLicenseModal({
           <div className="flex flex-col gap-1.5 font-medium">
             <div className="flex justify-between">
               <span className="text-muted">{station.name}</span>
-              <span className="font-mono font-bold text-brand">{station.stationCode || station.id}</span>
+              <span className="tabular-nums font-bold text-brand">{station.stationCode || station.id}</span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
               <span className="text-faint">{t('issueLicenseModal.ownerLabel', { defaultValue: 'Chủ sở hữu' })}:</span>
@@ -103,7 +103,7 @@ export function IssueLicenseModal({
                 <span className="text-[13px] font-bold">
                   {t('issueLicenseModal.planMonthly', { defaultValue: 'Gói Tháng' })}
                 </span>
-                <span className="font-mono text-[11px] font-semibold text-faint">500k/tháng</span>
+                <span className="tabular-nums text-[11px] font-semibold text-faint">500k/tháng</span>
               </div>
               <span className="mt-0.5 text-[11px] text-muted">
                 {t('issueLicenseModal.planMonthlyDesc', { defaultValue: 'Hiệu lực 1 tháng lịch' })}
@@ -136,7 +136,7 @@ export function IssueLicenseModal({
         {/* Standard Fee Summary Box */}
         <div className="mt-3.5 flex items-center justify-between rounded-[9px] bg-surface-2 p-3 text-[12.5px]">
           <span className="text-muted font-medium">Mức phí niêm yết theo gói:</span>
-          <span className="font-mono font-bold text-ink text-[14px]">
+          <span className="tabular-nums font-bold text-ink text-[14px]">
             {plan === 'YEARLY' ? '5.000.000 đ' : '500.000 đ'}
           </span>
         </div>

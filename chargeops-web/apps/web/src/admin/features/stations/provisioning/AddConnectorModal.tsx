@@ -60,7 +60,7 @@ export function AddConnectorModal({
           </h3>
           <p className="text-[12px] text-muted mt-0.5">
             {t('provisioning.workspace.common.cpLabel')}{' '}
-            <b className="font-mono text-brand">{chargePoint.chargePointCode || chargePoint.id}</b>
+            <b className="tabular-nums text-brand">{chargePoint.chargePointCode || chargePoint.id}</b>
             {chargePoint.name ? ` (${chargePoint.name})` : ''}
           </p>
         </div>
@@ -76,7 +76,7 @@ export function AddConnectorModal({
               onChange={(e) => setConnectorCode(e.target.value)}
               placeholder={t('provisioning.workspace.connectorForm.codePlaceholder')}
               required
-              className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] font-mono text-ink focus:border-brand focus:outline-none"
+              className="w-full rounded-[8px] border border-line bg-surface p-2.5 text-[12.5px] tabular-nums text-ink focus:border-brand focus:outline-none"
             />
           </div>
 

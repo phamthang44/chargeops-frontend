@@ -56,7 +56,7 @@
   },
   "legal": {
     "title": "Chính sách & Quy định Nền tảng",
-    "subtitle": "Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép License B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.",
+    "subtitle": "Kho văn kiện pháp lý và quy chuẩn vận hành chính thức dành cho Chủ trạm sạc: cấp phép giấy phép B2B, quản lý trụ sạc, phân quyền nhân viên và chi trả doanh thu.",
     "staffSubtitle": "Văn bản pháp lý, chính sách vận hành và tài liệu hướng dẫn dành cho nhân viên trạm.",
     "search": {
       "placeholder": "Tìm theo tiêu đề, từ khóa...",
@@ -68,7 +68,7 @@
     },
     "groups": {
       "all": "Tất cả ({{count}})",
-      "license": "License B2B",
+      "license": "Giấy phép B2B",
       "operation": "Vận hành",
       "general": "Chung"
     },
@@ -76,7 +76,7 @@
     "docTypes": {
       "TERMS_OF_SERVICE": "Điều khoản dịch vụ",
       "PRIVACY_POLICY": "Chính sách bảo mật",
-      "LICENSE_AGREEMENT": "Thỏa thuận License B2B",
+      "LICENSE_AGREEMENT": "Thỏa thuận giấy phép B2B",
       "OPERATIONAL_REGULATION": "Quy chế vận hành"
     },
     "audience": {
@@ -117,10 +117,10 @@
     "withdrawn": "Đã rút hồ sơ",
     "unapproved": "Chưa duyệt",
     "licenseMissing": "Thiếu Giấy phép",
-    "licenseExpired": "License hết hạn",
-    "licenseSuspended": "License tạm ngưng",
-    "licenseCancelled": "License đã hủy",
-    "licenseNotStarted": "License chờ hiệu lực",
+    "licenseExpired": "Giấy phép hết hạn",
+    "licenseSuspended": "Giấy phép tạm ngưng",
+    "licenseCancelled": "Giấy phép đã hủy",
+    "licenseNotStarted": "Giấy phép chờ hiệu lực",
     "noActiveChargers": "Chưa cấp trụ sạc",
     "allChargersOffline": "Tất cả trụ Offline",
     "hiddenFromSearch": "Tạm ẩn tìm kiếm",
@@ -139,11 +139,11 @@
     "suspended": "Trạm đang bị đình chỉ hoạt động bởi quản trị hệ thống.",
     "withdrawn": "Hồ sơ trạm sạc đã được chủ trạm rút lại.",
     "unapproved": "Trạng thái trạm: {{status}}",
-    "licenseMissing": "Trạm chưa có gói License hợp lệ nên đang tạm ẩn khỏi tìm kiếm của tài xế.",
-    "licenseExpired": "Gói License của trạm đã hết hạn hiệu lực. Vui lòng gia hạn để đón khách trở lại.",
-    "licenseSuspended": "Gói License của trạm đang bị tạm ngưng.",
-    "licenseCancelled": "Gói License của trạm đã bị hủy bỏ.",
-    "licenseNotStarted": "Gói License của trạm chưa tới ngày bắt đầu hiệu lực.",
+    "licenseMissing": "Trạm chưa có gói giấy phép hợp lệ nên đang tạm ẩn khỏi tìm kiếm của tài xế.",
+    "licenseExpired": "Gói giấy phép của trạm đã hết hạn hiệu lực. Vui lòng gia hạn để đón khách trở lại.",
+    "licenseSuspended": "Gói giấy phép của trạm đang bị tạm ngưng.",
+    "licenseCancelled": "Gói giấy phép của trạm đã bị hủy bỏ.",
+    "licenseNotStarted": "Gói giấy phép của trạm chưa tới ngày bắt đầu hiệu lực.",
     "noActiveChargers": "Trạm chưa có trụ sạc hoặc súng sạc nào được kích hoạt.",
     "allChargersOffline": "Tất cả trụ sạc của trạm đang tạm dừng, chờ kích hoạt hoặc mất kết nối.",
     "hiddenFromSearch": "Trạm tạm thời chưa đủ điều kiện nhận đón tài xế.",
@@ -212,7 +212,7 @@
     "statusAll": "Tất cả ({{count}})",
     "statusUnread": "Chưa đọc ({{count}})",
     "filterPlaceholder": "Lọc...",
-    "emptyUnread": "Bạn đã đọc hết mọi thông báo! 🎉",
+    "emptyUnread": "Bạn đã đọc hết mọi thông báo!",
     "emptyFilter": "Không có thông báo phù hợp",
     "emptyDefault": "Không có thông báo mới",
     "markAsRead": "Đánh dấu đã đọc",

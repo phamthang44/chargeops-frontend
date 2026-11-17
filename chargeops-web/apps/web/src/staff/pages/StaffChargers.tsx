@@ -13,11 +13,12 @@ import {
   IconAlertTriangle,
   IconHistory,
   IconWrench,
-  KpiCard,
   PageHeader,
   Skeleton,
   StatusPill,
   useToast,
+  MetricCard,
+  MetricStrip,
 } from '@chargeops/ui';
 import { getApiErrorMessage } from '../../i18n';
 import { ApiErrorState } from '../../shared/components/ApiErrorState';
@@ -152,27 +153,25 @@ export function StaffChargers() {
         />
       ) : (
         <>
-          <div className="mb-4 grid grid-cols-3 gap-[13px]">
-            <KpiCard
+          <MetricStrip className="mb-4">
+            <MetricCard
               label={t('chargers.kpi.chargePoints')}
               value={String(equipment.chargePoints.length)}
-              delta={t('chargers.kpi.chargePointsSub')}
+              sub={t('chargers.kpi.chargePointsSub')}
             />
-            <KpiCard
+            <MetricCard
               label={t('chargers.kpi.connectors')}
               value={String(equipment.connectors.length)}
-              delta={t('chargers.kpi.connectorsSub', {
+              sub={t('chargers.kpi.connectorsSub', {
                 available: equipment.connectors.filter((c) => c.runtimeStatus === 'AVAILABLE').length,
               })}
-              deltaClass="text-faint"
             />
-            <KpiCard
+            <MetricCard
               label={t('chargers.kpi.offline')}
               value={String(offlineCount)}
-              delta={offlineCount > 0 ? t('chargers.kpi.offlineSub') : t('chargers.kpi.allOnline')}
-              deltaClass={offlineCount > 0 ? 'text-bad' : 'text-good'}
+              sub={offlineCount > 0 ? t('chargers.kpi.offlineSub') : t('chargers.kpi.allOnline')}
             />
-          </div>
+          </MetricStrip>
 
           <div className="flex flex-col gap-3">
             {equipment.groups.map((group) => (
@@ -305,7 +304,7 @@ function ChargePointCard({
               <span className="text-[13.5px] font-bold text-ink">
                 {chargePoint.name || chargePoint.code}
               </span>
-              <span className="rounded bg-chip px-2 py-0.5 font-mono text-[10px] font-semibold text-faint">
+              <span className="rounded bg-chip px-2 py-0.5 tabular-nums text-[11.5px] font-semibold text-faint">
                 {chargePoint.code}
               </span>
               {chargePoint.zoneLabel && (
@@ -368,7 +367,7 @@ function ChargePointCard({
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="font-mono text-[12px] font-semibold text-brand">
+                  <span className="tabular-nums text-[12px] font-semibold text-brand">
                     {connector.code || connector.id}
                   </span>
                   <span className="text-[12px] text-muted">{connector.connectorType}</span>
@@ -486,11 +485,7 @@ function toneFor(status: string): 'good' | 'warn' | 'bad' | 'brand' | 'neutral' 
 function ChargersSkeleton() {
   return (
     <>
-      <div className="mb-4 grid grid-cols-3 gap-[13px]">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-[92px] rounded-card" />
-        ))}
-      </div>
+      <Skeleton className="mb-4 h-[76px] rounded-card" />
       <Skeleton className="h-[320px] rounded-card" />
     </>
   );

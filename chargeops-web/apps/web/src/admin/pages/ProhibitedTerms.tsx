@@ -302,7 +302,7 @@ export function ProhibitedTerms() {
                           {/* Term */}
                           <td className="py-3.5 pr-2">
                             <div className="flex flex-col">
-                              <span className="font-mono text-[13px] font-bold text-ink">
+                              <span className="tabular-nums text-[13px] font-bold text-ink">
                                 "{term.term}"
                               </span>
                               {term.note && (

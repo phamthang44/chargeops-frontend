@@ -150,7 +150,7 @@ export function StationDetailDrawer({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[13px] font-bold text-brand">
+                  <span className="tabular-nums text-[13px] font-bold text-brand">
                     {station.stationCode || station.id}
                   </span>
                   <button
@@ -265,11 +265,11 @@ export function StationDetailDrawer({
                   </div>
                   <div>
                     <span className="text-faint">{t('stations.drawer.overview.lat')}</span>
-                    <div className="font-mono font-medium text-ink">{station.latitude ?? '—'}</div>
+                    <div className="tabular-nums font-medium text-ink">{station.latitude ?? '—'}</div>
                   </div>
                   <div>
                     <span className="text-faint">{t('stations.drawer.overview.lng')}</span>
-                    <div className="font-mono font-medium text-ink">{station.longitude ?? '—'}</div>
+                    <div className="tabular-nums font-medium text-ink">{station.longitude ?? '—'}</div>
                   </div>
                   <div>
                     <span className="text-faint">{t('stations.drawer.overview.phone')}</span>
@@ -302,7 +302,7 @@ export function StationDetailDrawer({
                         <span className="font-medium text-body">
                           {t(`stations.drawer.days.${p.dayOfWeek}`)}
                         </span>
-                        <span className="font-mono font-semibold text-ink">
+                        <span className="tabular-nums font-semibold text-ink">
                           {p.openTime} - {p.closeTime}
                         </span>
                       </div>
@@ -360,7 +360,7 @@ export function StationDetailDrawer({
                   </div>
                   <div className="flex items-center justify-between border-b border-hairline pb-2">
                     <span className="text-faint">{t('stations.drawer.owner.email')}</span>
-                    <span className="font-mono text-body">{station.ownerEmail || '—'}</span>
+                    <span className="tabular-nums text-body">{station.ownerEmail || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-hairline pb-2">
                     <span className="text-faint">{t('stations.drawer.owner.phone')}</span>
@@ -368,7 +368,7 @@ export function StationDetailDrawer({
                   </div>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-faint">{t('stations.drawer.owner.uuid')}</span>
-                    <span className="font-mono text-[11px] text-faint truncate max-w-[240px]">
+                    <span className="tabular-nums text-[11px] text-faint truncate max-w-[240px]">
                       {station.ownerId || '—'}
                     </span>
                   </div>
@@ -470,14 +470,14 @@ export function StationDetailDrawer({
                           <div>
                             <div className="flex flex-wrap items-center gap-1.5">
                               <span className="font-bold text-[13.5px] text-ink">{cp.name || t('provisioning.cpListTitle')}</span>
-                              <span className="font-mono text-[11px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
+                              <span className="tabular-nums text-[11px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
                               {cp.zoneLabel && (
                                 <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-medium text-faint border border-line">
                                   {cp.zoneLabel}
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11.5px] text-muted mt-0.5 font-mono">
+                            <div className="text-[11.5px] text-muted mt-0.5 tabular-nums">
                               {t('stations.drawer.hardware.powerSummary', {
                                 power: cp.maxPowerKw,
                                 count: cpConnectors.length,
@@ -536,7 +536,7 @@ export function StationDetailDrawer({
                               return (
                                 <div key={c.id} className="flex items-center justify-between gap-1.5 rounded-[6px] bg-surface-2 px-2.5 py-1.5 text-[11px]">
                                   <div className="flex items-center gap-1.5">
-                                    <span className="font-mono font-bold text-brand">{c.connectorCode || c.id}</span>
+                                    <span className="tabular-nums font-bold text-brand">{c.connectorCode || c.id}</span>
                                     <span className="text-muted">({c.powerKw} kW - {c.connectorType})</span>
                                   </div>
                                   <StatusPill tone={cTone} label={cLabel} />

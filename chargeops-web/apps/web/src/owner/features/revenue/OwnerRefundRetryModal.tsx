@@ -100,7 +100,7 @@ export function OwnerRefundRetryModal({
           </div>
           <div className="flex justify-between">
             <span className="text-muted">{t('finance.refunds.table.cols.amount', 'Số tiền hoàn trả')}:</span>
-            <span className="font-mono font-bold text-good text-[14px]">+{formatVnd(refund.amount)}</span>
+            <span className="tabular-nums font-bold text-good text-[14px]">+{formatVnd(refund.amount)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">{t('finance.refunds.table.cols.reason', 'Lý do phát sinh')}:</span>
@@ -114,7 +114,7 @@ export function OwnerRefundRetryModal({
           </div>
           <div className="flex justify-between">
             <span className="text-muted">{t('finance.refunds.retryModal.recordVersion', 'Version hồ sơ')}:</span>
-            <span className="font-mono text-faint">v{refund.version}</span>
+            <span className="tabular-nums text-faint">v{refund.version}</span>
           </div>
         </div>
 

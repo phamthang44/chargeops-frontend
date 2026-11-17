@@ -156,7 +156,7 @@ export function ReportIncidentModal({
           <div className="flex items-center gap-2">
             <IconBolt size={14} className="text-owner" />
             <span className="font-semibold text-body">{t('incidents.report.connectorCodeLabel', 'Mã cổng sạc:')}</span>
-            <span className="font-mono font-bold text-ink">{connectorLabel}</span>
+            <span className="tabular-nums font-bold text-ink">{connectorLabel}</span>
           </div>
           <div className="flex items-center gap-1.5 text-muted">
             <IconLock size={12} />

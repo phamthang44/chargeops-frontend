@@ -57,14 +57,14 @@ export function BookingTable({
               className="grid cursor-pointer items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium hover:bg-row-hover"
               style={{ gridTemplateColumns: GRID }}
             >
-              <span className="font-mono text-[11.5px] font-semibold text-brand">{b.bookingCode || b.bookingId}</span>
+              <span className="tabular-nums text-[11.5px] font-semibold text-brand">{b.bookingCode || b.bookingId}</span>
               <span className="truncate font-semibold">{b.driverDisplayName}</span>
               <span className="truncate text-muted">{b.stationName}</span>
               <span className="text-muted">{b.connectorCode || b.connectorId}</span>
               <span className="text-muted">
                 {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
               </span>
-              <span className="font-mono text-[11.5px] text-muted">{formatDuration(durationMin)}</span>
+              <span className="tabular-nums text-[11.5px] text-muted">{formatDuration(durationMin)}</span>
               <span className="text-right font-semibold">{formatVnd(b.totalAmount)}</span>
               <span className="text-center">
                 <StatusPill tone={meta.tone} label={statusLabel} />

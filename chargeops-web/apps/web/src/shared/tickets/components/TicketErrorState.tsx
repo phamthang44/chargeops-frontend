@@ -37,7 +37,7 @@ export function TicketErrorState({
         <div className="mt-4 flex items-center justify-center gap-2">
           <h2 className="text-lg font-bold text-ink sm:text-xl">{errMeta.title}</h2>
           {errMeta.code && (
-            <span className="font-mono text-[11px] font-semibold uppercase px-2 py-0.5 rounded bg-chip text-muted border border-hairline">
+            <span className="tabular-nums text-[11px] font-semibold px-2 py-0.5 rounded bg-chip text-muted border border-hairline">
               {errMeta.code}
             </span>
           )}

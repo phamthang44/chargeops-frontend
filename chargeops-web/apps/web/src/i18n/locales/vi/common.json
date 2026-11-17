@@ -136,20 +136,20 @@
       "reminder": {
         "title": "Sắp đến giờ đặt chỗ"
       },
-      "state_message": "Booking {{code}}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành."
+      "state_message": "Đặt chỗ {{code}}. Vui lòng mở đặt chỗ để xem trạng thái hiện hành."
     },
     "refund": {
       "pending": {
         "title": "Nghĩa vụ hoàn tiền đang chờ xử lý",
-        "body": "Booking {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
+        "body": "Đặt chỗ {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
       },
       "attempt_failed": {
         "title": "Lần thực hiện hoàn tiền chưa thành công",
-        "body": "Booking {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
+        "body": "Đặt chỗ {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
       },
       "succeeded": {
         "title": "Hoàn tiền đã thành công trong Simulator",
-        "body": "Booking {{code}}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật."
+        "body": "Đặt chỗ {{code}}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật."
       }
     },
     "ticket": {

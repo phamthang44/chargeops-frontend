@@ -14,6 +14,8 @@ export interface ShellNavItem {
   icon: ReactNode;
   /** Not built yet — rendered with a SOON badge, not clickable. */
   soon?: boolean;
+  /** Section heading shown above the first item of each group (sidebar sections). */
+  group?: string;
 }
 
 export interface RolePill {
@@ -141,7 +143,7 @@ function StationSelector({
               >
                 <div className="min-w-0 flex-1">
                   <div className="truncate">{s.name}</div>
-                  <div className="truncate font-mono text-[10.5px] text-faint">
+                  <div className="truncate tabular-nums text-[11.5px] text-faint">
                     {s.stationCode || s.id} {s.city ? `· ${s.city}` : ''}
                   </div>
                 </div>
@@ -187,13 +189,33 @@ export function AppShell({
     document.title = pageLabel ? `${pageLabel} · ChargeOps` : 'ChargeOps';
   }, [pageLabel]);
 
+  // One accent per console: owner & staff re-point the brand tokens to emerald
+  // (tokens.css `:root[data-accent='owner']`). Set on <html> so portalled
+  // modals and drawers pick it up too.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.accent = accent;
+    return () => {
+      delete root.dataset.accent;
+    };
+  }, [accent]);
+
   const navList = (mobile: boolean) => (
     <>
-      {nav.map((it) => {
+      {nav.map((it, i) => {
         const active = it.key === activeKey;
+        const groupStart = it.group && it.group !== nav[i - 1]?.group;
         return (
+          <div key={it.key}>
+          {groupStart &&
+            (mobile || !collapsed ? (
+              <div className={`px-2.5 pb-1.5 text-[11.5px] font-medium text-faint ${i === 0 ? 'pt-1' : 'pt-4'}`}>
+                {it.group}
+              </div>
+            ) : (
+              i > 0 && <div className="mx-2.5 my-2.5 h-px bg-line" />
+            ))}
           <div
-            key={it.key}
             title={it.label}
             onClick={() => {
               if (it.soon) return;
@@ -214,10 +236,11 @@ export function AppShell({
               <span className="flex-1 overflow-hidden whitespace-nowrap">{it.label}</span>
             )}
             {(mobile || !collapsed) && it.soon && (
-              <span className="rounded-[5px] bg-line-3 px-[5px] py-0.5 font-mono text-[8.5px] font-semibold text-ghost">
+              <span className="rounded-[5px] bg-line-3 px-[5px] py-0.5 tabular-nums text-[11px] font-semibold text-ghost">
                 SOON
               </span>
             )}
+          </div>
           </div>
         );
       })}
@@ -268,8 +291,9 @@ export function AppShell({
         <div className="flex min-w-0 items-center justify-end gap-2.5">
           <div className="hidden min-w-0 md:block">{search}</div>
           {platformSwitcher}
+          {/* The perspective switcher (lg+) already names the role — don't say it twice. */}
           <span
-            className="hidden max-w-[160px] shrink-0 truncate rounded-full px-[11px] py-[5px] text-[10.5px] font-bold tracking-[0.04em] sm:block"
+            className={`hidden max-w-[160px] shrink-0 truncate rounded-full px-[11px] py-[5px] text-[11.5px] font-semibold sm:block ${platformSwitcher ? 'lg:hidden' : ''}`}
             style={{ background: rolePill.bg, color: rolePill.fg }}
           >
             {rolePill.label}
@@ -300,7 +324,7 @@ export function AppShell({
             onClick={() => setCollapsed((v) => !v)}
             className="mt-auto flex cursor-pointer items-center gap-2.5 rounded-ctl px-2.5 py-[9px] text-[12.5px] font-medium text-faint hover:bg-chip"
           >
-            <span className="w-[18px] shrink-0 text-center font-mono text-[13px] font-semibold">
+            <span className="w-[18px] shrink-0 text-center tabular-nums text-[13px] font-semibold">
               {collapsed ? '»' : '«'}
             </span>
             {!collapsed && <span>{t('sidebar.collapse')}</span>}

@@ -94,16 +94,16 @@ export function ChargerDetailPanel({
       <FieldLabel>{t('chargePoints.panel.chargePointId')}</FieldLabel>
       <div className="mb-[5px] flex items-center justify-between gap-2 rounded-[10px] border border-line bg-chip px-[13px] py-[11px]">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-mono text-[13px] font-semibold text-body">
+          <span className="tabular-nums text-[13px] font-semibold text-body">
             {chargePoint.chargePointCode || chargePoint.id}
           </span>
           {chargePoint.chargePointCode && (
-            <span className="font-mono text-[10.5px] text-faint truncate">({chargePoint.id})</span>
+            <span className="tabular-nums text-[11.5px] text-faint truncate">({chargePoint.id})</span>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[11px] font-bold font-mono">
-            ⚡ {chargePoint.maxPowerKw || connectors.reduce((m, c) => Math.max(m, c.powerKw || 0), 0) || 0} kW
+          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[11px] font-bold tabular-nums">
+            {chargePoint.maxPowerKw || connectors.reduce((m, c) => Math.max(m, c.powerKw || 0), 0) || 0} kW
           </span>
           <IconLock size={14} className="text-disabled" />
         </div>
@@ -244,7 +244,7 @@ function ConnectorCard({
     <div className="rounded-card border border-line p-3.5">
       <div className="mb-2.5 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="font-mono text-[12px] font-semibold text-brand">{c.connectorCode || c.id}</span>
+          <span className="tabular-nums text-[12px] font-semibold text-brand">{c.connectorCode || c.id}</span>
           <span className="truncate text-[12.5px] font-semibold">
             {c.name || t('connectors.panel.defaultName', 'Cổng sạc {{type}}', { type: c.connectorType })}
           </span>
@@ -276,7 +276,7 @@ function ConnectorCard({
       </div>
 
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex shrink-0 whitespace-nowrap items-center gap-[5px] rounded-full bg-warn-soft px-[9px] py-1 font-mono text-[10px] font-semibold text-warn">
+        <span className="inline-flex shrink-0 whitespace-nowrap items-center gap-[5px] rounded-full bg-warn-soft px-[9px] py-1 tabular-nums text-[11.5px] font-semibold text-warn">
           <IconLock size={11} strokeWidth={2.1} />
           <span>{t('connectors.panel.adminProvided')}</span>
         </span>

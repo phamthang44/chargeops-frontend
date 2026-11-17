@@ -211,12 +211,12 @@ export function OwnerCancelBookingModal({
           </div>
           <div className="flex justify-between border-t border-hairline pt-2">
             <span className="text-muted">{t('bookings.ownerCancelModal.totalAmountLabel', 'Tổng tiền gói sạc:')}</span>
-            <span className="font-mono font-bold text-ink">{formatVnd(booking.totalAmount)}</span>
+            <span className="tabular-nums font-bold text-ink">{formatVnd(booking.totalAmount)}</span>
           </div>
           {isPaid && (
             <div className="flex justify-between text-bad">
               <span className="font-semibold">{t('bookings.ownerCancelModal.refundObligationLabel', 'Nghĩa vụ hoàn lại cho khách (100%):')}</span>
-              <span className="font-mono font-bold text-[13px]">{formatVnd(refundAmount)}</span>
+              <span className="tabular-nums font-bold text-[13px]">{formatVnd(refundAmount)}</span>
             </div>
           )}
         </div>

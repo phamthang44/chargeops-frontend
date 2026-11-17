@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import type { ChargePoint, Connector, ProvisioningStatus } from '@chargeops/api';
-import { IconAlertTriangle, IconBolt, IconCard, IconHistory, IconLock, IconPin, IconShieldAlert, IconWrench } from '@chargeops/ui';
+import { IconAlertTriangle, IconEdit, IconHistory, IconLock, IconWrench } from '@chargeops/ui';
 import {
   getChargePointPill,
   getConnectorPill,
@@ -97,24 +97,23 @@ function ChargePointCard({
 
   const pill = getChargePointPill(cp.provisioningStatus, cp.operationalStatus);
   const canToggle = canToggleChargePoint(cp.provisioningStatus);
+  const maxKw = cp.maxPowerKw || connectors.reduce((max, c) => Math.max(max, c.powerKw || 0), 0);
+  const deviceDown =
+    cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
 
   return (
     <div
-      className={`overflow-hidden rounded-card border bg-surface transition ${
+      className={`overflow-hidden rounded-card border bg-surface transition-colors ${
         selected ? 'border-owner' : 'border-line'
       }`}
     >
       {/* ---- device header ---- */}
       <div
         onClick={() => onSelect(cp)}
-        className="flex cursor-pointer items-start gap-3 px-4 py-[13px] hover:bg-row-hover"
+        className="flex cursor-pointer items-start justify-between gap-3 px-4 py-3 hover:bg-row-hover"
       >
-        <span className="mt-px flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-owner-soft">
-          <IconBolt size={17} className="text-owner" />
-        </span>
-
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
             <span onClick={(e) => e.stopPropagation()}>
               {editing ? (
                 <input
@@ -126,118 +125,101 @@ function ChargePointCard({
                     if (e.key === 'Enter') commit();
                     if (e.key === 'Escape') setEditing(false);
                   }}
-                  className="w-[190px] rounded-[7px] border-[1.5px] border-owner px-2 py-[3px] text-[14px] font-semibold"
+                  className="w-[200px] rounded-[7px] border border-owner px-2 py-[3px] text-[14px] font-semibold"
                 />
               ) : (
-                <span
+                <button
+                  type="button"
                   onClick={() => {
                     setDraft(cp.name);
                     setEditing(true);
                   }}
-                  className="cursor-text border-b border-dashed border-ghost pb-px text-[14.5px] font-bold hover:border-owner text-ink"
+                  title={t('chargers.renameHint', 'Bấm để đổi tên')}
+                  className="group inline-flex items-center gap-1.5 text-[14.5px] font-semibold text-ink"
                 >
                   {cp.name}
-                </span>
+                  <IconEdit size={12} className="text-faint opacity-0 transition-opacity group-hover:opacity-100" />
+                </button>
               )}
             </span>
-            {cp.chargePointCode ? (
-              <span className="rounded bg-brand-soft text-brand font-mono px-1.5 py-0.5 text-[11px] font-bold border border-brand-line">
+            {cp.chargePointCode && (
+              <span className="text-[12px] tabular-nums text-faint" title={cp.id}>
                 {cp.chargePointCode}
               </span>
-            ) : null}
-            <span className="font-mono text-[11px] text-faint">#{cp.id.slice(0, 8)}</span>
-            <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 text-[10.5px] font-bold font-mono">
-              ⚡ {cp.maxPowerKw || connectors.reduce((max, c) => Math.max(max, c.powerKw || 0), 0) || 0} kW Max
-            </span>
+            )}
           </div>
 
-          <div className="mt-[3px] flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] font-medium text-faint">
-            {cp.zoneLabel ? (
-              <span className="flex items-center gap-1 text-muted">
-                <IconPin size={11} strokeWidth={2} />
-                {cp.zoneLabel}
-              </span>
-            ) : (
-              <span className="text-[10.5px] text-faint italic">{t('chargers.noZone', 'Chưa ghi chú vị trí')}</span>
-            )}
-            <span className="flex items-center gap-1">
-              <span className="h-[3px] w-[3px] rounded-full bg-disabled" />
-              <span>{t('chargePoints.connectorCount', { count: connectors.length })}</span>
-              {connectors.length > 0 && (
-                <span className="text-faint font-mono">
-                  ({connectors.map((c) => `${c.connectorType} ${c.powerKw}kW`).join(', ')})
-                </span>
-              )}
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-muted">
+            <span className={cp.zoneLabel ? '' : 'italic text-faint'}>
+              {cp.zoneLabel || t('chargers.noZone', 'Chưa ghi chú vị trí')}
             </span>
+            <span className="text-disabled">·</span>
+            <span>{t('chargePoints.connectorCount', { count: connectors.length })}</span>
+            {maxKw > 0 && (
+              <>
+                <span className="text-disabled">·</span>
+                <span className="tabular-nums">{t('chargers.maxPower', { kw: maxKw })}</span>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onViewCpHistory(cp);
             }}
-            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
+            className="inline-flex items-center gap-1 rounded-ctl px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-chip hover:text-ink"
             title={t('chargePoints.history.cpTooltip')}
           >
-            <IconHistory size={12} strokeWidth={2} />
+            <IconHistory size={13} strokeWidth={2} />
             <span>{t('chargePoints.history.shortLabel')}</span>
           </button>
-
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (canToggle) {
-                onCycleStatus(cp);
-              }
+              if (canToggle) onCycleStatus(cp);
             }}
             disabled={!canToggle}
             title={!canToggle ? t('chargePoints.pendingTooltip') : undefined}
-            className="mt-px inline-flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:opacity-80"
+            className="whitespace-nowrap rounded-full px-2 py-[2px] text-[11.5px] font-medium hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
             style={{ background: pill.bg, color: pill.fg }}
           >
-            <span className="h-[6px] w-[6px] rounded-full" style={{ background: pill.fg }} />
             {t(pill.key)}
           </button>
         </div>
       </div>
 
-      {/* ---- connectors ---- */}
-      <div className="border-t border-hairline bg-surface-2 px-3 py-2.5">
-        {/* BR-CHG-01 — say once, for the whole group, why every port below is down */}
-        {(cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE') && connectors.length > 0 && (
-          <div className="mb-2 flex items-start gap-1.5 rounded-[9px] border border-warn-border bg-warn-soft px-2.5 py-2 text-[11px] leading-[1.45] font-medium text-warn-deep">
-            <IconAlertTriangle size={13} strokeWidth={2} className="mt-px shrink-0" />
-            <span>
-              {cp.provisioningStatus === 'PENDING_ACTIVATION'
-                ? t('connectors.card.pendingActivation')
-                : t('connectors.card.deviceDown', { status: t(pill.key) })}
-            </span>
-          </div>
-        )}
+      {/* BR-CHG-01 — say once, for the whole device, why every port below is down */}
+      {deviceDown && connectors.length > 0 && (
+        <div className="flex items-start gap-1.5 border-t border-hairline bg-warn-soft px-4 py-2 text-[12px] text-warn-deep">
+          <IconAlertTriangle size={13} strokeWidth={2} className="mt-[3px] shrink-0" />
+          <span>
+            {cp.provisioningStatus === 'PENDING_ACTIVATION'
+              ? t('connectors.card.pendingActivation')
+              : t('connectors.card.deviceDown', { status: t(pill.key) })}
+          </span>
+        </div>
+      )}
 
-        {connectors.length === 0 ? (
-          <div className="px-1 py-2 text-[11.5px] font-medium text-faint">
-            {t('connectors.card.none')}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {connectors.map((c) => (
-              <ConnectorRow
-                key={c.id}
-                connector={c}
-                chargePoint={cp}
-                onCycleStatus={onCycleConnectorStatus}
-                onDownloadQr={onDownloadQr}
-                onViewConnectorHistory={onViewConnectorHistory}
-                onOpenIncident={onOpenIncident}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {/* ---- connectors: one row each, divided by hairlines ---- */}
+      {connectors.length === 0 ? (
+        <div className="border-t border-hairline px-4 py-2.5 text-[12px] text-faint">{t('connectors.card.none')}</div>
+      ) : (
+        connectors.map((c) => (
+          <ConnectorRow
+            key={c.id}
+            connector={c}
+            chargePoint={cp}
+            onCycleStatus={onCycleConnectorStatus}
+            onDownloadQr={onDownloadQr}
+            onViewConnectorHistory={onViewConnectorHistory}
+            onOpenIncident={onOpenIncident}
+          />
+        ))
+      )}
     </div>
   );
 }
@@ -262,18 +244,71 @@ function ConnectorRow({
   const effective = effectiveConnectorStatus(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
   const canToggle = canToggleConnector(cp.provisioningStatus, cp.operationalStatus, c.runtimeStatus);
   const pill = getConnectorPill(effective);
-  const inheritedDown = cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
+  const inheritedDown =
+    cp.provisioningStatus !== 'ACTIVE' || cp.operationalStatus === 'OFFLINE' || cp.operationalStatus === 'MAINTENANCE';
+  const usage = [
+    c.sessionsToday ? `${c.sessionsToday} ${t('chargers.sessionsCount', 'lượt sạc')}` : null,
+    c.kwhToday ? `${c.kwhToday} kWh` : null,
+  ].filter(Boolean);
 
   return (
-    <div className={`rounded-[10px] border border-line bg-surface px-3 py-2.5 ${inheritedDown ? 'opacity-70' : ''}`}>
-      {/* identity + runtime status */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="font-mono text-[11.5px] font-semibold text-brand">{c.connectorCode || c.id}</span>
-          <span className="truncate text-[12.5px] font-semibold">
+    <div
+      className={`flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-hairline py-2.5 pl-4 pr-3 sm:flex-nowrap ${
+        inheritedDown ? 'opacity-70' : ''
+      }`}
+    >
+      {/* identity + locked hardware spec */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[12px] tabular-nums text-faint">{c.connectorCode || c.id}</span>
+          <span className="truncate text-[13px] font-medium text-ink">
             {c.name || t('connectors.panel.defaultName', { type: c.connectorType })}
           </span>
         </div>
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[12px] text-muted">
+          <span className="inline-flex items-center gap-1" title={t('chargers.specLocked', 'Do quản trị viên cấp, chỉ đọc')}>
+            {c.connectorType} · {c.powerKw} kW{c.chargerType ? ` · ${c.chargerType}` : ''}
+            <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
+          </span>
+          {usage.length > 0 && (
+            <>
+              <span className="text-disabled">·</span>
+              <span className="tabular-nums">{usage.join(' · ')}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* status + actions */}
+      <div className="ml-auto flex shrink-0 items-center gap-1">
+        {hasActiveIncident && (
+          <button
+            type="button"
+            onClick={() => onOpenIncident?.(c.activeIncidentId!)}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-ctl bg-bad px-2.5 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-bad-strong"
+            title={t('connectors.panel.resolveIncidentTooltip', 'Xem chi tiết sự cố và khắc phục')}
+          >
+            <IconWrench size={12} strokeWidth={2} />
+            {t('connectors.panel.resolveIncidentBtn', 'Khắc phục')}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => onDownloadQr(c)}
+          className="rounded-ctl px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-chip hover:text-ink"
+          title={t('connectors.panel.downloadQrBtn', 'Tải QR')}
+        >
+          QR
+        </button>
+        <button
+          type="button"
+          onClick={() => onViewConnectorHistory(c)}
+          className="inline-flex items-center gap-1 rounded-ctl px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-chip hover:text-ink"
+          title={t('chargePoints.history.connectorTooltip')}
+        >
+          <IconHistory size={13} strokeWidth={2} />
+          {t('chargePoints.history.shortLabel')}
+        </button>
         <button
           onClick={() => onCycleStatus(c)}
           disabled={!canToggle || hasActiveIncident}
@@ -284,82 +319,15 @@ function ConnectorRow({
                 ? t('connectors.card.lockedByDevice')
                 : undefined
           }
-          className="inline-flex shrink-0 whitespace-nowrap items-center gap-[5px] rounded-full px-2.5 py-1 text-[11px] font-semibold hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100"
-          style={{
-            background: hasActiveIncident ? 'rgba(239, 68, 68, 0.15)' : pill.bg,
-            color: hasActiveIncident ? '#ef4444' : pill.fg,
-          }}
+          className={`ml-1 whitespace-nowrap rounded-full px-2 py-[2px] text-[11.5px] font-medium hover:brightness-95 disabled:cursor-not-allowed disabled:hover:brightness-100 ${
+            hasActiveIncident ? 'bg-bad-soft text-bad' : ''
+          }`}
+          style={hasActiveIncident ? undefined : { background: pill.bg, color: pill.fg }}
         >
-          <span
-            className="h-[6px] w-[6px] rounded-full"
-            style={{ background: hasActiveIncident ? '#ef4444' : pill.fg }}
-          />
           {hasActiveIncident
             ? t('connectors.status.incident', 'Có sự cố')
             : t(`connectors.status.${effective}`, { defaultValue: t(pill.key) })}
         </button>
-      </div>
-
-      {/* locked hardware spec + incident badge & actions */}
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-chip px-2.5 py-1 text-[11px] font-semibold text-body">
-            {c.connectorType} · {c.powerKw} kW{c.chargerType ? ` · ${c.chargerType}` : ''}
-            <IconLock size={10} strokeWidth={2.2} className="text-disabled" />
-          </span>
-
-          {c.sessionsToday !== undefined && c.sessionsToday > 0 && (
-            <span className="inline-flex items-center gap-1 rounded bg-surface-2 px-2 py-0.5 font-mono text-[10.5px] text-muted border border-hairline">
-              <span>⚡ {c.sessionsToday} {t('chargers.sessionsCount', 'lượt sạc')}</span>
-            </span>
-          )}
-
-          {c.kwhToday !== undefined && c.kwhToday > 0 && (
-            <span className="inline-flex items-center gap-1 rounded bg-surface-2 px-2 py-0.5 font-mono text-[10.5px] text-muted border border-hairline">
-              <span>🔋 {c.kwhToday} kWh</span>
-            </span>
-          )}
-
-          {hasActiveIncident && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-bad-soft px-2 py-0.5 text-[11px] font-semibold text-bad">
-              <IconShieldAlert size={12} strokeWidth={2} />
-              <span>{t('connectors.card.incidentWarning', 'Đang có sự cố')}</span>
-            </span>
-          )}
-        </div>
-
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => onDownloadQr(c)}
-            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line bg-surface-2 px-2 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
-            title={t('connectors.panel.downloadQrBtn', 'Tải QR')}
-          >
-            <span>QR</span>
-          </button>
-
-          {hasActiveIncident && (
-            <button
-              type="button"
-              onClick={() => onOpenIncident?.(c.activeIncidentId!)}
-              className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-bad bg-bad px-2.5 py-[5px] text-[11px] font-semibold text-white shadow-xs hover:bg-bad/90 transition cursor-pointer"
-              title={t('connectors.panel.resolveIncidentTooltip', 'Xem chi tiết sự cố và khắc phục')}
-            >
-              <IconWrench size={12} strokeWidth={2} />
-              <span>{t('connectors.panel.resolveIncidentBtn', 'Khắc phục')}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => onViewConnectorHistory(c)}
-            className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-[8px] border border-line bg-surface-2 px-2.5 py-[5px] text-[11px] font-semibold text-muted hover:border-owner hover:text-owner transition cursor-pointer"
-            title={t('chargePoints.history.connectorTooltip')}
-          >
-            <IconHistory size={12} strokeWidth={2} />
-            <span>{t('chargePoints.history.shortLabel')}</span>
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -1,5 +1,10 @@
 {
   "console": {
+    "navGroup": {
+      "operations": "Operations",
+      "business": "Business",
+      "reference": "Reference"
+    },
     "role": {
       "staff": "Station staff",
       "owner": "Station owner"
@@ -181,7 +186,7 @@
       "refundReason": "Reason: {{reason}} ({{status}})"
     },
     "ownerCancelModal": {
-      "title": "Cancel Booking for Station Failure (BKG-056)",
+      "title": "Cancel Booking for Station Failure",
       "paidTitle": "Package Paid — Automatic 100% Refund",
       "unpaidTitle": "Unpaid Booking",
       "paidWarning": "A 100% refund obligation ({{amount}}) will be established and simulated to the driver. The charging slot will be released.",
@@ -206,7 +211,7 @@
       "submitting": "Processing..."
     },
     "ownerAdmitModal": {
-      "title": "Accept Station Failure & Refund (BKG-056)",
+      "title": "Accept Station Failure & Refund",
       "warningTitle": "Proactive Station Responsibility Confirmation",
       "warningDesc": "This action confirms station fault affected the driver's booking. The system records an immutable decision and grants a 100% full package refund in the Simulator without requiring admin intervention.",
       "affectedAtLabel": "Time Incident Occurred",
@@ -359,6 +364,7 @@
     "ports": "connectors",
     "createdAt": "Created at",
     "sessionsCount": "sessions today",
+    "maxPower": "Up to {{kw}} kW",
     "pendingActivationBadge": "Pending Activation",
     "statusGuide": {
       "title": "Charge Point & Connector Status Guide",
@@ -377,7 +383,7 @@
       "chargingTitle": "In Use",
       "chargingDesc": "Vehicle is plugged in and charging. Active kW and kWh consumption are being tracked.",
       "incidentTitle": "Incident",
-      "incidentDesc": "Urgent fault reported (BKG-054). Temporarily suspended for safety.",
+      "incidentDesc": "Urgent fault reported. Temporarily suspended for safety.",
       "connOfflineTitle": "Offline",
       "connOfflineDesc": "Connector turned off individually or inheriting offline state from its charge point."
     }
@@ -594,7 +600,7 @@
     },
     "incidentBannerTitle": "Technical malfunction or emergency incident?",
     "incidentBannerDesc": "If equipment is damaged or dangerous requiring immediate de-energization, you can activate an emergency incident report to immediately set the connector OFFLINE and capture snapshot bookings for safe resolution.",
-    "incidentBannerBtn": "Activate Emergency Incident (BKG-054)",
+    "incidentBannerBtn": "Activate Emergency Incident",
     "presets": {
       "maintenance": [
         "Routine hardware maintenance",
@@ -652,7 +658,7 @@
       "groupTitle": "Connectors ({{count}})",
       "adminProvided": "Admin-assigned",
       "defaultName": "Connector {{type}}",
-      "reportIncidentTooltip": "Report emergency incident on this connector (BKG-054)",
+      "reportIncidentTooltip": "Report emergency incident on this connector",
       "resolveIncidentBtn": "Resolve",
       "resolveIncidentTooltip": "Connector has an active incident. Click to view details and recover.",
       "incidentBlockedTooltip": "Connector has an active incident that must be resolved before turning online",
@@ -757,11 +763,11 @@
         "legendLow": "Off-peak",
         "legendBase": "Base Rate",
         "legendPeak": "Peak Rate",
-        "weekdaysTrack": "🏢 Weekdays",
+        "weekdaysTrack": "Weekdays",
         "weekdaysBadge": "Mon – Fri",
-        "weekendsTrack": "🏖️ Weekends",
+        "weekendsTrack": "Weekends",
         "weekendsBadge": "Sat – Sun",
-        "dailyTrack": "📅 All Week",
+        "dailyTrack": "All Week",
         "dailyBadge": "Mon – Sun",
         "editRuleTooltip": "Edit this rate window",
         "deleteRuleTooltip": "Delete rate window",
@@ -1145,7 +1151,7 @@
       },
       "eligibility": {
         "title": "Driver Search Visibility Criteria",
-        "rule1": "1. Station Approval Status (ACTIVE)",
+        "rule1": "1. Station Approval Status",
         "rule2": "2. Active License Subscription",
         "rule3": "3. Chargers Ready for Booking",
         "pass": "✓ Passed",
@@ -1386,7 +1392,7 @@
       "warningTitle": "Operational Safety & Policy Warning:",
       "warningOffline": "Connector will immediately switch to OFFLINE and block all new bookings.",
       "warningSnapshot": "The system captures an immutable snapshot of affected bookings for safe session termination.",
-      "warningNoAutoRefund": "No automatic refund: Incident reporting is an on-site technical safety action. Refunds, if any, will be processed via Station Failure Admission (BKG-056) or Admin Review (BKG-057).",
+      "warningNoAutoRefund": "No automatic refund: Incident reporting is an on-site technical safety action. Refunds, if any, will be processed via Station Failure Admission or Admin Review.",
       "connectorCodeLabel": "Connector Code:",
       "powerKw": "Power: {{power}} kW",
       "reasonLabel": "Incident Reason / Description",
@@ -1465,7 +1471,7 @@
         "subtitle": "BKG-055 · Restore Connector Operations",
         "info1": "The recovery command transitions the incident to RECOVERED.",
         "info2": "If there are no other open incidents and the station is operating, the connector will automatically return to AVAILABLE.",
-        "pendingWarning": "⚠️ Active session awaiting safe stop remains. Recovery will close this incident, but connector may remain OFFLINE or IN_USE.",
+        "pendingWarning": "Active session awaiting safe stop remains. Recovery will close this incident, but connector may remain OFFLINE or IN_USE.",
         "reasonLabel": "Reason & Remediation Outcome",
         "reasonPlaceholder": "Describe technical remediation (e.g. Technician replaced cable and verified insulation resistance meets specs, connector ready for service...)",
         "cancelBtn": "Cancel",
@@ -1494,7 +1500,7 @@
         "collected": "COLLECTED",
         "refunded": "REFUNDED",
         "net": "Net recorded",
-        "refundStatus": "REFUND",
+        "refundStatus": "Refund",
         "actions": "ACTIONS"
       },
       "empty": "No booking matches the filter.",
@@ -1528,8 +1534,8 @@
     "refunds": {
       "tabs": {
         "all": "All Records",
-        "pending": "Pending (PENDING)",
-        "succeeded": "Succeeded (SUCCEEDED)",
+        "pending": "Pending",
+        "succeeded": "Succeeded",
         "actionRequired": "Action Required"
       },
       "kpi": {
@@ -1567,7 +1573,7 @@
         "stationUnavailable": "Station unavailable"
       },
       "statusPill": {
-        "actionRequired": "Action required"
+        "actionRequired": "Retry needed"
       },
       "retrySuccess": "Refund retry request submitted successfully!",
       "retryError": "Could not retry refund. Please check connection and try again.",

@@ -124,7 +124,7 @@ export function PolicySandboxCard() {
         {/* Action Button */}
         <div className="mt-3 flex items-center justify-between">
           <span className="text-[11px] text-muted flex items-center gap-1">
-            <kbd className="rounded-md border border-line bg-surface-2 px-1.5 py-0.5 text-[10px] font-mono text-muted shadow-2xs">
+            <kbd className="rounded-md border border-line bg-surface-2 px-1.5 py-0.5 text-[11.5px] tabular-nums text-muted shadow-2xs">
               {t('prohibitedTerms.sandbox.hotkey', '⌘ + Enter')}
             </kbd>
           </span>
@@ -135,7 +135,7 @@ export function PolicySandboxCard() {
             disabled={!text.trim() || checkMutation.isPending}
             onClick={handleRun}
           >
-            {checkMutation.isPending ? t('prohibitedTerms.sandbox.running') : `⚡ ${t('prohibitedTerms.sandbox.runBtn')}`}
+            {checkMutation.isPending ? t('prohibitedTerms.sandbox.running') : `${t('prohibitedTerms.sandbox.runBtn')}`}
           </Button>
         </div>
 
@@ -181,12 +181,12 @@ export function PolicySandboxCard() {
                       className="flex items-center justify-between rounded-lg bg-surface px-2.5 py-1.5 border border-bad-border/80 shadow-2xs"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-ink">"{m.term}"</span>
+                        <span className="tabular-nums font-bold text-ink">"{m.term}"</span>
                         <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-body border border-line/60">
                           {m.matchType}
                         </span>
                       </div>
-                      <span className="font-mono text-[10px] text-muted">
+                      <span className="tabular-nums text-[11.5px] text-muted">
                         ID: {m.id.slice(0, 8)}
                       </span>
                     </div>
@@ -200,7 +200,7 @@ export function PolicySandboxCard() {
 
       {/* Footer Info */}
       <div className="mt-5 border-t border-line/70 pt-3 text-[11px] text-muted">
-        🛡️ ChargeOps Engine v1 · Zero Client Storage Invariant
+        ChargeOps Engine v1 · Zero Client Storage Invariant
       </div>
     </Card>
   );

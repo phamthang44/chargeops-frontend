@@ -217,7 +217,7 @@ export function Staff() {
                         <span className="h-2 w-2 rounded-full bg-owner" />
                         <span className="text-[13px] font-bold text-ink">{stationName}</span>
                       </div>
-                      <span className="rounded bg-chip px-2 py-0.5 font-mono text-[10px] font-semibold text-faint">
+                      <span className="rounded bg-chip px-2 py-0.5 tabular-nums text-[11.5px] font-semibold text-faint">
                         {id}
                       </span>
                     </div>

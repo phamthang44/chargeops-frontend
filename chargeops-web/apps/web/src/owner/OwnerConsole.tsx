@@ -82,19 +82,20 @@ const PAGES: Record<string, ComponentType> = {
   tickets: () => <TicketsRoute admin={false} />,
 };
 
+// Sidebar sections: day-to-day operations, the business setup, then reference.
 const NAV = [
-  { key: 'dashboard', icon: <IconGrid size={17} /> },
-  { key: 'notifications', icon: <IconBell size={17} /> },
-  { key: 'bookings', icon: <IconCalendar size={17} /> },
-  { key: 'chargers', icon: <IconBolt size={17} /> },
-  { key: 'tickets', icon: <IconLifebuoy size={17} /> },
-  { key: 'pricing', icon: <IconTag size={17} /> },
-  { key: 'stations', icon: <IconPin size={17} /> },
-  { key: 'staff', icon: <IconUsers size={17} /> },
-  { key: 'revenue', icon: <IconCard size={17} /> },
-  { key: 'license', icon: <IconShield size={17} /> },
-  { key: 'assistant', icon: <IconChat size={17} /> },
-  { key: 'legal', icon: <IconBook size={17} /> },
+  { key: 'dashboard', group: 'operations', icon: <IconGrid size={17} /> },
+  { key: 'notifications', group: 'operations', icon: <IconBell size={17} /> },
+  { key: 'bookings', group: 'operations', icon: <IconCalendar size={17} /> },
+  { key: 'chargers', group: 'operations', icon: <IconBolt size={17} /> },
+  { key: 'tickets', group: 'operations', icon: <IconLifebuoy size={17} /> },
+  { key: 'stations', group: 'business', icon: <IconPin size={17} /> },
+  { key: 'pricing', group: 'business', icon: <IconTag size={17} /> },
+  { key: 'revenue', group: 'business', icon: <IconCard size={17} /> },
+  { key: 'staff', group: 'business', icon: <IconUsers size={17} /> },
+  { key: 'license', group: 'business', icon: <IconShield size={17} /> },
+  { key: 'assistant', group: 'reference', icon: <IconChat size={17} /> },
+  { key: 'legal', group: 'reference', icon: <IconBook size={17} /> },
 ];
 
 /**
@@ -340,6 +341,7 @@ export function OwnerConsole({ base, reduced = false }: { base: string; reduced?
   const nav: (ShellNavItem & { title: string; subtitle: string })[] = items.map((item) => ({
     key: item.key,
     icon: item.icon,
+    group: t(`console.navGroup.${item.group}`),
     label: t(`console.nav.${item.key}.label`),
     title: t(`console.nav.${item.key}.title`),
     subtitle: t(`console.nav.${item.key}.subtitle`),

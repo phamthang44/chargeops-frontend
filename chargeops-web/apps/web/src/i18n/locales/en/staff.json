@@ -205,7 +205,7 @@
         "status": "Status"
       },
       "noData": "—",
-      "phoneHiddenHint": "Driver phone is not part of the operational booking response (BKG-048)."
+      "phoneHiddenHint": "Driver phone is not part of the operational booking response."
     }
   }
 }

@@ -251,7 +251,7 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: () => void
             </span>
 
             {item.code && (
-              <span className="font-mono text-[10.5px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-chip text-muted border border-hairline">
+              <span className="tabular-nums text-[11.5px] font-semibold px-1.5 py-0.5 rounded bg-chip text-muted border border-hairline">
                 {item.code}
               </span>
             )}

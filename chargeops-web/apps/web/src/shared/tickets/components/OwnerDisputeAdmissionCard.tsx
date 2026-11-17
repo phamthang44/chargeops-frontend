@@ -103,7 +103,7 @@ export function OwnerDisputeAdmissionCard({
           <div className="rounded-xl bg-surface p-3 text-[11.5px] space-y-1.5">
             <div className="flex justify-between">
               <span className="text-muted">{t('escalation.ownerAdmission.bookingAmountLabel', 'Gói sạc liên quan:')}</span>
-              <span className="font-mono font-semibold text-ink">
+              <span className="tabular-nums font-semibold text-ink">
                 {formatVnd(booking.totalAmount)}
               </span>
             </div>

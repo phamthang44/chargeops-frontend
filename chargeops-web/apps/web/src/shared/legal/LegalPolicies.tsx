@@ -279,7 +279,7 @@ export function LegalPolicies({
                     <div className="flex-1 pr-2">
                       <div className="mb-1 flex items-center gap-1.5">
                         <span
-                          className={`rounded px-1.5 py-0.2 font-mono text-[9.5px] font-bold ${
+                          className={`rounded px-1.5 py-0.2 tabular-nums text-[11px] font-bold ${
                             isSelected ? 'bg-owner/20 text-owner-deep' : 'bg-chip text-muted'
                           }`}
                         >
@@ -290,7 +290,7 @@ export function LegalPolicies({
                             {t('legal.audience.ownerBadge', { defaultValue: 'Chủ trạm' })}
                           </span>
                         )}
-                        <span className="font-mono text-[9.5px] text-ghost">v{d.version}</span>
+                        <span className="tabular-nums text-[11px] text-ghost">v{d.version}</span>
                       </div>
 
                       <div
@@ -328,7 +328,7 @@ export function LegalPolicies({
               {/* Document Overview Header Card */}
               <div className="rounded-card border border-line bg-surface p-6 shadow-xs">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-owner-soft px-2.5 py-0.5 font-mono text-[11px] font-bold text-owner-deep">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-owner-soft px-2.5 py-0.5 tabular-nums text-[11px] font-bold text-owner-deep">
                     <IconTag size={12} />
                     {getDocTypeLabel(activeDoc.docType)}
                   </span>
@@ -337,7 +337,7 @@ export function LegalPolicies({
                       ? t('legal.audience.forOwner', { defaultValue: 'Áp dụng cho Chủ trạm' })
                       : t('legal.audience.systemWide', { defaultValue: 'Toàn hệ thống' })}
                   </span>
-                  <span className="rounded-md border border-line bg-canvas px-2 py-0.5 font-mono text-[10.5px] text-muted">
+                  <span className="rounded-md border border-line bg-canvas px-2 py-0.5 tabular-nums text-[11.5px] text-muted">
                     v{activeDoc.version}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-good-soft px-2 py-0.5 text-[10px] font-bold text-good-deep">

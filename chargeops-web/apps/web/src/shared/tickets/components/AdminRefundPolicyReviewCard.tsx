@@ -54,7 +54,7 @@ function Section({ index, title, children }: { index: string; title: string; chi
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="rounded-md border border-brand-line bg-brand-soft px-1.5 py-[1px] font-mono text-[9.5px] font-bold text-brand">
+        <span className="rounded-md border border-brand-line bg-brand-soft px-1.5 py-[1px] tabular-nums text-[11px] font-bold text-brand">
           {index}
         </span>
         <h4 className="text-[12px] font-medium text-muted">{title}</h4>
@@ -69,7 +69,7 @@ function Row({ label, value, mono = false }: { label: string; value: React.React
   return (
     <div className="flex items-baseline justify-between gap-3 text-[11.5px]">
       <span className="shrink-0 text-muted">{label}</span>
-      <span className={`min-w-0 break-words text-right text-ink ${mono ? 'font-mono text-[11px]' : 'font-medium'}`}>
+      <span className={`min-w-0 break-words text-right text-ink ${mono ? 'tabular-nums text-[11px]' : 'font-medium'}`}>
         {value}
       </span>
     </div>
@@ -103,7 +103,7 @@ function MilestoneRow({
           <span className={`truncate text-[11.5px] ${isDeadline ? 'text-muted' : 'font-semibold text-ink'}`}>
             {label}
           </span>
-          <span className="shrink-0 font-mono text-[10.5px] text-muted">
+          <span className="shrink-0 tabular-nums text-[11.5px] text-muted">
             {formatDateVn(item.at)} {formatTimeVn(item.at)}
           </span>
         </div>
@@ -223,7 +223,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                 {bookingMeta ? (
                   <StatusPill tone={bookingMeta.tone} label={bookingMeta.label} />
                 ) : (
-                  <span className="font-mono text-[11px]">{context?.bookingStatus ?? '—'}</span>
+                  <span className="tabular-nums text-[11px]">{context?.bookingStatus ?? '—'}</span>
                 )}
               </span>
             }
@@ -268,7 +268,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   label={t('escalation.dossier.window')}
                   value={
                     ticket.bookingStartAt || ticket.bookingEndAt ? (
-                      <span className="inline-flex items-center gap-1.5 font-mono text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 tabular-nums text-[11px]">
                         <IconCalendar className="h-3.5 w-3.5 text-muted" />
                         {formatDateVn(ticket.bookingStartAt)} {formatTimeVn(ticket.bookingStartAt)} –{' '}
                         {formatTimeVn(ticket.bookingEndAt)}
@@ -294,7 +294,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                           <span className="font-medium">{dossier.snapshot.stationName}</span>
                         ) : null}
                         {dossier?.snapshot.chargePointCode ? (
-                          <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] font-mono text-[10px] text-muted">
+                          <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] tabular-nums text-[11.5px] text-muted">
                             {dossier.snapshot.chargePointCode}
                             {dossier.snapshot.connectorCode ? ` / ${dossier.snapshot.connectorCode}` : ''}
                           </span>
@@ -319,7 +319,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   <Row
                     label={t('escalation.dossier.policyVersion')}
                     value={
-                      <span className="rounded-md border border-brand-line bg-brand-soft px-1.5 py-[1px] font-mono text-[10px] font-semibold text-brand">
+                      <span className="rounded-md border border-brand-line bg-brand-soft px-1.5 py-[1px] tabular-nums text-[11.5px] font-semibold text-brand">
                         {dossier.policy.version}
                       </span>
                     }
@@ -394,9 +394,9 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                           tone={PAYMENT_TONE[payment.status] ?? 'neutral'}
                           label={t(`escalation.dossier.paymentStatus.${payment.status}`)}
                         />
-                        <span className="font-mono text-[11px]">{formatVnd(payment.amount)}</span>
+                        <span className="tabular-nums text-[11px]">{formatVnd(payment.amount)}</span>
                         {payment.environment ? (
-                          <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] font-mono text-[9.5px] text-muted">
+                          <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] tabular-nums text-[11px] text-muted">
                             {payment.environment}
                           </span>
                         ) : null}
@@ -411,7 +411,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   value={
                     receipt ? (
                       <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
-                        <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] font-mono text-[10px] text-muted">
+                        <span className="rounded-md border border-hairline bg-line-2 px-1.5 py-[1px] tabular-nums text-[11.5px] text-muted">
                           {receipt.receiptId}
                         </span>
                         <StatusPill
@@ -422,7 +422,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                               : t('escalation.dossier.receiptUnapplied')
                           }
                         />
-                        <span className="font-mono text-[11px]">{formatVnd(receipt.amount)}</span>
+                        <span className="tabular-nums text-[11px]">{formatVnd(receipt.amount)}</span>
                       </span>
                     ) : (
                       <span className="text-muted">{t('escalation.dossier.receiptEmpty')}</span>
@@ -433,7 +433,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   label={t('escalation.dossier.priceLines')}
                   value={
                     priceLines.length > 0 ? (
-                      <span className="font-mono text-[11px]">
+                      <span className="tabular-nums text-[11px]">
                         {priceLines.length} · {formatVnd(priceLines.reduce((sum, l) => sum + (l.amount ?? 0), 0))}
                       </span>
                     ) : (
@@ -452,11 +452,11 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                     >
                       <span className="truncate font-medium text-ink">
                         {line.label}
-                        <span className="ml-1.5 font-mono text-[10px] text-muted">
+                        <span className="ml-1.5 tabular-nums text-[11.5px] text-muted">
                           {t('escalation.dossier.priceLineRow', { min: line.durationMin })}
                         </span>
                       </span>
-                      <span className="shrink-0 font-mono text-[11px] text-ink">{formatVnd(line.amount)}</span>
+                      <span className="shrink-0 tabular-nums text-[11px] text-ink">{formatVnd(line.amount)}</span>
                     </li>
                   ))}
                 </ul>
@@ -468,7 +468,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                     <IconCheckCircle className="h-3.5 w-3.5" />
                     {t('escalation.dossier.eligibleAmount')}
                   </span>
-                  <span className="font-mono text-[14px] font-bold text-good">
+                  <span className="tabular-nums text-[14px] font-bold text-good">
                     {context.eligibleRefundAmountVnd != null
                       ? formatVnd(context.eligibleRefundAmountVnd)
                       : t('escalation.refundPolicy.unknownAmount')}
@@ -503,7 +503,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                               : t('escalation.refundPolicy.card.insufficientPill')
                           }
                         />
-                        <span className="font-mono text-[10.5px] text-muted">#{latest.sequenceNo}</span>
+                        <span className="tabular-nums text-[11.5px] text-muted">#{latest.sequenceNo}</span>
                       </span>
                     ) : (
                       <span className="text-muted">{t('escalation.dossier.noDecision')}</span>
@@ -520,7 +520,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
                   label={t('escalation.dossier.refundSummary')}
                   value={
                     refundSummary ? (
-                      <span className="font-mono text-[11px]">
+                      <span className="tabular-nums text-[11px]">
                         {formatVnd(refundSummary.amount)} · #{refundSummary.refundId}
                       </span>
                     ) : (

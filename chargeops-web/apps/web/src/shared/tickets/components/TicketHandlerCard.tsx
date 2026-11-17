@@ -79,7 +79,7 @@ export function TicketHandlerCard({
               <div className="font-bold text-ink text-[13.5px] truncate">
                 {resolvedHandlerName || (isAdminPlatformDirect ? t('platformQueue.handlerFallback', 'Chuyên viên Nền tảng') : t('detail.handlerCard.stationTechFallback', 'Kỹ thuật viên trạm'))}
               </div>
-              <div className="font-mono text-[11px] text-muted truncate">
+              <div className="tabular-nums text-[11px] text-muted truncate">
                 {ticket.assignedHandlerId ? `#${ticket.assignedHandlerId.slice(0, 8)}` : (isAdminPlatformDirect ? t('platformQueue.adminDirect', 'Nền tảng trực tiếp') : t('detail.handlerCard.stationAssigned', 'Trạm phụ trách'))} ·{' '}
                 {isAdminPlatformDirect
                   ? t('platformQueue.handlerTitle', 'Chuyên viên Nền tảng')

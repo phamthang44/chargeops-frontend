@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { MetricCard } from '@chargeops/ui';
+import { MetricCard, MetricStrip } from '@chargeops/ui';
 import type { ChargePointGroup } from './ChargerTable';
 import { effectiveConnectorStatus } from './chargerStatus';
 
@@ -26,7 +26,7 @@ export function ChargerStatsStrip({ groups }: { groups: ChargePointGroup[] }) {
   const incidentCount = connectors.filter((c) => Boolean(c.activeIncidentId)).length;
 
   return (
-    <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-3 xl:grid-cols-5">
+    <MetricStrip className="mb-4">
       <MetricCard label={t('connectors.stats.chargePoints', 'TỔNG TRỤ SẠC')} value={String(totalChargePoints)} accent="#5b54e8" />
       <MetricCard label={t('connectors.stats.available', 'SẴN SÀNG')} value={String(available)} accent="#12a150" />
       <MetricCard label={t('connectors.stats.inuse', 'ĐANG SẠC')} value={String(inuse)} accent="#3b82f6" />
@@ -37,6 +37,6 @@ export function ChargerStatsStrip({ groups }: { groups: ChargePointGroup[] }) {
         sub={incidentCount > 0 ? t('connectors.stats.needAction', 'Cần khắc phục') : t('connectors.stats.allNormal', 'Bình thường')}
         accent={incidentCount > 0 ? '#ef4444' : '#64748b'}
       />
-    </div>
+    </MetricStrip>
   );
 }

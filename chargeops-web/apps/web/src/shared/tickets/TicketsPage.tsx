@@ -14,13 +14,10 @@ import {
   Button,
   Card,
   FilterTabs,
-  IconAlertCircle,
-  IconCheckCircle,
-  IconClock,
   IconInfo,
-  IconLock,
   IconRefreshCw,
-  IconUsers,
+  MetricCard,
+  MetricStrip,
   PageHeader,
   Pagination,
   SearchInput,
@@ -252,94 +249,28 @@ export function TicketsPage({
         </Button>
       </div>
 
-      {/* BKG-052 4-Box Asymmetric Bento Metric Header (Clean Single-Bezel) */}
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Box 1: OPEN (Unassigned / Pending Claim) */}
-        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
-                {t('kpi.unassigned', 'Chờ tiếp nhận')}
-              </div>
-              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
-                {summaryQuery.isLoading ? '—' : openCount}
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warn-pill text-warn-deep border border-warn-border">
-              <IconAlertCircle size={20} strokeWidth={2.2} />
-            </div>
-          </div>
-          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
-            {admin
-              ? t('kpi.unassignedHelpAdmin', 'Phiếu sự cố chờ phân công hoặc tiếp nhận')
-              : t('kpi.unassignedHelp', 'Nhân viên trạm có thể tiếp nhận')}
-          </div>
-        </Card>
-
-        {/* Box 2: IN_PROGRESS (Active SLA) */}
-        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
-                {t('kpi.inProgress', 'Đang xử lý')}
-              </div>
-              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
-                {summaryQuery.isLoading ? '—' : inProgressCount}
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-deep">
-              <IconUsers size={20} strokeWidth={2} />
-            </div>
-          </div>
-          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
-            {admin
-              ? t('kpi.inProgressHelpAdmin', 'Đang có chuyên viên hoặc trạm xử lý')
-              : t('kpi.inProgressHelp', 'Đang có nhân viên xử lý')}
-          </div>
-        </Card>
-
-        {/* Box 3: RESOLVED (10-Day Auto-Close Watch) */}
-        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
-                {admin ? t('kpi.resolvingWatchAdmin', 'Chờ tài xế phản hồi') : t('kpi.resolvingWatch', 'Chờ tài xế (10 ngày)')}
-              </div>
-              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
-                {summaryQuery.isLoading ? '—' : resolvedWatchCount}
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
-              <IconClock size={20} strokeWidth={2.2} />
-            </div>
-          </div>
-          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
-            {admin
-              ? t('kpi.resolvingWatchHelpAdmin', 'Tự động đóng theo chính sách nếu không phản hồi')
-              : t('kpi.resolvingWatchHelp', 'Tự động đóng sau 10 ngày')}
-          </div>
-        </Card>
-
-        {/* Box 4: CLOSED (Terminal Completed) */}
-        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
-                {t('kpi.completed', 'Đã hoàn tất')}
-              </div>
-              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
-                {summaryQuery.isLoading ? '—' : closedCount}
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-muted">
-              <IconCheckCircle size={20} strokeWidth={2} />
-            </div>
-          </div>
-          <div className="mt-2 text-[10.5px] text-faint line-clamp-2">
-            {t('kpi.completedHelp', 'Đã hoàn thành và đóng')}
-          </div>
-        </Card>
-      </div>
+      <MetricStrip className="mb-4">
+        <MetricCard
+          label={t('kpi.unassigned', 'Chờ tiếp nhận')}
+          value={summaryQuery.isLoading ? '—' : String(openCount)}
+          sub={admin ? t('kpi.unassignedHelpAdmin', 'Phiếu sự cố chờ phân công hoặc tiếp nhận') : t('kpi.unassignedHelp', 'Nhân viên trạm có thể tiếp nhận')}
+        />
+        <MetricCard
+          label={t('kpi.inProgress', 'Đang xử lý')}
+          value={summaryQuery.isLoading ? '—' : String(inProgressCount)}
+          sub={admin ? t('kpi.inProgressHelpAdmin', 'Đang có chuyên viên hoặc trạm xử lý') : t('kpi.inProgressHelp', 'Đang có nhân viên xử lý')}
+        />
+        <MetricCard
+          label={admin ? t('kpi.resolvingWatchAdmin', 'Chờ tài xế phản hồi') : t('kpi.resolvingWatch', 'Chờ tài xế (10 ngày)')}
+          value={summaryQuery.isLoading ? '—' : String(resolvedWatchCount)}
+          sub={admin ? t('kpi.resolvingWatchHelpAdmin', 'Tự động đóng theo chính sách nếu không phản hồi') : t('kpi.resolvingWatchHelp', 'Tự động đóng sau 10 ngày')}
+        />
+        <MetricCard
+          label={t('kpi.completed', 'Đã hoàn tất')}
+          value={summaryQuery.isLoading ? '—' : String(closedCount)}
+          sub={t('kpi.completedHelp', 'Đã hoàn thành và đóng')}
+        />
+      </MetricStrip>
 
       {/* Incident Status Explanations Accordion */}
       <div className="mb-4">
@@ -374,7 +305,7 @@ export function TicketsPage({
               </div>
               <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline md:col-span-2 lg:col-span-2">
                 <span className="inline-flex shrink-0 items-center gap-1 rounded bg-brand-soft text-brand px-1.5 py-0.5 text-[10px] font-bold border border-brand-line">
-                  ⚡ {t('statusExplains.escalatedTitle', 'Chuyển cấp Admin (Escalated)')}
+                  {t('statusExplains.escalatedTitle', 'Chuyển cấp Admin (Escalated)')}
                 </span>
                 <span className="text-muted leading-relaxed">{t('statusExplains.escalatedDesc')}</span>
               </div>
@@ -399,7 +330,7 @@ export function TicketsPage({
                   : 'text-muted hover:text-ink hover:bg-surface-2'
               }`}
             >
-              <span>🛡️ {t('workstream.platform', 'Sự cố Nền tảng & Hệ thống')}</span>
+              <span>{t('workstream.platform', 'Sự cố Nền tảng & Hệ thống')}</span>
             </button>
             <button
               type="button"
@@ -425,7 +356,6 @@ export function TicketsPage({
           )}
           {workstream === 'escalated' && (
             <div className="flex items-start gap-2 rounded-xl border border-brand-line bg-brand-soft/40 p-2.5 text-[11.5px] text-ink">
-              <span className="font-bold">⚖️</span>
               <span>{t('workstream.escalatedHelp', 'Admin xem xét yêu cầu hỗ trợ và trả lại trạm hoặc kết thúc support case với lý do rõ ràng.')}</span>
             </div>
           )}

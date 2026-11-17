@@ -80,7 +80,7 @@ export function StationActionModal({
           </div>
           <div>
             <div className="font-bold text-ink">{station.name}</div>
-            <div className="font-mono text-[11px] text-faint">
+            <div className="tabular-nums text-[11px] text-faint">
               {t('stations.modal.stationCode', {
                 code: station.stationCode || station.id,
                 owner: station.ownerDisplayName || '—',

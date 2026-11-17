@@ -101,7 +101,7 @@ export function TicketContextCard({
               {t('detail.context.booking', 'Đơn sạc liên kết')}
             </div>
             <div className="mt-1 flex items-center justify-between gap-2">
-              <span className="min-w-0 break-all font-mono text-[12px] font-semibold text-brand select-all">
+              <span className="min-w-0 break-all tabular-nums text-[12px] font-semibold text-brand select-all">
                 {bookingLabel}
               </span>
               {bookingsListPath && (

@@ -151,7 +151,7 @@ export function Approvals() {
                         borderLeft: `3px solid ${on ? '#5b54e8' : 'transparent'}`,
                       }}
                     >
-                      <span className="font-mono text-[10.5px] font-semibold text-brand">{s.stationCode || s.id}</span>
+                      <span className="tabular-nums text-[11.5px] font-semibold text-brand">{s.stationCode || s.id}</span>
                       <span className="font-semibold">{s.name}</span>
                       <span className="text-muted">{owner}</span>
                       <span className="text-muted">{city}</span>
@@ -295,7 +295,7 @@ function ApprovalDetail({
           {detail?.assets?.length ? ` (${detail.assets.length})` : ''}
         </div>
         {detailLoading ? (
-          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-surface-2 font-mono text-[11px] text-faint">
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-surface-2 tabular-nums text-[11px] text-faint">
             <span>{t('approvals.detail.loadingDocuments', 'Đang tải danh sách tài liệu...')}</span>
           </div>
         ) : detail?.assets && detail.assets.length > 0 ? (
@@ -327,7 +327,7 @@ function ApprovalDetail({
             ))}
           </div>
         ) : (
-          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-canvas font-mono text-[11px] text-ghost">
+          <div className="flex h-[54px] items-center justify-center gap-[7px] rounded-[9px] bg-canvas tabular-nums text-[11px] text-ghost">
             <IconClipboardCheck size={15} className="text-ghost" />
             <span>{t('approvals.detail.noDocuments', { defaultValue: 'Chưa có tài liệu đính kèm' })}</span>
           </div>
@@ -368,7 +368,7 @@ function ApprovalDetail({
                   <div key={h.id} className="border-b border-hairline pb-2.5 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between">
                       <span className={`font-bold ${ev.tone}`}>{ev.label}</span>
-                      <span className="font-mono text-[10.5px] text-faint">{formatDateTimeVn(h.performedAt)}</span>
+                      <span className="tabular-nums text-[11.5px] text-faint">{formatDateTimeVn(h.performedAt)}</span>
                     </div>
                     <div className="mt-0.5 text-[11px] text-muted">
                       <span>{t('approvals.history.by', 'Bởi: ')}</span>
@@ -380,7 +380,7 @@ function ApprovalDetail({
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex items-center gap-1 font-mono text-[10.5px] text-faint">
+                    <div className="mt-1 flex items-center gap-1 tabular-nums text-[11.5px] text-faint">
                       <span>{h.fromStatus || '—'}</span>
                       <span>→</span>
                       <span className="font-bold text-ink">{h.toStatus}</span>

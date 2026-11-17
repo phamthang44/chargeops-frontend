@@ -39,7 +39,6 @@ export function Open247WarningModal({
         <div className="mb-5 flex flex-col gap-2.5">
           {/* Item 1: Access */}
           <div className="flex items-start gap-3 rounded-[10px] bg-surface-2 p-3 text-[12px] leading-relaxed">
-            <span className="shrink-0 text-base leading-none mt-0.5">🚗</span>
             <div>
               <div className="font-semibold text-ink">
                 {t('pricing.open247.item1Title', { defaultValue: 'Lối vào & barie tiếp cận xuyên đêm' })}
@@ -73,7 +72,6 @@ export function Open247WarningModal({
 
           {/* Item 3: TOU Pricing Recommendation */}
           <div className="flex items-start gap-3 rounded-[10px] bg-surface-2 p-3 text-[12px] leading-relaxed">
-            <span className="shrink-0 text-base leading-none mt-0.5">⚡</span>
             <div>
               <div className="font-semibold text-ink">
                 {t('pricing.open247.item3Title', { defaultValue: 'Khuyến nghị biểu giá sạc giờ thấp điểm (TOU)' })}

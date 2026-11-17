@@ -24,8 +24,8 @@ function variantClass(variant: ButtonVariant, accent: ButtonAccent): string {
   switch (variant) {
     case 'primary':
       return accent === 'owner'
-        ? 'bg-owner text-white shadow-[0_1px_3px_rgba(18,161,80,.35)] hover:bg-owner-strong'
-        : 'bg-brand text-white shadow-[0_1px_2px_rgba(91,84,232,.3)] hover:bg-brand-strong';
+        ? 'bg-owner text-white hover:bg-owner-strong'
+        : 'bg-brand text-white hover:bg-brand-strong';
     case 'secondary':
       return 'border border-line bg-surface text-body hover:border-line-hover hover:bg-canvas';
     case 'danger':

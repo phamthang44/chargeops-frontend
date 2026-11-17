@@ -42,7 +42,7 @@ export function LicenseHistoryDrawer({
             </div>
             <div className="text-[12px] text-muted">
               {stationName || stationId} · {t('licenses.historyDrawer.stationCode', 'Mã trạm: ')}
-              <span className="font-mono font-semibold">{stationId}</span>
+              <span className="tabular-nums font-semibold">{stationId}</span>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function LicenseHistoryDrawer({
               <Card key={l.id} bordered={false} className="bg-surface-2 p-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[12px] font-bold text-brand">{l.licenseCode || l.id}</span>
+                    <span className="tabular-nums text-[12px] font-bold text-brand">{l.licenseCode || l.id}</span>
                     <span className="rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-body">
                       {isYear
                         ? t('licenses.historyDrawer.planYearly', 'Gói Năm (1 năm)')

@@ -87,7 +87,7 @@ export function ServiceFailureDecisionsCard({
               {/* Header row: Decision Sequence + Actor Badge + Result Pill */}
               <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-hairline pb-2">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-mono text-[10.5px] font-bold text-muted bg-surface px-1.5 py-0.5 rounded border border-line">
+                  <span className="tabular-nums text-[11.5px] font-bold text-muted bg-surface px-1.5 py-0.5 rounded border border-line">
                     #{dec.sequenceNo}
                   </span>
                   <StatusPill tone={kindTone} label={kindLabel} />
@@ -134,7 +134,7 @@ export function ServiceFailureDecisionsCard({
                       })}
                     </span>
                   </span>
-                  <span className="font-mono font-bold text-bad">
+                  <span className="tabular-nums font-bold text-bad">
                     {formatVnd(dec.amountVnd || 0)}
                   </span>
                 </div>

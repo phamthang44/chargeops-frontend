@@ -137,7 +137,7 @@ export function TicketLifecycleStepper({
 
                   <div className="min-w-0 pr-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-[10px] font-bold text-faint uppercase tracking-wider">
+                      <span className="tabular-nums text-[11.5px] font-bold text-faintr">
                         {step.stepNumber}
                       </span>
                       <span className={`text-[12.5px] tracking-tight ${titleClasses}`}>
@@ -197,7 +197,7 @@ export function TicketLifecycleStepper({
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-[9.5px] font-bold text-faint">{step.stepNumber}</span>
+                    <span className="tabular-nums text-[11px] font-bold text-faint">{step.stepNumber}</span>
                     <span className={`text-[12px] font-medium leading-tight ${titleClasses}`}>{step.label}</span>
                   </div>
                   <div className="text-[11px] text-muted mt-0.5 leading-snug line-clamp-1">{step.sublabel}</div>

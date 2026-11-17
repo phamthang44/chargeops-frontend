@@ -358,7 +358,7 @@ export function DateTimeInput({
             }`}
           />
           {triggerFormatted ? (
-            <span className="font-mono text-[13px] font-medium text-ink truncate">
+            <span className="tabular-nums text-[13px] font-medium text-ink truncate">
               {triggerFormatted}
             </span>
           ) : (
@@ -451,7 +451,7 @@ export function DateTimeInput({
           </div>
 
           {/* Weekday row */}
-          <div className="grid grid-cols-7 pt-2.5 pb-1 text-center font-mono text-[10.5px] font-bold uppercase tracking-wider text-faint">
+          <div className="grid grid-cols-7 pt-2.5 pb-1 text-center tabular-nums text-[11.5px] font-boldr text-faint">
             {weekdays.map((wd) => (
               <span key={wd}>{wd}</span>
             ))}
@@ -465,7 +465,7 @@ export function DateTimeInput({
                   key={`${cell.year}-${cell.month}-${cell.day}-${idx}`}
                   type="button"
                   onClick={() => handleSelectDay(cell)}
-                  className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg font-mono text-[12px] transition-all cursor-pointer ${
+                  className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg tabular-nums text-[12px] transition-all cursor-pointer ${
                     cell.isSelected
                       ? accentClasses.pillSelected
                       : cell.isToday
@@ -491,7 +491,7 @@ export function DateTimeInput({
                 <IconClock size={12} className="text-faint" />
                 <span>{t('dateTime.time24')}</span>
               </span>
-              <span className="font-mono text-[12px] font-semibold text-ink">
+              <span className="tabular-nums text-[12px] font-semibold text-ink">
                 {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
               </span>
             </div>
@@ -507,7 +507,7 @@ export function DateTimeInput({
                   -
                 </button>
                 <div className="flex flex-col items-center">
-                  <span className="font-mono text-[13px] font-bold text-ink">
+                  <span className="tabular-nums text-[13px] font-bold text-ink">
                     {hours.toString().padStart(2, '0')}
                   </span>
                   <span className="text-[12px] font-medium text-muted">{t('dateTime.hours')}</span>
@@ -521,7 +521,7 @@ export function DateTimeInput({
                 </button>
               </div>
 
-              <span className="font-mono text-[14px] font-bold text-faint">:</span>
+              <span className="tabular-nums text-[14px] font-bold text-faint">:</span>
 
               {/* Minutes Stepper */}
               <div className="flex flex-1 items-center justify-between rounded-lg bg-surface px-1.5 py-1">
@@ -533,7 +533,7 @@ export function DateTimeInput({
                   -
                 </button>
                 <div className="flex flex-col items-center">
-                  <span className="font-mono text-[13px] font-bold text-ink">
+                  <span className="tabular-nums text-[13px] font-bold text-ink">
                     {minutes.toString().padStart(2, '0')}
                   </span>
                   <span className="text-[12px] font-medium text-muted">{t('dateTime.minutes')}</span>
@@ -557,7 +557,7 @@ export function DateTimeInput({
                     key={m}
                     type="button"
                     onClick={() => updateTime(hours, m)}
-                    className={`flex-1 rounded-md py-1 text-center font-mono text-[11px] font-semibold transition-all cursor-pointer ${
+                    className={`flex-1 rounded-md py-1 text-center tabular-nums text-[11px] font-semibold transition-all cursor-pointer ${
                       isActive
                         ? accentClasses.pillSelected
                         : 'border border-line bg-surface text-muted hover:bg-chip hover:text-ink'

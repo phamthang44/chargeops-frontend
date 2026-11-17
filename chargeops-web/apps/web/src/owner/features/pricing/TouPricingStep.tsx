@@ -61,7 +61,7 @@ function TimelineTrack({
       <div className="flex items-center justify-between text-[11.5px]">
         <div className="flex items-center gap-1.5">
           <span className="font-semibold text-ink">{title}</span>
-          <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-mono font-bold text-muted border border-hairline">
+          <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11.5px] tabular-nums font-bold text-muted border border-hairline">
             {badge}
           </span>
         </div>
@@ -93,7 +93,7 @@ function TimelineTrack({
         })}
       </div>
 
-      <div className="flex justify-between font-mono text-[9px] text-faint px-0.5">
+      <div className="flex justify-between tabular-nums text-[11px] text-faint px-0.5">
         <span>00:00</span>
         <span>06:00</span>
         <span>12:00</span>
@@ -138,7 +138,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         <div className="flex flex-col gap-3.5 divide-y divide-hairline">
           {/* Weekday track */}
           <TimelineTrack
-            title={t('pricing.steps.step3.weekdaysTrack', { defaultValue: '🏢 Ngày trong tuần' })}
+            title={t('pricing.steps.step3.weekdaysTrack', { defaultValue: 'Ngày trong tuần' })}
             badge={t('pricing.steps.step3.weekdaysBadge', { defaultValue: 'Thứ 2 – Thứ 6' })}
             rules={rules}
             basePriceVnd={basePriceVnd}
@@ -148,7 +148,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
           {/* Weekend track */}
           <div className="pt-3">
             <TimelineTrack
-              title={t('pricing.steps.step3.weekendsTrack', { defaultValue: '🏖️ Cuối tuần' })}
+              title={t('pricing.steps.step3.weekendsTrack', { defaultValue: 'Cuối tuần' })}
               badge={t('pricing.steps.step3.weekendsBadge', { defaultValue: 'Thứ 7 – Chủ Nhật' })}
               rules={rules}
               basePriceVnd={basePriceVnd}
@@ -158,7 +158,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
         </div>
       ) : (
         <TimelineTrack
-          title={t('pricing.steps.step3.dailyTrack', { defaultValue: '📅 Cả tuần' })}
+          title={t('pricing.steps.step3.dailyTrack', { defaultValue: 'Cả tuần' })}
           badge={t('pricing.steps.step3.dailyBadge', { defaultValue: 'Thứ 2 – Chủ Nhật' })}
           rules={rules}
           basePriceVnd={basePriceVnd}
@@ -215,7 +215,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                         </span>
                         <div className="min-w-0">
                           <div className="text-[13.5px] font-semibold text-ink">{r.name}</div>
-                          <div className="mt-0.5 font-mono text-[11px] text-faint">
+                          <div className="mt-0.5 tabular-nums text-[11px] text-faint">
                             {r.from}–{r.to} · {t(`pricing.days.${r.days}`)}
                           </div>
                         </div>
@@ -246,7 +246,7 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                     <div className="flex items-end justify-between gap-3 border-t border-hairline pt-3">
                       <div className="text-[19px] font-semibold text-ink tabular-nums">
                         {formatVnd(r.rateVnd)}
-                        <span className="font-mono text-[11px] font-medium text-faint"> /kWh</span>
+                        <span className="tabular-nums text-[11px] font-medium text-faint"> /kWh</span>
                       </div>
                       <div className="text-right">
                         <div className="text-[8.5px] font-medium text-muted">

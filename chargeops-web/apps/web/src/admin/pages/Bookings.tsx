@@ -14,7 +14,7 @@ import {
   Card,
   EmptyState,
   FilterTabs,
-  MetricCard,
+  MetricCard, MetricStrip,
   PageHeader,
   Pagination,
   SearchInput,
@@ -81,12 +81,12 @@ export function Bookings() {
       <PageHeader title={t('console.nav.bookings.title')} subtitle={t('console.nav.bookings.subtitle')} />
 
       {s && (
-        <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">
+        <MetricStrip className="mb-4">
           <MetricCard label={t('bookings.metrics.total')} value={String(s.total)} accent="#5b54e8" />
           <MetricCard label={t('bookings.metrics.completed')} value={String(s.byStatus.completed)} accent="#0d8a5a" />
           <MetricCard label={t('bookings.metrics.cancelled')} value={String(s.byStatus.cancelled)} accent="#c0392b" />
           <MetricCard label={t('bookings.metrics.pending')} value={String(s.byStatus.pending)} accent="#9a6b16" />
-        </div>
+        </MetricStrip>
       )}
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -154,7 +154,7 @@ function Row({ booking: b }: { booking: Booking }) {
       className="grid items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium"
       style={{ gridTemplateColumns: GRID }}
     >
-      <span className="font-mono text-[11.5px] font-semibold text-brand">{b.id}</span>
+      <span className="tabular-nums text-[11.5px] font-semibold text-brand">{b.id}</span>
       <span className="font-semibold">{b.stationName}</span>
       <span className="text-muted">{b.ownerName}</span>
       <span className="text-muted">{b.connectorId}</span>

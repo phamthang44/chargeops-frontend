@@ -49,7 +49,7 @@ export function TicketHeader(props: TicketHeaderProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[13px] font-bold text-brand">{code}</span>
+            <span className="tabular-nums text-[13px] font-bold text-brand">{code}</span>
             <span className="text-[11px] text-faint">·</span>
             <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted">
               <span>{t('table.cols.priority', 'Ưu tiên')}:</span>

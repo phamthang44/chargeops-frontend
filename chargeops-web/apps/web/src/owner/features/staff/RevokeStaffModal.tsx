@@ -57,7 +57,7 @@ export function RevokeStaffModal({
         {/* Member preview summary */}
         <div className="rounded-lg bg-surface-2 px-3.5 py-2.5 flex items-center justify-between text-[12px]">
           <span className="font-medium text-muted">Tài khoản:</span>
-          <span className="font-mono text-ink font-semibold">{member.email}</span>
+          <span className="tabular-nums text-ink font-semibold">{member.email}</span>
         </div>
 
         {/* Actions */}

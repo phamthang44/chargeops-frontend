@@ -289,7 +289,7 @@ export function NotificationBell({
       >
         <IconBell size={17} strokeWidth={1.9} className="text-body group-hover:text-ink transition-colors" />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-brand px-1 font-mono text-[9.5px] font-black text-white leading-none shadow-xs animate-pulse">
+          <span className="absolute -right-1 -top-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-brand px-1 tabular-nums text-[11px] font-black text-white leading-none shadow-xs animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -308,7 +308,7 @@ export function NotificationBell({
               <div className="flex items-center gap-2">
                 <span className="text-[14px] font-black text-ink tracking-tight">{t('notificationBell.headerTitle', 'Hộp Thông Báo')}</span>
                 {unreadCount > 0 ? (
-                  <span className="flex h-5 items-center rounded-full bg-brand/10 border border-brand/20 px-2 font-mono text-[10px] font-bold text-brand">
+                  <span className="flex h-5 items-center rounded-full bg-brand/10 border border-brand/20 px-2 tabular-nums text-[11.5px] font-bold text-brand">
                     {t('notificationBell.unreadCount', { count: unreadCount, defaultValue: `${unreadCount} chưa đọc` })}
                   </span>
                 ) : (
@@ -413,7 +413,7 @@ export function NotificationBell({
                   <IconBell size={20} strokeWidth={1.6} />
                 </span>
                 <span className="text-[13px] font-bold text-ink">
-                  {statusTab === 'unread' ? t('notificationBell.emptyUnread', 'Bạn đã đọc hết mọi thông báo! 🎉') : t('notificationBell.emptyFilter', 'Không có thông báo phù hợp')}
+                  {statusTab === 'unread' ? t('notificationBell.emptyUnread', 'Bạn đã đọc hết mọi thông báo!') : t('notificationBell.emptyFilter', 'Không có thông báo phù hợp')}
                 </span>
                 <span className="text-[11.5px] text-muted max-w-[240px] leading-relaxed">{emptyLabel}</span>
               </div>
@@ -470,7 +470,7 @@ export function NotificationBell({
                           {/* Meta Row: Timestamp trái + Hover Quick Actions phải */}
                           <div className="mt-1.5 flex items-center gap-2">
                             {n.time && (
-                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium text-ghost dark:text-faint">
+                              <span className="inline-flex items-center gap-1 tabular-nums text-[11.5px] font-medium text-ghost dark:text-faint">
                                 <IconClock size={11} strokeWidth={2} />
                                 {n.time}
                               </span>
@@ -510,12 +510,12 @@ export function NotificationBell({
                         <div className="flex flex-wrap items-center gap-1.5 pl-[38px]">
                           {n.stationName && (
                             <span className="rounded-md bg-surface border border-line dark:bg-chip dark:border-line px-1.5 py-0.5 text-[10px] font-bold text-body shadow-2xs">
-                              📍 {n.stationName}
+                              {n.stationName}
                             </span>
                           )}
                           {n.chargerId && (
-                            <span className="rounded-md bg-surface border border-line dark:bg-chip dark:border-line px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted shadow-2xs">
-                              ⚡ {n.chargerId}
+                            <span className="rounded-md bg-surface border border-line dark:bg-chip dark:border-line px-1.5 py-0.5 tabular-nums text-[11.5px] font-bold text-muted shadow-2xs">
+                              {n.chargerId}
                             </span>
                           )}
                           {n.badge && (

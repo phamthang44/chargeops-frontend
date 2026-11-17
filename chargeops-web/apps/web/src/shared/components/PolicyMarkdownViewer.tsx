@@ -169,7 +169,7 @@ export function PolicyMarkdownViewer({
         tokens.push(
           <code
             key={idx}
-            className={`rounded bg-chip px-1.5 py-0.5 font-mono font-medium text-brand-strong ${typo.code}`}
+            className={`rounded bg-chip px-1.5 py-0.5 tabular-nums font-medium text-brand-strong ${typo.code}`}
           >
             {highlightText(p.slice(1, -1), query)}
           </code>,
@@ -354,7 +354,7 @@ export function PolicyMarkdownViewer({
                   e.preventDefault();
                   scrollToHeading(id);
                 }}
-                className="text-[11px] font-mono text-ghost hover:text-brand"
+                className="text-[11px] tabular-nums text-ghost hover:text-brand"
                 title={t('markdownViewer.anchorTitle', { defaultValue: 'Neo liên kết mục này' })}
               >
                 #{id.split('-').slice(0, 2).join('-')}
@@ -566,7 +566,7 @@ export function PolicyMarkdownViewer({
                   <IconBook size={13} className="text-brand" />
                   <span>{t('markdownViewer.toc', { defaultValue: 'Mục lục điều khoản' })}</span>
                 </div>
-                <span className="font-mono text-[11px] text-ghost">({headings.length})</span>
+                <span className="tabular-nums text-[11px] text-ghost">({headings.length})</span>
               </div>
 
               <div className="max-h-[calc(80vh-160px)] overflow-y-auto pr-1">

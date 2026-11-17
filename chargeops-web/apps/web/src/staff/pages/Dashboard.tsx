@@ -230,7 +230,7 @@ export function Dashboard() {
                         >
                           <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1 font-mono text-xs font-bold text-ink border border-line/50">
+                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1 tabular-nums text-xs font-bold text-ink border border-line/50">
                                 <IconClock size={12} className="text-brand" />
                                 {formatTime(booking.startAt)} – {formatTime(booking.endAt)}
                               </span>
@@ -239,7 +239,7 @@ export function Dashboard() {
 
                             <p className="truncate text-sm font-semibold text-ink">
                               {booking.driverDisplayName}
-                              <span className="ml-2 font-mono text-xs font-normal text-muted">
+                              <span className="ml-2 tabular-nums text-xs font-normal text-muted">
                                 · {booking.connectorCode}
                               </span>
                             </p>
@@ -253,7 +253,7 @@ export function Dashboard() {
                           </div>
 
                           <div className="flex shrink-0 items-center gap-2">
-                            <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[11px] font-medium text-muted">
+                            <span className="rounded-md bg-chip px-2 py-0.5 tabular-nums text-[11px] font-medium text-muted">
                               {booking.bookingCode}
                             </span>
                             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-muted transition-transform duration-200 group-hover/item:translate-x-1 group-hover/item:text-brand">
@@ -319,7 +319,7 @@ export function Dashboard() {
                         >
                           <div className="min-w-0 space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm font-bold text-ink">{item.code}</span>
+                              <span className="tabular-nums text-sm font-bold text-ink">{item.code}</span>
                               <span className="rounded-full bg-chip px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
                                 {t(`equipment.types.${item.equipmentType}`)}
                               </span>
@@ -407,7 +407,7 @@ export function Dashboard() {
                         >
                           <div className="min-w-0 space-y-1.5">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs font-bold text-brand bg-brand-soft/70 px-2.5 py-0.5 rounded-full">
+                              <span className="tabular-nums text-xs font-bold text-brand bg-brand-soft/70 px-2.5 py-0.5 rounded-full">
                                 {ticket.ticketCode}
                               </span>
                               <span className="text-[11px] text-muted">

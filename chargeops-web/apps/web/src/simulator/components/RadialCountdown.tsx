@@ -91,7 +91,7 @@ export function RadialCountdown({
         className="absolute inset-0 flex flex-col items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none cursor-pointer group"
       >
         <span
-          className="font-mono text-2xl font-bold leading-none tracking-tight tabular-nums transition-colors"
+          className=" text-2xl font-bold leading-none tracking-tight tabular-nums transition-colors"
           style={{ color: strokeColor }}
         >
           {Math.ceil(remainingSeconds)}s

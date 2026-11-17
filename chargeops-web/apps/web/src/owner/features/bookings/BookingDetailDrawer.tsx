@@ -77,10 +77,10 @@ export function BookingDetailDrawer({
         onClose={onClose}
         title={
           isLoading || !booking || !meta ? (
-            <span className="font-mono text-[16px] font-bold">{t('bookings.drawer.loading', 'Đang tải...')}</span>
+            <span className="tabular-nums text-[16px] font-bold">{t('bookings.drawer.loading', 'Đang tải...')}</span>
           ) : (
             <>
-              <span className="font-mono text-[16px] font-bold">{booking.bookingCode || booking.bookingId}</span>
+              <span className="tabular-nums text-[16px] font-bold">{booking.bookingCode || booking.bookingId}</span>
               <StatusPill tone={meta.tone} label={statusLabel} />
             </>
           )
@@ -234,7 +234,7 @@ export function BookingDetailDrawer({
                           {formatTimeVn(line.startAt)}–{formatTimeVn(line.endAt)} ·{' '}
                           <span className="text-muted">{lineLabel}</span>
                         </span>
-                        <span className="font-mono">
+                        <span className="tabular-nums">
                           {formatVnd(line.rateVndPerKwh)}/kWh · {formatVnd(line.amount)}
                         </span>
                       </div>
@@ -243,12 +243,12 @@ export function BookingDetailDrawer({
                 ) : (
                   <div className="flex justify-between">
                     <span>{t('bookings.drawer.fixedRate', 'Giá gói cố định')}</span>
-                    <span className="font-mono">{formatVnd(booking.totalAmount)}</span>
+                    <span className="tabular-nums">{formatVnd(booking.totalAmount)}</span>
                   </div>
                 )}
                 <div className="mt-0.5 flex justify-between border-t border-line pt-2 text-[14px] font-bold text-ink">
                   <span>{t('bookings.total')}</span>
-                  <span className="font-mono">{formatVnd(booking.totalAmount)}</span>
+                  <span className="tabular-nums">{formatVnd(booking.totalAmount)}</span>
                 </div>
               </div>
             </div>
@@ -267,7 +267,7 @@ export function BookingDetailDrawer({
                 </div>
                 <div className="mt-1 flex justify-between text-[12.5px] font-medium">
                   <span className="text-muted">{t('bookings.drawer.collectedAmount', 'Đã thu:')}</span>
-                  <span className="font-mono font-semibold">{formatVnd(booking.payment.collectedAmount)}</span>
+                  <span className="tabular-nums font-semibold">{formatVnd(booking.payment.collectedAmount)}</span>
                 </div>
               </div>
             )}
@@ -287,7 +287,7 @@ export function BookingDetailDrawer({
                         defaultValue: `Lý do: ${ref.reason} (${ref.status})`,
                       })}
                     </span>
-                    <span className="font-mono text-[14px] font-bold text-bad">{formatVnd(ref.amount)}</span>
+                    <span className="tabular-nums text-[14px] font-bold text-bad">{formatVnd(ref.amount)}</span>
                   </div>
                 ))}
               </div>

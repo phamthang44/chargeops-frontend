@@ -62,7 +62,7 @@ export function EditConnectorModal({
           </h3>
           <p className="text-[12px] text-muted mt-0.5">
             {t('provisioning.workspace.connectorForm.editCodeLabel')}{' '}
-            <b className="font-mono text-brand">{connector.connectorCode || connector.id}</b> ·{' '}
+            <b className="tabular-nums text-brand">{connector.connectorCode || connector.id}</b> ·{' '}
             {t('provisioning.workspace.common.cpLabel')} <b>{chargePoint.name || chargePoint.chargePointCode || chargePoint.id}</b>
           </p>
         </div>

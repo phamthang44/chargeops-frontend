@@ -25,7 +25,7 @@ import {
   IconRefreshCw,
   IconShield,
   IconX,
-  MetricCard,
+  MetricCard, MetricStrip,
   MoreMenu,
   PageHeader,
   Pagination,
@@ -215,7 +215,7 @@ export function Licenses() {
         ) : (
           <>
             {/* Top Metric Cards */}
-            <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
+            <MetricStrip>
               <MetricCard
                 label={t('licenses.kpi.total', 'Tổng số License')}
                 value={String(total)}
@@ -236,7 +236,7 @@ export function Licenses() {
                 value={formatVndCompact(totalFeeRecorded)}
                 accent="#10111a"
               />
-            </div>
+            </MetricStrip>
 
             {/* Operational Panel & Renewal Queue */}
             <div className="grid gap-[13px] lg:grid-cols-[1.5fr_1fr]">
@@ -277,12 +277,12 @@ export function Licenses() {
                                 <span className="truncate text-[12.5px] font-semibold text-ink">
                                   {l.stationName || l.stationId}
                                 </span>
-                                <span className="font-mono text-[10.5px] text-faint">
+                                <span className="tabular-nums text-[11.5px] text-faint">
                                   ({l.stationCode || l.stationId})
                                 </span>
                               </div>
                               <div className="mt-0.5 text-[11px] text-muted">
-                                <span className="font-mono text-brand font-bold">{l.licenseCode || l.id}</span> ·{' '}
+                                <span className="tabular-nums text-brand font-bold">{l.licenseCode || l.id}</span> ·{' '}
                                 {l.ownerName || t('licenses.queue.defaultOwner', 'Chủ trạm')} · {isYear ? t('licenses.queue.planYear', 'Gói Năm') : t('licenses.queue.planMonth', 'Gói Tháng')}
                               </div>
                             </div>
@@ -584,7 +584,7 @@ function LicenseRow({
     >
       {/* License Code & Quick Copy */}
       <div className="flex items-center gap-1.5 min-w-0 pr-2">
-        <span className="font-mono text-[11.5px] font-bold text-brand truncate">{displayCode}</span>
+        <span className="tabular-nums text-[11.5px] font-bold text-brand truncate">{displayCode}</span>
         <button
           type="button"
           onClick={handleCopy}
@@ -598,7 +598,7 @@ function LicenseRow({
       {/* Station Name & Code */}
       <div className="min-w-0 pr-2">
         <div className="truncate font-semibold text-ink">{l.stationName || l.stationId}</div>
-        <div className="font-mono text-[11px] text-faint truncate">{l.stationCode || l.stationId}</div>
+        <div className="tabular-nums text-[11px] text-faint truncate">{l.stationCode || l.stationId}</div>
       </div>
 
       {/* Owner Name */}

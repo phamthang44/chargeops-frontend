@@ -63,7 +63,7 @@ function Row({
     <div className={`flex justify-between gap-3 ${border ? 'border-b border-hairline pb-2' : ''}`}>
       <span className="shrink-0 text-faint">{label}</span>
       {node ?? (
-        <span className={`truncate text-right ${mono ? 'font-mono text-[11.5px]' : 'font-medium text-body'}`}>
+        <span className={`truncate text-right ${mono ? 'tabular-nums text-[11.5px]' : 'font-medium text-body'}`}>
           {value}
         </span>
       )}
@@ -108,7 +108,7 @@ export function UserDetailDrawer({
           </span>
           <span className="flex flex-col">
             <span className="text-[14px] font-bold">{user?.displayName ?? '—'}</span>
-            <span className="font-mono text-[11px] font-normal text-faint">{user?.email}</span>
+            <span className="tabular-nums text-[11px] font-normal text-faint">{user?.email}</span>
           </span>
         </span>
       }

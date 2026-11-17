@@ -119,7 +119,7 @@ export function StaffBookings() {
             <div className="flex items-center gap-3">
               <div className="flex items-baseline gap-1.5" role="status">
                 <span className="sr-only">{t('bookings.filter.resultCount', { count: total })}</span>
-                <span className="font-mono text-[16px] font-semibold tabular-nums text-ink" aria-hidden="true">
+                <span className=" text-[16px] font-semibold tabular-nums text-ink" aria-hidden="true">
                   {total}
                 </span>
                 <span className="text-[11px] font-medium text-faint" aria-hidden="true">
@@ -219,14 +219,14 @@ export function StaffBookings() {
                     className="grid items-center border-b border-hairline px-4 py-3 text-[12.5px] font-medium last:border-b-0 hover:bg-row-hover"
                     style={{ gridTemplateColumns: GRID }}
                   >
-                    <span className="font-mono text-[11.5px] font-semibold text-brand">
+                    <span className="tabular-nums text-[11.5px] font-semibold text-brand">
                       {b.bookingCode || b.bookingId}
                     </span>
                     <span className="text-muted">
                       {formatDateVn(b.startAt)} · {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
                     </span>
                     <span className="truncate font-semibold">{b.driverDisplayName || '—'}</span>
-                    <span className="font-mono text-muted" title={t('bookings.table.phoneHiddenHint')}>
+                    <span className="tabular-nums text-muted" title={t('bookings.table.phoneHiddenHint')}>
                       {t('bookings.table.noData')}
                     </span>
                     <span className="text-muted">{b.connectorCode || b.connectorId}</span>

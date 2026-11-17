@@ -366,7 +366,7 @@ export function TicketFindingsCard({
                     {validationError}
                   </span>
                 ) : <span />}
-                <span className="text-faint ml-auto font-mono">
+                <span className="text-faint ml-auto tabular-nums">
                   {reason.length}/2000
                 </span>
               </div>

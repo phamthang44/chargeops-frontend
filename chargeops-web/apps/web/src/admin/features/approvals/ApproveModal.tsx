@@ -56,7 +56,7 @@ export function ApproveModal({
         <div className="flex flex-col gap-1.5 font-medium">
           <div className="flex justify-between">
             <span className="text-muted">{station.name}</span>
-            <span className="font-mono font-bold text-brand">{station.stationCode || station.id}</span>
+            <span className="tabular-nums font-bold text-brand">{station.stationCode || station.id}</span>
           </div>
           <div className="flex justify-between border-t border-hairline pt-1.5">
             <span className="text-faint">{t('approveModal.ownerLabel', { defaultValue: 'Chủ sở hữu' })}:</span>

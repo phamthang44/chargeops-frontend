@@ -485,7 +485,7 @@ export function Dashboard() {
                       >
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-[11px] font-semibold text-faint">
+                            <span className="tabular-nums text-[11px] font-semibold text-faint">
                               {item.stationCode || item.stationId.slice(-8)}
                             </span>
                             <StatusPill tone="warn" label={t('dashboard.kpi.approvals', { defaultValue: 'Chờ duyệt' })} />
@@ -543,7 +543,7 @@ export function Dashboard() {
                       total: approvalsQ.data.meta.totalPages,
                       defaultValue: `Trang ${approvalsQ.data.meta.page} / ${approvalsQ.data.meta.totalPages}`,
                     })}{' '}
-                    <span className="text-faint font-mono">
+                    <span className="text-faint tabular-nums">
                       {t('dashboard.queues.totalRecords', { count: approvalsQ.data.meta.totalElements, defaultValue: `(${approvalsQ.data.meta.totalElements} bản ghi)` })}
                     </span>
                   </span>
@@ -558,7 +558,7 @@ export function Dashboard() {
                     >
                       <IconChevronLeft size={13} />
                     </button>
-                    <span className="px-2 font-mono font-bold text-ink text-[12px]">
+                    <span className="px-2 tabular-nums font-bold text-ink text-[12px]">
                       {approvalsPage}
                     </span>
                     <button
@@ -661,7 +661,7 @@ export function Dashboard() {
                       >
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-[11px] font-semibold text-brand">
+                            <span className="tabular-nums text-[11px] font-semibold text-brand">
                               #{item.ticketCode || item.ticketId.slice(-6)}
                             </span>
                             <StatusPill
@@ -728,7 +728,7 @@ export function Dashboard() {
                       total: platformQ.data.meta.totalPages,
                       defaultValue: `Trang ${platformQ.data.meta.page} / ${platformQ.data.meta.totalPages}`,
                     })}{' '}
-                    <span className="text-faint font-mono">
+                    <span className="text-faint tabular-nums">
                       {t('dashboard.queues.totalRecords', { count: platformQ.data.meta.totalElements, defaultValue: `(${platformQ.data.meta.totalElements} bản ghi)` })}
                     </span>
                   </span>
@@ -743,7 +743,7 @@ export function Dashboard() {
                     >
                       <IconChevronLeft size={13} />
                     </button>
-                    <span className="px-2 font-mono font-bold text-ink text-[12px]">
+                    <span className="px-2 tabular-nums font-bold text-ink text-[12px]">
                       {platformPage}
                     </span>
                     <button
@@ -854,7 +854,7 @@ export function Dashboard() {
                       >
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[11px] font-bold text-bad">
+                            <span className="tabular-nums text-[11px] font-bold text-bad">
                               #{item.ticketCode || item.ticketId.slice(-6)}
                             </span>
                             {ageInfo && (
@@ -874,7 +874,6 @@ export function Dashboard() {
 
                           {item.stationName && (
                             <div className="text-[11.5px] font-medium text-body flex items-center gap-1 truncate">
-                              <span className="text-faint">📍</span>
                               <span className="truncate">{item.stationName}</span>
                             </div>
                           )}
@@ -940,7 +939,7 @@ export function Dashboard() {
                     >
                       <IconChevronLeft size={11} />
                     </button>
-                    <span className="px-1.5 font-mono font-bold text-ink">
+                    <span className="px-1.5 tabular-nums font-bold text-ink">
                       {escalatedPage}
                     </span>
                     <button
@@ -1037,7 +1036,7 @@ export function Dashboard() {
 
               {/* User Evaluation Time */}
               {userSummaryQ.data?.evaluatedAt && (
-                <div className="pt-1 text-[10.5px] text-faint text-right font-mono">
+                <div className="pt-1 text-[11.5px] text-faint text-right tabular-nums">
                   {t('dashboard.usersOverview.evaluatedAt', {
                     time: formatDateTimeVn(userSummaryQ.data.evaluatedAt),
                     defaultValue: `Đánh giá lúc ${formatDateTimeVn(userSummaryQ.data.evaluatedAt)}`,

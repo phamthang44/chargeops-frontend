@@ -98,7 +98,7 @@ export function StaffStatusHistoryDrawer({
                 ? t('equipmentHistory.titleConnector', 'Lịch sử trạng thái Súng sạc')
                 : t('equipmentHistory.titleChargePoint', 'Lịch sử trạng thái Trụ sạc')}
             </div>
-            <div className="text-[12px] font-mono text-muted">{itemName}</div>
+            <div className="text-[12px] tabular-nums text-muted">{itemName}</div>
           </div>
         </div>
       }
@@ -175,7 +175,7 @@ export function StaffStatusHistoryDrawer({
                           )}
                           <span>{actorLabel}</span>
                         </span>
-                        <span className="flex items-center gap-1 font-mono text-faint">
+                        <span className="flex items-center gap-1 tabular-nums text-faint">
                           <IconClock size={11} />
                           <span>{formatDateTimeVn(evt.performedAt)}</span>
                         </span>
@@ -194,7 +194,7 @@ export function StaffStatusHistoryDrawer({
                             defaultValue: evt.fromStatus,
                           })}
                         />
-                        <span className="font-mono font-bold text-faint">→</span>
+                        <span className="tabular-nums font-bold text-faint">→</span>
                         <StatusPill
                           tone={toneFor(evt.toStatus)}
                           label={t(`equipmentHistory.status.${evt.toStatus}`, {

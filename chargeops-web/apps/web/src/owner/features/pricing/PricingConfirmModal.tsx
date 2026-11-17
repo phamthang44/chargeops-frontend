@@ -136,7 +136,7 @@ export function PricingConfirmModal({
             <span className="text-muted">
               {t('pricing.confirmModal.basePriceRow', { defaultValue: 'Giá sạc gốc / kWh:' })}
             </span>
-            <div className="flex items-center gap-1.5 font-mono">
+            <div className="flex items-center gap-1.5 tabular-nums">
               {initialConfig && basePriceChanged && (
                 <>
                   <span className="text-faint line-through">{formatVnd(initialConfig.basePriceVnd)}</span>
@@ -154,7 +154,7 @@ export function PricingConfirmModal({
             <span className="text-muted">
               {t('pricing.confirmModal.minDurationRow', { defaultValue: 'Thời lượng đặt tối thiểu (Thương mại):' })}
             </span>
-            <div className="flex items-center gap-1.5 font-mono">
+            <div className="flex items-center gap-1.5 tabular-nums">
               {initialConfig && minDurationChanged && (
                 <>
                   <span className="text-faint line-through">
@@ -191,7 +191,7 @@ export function PricingConfirmModal({
                 {hoursDiffs.map((diff, i) => (
                   <div key={i} className="flex items-center justify-between py-0.5">
                     <span className="font-semibold text-ink">{diff.dayLabel}:</span>
-                    <div className="flex items-center gap-1.5 font-mono">
+                    <div className="flex items-center gap-1.5 tabular-nums">
                       <span className="text-faint line-through">{diff.fromText}</span>
                       <span className="text-faint">→</span>
                       <span className="font-bold text-owner-deep">{diff.toText}</span>
@@ -207,7 +207,7 @@ export function PricingConfirmModal({
             <span className="text-muted">
               {t('pricing.confirmModal.touCountRow', { defaultValue: 'Số khung giá theo giờ (TOU):' })}
             </span>
-            <div className="flex items-center gap-1.5 font-mono">
+            <div className="flex items-center gap-1.5 tabular-nums">
               {initialConfig && touCountChanged && (
                 <>
                   <span className="text-faint line-through">
@@ -234,7 +234,7 @@ export function PricingConfirmModal({
           {/* System Safety Buffer */}
           <div className="flex items-center justify-between py-1 text-faint text-[11.5px]">
             <span>{t('pricing.confirmModal.bufferRow', { defaultValue: 'Thời gian giãn ca giữa 2 lượt:' })}</span>
-            <span className="font-mono font-medium">
+            <span className="tabular-nums font-medium">
               {t('pricing.steps.step4.bufferBadge', {
                 minutes: SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES,
                 defaultValue: `${SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} phút cố định`,

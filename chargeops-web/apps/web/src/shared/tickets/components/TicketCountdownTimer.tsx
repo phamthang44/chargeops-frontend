@@ -89,7 +89,7 @@ export function TicketCountdownTimer({ autoCloseAt, resolvedAt, className = '' }
         <span className="text-[12px] font-medium text-warn-deep">
           {t('countdown.autoClosePrefix', 'Tự đóng sau:')}
         </span>
-        <span className="font-mono font-bold tracking-tight text-warn-deep">
+        <span className="tabular-nums font-bold tracking-tight text-warn-deep">
           {timeLeft.days > 0 && `${timeLeft.days}d `}
           {String(timeLeft.hours).padStart(2, '0')}h : {String(timeLeft.minutes).padStart(2, '0')}m : {String(timeLeft.seconds).padStart(2, '0')}s
         </span>

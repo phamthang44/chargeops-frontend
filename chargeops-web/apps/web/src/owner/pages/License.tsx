@@ -86,7 +86,7 @@ export function License() {
                   {currentStation?.name || t('license.defaultStationName', { defaultValue: 'Trạm sạc' })}
                 </span>
                 {currentStation?.stationCode && (
-                  <span className="font-mono text-[11px] font-semibold text-faint">
+                  <span className="tabular-nums text-[11px] font-semibold text-faint">
                     ({currentStation.stationCode})
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function License() {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[13.5px] font-bold text-ink">{currentStation.name}</span>
             {currentStation.stationCode && (
-              <span className="font-mono text-[11px] font-semibold text-faint">({currentStation.stationCode})</span>
+              <span className="tabular-nums text-[11px] font-semibold text-faint">({currentStation.stationCode})</span>
             )}
             {currentStation.city && (
               <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-muted">
@@ -349,7 +349,7 @@ function Body({ license, station, history }: { license: License; station: Statio
                       ? t('license.plans.yearly', { defaultValue: 'Gói Năm (1 năm lịch)' })
                       : t('license.plans.monthly', { defaultValue: 'Gói Tháng (1 tháng lịch)' })}
                   </div>
-                  <div className="text-[12px] font-mono text-faint">
+                  <div className="text-[12px] tabular-nums text-faint">
                     {t('license.licenseCodeLabel', { defaultValue: 'Mã License:' })}{' '}
                     <span className="font-bold text-brand">{license.licenseCode || license.id}</span>
                   </div>
@@ -507,7 +507,7 @@ function Body({ license, station, history }: { license: License; station: Statio
               return (
                 <div key={h.id} className="flex items-center justify-between px-4 py-3 text-[12.5px] transition-colors hover:bg-surface-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[11.5px] font-bold text-brand">{h.licenseCode || h.id}</span>
+                    <span className="tabular-nums text-[11.5px] font-bold text-brand">{h.licenseCode || h.id}</span>
                     <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-semibold text-body">
                       {hPlanLabel}
                     </span>
@@ -516,7 +516,7 @@ function Body({ license, station, history }: { license: License; station: Statio
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-ink">
+                    <span className="tabular-nums font-bold text-ink">
                       {h.feeAmount ? formatVnd(h.feeAmount) : '—'}
                     </span>
                     <div title={hStatusTooltip} className="cursor-default">
@@ -550,8 +550,8 @@ function DetailRow({
     <div className="flex items-center justify-between border-b border-hairline pb-2.5">
       <span className="text-muted">{label}</span>
       <span
-        className={`text-right ${isMono ? 'font-mono' : ''} ${isBold ? 'font-bold text-ink' : ''} ${
-          isBrand ? 'font-mono font-bold text-brand' : 'text-ink font-medium'
+        className={`text-right ${isMono ? 'tabular-nums' : ''} ${isBold ? 'font-bold text-ink' : ''} ${
+          isBrand ? 'tabular-nums font-bold text-brand' : 'text-ink font-medium'
         }`}
       >
         {value ?? '—'}

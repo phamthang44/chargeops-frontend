@@ -52,7 +52,7 @@ export function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={`w-full rounded-[10px] border px-[13px] py-[11px] text-[13.5px] transition focus:ring-2 ${
-        mono ? 'font-mono' : ''
+        mono ? 'tabular-nums' : ''
       } ${invalid ? 'border-bad' : 'border-line'} ${ring}`}
     />
   );

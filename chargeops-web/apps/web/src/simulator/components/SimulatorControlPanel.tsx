@@ -217,7 +217,7 @@ function StationPickerDropdown({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-xs font-semibold">{s.name}</span>
-                        <span className="rounded bg-slate-100 px-1 py-0.2 text-[9px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <span className="rounded bg-slate-100 px-1 py-0.2 text-[11px] tabular-nums text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                           {s.stationCode || 'ST'}
                         </span>
                       </div>
@@ -319,7 +319,7 @@ function ConnectorPickerDropdown({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 truncate text-xs font-bold text-slate-900 dark:text-white">
               {selected?.chargePointCode && (
-                <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[10px] font-mono text-emerald-400">
+                <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[11.5px] tabular-nums text-emerald-400">
                   {selected.chargePointCode}
                 </span>
               )}
@@ -469,7 +469,7 @@ function ConnectorPickerDropdown({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {c.chargePointCode && (
-                          <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9.5px] font-mono font-bold text-white dark:bg-slate-700">
+                          <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[11px] tabular-nums font-bold text-white dark:bg-slate-700">
                             {c.chargePointCode}
                           </span>
                         )}
@@ -489,7 +489,7 @@ function ConnectorPickerDropdown({
                           {c.runtimeStatus}
                         </span>
                         <span>·</span>
-                        <span className="font-mono text-[9.5px] opacity-70">
+                        <span className="tabular-nums text-[11px] opacity-70">
                           ID: {c.id.length > 14 ? `${c.id.slice(0, 8)}...` : c.id}
                         </span>
                       </div>
@@ -602,7 +602,7 @@ export function SimulatorControlPanel({
               onChange={(e) => setSyncInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleRunSync()}
               placeholder={t('controlPanel.quickSync.placeholder', 'Dán UUID cổng sạc (ví dụ: b8a7... hoặc Cổng 1, HN-01)...')}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white font-mono"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white tabular-nums"
             />
             {syncInput ? (
               <button
@@ -701,12 +701,12 @@ export function SimulatorControlPanel({
           <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/50">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500 dark:text-slate-400">{t('kiosk.ready.challengeCode', 'Mã Token:')}</span>
-              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <span className=" font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {t('controlPanel.challenge.secondsLeft', { seconds: remainingSeconds, defaultValue: `${remainingSeconds}s còn lại` })}
               </span>
             </div>
             
-            <div className="mt-1.5 break-all rounded-lg bg-white p-2.5 font-mono text-[11px] text-slate-800 dark:bg-slate-900 dark:text-slate-200">
+            <div className="mt-1.5 break-all rounded-lg bg-white p-2.5 tabular-nums text-[11px] text-slate-800 dark:bg-slate-900 dark:text-slate-200">
               {challengeToken || t('kiosk.ready.generating', 'Đang tạo...')}
             </div>
 
@@ -853,7 +853,7 @@ export function SimulatorControlPanel({
           </button>
         </div>
 
-        <div className="h-32 overflow-y-auto rounded-xl bg-slate-950 p-3 font-mono text-[11px] text-slate-300 space-y-1.5">
+        <div className="h-32 overflow-y-auto rounded-xl bg-slate-950 p-3 tabular-nums text-[11px] text-slate-300 space-y-1.5">
           {logs.length === 0 ? (
             <div className="text-slate-600 italic">{t('controlPanel.logs.empty', 'Chưa có sự kiện nào được ghi nhận.')}</div>
           ) : (

@@ -63,7 +63,7 @@ export function RefundAttemptsDrawer({
         <div className="rounded-card border border-line bg-surface p-4 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[12px] text-muted">{t('finance.refunds.table.cols.amount', 'Số tiền hoàn')}:</span>
-            <span className="font-mono font-bold text-good text-[15px]">+{formatVnd(refund.amount)}</span>
+            <span className="tabular-nums font-bold text-good text-[15px]">+{formatVnd(refund.amount)}</span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -148,20 +148,20 @@ export function RefundAttemptsDrawer({
                         />
                       </div>
 
-                      <div className="text-[11px] text-muted flex items-center gap-1 font-mono">
+                      <div className="text-[11px] text-muted flex items-center gap-1 tabular-nums">
                         <IconClock size={11} className="text-faint" />
                         <span>{t('finance.attemptsDrawer.started', 'Bắt đầu')}: {att.startedAt ? formatDateTimeVn(att.startedAt) : '—'}</span>
                       </div>
 
                       {att.completedAt && (
-                        <div className="text-[11px] text-muted flex items-center gap-1 font-mono">
+                        <div className="text-[11px] text-muted flex items-center gap-1 tabular-nums">
                           <IconCheckCircle size={11} className="text-good" />
                           <span>{t('finance.attemptsDrawer.completed', 'Hoàn tất')}: {formatDateTimeVn(att.completedAt)}</span>
                         </div>
                       )}
 
                       {att.failureReason && (
-                        <div className="rounded-lg bg-bad-soft/40 p-2 text-[11px] text-bad font-mono">
+                        <div className="rounded-lg bg-bad-soft/40 p-2 text-[11px] text-bad tabular-nums">
                           {t('finance.attemptsDrawer.failureReason', 'Lý do lỗi')}: {att.failureReason}
                         </div>
                       )}

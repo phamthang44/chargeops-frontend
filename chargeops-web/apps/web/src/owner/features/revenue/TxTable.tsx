@@ -37,8 +37,8 @@ export function TxTable({ rows }: { rows: Transaction[] }) {
               className="grid items-center border-b border-hairline px-4 py-[11px] text-[12.5px] font-medium"
               style={{ gridTemplateColumns: GRID }}
             >
-              <span className="font-mono text-[11px] font-semibold text-brand">{tx.id}</span>
-              <span className="font-mono text-[11.5px] text-muted">{tx.bookingId}</span>
+              <span className="tabular-nums text-[11px] font-semibold text-brand">{tx.id}</span>
+              <span className="tabular-nums text-[11.5px] text-muted">{tx.bookingId}</span>
               <span>
                 <span className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold" style={{ color }}>
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
@@ -70,7 +70,7 @@ export function TxCards({ rows }: { rows: Transaction[] }) {
         return (
           <Card key={tx.id} className="p-[13px]">
             <div className="mb-1.5 flex items-center justify-between">
-              <span className="font-mono text-[11px] font-semibold text-brand">{tx.id}</span>
+              <span className="tabular-nums text-[11px] font-semibold text-brand">{tx.id}</span>
               <span className="text-[13px] font-semibold" style={{ color }}>
                 {tx.amountVnd < 0 ? '−' : ''}
                 {formatVnd(Math.abs(tx.amountVnd))}

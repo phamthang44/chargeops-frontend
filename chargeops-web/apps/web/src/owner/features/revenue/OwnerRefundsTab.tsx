@@ -192,7 +192,7 @@ export function OwnerRefundsTab() {
                   {t('finance.refunds.kpi.actionRequired', 'CẦN OWNER RETRY')}
                 </span>
               </div>
-              <div className={`text-[23px] font-extrabold tracking-tight font-mono ${s.requiresOwnerActionCount > 0 ? 'text-bad' : 'text-ink'}`}>
+              <div className={`text-[23px] font-extrabold tracking-tight tabular-nums ${s.requiresOwnerActionCount > 0 ? 'text-bad' : 'text-ink'}`}>
                 {s.requiresOwnerActionCount}
               </div>
             </div>
@@ -299,7 +299,7 @@ export function OwnerRefundsTab() {
                       >
                         {/* Refund ID with copy */}
                         <div className="flex items-center gap-1.5 min-w-0 pr-2">
-                          <span className="font-mono text-[11px] font-bold text-brand truncate">
+                          <span className="tabular-nums text-[11px] font-bold text-brand truncate">
                             {r.refundId}
                           </span>
                           <button
@@ -317,12 +317,12 @@ export function OwnerRefundsTab() {
                         </div>
 
                         {/* Booking Code */}
-                        <div className="font-mono text-[11.5px] font-semibold text-body truncate pr-2">
+                        <div className="tabular-nums text-[11.5px] font-semibold text-body truncate pr-2">
                           {r.bookingCode || r.bookingId}
                         </div>
 
                         {/* Station */}
-                        <div className="text-[12px] text-body truncate pr-2 font-mono">
+                        <div className="text-[12px] text-body truncate pr-2 tabular-nums">
                           #{r.stationId}
                         </div>
 
@@ -338,7 +338,7 @@ export function OwnerRefundsTab() {
                         </div>
 
                         {/* Amount */}
-                        <div className="text-right font-mono font-bold text-[13px] text-good">
+                        <div className="text-right tabular-nums font-bold text-[13px] text-good">
                           +{formatVnd(r.amount)}
                         </div>
 
@@ -346,19 +346,19 @@ export function OwnerRefundsTab() {
                         <div className="text-center">
                           {isPending ? (
                             r.requiresOwnerAction ? (
-                              <StatusPill tone="bad" label={t('finance.refunds.statusPill.actionRequired', 'CẦN RETRY')} />
+                              <StatusPill tone="bad" label={t('finance.refunds.statusPill.actionRequired', 'Cần thử lại')} />
                             ) : (
-                              <StatusPill tone="warn" label="PENDING" />
+                              <StatusPill tone="warn" label={t('finance.refunds.tabs.pending', 'Chờ xử lý')} />
                             )
                           ) : (
-                            <StatusPill tone="good" label="SUCCEEDED" />
+                            <StatusPill tone="good" label={t('finance.refunds.tabs.succeeded', 'Đã hoàn tất')} />
                           )}
                         </div>
 
                         {/* Attempts count */}
                         <div className="text-center">
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[10.5px] font-mono font-bold ${
+                            className={`rounded-full px-2 py-0.5 text-[11.5px] tabular-nums font-bold ${
                               hasFailedAttempt
                                 ? 'bg-bad-soft text-bad border border-bad/30'
                                 : 'bg-surface-2 text-muted border border-hairline'

@@ -78,7 +78,7 @@ function ToastItem({ toast, onDismiss }: { toast: NotificationItem; onDismiss: (
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="text-[13px] font-extrabold tracking-tight text-ink truncate">{toast.title}</span>
-          {toast.time && <span className="font-mono text-[10px] font-medium text-ghost">{toast.time}</span>}
+          {toast.time && <span className="tabular-nums text-[11.5px] font-medium text-ghost">{toast.time}</span>}
         </div>
 
         {toast.subtitle && <p className="mt-0.5 text-[11.5px] font-medium text-muted">{toast.subtitle}</p>}

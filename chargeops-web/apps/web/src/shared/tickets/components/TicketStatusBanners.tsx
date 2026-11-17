@@ -201,7 +201,7 @@ export function TicketStatusBanners({
                     })}
                   </span>
                   {ticket.autoCloseAt && (
-                    <span className="font-mono text-[11px] font-semibold text-warn">
+                    <span className="tabular-nums text-[11px] font-semibold text-warn">
                       {t('detail.deadline', 'Hạn chót: {{time}} ngày {{date}}', {
                         time: formatTimeVn(ticket.autoCloseAt),
                         date: formatDateVn(ticket.autoCloseAt),

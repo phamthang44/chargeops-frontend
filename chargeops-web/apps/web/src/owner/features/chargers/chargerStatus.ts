@@ -38,7 +38,7 @@ export const OPERATIONAL_STATUS_PILL: Record<
 
 export const CONNECTOR_PILL: Record<ConnectorRuntimeStatus, { bg: string; fg: string; key: string }> = {
   AVAILABLE: { bg: 'var(--color-good-soft)', fg: 'var(--color-good-deep)', key: 'connectors.status.AVAILABLE' },
-  IN_USE: { bg: 'var(--color-brand-soft)', fg: 'var(--color-brand)', key: 'connectors.status.IN_USE' },
+  IN_USE: { bg: 'var(--color-info-soft)', fg: 'var(--color-info)', key: 'connectors.status.IN_USE' },
   OFFLINE: { bg: 'var(--color-bad-soft)', fg: 'var(--color-bad-deep)', key: 'connectors.status.OFFLINE' },
 };
 

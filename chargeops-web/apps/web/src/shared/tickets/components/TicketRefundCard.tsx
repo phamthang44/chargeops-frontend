@@ -33,8 +33,8 @@ export function TicketRefundCard({ ticket, admin, hasRefund }: TicketRefundCardP
           <div className="mt-2.5 space-y-1">
             {ticket.refundIds?.map((refId) => (
               <div key={refId} className="flex items-center justify-between text-[11px] py-1 border-b border-hairline last:border-0">
-                <span className="font-mono text-muted">ID: #{refId.slice(0, 14)}...</span>
-                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-mono text-faint">
+                <span className="tabular-nums text-muted">ID: #{refId.slice(0, 14)}...</span>
+                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[11.5px] tabular-nums text-faint">
                   {t('detail.refund.ownerLedgerBadge', 'Sổ trạm')}
                 </span>
               </div>

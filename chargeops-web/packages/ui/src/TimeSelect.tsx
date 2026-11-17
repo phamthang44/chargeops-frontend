@@ -112,7 +112,7 @@ export function TimeSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => !disabled && setOpen((v) => !v)}
-        className={`flex h-[36px] w-full items-center justify-between gap-1.5 rounded-[9px] border px-2.5 text-center font-mono text-[12.5px] font-medium transition cursor-pointer ${
+        className={`flex h-[36px] w-full items-center justify-between gap-1.5 rounded-[9px] border px-2.5 text-center tabular-nums text-[12.5px] font-medium transition cursor-pointer ${
           disabled
             ? 'border-line bg-chip text-faint cursor-not-allowed opacity-70'
             : open
@@ -150,7 +150,7 @@ export function TimeSelect({
               value={typedInput}
               onChange={(e) => setTypedInput(e.target.value.replace(/[^0-9:]/g, ''))}
               placeholder="Gõ giờ (VD: 08:30)..."
-              className="w-full rounded-[6px] border border-line bg-surface px-2 py-1 font-mono text-[11.5px] text-ink outline-none focus:border-owner"
+              className="w-full rounded-[6px] border border-line bg-surface px-2 py-1 tabular-nums text-[11.5px] text-ink outline-none focus:border-owner"
             />
           </div>
 
@@ -177,7 +177,7 @@ export function TimeSelect({
                       onChange(opt);
                       setOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between px-3 py-1.5 text-left font-mono text-[12px] transition hover:bg-chip cursor-pointer ${
+                    className={`flex w-full items-center justify-between px-3 py-1.5 text-left tabular-nums text-[12px] transition hover:bg-chip cursor-pointer ${
                       isSelected ? selectedRowClass : 'text-body'
                     }`}
                   >

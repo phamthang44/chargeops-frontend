@@ -120,20 +120,20 @@ export function StationCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span
-                className="text-[16px] font-bold text-ink hover:text-owner transition-colors cursor-pointer truncate"
+                className="cursor-pointer truncate text-[15.5px] font-semibold text-ink transition-colors hover:text-owner"
                 onClick={() => onOpenDetail?.(station)}
                 title={station.name}
               >
                 {station.name}
               </span>
               {isActiveContext && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10px] font-bold text-owner-deep shrink-0 border border-owner-border/40">
-                  <IconCheck size={11} strokeWidth={2.4} />
-                  <span>{t('stations.card.selectedBadge', { defaultValue: 'Đang chọn' })}</span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-medium text-owner-deep">
+                  <IconCheck size={12} strokeWidth={2.4} />
+                  {t('stations.card.selectedBadge', { defaultValue: 'Đang chọn' })}
                 </span>
               )}
             </div>
-            <div className="mt-0.5 font-mono text-[12px] text-faint truncate">
+            <div className="mt-0.5 tabular-nums text-[12px] text-faint truncate">
               {station.stationCode || station.id} {cityName ? `· ${cityName}` : ''}
             </div>
           </div>
@@ -149,7 +149,7 @@ export function StationCard({
 
         {/* Metrics row when active */}
         {isActive && (
-          <div className="mb-[13px] grid grid-cols-3 gap-[9px]">
+          <div className="mb-3 grid grid-cols-3 divide-x divide-line">
             <MiniStat label={t('stations.card.bookingsToday')} value={String(station.bookingsToday ?? 0)} />
             <MiniStat label={t('stations.card.chargersOnline')} value={`${onlineChargers}/${totalChargers}`} />
             <MiniStat label={t('stations.card.utilization')} value={`${station.utilizationPct ?? 0}%`} />
@@ -158,7 +158,7 @@ export function StationCard({
 
         {/* Warning Callout when Station is Active but License is Inactive */}
         {isActive && !eligibility.isEligible && (
-          <div className="mb-3 rounded-[9px] border border-warn-border bg-warn-soft/50 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
+          <div className="mb-3 rounded-[9px] bg-warn-soft p-2.5 text-[12px] leading-relaxed text-warn-deep">
             <div className="flex items-center gap-1.5 font-bold text-ink">
               <IconShieldAlert size={15} className="shrink-0 text-warn" />
               <span>{t('stations.card.hiddenCalloutTitle', { defaultValue: 'Trạm đang tạm ẩn khỏi tìm kiếm tài xế' })}</span>
@@ -173,10 +173,9 @@ export function StationCard({
 
         {/* Operational Status Callout when PAUSED or MAINTENANCE */}
         {isActive && station.operationalStatus === 'PAUSED' && (
-          <div className="mb-3 rounded-[9px] border border-bad-border bg-bad-soft/60 p-2.5 text-[11.5px] leading-relaxed text-bad-deep">
+          <div className="mb-3 rounded-[9px] bg-bad-soft p-2.5 text-[12px] leading-relaxed text-bad-deep">
             <div className="flex items-center justify-between font-bold text-ink">
               <div className="flex items-center gap-1.5">
-                <span>⏸️</span>
                 <span>{t('stations.operationalStatus.PAUSED', { defaultValue: 'Trạm đang tạm dừng đón khách' })}</span>
               </div>
               {onChangeOperationalStatus && (
@@ -196,10 +195,9 @@ export function StationCard({
         )}
 
         {isActive && station.operationalStatus === 'MAINTENANCE' && (
-          <div className="mb-3 rounded-[9px] border border-warn-border bg-warn-soft/60 p-2.5 text-[11.5px] leading-relaxed text-warn-deep">
+          <div className="mb-3 rounded-[9px] bg-warn-soft p-2.5 text-[12px] leading-relaxed text-warn-deep">
             <div className="flex items-center justify-between font-bold text-ink">
               <div className="flex items-center gap-1.5">
-                <span>🛠️</span>
                 <span>{t('stations.operationalStatus.MAINTENANCE', { defaultValue: 'Trạm đang bảo trì' })}</span>
               </div>
               {onChangeOperationalStatus && (
@@ -243,12 +241,12 @@ export function StationCard({
         </div>
 
         {isRejected && station.rejectionReason && (
-          <div className="mt-3 flex gap-2 rounded-[9px] border border-bad-border bg-bad-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-bad-deep">
+          <div className="mt-3 flex gap-2 rounded-[9px] bg-bad-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-bad-deep">
             <span>{t('stations.card.rejectionReason', { reason: station.rejectionReason })}</span>
           </div>
         )}
         {isPending && (
-          <div className="mt-3 flex items-center gap-2 rounded-[9px] border border-warn-border bg-warn-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-warn-deep">
+          <div className="mt-3 flex items-center gap-2 rounded-[9px] bg-warn-soft px-3 py-2.5 text-[11.5px] leading-[1.5] font-medium text-warn-deep">
             <IconClock size={15} className="shrink-0" />
             <span>{t('stations.card.pendingHelp')}</span>
           </div>
@@ -258,9 +256,8 @@ export function StationCard({
       {/* Card Action Buttons */}
       <div className="mt-4 flex items-center gap-2 border-t border-hairline pt-3">
         <Button
-          accent="owner"
+          variant="secondary"
           size="sm"
-          className="flex-1"
           onClick={() => onOpenDetail?.(station)}
         >
           {t('stations.card.viewDetailBtn', { defaultValue: 'Xem chi tiết trạm' })}
@@ -268,7 +265,7 @@ export function StationCard({
 
         {isActive && onChangeOperationalStatus && (
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             onClick={() => onChangeOperationalStatus(station)}
             title={t('stations.card.changeStatusTooltip', { defaultValue: 'Đổi trạng thái vận hành trạm (Operating / Paused / Maintenance)' })}
@@ -294,9 +291,9 @@ export function StationCard({
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[9px] bg-canvas p-2.5">
-      <div className="text-[12px] font-medium text-muted">{label}</div>
-      <div className="mt-[3px] text-[17px] font-bold text-ink">{value}</div>
+    <div className="px-3 first:pl-0">
+      <div className="text-[12px] text-muted">{label}</div>
+      <div className="mt-0.5 text-[17px] font-semibold tabular-nums text-ink">{value}</div>
     </div>
   );
 }

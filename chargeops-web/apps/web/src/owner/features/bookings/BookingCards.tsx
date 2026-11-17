@@ -19,7 +19,7 @@ export function BookingCards({ rows, onOpen }: { rows: OwnerBookingListItem[]; o
         return (
           <Card key={b.bookingId} className="cursor-pointer p-[13px]" onClick={() => onOpen(b)}>
             <div className="mb-[7px] flex items-center justify-between">
-              <span className="font-mono text-[11.5px] font-semibold text-brand">{b.bookingCode || b.bookingId}</span>
+              <span className="tabular-nums text-[11.5px] font-semibold text-brand">{b.bookingCode || b.bookingId}</span>
               <StatusPill tone={meta.tone} label={statusLabel} />
             </div>
             <div className="mb-1 text-[14px] font-semibold">{b.driverDisplayName}</div>

@@ -24,7 +24,7 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
             defaultValue: `Hệ thống tự động hủy giữ chỗ và giải phóng cổng sạc sau ${SYSTEM_BOOKING_RULES.NO_SHOW_AUTO_LOCK_MINUTES} phút nếu tài xế không thực hiện check-in đúng giờ.`,
           })}
           control={
-            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-owner-deep bg-owner-soft font-mono">
+            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-owner-deep bg-owner-soft tabular-nums">
               <IconShieldCheck size={14} className="text-owner-deep" />
               <span>
                 {t('pricing.steps.step4.noShowBadge', {
@@ -43,7 +43,7 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
             defaultValue: 'Chỉ mở nhận đặt chỗ cho Hôm nay và Ngày mai (~48 giờ) để bảo đảm lịch hẹn luôn chuẩn xác và không bị treo slot.',
           })}
           control={
-            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 font-mono">
+            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 tabular-nums">
               <IconCalendar size={14} className="text-faint" />
               <span>
                 {t('pricing.steps.step4.advanceBadge', {
@@ -63,7 +63,7 @@ export function AvailabilityStep({}: AvailabilityStepProps) {
               'Khoảng nghỉ cố định bắt buộc sau mỗi lượt sạc để xe trước rút sạc, di chuyển ra khỏi vị trí an toàn trước khi lượt kế tiếp bắt đầu.',
           })}
           control={
-            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 font-mono">
+            <span className="flex items-center gap-1.5 rounded-[9px] border border-line px-3 py-1.5 text-[12px] font-semibold text-ink bg-surface-2 tabular-nums">
               <IconClock size={14} className="text-faint" />
               <span>
                 {t('pricing.steps.step4.bufferBadge', {

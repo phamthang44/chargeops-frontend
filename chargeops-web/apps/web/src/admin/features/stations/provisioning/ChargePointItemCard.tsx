@@ -85,7 +85,7 @@ export function ChargePointItemCard({
               <span className="font-bold text-[15px] text-ink">
                 {cp.name || t('provisioning.workspace.chargePoint.nameFallback')}
               </span>
-              <span className="font-mono text-[12px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
+              <span className="tabular-nums text-[12px] font-bold text-brand">{cp.chargePointCode || cp.id}</span>
               {cp.zoneLabel && (
                 <span className="rounded bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-faint border border-line">
                   <IconPin size={11} className="inline mr-1 text-faint" />
@@ -96,7 +96,7 @@ export function ChargePointItemCard({
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted">
               <span>
                 {t('provisioning.workspace.chargePoint.maxPowerLabel')}{' '}
-                <b className="text-ink font-mono">{cp.maxPowerKw} kW</b>
+                <b className="text-ink tabular-nums">{cp.maxPowerKw} kW</b>
               </span>
               <span>·</span>
               <span>
@@ -232,7 +232,7 @@ export function ChargePointItemCard({
                       </div>
                       <div className="min-w-0 flex flex-col">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="font-mono text-[12px] font-bold text-ink">
+                          <span className="tabular-nums text-[12px] font-bold text-ink">
                             {c.connectorCode || c.id}
                           </span>
                           <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10.5px] font-bold text-body border border-line">
@@ -243,7 +243,7 @@ export function ChargePointItemCard({
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 mt-1 text-[12px]">
-                          <span className="font-mono font-bold text-brand">{c.powerKw} kW</span>
+                          <span className="tabular-nums font-bold text-brand">{c.powerKw} kW</span>
                         </div>
                       </div>
                     </div>

@@ -113,7 +113,7 @@ export function ProvisioningStatusLegend() {
 
               {/* Note tháo gỡ thắc mắc */}
               <div className="mt-1 rounded-[6px] bg-brand-soft/20 p-2.5 text-[11px] text-body leading-relaxed">
-                <span className="font-bold text-brand">💡 {t('provisioning.legend.cpNoteTitle')}</span>
+                <span className="font-bold text-brand">{t('provisioning.legend.cpNoteTitle')}</span>
                 <p className="mt-0.5 text-muted">
                   {t('provisioning.legend.cpNoteBody')}
                 </p>
@@ -161,7 +161,7 @@ export function ProvisioningStatusLegend() {
 
               {/* Note phân quyền */}
               <div className="mt-auto rounded-[6px] bg-surface-2 p-2.5 text-[11px] text-body leading-relaxed">
-                <span className="font-bold text-ink">⚡ {t('provisioning.legend.connRuleTitle')}</span>
+                <span className="font-bold text-ink">{t('provisioning.legend.connRuleTitle')}</span>
                 <p className="mt-0.5 text-muted">
                   {t('provisioning.legend.connRuleBody')}
                 </p>

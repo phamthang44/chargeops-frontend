@@ -434,7 +434,7 @@ export function PolicyKB() {
       <div className="mb-2">
         <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft/60 px-3 py-1 shadow-2xs backdrop-blur-xs">
           <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
-          <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.18em] text-brand">
+          <span className="tabular-nums text-[11.5px] font-bold text-brand">
             SSOT Knowledge Architecture · Legal Intelligence
           </span>
         </div>
@@ -554,7 +554,7 @@ export function PolicyKB() {
                   >
                     <span>{tab.label}</span>
                     <span
-                      className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-bold transition ${
+                      className={`rounded-full px-2 py-0.5 tabular-nums text-[11px] font-bold transition ${
                         isActive
                           ? 'bg-surface/20 text-surface'
                           : 'bg-line/80 text-muted group-hover:bg-line group-hover:text-ink'
@@ -688,7 +688,7 @@ export function PolicyKB() {
           <div className="flex items-center justify-between text-[12.5px] text-muted px-1.5">
             <span className="flex items-center gap-2">
               <span>Hiển thị</span>
-              <span className="inline-flex items-center rounded-md bg-canvas px-2 py-0.5 font-mono text-[12px] font-bold text-ink border border-line">
+              <span className="inline-flex items-center rounded-md bg-canvas px-2 py-0.5 tabular-nums text-[12px] font-bold text-ink border border-line">
                 {filteredDocs.length}
               </span>
               <span>/ {allDocs.length} văn kiện trong kho</span>
@@ -696,7 +696,7 @@ export function PolicyKB() {
             {committedSearch && (
               <div className="flex items-center gap-1.5">
                 <span>Bộ lọc từ khóa:</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 font-mono text-[11px] font-semibold text-brand">
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 tabular-nums text-[11px] font-semibold text-brand">
                   "{committedSearch}"
                   <button
                     type="button"
@@ -744,7 +744,7 @@ export function PolicyKB() {
                         {/* Top Micro-Pills Row */}
                         <div className="mb-2.5 flex flex-wrap items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-0.5 font-mono text-[11px] font-bold ${badgeBg}`}
+                            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-0.5 tabular-nums text-[11px] font-bold ${badgeBg}`}
                           >
                             <IconTag size={11} />
                             {docTypeLabels[doc.docType]}
@@ -761,7 +761,7 @@ export function PolicyKB() {
 
                           {/* Locale Pill */}
                           <span
-                            className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-[10.5px] font-bold ${
+                            className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 tabular-nums text-[11.5px] font-bold ${
                               doc.locale === 'en'
                                 ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300'
                                 : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
@@ -770,7 +770,7 @@ export function PolicyKB() {
                             {doc.locale ? doc.locale.toUpperCase() : 'VI'}
                           </span>
 
-                          <span className="rounded-lg border border-line bg-canvas px-2 py-0.5 font-mono text-[10.5px] font-semibold text-muted">
+                          <span className="rounded-lg border border-line bg-canvas px-2 py-0.5 tabular-nums text-[11.5px] font-semibold text-muted">
                             v{doc.version}
                           </span>
 
@@ -805,7 +805,7 @@ export function PolicyKB() {
                           <button
                             type="button"
                             onClick={() => handleCopySlug(doc.slug)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas px-2.5 py-1 font-mono text-[11px] font-semibold text-brand-strong transition hover:border-brand/40 hover:bg-brand-soft/30 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas px-2.5 py-1 tabular-nums text-[11px] font-semibold text-brand-strong transition hover:border-brand/40 hover:bg-brand-soft/30 active:scale-95"
                             title="Nhấn để sao chép slug"
                           >
                             {copiedSlug === doc.slug ? (
@@ -834,7 +834,7 @@ export function PolicyKB() {
                             {doc.keywords.slice(0, 5).map((kw, idx) => (
                               <span
                                 key={idx}
-                                className="rounded-md border border-line bg-canvas px-2 py-0.5 font-mono text-[11px] text-body shadow-2xs"
+                                className="rounded-md border border-line bg-canvas px-2 py-0.5 tabular-nums text-[11px] text-body shadow-2xs"
                               >
                                 {kw}
                               </span>
@@ -903,14 +903,14 @@ export function PolicyKB() {
             <div className="flex items-start justify-between border-b border-line pb-4">
               <div>
                 <div className="mb-1 flex items-center gap-2">
-                  <span className="rounded-md bg-brand-soft px-2 py-0.5 font-mono text-[11px] font-bold text-brand">
+                  <span className="rounded-md bg-brand-soft px-2 py-0.5 tabular-nums text-[11px] font-bold text-brand">
                     {docTypeLabels[activeDoc.docType]}
                   </span>
                   <span className="rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-body">
                     {audienceLabels[activeDoc.targetAudience]}
                   </span>
                   <span
-                    className={`rounded-md border px-2 py-0.5 font-mono text-[10.5px] font-bold ${
+                    className={`rounded-md border px-2 py-0.5 tabular-nums text-[11.5px] font-bold ${
                       activeDoc.locale === 'en'
                         ? 'border-sky-300 bg-sky-50 text-sky-700'
                         : 'border-emerald-300 bg-emerald-50 text-emerald-700'
@@ -918,7 +918,7 @@ export function PolicyKB() {
                   >
                     {activeDoc.locale ? activeDoc.locale.toUpperCase() : 'VI'}
                   </span>
-                  <span className="font-mono text-[11px] text-muted">v{activeDoc.version}</span>
+                  <span className="tabular-nums text-[11px] text-muted">v{activeDoc.version}</span>
                 </div>
                 <h2 className="text-[21px] font-extrabold text-ink">{activeDoc.title}</h2>
                 <div className="text-[12px] text-ghost">
@@ -932,7 +932,7 @@ export function PolicyKB() {
                     {activeDoc.keywords.map((kw, idx) => (
                       <span
                         key={idx}
-                        className="rounded-md bg-brand-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-brand"
+                        className="rounded-md bg-brand-soft px-2 py-0.5 tabular-nums text-[11px] font-semibold text-brand"
                       >
                         {kw}
                       </span>
@@ -1032,7 +1032,7 @@ export function PolicyKB() {
                   value={formSlug}
                   onChange={(e) => setFormSlug(e.target.value)}
                   placeholder="terms-of-service"
-                  className="w-full rounded-xl border border-line bg-canvas px-3 py-2 font-mono text-[12px] disabled:opacity-60 outline-none focus:border-brand"
+                  className="w-full rounded-xl border border-line bg-canvas px-3 py-2 tabular-nums text-[12px] disabled:opacity-60 outline-none focus:border-brand"
                 />
               </div>
             </div>

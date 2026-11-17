@@ -919,6 +919,298 @@ body {
   color: #92400e;
 }
 
+/* ChargeOps OAuth consent screen */
+.co-oauth-client-bar {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--co-line);
+  background: var(--co-surface);
+  padding: 0.75rem 1.25rem;
+}
+
+.co-oauth-client-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.co-oauth-app-icon,
+.co-oauth-client-logo {
+  display: inline-flex;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--co-primary);
+  color: #ffffff;
+  object-fit: contain;
+  padding: 0.4rem;
+}
+
+.co-oauth-client-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.co-oauth-client-caption {
+  color: var(--co-muted);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.co-oauth-client-name {
+  overflow-wrap: anywhere;
+  color: var(--co-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.co-oauth-mobile-languages {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.co-oauth-mobile-languages a {
+  border-radius: 999px;
+  color: var(--co-muted);
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.4rem 0.5rem;
+  text-decoration: none;
+}
+
+.co-oauth-mobile-languages a.is-active {
+  background: var(--co-primary-soft);
+  color: var(--co-primary-dark);
+  font-weight: 700;
+}
+
+.co-oauth-body {
+  gap: 0.7rem;
+  padding: 1.2rem 1.3rem 1.1rem;
+}
+
+.co-oauth-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.co-oauth-eyebrow {
+  color: var(--co-primary-dark);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.065em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.co-oauth-title {
+  margin: 0;
+  font-size: 1.55rem;
+  letter-spacing: -0.025em;
+  line-height: 1.16;
+}
+
+.co-oauth-subtitle {
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.co-oauth-permissions {
+  border: 1px solid var(--co-line);
+  border-radius: 12px;
+  background: var(--co-surface-alt);
+  padding: 0.75rem 0.85rem 0.4rem;
+}
+
+.co-oauth-permission-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.co-oauth-permission-heading h2 {
+  margin: 0;
+  color: var(--co-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.co-oauth-permission-count {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--co-primary-soft);
+  color: var(--co-primary-dark);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0.3rem 0.55rem;
+}
+
+.co-oauth-permission-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.co-oauth-permission-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  border-top: 1px solid var(--co-line);
+  padding: 0.42rem 0.05rem;
+}
+
+.co-oauth-permission-check {
+  display: inline-flex;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.05rem;
+  border-radius: 50%;
+  background: var(--co-primary-soft);
+  color: var(--co-primary-dark);
+}
+
+.co-oauth-permission-text {
+  min-width: 0;
+  color: var(--co-body);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.co-oauth-permission-text strong {
+  color: var(--co-ink);
+  font-weight: 700;
+}
+
+.co-oauth-client-policy {
+  margin: 0;
+  color: var(--co-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.co-oauth-client-policy a,
+.co-oauth-legal a {
+  color: var(--co-primary-dark);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.co-oauth-client-policy a:hover,
+.co-oauth-legal a:hover {
+  text-decoration: underline;
+}
+
+.co-oauth-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+  color: var(--co-muted);
+  font-size: 0.71rem;
+  line-height: 1.4;
+}
+
+.co-oauth-security-note svg {
+  flex: 0 0 auto;
+  margin-top: 0.02rem;
+  color: var(--co-primary-dark);
+}
+
+.co-oauth-form {
+  width: 100%;
+  margin: 0;
+}
+
+.co-oauth-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.8fr);
+  gap: 0.6rem;
+}
+
+.co-oauth-actions button {
+  min-width: 0;
+  min-height: 46px;
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0 0.7rem;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.co-oauth-allow {
+  border: 1px solid var(--co-primary);
+  background: var(--co-primary);
+  color: #ffffff;
+}
+
+.co-oauth-allow:hover {
+  border-color: var(--co-primary-dark);
+  background: var(--co-primary-dark);
+}
+
+.co-oauth-deny {
+  border: 1px solid var(--co-line);
+  background: var(--co-surface);
+  color: var(--co-body);
+}
+
+.co-oauth-deny:hover {
+  border-color: #cbd5e1;
+  background: var(--co-surface-alt);
+}
+
+.co-oauth-actions button:focus-visible,
+.co-oauth-mobile-languages a:focus-visible,
+.co-oauth-legal a:focus-visible,
+.co-oauth-client-policy a:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.3);
+  outline-offset: 2px;
+}
+
+.co-oauth-legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem 0.4rem;
+  color: var(--co-muted);
+  font-size: 0.66rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.co-oauth-legal-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem 0.55rem;
+}
+
 /* ==========================================================================
    Responsive Breakpoints for Mobile Web & Mobile App (WebView)
    ========================================================================== */
@@ -938,7 +1230,7 @@ body {
   }
 
   .co-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
     padding: 0;
     margin: 0;
@@ -949,10 +1241,40 @@ body {
     border: none;
     box-shadow: none;
     min-height: 100vh;
+    min-width: 0;
     width: 100%;
   }
 
   .co-app-body {
     background-color: var(--co-surface);
+  }
+
+  .co-oauth-client-bar {
+    min-height: 64px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 0.65rem 1rem;
+  }
+
+  .co-oauth-mobile-languages {
+    display: flex;
+    flex: 0 0 100%;
+    margin-left: 3.1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .co-oauth-body {
+    gap: 0.65rem;
+    padding: 1.15rem 1rem 1rem;
+  }
+
+  .co-oauth-title {
+    font-size: 1.4rem;
+  }
+
+  .co-oauth-actions {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }

@@ -84,10 +84,10 @@ export function ScheduleHistoryDrawer({
           </span>
           <div>
             <div className="text-[15px] font-bold text-ink">
-              {t('pricing.history.title', { defaultValue: 'Lịch sử giờ hoạt động' })}
+              {t('pricing.history.title', { defaultValue: 'Lịch sử phiên bản Giá & Giờ' })}
             </div>
             <div className="text-[11.5px] text-muted">
-              {t('pricing.history.subtitle', { defaultValue: 'Các phiên bản lịch mở cửa cùng mốc lưu, bắt đầu và kết thúc hiệu lực.' })}
+              {t('pricing.history.subtitle', { defaultValue: 'Các phiên bản cấu hình Giá & Giờ, thời điểm lưu và các mốc bắt đầu, kết thúc hiệu lực.' })}
             </div>
           </div>
         </div>
@@ -95,10 +95,10 @@ export function ScheduleHistoryDrawer({
     >
       {/* Informational Callout */}
       <div className="rounded-[10px] border border-line bg-surface-2 p-3 text-[12px] leading-relaxed text-muted">
-        <b>{t('pricing.history.calloutTitle', { defaultValue: 'Quy cách chu kỳ giờ hoạt động:' })}</b>{' '}
+        <b>{t('pricing.history.calloutTitle', { defaultValue: 'Phạm vi lịch sử và thời điểm hiệu lực:' })}</b>{' '}
         {t('pricing.history.calloutDesc', {
           defaultValue:
-            'Giờ mở/đóng lặp lại hàng tuần. Cấu hình thương mại đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam). Lịch hiện hành tiếp tục có hiệu lực đến đúng mốc đó. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.',
+            'Mỗi mục là một phiên bản của toàn bộ cấu hình thương mại (giá, thời lượng đặt tối thiểu, khung TOU và giờ mở/đóng). Sửa giá, thời lượng hoặc TOU cũng có thể tạo mục mới dù giờ mở/đóng không đổi. Khung lịch sử này hiện chỉ hiển thị giờ hoạt động và mốc hiệu lực, chưa cho biết trường nào đã thay đổi. Giờ mở/đóng lặp lại hàng tuần. Nếu trạm chưa có đủ giá và thời lượng đặt, lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam), còn cấu hình hiện hành có hiệu lực đến đúng mốc đó. Khoảng thời gian trên mỗi mục là thời gian phiên bản đó có hiệu lực, không phải độ dài chu kỳ tuần. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.',
         })}
       </div>
 
@@ -112,8 +112,8 @@ export function ScheduleHistoryDrawer({
         <ApiErrorState
           error={error}
           compact
-          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử giờ hoạt động' })}
-          title={t('pricing.history.error.title', { defaultValue: 'Không thể tải lịch sử giờ hoạt động' })}
+          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử phiên bản Giá & Giờ' })}
+          title={t('pricing.history.error.title', { defaultValue: 'Không thể tải lịch sử phiên bản Giá & Giờ' })}
           onRetry={() => refetch()}
           isRetrying={isFetching}
         />
@@ -122,7 +122,7 @@ export function ScheduleHistoryDrawer({
           compact
           tone="brand"
           icon={<IconClock size={22} />}
-          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử giờ hoạt động' })}
+          eyebrow={t('pricing.history.error.eyebrow', { defaultValue: 'Lịch sử phiên bản Giá & Giờ' })}
           title={t('pricing.history.empty', { defaultValue: 'Chưa có lịch sử thay đổi nào cho trạm này.' })}
         />
       ) : (

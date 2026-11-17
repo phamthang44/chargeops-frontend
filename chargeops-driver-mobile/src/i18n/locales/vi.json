@@ -1193,7 +1193,7 @@
     "retry": "Thử lại",
     "completedNote": "Lượt đặt chỗ đã kết thúc.",
     "checkedInNote": "Bạn đã check-in lúc {{time}}.",
-    "refundedNote": "Đã hủy. Có hồ sơ hoàn {{amount}}; xem trạng thái trong Lịch sử đặt chỗ. Demo dùng Simulator, không xác nhận tiền đã về tài khoản.",
+    "refundedNote": "Đã hủy. Có hồ sơ hoàn {{amount}}; xem trạng thái trong Lịch sử đặt chỗ. ChargeOps ghi nhận trạng thái hồ sơ, không tự xác minh giao dịch ngân hàng.",
     "noRefundNote": "Lượt đặt chỗ đã hủy, không được hoàn tiền.",
     "chargePoint": "Trụ sạc",
     "timeRange": "Khung giờ",
@@ -1233,14 +1233,14 @@
     "refundReasonDefault": "Hoàn tiền theo chính sách quy định",
     "refundStatusReconciling": "Đang tra soát hoàn tiền",
     "refundStatusProcessing": "Hồ sơ hoàn đang chờ xử lý",
-    "refundStatusSucceeded": "Hoàn thành công trong Simulator",
-    "refundBadgeSucceeded": "Simulator: thành công",
+    "refundStatusSucceeded": "Hồ sơ hoàn được ghi nhận thành công",
+    "refundBadgeSucceeded": "Đã ghi nhận",
     "refundBadgeProcessing": "Chờ xử lý",
     "refundBadgeReconciling": "Đang tra soát",
     "refundDescReconciling": "Hồ sơ hoàn đang được đối soát; trạng thái này chưa xác nhận giao dịch hoàn thành công.",
     "refundDescProcessing": "Hồ sơ hoàn đang chờ xử lý; trạng thái này chưa xác nhận tiền đã về tài khoản.",
     "refundDescAutoProcessing": "Simulator đang xử lý yêu cầu hoàn trong bản demo; chưa có kết quả thành công.",
-    "refundDescSucceeded": "Yêu cầu hoàn thành công trong Simulator. Kết quả này không xác nhận có giao dịch ngân hàng thật.",
+    "refundDescSucceeded": "ChargeOps ghi nhận hồ sơ hoàn ở trạng thái thành công; ứng dụng không tự xác minh giao dịch ngân hàng.",
     "refundedTotal": "Số tiền trong hồ sơ hoàn",
     "graceCardTitle": "Hạn hủy đủ điều kiện hoàn 100%",
     "graceCardRemaining": "Còn {{time}} trong hạn hủy để lập nghĩa vụ hoàn 100% giá gói",
@@ -1652,8 +1652,8 @@
         "body": "Booking {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
       },
       "succeeded": {
-        "title": "Hoàn tiền đã thành công trong Simulator",
-        "body": "Booking {{code}}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật."
+        "title": "Hồ sơ hoàn đã ghi nhận thành công",
+        "body": "Booking {{code}}. ChargeOps ghi nhận hồ sơ hoàn ở trạng thái thành công; ứng dụng không tự xác minh giao dịch ngân hàng."
       }
     },
     "ticket": {

@@ -411,14 +411,14 @@ export function RefundExecutionDrawer({
             <IconCheck size={16} />
             {t(
               'refunds.drawer.terminalBanner',
-              'Khoản hoàn tiền đã được hoàn tất thành công (Terminal State)'
+              'Hồ sơ hoàn tiền đã được ghi nhận là hoàn tất'
             )}
           </div>
           <p className="text-muted leading-relaxed">
             {t('refunds.drawer.terminalDesc', {
               ref: activeRefund.transferReference || 'N/A',
               time: formatDateTimeVn(activeRefund.completedAt || activeRefund.decisionAt),
-              defaultValue: `Mã tham chiếu ngân hàng: ${activeRefund.transferReference || 'N/A'}. Hoàn tất lúc: ${formatDateTimeVn(activeRefund.completedAt || activeRefund.decisionAt)}. Hệ thống không cho phép thực thi thêm lệnh mới trên bản ghi này.`,
+              defaultValue: `Mã tham chiếu thực thi/ghi nhận: ${activeRefund.transferReference || 'N/A'}. Ghi nhận lúc: ${formatDateTimeVn(activeRefund.completedAt || activeRefund.decisionAt)}. Ứng dụng không tự xác minh giao dịch ngân hàng; không thể thực hiện thêm thao tác trên bản ghi này.`,
             })}
           </p>
         </div>

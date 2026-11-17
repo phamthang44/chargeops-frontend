@@ -898,14 +898,14 @@
       "confirmBtn": "I Understand & Enable 24/7"
     },
     "history": {
-      "title": "Operating Hours History",
+      "title": "Price & Hours Version History",
       "error": {
-        "eyebrow": "Operating hours history",
-        "title": "Could not load the operating hours history"
+        "eyebrow": "Price & Hours version history",
+        "title": "Could not load Price & Hours version history"
       },
-      "subtitle": "Operating-hour versions, when they were saved, and their effective start and end times.",
-      "calloutTitle": "Operating Schedule Cycle Specification:",
-      "calloutDesc": "Opening hours repeat weekly. If the current schedule has no complete price and booking-duration values, the first complete configuration takes effect immediately; later edits start at 00:00 next Monday (Vietnam time). When a change is scheduled, the current schedule stays effective until the new version starts. The duration shown on a history entry is how long that version was effective, not the length of a weekly cycle. Emergency closures are handled separately and take effect immediately.",
+      "subtitle": "Price & Hours configuration versions, when each was saved, and when each takes effect and expires.",
+      "calloutTitle": "History scope and effective dates:",
+      "calloutDesc": "Each entry records a version of the full commercial configuration (base price, minimum booking duration, TOU windows, and opening hours). A price, duration, or TOU edit can create a new entry even when the hours stay unchanged. This view currently shows the hours and effective window, not a field-by-field change list. Opening hours repeat weekly. If a station has no complete price and booking-duration values, its first complete configuration takes effect immediately; later edits start at 00:00 next Monday (Vietnam time), while the current configuration remains effective through that exact boundary. The duration on an entry is how long that version was effective, not the length of a weekly cycle. Emergency closures are handled separately and take effect immediately.",
       "activeBadge": "Currently Active (Repeats Weekly)",
       "activeHint": "This schedule repeats weekly until it is replaced.",
       "activeHintUntil": "This schedule repeats weekly until {{effectiveTo}}; the next version starts at that exact boundary.",
@@ -934,7 +934,7 @@
       "open247AllDays": "Open 24/7 all 7 days of the week",
       "closed": "Closed",
       "empty": "No schedule change history found for this station.",
-      "loadError": "Could not load schedule history: ",
+      "loadError": "Could not load Price & Hours version history: ",
       "durationUnderOneHour": "Under 1 hour",
       "durationDaysHours": "{{days}} days {{hours}} hours",
       "durationDays": "{{days}} days",

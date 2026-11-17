@@ -1193,7 +1193,7 @@
     "retry": "Retry",
     "completedNote": "This booking has ended.",
     "checkedInNote": "You checked in at {{time}}.",
-    "refundedNote": "Cancelled. A refund record for {{amount}} is available in Booking History. The demo uses a Simulator and does not confirm funds reached an account.",
+    "refundedNote": "Cancelled. A refund record for {{amount}} is available in Booking History. ChargeOps records the refund status; the app does not independently verify a bank transaction.",
     "noRefundNote": "Booking cancelled — no refund applied.",
     "chargePoint": "Charge point",
     "timeRange": "Time range",
@@ -1233,14 +1233,14 @@
     "refundReasonDefault": "Policy refund",
     "refundStatusReconciling": "Reconciling Refund",
     "refundStatusProcessing": "Refund record pending",
-    "refundStatusSucceeded": "Succeeded in Simulator",
-    "refundBadgeSucceeded": "Simulator: succeeded",
+    "refundStatusSucceeded": "Refund record marked successful",
+    "refundBadgeSucceeded": "Success recorded",
     "refundBadgeProcessing": "Pending",
     "refundBadgeReconciling": "Reconciling",
     "refundDescReconciling": "The refund record is being reconciled; this status does not confirm a successful refund execution.",
     "refundDescProcessing": "The refund record is awaiting processing; this status does not confirm that funds reached your account.",
     "refundDescAutoProcessing": "The Simulator is processing the refund request in this demo; there is no successful result yet.",
-    "refundDescSucceeded": "The refund succeeded in the Simulator. This does not confirm a real bank transaction.",
+    "refundDescSucceeded": "ChargeOps records this refund as successful; the app does not independently verify a bank transaction.",
     "refundedTotal": "Refund record amount",
     "graceCardTitle": "100% refund-eligible cancellation window",
     "graceCardRemaining": "{{time}} left in the eligible cancellation window",
@@ -1652,8 +1652,8 @@
         "body": "Booking {{code}}. Refund obligation is held; funds are not yet considered refunded."
       },
       "succeeded": {
-        "title": "Refund succeeded in Simulator",
-        "body": "Booking {{code}}. Simulator recorded refund success; this is not a real banking transaction."
+        "title": "Refund record marked successful",
+        "body": "Booking {{code}}. ChargeOps records the refund as successful; the app does not independently verify a bank transaction."
       }
     },
     "ticket": {

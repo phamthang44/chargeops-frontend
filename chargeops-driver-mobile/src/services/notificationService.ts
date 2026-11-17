@@ -153,11 +153,11 @@ function getDefaultNotificationText(key: string, params: Record<string, any>, is
         ? `Booking ${code}. Refund obligation is held; funds are not yet considered refunded.`
         : `Booking ${code}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn.`;
     case 'notification.refund.succeeded.title':
-      return isEn ? 'Refund succeeded in Simulator' : 'Hoàn tiền đã thành công trong Simulator';
+      return isEn ? 'Refund record marked successful' : 'Hồ sơ hoàn tiền được ghi nhận thành công';
     case 'notification.refund.succeeded.body':
       return isEn
-        ? `Booking ${code}. Simulator recorded refund success; this is not a real banking transaction.`
-        : `Booking ${code}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật.`;
+        ? `Booking ${code}. ChargeOps records this refund as successful; the app does not independently verify a bank transaction.`
+        : `Booking ${code}. ChargeOps ghi nhận hồ sơ hoàn tiền thành công; ứng dụng không tự xác minh giao dịch ngân hàng.`;
     default:
       return key;
   }

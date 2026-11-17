@@ -130,6 +130,6 @@ const styles = StyleSheet.create({
   metaText: { flex: 1, fontSize: fontSizes.body, lineHeight: lineHeights.body },
   dashDivider: { height: 1, borderTopWidth: 1, borderStyle: 'dashed', marginVertical: spacing.xs },
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  totalLabel: { fontSize: fontSizes.caption, letterSpacing: 0.5 },
+  totalLabel: { fontSize: fontSizes.caption, letterSpacing: 0 },
   total: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold },
 });

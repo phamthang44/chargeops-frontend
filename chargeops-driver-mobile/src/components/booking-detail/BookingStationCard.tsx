@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   ribbonCopy: { flex: 1, minWidth: 0 },
-  ribbonLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, textTransform: 'uppercase', letterSpacing: 0.5 },
+  ribbonLabel: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, textTransform: 'uppercase', letterSpacing: 0 },
   ribbonValue: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, marginTop: 1 },
   copyIconBtn: {
     width: 32,

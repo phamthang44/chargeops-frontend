@@ -213,8 +213,7 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.medium,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   total: { fontSize: fontSizes.heading, fontWeight: fontWeights.bold, marginTop: 2 },
   footerMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

@@ -57,16 +57,11 @@ export function OwnerFinanceCharts({ stationId, period, onSelectStation }: Owner
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-owner-soft text-owner">
-              <IconCard size={16} />
-            </span>
             <h2 id="owner-finance-title" className="text-base sm:text-lg font-semibold text-ink">
               {t('finance.title')}
             </h2>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-owner-border/70 bg-owner-soft/80 px-2.5 py-0.5 text-[11px] font-medium text-owner-deep">
-              <span className="h-1.5 w-1.5 rounded-full bg-owner animate-pulse" />
-              {t('finance.simulatorBadge')}
-            </span>
+            {/* Plain note, not a pulsing badge: it tells the reader where the numbers come from. */}
+            <span className="text-[12px] text-muted">{t('finance.simulatorBadge')}</span>
           </div>
           <p className="max-w-3xl text-xs sm:text-sm text-muted leading-relaxed">
             {t('finance.description')}
@@ -157,88 +152,35 @@ function FinanceKpis({
     data.grossVnd > 0 ? ((data.refundedVnd / data.grossVnd) * 100).toFixed(1) : '0';
   const isNetPositive = data.netVnd >= 0;
 
-  return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      {/* Gross Inflow */}
-      <Card className="relative overflow-hidden p-4 sm:p-5 border-line/80 transition-all hover:border-owner-border/60 hover:shadow-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-            {t('finance.grossVnd')}
-          </span>
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-owner-soft text-owner">
-            <span className="font-bold text-xs">+</span>
-          </span>
-        </div>
-        <p className="mt-2.5 break-words text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-          {money(data.grossVnd)}
-        </p>
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-owner-deep">
-          <span className="inline-flex items-center gap-1 rounded-full bg-owner-soft px-2 py-0.5 text-[10.5px] font-medium">
-            {t('finance.inflow')}
-          </span>
-        </div>
-      </Card>
-
-      {/* Refunds Outflow */}
-      <Card className="relative overflow-hidden p-4 sm:p-5 border-line/80 transition-all hover:border-warn-border/60 hover:shadow-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-            {t('finance.refundedVnd')}
-          </span>
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-warn-soft text-warn">
-            <span className="font-bold text-xs">-</span>
-          </span>
-        </div>
-        <p className="mt-2.5 break-words text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-          {money(data.refundedVnd)}
-        </p>
-        <div className="mt-3 flex items-center gap-1.5 text-xs">
-          <span className="inline-flex items-center gap-1 rounded-full bg-warn-soft px-2 py-0.5 text-[10.5px] font-medium text-warn-deep">
-            {t('finance.refundRate', { rate: refundRate })}
-          </span>
-        </div>
-      </Card>
-
-      {/* Net Receipts Hero */}
-      <Card
-        className={`relative overflow-hidden p-4 sm:p-5 transition-all hover:shadow-xs ${
-          isNetPositive
-            ? 'border-owner-border/80 bg-gradient-to-br from-surface to-owner-soft/25'
-            : 'border-bad-border/80 bg-gradient-to-br from-surface to-bad-soft/25'
+  // Same tile as every other KPI row: label, figure, one quiet line. Colour only when net goes negative.
+  const tile = (label: string, value: string, note?: string, negative = false) => (
+    <Card className="p-4 sm:p-5">
+      <div className="text-[12.5px] font-medium text-muted">{label}</div>
+      <p
+        className={`mt-1.5 break-words text-[26px] font-semibold tracking-tight tabular-nums ${
+          negative ? 'text-bad' : 'text-ink'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-            {t('finance.netVnd')}
-          </span>
-          <span
-            className={`flex h-7 w-7 items-center justify-center rounded-full ${
-              isNetPositive ? 'bg-good-soft text-good' : 'bg-bad-soft text-bad'
-            }`}
-          >
-            {isNetPositive ? <IconCheckCircle size={15} /> : <span className="font-bold text-xs">!</span>}
-          </span>
-        </div>
-        <p
-          className={`mt-2.5 break-words text-2xl sm:text-3xl font-bold tracking-tight tabular-nums ${
-            isNetPositive ? 'text-owner-deep' : 'text-bad'
-          }`}
-        >
-          {money(data.netVnd)}
-        </p>
-        <div className="mt-3 flex items-center gap-1.5 text-xs">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-medium ${
-              isNetPositive ? 'bg-good-soft text-good-deep' : 'bg-bad-soft text-bad'
-            }`}
-          >
-            {isNetPositive ? t('finance.positiveCashflow') : t('finance.negativeCashflow')}
-          </span>
-        </div>
-      </Card>
+        {value}
+      </p>
+      {note && <p className={`mt-1 text-[12px] ${negative ? 'text-bad' : 'text-muted'}`}>{note}</p>}
+    </Card>
+  );
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {tile(t('finance.grossVnd'), money(data.grossVnd))}
+      {tile(t('finance.refundedVnd'), money(data.refundedVnd), t('finance.refundRate', { rate: refundRate }))}
+      {tile(
+        t('finance.netVnd'),
+        money(data.netVnd),
+        isNetPositive ? undefined : t('finance.negativeCashflow'),
+        !isNetPositive,
+      )}
     </div>
   );
 }
+
 
 function CashFlowCard({
   daily,
@@ -347,7 +289,7 @@ function CashFlowCard({
         {showTable && (
           <div className="mt-3 max-h-64 overflow-y-auto rounded-card border border-line bg-surface-2/40">
             <table className="w-full text-right text-xs tabular-nums">
-              <thead className="sticky top-0 bg-surface-2 text-faint uppercase text-[10px] tracking-wider border-b border-line">
+              <thead className="sticky top-0 bg-surface-2 text-muted text-[12px] border-b border-line">
                 <tr>
                   <th scope="col" className="p-2.5 text-left font-semibold">
                     {t('finance.date')}

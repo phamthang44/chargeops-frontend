@@ -293,7 +293,7 @@ export function RefundExecutionDrawer({
       <Card className="p-4 space-y-3 bg-surface-2 border-hairline">
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('refunds.drawer.amountLabel', 'Số tiền cần hoàn trả')}
             </span>
             <div className="text-[24px] font-bold text-good">
@@ -301,7 +301,7 @@ export function RefundExecutionDrawer({
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-faint block mb-1">
+            <span className="text-[12px] font-medium text-muted block mb-1">
               {t('refunds.drawer.statusLabel', 'Trạng thái')}
             </span>
             <StatusPill

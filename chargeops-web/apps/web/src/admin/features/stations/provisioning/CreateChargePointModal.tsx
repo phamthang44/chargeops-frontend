@@ -65,7 +65,7 @@ export function CreateChargePointModal({
 
         <div className="flex flex-col gap-3">
           <div>
-            <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+            <label className="block text-[12px] font-medium text-muted mb-1">
               {t('provisioning.workspace.create.nameLabel')}
             </label>
             <input
@@ -78,7 +78,7 @@ export function CreateChargePointModal({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+            <label className="block text-[12px] font-medium text-muted mb-1">
               {t('provisioning.workspace.create.zoneLabel')}
             </label>
             <input
@@ -91,7 +91,7 @@ export function CreateChargePointModal({
 
           <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+              <label className="block text-[12px] font-medium text-muted mb-1">
                 {t('provisioning.workspace.create.standardLabel')}
               </label>
               <Select
@@ -101,7 +101,7 @@ export function CreateChargePointModal({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+              <label className="block text-[12px] font-medium text-muted mb-1">
                 {t('provisioning.workspace.create.powerLabel')}
               </label>
               <Select
@@ -111,7 +111,7 @@ export function CreateChargePointModal({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+              <label className="block text-[12px] font-medium text-muted mb-1">
                 {t('provisioning.workspace.create.quantityLabel')}
               </label>
               <input

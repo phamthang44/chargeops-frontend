@@ -296,7 +296,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontWeight: fontWeights.bold,
-    textTransform: 'uppercase',
   },
   brandText: {
     fontSize: 11,

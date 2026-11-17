@@ -226,7 +226,7 @@ export function ScheduleHistoryDrawer({
                     </div>
                   ) : (
                     <div className="flex flex-col gap-1.5">
-                      <div className="font-semibold text-muted text-[10.5px] uppercase tracking-wider">
+                      <div className="font-medium text-muted text-[12px]">
                         {t('pricing.history.sevenDaysHours', { defaultValue: 'Khung giờ từng ngày:' })}
                       </div>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1">

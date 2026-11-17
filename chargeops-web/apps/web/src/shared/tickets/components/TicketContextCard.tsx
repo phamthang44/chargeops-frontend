@@ -42,7 +42,7 @@ export function TicketContextCard({
   const bookingWindow = bookingWindowLabel(ticket.bookingStartAt, ticket.bookingEndAt);
 
   return (
-    <Card className="rounded-2xl p-4 shadow-sm">
+    <Card className="rounded-card p-4 shadow-sm">
       <h2 className="mb-3 text-[13px] font-bold text-ink">
         {t('detail.context.title', 'Bối cảnh liên quan')}
       </h2>

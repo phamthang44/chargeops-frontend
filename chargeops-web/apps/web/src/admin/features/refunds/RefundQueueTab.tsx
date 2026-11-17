@@ -192,9 +192,8 @@ export function RefundQueueTab() {
         <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {/* Pending Card */}
           <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-warn/40">
-            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+              <span className="text-[12px] font-medium text-muted">
                 {t('refunds.kpi.pending', 'ĐANG CHỜ XỬ LÝ (PENDING)')}
               </span>
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
@@ -202,7 +201,7 @@ export function RefundQueueTab() {
               </span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-1.5">
-              <span className="text-[26px] font-black tracking-tight text-ink font-mono">
+              <span className="text-[26px] font-semibold tracking-tight text-ink tabular-nums">
                 {s.totalPendingAmountVnd > 0 ? formatVndCompact(s.totalPendingAmountVnd) : `${s.totalPendingCount}`}
               </span>
               {s.totalPendingAmountVnd > 0 && (
@@ -231,9 +230,8 @@ export function RefundQueueTab() {
 
           {/* Succeeded Card */}
           <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-good/40">
-            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+              <span className="text-[12px] font-medium text-muted">
                 {t('refunds.kpi.succeeded', 'ĐÃ HOÀN TẤT')}
               </span>
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20">
@@ -241,7 +239,7 @@ export function RefundQueueTab() {
               </span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-1.5">
-              <span className="text-[26px] font-black tracking-tight text-ink font-mono">
+              <span className="text-[26px] font-semibold tracking-tight text-ink tabular-nums">
                 {s.totalSucceededAmountVnd > 0 ? formatVndCompact(s.totalSucceededAmountVnd) : `${s.totalSucceededCount}`}
               </span>
               {s.totalSucceededAmountVnd > 0 && (
@@ -263,9 +261,8 @@ export function RefundQueueTab() {
 
           {/* Total Obligations Card */}
           <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-brand/40">
-            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+              <span className="text-[12px] font-medium text-muted">
                 {t('refunds.kpi.total', 'TỔNG NGHĨA VỤ HOÀN')}
               </span>
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20">
@@ -273,7 +270,7 @@ export function RefundQueueTab() {
               </span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-1.5">
-              <span className="text-[26px] font-black tracking-tight text-ink font-mono">
+              <span className="text-[26px] font-semibold tracking-tight text-ink tabular-nums">
                 {s.totalPendingAmountVnd + s.totalSucceededAmountVnd > 0
                   ? formatVndCompact(s.totalPendingAmountVnd + s.totalSucceededAmountVnd)
                   : `${s.totalPendingCount + s.totalSucceededCount}`}
@@ -292,9 +289,8 @@ export function RefundQueueTab() {
 
           {/* Action Required / Failed Attempts Card (Replaces Mode Card per §7.3) */}
           <div className="group relative overflow-hidden rounded-[18px] border border-line bg-gradient-to-b from-surface to-surface-2/90 p-4 shadow-xs backdrop-blur-xs transition-all hover:border-rose-500/40">
-            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.14),transparent_70%)] blur-xl" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+              <span className="text-[12px] font-medium text-muted">
                 {t('refunds.kpi.actionRequired', 'CẦN CAN THIỆP (LỖI LẦN THỬ)')}
               </span>
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 ring-1 ring-rose-500/20">
@@ -408,7 +404,7 @@ export function RefundQueueTab() {
               <div className="min-w-[920px]">
                 {/* Header */}
                 <div
-                  className="grid border-b border-line bg-surface-2/70 px-4 py-3 text-[10.5px] font-bold uppercase tracking-[0.08em] text-faint"
+                  className="grid border-b border-line bg-surface-2/70 px-4 py-3 text-[12px] font-medium text-muted"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>{t('refunds.table.cols.id', 'MÃ REFUND')}</span>

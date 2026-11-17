@@ -329,7 +329,7 @@ export function StationDetailDrawer({
                         <img
                           src={asset.assetUrl}
                           alt={`Asset ${idx + 1}`}
-                          className="h-full w-full object-cover transition group-hover:scale-105"
+                          className="h-full w-full object-cover transition"
                         />
                         {asset.isPrimary && (
                           <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-bold text-white">
@@ -511,7 +511,7 @@ export function StationDetailDrawer({
                       {/* Connectors preview */}
                       {cpConnectors.length > 0 && (
                         <div className="border-t border-hairline pt-2 flex flex-col gap-1.5">
-                          <span className="text-[10.5px] font-bold uppercase tracking-wider text-faint">
+                          <span className="text-[12px] font-medium text-muted">
                             {t('stations.drawer.hardware.connectorsTitle')}
                           </span>
                           <div className="grid gap-1.5 sm:grid-cols-2">

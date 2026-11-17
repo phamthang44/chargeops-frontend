@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: fontSizes.body,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   timeWindowText: {
     fontSize: fontSizes.body,

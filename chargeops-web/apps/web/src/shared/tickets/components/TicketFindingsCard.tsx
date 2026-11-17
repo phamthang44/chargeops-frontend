@@ -101,7 +101,7 @@ export function TicketFindingsCard({
   const isArbitrationForm = false;
 
   return (
-    <Card className="rounded-2xl p-4 shadow-sm">
+    <Card className="rounded-card p-4 shadow-sm">
       {/* Header */}
       <div className="mb-3.5 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-[13.5px] font-bold text-ink">

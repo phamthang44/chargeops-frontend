@@ -206,7 +206,7 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
                     {/* Rejection / Suspension reason callout */}
                     {item.reason && (
                       <div className="mt-2.5 rounded-[8px] border border-bad-border/60 bg-bad-soft/60 p-2.5 text-[12px] leading-relaxed text-bad-deep">
-                        <div className="font-semibold text-[11px] uppercase tracking-wider">
+                        <div className="font-medium text-[12px]">
                           {t('stations.timeline.reasonTitle')}:
                         </div>
                         <div className="mt-0.5">{item.reason}</div>

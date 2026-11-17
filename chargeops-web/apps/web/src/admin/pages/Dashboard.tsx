@@ -216,7 +216,7 @@ export function Dashboard() {
           <div className="flex flex-wrap items-center gap-2 pt-1 text-[12.5px] text-muted">
             <span>{t('dashboard.subtitle', { defaultValue: 'Hàng đợi điều phối hồ sơ, ticket nền tảng và các vụ việc leo thang cần xử lý.' })}</span>
             <span className="hidden sm:inline text-line">•</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-medium text-faint border border-line shadow-2xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-medium text-faint border border-line">
               <IconClock size={11.5} className="text-brand" />
               <span>{t('dashboard.generatedAt', { time: formattedRefTime, defaultValue: `Dữ liệu tính đến ${formattedRefTime}` })}</span>
             </span>
@@ -229,7 +229,7 @@ export function Dashboard() {
             onClick={handleGlobalRefresh}
             disabled={isGlobalFetching}
             icon={<IconRefreshCw size={13} className={isGlobalFetching ? 'animate-spin text-brand' : ''} />}
-            className="rounded-full shadow-2xs hover:shadow-xs"
+            className="rounded-full hover:shadow-xs"
           >
             <span>
               {isGlobalFetching
@@ -256,25 +256,22 @@ export function Dashboard() {
         {/* KPI 1: Approvals */}
         <div
           onClick={() => scrollToQueue('approvals', 'queue-approvals')}
-          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-warn hover:bg-warn-soft/10 hover:shadow-md"
+          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-card border border-line bg-surface p-4 transition-all duration-300 hover:border-line-hover"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('dashboard.kpi.approvals', { defaultValue: 'Hồ sơ chờ duyệt' })}
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-warn-pill text-warn transition-transform group-hover:scale-110">
-              <IconShield size={14} strokeWidth={2} />
-            </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <div className="text-[28px] font-bold tracking-tight text-ink tabular-nums font-mono">
+          <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-3">
+            <div className="text-[28px] font-semibold tracking-tight text-ink tabular-nums">
               {summaryQ.isLoading ? (
                 <Skeleton className="h-8 w-14 rounded-md" />
               ) : (
                 summaryQ.data?.pendingApprovals ?? 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-warn opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 whitespace-nowrap text-[12px] text-muted transition-colors group-hover:text-ink">
               <span>{t('dashboard.kpi.clickToFocus', { defaultValue: 'Xem hàng đợi' })}</span>
               <span className="transition-transform group-hover:translate-y-0.5">↓</span>
             </div>
@@ -284,25 +281,22 @@ export function Dashboard() {
         {/* KPI 2: Platform Tickets */}
         <div
           onClick={() => scrollToQueue('platform', 'queue-platform')}
-          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand-soft/10 hover:shadow-md"
+          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-card border border-line bg-surface p-4 transition-all duration-300 hover:border-line-hover"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('dashboard.kpi.platformTickets', { defaultValue: 'Ticket nền tảng' })}
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-soft text-brand transition-transform group-hover:scale-110">
-              <IconWrench size={14} strokeWidth={2} />
-            </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <div className="text-[28px] font-bold tracking-tight text-ink tabular-nums font-mono">
+          <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-3">
+            <div className="text-[28px] font-semibold tracking-tight text-ink tabular-nums">
               {summaryQ.isLoading ? (
                 <Skeleton className="h-8 w-14 rounded-md" />
               ) : (
                 summaryQ.data?.platformOpenTickets ?? 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-brand opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 whitespace-nowrap text-[12px] text-muted transition-colors group-hover:text-ink">
               <span>{t('dashboard.kpi.clickToFocus', { defaultValue: 'Xem hàng đợi' })}</span>
               <span className="transition-transform group-hover:translate-y-0.5">↓</span>
             </div>
@@ -312,25 +306,22 @@ export function Dashboard() {
         {/* KPI 3: Escalated Cases */}
         <div
           onClick={() => scrollToQueue('escalated', 'queue-escalated')}
-          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-bad hover:bg-bad-soft/10 hover:shadow-md"
+          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-card border border-line bg-surface p-4 transition-all duration-300 hover:border-line-hover"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('dashboard.kpi.escalatedCases', { defaultValue: 'Case escalation' })}
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-bad-soft text-bad transition-transform group-hover:scale-110">
-              <IconShieldAlert size={14} strokeWidth={2} />
-            </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <div className="text-[28px] font-bold tracking-tight text-ink tabular-nums font-mono">
+          <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-3">
+            <div className="text-[28px] font-semibold tracking-tight text-ink tabular-nums">
               {summaryQ.isLoading ? (
                 <Skeleton className="h-8 w-14 rounded-md" />
               ) : (
                 summaryQ.data?.escalatedOpenCases ?? 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-bad opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 whitespace-nowrap text-[12px] text-muted transition-colors group-hover:text-ink">
               <span>{t('dashboard.kpi.clickToFocus', { defaultValue: 'Xem hàng đợi' })}</span>
               <span className="transition-transform group-hover:translate-y-0.5">↓</span>
             </div>
@@ -340,25 +331,22 @@ export function Dashboard() {
         {/* KPI 4: Active Stations */}
         <div
           onClick={() => navigate('/admin/stations?status=ACTIVE')}
-          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good hover:bg-good-soft/10 hover:shadow-md"
+          className="group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-card border border-line bg-surface p-4 transition-all duration-300 hover:border-line-hover"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('dashboard.kpi.activeStations', { defaultValue: 'Trạm hoạt động' })}
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-good-soft text-good transition-transform group-hover:scale-110">
-              <span className="h-2 w-2 rounded-full bg-good animate-ping" />
-            </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <div className="text-[28px] font-bold tracking-tight text-ink tabular-nums font-mono">
+          <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-3">
+            <div className="text-[28px] font-semibold tracking-tight text-ink tabular-nums">
               {summaryQ.isLoading ? (
                 <Skeleton className="h-8 w-14 rounded-md" />
               ) : (
                 summaryQ.data?.activeStations ?? 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-good opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 whitespace-nowrap text-[12px] text-muted transition-colors group-hover:text-ink">
               <span>{t('dashboard.queues.viewAll', { defaultValue: 'Xem tất cả →' })}</span>
             </div>
           </div>
@@ -366,7 +354,7 @@ export function Dashboard() {
       </div>
 
       {/* Mobile Tab Switcher (<1024px) */}
-      <div className="flex lg:hidden overflow-x-auto rounded-[14px] border border-line bg-surface p-1 shadow-2xs">
+      <div className="flex lg:hidden overflow-x-auto rounded-[14px] border border-line bg-surface p-1">
         <button
           type="button"
           onClick={() => updateParam('queue', 'approvals')}
@@ -420,14 +408,11 @@ export function Dashboard() {
           {/* Widget 1: Approvals Queue */}
           <div
             id="queue-approvals"
-            className={`${activeTab === 'approvals' ? 'block' : 'hidden lg:block'} rounded-2xl border border-line bg-surface p-4 sm:p-5 shadow-2xs space-y-4`}
+            className={`${activeTab === 'approvals' ? 'block' : 'hidden lg:block'} rounded-card border border-line bg-surface p-4 sm:p-5 space-y-4`}
           >
             {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/50 pb-3.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-warn-pill text-warn">
-                    <IconShield size={16} strokeWidth={2} />
-                  </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-[15px] font-bold text-ink">
@@ -535,7 +520,7 @@ export function Dashboard() {
                           <button
                             type="button"
                             onClick={() => navigate(`/admin/approvals?stationId=${item.stationId}`)}
-                            className="group/btn inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[12px] font-semibold text-ink transition-all duration-200 hover:border-brand hover:bg-brand-soft hover:text-brand active:scale-[0.98]"
+                            className="group/btn inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[12px] font-semibold text-ink transition-all duration-200 hover:border-line-hover hover:bg-brand-soft hover:text-brand active:scale-[0.98]"
                           >
                             <span>{t('dashboard.queues.openApproval', { defaultValue: 'Mở hồ sơ' })}</span>
                             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-line-3 text-muted group-hover/btn:bg-brand group-hover/btn:text-white transition-all">
@@ -593,14 +578,11 @@ export function Dashboard() {
           {/* Widget 2: Platform Tickets Queue */}
           <div
             id="queue-platform"
-            className={`${activeTab === 'platform' ? 'block' : 'hidden lg:block'} rounded-2xl border border-line bg-surface p-4 sm:p-5 shadow-2xs space-y-4`}
+            className={`${activeTab === 'platform' ? 'block' : 'hidden lg:block'} rounded-card border border-line bg-surface p-4 sm:p-5 space-y-4`}
           >
             {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/50 pb-3.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft text-brand">
-                    <IconWrench size={16} strokeWidth={2} />
-                  </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-[15px] font-bold text-ink">
@@ -723,7 +705,7 @@ export function Dashboard() {
                           <button
                             type="button"
                             onClick={() => navigate(`/admin/tickets/${item.ticketId}`)}
-                            className="group/btn inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[12px] font-semibold text-ink transition-all duration-200 hover:border-brand hover:bg-brand-soft hover:text-brand active:scale-[0.98]"
+                            className="group/btn inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[12px] font-semibold text-ink transition-all duration-200 hover:border-line-hover hover:bg-brand-soft hover:text-brand active:scale-[0.98]"
                           >
                             <span>{t('dashboard.queues.openTicket', { defaultValue: 'Mở ticket' })}</span>
                             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-line-3 text-muted group-hover/btn:bg-brand group-hover/btn:text-white transition-all">
@@ -784,14 +766,11 @@ export function Dashboard() {
           {/* Widget 3: Escalated Cases Queue */}
           <div
             id="queue-escalated"
-            className={`${activeTab === 'escalated' ? 'block' : 'hidden lg:block'} rounded-2xl border border-line bg-surface p-4 sm:p-5 shadow-2xs space-y-4`}
+            className={`${activeTab === 'escalated' ? 'block' : 'hidden lg:block'} rounded-card border border-line bg-surface p-4 sm:p-5 space-y-4`}
           >
             {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/50 pb-3.5">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-bad-soft text-bad">
-                    <IconShieldAlert size={16} strokeWidth={2} />
-                  </div>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h2 className="text-[14.5px] font-bold text-ink">
@@ -978,12 +957,9 @@ export function Dashboard() {
           </div>
 
           {/* Widget 4: Platform User Overview (UM-01) */}
-          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 shadow-2xs space-y-3.5">
+          <div className="rounded-card border border-line bg-surface p-4 sm:p-5 space-y-3.5">
             <div className="flex items-center justify-between border-b border-line/50 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-soft text-brand">
-                    <IconUsers size={14} strokeWidth={2} />
-                  </div>
                   <div>
                     <h2 className="text-[14px] font-bold text-ink">
                       {t('dashboard.usersOverview.title', { defaultValue: 'Người dùng nền tảng' })}
@@ -1008,10 +984,10 @@ export function Dashboard() {
                   onClick={() => navigate('/admin/users')}
                   className="group flex flex-col justify-between rounded-card border border-line/60 bg-surface p-3 text-left transition-all duration-200 hover:border-brand/40 hover:bg-surface-2"
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-faint">
+                  <span className="text-[12px] font-medium text-muted">
                     {t('dashboard.usersOverview.total', { defaultValue: 'Tổng tài khoản' })}
                   </span>
-                  <div className="mt-2 text-[20px] font-bold text-ink tabular-nums font-mono group-hover:text-brand transition-colors">
+                  <div className="mt-2 text-[20px] font-semibold text-ink tabular-nums group-hover:text-brand transition-colors">
                     {userSummaryQ.isLoading ? '…' : userSummaryQ.data?.totalProfiles ?? 0}
                   </div>
                 </button>
@@ -1022,10 +998,10 @@ export function Dashboard() {
                   onClick={() => navigate('/admin/users?role=DRIVER')}
                   className="group flex flex-col justify-between rounded-card border border-line/60 bg-surface p-3 text-left transition-all duration-200 hover:border-good/40 hover:bg-good-soft/20"
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-faint">
+                  <span className="text-[12px] font-medium text-muted">
                     {t('dashboard.usersOverview.drivers', { defaultValue: 'Tài xế' })}
                   </span>
-                  <div className="mt-2 text-[20px] font-bold text-ink tabular-nums font-mono group-hover:text-good transition-colors">
+                  <div className="mt-2 text-[20px] font-semibold text-ink tabular-nums group-hover:text-good transition-colors">
                     {userSummaryQ.isLoading ? '…' : userSummaryQ.data?.byRole?.DRIVER ?? 0}
                   </div>
                 </button>
@@ -1036,10 +1012,10 @@ export function Dashboard() {
                   onClick={() => navigate('/admin/users?role=STAFF')}
                   className="group flex flex-col justify-between rounded-card border border-line/60 bg-surface p-3 text-left transition-all duration-200 hover:border-warn/40 hover:bg-warn-soft/20"
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-faint">
+                  <span className="text-[12px] font-medium text-muted">
                     {t('dashboard.usersOverview.staff', { defaultValue: 'Nhân viên trạm' })}
                   </span>
-                  <div className="mt-2 text-[20px] font-bold text-ink tabular-nums font-mono group-hover:text-warn transition-colors">
+                  <div className="mt-2 text-[20px] font-semibold text-ink tabular-nums group-hover:text-warn transition-colors">
                     {userSummaryQ.isLoading ? '…' : userSummaryQ.data?.byRole?.STAFF ?? 0}
                   </div>
                 </button>
@@ -1050,10 +1026,10 @@ export function Dashboard() {
                   onClick={() => navigate('/admin/users?role=OWNER')}
                   className="group flex flex-col justify-between rounded-card border border-line/60 bg-surface p-3 text-left transition-all duration-200 hover:border-brand/40 hover:bg-brand-soft/20"
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-faint">
+                  <span className="text-[12px] font-medium text-muted">
                     {t('dashboard.usersOverview.owners', { defaultValue: 'Chủ trạm' })}
                   </span>
-                  <div className="mt-2 text-[20px] font-bold text-ink tabular-nums font-mono group-hover:text-brand transition-colors">
+                  <div className="mt-2 text-[20px] font-semibold text-ink tabular-nums group-hover:text-brand transition-colors">
                     {userSummaryQ.isLoading ? '…' : userSummaryQ.data?.byRole?.OWNER ?? 0}
                   </div>
                 </button>

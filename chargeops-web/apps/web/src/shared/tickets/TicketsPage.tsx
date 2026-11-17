@@ -255,13 +255,13 @@ export function TicketsPage({
       {/* BKG-052 4-Box Asymmetric Bento Metric Header (Clean Single-Bezel) */}
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Box 1: OPEN (Unassigned / Pending Claim) */}
-        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
+        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
+              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.unassigned', 'Chờ tiếp nhận')}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-warn-deep font-mono">
+              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
                 {summaryQuery.isLoading ? '—' : openCount}
               </div>
             </div>
@@ -277,13 +277,13 @@ export function TicketsPage({
         </Card>
 
         {/* Box 2: IN_PROGRESS (Active SLA) */}
-        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
+        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
+              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.inProgress', 'Đang xử lý')}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-brand font-mono">
+              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
                 {summaryQuery.isLoading ? '—' : inProgressCount}
               </div>
             </div>
@@ -299,13 +299,13 @@ export function TicketsPage({
         </Card>
 
         {/* Box 3: RESOLVED (10-Day Auto-Close Watch) */}
-        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
+        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
+              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
                 {admin ? t('kpi.resolvingWatchAdmin', 'Chờ tài xế phản hồi') : t('kpi.resolvingWatch', 'Chờ tài xế (10 ngày)')}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-emerald-500 font-mono">
+              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
                 {summaryQuery.isLoading ? '—' : resolvedWatchCount}
               </div>
             </div>
@@ -321,13 +321,13 @@ export function TicketsPage({
         </Card>
 
         {/* Box 4: CLOSED (Terminal Completed) */}
-        <Card className="rounded-2xl p-4 shadow-2xs transition-all flex flex-col justify-between">
+        <Card className="rounded-card p-4 shadow-2xs transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-muted min-h-[30px] line-clamp-2">
+              <div className="text-[12px] font-medium text-muted min-h-[30px] line-clamp-2">
                 {t('kpi.completed', 'Đã hoàn tất')}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-ink font-mono">
+              <div className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
                 {summaryQuery.isLoading ? '—' : closedCount}
               </div>
             </div>
@@ -464,7 +464,7 @@ export function TicketsPage({
       </div>
 
       {/* Ticket List Card */}
-      <Card className="overflow-hidden rounded-2xl">
+      <Card className="overflow-hidden rounded-card">
         {listQuery.isLoading || !data ? (
           <div className="p-4">
             <Skeleton className="mb-2 h-9 w-full" />

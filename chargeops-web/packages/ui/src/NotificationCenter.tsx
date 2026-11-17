@@ -158,10 +158,10 @@ export function NotificationCenter({
   return (
     <div className="space-y-6">
       {/* ===== HEADER BANNER (Clean & Modern) ===== */}
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
+      <div className="rounded-card border border-line bg-surface p-5 shadow-xs">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3.5">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-2xs">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-brand/10 text-brand shadow-2xs">
               <IconBell size={22} strokeWidth={2.2} />
             </span>
             <div>
@@ -298,8 +298,8 @@ export function NotificationCenter({
           </button>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="rounded-2xl border border-line bg-surface p-12 text-center shadow-xs">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-chip text-faint">
+        <div className="rounded-card border border-line bg-surface p-12 text-center shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-card bg-chip text-faint">
             <IconBell size={26} strokeWidth={1.6} />
           </div>
           <h3 className="mt-4 text-base font-bold text-ink">
@@ -327,7 +327,7 @@ export function NotificationCenter({
               <div
                 key={item.id}
                 className={[
-                  'group relative overflow-hidden rounded-2xl border transition-all duration-200 shadow-2xs p-4 sm:p-5',
+                  'group relative overflow-hidden rounded-card border transition-all duration-200 shadow-2xs p-4 sm:p-5',
                   item.read
                     ? 'border-line/70 bg-surface/70 hover:bg-surface hover:border-line opacity-80 hover:opacity-100'
                     : 'border-brand/25 bg-surface hover:border-brand/40 shadow-xs',

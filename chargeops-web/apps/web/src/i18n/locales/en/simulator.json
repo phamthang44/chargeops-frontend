@@ -38,7 +38,7 @@
       "charger": "Charger:",
       "connector": "Port:"
     },
-    "clockDiagnostic": "4G LTE · 32°C",
+    "clockDiagnostic": "4G lte · 32°c",
     "ready": {
       "badge": "Ready for Service · Dynamic QR Check-in",
       "title": "Scan QR Code to Check-in & Start Charging",

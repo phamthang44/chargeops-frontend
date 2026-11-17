@@ -203,29 +203,7 @@ export function AppHeader({
           </View>
         </View>
 
-        {/* Center: Slogan Column */}
-        {showSlogan && slogan !== false && slogan && slogan.length === 2 && (
-          <View style={styles.sloganCol}>
-            <Text
-              style={[styles.sloganText, { color: isDark ? '#A7F3D0' : '#00875A' }]}
-              numberOfLines={1}
-            >
-              {slogan[0]}
-            </Text>
-            <Text
-              style={[styles.sloganText, { color: isDark ? '#A7F3D0' : '#00875A' }]}
-              numberOfLines={1}
-            >
-              {slogan[1]}
-            </Text>
-            <View
-              style={[
-                styles.sloganLine,
-                { backgroundColor: isDark ? '#34D399' : '#00B074' },
-              ]}
-            />
-          </View>
-        )}
+        {/* No centre tagline: every tab repeated one and it crowded the actions. `slogan` is ignored. */}
 
         {/* Right: Actions */}
         {trailing ? <View style={styles.headerActions}>{trailing}</View> : null}
@@ -344,8 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 10.5,
     fontWeight: '700',
     color: '#64748B',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
     marginTop: 1,
   },
   sloganCol: {

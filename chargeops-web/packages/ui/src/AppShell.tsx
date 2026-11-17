@@ -120,7 +120,7 @@ function StationSelector({
           role="listbox"
           className="absolute left-0 top-full z-50 mt-1.5 min-w-[260px] max-w-[340px] overflow-y-auto rounded-[11px] border border-line bg-surface py-1.5 shadow-[0_10px_30px_rgba(16,17,26,.12)]"
         >
-          <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+          <div className="px-3 py-1.5 text-[12px] font-medium text-muted">
             Trạm sạc của bạn
           </div>
           {stations.map((s) => {
@@ -180,6 +180,13 @@ export function AppShell({
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Name the browser tab after the open page ("Đặt chỗ · ChargeOps"), so tabs and history are tellable apart.
+  const pageLabel = nav.find((it) => it.key === activeKey)?.label
+    ?? (activeKey === 'settings' ? t('avatarMenu.settings') : undefined);
+  useEffect(() => {
+    document.title = pageLabel ? `${pageLabel} · ChargeOps` : 'ChargeOps';
+  }, [pageLabel]);
+
   const navList = (mobile: boolean) => (
     <>
       {nav.map((it) => {
@@ -234,7 +241,7 @@ export function AppShell({
             title={t('brand.switchPortal')}
             className={`flex items-center gap-2 ${onBrand ? 'cursor-pointer' : ''}`}
           >
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-[7px] bg-brand">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-[7px] bg-owner">
               <IconBolt size={14} strokeWidth={2.2} className="text-white" />
             </span>
             <span className="text-[15px] font-bold tracking-[-0.01em]">ChargeOps</span>

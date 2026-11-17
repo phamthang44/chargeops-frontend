@@ -110,16 +110,16 @@ export function ResourceStateCard({
 
   return (
     <div
-      className={`group relative rounded-2xl transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${meta.shell} ${className}`}
+      className={`group relative rounded-card transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${meta.shell} ${className}`}
       style={{ animation: 'riseIn 560ms cubic-bezier(0.32,0.72,0,1) both', animationDelay: `${delay}ms` }}
     >
       <div
-        className={`rounded-2xl border text-center shadow-sm ${
+        className={`rounded-card border text-center shadow-sm ${
           compact ? 'px-5 py-7' : 'px-6 py-10 sm:px-10'
         } ${meta.frame}`}
       >
         <span
-          className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border ${meta.iconBox}`}
+          className={`mx-auto flex h-12 w-12 items-center justify-center rounded-card border ${meta.iconBox}`}
           style={stagger(60)}
         >
           {icon ?? <Glyph size={22} />}

@@ -140,7 +140,7 @@ function StaffGuardScreen({
       style={{ animation: 'fadeIn .25s ease' }}
     >
       <div className="w-full max-w-[480px] rounded-panel border border-line bg-surface p-8 text-center shadow-subtle">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-danger-soft text-danger">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-card bg-danger-soft text-danger">
           <IconAlertTriangle size={24} />
         </div>
         <h2 className="mb-2 text-[18px] font-bold text-ink">{title}</h2>

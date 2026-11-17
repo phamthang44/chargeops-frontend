@@ -347,8 +347,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.micro,
     lineHeight: 12,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   title: {
     fontSize: fontSizes.heading,

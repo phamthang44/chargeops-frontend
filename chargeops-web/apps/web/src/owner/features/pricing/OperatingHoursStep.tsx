@@ -172,7 +172,7 @@ export function OperatingHoursStep({
         </div>
 
         {/* Subheader info bar */}
-        <div className="flex items-center justify-between border-b border-hairline pb-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">
+        <div className="flex items-center justify-between border-b border-hairline pb-2.5 text-[12px] font-medium text-muted">
           <div className="w-[110px]">{t('pricing.steps.step2.colDay', { defaultValue: 'Ngày trong tuần' })}</div>
           <div className="flex-1 grid grid-cols-2 gap-3 text-center">
             <span>{t('pricing.steps.step2.colOpen', { defaultValue: 'Giờ mở cửa' })}</span>

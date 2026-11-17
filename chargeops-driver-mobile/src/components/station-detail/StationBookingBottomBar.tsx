@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   selectedLabelText: {
     fontSize: 11,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.6,
+    letterSpacing: 0,
     color: '#059669',
   },
   bottomValueBig: {

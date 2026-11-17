@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, BrandMark, FeatureArt, LegalDocumentSheet, SettingsModal, type FeatureName } from '@/components';
@@ -15,6 +15,9 @@ import { isMockMode } from '@/services/stationService';
 import { colors, fontSizes, fontWeights, lineHeights, radius, spacing } from '@/theme';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
+
+/** The banner art is 3:1; sized explicitly because react-native-web ignores aspectRatio on absolute images. */
+const BANNER_HEIGHT = 180;
 
 const FEATURES: { art: FeatureName; key: 'fast' | 'find' | 'pay' }[] = [
   { art: 'charging', key: 'fast' },
@@ -28,7 +31,10 @@ export function WelcomeScreen() {
   const { signIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
-  const mockActive = isMockMode() || Platform.OS === 'web';
+  // The sample-driver shortcut stays on web (the public demo), but the badge only shows
+  // when the app really runs on mock data, so production web isn't labelled as a mock.
+  const mockData = isMockMode();
+  const demoAvailable = mockData || Platform.OS === 'web';
 
   function handleQuickMockLogin() {
     const mockDriver = usersMock[0];
@@ -45,10 +51,10 @@ export function WelcomeScreen() {
       >
         {/* Settings (language, appearance, …) & Mock status */}
         <View style={styles.topBar}>
-          {mockActive ? (
+          {mockData ? (
             <View style={styles.mockBadge}>
-              <Ionicons name="flash" size={14} color="#10B981" />
-              <Text style={styles.mockBadgeText}>MOCK MODE</Text>
+              <Ionicons name="flask-outline" size={14} color={colors.primary} />
+              <Text style={styles.mockBadgeText}>{t('welcome.mockBadge')}</Text>
             </View>
           ) : (
             <View />
@@ -86,10 +92,15 @@ export function WelcomeScreen() {
 
         {/* Station image banner */}
         <View style={styles.imageBanner}>
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="business-outline" size={56} color="rgba(255,255,255,0.25)" />
-          </View>
+          {/* 3:1 illustration, anchored right so the car and charger stay in frame on narrow screens. */}
+          <Image
+            source={require('../../assets/header-background.png')}
+            style={styles.bannerImage}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
+          />
           <View style={styles.imageCaptionRow}>
+            <Ionicons name="flash" size={14} color={colors.primary} />
             <Text style={styles.imageCaption}>{t('welcome.coverage')}</Text>
           </View>
         </View>
@@ -97,16 +108,16 @@ export function WelcomeScreen() {
 
       {/* Fixed footer */}
       <View style={styles.footer}>
-        {mockActive && (
+        {demoAvailable && (
           <AppButton
-            label="⚡ Trải nghiệm nhanh (Tài xế mẫu)"
+            label={t('welcome.quickDemo')}
             onPress={handleQuickMockLogin}
             style={styles.mockCtaButton}
           />
         )}
         <AppButton
           label={t('welcome.cta')}
-          variant={mockActive ? 'secondary' : 'primary'}
+          variant={demoAvailable ? 'secondary' : 'primary'}
           onPress={() => navigation.navigate('Login')}
           style={styles.ctaButton}
         />
@@ -137,7 +148,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  // Phone-width column, centred on tablets and desktop browsers.
   scroll: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xxl,
@@ -159,15 +174,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    backgroundColor: colors.primarySoft,
   },
   mockBadgeText: {
     fontSize: fontSizes.caption,
-    fontWeight: fontWeights.bold,
-    color: '#10B981',
-    letterSpacing: 0.5,
+    fontWeight: fontWeights.semibold,
+    color: colors.primary,
   },
 
   settingsBtn: {
@@ -234,34 +246,44 @@ const styles = StyleSheet.create({
   // Image banner
   imageBanner: {
     width: '100%',
-    height: 180,
+    height: BANNER_HEIGHT,
     borderRadius: radius.lg,
     overflow: 'hidden',
     backgroundColor: colors.surfaceAlt,
   },
-  imagePlaceholder: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: '#2D3748',
-    alignItems: 'center',
-    justifyContent: 'center',
+  bannerImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    height: BANNER_HEIGHT,
+    width: BANNER_HEIGHT * 3,
   },
   imageCaptionRow: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: 'rgba(17,24,39,0.55)',
+    top: spacing.md,
+    left: spacing.md,
+    maxWidth: '72%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(255,255,255,0.86)',
   },
   imageCaption: {
-    fontSize: fontSizes.body,
+    flexShrink: 1,
+    fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    color: colors.textInverse,
+    color: colors.textStrong,
+    lineHeight: lineHeights.caption,
   },
 
   // Footer
   footer: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.lg,
     paddingTop: spacing.sm,

@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   headerBtn: { width: 40, height: 40 },
   headerTitleBlock: { alignItems: 'center' },
   headerTitle: { fontSize: fontSizes.heading, fontWeight: fontWeights.semibold },
-  headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 1 },
+  headerRole: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0 },
   content: { padding: spacing.lg, gap: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   revealGroup: { gap: spacing.lg },
   terminalSupportCard: {

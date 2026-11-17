@@ -66,7 +66,7 @@ export function SuspendReactivateChargePointModal({
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase text-faint mb-1.5">
+          <label className="block text-[12px] font-medium text-muted mb-1.5">
             {isSuspend
               ? t('provisioning.workspace.suspend.reasonLabel')
               : t('provisioning.workspace.reactivate.reasonLabel')}

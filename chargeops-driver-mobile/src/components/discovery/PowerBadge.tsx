@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/context/PreferencesContext';
@@ -23,6 +24,7 @@ export function PowerBadge({
   size = 'md',
 }: PowerBadgeProps) {
   const { themeColors, isDark } = usePreferences();
+  const { t } = useTranslation();
 
   const isDc = currentType === 'DC' || (hasFastCharging && currentType !== 'AC');
   const isSuper = (powerKw ?? 0) >= 100 || isDc;
@@ -30,8 +32,8 @@ export function PowerBadge({
   const label = powerKw
     ? `${powerKw} kW ${isDc ? 'DC' : 'AC'}`
     : isDc
-      ? 'DC Fast Charge'
-      : 'AC Standard';
+      ? t('stationList.filters.dc')
+      : t('stationList.filters.ac');
 
   const isSmall = size === 'sm';
 

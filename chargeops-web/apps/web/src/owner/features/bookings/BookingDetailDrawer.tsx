@@ -167,7 +167,7 @@ export function BookingDetailDrawer({
 
             {/* time window */}
             <div className="rounded-card border border-line bg-surface-2 p-4">
-              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+              <div className="mb-3 text-[12px] font-medium text-muted">
                 {t('bookings.rangeLabel')}
               </div>
               <div className="flex items-center gap-3">
@@ -211,7 +211,7 @@ export function BookingDetailDrawer({
             {/* price snapshot */}
             <div className="rounded-card border border-line p-4">
               <div className="mb-[11px] flex items-center justify-between">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('bookings.snapshotLabel')}</div>
+                <div className="text-[12px] font-medium text-muted">{t('bookings.snapshotLabel')}</div>
                 <span className="rounded-full bg-warn-pill px-2 py-0.5 text-[10px] font-medium text-warn">
                   {t('bookings.rateKind.locked')}
                 </span>
@@ -256,7 +256,7 @@ export function BookingDetailDrawer({
             {/* Payment & Checkout Details */}
             {booking.payment && (
               <div className="rounded-card border border-line bg-surface-2 p-4">
-                <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+                <div className="mb-2 text-[12px] font-medium text-muted">
                   {t('bookings.drawer.paymentMethod', { method: booking.payment.method, defaultValue: `THANH TOÁN · ${booking.payment.method}` })}
                 </div>
                 <div className="flex justify-between text-[12.5px] font-medium">
@@ -275,7 +275,7 @@ export function BookingDetailDrawer({
             {/* Refunds details if any */}
             {booking.refunds && booking.refunds.length > 0 && (
               <div className="rounded-card border border-bad-border bg-bad-soft px-4 py-3.5">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-bad-deep">
+                <div className="mb-1 text-[12px] font-medium text-bad-deep">
                   {t('bookings.drawer.refundObligationTitle', 'NGHĨA VỤ HOÀN TIỀN')}
                 </div>
                 {booking.refunds.map((ref) => (
@@ -295,7 +295,7 @@ export function BookingDetailDrawer({
 
             {/* Refund policy guidelines */}
             <div className="rounded-card border border-line p-4">
-              <div className="mb-[9px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+              <div className="mb-[9px] text-[12px] font-medium text-muted">
                 {t('bookings.refundPolicy')}
               </div>
               <div className="flex flex-col gap-1.5 text-[12px] font-medium text-body">
@@ -332,7 +332,7 @@ export function BookingDetailDrawer({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <div className="mb-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
+      <div className="mb-[5px] text-[12px] font-medium text-muted">{label}</div>
       {children}
     </div>
   );

@@ -26,7 +26,7 @@ export function ProfilePaymentSection({
   return (
     <Card style={[styles.sectionCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="card-outline" size={20} color={themeColors.primary} />
+        <Ionicons name="card-outline" size={20} color={themeColors.textBody} />
         <Text style={[styles.sectionTitle, { color: themeColors.textStrong }]}>
           {t('profile.wallet.sectionTitle', 'Thanh toán')}
         </Text>
@@ -34,8 +34,8 @@ export function ProfilePaymentSection({
 
       {/* List Item: Payment Methods Management */}
       <Pressable style={styles.menuRow} onPress={onPressPaymentMethods}>
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E293B' : '#EFF6FF' }]}>
-          <Ionicons name="wallet-outline" size={20} color={themeColors.primary} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="wallet-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <View style={styles.paymentMethodTitleRow}>
@@ -59,8 +59,8 @@ export function ProfilePaymentSection({
 
       {/* List Item: Transaction History */}
       <Pressable style={styles.menuRow} onPress={onPressHistory}>
-        <View style={[styles.menuIconTile, { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }]}>
-          <Ionicons name="time-outline" size={20} color={isDark ? '#818CF8' : '#6366F1'} />
+        <View style={[styles.menuIconTile, { backgroundColor: themeColors.surfaceAlt }]}>
+          <Ionicons name="time-outline" size={20} color={themeColors.textBody} />
         </View>
         <View style={styles.menuTextContent}>
           <Text style={[styles.menuTitle, { color: themeColors.textStrong }]}>

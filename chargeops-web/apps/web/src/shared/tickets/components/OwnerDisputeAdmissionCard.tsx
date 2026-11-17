@@ -53,7 +53,7 @@ export function OwnerDisputeAdmissionCard({
 
   if (isLoading) {
     return (
-      <Card className="rounded-2xl p-4 shadow-sm space-y-2">
+      <Card className="rounded-card p-4 shadow-sm space-y-2">
         <Skeleton className="h-4 w-1/2" />
         <Skeleton className="h-12 w-full rounded-xl" />
       </Card>
@@ -63,7 +63,7 @@ export function OwnerDisputeAdmissionCard({
   if (!booking) return null;
 
   return (
-    <Card bordered={false} className="rounded-2xl border border-owner-border/70 bg-owner-soft/30 p-4 shadow-sm space-y-3">
+    <Card bordered={false} className="rounded-card border border-owner-border/70 bg-owner-soft/30 p-4 shadow-sm space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 border-b border-hairline pb-2.5">
         <div className="flex items-center gap-2">

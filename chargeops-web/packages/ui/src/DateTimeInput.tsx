@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   IconCalendar,
   IconClock,
@@ -27,30 +29,13 @@ export interface DateTimeInputProps {
 }
 
 const QUICK_PRESETS = [
-  { offset: 0, label: 'Bây giờ' },
-  { offset: 15, label: '-15 phút' },
-  { offset: 60, label: '-1 giờ' },
-];
+  { offset: 0, key: 'now' },
+  { offset: 15, key: 'minus15' },
+  { offset: 60, key: 'minus60' },
+] as const;
 
 /** Shared spring curve for every interactive transition in this component. */
 const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
-
-const MONTH_NAMES = [
-  'Tháng 1',
-  'Tháng 2',
-  'Tháng 3',
-  'Tháng 4',
-  'Tháng 5',
-  'Tháng 6',
-  'Tháng 7',
-  'Tháng 8',
-  'Tháng 9',
-  'Tháng 10',
-  'Tháng 11',
-  'Tháng 12',
-];
-
-const WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
 /** Formats a Date object to local YYYY-MM-DDTHH:mm string. */
 function toLocalDatetimeString(date: Date): string {
@@ -78,13 +63,13 @@ function parseDateTime(val: string) {
   };
 }
 
-/** Formats local datetime string into pleasant Vietnamese readable text. */
-function formatHumanVn(val: string): string {
-  if (!val) return 'Chưa chọn thời gian';
+/** Formats a local datetime string as readable text, e.g. "Thứ Ba, 26/09/2026 lúc 14:18". */
+function formatHuman(val: string, t: TFunction): string {
+  if (!val) return t('dateTime.notSet');
   try {
     const d = new Date(val);
     if (isNaN(d.getTime())) return val;
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const days = t('dateTime.days', { returnObjects: true }) as string[];
     const dayName = days[d.getDay()];
     const pad = (n: number) => n.toString().padStart(2, '0');
     const day = pad(d.getDate());
@@ -92,14 +77,14 @@ function formatHumanVn(val: string): string {
     const year = d.getFullYear();
     const hours = pad(d.getHours());
     const mins = pad(d.getMinutes());
-    return `${dayName}, ${day}/${month}/${year} lúc ${hours}:${mins}`;
+    return `${dayName}, ${day}/${month}/${year} ${t('dateTime.at')} ${hours}:${mins}`;
   } catch {
     return val;
   }
 }
 
 /** Formats trigger input text: e.g. 26/09/2026 lúc 14:18 */
-function formatTriggerDisplay(val: string): string {
+function formatTriggerDisplay(val: string, t: TFunction): string {
   if (!val) return '';
   try {
     const d = new Date(val);
@@ -110,7 +95,7 @@ function formatTriggerDisplay(val: string): string {
     const year = d.getFullYear();
     const hours = pad(d.getHours());
     const mins = pad(d.getMinutes());
-    return `${day}/${month}/${year} lúc ${hours}:${mins}`;
+    return `${day}/${month}/${year} ${t('dateTime.at')} ${hours}:${mins}`;
   } catch {
     return val;
   }
@@ -134,8 +119,11 @@ export function DateTimeInput({
   showEmptyHint = true,
   className = '',
   id,
-  placeholder = 'Chọn ngày và giờ...',
+  placeholder,
 }: DateTimeInputProps) {
+  const { t } = useTranslation('ui');
+  const monthNames = t('dateTime.months', { returnObjects: true }) as string[];
+  const weekdays = t('dateTime.weekdays', { returnObjects: true }) as string[];
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -327,8 +315,8 @@ export function DateTimeInput({
     }
   }, [accent]);
 
-  const triggerFormatted = useMemo(() => formatTriggerDisplay(value), [value]);
-  const previewVn = useMemo(() => formatHumanVn(value), [value]);
+  const triggerFormatted = useMemo(() => formatTriggerDisplay(value, t), [value, t]);
+  const previewVn = useMemo(() => formatHuman(value, t), [value, t]);
 
   return (
     <div ref={containerRef} className={`relative space-y-1.5 ${className}`}>
@@ -374,7 +362,7 @@ export function DateTimeInput({
               {triggerFormatted}
             </span>
           ) : (
-            <span className="text-[13px] text-faint truncate">{placeholder}</span>
+            <span className="text-[13px] text-faint truncate">{placeholder ?? t('dateTime.placeholder')}</span>
           )}
         </div>
 
@@ -382,7 +370,7 @@ export function DateTimeInput({
           {value && !disabled && (
             <button
               type="button"
-              title="Xóa lựa chọn"
+              title={t('dateTime.clear')}
               onClick={(e) => {
                 e.stopPropagation();
                 onChange('');
@@ -405,8 +393,8 @@ export function DateTimeInput({
       {/* Quick presets — own row below the trigger so the label never gets crushed */}
       {label && showQuickPresets && !disabled && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[9.5px] font-bold uppercase tracking-[0.16em] text-faint">
-            Chọn nhanh
+          <span className="mr-0.5 text-[12px] font-medium text-muted">
+            {t('dateTime.quick')}
           </span>
           {QUICK_PRESETS.map((preset, i) => (
             <span
@@ -422,7 +410,7 @@ export function DateTimeInput({
                 onClick={() => setPreset(preset.offset)}
                 className={`cursor-pointer rounded-full border border-line bg-surface-2 px-2.5 py-[3px] text-[10.5px] font-semibold text-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-px active:scale-95 ${accentClasses.chipHover}`}
               >
-                {preset.label}
+                {t(`dateTime.presets.${preset.key}`)}
               </button>
             </span>
           ))}
@@ -433,8 +421,8 @@ export function DateTimeInput({
       {isOpen && (
         <div
           role="dialog"
-          aria-label="Bộ chọn ngày giờ"
-          className="absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-[300px] max-w-[calc(100vw-1.5rem)] origin-top-left rounded-2xl border border-line bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md"
+          aria-label={t('dateTime.dialog')}
+          className="absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-[300px] max-w-[calc(100vw-1.5rem)] origin-top-left rounded-card border border-line bg-surface p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_22px_55px_rgba(0,0,0,0.7)] backdrop-blur-md"
           style={{ animation: 'popIn .12s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Popover Header: Month & Year Navigator */}
@@ -442,20 +430,20 @@ export function DateTimeInput({
             <button
               type="button"
               onClick={prevMonth}
-              title="Tháng trước"
+              title={t('dateTime.prevMonth')}
               className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
             >
               <IconChevronLeft size={14} strokeWidth={2.4} />
             </button>
 
             <div className="text-[13px] font-bold text-ink tracking-tight">
-              {MONTH_NAMES[viewMonth]}, {viewYear}
+              {t('dateTime.monthYear', { month: monthNames[viewMonth], year: viewYear })}
             </div>
 
             <button
               type="button"
               onClick={nextMonth}
-              title="Tháng sau"
+              title={t('dateTime.nextMonth')}
               className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-surface hover:bg-chip hover:text-ink text-muted transition-colors cursor-pointer active:scale-95"
             >
               <IconChevronRight size={14} strokeWidth={2.4} />
@@ -464,7 +452,7 @@ export function DateTimeInput({
 
           {/* Weekday row */}
           <div className="grid grid-cols-7 pt-2.5 pb-1 text-center font-mono text-[10.5px] font-bold uppercase tracking-wider text-faint">
-            {WEEKDAYS.map((wd) => (
+            {weekdays.map((wd) => (
               <span key={wd}>{wd}</span>
             ))}
           </div>
@@ -498,10 +486,10 @@ export function DateTimeInput({
 
           {/* 24-Hour Time Stepper Section */}
           <div className="space-y-2 rounded-xl bg-surface-2/60 p-2.5">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted">
+            <div className="flex items-center justify-between text-[12px] font-medium text-muted">
               <span className="flex items-center gap-1.5 text-ink">
                 <IconClock size={12} className="text-faint" />
-                <span>Giờ thực hiện (24h)</span>
+                <span>{t('dateTime.time24')}</span>
               </span>
               <span className="font-mono text-[12px] font-semibold text-ink">
                 {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
@@ -522,7 +510,7 @@ export function DateTimeInput({
                   <span className="font-mono text-[13px] font-bold text-ink">
                     {hours.toString().padStart(2, '0')}
                   </span>
-                  <span className="text-[9px] font-medium text-faint uppercase">Giờ</span>
+                  <span className="text-[12px] font-medium text-muted">{t('dateTime.hours')}</span>
                 </div>
                 <button
                   type="button"
@@ -548,7 +536,7 @@ export function DateTimeInput({
                   <span className="font-mono text-[13px] font-bold text-ink">
                     {minutes.toString().padStart(2, '0')}
                   </span>
-                  <span className="text-[9px] font-medium text-faint uppercase">Phút</span>
+                  <span className="text-[12px] font-medium text-muted">{t('dateTime.minutes')}</span>
                 </div>
                 <button
                   type="button"
@@ -592,7 +580,7 @@ export function DateTimeInput({
               }}
               className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-muted hover:border-line hover:text-ink hover:bg-surface transition-colors cursor-pointer"
             >
-              Chọn bây giờ
+              {t('dateTime.pickNow')}
             </button>
 
             <button
@@ -601,7 +589,7 @@ export function DateTimeInput({
               className={`flex items-center gap-1 rounded-lg px-3 py-1 text-[11.5px] font-bold transition-all cursor-pointer active:scale-95 ${accentClasses.pillSelected}`}
             >
               <IconCheck size={12} strokeWidth={2.4} />
-              <span>Xác nhận</span>
+              <span>{t('dateTime.confirm')}</span>
             </button>
           </div>
         </div>
@@ -616,7 +604,7 @@ export function DateTimeInput({
               <span>{previewVn}</span>
             </div>
           ) : (
-            showEmptyHint && <span className="text-[11px] text-faint">Vui lòng chọn ngày và giờ</span>
+            showEmptyHint && <span className="text-[11px] text-faint">{t('dateTime.emptyHint')}</span>
           )}
 
           {hint && <span className="text-[11px] text-faint">{hint}</span>}

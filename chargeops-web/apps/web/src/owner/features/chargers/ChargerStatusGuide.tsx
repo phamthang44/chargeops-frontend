@@ -23,7 +23,7 @@ export function ChargerStatusGuide() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11.5px]">
             {/* Left Column: ChargePoint Operational Statuses */}
             <div className="space-y-2">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-faint">
+              <div className="text-[12px] font-medium text-muted">
                 {t('chargers.statusGuide.cpSection', 'Trạng thái Trụ sạc (Charge Point)')}
               </div>
               <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">
@@ -66,7 +66,7 @@ export function ChargerStatusGuide() {
 
             {/* Right Column: Connector Runtime Statuses */}
             <div className="space-y-2">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-faint">
+              <div className="text-[12px] font-medium text-muted">
                 {t('chargers.statusGuide.connSection', 'Trạng thái Cổng sạc (Connector / Port)')}
               </div>
               <div className="flex items-start gap-2 rounded-lg bg-surface p-2.5 border border-hairline">

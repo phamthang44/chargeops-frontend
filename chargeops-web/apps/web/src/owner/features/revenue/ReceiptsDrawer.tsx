@@ -67,7 +67,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
         </div>
 
         {/* Summary Card */}
-        <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs space-y-2">
+        <div className="rounded-card border border-line bg-surface p-4 shadow-2xs space-y-2">
           <div className="flex justify-between text-[12px]">
             <span className="text-muted">{t('finance.receiptsDrawer.collected', 'Thu ghi nhận')}:</span>
             <span className="font-mono font-bold text-good">+{formatVnd(booking.collectedAmount)}</span>
@@ -84,7 +84,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
 
         {/* Receipts List */}
         <div>
-          <h4 className="text-[12px] font-bold uppercase tracking-wider text-faint mb-2.5">
+          <h4 className="text-[12px] font-medium text-muted mb-2.5">
             {t('finance.receiptsDrawer.listTitle', 'Danh sách biên lai')} ({receipts.length})
           </h4>
 

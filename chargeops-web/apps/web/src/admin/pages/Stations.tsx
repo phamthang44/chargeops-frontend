@@ -274,7 +274,7 @@ export function Stations() {
                 <div className="min-w-[980px]">
                   {/* Table Header */}
                   <div
-                    className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
+                    className="grid bg-surface-2 px-4 py-[11px] text-[12px] font-medium text-muted"
                     style={{ gridTemplateColumns: GRID_COLS }}
                   >
                     <span>{t('stations.table.cols.code', 'MÃ TRẠM')}</span>

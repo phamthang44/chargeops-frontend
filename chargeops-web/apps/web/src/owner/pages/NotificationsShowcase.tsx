@@ -249,8 +249,8 @@ export function NotificationsShowcase() {
       {/* DEMO VIEW 2: POPOVER DROPDOWN INTERACTIVE PREVIEW */}
       {demoView === 'popover' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm max-w-xl mx-auto text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+          <div className="rounded-card border border-line bg-surface p-6 shadow-sm max-w-xl mx-auto text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-card bg-brand/10 text-brand">
               <IconBell size={24} />
             </div>
             <h3 className="mt-3 text-lg font-bold text-ink">Thử nghiệm Dropdown Popover trên Header</h3>

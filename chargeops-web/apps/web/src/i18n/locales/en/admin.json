@@ -26,11 +26,11 @@
       "activeStations": "Active stations",
       "clickToFocus": "Jump to queue below",
       "activeStationsDelta": "+{{count}} this week",
-      "pendingApprovals": "PENDING APPROVALS",
+      "pendingApprovals": "Pending approvals",
       "pendingApprovalsDelta": "{{count}} new submissions today",
-      "bookingsToday": "BOOKINGS TODAY",
+      "bookingsToday": "Bookings today",
       "bookingsDelta": "+{{pct}}% vs yesterday",
-      "revenueMonth": "REVENUE IN JUNE",
+      "revenueMonth": "Revenue in june",
       "revenueDelta": "+{{pct}}% vs May"
     },
     "charts": {
@@ -209,7 +209,7 @@
       }
     },
     "hub": {
-      "badge": "PLATFORM-WIDE MONITORING SYSTEM",
+      "badge": "Platform-wide monitoring system",
       "title": "Admin Notification & Alert Center",
       "subtitle": "Real-time monitoring of technical anomalies, station registration approvals, license compliance, and urgent support tickets.",
       "simulateLabel": "Simulate Event:",
@@ -274,7 +274,7 @@
   "rejectModal": {
     "title": "Reject Station Registration",
     "subtitle": "The reason will be sent to the station owner of {{name}} on the registration status screen.",
-    "reasonLabel": "REJECTION REASON",
+    "reasonLabel": "Rejection reason",
     "reasonRequired": "Rejection reason is required.",
     "placeholder": "e.g., Missing valid business license...",
     "cancelBtn": "Cancel",
@@ -284,7 +284,7 @@
   "issueLicenseModal": {
     "title": "Record & Activate License",
     "subtitle": "Record a subscription license after verifying off-platform purchase/payment.",
-    "stationInfoTitle": "STATION INFORMATION",
+    "stationInfoTitle": "Station information",
     "ownerLabel": "Owner",
     "planLabel": "Subscription Plan",
     "planMonthly": "Monthly Plan",
@@ -304,7 +304,7 @@
   "approveModal": {
     "title": "Confirm Station Application Approval",
     "subtitle": "The station will be administratively approved for subsequent charger configuration.",
-    "stationInfoTitle": "STATION INFORMATION",
+    "stationInfoTitle": "Station information",
     "ownerLabel": "Owner",
     "locationLabel": "Location",
     "chargersLabel": "Planned Chargers",
@@ -320,7 +320,7 @@
     "addTitle": "Add Policy Document",
     "subtitle": "Once saved, the document will regenerate embeddings for the AI assistant to reply using the latest policies.",
     "categoryLabel": "CATEGORY",
-    "contentLabel": "POLICY CONTENT",
+    "contentLabel": "Policy content",
     "contentRequired": "Please enter the policy content.",
     "placeholder": "A clear, self-contained policy statement...",
     "cancelBtn": "Cancel",
@@ -351,11 +351,11 @@
       "connectionTypes": "Connector Type Distribution"
     },
     "kpis": {
-      "revenue12m": "DOANH THU 12TH",
-      "totalBookings": "TOTAL BOOKINGS",
-      "activeStations": "ACTIVE STATIONS",
-      "occupancyRate": "OCCUPANCY RATE",
-      "cancellationNoShow": "CANCEL / NO-SHOW"
+      "revenue12m": "Doanh thu 12 tháng",
+      "totalBookings": "Total bookings",
+      "activeStations": "Active stations",
+      "occupancyRate": "Occupancy rate",
+      "cancellationNoShow": "Cancel / no-show"
     },
     "deltas": {
       "vsPrevious": "vs last period",
@@ -437,10 +437,10 @@
       "cancelled": "Cancelled"
     },
     "metrics": {
-      "total": "TOTAL BOOKINGS",
+      "total": "Total bookings",
       "completed": "COMPLETED",
       "cancelled": "CANCELLED",
-      "pending": "PENDING PAYMENT"
+      "pending": "Pending payment"
     },
     "placeholder": "Filter by ID, station, driver, charger...",
     "searchFieldLabel": "Search field",
@@ -450,7 +450,7 @@
         "station": "STATION",
         "owner": "OWNER",
         "charger": "CHARGER",
-        "timeSlot": "TIME SLOT",
+        "timeSlot": "Time slot",
         "amount": "AMOUNT",
         "status": "STATUS"
       },
@@ -526,13 +526,13 @@
     "table": {
       "refresh": "Refresh",
       "cols": {
-        "code": "LICENSE CODE",
+        "code": "License code",
         "station": "STATION",
         "owner": "OWNER",
         "plan": "PLAN",
         "expiry": "EXPIRES",
         "status": "STATUS",
-        "period": "VALIDITY PERIOD",
+        "period": "Validity period",
         "fee": "FEE",
         "actions": "ACTIONS"
       },
@@ -746,10 +746,10 @@
     },
     "table": {
       "cols": {
-        "title": "TITLE / SLUG",
-        "type": "DOC TYPE",
+        "title": "Title / slug",
+        "type": "Doc type",
         "audience": "AUDIENCE",
-        "version": "VERSION / EFFECTIVE",
+        "version": "Version / effective",
         "status": "STATUS",
         "actions": "ACTIONS"
       },
@@ -842,7 +842,7 @@
       "createTitle": "Add connector",
       "createSub": "Adding to",
       "createHelp": "Connector type and power are locked after provisioning. This generates one Charger ID and one QR image for this port.",
-      "connectorLabel": "CONNECTOR TYPE",
+      "connectorLabel": "Connector type",
       "powerLabel": "POWER (kW)",
       "displayNameLabel": "DISPLAY NAME (optional)",
       "displayNamePlaceholder": "e.g., Connector 1 — owner can edit later",
@@ -1076,40 +1076,40 @@
       "refund": "Refund"
     },
     "kpi": {
-      "gross": "GROSS REVENUE",
+      "gross": "Gross revenue",
       "grossSub": "{{count}} transactions",
-      "refunded": "TOTAL REFUNDED",
+      "refunded": "Total refunded",
       "refundedSub": "{{count}} refunds",
-      "net": "NET REVENUE",
+      "net": "Net revenue",
       "netSub": "payments − refunds",
-      "avg": "AVERAGE VALUE",
+      "avg": "Average value",
       "avgSub": "per transaction"
     },
     "breakdown": "By Payment Method",
     "table": {
       "cols": {
-        "id": "TX ID",
+        "id": "Transaction ID",
         "bookingId": "BOOKING",
         "station": "STATION",
         "type": "TYPE",
         "method": "METHOD",
         "amount": "AMOUNT",
         "date": "DATE",
-        "txId": "TX ID"
+        "txId": "Transaction ID"
       },
       "empty": "No transactions match the filters."
     },
     "metrics": {
-      "gross": "GROSS REVENUE",
+      "gross": "Gross revenue",
       "grossSub": "Total revenue processed across all payment gateways",
       "payCountVal": "{{count}} transactions",
-      "refunded": "TOTAL REFUNDED",
+      "refunded": "Total refunded",
       "refundedSub": "Refunds issued for grace period cancellations or station faults",
       "refundCountVal": "{{count}} refunds",
-      "net": "NET REVENUE",
+      "net": "Net revenue",
       "netSub": "Net settled cash flow after deducting all refunds",
       "netDelta": "Net settleable",
-      "avg": "AVERAGE TICKET",
+      "avg": "Average ticket",
       "avgSub": "Average transaction volume per completed charging session",
       "avgDelta": "Avg per transaction"
     },
@@ -1121,15 +1121,15 @@
   },
   "refunds": {
     "kpi": {
-      "pending": "PENDING PROCESSING",
+      "pending": "Pending processing",
       "pendingDelta": "{{count}} pending obligations",
       "pendingCountLabel": "No pending obligations",
       "succeeded": "COMPLETED",
       "succeededDelta": "{{count}} completed",
       "succeededCountLabel": "Successfully processed",
-      "total": "TOTAL OBLIGATIONS",
+      "total": "Total obligations",
       "totalDelta": "{{count}} total records",
-      "actionRequired": "REQUIRES ACTION (FAILED ATTEMPTS)",
+      "actionRequired": "Requires action (failed attempts)",
       "actionRequiredDelta": "{{count}} failed attempts",
       "actionRequiredZero": "No failed attempts"
     },
@@ -1145,23 +1145,23 @@
       "EXCESS_PAYMENT": "Excess Payment"
     },
     "status": {
-      "actionRequired": "REQUIRES ACTION",
+      "actionRequired": "Requires action",
       "failedAttemptSub": "Failed attempt",
       "adminRequiredSub": "Admin audit required",
-      "autoProcessing": "AUTO PROCESSING",
+      "autoProcessing": "Auto processing",
       "autoProcessingSub": "System running",
       "pendingSub": "Pending",
       "succeededSub": "Completed"
     },
     "table": {
       "cols": {
-        "id": "REFUND ID",
+        "id": "Refund ID",
         "booking": "BOOKING",
         "station": "STATION",
         "reason": "REASON",
         "amount": "AMOUNT",
         "status": "STATUS",
-        "date": "OCCURRED AT",
+        "date": "Occurred at",
         "actions": "ACTIONS"
       },
       "empty": "No refunds match the current filter.",
@@ -1183,10 +1183,10 @@
       "confirmManual": "Confirm Bank Transfer & Reconcile",
       "amountLabel": "Refund Amount",
       "statusLabel": "Status",
-      "statusSucceeded": "COMPLETED (SUCCEEDED)",
-      "statusFailedAttempt": "REQUIRES ACTION (FAILED ATTEMPT)",
-      "statusAutoProcessing": "AUTO PROCESSING (AUTO_FIRST_ATTEMPT)",
-      "statusPending": "PENDING PROCESSING",
+      "statusSucceeded": "Completed (succeeded)",
+      "statusFailedAttempt": "Requires action (failed attempt)",
+      "statusAutoProcessing": "Auto processing",
+      "statusPending": "Pending processing",
       "bookingCode": "Booking Code:",
       "driverName": "Driver:",
       "stationName": "Station:",
@@ -1272,7 +1272,7 @@
     "toastNoop": "Status is already in this state — no change applied.",
     "error": "Failed to load users",
     "kpi": {
-      "total": "TOTAL ACCOUNTS",
+      "total": "Total accounts",
       "drivers": "DRIVERS",
       "staff": "STAFF",
       "owners": "OWNERS",
@@ -1347,7 +1347,7 @@
   "renewModal": {
     "title": "Record License Renewal",
     "subtitle": "Create a new License term after verifying off-platform renewal payment.",
-    "currentInfoTitle": "CURRENT LICENSE INFORMATION",
+    "currentInfoTitle": "Current license information",
     "licenseCode": "License Code:",
     "station": "Station:",
     "owner": "Owner:",
@@ -1400,13 +1400,13 @@
     },
     "table": {
       "cols": {
-        "code": "STATION CODE",
-        "nameAndAddress": "STATION NAME & ADDRESS",
-        "host": "HOST / OPERATOR",
+        "code": "Station code",
+        "nameAndAddress": "Station name & address",
+        "host": "Host / operator",
         "province": "PROVINCE",
-        "chargers": "CHARGERS / PORTS",
+        "chargers": "Chargers / ports",
         "status": "STATUS",
-        "createdAt": "CREATED DATE",
+        "createdAt": "Created date",
         "actions": "ACTIONS"
       },
     "chargersCount": "{{chargePoints}} EVSEs · {{connectors}} ports",
@@ -1492,7 +1492,7 @@
         "name": "Representative Name:",
         "email": "Account Email:",
         "phone": "Contact Phone:",
-        "uuid": "CPO UUID:",
+        "uuid": "Cpo uuid:",
         "licenseTitle": "Subscription License",
         "manageLicense": "Manage License ↗",
         "planYearly": "Yearly Plan (12 Months)",

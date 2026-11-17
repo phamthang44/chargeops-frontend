@@ -37,7 +37,7 @@ export function TicketHandlerCard({
   const { t } = useTranslation('tickets');
 
   return (
-    <Card className="rounded-2xl p-4 shadow-xs">
+    <Card className="rounded-card p-4 shadow-xs">
       <div className="flex items-center justify-between mb-3 border-b border-hairline pb-2.5">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-surface-2 text-muted">

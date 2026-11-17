@@ -311,6 +311,10 @@ function OwnerConsoleContent({
         })}
         {/* Settings lives behind the header avatar menu, not the sidebar. */}
         <Route path="settings" element={<SettingsPage accent="owner" />} />
+        {/* Public entry point linked from chargeops.online ("Đăng ký kết nối trạm"). */}
+        {!reduced && (
+          <Route path="register" element={<Navigate to={`${base}/stations?register=1`} replace />} />
+        )}
         <Route path="*" element={<Navigate to={`${base}/dashboard`} replace />} />
       </Routes>
     </AppShell>

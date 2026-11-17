@@ -244,7 +244,7 @@ export function ConnectorIncidentDrawer({
 
               <div className="grid grid-cols-2 gap-3 text-[12.5px]">
                 <div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-faint block mb-0.5">
+                  <span className="text-[12px] font-medium text-muted block mb-0.5">
                     {t('incidents.drawer.occurredAtLabel', 'Thời điểm xảy ra:')}
                   </span>
                   <span className="font-medium text-body">
@@ -255,7 +255,7 @@ export function ConnectorIncidentDrawer({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-faint block mb-0.5">
+                  <span className="text-[12px] font-medium text-muted block mb-0.5">
                     {t('incidents.drawer.reportedAtLabel', 'Thời điểm ghi nhận:')}
                   </span>
                   <span className="font-medium text-body">
@@ -268,7 +268,7 @@ export function ConnectorIncidentDrawer({
               </div>
 
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-faint block mb-0.5">
+                <span className="text-[12px] font-medium text-muted block mb-0.5">
                   {t('incidents.drawer.incidentReasonLabel', 'Lý do sự cố:')}
                 </span>
                 <p className="rounded-lg bg-surface-2 p-2.5 text-[12.5px] font-medium text-ink leading-relaxed">

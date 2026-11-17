@@ -14,14 +14,12 @@ export interface KpiCardProps {
 export function KpiCard({ label, value, suffix, delta, deltaClass = 'text-faint', bordered }: KpiCardProps) {
   return (
     <Card bordered={bordered} className="px-4 py-[15px]">
-      <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
-        {label}
-      </div>
-      <div className="mt-[7px] text-[27px] font-bold tracking-[-0.02em]">
+      <div className="text-[12.5px] font-medium text-muted">{label}</div>
+      <div className="mt-1.5 text-[26px] font-semibold tabular-nums tracking-[-0.02em] text-ink">
         {value}
-        {suffix && <span className="text-[16px] font-medium text-faint">{suffix}</span>}
+        {suffix && <span className="text-[15px] font-medium text-faint">{suffix}</span>}
       </div>
-      {delta && <div className={`mt-1 text-[11.5px] font-medium ${deltaClass}`}>{delta}</div>}
+      {delta && <div className={`mt-1 text-[12px] ${deltaClass}`}>{delta}</div>}
     </Card>
   );
 }

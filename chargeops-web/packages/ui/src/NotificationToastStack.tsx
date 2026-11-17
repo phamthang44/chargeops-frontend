@@ -40,7 +40,7 @@ function ToastItem({ toast, onDismiss }: { toast: NotificationItem; onDismiss: (
   return (
     <div
       className={[
-        'pointer-events-auto flex items-start gap-3 rounded-2xl border p-4 shadow-xl backdrop-blur-xl transition-all duration-300 transform',
+        'pointer-events-auto flex items-start gap-3 rounded-card border p-4 shadow-xl backdrop-blur-xl transition-all duration-300 transform',
         visible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-6 opacity-0 scale-95',
         tone === 'bad'
           ? 'border-bad/30 bg-bad-soft/90 text-ink'

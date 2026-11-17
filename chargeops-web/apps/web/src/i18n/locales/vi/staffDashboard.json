@@ -8,13 +8,13 @@
   "updatedAt": "Cập nhật lúc {{time}}",
   "kpi": {
     "section": "Chỉ số vận hành hôm nay",
-    "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+    "bookingsToday": "Đặt chỗ hôm nay",
     "bookingsTodayHint": "Theo giờ bắt đầu trong ngày",
-    "chargingNow": "ĐANG SẠC",
+    "chargingNow": "Đang sạc",
     "chargingNowHint": "Bao gồm phiên bắt đầu từ hôm trước",
-    "availableConnectors": "ĐẦU SẠC SẴN SÀNG",
+    "availableConnectors": "Đầu sạc sẵn sàng",
     "availableConnectorsHint": "Trên các trụ đang hoạt động",
-    "unclaimedTickets": "YÊU CẦU CHƯA NHẬN",
+    "unclaimedTickets": "Yêu cầu chưa nhận",
     "unclaimedTicketsHint": "Đang mở hoặc đang xử lý"
   },
   "bookings": {

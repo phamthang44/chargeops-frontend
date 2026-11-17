@@ -267,8 +267,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   summaryCard: {
     borderWidth: 1,

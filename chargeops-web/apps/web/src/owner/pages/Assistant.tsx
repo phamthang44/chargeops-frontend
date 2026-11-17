@@ -191,7 +191,7 @@ function BotMessageContent({ text }: BotMessageContentProps) {
 
           {showThinking && (
             <div className="mt-2.5 max-h-72 overflow-y-auto rounded-lg border border-line/60 bg-canvas/80 p-3 font-mono text-[11px] leading-relaxed text-muted whitespace-pre-wrap border-l-2 border-l-brand/70">
-              <div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+              <div className="mb-1.5 flex items-center justify-between text-[12px] font-medium text-muted/70">
                 <span>{t('assistant.thinking.title', { defaultValue: 'Quá trình suy nghĩ (Reasoning)' })}</span>
                 <span className="text-[10px] lowercase text-muted/50">{thinking.length} ký tự</span>
               </div>
@@ -609,7 +609,7 @@ export function Assistant() {
       />
 
       <div
-        className="flex min-h-[500px] flex-col md:flex-row overflow-hidden rounded-2xl border border-line bg-surface shadow-xs"
+        className="flex min-h-[500px] flex-col md:flex-row overflow-hidden rounded-card border border-line bg-surface shadow-xs"
         style={{ height: 'calc(100vh - 210px)' }}
       >
         {/* Sidebar: Conversation History */}
@@ -643,7 +643,7 @@ export function Assistant() {
 
           {/* Sidebar History List */}
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            <div className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+            <div className="px-2 py-1.5 text-[12px] font-medium text-muted flex items-center gap-1.5">
               <IconHistory size={12} />
               <span>{t('assistant.history')}</span>
             </div>
@@ -792,7 +792,7 @@ export function Assistant() {
                     <div className={`flex flex-col gap-2 ${isUser ? 'max-w-[80%]' : 'max-w-[88%]'}`}>
                       {/* Bubble */}
                       <div
-                        className={`rounded-2xl px-4 py-3 text-[13.5px] leading-relaxed shadow-2xs ${
+                        className={`rounded-card px-4 py-3 text-[13.5px] leading-relaxed shadow-2xs ${
                           isUser
                             ? 'rounded-tr-xs bg-brand text-white'
                             : 'rounded-tl-xs border border-line bg-canvas text-ink'
@@ -870,7 +870,7 @@ export function Assistant() {
             {/* Pending search indicator */}
             {pending && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2.5 rounded-2xl rounded-tl-xs border border-line bg-canvas px-4 py-3 shadow-2xs">
+                <div className="flex items-center gap-2.5 rounded-card rounded-tl-xs border border-line bg-canvas px-4 py-3 shadow-2xs">
                   <span className="h-4 w-4 animate-[spin360_.7s_linear_infinite] rounded-full border-2 border-line border-t-brand" />
                   <span className="text-[12.5px] font-medium text-muted">{t('assistant.searching')}</span>
                 </div>

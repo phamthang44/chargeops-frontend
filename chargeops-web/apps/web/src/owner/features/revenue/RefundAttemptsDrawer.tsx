@@ -60,7 +60,7 @@ export function RefundAttemptsDrawer({
     >
       <div className="space-y-4 p-5">
         {/* Refund Status Overview */}
-        <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs space-y-2">
+        <div className="rounded-card border border-line bg-surface p-4 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[12px] text-muted">{t('finance.refunds.table.cols.amount', 'Số tiền hoàn')}:</span>
             <span className="font-mono font-bold text-good text-[15px]">+{formatVnd(refund.amount)}</span>
@@ -100,7 +100,7 @@ export function RefundAttemptsDrawer({
 
         {/* Attempts Timeline */}
         <div>
-          <h4 className="text-[12px] font-bold uppercase tracking-wider text-faint mb-3">
+          <h4 className="text-[12px] font-medium text-muted mb-3">
             {t('finance.attemptsDrawer.timelineTitle', 'Tiến trình các lần thử')} ({attempts.length})
           </h4>
 

@@ -60,7 +60,7 @@ export function ChargerDetailPanel({
     <Card className="p-[18px]">
       <div className="mb-1.5 flex items-start justify-between">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-owner">
+          <div className="text-[12px] font-medium text-owner">
             {t('chargePoints.panel.editTitle')}
           </div>
           <div className="mt-1 text-[17px] font-bold">{chargePoint.name}</div>
@@ -141,7 +141,7 @@ export function ChargerDetailPanel({
       </SectionTitle>
 
       <div className="mb-2 rounded-[10px] bg-canvas p-3">
-        <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+        <div className="mb-2 text-[12px] font-medium text-muted">
           {t('chargePoints.panel.provStatus')}
         </div>
         <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export function ChargerDetailPanel({
       </div>
 
       <div className="rounded-[10px] bg-canvas p-3">
-        <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">
+        <div className="mb-1 text-[12px] font-medium text-muted">
           {t('chargePoints.panel.operStatus')}
         </div>
         <p className="mb-2.5 text-[11px] leading-[1.45] text-faint">
@@ -349,7 +349,7 @@ function SectionTitle({
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-[7px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
+    <div className="mb-[7px] text-[12px] font-medium text-muted">
       {children}
     </div>
   );
@@ -358,7 +358,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
 function LockedSpec({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1">
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
+      <div className="mb-1.5 text-[12px] font-medium text-muted">{label}</div>
       <div className="rounded-[10px] border border-line bg-chip px-3 py-2 text-[12px] font-semibold text-body truncate">
         {value}
       </div>

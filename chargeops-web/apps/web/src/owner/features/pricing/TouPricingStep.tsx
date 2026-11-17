@@ -115,7 +115,7 @@ function TouTimeline24h({ rules, basePriceVnd }: { rules: TouRule[]; basePriceVn
     <div className="mb-4 rounded-[10px] bg-surface-2 p-3.5 flex flex-col gap-3">
       {/* Header & Legend */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-2.5">
-        <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-faint">
+        <span className="text-[12px] font-medium text-muted">
           {t('pricing.steps.step3.timelineTitle', { defaultValue: 'Biểu đồ phân bổ giá theo khung giờ (24h)' })}
         </span>
         <div className="flex items-center gap-3 text-[11px]">
@@ -244,12 +244,12 @@ export function TouPricingStep({ rules, basePriceVnd, onAdd, onEdit, onRemove }:
                     </div>
 
                     <div className="flex items-end justify-between gap-3 border-t border-hairline pt-3">
-                      <div className="font-mono text-[19px] font-bold text-ink">
+                      <div className="text-[19px] font-semibold text-ink tabular-nums">
                         {formatVnd(r.rateVnd)}
                         <span className="font-mono text-[11px] font-medium text-faint"> /kWh</span>
                       </div>
                       <div className="text-right">
-                        <div className="text-[8.5px] font-semibold uppercase tracking-[0.06em] text-faint">
+                        <div className="text-[8.5px] font-medium text-muted">
                           {t('pricing.steps.step3.vsBase')}
                         </div>
                         <div

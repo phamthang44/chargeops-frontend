@@ -105,7 +105,7 @@ export function OwnerNotifications({ base = '/owner' }: { base?: string }) {
   return (
     <div className="space-y-6">
       {/* Scope Mode Switcher: Vận hành trạm vs Cá nhân */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-2xl bg-surface border border-line shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-card bg-surface border border-line shadow-xs">
         <div>
           <h2 className="text-sm font-semibold text-heading flex items-center gap-2">
             {context === 'owner' ? (

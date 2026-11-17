@@ -59,7 +59,7 @@ export function ProvisioningStatusLegend() {
 
               {/* Tầng 1: Cấp phép */}
               <div className="space-y-1">
-                <span className="text-[10.5px] font-bold text-muted uppercase tracking-wider">
+                <span className="text-[12px] font-medium text-muted">
                   {t('provisioning.legend.cpAdminGroup')}
                 </span>
                 <div className="grid grid-cols-1 gap-1 pl-1">
@@ -86,7 +86,7 @@ export function ProvisioningStatusLegend() {
 
               {/* Tầng 2: Kết nối Kỹ thuật */}
               <div className="space-y-1 mt-1 border-t border-hairline pt-2">
-                <span className="text-[10.5px] font-bold text-muted uppercase tracking-wider">
+                <span className="text-[12px] font-medium text-muted">
                   {t('provisioning.legend.cpTechGroup')}
                 </span>
                 <div className="grid grid-cols-1 gap-1 pl-1">
@@ -128,7 +128,7 @@ export function ProvisioningStatusLegend() {
               </div>
 
               <div className="space-y-1.5 pt-0.5">
-                <span className="text-[10.5px] font-bold text-muted uppercase tracking-wider">
+                <span className="text-[12px] font-medium text-muted">
                   {t('provisioning.legend.connectorSectionSub')}
                 </span>
                 <div className="grid grid-cols-1 gap-1.5 pl-1">

@@ -52,6 +52,6 @@ const styles = StyleSheet.create({
   chargeBanner: { padding: spacing.sm, borderRadius: radius.md, borderWidth: 1, gap: spacing.xs },
   chargeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   liveTag: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  liveText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0.5 },
+  liveText: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, letterSpacing: 0 },
   elapsed: { fontSize: fontSizes.caption, fontWeight: fontWeights.bold, fontVariant: ['tabular-nums'] },
 });

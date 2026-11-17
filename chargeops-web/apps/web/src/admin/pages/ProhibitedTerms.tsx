@@ -174,7 +174,7 @@ export function ProhibitedTerms() {
       </div>
 
       {/* Seed Rules Notification Banner */}
-      <div className="flex items-start gap-3 rounded-2xl border border-warn-border bg-warn-soft/70 p-4 text-[12.5px] text-body shadow-2xs">
+      <div className="flex items-start gap-3 rounded-card border border-warn-border bg-warn-soft/70 p-4 text-[12.5px] text-body shadow-2xs">
         <IconAlertTriangle size={18} className="mt-0.5 shrink-0 text-warn-deep" />
         <div className="flex-1 leading-relaxed">
           <span className="font-semibold text-warn-deep">Thông báo chính sách: </span>
@@ -186,7 +186,7 @@ export function ProhibitedTerms() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Left Column: Data Table & Filters (col-span-8) */}
         <div className="xl:col-span-8 space-y-4">
-          <Card bordered className="bg-surface p-5 shadow-xs rounded-2xl border-line">
+          <Card bordered className="bg-surface p-5 shadow-xs rounded-card border-line">
             {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="w-full sm:w-72">
@@ -245,9 +245,9 @@ export function ProhibitedTerms() {
 
             {/* Data Table */}
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-[12.5px]">
+              <table className="w-full min-w-[760px] text-left text-[12.5px]">
                 <thead>
-                  <tr className="border-b border-line/80 text-[11px] uppercase tracking-wider text-muted">
+                  <tr className="whitespace-nowrap border-b border-line/80 text-[12px] text-muted">
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.term')}</th>
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.matchType')}</th>
                     <th className="pb-3 font-semibold">{t('prohibitedTerms.table.scopes')}</th>

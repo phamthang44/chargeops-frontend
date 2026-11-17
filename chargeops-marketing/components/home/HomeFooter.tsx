@@ -4,12 +4,13 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { useLocale } from "@/lib/i18n";
 import { DRIVER_DEMO_URL, SUPPORT_EMAIL } from "@/lib/home/content";
-import { EASE_OUT, ExternalIcon, GlobeIcon, Wordmark, useAnchorScroll, useHomeCopy } from "./core";
+import { EASE_OUT, ExternalIcon, GlobeIcon, Wordmark, useAnchorScroll, useHomeCopy, useHomeHref } from "./core";
 
 export function HomeFooter() {
   const c = useHomeCopy();
   const { locale, setLocale } = useLocale();
   const anchorScroll = useAnchorScroll();
+  const homeHref = useHomeHref();
   const reduce = useReducedMotion();
   const year = new Date().getFullYear();
 
@@ -35,7 +36,7 @@ export function HomeFooter() {
                         </Link>
                       ) : (
                         <a
-                          href={l.href}
+                          href={homeHref(l.href)}
                           {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                           onClick={(e) => {
                             if (anchorScroll(l.href)) e.preventDefault();

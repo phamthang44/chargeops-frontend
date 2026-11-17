@@ -202,9 +202,6 @@ export function OwnerDashboard() {
       {/* Scope and Period Control Toolbar */}
       <div className="relative z-10 flex flex-col gap-3 rounded-card border border-line bg-surface p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">
-            <IconPin size={16} />
-          </span>
           <div className="w-full sm:max-w-sm">
             <Select
               value={stationId ?? ''}
@@ -255,10 +252,6 @@ export function OwnerDashboard() {
               <h2 id="owner-current-title" className="text-base font-semibold text-ink">
                 {t('sections.current')}
               </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-2 px-2.5 py-0.5 text-xs text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-good animate-pulse" />
-                {t('hero.liveStatus')}
-              </span>
             </div>
           </div>
 
@@ -274,11 +267,8 @@ export function OwnerDashboard() {
                 {/* Active Stations */}
                 <div className="flex flex-col justify-between rounded-card border border-line bg-surface p-4 shadow-2xs transition-all hover:border-line-hover sm:p-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                    <span className="text-[12px] font-medium text-muted">
                       {t('kpi.activeStations')}
-                    </span>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-owner-soft text-owner">
-                      <IconGrid size={15} />
                     </span>
                   </div>
                   <div className="mt-3">
@@ -288,7 +278,7 @@ export function OwnerDashboard() {
                         /{number.format(summary.data.stations.totalStations)}
                       </span>
                     </p>
-                    <p className="mt-1 text-xs text-owner-deep font-medium">
+                    <p className="mt-1 text-[12px] text-muted">
                       {t('hero.activeStationNote')}
                     </p>
                   </div>
@@ -297,11 +287,8 @@ export function OwnerDashboard() {
                 {/* Chargers Online */}
                 <div className="flex flex-col justify-between rounded-card border border-line bg-surface p-4 shadow-2xs transition-all hover:border-line-hover sm:p-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                    <span className="text-[12px] font-medium text-muted">
                       {t('kpi.chargersOnline')}
-                    </span>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-owner-soft text-owner">
-                      <IconBolt size={15} />
                     </span>
                   </div>
                   <div className="mt-3">
@@ -311,7 +298,7 @@ export function OwnerDashboard() {
                         /{number.format(summary.data.stations.totalChargePoints)}
                       </span>
                     </p>
-                    <p className="mt-1 text-xs text-owner-deep font-medium">
+                    <p className="mt-1 text-[12px] text-muted">
                       {t('hero.onlineNote')}
                     </p>
                   </div>
@@ -320,11 +307,8 @@ export function OwnerDashboard() {
                 {/* Available Connectors */}
                 <div className="flex flex-col justify-between rounded-card border border-line bg-surface p-4 shadow-2xs transition-all hover:border-line-hover sm:p-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                    <span className="text-[12px] font-medium text-muted">
                       {t('kpi.connectorsAvailable')}
-                    </span>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-good-soft text-good">
-                      <IconCheckCircle size={15} />
                     </span>
                   </div>
                   <div className="mt-3">
@@ -334,7 +318,7 @@ export function OwnerDashboard() {
                         /{number.format(summary.data.hardware.totalConnectors)}
                       </span>
                     </p>
-                    <p className="mt-1 text-xs text-good font-medium">
+                    <p className="mt-1 text-[12px] text-muted">
                       {t('hero.availableNote')}
                     </p>
                   </div>
@@ -343,11 +327,8 @@ export function OwnerDashboard() {
                 {/* Currently Charging */}
                 <div className="flex flex-col justify-between rounded-card border border-line bg-surface p-4 shadow-2xs transition-all hover:border-line-hover sm:p-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                    <span className="text-[12px] font-medium text-muted">
                       {t('metrics.charging')}
-                    </span>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 text-muted">
-                      <IconClock size={15} />
                     </span>
                   </div>
                   <div className="mt-3">
@@ -382,9 +363,6 @@ export function OwnerDashboard() {
           <Card className="h-full p-4 sm:p-6 shadow-2xs">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">
-                  <IconPin size={18} />
-                </span>
                 <div>
                   <h2 id="owner-stations-title" className="text-base font-semibold text-ink">
                     {t('sections.stations')}
@@ -532,9 +510,6 @@ export function OwnerDashboard() {
           <Card className="flex h-full flex-col p-4 sm:p-6 shadow-2xs">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn">
-                  <IconWrench size={18} />
-                </span>
                 <div>
                   <h2 id="owner-attention-title" className="text-base font-semibold text-ink">
                     {t('sections.attention')}
@@ -621,9 +596,6 @@ export function OwnerDashboard() {
                 </div>
               ) : (
                 <div className="py-6 text-center">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-good-soft text-good">
-                    <IconCheckCircle size={20} />
-                  </div>
                   <p className="mt-2 text-xs font-semibold text-ink">{t('empty.noAttention')}</p>
                   <p className="mt-0.5 text-[11px] text-muted">
                     {t('panel.noActionItems', { defaultValue: 'Không có mục cần xử lý.' })}
@@ -662,9 +634,6 @@ export function OwnerDashboard() {
         <section className="xl:col-span-8" aria-labelledby="owner-activity-title">
           <Card className="h-full p-4 sm:p-6 shadow-2xs">
             <div className="mb-4 flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">
-                <IconBarChart size={18} />
-              </span>
               <div>
                 <h2 id="owner-activity-title" className="text-base font-semibold text-ink">
                   {t('sections.activity')}
@@ -732,9 +701,6 @@ export function OwnerDashboard() {
         <section className="xl:col-span-4" aria-labelledby="owner-bookings-title">
           <Card className="flex h-full flex-col p-4 sm:p-6 shadow-2xs">
             <div className="mb-4 flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-owner-soft text-owner">
-                <IconCalendar size={18} />
-              </span>
               <div>
                 <h2 id="owner-bookings-title" className="text-base font-semibold text-ink">
                   {t('panel.upcomingBookings')}
@@ -779,7 +745,7 @@ export function OwnerDashboard() {
                             timeZone: 'Asia/Ho_Chi_Minh',
                           }).format(new Date(booking.startAt))}
                         </strong>
-                        <span className="mt-0.5 text-[9px] font-semibold uppercase text-muted">
+                        <span className="mt-0.5 text-[12px] font-medium text-muted">
                           {new Intl.DateTimeFormat(locale, {
                             month: 'short',
                             timeZone: 'Asia/Ho_Chi_Minh',

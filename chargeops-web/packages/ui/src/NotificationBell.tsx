@@ -299,7 +299,7 @@ export function NotificationBell({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl"
+          className="absolute right-0 top-full z-50 mt-2.5 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-line bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18),0_6px_16px_rgba(0,0,0,0.08)] backdrop-blur-xl"
           style={{ animation: 'popIn .18s cubic-bezier(0.16, 1, 0.3, 1)' }}
         >
           {/* Header Bar */}

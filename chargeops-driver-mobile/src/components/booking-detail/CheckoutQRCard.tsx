@@ -372,8 +372,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: fontSizes.caption,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     fontWeight: fontWeights.semibold,
   },
   infoValue: {
@@ -383,7 +382,7 @@ const styles = StyleSheet.create({
   infoValueHigh: {
     fontSize: fontSizes.heading,
     fontWeight: fontWeights.bold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   copyBtn: {
     flexDirection: 'row',

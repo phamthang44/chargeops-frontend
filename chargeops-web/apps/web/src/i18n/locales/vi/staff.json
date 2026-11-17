@@ -29,7 +29,7 @@
     },
     "nav": {
       "dashboard": {
-        "label": "Dashboard",
+        "label": "Tổng quan",
         "title": "Tổng quan vận hành",
         "subtitle": "Chỉ số vận hành trạm trong ngày."
       },
@@ -128,7 +128,7 @@
     "inUseLock": "Hệ thống tự quản lý trạng thái đang sạc",
     "historyBtn": "Lịch sử",
     "reportBtn": "Báo sự cố",
-    "incidentStatus": "CÓ SỰ CỐ",
+    "incidentStatus": "Có sự cố",
     "handlingIncident": "Đang xử lý sự cố",
     "incidentBlockedTooltip": "Cổng đang có sự cố chưa được khắc phục. Vui lòng khắc phục sự cố trước khi bật lại.",
     "resolveBtn": "Khắc phục sự cố",

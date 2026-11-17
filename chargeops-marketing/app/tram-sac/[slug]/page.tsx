@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
-import { STATIONS, getStationBySlug } from "@/components/stations";
+import { STATIONS, getStationBySlug, type CoverageStation } from "@/components/stations";
 import { fetchPublicStationBySlug, fetchPublicStations } from "@/lib/stations-api";
-import { StationDetailView } from "@/components/StationDetailView";
-import { mediaAsset } from "@/lib/media";
+import { SubpageShell } from "@/components/home/SubpageShell";
+import { StationDetail, type OtherStation } from "@/components/home/StationDetail";
+import { illustrativePhotos, isSampleStation } from "@/lib/home/stationPhotos";
 
 type Params = { slug: string };
+
+const isSample = isSampleStation;
 
 export function generateStaticParams(): Params[] {
   return STATIONS.map((s) => ({ slug: s.slug }));
@@ -21,6 +22,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const station = (await fetchPublicStationBySlug(slug)) || getStationBySlug(slug);
   if (!station) return { title: "Không tìm thấy trạm sạc" };
+  const ogImage = (!isSample(station) && (station.primaryImageUrl || station.images?.[0])) || illustrativePhotos(station)[0];
 
   const title = `${station.name} · Trạm sạc xe điện ${station.district}, ${station.city}`;
   const description = `${station.name} tại ${station.address}. Xem thông tin địa điểm và cổng sạc. Dữ liệu và khả năng đặt chỗ phụ thuộc vào thông tin do trạm cung cấp.`;
@@ -33,7 +35,7 @@ export async function generateMetadata({
       title,
       description,
       url: `/tram-sac/${station.slug}`,
-      images: station.primaryImageUrl ? [{ url: station.primaryImageUrl }] : [],
+      images: [{ url: ogImage }],
     },
   };
 }
@@ -49,17 +51,16 @@ export default async function StationDetailPage({
 
   const isFull = station.total > 0 && station.available === 0;
 
-  // Fetch contextual other stations (prefer live API stations, fallback to curated STATIONS)
-  let others = STATIONS.filter((s) => s.slug !== station.slug).slice(0, 3);
+  // Other stations: prefer the live API, fall back to the sample list.
+  let others: CoverageStation[] = STATIONS.filter((s) => s.slug !== station.slug).slice(0, 3);
   try {
     const listRes = await fetchPublicStations({ size: 10 });
     const apiOthers = listRes.stations.filter((s) => s.slug !== station.slug).slice(0, 3);
     if (apiOthers.length > 0) others = apiOthers;
   } catch {
-    // Keep fallback
+    // keep the sample list
   }
 
-  // Real GPS & Maps navigation
   const lat = station.latitude ?? 10.7769;
   const lng = station.longitude ?? 106.7009;
   const delta = 0.006;
@@ -67,47 +68,37 @@ export default async function StationDetailPage({
   const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`;
   const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
-  // Gallery images priority: backend assets > primaryImageUrl > curated real EV photography
-  const defaultStationPhotos = [
-    mediaAsset("stations/hub-exterior.jpg"),
-    mediaAsset("stations/charger-close.jpg"),
-    mediaAsset("stations/mall-indoor.jpg"),
-  ];
-  const gallery =
-    station.images && station.images.length > 0
-      ? station.images
-      : defaultStationPhotos;
+  // Real photos only come from the live API; the sample stations use the
+  // home page's illustrative photos (labelled as such on the page).
+  const livePhotos = isSample(station) ? [] : (station.images?.filter(Boolean) ?? []);
+  const illustrative = livePhotos.length === 0;
+  const photos = illustrative ? illustrativePhotos(station) : livePhotos;
 
-  const fillPercent =
-    station.total > 0
-      ? Math.round(((station.total - station.available) / station.total) * 100)
-      : 100;
+  const price = (s: CoverageStation) =>
+    s.priceNumber
+      ? `${Number(s.priceNumber).toLocaleString("vi-VN")}đ`
+      : s.pricePerKwh.replace(/\(tham khảo\)/gi, "").replace(/\/gói tham khảo/gi, "").trim();
 
-  // Clean price display
-  const displayPrice = station.priceNumber
-    ? `${Number(station.priceNumber).toLocaleString("vi-VN")}đ`
-    : station.pricePerKwh.replace(/\(tham khảo\)/gi, "").replace(/\/gói tham khảo/gi, "").trim();
+  const otherCards: OtherStation[] = others.map((s) => ({
+    station: s,
+    cover: (!isSample(s) && (s.primaryImageUrl || s.images?.[0])) || illustrativePhotos(s)[0],
+    price: price(s),
+  }));
 
   return (
-    <>
-      <SiteHeader />
-      <main className="min-h-screen bg-[#070A08] text-white pt-24 sm:pt-28 lg:pt-32 pb-24">
-        <StationDetailView
-          station={station}
-          others={others}
-          gallery={gallery}
-          mapEmbedUrl={mapEmbedUrl}
-          googleMapsDirectionsUrl={googleMapsDirectionsUrl}
-          lat={lat}
-          lng={lng}
-          displayPrice={displayPrice}
-          fillPercent={fillPercent}
-          isFull={isFull}
-        />
-      </main>
-      <SiteFooter />
+    <SubpageShell>
+      <StationDetail
+        station={station}
+        others={otherCards}
+        photos={photos}
+        illustrative={illustrative}
+        mapEmbedUrl={mapEmbedUrl}
+        googleMapsDirectionsUrl={googleMapsDirectionsUrl}
+        displayPrice={price(station)}
+        isFull={isFull}
+      />
       <JsonLd name={station.name} address={station.address} />
-    </>
+    </SubpageShell>
   );
 }
 

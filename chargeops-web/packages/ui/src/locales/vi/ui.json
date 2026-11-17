@@ -228,6 +228,59 @@
       "account": "Hệ thống",
       "station": "Trạm sạc"
     }
+  },
+  "dateTime": {
+    "placeholder": "Chọn ngày và giờ...",
+    "notSet": "Chưa chọn thời gian",
+    "at": "lúc",
+    "clear": "Xóa lựa chọn",
+    "quick": "Chọn nhanh",
+    "presets": {
+      "now": "Bây giờ",
+      "minus15": "-15 phút",
+      "minus60": "-1 giờ"
+    },
+    "dialog": "Bộ chọn ngày giờ",
+    "prevMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "time24": "Giờ thực hiện (24h)",
+    "hours": "Giờ",
+    "minutes": "Phút",
+    "pickNow": "Chọn bây giờ",
+    "confirm": "Xác nhận",
+    "emptyHint": "Vui lòng chọn ngày và giờ",
+    "monthYear": "{{month}}, {{year}}",
+    "months": [
+      "Tháng 1",
+      "Tháng 2",
+      "Tháng 3",
+      "Tháng 4",
+      "Tháng 5",
+      "Tháng 6",
+      "Tháng 7",
+      "Tháng 8",
+      "Tháng 9",
+      "Tháng 10",
+      "Tháng 11",
+      "Tháng 12"
+    ],
+    "weekdays": [
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7",
+      "CN"
+    ],
+    "days": [
+      "Chủ Nhật",
+      "Thứ Hai",
+      "Thứ Ba",
+      "Thứ Tư",
+      "Thứ Năm",
+      "Thứ Sáu",
+      "Thứ Bảy"
+    ]
   }
 }
-

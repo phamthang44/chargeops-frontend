@@ -86,7 +86,7 @@ export function TicketCountdownTimer({ autoCloseAt, resolvedAt, className = '' }
     >
       <IconClock size={14} strokeWidth={2.2} className="shrink-0 text-warn animate-pulse" />
       <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-ink">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-warn-deep">
+        <span className="text-[12px] font-medium text-warn-deep">
           {t('countdown.autoClosePrefix', 'Tự đóng sau:')}
         </span>
         <span className="font-mono font-bold tracking-tight text-warn-deep">

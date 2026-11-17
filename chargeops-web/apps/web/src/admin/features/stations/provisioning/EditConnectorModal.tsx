@@ -77,7 +77,7 @@ export function EditConnectorModal({
 
         <div className="flex flex-col gap-3">
           <div>
-            <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+            <label className="block text-[12px] font-medium text-muted mb-1">
               {t('provisioning.workspace.connectorForm.typeLabel')}
             </label>
             <Select
@@ -89,7 +89,7 @@ export function EditConnectorModal({
 
           <div className="grid grid-cols-1 gap-2.5">
             <div>
-              <label className="block text-[11px] font-bold uppercase text-faint mb-1">
+              <label className="block text-[12px] font-medium text-muted mb-1">
                 {t('provisioning.workspace.connectorForm.powerLabel')}
               </label>
               <Select

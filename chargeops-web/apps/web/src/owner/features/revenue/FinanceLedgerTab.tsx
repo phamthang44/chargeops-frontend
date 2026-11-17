@@ -105,16 +105,14 @@ export function FinanceLedgerTab() {
       {s ? (
         <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
           {/* Card 1: Gross Collected */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-brand/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-brand/40">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                <span className="text-[12px] font-medium text-muted">
                   {t('finance.kpis.gross', 'TỔNG THU GHI NHẬN')}
                 </span>
-                <span className="h-2 w-2 rounded-full bg-brand" />
               </div>
-              <div className="text-[23px] font-extrabold text-ink tracking-tight font-mono">
+              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
                 {formatVndCompact(s.grossVnd)}
               </div>
             </div>
@@ -128,16 +126,14 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 2: Total Refunded */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-bad/40 hover:shadow-md">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-bad/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-bad/40">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                <span className="text-[12px] font-medium text-muted">
                   {t('finance.kpis.refunded', 'ĐÃ HOÀN TRẢ')}
                 </span>
-                <span className="h-2 w-2 rounded-full bg-bad" />
               </div>
-              <div className="text-[23px] font-extrabold text-bad-deep tracking-tight font-mono">
+              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
                 {formatVndCompact(s.refundedVnd)}
               </div>
             </div>
@@ -150,16 +146,14 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 3: Pending Obligations */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-warn/40 hover:shadow-md">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-warn/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-warn/40">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                <span className="text-[12px] font-medium text-muted">
                   {t('finance.kpis.pending', 'NGHĨA VỤ HOÀN CHỜ')}
                 </span>
-                <span className="h-2 w-2 rounded-full bg-warn" />
               </div>
-              <div className="text-[23px] font-extrabold text-warn-deep tracking-tight font-mono">
+              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
                 {formatVndCompact(s.pendingRefundVnd)}
               </div>
             </div>
@@ -170,16 +164,14 @@ export function FinanceLedgerTab() {
           </div>
 
           {/* Card 4: Net Recorded Amount */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-good/5 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-good/40">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+                <span className="text-[12px] font-medium text-muted">
                   {t('finance.kpis.net', 'THU RÒNG GHI NHẬN')}
                 </span>
-                <span className="h-2 w-2 rounded-full bg-good" />
               </div>
-              <div className="text-[23px] font-extrabold text-good tracking-tight font-mono">
+              <div className="text-[23px] font-semibold text-ink tracking-tight tabular-nums">
                 {formatVndCompact(s.netVnd)}
               </div>
             </div>
@@ -192,7 +184,7 @@ export function FinanceLedgerTab() {
       ) : (
         <div className="mb-5 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[105px] rounded-2xl" />
+            <Skeleton key={i} className="h-[105px] rounded-card" />
           ))}
         </div>
       )}
@@ -219,7 +211,7 @@ export function FinanceLedgerTab() {
       </div>
 
       {/* 3. Table Card (single outline) */}
-      <Card className="overflow-hidden rounded-2xl shadow-xs">
+      <Card className="overflow-hidden rounded-card shadow-xs">
         {listQuery.isLoading || !data ? (
           <div className="p-4 space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -231,7 +223,7 @@ export function FinanceLedgerTab() {
             <div className="overflow-x-auto">
               <div className="min-w-[860px]">
                 <div
-                  className="grid bg-surface-2 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.08em] text-faint border-b border-hairline"
+                  className="grid bg-surface-2 px-4 py-3 text-[12px] font-medium text-muted border-b border-hairline"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>{t('finance.table.cols.booking', 'ĐƠN ĐẶT CHỖ')}</span>

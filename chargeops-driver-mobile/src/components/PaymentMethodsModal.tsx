@@ -845,8 +845,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: fontSizes.caption - 1,
     fontWeight: fontWeights.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   bankPills: {
     flexDirection: 'row',

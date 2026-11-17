@@ -127,7 +127,7 @@ export function PricingConfirmModal({
 
         {/* Change Comparison Summary */}
         <div className="mb-4 flex flex-col gap-2 rounded-[11px] bg-surface-2 p-3.5 text-[12.5px]">
-          <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-faint mb-1">
+          <div className="text-[12px] font-medium text-muted mb-1">
             {t('pricing.confirmModal.summaryTitle', { defaultValue: 'Tóm tắt các thông số điều chỉnh' })}
           </div>
 

@@ -471,52 +471,52 @@ export function PolicyKB() {
       {/* KPI Metric Strip - Clean Single-border cards */}
       <div className="mb-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {/* Metric 1: Total Docs */}
-        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-105">
+        <div className="group flex items-center gap-3.5 rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-brand/40">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand transition-transform duration-300">
             <IconBook size={20} />
           </div>
           <div>
             <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.totalDocs', 'Tổng số văn kiện')}</div>
-            <div className="font-mono text-[22px] font-black tracking-tight text-ink">{allDocs.length}</div>
+            <div className="text-[22px] font-semibold tracking-tight text-ink tabular-nums">{allDocs.length}</div>
           </div>
         </div>
 
         {/* Metric 2: Active Docs */}
-        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-good/40 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-good-soft text-good transition-transform duration-300 group-hover:scale-105">
+        <div className="group flex items-center gap-3.5 rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-good/40">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-good-soft text-good transition-transform duration-300">
             <IconShieldCheck size={20} />
           </div>
           <div>
             <div className="text-[11.5px] font-medium text-muted">{t('policyKB.kpi.activeDocs', 'Đang hiệu lực')}</div>
-            <div className="font-mono text-[22px] font-black tracking-tight text-good-deep">
+            <div className="text-[22px] font-semibold tracking-tight text-ink tabular-nums">
               {allDocs.filter((d) => d.active).length}
             </div>
           </div>
         </div>
 
         {/* Metric 3: Booking & Pricing Category Docs */}
-        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-transform duration-300 group-hover:scale-105">
+        <div className="group flex items-center gap-3.5 rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-amber-400/40">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-transform duration-300">
             <IconBolt size={20} />
           </div>
           <div>
             <div className="text-[11.5px] font-medium text-muted">
               {t('policyKB.categories.booking', 'Đặt chỗ & Biểu giá')}
             </div>
-            <div className="font-mono text-[22px] font-black tracking-tight text-ink">
+            <div className="text-[22px] font-semibold tracking-tight text-ink tabular-nums">
               {allDocs.filter((d) => matchDocumentCategory(d.slug, 'booking', d.docType)).length}
             </div>
           </div>
         </div>
 
         {/* Metric 4: Owner & License Docs */}
-        <div className="group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300 group-hover:scale-105">
+        <div className="group flex items-center gap-3.5 rounded-card border border-line bg-surface p-4 shadow-2xs transition-all duration-300 hover:border-emerald-400/40">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-300">
             <IconHome size={20} />
           </div>
           <div>
             <div className="text-[11.5px] font-medium text-muted">{t('policyKB.audiences.OWNER', 'Chủ trạm & License')}</div>
-            <div className="font-mono text-[22px] font-black tracking-tight text-ink">
+            <div className="text-[22px] font-semibold tracking-tight text-ink tabular-nums">
               {allDocs.filter((d) => matchDocumentCategory(d.slug, 'license', d.docType)).length}
             </div>
           </div>
@@ -536,8 +536,8 @@ export function PolicyKB() {
       ) : (
         <div className="flex flex-col gap-5">
           {/* Category Tabs - Floating Glass Segmented Dock */}
-          <div className="rounded-2xl bg-surface-2/40 shadow-xs backdrop-blur-xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-line/30 bg-surface p-1 scrollbar-none">
+          <div className="rounded-card bg-surface-2/40 shadow-xs backdrop-blur-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto rounded-card border border-line/30 bg-surface p-1 scrollbar-none">
               {categoryTabs.map((tab) => {
                 const count = allDocs.filter((d) => matchDocumentCategory(d.slug, tab.id, d.docType)).length;
                 const isActive = activeTab === tab.id;
@@ -569,8 +569,8 @@ export function PolicyKB() {
           </div>
 
           {/* Filter & Search Toolbar - Single-border control bar */}
-          <div className="rounded-2xl bg-surface-2/40 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-line/40 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+          <div className="rounded-card bg-surface-2/40 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3.5 rounded-card border border-line/40 bg-surface p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
               {/* Search Box with explicit action (click or Enter) */}
               <form
                 onSubmit={(e) => {
@@ -738,7 +738,7 @@ export function PolicyKB() {
                 return (
                   <div
                     key={doc.id}
-                    className="group flex flex-col justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md lg:flex-row lg:items-start"
+                    className="group flex flex-col justify-between gap-4 rounded-card border border-line bg-surface p-5 shadow-2xs transition-all duration-300 hover:border-brand/40 lg:flex-row lg:items-start"
                   >
                     <div className="flex-1">
                         {/* Top Micro-Pills Row */}
@@ -792,7 +792,7 @@ export function PolicyKB() {
 
                         {/* Eyebrow & Title */}
                         {doc.eyebrow && (
-                          <div className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand">
+                          <div className="mb-1 text-[12px] font-medium text-brand">
                             {doc.eyebrow}
                           </div>
                         )}

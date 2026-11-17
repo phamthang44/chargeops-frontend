@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: fontWeights.medium,
     textAlign: 'center',
-    letterSpacing: 0.8,
+    letterSpacing: 0,
   },
 });

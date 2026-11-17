@@ -39,7 +39,7 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold uppercase tracking-wider text-faint">
+        <span className="text-[12px] font-medium text-muted">
           {t('refunds.timeline.title', {
             count: attempts.length,
             defaultValue: `Lịch sử các lần thực thi (${attempts.length})`,

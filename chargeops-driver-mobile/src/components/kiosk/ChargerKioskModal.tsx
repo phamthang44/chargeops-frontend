@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   kioskBrand: {
     fontSize: 10,
     fontWeight: fontWeights.bold,
-    letterSpacing: 1,
+    letterSpacing: 0,
     color: '#94A3B8',
   },
   closeBtn: {

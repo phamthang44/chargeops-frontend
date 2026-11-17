@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   checkRing: { width: 64, height: 64, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
   errorRing: { width: 64, height: 64, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
   sheetTitle: { fontSize: fontSizes.title, fontWeight: fontWeights.bold, textAlign: 'center' },
-  sheetCode: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, letterSpacing: 0.5 },
+  sheetCode: { fontSize: fontSizes.caption, fontWeight: fontWeights.semibold, letterSpacing: 0 },
 
   sheetCard: {
     alignSelf: 'stretch',
@@ -645,8 +645,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.bold,
     marginBottom: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   targetBoxRow: {
     flexWrap: 'wrap',

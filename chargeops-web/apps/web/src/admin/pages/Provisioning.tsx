@@ -741,7 +741,7 @@ function AddConnectorModal({ chargePoint, onClose }: { chargePoint: ChargePoint;
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
+      <div className="mb-1.5 text-[12px] font-medium text-muted">{label}</div>
       {children}
     </div>
   );

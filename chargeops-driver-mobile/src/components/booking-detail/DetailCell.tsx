@@ -36,8 +36,7 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: fontSizes.caption,
     fontWeight: fontWeights.semibold,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   detailValue: { fontSize: fontSizes.body, fontWeight: fontWeights.bold, lineHeight: lineHeights.body },
   detailSub: { fontSize: fontSizes.caption, lineHeight: lineHeights.caption },

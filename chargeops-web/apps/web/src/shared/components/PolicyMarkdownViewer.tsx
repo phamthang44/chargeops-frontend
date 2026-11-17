@@ -235,7 +235,7 @@ export function PolicyMarkdownViewer({
         <div key={key} className="my-4 overflow-x-auto rounded-lg border border-line bg-surface">
           <table className={`w-full text-left ${typo.table}`}>
             <thead>
-              <tr className="border-b border-line bg-surface-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <tr className="border-b border-line bg-surface-2 text-[12px] font-medium text-muted">
                 {headers.map((h, i) => (
                   <th key={i} className="px-3.5 py-2.5">
                     {renderInline(h.trim(), searchQuery)}
@@ -553,7 +553,7 @@ export function PolicyMarkdownViewer({
       {/* Main Container: Split with Table of Contents if enabled */}
       <div className={`grid items-start gap-5 ${showToc && headings.length > 1 ? 'lg:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
         {/* Document Content View */}
-        <div className={`rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs transition-[font-size] duration-150 ${typo.body} ${typo.leading}`}>
+        <div className={`rounded-card border border-line bg-surface p-6 sm:p-8 shadow-xs transition-[font-size] duration-150 ${typo.body} ${typo.leading}`}>
           {renderDocumentBlocks()}
         </div>
 
@@ -562,7 +562,7 @@ export function PolicyMarkdownViewer({
           <div className="sticky top-6 flex flex-col gap-3">
             <div className="rounded-xl border border-line bg-surface p-4 shadow-xs">
               <div className="mb-2.5 flex items-center justify-between border-b border-line pb-2 text-[12px]">
-                <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-muted">
+                <div className="flex items-center gap-1.5 font-medium text-muted">
                   <IconBook size={13} className="text-brand" />
                   <span>{t('markdownViewer.toc', { defaultValue: 'Mục lục điều khoản' })}</span>
                 </div>

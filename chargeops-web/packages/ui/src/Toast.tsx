@@ -233,7 +233,7 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: () => void
     <div
       onMouseEnter={pauseTimer}
       onMouseLeave={startTimer}
-      className={`pointer-events-auto relative overflow-hidden w-full sm:w-[420px] md:w-[460px] lg:w-[480px] rounded-2xl border ${toneConfig.border} bg-surface/95 dark:bg-surface/90 backdrop-blur-xl p-4 sm:p-4.5 ${toneConfig.shadow} transition-all duration-300`}
+      className={`pointer-events-auto relative overflow-hidden w-full sm:w-[420px] md:w-[460px] lg:w-[480px] rounded-card border ${toneConfig.border} bg-surface/95 dark:bg-surface/90 backdrop-blur-xl p-4 sm:p-4.5 ${toneConfig.shadow} transition-all duration-300`}
       style={{ animation: 'toastSlideInRight .28s cubic-bezier(0.16, 1, 0.3, 1)' }}
       role="alert"
     >

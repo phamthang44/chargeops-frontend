@@ -1,4 +1,4 @@
-<#macro registrationLayout displayMessage=true displayRequiredFields=false displayInfo=false displayWide=false showAnotherWayIfPresent=true>
+<#macro registrationLayout displayMessage=true displayRequiredFields=false displayInfo=false displayWide=false showAnotherWayIfPresent=true bodyClass="">
 <!DOCTYPE html>
 <html class="${properties.kcHtmlClass!}" lang="${locale.currentLanguageTag!'vi'}">
 <head>
@@ -30,7 +30,7 @@
     </#if>
 </head>
 
-<body id="keycloak-bg" class="co-app-body">
+<body id="keycloak-bg" class="co-app-body ${bodyClass}">
   <div class="co-main-container">
     <!-- Desktop Top Brand Header Bar -->
     <header class="co-desktop-header">

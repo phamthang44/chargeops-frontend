@@ -60,6 +60,11 @@
         "title": "Policy Assistant",
         "subtitle": "Look up cancellation, check-in, and payment regulations."
       },
+      "agents": {
+        "label": "Connect AI Agents",
+        "title": "Connect AI Agents",
+        "subtitle": "Connect Codex or Claude Code to ask about station operations."
+      },
       "legal": {
         "label": "Policies & Legal",
         "title": "Policies & Regulations",
@@ -71,6 +76,52 @@
         "subtitle": "Real-time station alerts, charging sessions, and system notices."
       }
     }
+  },
+  "agents": {
+    "title": "Connect AI Agents",
+    "subtitle": "Use your existing Codex or Claude Code subscription to ask about your charging stations.",
+    "readyTitle": "Connection instructions are available for this environment",
+    "readyDescription": "Copy the commands below. They open ChargeOps sign-in in your browser; use your Owner account.",
+    "notReadyTitle": "Connection is not enabled in this environment",
+    "notReadyDescription": "An administrator must enable MCP on the backend, configure the OAuth client in Keycloak, and add the endpoint to the console. Connection commands will appear here after setup.",
+    "howItWorksTitle": "How it works",
+    "howItWorksDescription": "The agent runs in Codex or Claude Code on your computer. ChargeOps returns operational data after you sign in and Owner access is verified; model usage comes from your agent subscription.",
+    "steps": {
+      "step1": "Use a terminal for the one-time setup on a computer with Codex or Claude Code installed.",
+      "step2": "Run the provider commands below in order.",
+      "step3": "Sign in to ChargeOps in the browser when prompted.",
+      "step4": "Return to the agent and ask about your station status."
+    },
+    "codex": {
+      "title": "Codex",
+      "description": "Run the command once; MCP configuration is shared across Codex desktop, CLI, and IDE. Sign in with your ChargeOps Owner account.",
+      "docs": "Codex docs"
+    },
+    "claude": {
+      "title": "Claude Code",
+      "description": "Use Claude Code with your Claude Pro/Max plan and sign in with your ChargeOps Owner account; no Anthropic API key is needed.",
+      "docs": "Claude Code docs"
+    },
+    "placeholderCommands": "Connection commands will appear when this environment is enabled.",
+    "runCommandsInOrder": "Run each line in order in your terminal.",
+    "copyCommands": "Copy commands",
+    "copied": "Copied",
+    "copyFailed": "Automatic copy failed. You can still select and copy the commands in this panel.",
+    "tryTitle": "Try asking the agent",
+    "tryDescription": "After chargeops shows as connected in Codex or Claude Code:",
+    "prompts": {
+      "prompt1": "Summarize the status of my stations and equipment.",
+      "prompt2": "Which stations have equipment that needs attention? Include status and update time.",
+      "prompt3": "List my stations and the number of available connectors."
+    },
+    "scopeTitle": "Permissions and data",
+    "scope": {
+      "scope1": "Read-only summary, station list, and equipment alerts for the signed-in Owner.",
+      "scope2": "No charger control, station status changes, pricing, bookings, or finance actions.",
+      "scope3": "Customer data, ticket contents, booking IDs, transactions, and payment details are not sent.",
+      "scope4": "Status reflects data stored in ChargeOps, not a live device heartbeat."
+    },
+    "connectionNote": "The ChargeOps console cannot read the token or connection state stored in Codex/Claude on your computer. Disconnect or revoke access in the agent app's MCP settings or in Keycloak."
   },
   "notifications": {
     "empty": "No new notifications.",
@@ -904,8 +955,12 @@
         "title": "Could not load Price & Hours version history"
       },
       "subtitle": "Price & Hours configuration versions, when each was saved, and when each takes effect and expires.",
-      "calloutTitle": "History scope and effective dates:",
-      "calloutDesc": "Each entry records a version of the full commercial configuration (base price, minimum booking duration, TOU windows, and opening hours). A price, duration, or TOU edit can create a new entry even when the hours stay unchanged. This view currently shows the hours and effective window, not a field-by-field change list. Opening hours repeat weekly. If a station has no complete price and booking-duration values, its first complete configuration takes effect immediately; later edits start at 00:00 next Monday (Vietnam time), while the current configuration remains effective through that exact boundary. The duration on an entry is how long that version was effective, not the length of a weekly cycle. Emergency closures are handled separately and take effect immediately.",
+      "calloutTitle": "Effective dates & reading history:",
+      "calloutFirstSave": "The first complete configuration takes effect immediately.",
+      "calloutLaterEdits": "Later edits start at 00:00 next Monday (Vietnam time); the current version stays effective until then.",
+      "calloutWeeklyVersion": "The schedule repeats weekly. Each version groups price, minimum booking duration, TOU windows, and opening hours.",
+      "calloutEffectiveDuration": "Price, duration, or TOU edits create a version even when hours stay the same. The duration shown is how long it was actually effective.",
+      "calloutLimitAndEmergency": "History does not show which fields changed. Emergency closures take effect immediately.",
       "activeBadge": "Currently Active (Repeats Weekly)",
       "activeHint": "This schedule repeats weekly until it is replaced.",
       "activeHintUntil": "This schedule repeats weekly until {{effectiveTo}}; the next version starts at that exact boundary.",

@@ -60,6 +60,11 @@
         "title": "Trợ lý chính sách",
         "subtitle": "Tra cứu quy định hủy, check-in, thanh toán."
       },
+      "agents": {
+        "label": "Kết nối AI Agents",
+        "title": "Kết nối AI Agents",
+        "subtitle": "Nối Codex hoặc Claude Code để hỏi về vận hành trạm."
+      },
       "legal": {
         "label": "Chính sách & Pháp lý",
         "title": "Chính sách & Quy định",
@@ -71,6 +76,52 @@
         "subtitle": "Cảnh báo trạm, phiên sạc và thông báo hệ thống thời gian thực."
       }
     }
+  },
+  "agents": {
+    "title": "Kết nối AI Agents",
+    "subtitle": "Dùng Codex hoặc Claude Code bạn đã đăng ký để hỏi về tình hình trạm sạc.",
+    "readyTitle": "Đã có hướng dẫn kết nối cho môi trường này",
+    "readyDescription": "Bạn có thể sao chép lệnh bên dưới. Lệnh sẽ mở đăng nhập ChargeOps trên trình duyệt; hãy dùng tài khoản Owner.",
+    "notReadyTitle": "Kết nối chưa được bật ở môi trường này",
+    "notReadyDescription": "Quản trị viên cần bật MCP ở backend, cấu hình client OAuth trong Keycloak và khai báo endpoint cho console. Khi hoàn tất, các lệnh kết nối sẽ xuất hiện tại đây.",
+    "howItWorksTitle": "Cách sử dụng",
+    "howItWorksDescription": "Agent chạy trong Codex hoặc Claude Code trên máy của bạn. ChargeOps chỉ trả dữ liệu vận hành sau khi bạn đăng nhập và xác thực quyền Owner; model dùng hạn mức subscription của tài khoản agent.",
+    "steps": {
+      "step1": "Mở terminal để cấu hình lần đầu trên máy đã cài Codex hoặc Claude Code.",
+      "step2": "Chạy các lệnh của nhà cung cấp bên dưới theo thứ tự.",
+      "step3": "Đăng nhập ChargeOps trong cửa sổ trình duyệt khi được yêu cầu.",
+      "step4": "Quay lại agent và hỏi về trạng thái các trạm của bạn."
+    },
+    "codex": {
+      "title": "Codex",
+      "description": "Chạy lệnh một lần; cấu hình MCP được dùng chung với Codex desktop, CLI và IDE. Đăng nhập bằng tài khoản ChargeOps Owner.",
+      "docs": "Tài liệu Codex"
+    },
+    "claude": {
+      "title": "Claude Code",
+      "description": "Dùng Claude Code với gói Claude Pro/Max, đăng nhập bằng tài khoản ChargeOps Owner; không cần API key Anthropic.",
+      "docs": "Tài liệu Claude Code"
+    },
+    "placeholderCommands": "Lệnh kết nối sẽ xuất hiện sau khi môi trường được bật.",
+    "runCommandsInOrder": "Chạy lần lượt từng dòng trong terminal.",
+    "copyCommands": "Sao chép lệnh",
+    "copied": "Đã sao chép",
+    "copyFailed": "Không thể sao chép tự động. Bạn vẫn có thể chọn và sao chép lệnh trong khung.",
+    "tryTitle": "Thử hỏi agent",
+    "tryDescription": "Sau khi thấy server chargeops đã kết nối trong Codex hoặc Claude Code:",
+    "prompts": {
+      "prompt1": "Tóm tắt tình hình các trạm và thiết bị của tôi.",
+      "prompt2": "Trạm nào có thiết bị cần chú ý? Nêu trạng thái và thời điểm cập nhật.",
+      "prompt3": "Liệt kê trạm của tôi và số connector khả dụng."
+    },
+    "scopeTitle": "Quyền và dữ liệu",
+    "scope": {
+      "scope1": "Chỉ đọc tổng quan, danh sách trạm và cảnh báo thiết bị trong phạm vi Owner đang đăng nhập.",
+      "scope2": "Không điều khiển trụ sạc, thay đổi trạng thái trạm, giá, đặt chỗ hay tài chính.",
+      "scope3": "Không gửi dữ liệu khách hàng, nội dung ticket, booking ID, giao dịch hoặc thanh toán.",
+      "scope4": "Trạng thái phản ánh dữ liệu đang lưu trong ChargeOps, không phải heartbeat thiết bị trực tiếp."
+    },
+    "connectionNote": "ChargeOps console không đọc token hoặc trạng thái kết nối được lưu trong ứng dụng Codex/Claude trên máy bạn. Ngắt kết nối hoặc thu hồi quyền trong phần quản lý MCP của ứng dụng agent hoặc trong Keycloak."
   },
   "notifications": {
     "empty": "Không có thông báo mới.",
@@ -904,8 +955,12 @@
         "title": "Không thể tải lịch sử phiên bản Giá & Giờ"
       },
       "subtitle": "Các phiên bản cấu hình Giá & Giờ, thời điểm lưu và các mốc bắt đầu, kết thúc hiệu lực.",
-      "calloutTitle": "Phạm vi lịch sử và thời điểm hiệu lực:",
-      "calloutDesc": "Mỗi mục là một phiên bản của toàn bộ cấu hình thương mại (giá, thời lượng đặt tối thiểu, khung TOU và giờ mở/đóng). Sửa giá, thời lượng hoặc TOU cũng có thể tạo mục mới dù giờ mở/đóng không đổi. Khung lịch sử này hiện chỉ hiển thị giờ hoạt động và mốc hiệu lực, chưa cho biết trường nào đã thay đổi. Giờ mở/đóng lặp lại hàng tuần. Nếu trạm chưa có đủ giá và thời lượng đặt, lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam), còn cấu hình hiện hành có hiệu lực đến đúng mốc đó. Khoảng thời gian trên mỗi mục là thời gian phiên bản đó có hiệu lực, không phải độ dài chu kỳ tuần. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.",
+      "calloutTitle": "Hiệu lực & cách đọc lịch sử:",
+      "calloutFirstSave": "Lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay.",
+      "calloutLaterEdits": "Các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam); bản hiện tại giữ đến mốc đó.",
+      "calloutWeeklyVersion": "Lịch lặp hằng tuần. Mỗi phiên bản gộp giá, thời lượng tối thiểu, TOU và giờ mở/đóng.",
+      "calloutEffectiveDuration": "Sửa giá, thời lượng hoặc TOU cũng tạo phiên bản dù giờ không đổi. Thời lượng trên thẻ là thời gian có hiệu lực thực tế.",
+      "calloutLimitAndEmergency": "Lịch sử chưa cho biết trường nào đã đổi. Đóng trạm khẩn cấp có hiệu lực ngay.",
       "activeBadge": "Đang áp dụng (Lặp lại hàng tuần)",
       "activeHint": "Lịch này lặp lại hàng tuần đến khi có phiên bản thay thế.",
       "activeHintUntil": "Lịch lặp lại hàng tuần đến {{effectiveTo}}; phiên bản kế tiếp bắt đầu đúng mốc đó.",

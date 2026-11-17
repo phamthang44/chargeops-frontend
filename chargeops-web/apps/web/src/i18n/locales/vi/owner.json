@@ -898,14 +898,14 @@
       "confirmBtn": "Tôi hiểu & Bật chế độ 24/7"
     },
     "history": {
-      "title": "Lịch sử giờ hoạt động",
+      "title": "Lịch sử phiên bản Giá & Giờ",
       "error": {
-        "eyebrow": "Lịch sử giờ hoạt động",
-        "title": "Không thể tải lịch sử giờ hoạt động"
+        "eyebrow": "Lịch sử phiên bản Giá & Giờ",
+        "title": "Không thể tải lịch sử phiên bản Giá & Giờ"
       },
-      "subtitle": "Các phiên bản lịch mở cửa cùng thời điểm lưu và các mốc bắt đầu, kết thúc hiệu lực.",
-      "calloutTitle": "Quy cách chu kỳ giờ hoạt động:",
-      "calloutDesc": "Giờ mở/đóng lặp lại hàng tuần. Nếu lịch hiện tại chưa có đủ giá và thời lượng đặt, lần lưu cấu hình đầy đủ đầu tiên áp dụng ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam). Khi có bản sửa đã lưu, lịch hiện hành giữ hiệu lực đến đúng mốc bắt đầu của bản mới. Khoảng thời gian trên mỗi mục là thời gian phiên bản đó có hiệu lực, không phải độ dài chu kỳ tuần. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.",
+      "subtitle": "Các phiên bản cấu hình Giá & Giờ, thời điểm lưu và các mốc bắt đầu, kết thúc hiệu lực.",
+      "calloutTitle": "Phạm vi lịch sử và thời điểm hiệu lực:",
+      "calloutDesc": "Mỗi mục là một phiên bản của toàn bộ cấu hình thương mại (giá, thời lượng đặt tối thiểu, khung TOU và giờ mở/đóng). Sửa giá, thời lượng hoặc TOU cũng có thể tạo mục mới dù giờ mở/đóng không đổi. Khung lịch sử này hiện chỉ hiển thị giờ hoạt động và mốc hiệu lực, chưa cho biết trường nào đã thay đổi. Giờ mở/đóng lặp lại hàng tuần. Nếu trạm chưa có đủ giá và thời lượng đặt, lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam), còn cấu hình hiện hành có hiệu lực đến đúng mốc đó. Khoảng thời gian trên mỗi mục là thời gian phiên bản đó có hiệu lực, không phải độ dài chu kỳ tuần. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.",
       "activeBadge": "Đang áp dụng (Lặp lại hàng tuần)",
       "activeHint": "Lịch này lặp lại hàng tuần đến khi có phiên bản thay thế.",
       "activeHintUntil": "Lịch lặp lại hàng tuần đến {{effectiveTo}}; phiên bản kế tiếp bắt đầu đúng mốc đó.",
@@ -934,7 +934,7 @@
       "open247AllDays": "Cả tuần: Mở liên tục 24/7 (00:00 – 24:00)",
       "closed": "Đóng cửa",
       "empty": "Chưa có lịch sử thay đổi nào cho trạm này.",
-      "loadError": "Không thể tải lịch sử giờ hoạt động: ",
+      "loadError": "Không thể tải lịch sử phiên bản Giá & Giờ: ",
       "durationUnderOneHour": "Dưới 1 giờ",
       "durationDaysHours": "{{days}} ngày {{hours}} giờ",
       "durationDays": "{{days}} ngày",

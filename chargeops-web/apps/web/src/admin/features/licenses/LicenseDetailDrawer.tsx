@@ -190,7 +190,7 @@ export function LicenseDetailDrawer({
       title={
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[16px] font-bold text-brand">{displayCode}</span>
+            <span className="tabular-nums text-[16px] font-bold text-brand">{displayCode}</span>
             <button
               type="button"
               onClick={() =>
@@ -205,7 +205,7 @@ export function LicenseDetailDrawer({
           </div>
           <div className="text-[12px] text-muted">
             {license?.stationName || '—'} ·{' '}
-            <span className="font-mono font-medium text-faint">({license?.stationCode || license?.stationId})</span>
+            <span className="tabular-nums font-medium text-faint">({license?.stationCode || license?.stationId})</span>
           </div>
         </div>
       }
@@ -243,7 +243,7 @@ export function LicenseDetailDrawer({
               </div>
               <div>
                 <div className="text-[11px] text-faint">{t('licenses.drawer.feeLabel', 'Mức phí niêm yết (Snapshot)')}</div>
-                <div className="font-mono font-bold text-brand">{formatVnd(fee)}</div>
+                <div className="tabular-nums font-bold text-brand">{formatVnd(fee)}</div>
               </div>
               <div>
                 <div className="text-[11px] text-faint">{t('licenses.drawer.startDateLabel', 'Ngày bắt đầu hiệu lực')}</div>
@@ -317,7 +317,7 @@ export function LicenseDetailDrawer({
               <div className="flex justify-between items-center mt-0.5">
                 <span className="text-[10px]">{t('licenses.drawer.techId', 'Technical ID (UUID):')}</span>
                 <div className="flex items-center gap-1">
-                  <span className="font-mono text-[10px] text-muted truncate max-w-[180px]">{license.id}</span>
+                  <span className="tabular-nums text-[11.5px] text-muted truncate max-w-[180px]">{license.id}</span>
                   <button
                     type="button"
                     onClick={() =>
@@ -509,7 +509,7 @@ export function LicenseDetailDrawer({
                                   <span className="font-bold text-ink text-[13px]">
                                     {eventTitle}
                                   </span>
-                                  <span className="font-mono text-[10.5px] font-semibold text-faint">
+                                  <span className="tabular-nums text-[11.5px] font-semibold text-faint">
                                     ({evt.eventType})
                                   </span>
                                   {isCurrentState && (
@@ -522,9 +522,9 @@ export function LicenseDetailDrawer({
                                 {evt.fromStatus && (
                                   <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted">
                                     <span>{t('licenses.drawer.stateTransition', 'Chuyển trạng thái:')}</span>
-                                    <span className="font-mono font-semibold text-faint">{evt.fromStatus}</span>
+                                    <span className="tabular-nums font-semibold text-faint">{evt.fromStatus}</span>
                                     <span className="text-faint">→</span>
-                                    <span className="font-mono font-bold text-ink">{evt.toStatus}</span>
+                                    <span className="tabular-nums font-bold text-ink">{evt.toStatus}</span>
                                   </div>
                                 )}
                               </div>
@@ -550,7 +550,7 @@ export function LicenseDetailDrawer({
                                     : evt.performedByName || t('licenses.drawer.adminActor', 'Quản trị viên')}
                                 </b>
                               </span>
-                              <span className="font-mono text-[10px] rounded bg-surface px-1.5 py-0.5 border border-hairline">
+                              <span className="tabular-nums text-[11.5px] rounded bg-surface px-1.5 py-0.5 border border-hairline">
                                 {evt.actorType}
                               </span>
                             </div>
@@ -589,7 +589,7 @@ export function LicenseDetailDrawer({
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-[12px] font-bold text-brand">
+                            <span className="tabular-nums text-[12px] font-bold text-brand">
                               {p.licenseCode || p.id}
                             </span>
                             {isCurrent && (
@@ -613,7 +613,7 @@ export function LicenseDetailDrawer({
                           </div>
                           <div>
                             <span className="text-faint">{t('licenses.drawer.periodFee', 'Phí: ')}</span>
-                            <span className="font-mono font-semibold text-ink">
+                            <span className="tabular-nums font-semibold text-ink">
                               {formatVnd(p.feeAmount ?? p.priceVnd ?? 0)}
                             </span>
                           </div>

@@ -245,7 +245,7 @@ function StationPicker({
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="text-[13.5px] font-semibold">{station.name}</span>
-                  <span className="font-mono text-[10.5px] font-semibold text-faint">{station.stationCode || station.id}</span>
+                  <span className="tabular-nums text-[11.5px] font-semibold text-faint">{station.stationCode || station.id}</span>
                 </span>
                 {/* City + operator are what actually disambiguate near-identical names. */}
                 <span className="mt-0.5 block truncate text-[11.5px] font-medium text-muted">
@@ -351,7 +351,7 @@ function StationProvisioning({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-[17px] font-bold">{station.name}</span>
-            <span className="font-mono text-[11px] font-semibold text-faint">{station.stationCode || station.id}</span>
+            <span className="tabular-nums text-[11px] font-semibold text-faint">{station.stationCode || station.id}</span>
           </div>
           <div className="mt-1 truncate text-[12px] font-medium text-muted">
             {station.city} · {station.address} · {station.ownerName}
@@ -474,7 +474,7 @@ function ChargePointCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-[14.5px] font-bold">{cp.name}</span>
-            <span className="font-mono text-[11px] font-semibold text-faint">{cp.id}</span>
+            <span className="tabular-nums text-[11px] font-semibold text-faint">{cp.id}</span>
           </div>
           <div className="mt-[3px] flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] font-medium text-faint">
             {cp.zoneLabel && (
@@ -506,7 +506,7 @@ function ChargePointCard({
                   <QrGlyph size={22} />
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="font-mono text-[11.5px] font-semibold text-brand">{c.id}</span>
+                  <span className="tabular-nums text-[11.5px] font-semibold text-brand">{c.id}</span>
                   <span className="truncate text-[11.5px] font-medium text-muted">{c.name}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-chip px-2.5 py-1 text-[11px] font-semibold text-body">

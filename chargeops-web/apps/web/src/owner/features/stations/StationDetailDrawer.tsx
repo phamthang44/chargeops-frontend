@@ -262,7 +262,7 @@ export function StationDetailDrawer({
               variant="detailed"
             />
           </div>
-          <div className="text-[12px] font-mono text-faint">
+          <div className="text-[12px] tabular-nums text-faint">
             {station.stationCode || station.id} {station.city || station.provinceName ? `· ${station.city || station.provinceName}` : ''}
           </div>
         </div>
@@ -427,7 +427,7 @@ export function StationDetailDrawer({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[12.5px]">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-faint font-medium">{t('stations.detail.stationCode', { defaultValue: 'Mã trạm hệ thống' })}</span>
-                  <div className="flex items-center gap-2 font-mono font-bold text-ink">
+                  <div className="flex items-center gap-2 tabular-nums font-bold text-ink">
                     <span>{station.stationCode || station.id}</span>
                     <button
                       type="button"
@@ -459,7 +459,7 @@ export function StationDetailDrawer({
                   <div className="col-span-full flex items-center justify-between border-t border-hairline pt-2.5">
                     <div className="flex items-center gap-2 text-faint">
                       <span>{t('stations.detail.gpsCoordinates', { defaultValue: 'Tọa độ GPS:' })}</span>
-                      <span className="font-mono text-ink">
+                      <span className="tabular-nums text-ink">
                         {(station as any).latitude}, {(station as any).longitude}
                       </span>
                     </div>
@@ -611,7 +611,7 @@ export function StationDetailDrawer({
                             className={`h-2.5 w-2.5 rounded-full ${isCpOnline ? 'bg-good' : cp.operationalStatus === 'MAINTENANCE' ? 'bg-warn' : 'bg-bad'}`}
                           />
                           <span className="font-bold text-[14px] text-ink">{cp.name}</span>
-                          <span className="font-mono text-[11px] text-faint">({cp.chargePointCode || cp.id})</span>
+                          <span className="tabular-nums text-[11px] text-faint">({cp.chargePointCode || cp.id})</span>
                           {cp.zoneLabel && (
                             <span className="rounded bg-chip px-1.5 py-0.5 text-[10.5px] font-medium text-body">
                               {cp.zoneLabel}
@@ -644,7 +644,7 @@ export function StationDetailDrawer({
                                     <div className="font-semibold text-ink">
                                       {conn.connectorCode || conn.name}
                                     </div>
-                                    <div className="font-mono text-[10.5px] text-faint">
+                                    <div className="tabular-nums text-[11.5px] text-faint">
                                       {conn.connectorType} · {conn.powerKw} kW
                                     </div>
                                   </div>
@@ -702,7 +702,7 @@ export function StationDetailDrawer({
                     <div className="font-semibold text-ink">
                       {t(`pricing.dayNames.${day}`, { defaultValue: DAY_LABELS[day] || day })}
                     </div>
-                    <div className="mt-0.5 text-[11px] font-mono text-good font-medium">00:00 – 24:00 (24/7)</div>
+                    <div className="mt-0.5 text-[11px] tabular-nums text-good font-medium">00:00 – 24:00 (24/7)</div>
                   </div>
                 ))}
               </div>
@@ -982,7 +982,7 @@ export function StationDetailDrawer({
                       />
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-[13px] text-ink">{event.eventType}</span>
-                        <span className="text-[11px] font-mono text-faint">
+                        <span className="text-[11px] tabular-nums text-faint">
                           {formatDateTimeVn(event.performedAt)}
                         </span>
                       </div>

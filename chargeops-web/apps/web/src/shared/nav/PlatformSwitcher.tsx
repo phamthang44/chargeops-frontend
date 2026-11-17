@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconChevronDown } from '@chargeops/ui';
+import { IconBolt, IconChevronDown, IconHome, IconPhone, IconShield, IconUsers } from '@chargeops/ui';
 
 export function getDriverAppUrl(): string {
   const custom = import.meta.env.VITE_DRIVER_APP_URL?.trim();
@@ -16,7 +16,7 @@ interface PlatformItem {
   title: string;
   subtitle: string;
   badge?: string;
-  icon: string;
+  icon: ReactNode;
   type: 'route' | 'external';
   target: string;
   colorClass: string;
@@ -45,19 +45,18 @@ export function PlatformSwitcher() {
         ? t('platformSwitcher.roles.staff', 'Nhân viên trạm')
         : t('platformSwitcher.roles.system', 'Hệ thống');
 
-  const currentIcon = isCurrentAdmin
-    ? '👑'
-    : isCurrentOwner
-      ? '🏢'
-      : isCurrentStaff
-        ? '🧑‍💼'
-        : '⚡';
+  const currentIcon = isCurrentAdmin ? (
+    <IconShield size={14} />
+  ) : isCurrentOwner ? (
+    <IconHome size={14} />
+  ) : isCurrentStaff ? (
+    <IconUsers size={14} />
+  ) : (
+    <IconBolt size={14} />
+  );
 
-  const currentBadgeTone = isCurrentAdmin
-    ? 'bg-brand-soft text-brand border-brand-tint'
-    : isCurrentOwner
-      ? 'bg-owner-soft text-owner-deep border-owner-border'
-      : 'bg-chip text-body border-line';
+  // Neutral like every other header control; the sidebar already carries the console accent.
+  const currentBadgeTone = 'border-line bg-surface text-ink hover:border-line-hover hover:bg-canvas';
 
   useEffect(() => {
     if (!open) return;
@@ -82,42 +81,42 @@ export function PlatformSwitcher() {
       id: 'admin',
       title: t('platformSwitcher.platforms.admin.title', 'Quản trị hệ thống (Admin Platform)'),
       subtitle: t('platformSwitcher.platforms.admin.subtitle', 'Duyệt trạm, quản lý giấy phép, giám sát & tài khoản toàn sàn'),
-      icon: '👑',
+      icon: <IconShield size={16} />,
       type: 'route',
       target: '/admin',
-      colorClass: 'text-indigo-600 dark:text-indigo-400',
-      bgClass: 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60',
+      colorClass: 'text-body',
+      bgClass: 'border-line bg-canvas text-body',
     },
     {
       id: 'owner',
       title: t('platformSwitcher.platforms.owner.title', 'Chủ trạm sạc (Owner Portal)'),
       subtitle: t('platformSwitcher.platforms.owner.subtitle', 'Vận hành trạm, cài đặt giá TOU, lịch mở cửa & doanh thu'),
-      icon: '🏢',
+      icon: <IconHome size={16} />,
       type: 'route',
       target: '/owner',
-      colorClass: 'text-emerald-600 dark:text-emerald-400',
-      bgClass: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60',
+      colorClass: 'text-body',
+      bgClass: 'border-line bg-canvas text-body',
     },
     {
       id: 'driver',
       title: t('platformSwitcher.platforms.driver.title', 'Ứng dụng Tài xế (Driver Mobile)'),
       subtitle: t('platformSwitcher.platforms.driver.subtitle', 'Tìm trạm sạc, bản đồ trực quan, đặt chỗ & theo dõi phiên sạc'),
-      icon: '🚗',
+      icon: <IconPhone size={16} />,
       type: 'external',
       target: driverUrl,
       badge: isDemo ? 'Tailscale' : 'DEV',
-      colorClass: 'text-sky-600 dark:text-sky-400',
-      bgClass: 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800/60',
+      colorClass: 'text-body',
+      bgClass: 'border-line bg-canvas text-body',
     },
     {
       id: 'simulator',
       title: t('platformSwitcher.platforms.simulator.title', 'Bộ mô phỏng trụ sạc (Simulator)'),
       subtitle: t('platformSwitcher.platforms.simulator.subtitle', 'Giả lập cắm sạc xe điện, đồng hồ điện tử & kiểm thử OCPP'),
-      icon: '⚡',
+      icon: <IconBolt size={16} />,
       type: 'external',
       target: '/simulator',
-      colorClass: 'text-amber-600 dark:text-amber-400',
-      bgClass: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60',
+      colorClass: 'text-body',
+      bgClass: 'border-line bg-canvas text-body',
     },
   ];
 
@@ -136,16 +135,16 @@ export function PlatformSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all duration-150 hover:shadow-xs cursor-pointer ${currentBadgeTone}`}
+        className={`group flex max-w-full items-center gap-1.5 rounded-ctl border px-2.5 py-[5px] text-[12.5px] font-medium transition-colors duration-150 cursor-pointer ${currentBadgeTone}`}
         title={t('platformSwitcher.triggerTitle', 'Bấm để chuyển đổi góc nhìn nền tảng')}
         aria-label={t('platformSwitcher.triggerAria', { label: currentLabel, defaultValue: `Góc nhìn: ${currentLabel}` })}
         aria-expanded={open}
       >
-        <span className="shrink-0 text-[13px] leading-none">{currentIcon}</span>
-        <span className="hidden shrink-0 font-medium text-ink xl:inline">
+        <span className="shrink-0 text-muted">{currentIcon}</span>
+        <span className="hidden shrink-0 text-muted xl:inline">
           {t('platformSwitcher.viewLabel', 'Góc nhìn:')}
         </span>
-        <span className="min-w-0 max-w-[112px] truncate font-bold">{currentLabel}</span>
+        <span className="min-w-0 max-w-[112px] truncate font-semibold">{currentLabel}</span>
         <IconChevronDown
           size={12}
           strokeWidth={2.4}
@@ -166,7 +165,7 @@ export function PlatformSwitcher() {
               <span className="text-[12px] font-medium text-muted">
                 {t('platformSwitcher.popoverTitle', 'Chuyển đổi góc nhìn')}
               </span>
-              <span className="rounded-[4px] bg-chip px-1.5 py-0.5 text-[9.5px] font-mono font-medium text-faint">
+              <span className="rounded-[4px] bg-chip px-1.5 py-0.5 text-[11px] tabular-nums font-medium text-faint">
                 {isDemo ? 'DEMO MODE' : 'DEV MODE'}
               </span>
             </div>
@@ -194,7 +193,7 @@ export function PlatformSwitcher() {
                   }`}
                 >
                   <div
-                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border text-[15px] ${item.bgClass}`}
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border ${item.bgClass}`}
                   >
                     {item.icon}
                   </div>
@@ -210,7 +209,7 @@ export function PlatformSwitcher() {
                         </span>
                       )}
                       {item.type === 'external' && (
-                        <span className="text-[10px] font-mono text-muted">↗</span>
+                        <span className="text-[11.5px] tabular-nums text-muted">↗</span>
                       )}
                     </div>
                     <p className="text-[11px] leading-[1.35] text-muted mt-0.5 line-clamp-2">
@@ -224,7 +223,7 @@ export function PlatformSwitcher() {
 
           {/* Footer Target Info */}
           <div className="mt-1 pt-2 border-t border-line px-2.5 py-1.5 bg-canvas/60 rounded-b-md flex items-center justify-between text-[10.5px] text-muted">
-            <span className="truncate">Driver: <span className="font-mono text-ink">{driverUrl}</span></span>
+            <span className="truncate">Driver: <span className="tabular-nums text-ink">{driverUrl}</span></span>
             <span className="shrink-0 text-faint ml-2">port 8082</span>
           </div>
         </div>

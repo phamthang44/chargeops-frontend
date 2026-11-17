@@ -68,13 +68,13 @@
     "activity": "Hoạt động",
     "generatedAt": "Cập nhật lúc {{time}}"
   },
-  "attentionKinds": { "EQUIPMENT": "Thiết bị", "TICKET": "Ticket", "LICENSE": "License" },
+  "attentionKinds": { "EQUIPMENT": "Thiết bị", "TICKET": "Phiếu hỗ trợ", "LICENSE": "Giấy phép" },
   "metrics": {
     "connectors": "Cổng sẵn sàng / tổng",
     "charging": "Đang sạc",
     "needsCheck": "Cần kiểm tra",
     "sessions": "Phiên bắt đầu",
-    "bookingsScheduled": "Booking có lịch",
+    "bookingsScheduled": "Đặt chỗ có lịch",
     "availability": "Tỷ lệ sẵn sàng",
     "connectorAvailability": "{{available}} trên {{total}} cổng sạc đang sẵn sàng"
   },
@@ -118,9 +118,9 @@
     "OFFLINE": "Trụ ngoại tuyến",
     "MAINTENANCE": "Đang bảo trì",
     "CONNECTOR_OFFLINE": "Cổng sạc ngoại tuyến",
-    "OPEN_TICKET": "Ticket đang mở",
-    "LICENSE_EXPIRED": "License đã hết hạn",
-    "LICENSE_EXPIRING": "License sắp hết hạn",
+    "OPEN_TICKET": "Phiếu hỗ trợ đang mở",
+    "LICENSE_EXPIRED": "Giấy phép đã hết hạn",
+    "LICENSE_EXPIRING": "Giấy phép sắp hết hạn",
     "REJECTED": "Hồ sơ bị từ chối",
     "rejected": "Hồ sơ bị từ chối",
     "STATION_REJECTED": "Hồ sơ trạm bị từ chối",

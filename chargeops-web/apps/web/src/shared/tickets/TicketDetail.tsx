@@ -345,7 +345,7 @@ export function TicketDetail({
                   </div>
                 )}
 
-                <span className="text-[11px] font-mono text-faint">
+                <span className="text-[11px] tabular-nums text-faint">
                   {tk.resolutionCycle
                     ? t('detail.cycleBadge', 'Lần #{{cycle}}', { cycle: tk.resolutionCycle })
                     : t('detail.cycleInitial', 'Khởi tạo')}

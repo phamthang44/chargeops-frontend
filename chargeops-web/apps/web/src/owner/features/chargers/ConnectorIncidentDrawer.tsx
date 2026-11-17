@@ -179,12 +179,12 @@ export function ConnectorIncidentDrawer({
         onClose={onClose}
         title={
           isLoading || !incident ? (
-            <span className="font-mono text-[16px] font-bold">
+            <span className="tabular-nums text-[16px] font-bold">
               {t('incidents.drawer.loading', 'Đang tải sự cố...')}
             </span>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[16px] font-bold text-ink">
+              <span className="tabular-nums text-[16px] font-bold text-ink">
                 {t('incidents.drawer.incidentCode', 'SỰ CỐ #{{code}}', {
                   code: incident.incidentId.slice(-8).toUpperCase(),
                 })}
@@ -239,7 +239,7 @@ export function ConnectorIncidentDrawer({
                 <span className="text-[12px] font-semibold text-muted">
                   {t('incidents.drawer.fullIdLabel', 'Mã định danh đầy đủ:')}
                 </span>
-                <span className="font-mono text-[11.5px] text-faint select-all">{incident.incidentId}</span>
+                <span className="tabular-nums text-[11.5px] text-faint select-all">{incident.incidentId}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-[12.5px]">
@@ -351,10 +351,10 @@ export function ConnectorIncidentDrawer({
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[12.5px] font-bold text-brand">
+                              <span className="tabular-nums text-[12.5px] font-bold text-brand">
                                 #{b.bookingId.slice(-8).toUpperCase()}
                               </span>
-                              <span className="rounded bg-chip px-1.5 py-0.5 text-[10.5px] font-mono text-muted">
+                              <span className="rounded bg-chip px-1.5 py-0.5 text-[11.5px] tabular-nums text-muted">
                                 {t('incidents.drawer.snapshotStatus', 'Snap: {{status}} (v{{version}})', {
                                   status: b.snapshotStatus,
                                   version: b.snapshotVersion,
@@ -565,7 +565,7 @@ export function ConnectorIncidentDrawer({
               <div className="rounded-lg bg-warn-soft p-2.5 text-[11.5px] font-medium text-warn">
                 {t(
                   'incidents.drawer.recoverModal.pendingWarning',
-                  '⚠️ Vẫn còn phiên sạc chưa xác nhận dừng an toàn. Lệnh phục hồi sẽ đóng sự cố này nhưng cổng sạc có thể tiếp tục giữ OFFLINE hoặc IN_USE.'
+                  'Vẫn còn phiên sạc chưa xác nhận dừng an toàn. Lệnh phục hồi sẽ đóng sự cố này nhưng cổng sạc có thể tiếp tục giữ OFFLINE hoặc IN_USE.'
                 )}
               </div>
             )}

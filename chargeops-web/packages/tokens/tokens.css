@@ -12,10 +12,11 @@
   --color-brand-line: #e7e6fb;
   --color-brand-tint: #c8c5f6;
 
-  /* Owner accent — emerald */
-  --color-owner: #12a150;
-  --color-owner-strong: #0e8a43;
-  --color-owner-deep: #0c7a3e;
+  /* Owner accent — emerald. Deep enough that white-on-owner and owner text on
+     white both pass WCAG AA (≈5:1); the old #12a150 was ≈3.2:1. */
+  --color-owner: #0b7f42;
+  --color-owner-strong: #096c38;
+  --color-owner-deep: #0a6b38;
   --color-owner-soft: #eafaf1;
   --color-owner-border: #c5ead4;
   --color-owner-tint: #d6f3e1;
@@ -35,6 +36,9 @@
   --color-bad-soft: #fdf3f2;
   --color-bad-border: #f3d0cd;
   --color-alert: #e5484d;
+  /* Info — in-use / in-progress states (DESIGN_SYSTEM.md `info`) */
+  --color-info: #2563eb;
+  --color-info-soft: #edf3fe;
 
   /* Neutrals (text) */
   --color-ink: #16171a;
@@ -175,6 +179,8 @@ summary {
   --color-bad-soft: #331a17;
   --color-bad-border: #522119;
   --color-alert: #ff6b70;
+  --color-info: #8fb1fa;
+  --color-info-soft: #172238;
 
   /* Neutrals (text) */
   --color-ink: #f2f3f5;
@@ -204,6 +210,24 @@ summary {
   --color-line-hover: #3a3b42;
   --color-bad-soft-hover: #402420;
 }
+
+/*
+ * Owner & staff consoles have one accent: emerald. AppShell sets
+ * <html data-accent="owner">, and the indigo brand tokens are re-pointed at
+ * the owner palette so links, IDs, focus rings and selected states don't mix
+ * indigo into a green console.
+ * (Declared after the dark block so it wins in both themes.)
+ */
+:root[data-accent='owner'] {
+  --color-brand: var(--color-owner);
+  --color-brand-strong: var(--color-owner-strong);
+  --color-brand-soft: var(--color-owner-soft);
+  --color-brand-faint: color-mix(in srgb, var(--color-owner) 5%, var(--color-surface));
+  --color-brand-line: var(--color-owner-border);
+  --color-brand-tint: var(--color-owner-tint);
+  --focus-ring: var(--color-owner);
+}
+:root[data-accent='owner'] ::selection { background: rgba(18, 161, 80, 0.16); }
 
 :root[data-theme='dark'] ::-webkit-scrollbar-thumb { background: #3a3b42; border-color: #0f1013; }
 :root[data-theme='dark'] ::-webkit-scrollbar-thumb:hover { background: #4a4b54; }

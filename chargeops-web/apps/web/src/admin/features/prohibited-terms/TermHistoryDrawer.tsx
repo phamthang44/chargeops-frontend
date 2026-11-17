@@ -61,7 +61,7 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
               {t('prohibitedTerms.history.title', 'Lịch sử thay đổi quy tắc')}
             </h3>
             <p className="text-[12px] text-muted">
-              {t('prohibitedTerms.table.term')}: <span className="font-semibold text-ink font-mono">"{term.term}"</span> · ID: {term.id.slice(0, 8)}...
+              {t('prohibitedTerms.table.term')}: <span className="font-semibold text-ink tabular-nums">"{term.term}"</span> · ID: {term.id.slice(0, 8)}...
             </p>
           </div>
         </div>
@@ -105,10 +105,10 @@ export function TermHistoryDrawer({ open, term, onClose }: TermHistoryDrawerProp
                     <span className="text-muted">Tác nhân:</span>
                     {isSystem ? (
                       <span className="inline-flex items-center gap-1 rounded-md bg-warn-pill border border-warn-border/70 px-2 py-0.5 text-[11px] font-semibold text-warn-deep">
-                        ⚡ {t('prohibitedTerms.history.actorSystem', 'Hệ thống')}
+                        {t('prohibitedTerms.history.actorSystem', 'Hệ thống')}
                       </span>
                     ) : (
-                      <span className="font-mono text-[11.5px] text-ink font-semibold">
+                      <span className="tabular-nums text-[11.5px] text-ink font-semibold">
                         {change.actorId ? `Admin (${change.actorId.slice(0, 8)})` : t('prohibitedTerms.history.actorAdmin')}
                       </span>
                     )}

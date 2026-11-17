@@ -115,11 +115,11 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                     </span>
                     {attempt.executionTrigger === 'SYSTEM_POLICY' ? (
                       <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                        {t('refunds.timeline.triggerSystem', '🤖 Tự động hệ thống')}
+                        {t('refunds.timeline.triggerSystem', 'Tự động hệ thống')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                        {t('refunds.timeline.triggerAdmin', '👤 Admin can thiệp')}
+                        {t('refunds.timeline.triggerAdmin', 'Admin can thiệp')}
                       </span>
                     )}
                   </div>
@@ -134,7 +134,7 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                   {attempt.transferReference && (
                     <div className="flex items-center gap-1.5">
                       <span className="text-faint">{t('refunds.timeline.reference', 'Mã tham chiếu:')}</span>
-                      <span className="font-mono font-medium text-body">
+                      <span className="tabular-nums font-medium text-body">
                         {attempt.transferReference}
                       </span>
                       <button
@@ -157,18 +157,18 @@ export function RefundAttemptTimeline({ attempts = [] }: RefundAttemptTimelinePr
                   {attempt.failureCode && (
                     <div className="flex items-center gap-1.5 text-bad">
                       <span className="font-semibold">{t('refunds.timeline.errorCode', 'Mã lỗi:')}</span>
-                      <span className="font-mono">{attempt.failureCode}</span>
+                      <span className="tabular-nums">{attempt.failureCode}</span>
                     </div>
                   )}
 
                   {!isSuccess && (
                     <div className="rounded bg-bad-soft/40 px-2.5 py-1 text-[11px] text-bad font-medium mt-1">
-                      ⚠️ Lần thử không thành công · Nghĩa vụ hoàn tiền vẫn được bảo lưu PENDING.
+                      Lần thử không thành công · Nghĩa vụ hoàn tiền vẫn được bảo lưu PENDING.
                     </div>
                   )}
 
                   {attempt.requestKey && (
-                    <div className="flex items-center gap-1.5 font-mono text-[10.5px] text-faint">
+                    <div className="flex items-center gap-1.5 tabular-nums text-[11.5px] text-faint">
                       <span>Idempotency-Key:</span>
                       <span className="truncate max-w-[200px]">{attempt.requestKey}</span>
                     </div>

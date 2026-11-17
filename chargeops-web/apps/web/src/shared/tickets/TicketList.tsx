@@ -53,7 +53,7 @@ function Meta({ t: tk }: { t: Ticket }) {
         <span className="truncate font-semibold text-ink">{tk.subject || tk.title || 'Phiếu hỗ trợ'}</span>
         {isEscalated && (
           <span className="inline-flex shrink-0 items-center gap-1 rounded bg-brand-soft text-brand px-1.5 py-0.5 text-[10px] font-bold border border-brand-line">
-            <span>⚡ {t('meta.escalatedBadge', 'Chờ Admin xem xét')}</span>
+            <span>{t('meta.escalatedBadge', 'Chờ Admin xem xét')}</span>
           </span>
         )}
         {hasRefund && (
@@ -70,7 +70,7 @@ function Meta({ t: tk }: { t: Ticket }) {
         </span>
 
         {tk.bookingId && (
-          <span className="font-mono text-[10.5px] text-brand">
+          <span className="tabular-nums text-[11.5px] text-brand">
             #{String(tk.bookingId).slice(0, 8)}
           </span>
         )}
@@ -118,7 +118,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
             style={{ gridTemplateColumns: GRID }}
           >
             <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-[11.5px] font-bold text-brand">{code}</span>
+              <span className="tabular-nums text-[11.5px] font-bold text-brand">{code}</span>
               <PriorityDot priority={tk.priority} />
             </div>
 
@@ -150,7 +150,7 @@ export function TicketTable({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
                   ? t('table.expired', 'Quá hạn')
                   : t('table.daysLeft', { count: daysLeft, defaultValue: `${daysLeft} ngày` });
                 return (
-                  <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
+                  <span className="flex items-center gap-1 tabular-nums text-[11.5px] font-semibold text-warn-deep">
                     <IconClock size={10} strokeWidth={2.2} />
                     <span>{text}</span>
                   </span>
@@ -186,7 +186,7 @@ export function TicketCards({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
           <Card key={tk.id} className="cursor-pointer p-3.5 transition-all" onClick={() => onOpen(tk)}>
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[11.5px] font-bold text-brand">{code}</span>
+                <span className="tabular-nums text-[11.5px] font-bold text-brand">{code}</span>
                 <PriorityDot priority={tk.priority} />
               </div>
               <div className="flex items-center gap-1.5">
@@ -197,7 +197,7 @@ export function TicketCards({ rows, onOpen }: { rows: Ticket[]; onOpen: (t: Tick
                     ? t('table.expired', 'Quá hạn')
                     : t('table.daysLeft', { count: daysLeft, defaultValue: `${daysLeft} ngày` });
                   return (
-                    <span className="flex items-center gap-1 font-mono text-[10px] font-semibold text-warn-deep">
+                    <span className="flex items-center gap-1 tabular-nums text-[11.5px] font-semibold text-warn-deep">
                       <IconClock size={10} strokeWidth={2.2} />
                       <span>{text}</span>
                     </span>

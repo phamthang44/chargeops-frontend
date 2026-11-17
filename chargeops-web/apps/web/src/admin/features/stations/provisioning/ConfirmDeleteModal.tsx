@@ -43,12 +43,12 @@ export function ConfirmDeleteModal({
             {isCp ? (
               <>
                 {t('provisioning.workspace.delete.cpLabel')}{' '}
-                <b className="font-mono text-ink">{cpName}</b>
+                <b className="tabular-nums text-ink">{cpName}</b>
               </>
             ) : (
               <>
                 {t('provisioning.workspace.delete.codeLabel')}{' '}
-                <b className="font-mono text-brand">{connCode}</b> ·{' '}
+                <b className="tabular-nums text-brand">{connCode}</b> ·{' '}
                 {t('provisioning.workspace.delete.cpLabel')}{' '}
                 <b className="text-ink">{cpName}</b>
               </>

@@ -95,7 +95,7 @@ export function ScheduleHistoryDrawer({
     >
       {/* Informational Callout */}
       <div className="rounded-[10px] border border-line bg-surface-2 p-3 text-[12px] leading-relaxed text-muted">
-        💡 <b>{t('pricing.history.calloutTitle', { defaultValue: 'Quy cách chu kỳ giờ hoạt động:' })}</b>{' '}
+        <b>{t('pricing.history.calloutTitle', { defaultValue: 'Quy cách chu kỳ giờ hoạt động:' })}</b>{' '}
         {t('pricing.history.calloutDesc', {
           defaultValue:
             'Giờ mở/đóng là lịch lặp lại hàng tuần. Khi bạn xác nhận Lưu & áp dụng ngay, phiên bản cũ sẽ chốt mốc dừng, và phiên bản mới này sẽ duy trì hiệu lực xuyên suốt các tuần cho đến lần chỉnh sửa tiếp theo.',
@@ -152,7 +152,7 @@ export function ScheduleHistoryDrawer({
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-[11px] text-faint">
+                  <span className="tabular-nums text-[11px] text-faint">
                     {t('pricing.history.version', { count: history.length - index, defaultValue: `Phiên bản #${history.length - index}` })}
                   </span>
                 </div>
@@ -175,7 +175,7 @@ export function ScheduleHistoryDrawer({
                       </div>
                     </div>
                     <div className="rounded-[7px] bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-700 leading-snug">
-                      🔄 {t('pricing.history.activeHint', {
+                      {t('pricing.history.activeHint', {
                         defaultValue: 'Phiên bản này đang chạy và sẽ tự động lặp lại mỗi tuần cho đến khi bạn cập nhật lịch mới.',
                       })}
                     </div>
@@ -204,7 +204,7 @@ export function ScheduleHistoryDrawer({
                     </div>
                     {item.effectiveTo && (
                       <div className="text-[11px] text-muted">
-                        ⏱️ {t('pricing.history.duration', { defaultValue: 'Thời gian đã vận hành: ' })}
+                        {t('pricing.history.duration', { defaultValue: 'Thời gian đã vận hành: ' })}
                         <span className="font-semibold text-ink">{getActiveDuration(item.effectiveFrom, item.effectiveTo, t)}</span>
                       </div>
                     )}
@@ -239,7 +239,7 @@ export function ScheduleHistoryDrawer({
                               {t(`pricing.dayNames.${h.day}`, { defaultValue: DAY_NAME_MAP[h.day] ?? h.day })}:
                             </span>
                             <span
-                              className={`font-mono ${
+                              className={`tabular-nums ${
                                 h.open24
                                   ? 'text-ink font-semibold'
                                   : 'text-faint italic'

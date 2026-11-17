@@ -8,36 +8,29 @@ export interface FilterTabsProps<K extends string> {
   tabs: FilterTab<K>[];
   active: K;
   onChange: (key: K) => void;
-  /** Active pill colour theme. */
+  /** Kept for API compatibility; the active tab is neutral in every console. */
   accent?: 'brand' | 'owner';
 }
 
-/** Row of pill filters with optional counts (booking status, tx type, users…). */
-export function FilterTabs<K extends string>({
-  tabs,
-  active,
-  onChange,
-  accent = 'owner',
-}: FilterTabsProps<K>) {
-  const activeCls =
-    accent === 'owner'
-      ? 'border-owner bg-owner-soft text-owner-deep'
-      : 'border-brand bg-brand-soft text-brand';
+/** Quiet filter tabs with optional counts (booking status, tx type, users…). */
+export function FilterTabs<K extends string>({ tabs, active, onChange }: FilterTabsProps<K>) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div role="tablist" className="flex flex-wrap items-center gap-1">
       {tabs.map((t) => {
         const on = t.key === active;
         return (
           <button
             key={t.key}
+            role="tab"
+            aria-selected={on}
             onClick={() => onChange(t.key)}
-            className={`flex items-center gap-[7px] rounded-ctl border px-3 py-[7px] text-[12.5px] font-semibold ${
-              on ? activeCls : 'border-line bg-surface text-body hover:bg-canvas'
+            className={`flex items-center gap-1.5 rounded-ctl px-2.5 py-1.5 text-[13px] transition-colors ${
+              on ? 'bg-chip font-semibold text-ink' : 'font-medium text-muted hover:bg-canvas hover:text-ink'
             }`}
           >
             {t.label}
             {t.count !== undefined && (
-              <span className="font-mono text-[10.5px] opacity-70">{t.count}</span>
+              <span className={`text-[12px] tabular-nums ${on ? 'text-muted' : 'text-faint'}`}>{t.count}</span>
             )}
           </button>
         );

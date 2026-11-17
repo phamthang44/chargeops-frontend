@@ -81,13 +81,13 @@ export function RenewLicenseModal({
           <div className="flex flex-col gap-1.5 font-medium">
             <div className="flex justify-between">
               <span className="text-muted">{t('renewModal.licenseCode', 'Mã License:')}</span>
-              <span className="font-mono font-bold text-brand">{license.licenseCode || license.id}</span>
+              <span className="tabular-nums font-bold text-brand">{license.licenseCode || license.id}</span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
               <span className="text-muted">{t('renewModal.station', 'Trạm sạc:')}</span>
               <span className="font-semibold text-ink">
                 {license.stationName || license.stationId}{' '}
-                <span className="font-mono text-faint font-normal">({license.stationCode || license.stationId})</span>
+                <span className="tabular-nums text-faint font-normal">({license.stationCode || license.stationId})</span>
               </span>
             </div>
             <div className="flex justify-between border-t border-hairline pt-1.5">
@@ -118,7 +118,7 @@ export function RenewLicenseModal({
             >
               <div className="flex w-full items-center justify-between">
                 <span className="text-[13px] font-bold">{t('renewModal.monthly', 'Gói Tháng')}</span>
-                <span className="font-mono text-[11px] font-semibold text-faint">
+                <span className="tabular-nums text-[11px] font-semibold text-faint">
                   {t('renewModal.monthlyRate', '500k/tháng')}
                 </span>
               </div>
@@ -151,7 +151,7 @@ export function RenewLicenseModal({
         {/* Standard Fee Summary Box */}
         <div className="mt-3.5 flex items-center justify-between rounded-[9px] bg-surface-2 p-3 text-[12.5px]">
           <span className="text-muted font-medium">{t('renewModal.feeLabel', 'Mức phí niêm yết theo gói:')}</span>
-          <span className="font-mono font-bold text-ink text-[14px]">
+          <span className="tabular-nums font-bold text-ink text-[14px]">
             {plan === 'YEARLY' ? '5.000.000 đ' : '500.000 đ'}
           </span>
         </div>

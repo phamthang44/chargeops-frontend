@@ -212,7 +212,7 @@
     "statusAll": "All ({{count}})",
     "statusUnread": "Unread ({{count}})",
     "filterPlaceholder": "Filter...",
-    "emptyUnread": "You are all caught up! 🎉",
+    "emptyUnread": "You are all caught up!",
     "emptyFilter": "No matching notifications",
     "emptyDefault": "No new notifications",
     "markAsRead": "Mark as read",

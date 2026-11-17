@@ -56,7 +56,7 @@ export function TrendChart({ title, axis, legend = [] }: TrendChartProps) {
           strokeLinejoin="round"
         />
       </svg>
-      <div className="mt-2 flex justify-between font-mono text-[10px] font-medium text-ghost">
+      <div className="mt-2 flex justify-between tabular-nums text-[11.5px] font-medium text-ghost">
         <span>{axis[0]}</span>
         <span>{axis[1]}</span>
       </div>

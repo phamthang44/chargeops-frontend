@@ -115,7 +115,7 @@ export function StaffStatusChangeDialog({
           </div>
           <div className="mt-1 flex items-center gap-2 text-[12px]">
             <StatusPill tone={statusTone(currentStatus)} label={t(`status.${currentStatus}`)} />
-            <span className="font-mono font-bold text-faint">→</span>
+            <span className="tabular-nums font-bold text-faint">→</span>
             <StatusPill tone={statusTone(target.next)} label={t(`status.${target.next}`)} />
           </div>
         </div>

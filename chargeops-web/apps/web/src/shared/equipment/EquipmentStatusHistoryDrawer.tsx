@@ -116,7 +116,7 @@ export function EquipmentStatusHistoryDrawer({
           </span>
           <div>
             <div className="text-[15px] font-bold text-ink">{title}</div>
-            <div className="text-[12px] font-mono text-muted">{itemName}</div>
+            <div className="text-[12px] tabular-nums text-muted">{itemName}</div>
           </div>
         </div>
       }
@@ -212,7 +212,7 @@ export function EquipmentStatusHistoryDrawer({
                           <span>{actorLabel}</span>
                         </span>
 
-                        <span className="flex items-center gap-1 font-mono text-faint">
+                        <span className="flex items-center gap-1 tabular-nums text-faint">
                           <IconClock size={11} />
                           <span>{formatDateTimeVn(evt.performedAt)}</span>
                         </span>
@@ -230,7 +230,7 @@ export function EquipmentStatusHistoryDrawer({
                       {/* Transition: From Status -> To Status */}
                       <div className="flex flex-wrap items-center gap-2 text-[12px]">
                         <StatusPill tone={fromMeta.tone} label={fromMeta.label} />
-                        <span className="text-faint font-bold font-mono">→</span>
+                        <span className="text-faint font-bold tabular-nums">→</span>
                         <StatusPill tone={toMeta.tone} label={toMeta.label} />
                       </div>
 

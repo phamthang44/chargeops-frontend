@@ -197,7 +197,7 @@ export function StationTimelineModal({ station, open, onClose }: Props) {
                     </div>
 
                     {/* Status transition badge */}
-                    <div className="mt-2 flex items-center gap-1 text-[11px] font-mono text-faint">
+                    <div className="mt-2 flex items-center gap-1 text-[11px] tabular-nums text-faint">
                       <span>{item.fromStatus || '—'}</span>
                       <span>→</span>
                       <span className="font-bold text-ink">{item.toStatus}</span>

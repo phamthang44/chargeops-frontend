@@ -224,17 +224,18 @@ export function AdminConsole({ base }: { base: string }) {
 
   const NAV: (ShellNavItem & { title: string })[] = useMemo(
     () => [
-      { key: 'dashboard', label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
-      { key: 'notifications', label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
-      { key: 'stations', label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
-      { key: 'approvals', label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
-      { key: 'tickets', label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
-      { key: 'licenses', label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
-      { key: 'users', label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
-      { key: 'observability', label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
-      { key: 'kb', label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
+      { key: 'dashboard', group: t('console.navGroup.operations'), label: t('console.nav.dashboard.label'), icon: <IconGrid size={17} />, title: t('console.nav.dashboard.title') },
+      { key: 'notifications', group: t('console.navGroup.operations'), label: t('console.nav.notifications.label'), icon: <IconBell size={17} />, title: t('console.nav.notifications.title') },
+      { key: 'tickets', group: t('console.navGroup.operations'), label: t('console.nav.tickets.label'), icon: <IconLifebuoy size={17} />, title: t('console.nav.tickets.title') },
+      { key: 'stations', group: t('console.navGroup.network'), label: t('console.nav.stations.label'), icon: <IconPin size={17} />, title: t('console.nav.stations.title') },
+      { key: 'approvals', group: t('console.navGroup.network'), label: t('console.nav.approvals.label'), icon: <IconClipboardCheck size={17} />, title: t('console.nav.approvals.title') },
+      { key: 'licenses', group: t('console.navGroup.network'), label: t('console.nav.licenses.label'), icon: <IconShield size={17} />, title: t('console.nav.licenses.title') },
+      { key: 'users', group: t('console.navGroup.platform'), label: t('console.nav.users.label'), icon: <IconUsers size={17} />, title: t('console.nav.users.title') },
+      { key: 'observability', group: t('console.navGroup.platform'), label: t('console.nav.observability.label'), icon: <IconWrench size={17} />, title: t('console.nav.observability.title') },
+      { key: 'kb', group: t('console.navGroup.platform'), label: t('console.nav.kb.label'), icon: <IconBook size={17} />, title: t('console.nav.kb.title') },
       {
         key: 'prohibited-terms',
+        group: t('console.navGroup.platform'),
         label: t('prohibitedTerms.nav.label', 'Từ cấm'),
         icon: <IconShieldAlert size={17} />,
         title: t('prohibitedTerms.nav.title', 'Quản lý từ cấm & Kiểm duyệt'),

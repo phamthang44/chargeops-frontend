@@ -95,6 +95,11 @@
     }
   },
   "console": {
+    "navGroup": {
+      "operations": "Operations",
+      "network": "Station network",
+      "platform": "Platform"
+    },
     "role": "ADMINISTRATOR",
     "searchPlaceholder": "Search bookings, chargers, stations, owners...",
     "nav": {
@@ -220,17 +225,17 @@
     },
     "sim": {
       "justNow": "Just now",
-      "stationTitle": "📋 New station registration ST-1020",
+      "stationTitle": "New station registration ST-1020",
       "stationSubtitle": "Station owner submitted application for charging station in Da Nang City.",
       "reviewNow": "Review Now",
-      "overheatTitle": "🔥 ALARM: Dispenser #CHG-08 Overheating (74°C)",
+      "overheatTitle": "ALARM: Dispenser #CHG-08 Overheating (74°C)",
       "overheatSubtitle": "Tan Binh Station reports abnormal high temperature. Immediate inspection advised!",
       "checkTech": "Technical Inspection",
-      "ticketTitle": "🎟️ Urgent driver assistance ticket #TK-9944",
+      "ticketTitle": "Urgent driver assistance ticket #TK-9944",
       "ticketSubtitle": "VinFast VF9 driver requires emergency connector release at Cau Giay Station.",
       "urgent": "Urgent",
       "openTicket": "Open Ticket",
-      "licenseTitle": "🛡️ Station operating license expired",
+      "licenseTitle": "Station operating license expired",
       "licenseSubtitle": "License package for Nam Tu Liem Station has expired. Station automatically paused bookings.",
       "viewLicenses": "View Licenses"
     },
@@ -508,7 +513,7 @@
       "suspendedTitle": "Suspended",
       "suspendedDesc": "Station operating rights are temporarily suspended (due to maintenance, policy violation, or host request). Hidden from driver app.",
       "expiredTitle": "Expired",
-      "expiredDesc": "License term has ended. Station automatically halts accepting new bookings (LICENSE_SEARCH_VISIBILITY) until renewed.",
+      "expiredDesc": "License term has ended. Station automatically halts accepting new bookings until renewed.",
       "cancelledTitle": "Cancelled",
       "cancelledDesc": "License has been terminated permanently and cannot be reactivated. A new license must be issued to reopen the station."
     },
@@ -585,7 +590,7 @@
       "recordedAt": "Recorded on: {{date}}",
       "recordedBy": "Recorded by: {{name}}",
       "systemRecorded": "System",
-      "techId": "Technical ID (UUID):",
+      "techId": "Technical ID:",
       "copyUuidTitle": "Copy UUID",
       "lifecycleTitle": "Lifecycle Actions",
       "renewAction": "Renew for New Term",
@@ -605,7 +610,7 @@
       "stateTransition": "Status Transition:",
       "reason": "Reason: ",
       "performedBy": "Performed by: ",
-      "systemActor": "Automated System (SYSTEM)",
+      "systemActor": "Automated System",
       "adminActor": "Administrator",
       "emptyPeriods": "Station has no other license history periods.",
       "selectedPeriod": "Selected",
@@ -729,8 +734,8 @@
     "audiences": {
       "all": "All Audiences",
       "ALL": "System-wide (ALL)",
-      "DRIVER": "Drivers (DRIVER)",
-      "OWNER": "Station Hosts (OWNER)"
+      "DRIVER": "Drivers",
+      "OWNER": "Station Hosts"
     },
     "statusOptions": {
       "all": "All Statuses",
@@ -874,7 +879,7 @@
     },
     "legend": {
       "title": "Equipment Status Reference Guide",
-      "subtitle": "Two-tier status architecture: Administrative Provisioning (Admin) vs Operational Telemetry (OCPP)",
+      "subtitle": "Two-tier status architecture: Administrative Provisioning (Admin) vs Operational Telemetry",
       "badge": "2-Tier Architecture",
       "toggleOpen": "View Detailed Guide ▼",
       "toggleClose": "Collapse Guide ▲",
@@ -896,7 +901,7 @@
       "connOfflineDesc": "Plug disabled (Station Owner/Staff paused for maintenance or hardware fault).",
       "connPendingDesc": "Connector sealed/paused due to parent Charge Point draft or suspended state.",
       "connRuleTitle": "Operational Authority Rules (SRS 4.8 & BR-CHG-05):",
-      "connRuleBody": "Admin provisions & seals Charge Point hardware (FR14). Station Owner & Staff manage daily runtime toggle of individual Connectors (BR-CHG-05)."
+      "connRuleBody": "Admin provisions & seals Charge Point hardware. Station Owner & Staff manage daily runtime toggle of individual Connectors."
     },
     "tooltips": {
       "cpPending": "Admin Provisioning: Draft state, hardware unsealed, closed to drivers.",
@@ -936,7 +941,7 @@
     "workspace": {
       "backToList": "Back to station list",
       "viewLicense": "View License ↗",
-      "fr14Badge": "Charge Point Provisioning (FR14)",
+      "fr14Badge": "Charge Point Provisioning",
       "ownerLabel": "Owner:",
       "ownerFallback": "Station owner",
       "plannedLabel": "Planned quota:",
@@ -965,7 +970,7 @@
         "connectorCountLabel": "Connectors:",
         "connectorUnit_one": "{{count}} connector",
         "connectorUnit_other": "{{count}} connectors",
-        "configuring": "⚙️ Configuring hardware",
+        "configuring": "Configuring hardware",
         "hardwareLocked": "Hardware locked",
         "historyTitle": "View the full status history of this charge point",
         "historyBtn": "CP history",
@@ -1032,7 +1037,7 @@
         "addSubmitBtn": "Confirm add",
         "editTitle": "Edit connector settings",
         "editCodeLabel": "Connector code:",
-        "editNotice": "⚙️ The charge point is in <bold>Pending Activation</bold> state. Admin can adjust the plug standard and rated power before the hardware is locked on activation.",
+        "editNotice": "The charge point is in <bold>Pending Activation</bold> state. Admin can adjust the plug standard and rated power before the hardware is locked on activation.",
         "editSubmitting": "Saving...",
         "editSubmitBtn": "Save changes",
         "updateToast": "Updated connector {{id}}"
@@ -1135,8 +1140,8 @@
     },
     "tabs": {
       "all": "All Records",
-      "pending": "Pending Processing (PENDING)",
-      "succeeded": "Completed (SUCCEEDED)"
+      "pending": "Pending Processing",
+      "succeeded": "Completed"
     },
     "searchPlaceholder": "Search refund ID, booking, driver...",
     "reasons": {
@@ -1241,8 +1246,8 @@
       "notice": "Refund entitlement preserved during disruptions",
       "empty": "No prior attempts recorded. Refund is in initial state.",
       "attemptNum": "Attempt #{{seq}}",
-      "triggerSystem": "🤖 System Policy",
-      "triggerAdmin": "👤 Admin Action",
+      "triggerSystem": "System Policy",
+      "triggerAdmin": "Admin Action",
       "reference": "Reference:",
       "copyTitle": "Copy",
       "errorCode": "Error Code:"
@@ -1372,7 +1377,7 @@
   "stations": {
     "copiedCode": "Copied station code",
     "pageTitle": "Charging Stations & EVSEs",
-    "pageSubtitle": "System-wide charging station directory, EVSE provisioning (FR14), license monitoring and operational interventions.",
+    "pageSubtitle": "System-wide charging station directory, EVSE provisioning, license monitoring and operational interventions.",
     "refreshBtn": "Refresh",
     "kpi": {
       "total": "Total Stations",
@@ -1416,7 +1421,7 @@
     },
     "actions": {
       "viewDetail": "View Details",
-      "provisioning": "Provisioning (FR14)",
+      "provisioning": "Provisioning",
       "provisioningBtn": "Provision",
       "suspend": "Suspend Operation",
       "reactivate": "Reactivate Station",
@@ -1523,7 +1528,7 @@
       "emptyHistory": "No status events recorded yet.",
       "btnSuspend": "Suspend Station",
       "btnReactivate": "Reactivate",
-      "btnProvisioning": "EVSE Provisioning (FR14)",
+      "btnProvisioning": "EVSE Provisioning",
       "btnLicense": "View License",
       "closeBtn": "Close",
       "copyCode": "Copy station code",

@@ -49,7 +49,7 @@ export function DriverNotice() {
               href="/simulator"
               className="inline-flex items-center gap-1.5 text-[12px] font-medium text-brand hover:underline"
             >
-              <span>⚡ Mở Màn hình Trụ sạc Mô phỏng (Simulator Kiosk)</span>
+              <span>Mở Màn hình Trụ sạc Mô phỏng (Simulator Kiosk)</span>
               <span>↗</span>
             </a>
           </div>

@@ -66,7 +66,7 @@ export function ResolveTicketModal({
         {/* Cycle & Policy Info Tag */}
         <div className="flex items-center justify-between rounded-xl bg-surface-2 p-3 text-[12px]">
           <div className="flex items-center gap-2">
-            <span className="font-mono font-bold text-brand">{ticketCode}</span>
+            <span className="tabular-nums font-bold text-brand">{ticketCode}</span>
             <span className="text-faint">·</span>
             <span className="font-medium text-ink">
               {t('resolveModal.cycle', 'Lần xử lý thứ {{cycle}}', { cycle: nextCycle })}

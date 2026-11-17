@@ -22,7 +22,7 @@ export function TxInsights({ summary }: { summary: TransactionSummary }) {
                 style={{ height: `${Math.max(4, (d.vnd / maxDay) * 100)}%` }}
                 title={t('revenue.insights.dayTooltip', { day: d.day, value: formatVndCompact(d.vnd) })}
               />
-              <span className="font-mono text-[8.5px] text-disabled">{d.day}</span>
+              <span className="tabular-nums text-[11px] text-disabled">{d.day}</span>
             </div>
           ))}
         </div>

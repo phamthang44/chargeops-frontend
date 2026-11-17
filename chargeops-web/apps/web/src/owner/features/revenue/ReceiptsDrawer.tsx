@@ -70,15 +70,15 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
         <div className="rounded-card border border-line bg-surface p-4 shadow-2xs space-y-2">
           <div className="flex justify-between text-[12px]">
             <span className="text-muted">{t('finance.receiptsDrawer.collected', 'Thu ghi nhận')}:</span>
-            <span className="font-mono font-bold text-good">+{formatVnd(booking.collectedAmount)}</span>
+            <span className="tabular-nums font-bold text-good">+{formatVnd(booking.collectedAmount)}</span>
           </div>
           <div className="flex justify-between text-[12px]">
             <span className="text-muted">{t('finance.receiptsDrawer.refunded', 'Đã hoàn trả')}:</span>
-            <span className="font-mono font-bold text-bad">−{formatVnd(booking.refundedAmount)}</span>
+            <span className="tabular-nums font-bold text-bad">−{formatVnd(booking.refundedAmount)}</span>
           </div>
           <div className="border-t border-hairline pt-2 flex justify-between text-[13px] font-bold">
             <span className="text-ink">{t('finance.receiptsDrawer.net', 'Thu ròng ghi nhận')}:</span>
-            <span className="font-mono text-ink">+{formatVnd(booking.netRecordedAmount)}</span>
+            <span className="tabular-nums text-ink">+{formatVnd(booking.netRecordedAmount)}</span>
           </div>
         </div>
 
@@ -100,7 +100,7 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
                   className="rounded-xl border border-hairline bg-surface p-3 text-[12px] transition hover:border-line shadow-2xs"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-mono font-bold text-brand text-[11.5px]">
+                    <span className="tabular-nums font-bold text-brand text-[11.5px]">
                       {r.transactionRef || r.receiptId}
                     </span>
                     <button
@@ -118,11 +118,11 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-muted">
-                    <span className="flex items-center gap-1 font-mono">
+                    <span className="flex items-center gap-1 tabular-nums">
                       <IconClock size={11} className="text-faint" />
                       {r.receivedAt ? formatDateTimeVn(r.receivedAt) : '—'}
                     </span>
-                    <span className="font-mono font-bold text-ink text-[12.5px]">
+                    <span className="tabular-nums font-bold text-ink text-[12.5px]">
                       {formatVnd(r.amount)}
                     </span>
                   </div>

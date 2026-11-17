@@ -298,7 +298,7 @@ export function RefundQueueTab() {
               </span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-1.5">
-              <span className={`text-[26px] font-black tracking-tight font-mono ${failedAttemptsCount > 0 ? 'text-bad' : 'text-ink'}`}>
+              <span className={`text-[26px] font-black tracking-tight tabular-nums ${failedAttemptsCount > 0 ? 'text-bad' : 'text-ink'}`}>
                 {failedAttemptsCount}
               </span>
               <span className="text-[12px] font-semibold text-faint">hồ sơ</span>
@@ -437,7 +437,7 @@ export function RefundQueueTab() {
                         style={{ gridTemplateColumns: GRID }}
                       >
                         {/* ID + Copy on Hover */}
-                        <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-brand">
+                        <div className="flex items-center gap-1.5 tabular-nums text-[11px] font-semibold text-brand">
                           <button
                             type="button"
                             onClick={(e) => copyRefundId(refundKey, e)}
@@ -471,7 +471,7 @@ export function RefundQueueTab() {
 
                         {/* Booking Code & Driver */}
                         <div>
-                          <div className="font-mono text-[11.5px] font-semibold text-body">
+                          <div className="tabular-nums text-[11.5px] font-semibold text-body">
                             {r.bookingCode || r.bookingId}
                           </div>
                           <div className="text-[11px] text-muted truncate">
@@ -495,7 +495,7 @@ export function RefundQueueTab() {
                         </div>
 
                         {/* Amount */}
-                        <div className="text-right font-mono font-bold text-good text-[13px] tracking-tight">
+                        <div className="text-right tabular-nums font-bold text-good text-[13px] tracking-tight">
                           +{formatVnd(r.amount)}
                         </div>
 
@@ -505,7 +505,7 @@ export function RefundQueueTab() {
                             needsOwnerAction ? (
                               <>
                                 <StatusPill tone="bad" label={t('refunds.status.actionRequired', 'CẦN CAN THIỆP')} />
-                                <span className="text-[10px] font-semibold text-bad">
+                                <span className="text-[11.5px] text-muted">
                                   {hasFailedAttempt
                                     ? t('refunds.status.failedAttemptSub', 'Lỗi lần thử')
                                     : t('refunds.status.adminRequiredSub', 'Admin đối soát')}
@@ -513,21 +513,17 @@ export function RefundQueueTab() {
                               </>
                             ) : isAutoProcessing ? (
                               <>
-                                <StatusPill tone="brand" label={t('refunds.status.autoProcessing', 'TỰ ĐỘNG XỬ LÝ')} />
-                                <span className="text-[10px] font-semibold text-brand">
+                                <StatusPill tone="brand" label={t('refunds.status.autoProcessing', 'Tự động xử lý')} />
+                                <span className="text-[11.5px] text-muted">
                                   {t('refunds.status.autoProcessingSub', 'Hệ thống đang chạy')}
                                 </span>
                               </>
                             ) : (
-                              <>
-                                <StatusPill tone="warn" label="PENDING" />
-                                <span className="text-[10px] text-faint">{t('refunds.status.pendingSub', 'Chờ xử lý')}</span>
-                              </>
+                              <StatusPill tone="warn" label={t('refunds.status.pendingSub', 'Chờ xử lý')} />
                             )
                           ) : (
                             <>
-                              <StatusPill tone="good" label="SUCCEEDED" />
-                              <span className="text-[10px] font-semibold text-good">{t('refunds.status.succeededSub', 'Đã hoàn tất')}</span>
+                              <StatusPill tone="good" label={t('refunds.status.succeededSub', 'Đã hoàn tất')} />
                             </>
                           )}
                         </div>
@@ -537,7 +533,7 @@ export function RefundQueueTab() {
                           <span className="text-[12px] font-semibold text-body">
                             {formatDateVn(r.decisionAt)}
                           </span>
-                          <span className="flex items-center gap-1 font-mono text-[10.5px] text-faint">
+                          <span className="flex items-center gap-1 tabular-nums text-[11.5px] text-faint">
                             <IconClock size={11} className="text-muted/60" />
                             {formatDateTimeVn(r.decisionAt).slice(11) || '00:00'}
                           </span>

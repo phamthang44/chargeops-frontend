@@ -137,7 +137,7 @@ export function PhysicalKioskScreen({
                   {t('kiosk.brandTerminal', 'Terminal 4.0')}
                 </span>
                 {stationCode && (
-                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-700">
+                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[11.5px] tabular-nums text-slate-400 border border-slate-700">
                     {stationCode}
                   </span>
                 )}
@@ -150,9 +150,9 @@ export function PhysicalKioskScreen({
           <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md">
             <div className="flex items-center gap-1.5 text-xs font-medium text-slate-200">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>{t('kiosk.stationPill.charger', 'Trụ:')} <strong className="font-mono text-white text-xs bg-slate-800 px-1.5 py-0.5 rounded border border-white/10 font-bold">{chargePointCode}</strong></span>
+              <span>{t('kiosk.stationPill.charger', 'Trụ:')} <strong className="tabular-nums text-white text-xs bg-slate-800 px-1.5 py-0.5 rounded border border-white/10 font-bold">{chargePointCode}</strong></span>
               <span className="text-emerald-500/40">·</span>
-              <span>{t('kiosk.stationPill.connector', 'Cổng:')} <strong className="font-mono text-emerald-400 text-sm font-bold">{connectorCode}</strong></span>
+              <span>{t('kiosk.stationPill.connector', 'Cổng:')} <strong className="tabular-nums text-emerald-400 text-sm font-bold">{connectorCode}</strong></span>
             </div>
             <span className="text-emerald-500/40">|</span>
             <span className="text-xs font-semibold text-emerald-300">{connectorType} · {powerKw} kW</span>
@@ -161,7 +161,7 @@ export function PhysicalKioskScreen({
           {/* Right Clock & Diagnostic */}
           <div className="flex items-center gap-4 text-right">
             <div>
-              <div className="font-mono text-base font-bold text-slate-200 tabular-nums">{timeStr}</div>
+              <div className=" text-base font-bold text-slate-200 tabular-nums">{timeStr}</div>
               <div className="flex items-center justify-end gap-1.5 text-[11px] text-slate-400 font-medium">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 <span>{t('kiosk.clockDiagnostic', '4G LTE · 32°C')}</span>
@@ -260,11 +260,11 @@ export function PhysicalKioskScreen({
                         <div className="flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-emerald-400" />
                           <span className="text-[11px] text-slate-400">{t('kiosk.ready.chargerLabel', 'Trụ:')}</span>
-                          <span className="font-mono font-bold text-white bg-slate-800 px-1.5 py-0.5 rounded text-xs border border-white/10">
+                          <span className="tabular-nums font-bold text-white bg-slate-800 px-1.5 py-0.5 rounded text-xs border border-white/10">
                             {chargePointCode}
                           </span>
                           <span className="text-[11px] text-slate-400 ml-1">{t('kiosk.ready.connectorLabel', 'Cổng:')}</span>
-                          <span className="font-mono font-bold text-emerald-400 text-sm">
+                          <span className="tabular-nums font-bold text-emerald-400 text-sm">
                             {connectorCode}
                           </span>
                         </div>
@@ -276,7 +276,7 @@ export function PhysicalKioskScreen({
                         {connectorName}
                       </div>
                       {connectorUuid ? (
-                        <div className="flex items-center justify-between text-[10.5px] text-slate-400 font-mono bg-black/40 rounded-lg px-2 py-1 border border-white/5">
+                        <div className="flex items-center justify-between text-[11.5px] text-slate-400 tabular-nums bg-black/40 rounded-lg px-2 py-1 border border-white/5">
                           <span className="truncate max-w-[130px]" title={connectorUuid}>
                             UUID: {connectorUuid.slice(0, 8)}...{connectorUuid.slice(-4)}
                           </span>
@@ -351,7 +351,7 @@ export function PhysicalKioskScreen({
                       <span>{t('kiosk.ready.challengeCode', 'Mã Challenge:')}</span>
                       {copied && <span className="text-emerald-400 font-bold">{t('kiosk.ready.copied', 'Đã sao chép!')}</span>}
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs font-mono text-slate-300">
+                    <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs tabular-nums text-slate-300">
                       <span className="truncate flex-1">
                         {challengeToken || t('kiosk.ready.generating', 'Đang tạo token...')}
                       </span>
@@ -421,7 +421,7 @@ export function PhysicalKioskScreen({
                 <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   {t('kiosk.checkedIn.welcome', { name: driverName, defaultValue: `Xin chào, ${driverName}!` })}
                 </h2>
-                <p className="mt-1 font-mono text-xs text-slate-400">
+                <p className="mt-1 tabular-nums text-xs text-slate-400">
                   {t('kiosk.checkedIn.bookingCodeLabel', 'Mã đặt chỗ:')} <span className="text-white font-semibold">{bookingCode}</span> · {t('kiosk.checkedIn.connectorLabel', 'Súng:')} <span className="text-emerald-400">{connectorCode}</span>
                 </p>
               </div>
@@ -470,7 +470,7 @@ export function PhysicalKioskScreen({
                     {t('kiosk.charging.badge', { type: connectorType, defaultValue: `Đang sạc nhanh DC · ${connectorType}` })}
                   </span>
                 </div>
-                <div className="font-mono text-xs text-slate-300">
+                <div className="tabular-nums text-xs text-slate-300">
                   {t('kiosk.charging.driverLabel', 'Tài xế:')} <strong className="text-white font-sans">{driverName}</strong> ({bookingCode})
                 </div>
               </div>
@@ -485,7 +485,7 @@ export function PhysicalKioskScreen({
                       {t('kiosk.charging.powerGauge', 'Công suất tức thời (Power)')}
                     </span>
                     <div className="mt-2 flex items-baseline gap-2">
-                      <span className="font-mono text-5xl font-bold tracking-tight text-emerald-400 tabular-nums">
+                      <span className=" text-5xl font-bold tracking-tight text-emerald-400 tabular-nums">
                         {currentPower}
                       </span>
                       <span className="text-lg font-bold text-slate-300">kW</span>
@@ -505,7 +505,7 @@ export function PhysicalKioskScreen({
                       />
                     ))}
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-xs text-slate-400 font-mono">
+                  <div className="mt-2 flex items-center justify-between text-xs text-slate-400 tabular-nums">
                     <span>{t('kiosk.charging.voltage', 'Điện áp: 418 V')}</span>
                     <span>{t('kiosk.charging.current', { current: Math.round((currentPower * 1000) / 418), defaultValue: `Dòng điện: ${Math.round((currentPower * 1000) / 418)} A` })}</span>
                   </div>
@@ -532,7 +532,7 @@ export function PhysicalKioskScreen({
                         className="transition-all duration-500"
                       />
                     </svg>
-                    <span className="absolute font-mono text-2xl font-bold text-white tabular-nums">
+                    <span className="absolute text-2xl font-bold text-white tabular-nums">
                       {Math.round(soc)}%
                     </span>
                   </div>
@@ -545,7 +545,7 @@ export function PhysicalKioskScreen({
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                       {t('kiosk.charging.energyDelivered', 'Điện năng tiêu thụ')}
                     </span>
-                    <div className="mt-1 font-mono text-2xl font-bold text-white tabular-nums">
+                    <div className="mt-1 text-2xl font-bold text-white tabular-nums">
                       {deliveredKwh} <span className="text-xs text-slate-400 font-sans font-normal">kWh</span>
                     </div>
                   </div>
@@ -554,7 +554,7 @@ export function PhysicalKioskScreen({
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                       {t('kiosk.charging.chargingDuration', 'Thời gian đã sạc')}
                     </span>
-                    <div className="mt-1 font-mono text-xl font-bold text-cyan-400 tabular-nums">
+                    <div className="mt-1 text-xl font-bold text-cyan-400 tabular-nums">
                       {Math.floor(chargingSeconds / 60)
                         .toString()
                         .padStart(2, '0')}
@@ -567,7 +567,7 @@ export function PhysicalKioskScreen({
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                       {t('kiosk.charging.totalCost', 'Tổng chi phí')}
                     </span>
-                    <div className="mt-1 font-mono text-base font-bold text-emerald-400 tabular-nums">
+                    <div className="mt-1 text-base font-bold text-emerald-400 tabular-nums">
                       {estimatedCostVnd.toLocaleString('vi-VN')} đ
                     </div>
                   </div>
@@ -608,7 +608,7 @@ export function PhysicalKioskScreen({
 
               {/* Receipt Summary Card */}
               <div className="w-full max-w-[420px] rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-md text-left">
-                <div className="space-y-3 font-mono text-xs">
+                <div className="space-y-3 tabular-nums text-xs">
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-slate-400 font-sans">{t('kiosk.completed.bookingCodeLabel', 'Mã đặt chỗ:')}</span>
                     <span className="text-white font-bold">{bookingCode}</span>
@@ -668,7 +668,7 @@ export function PhysicalKioskScreen({
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300 font-mono">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300 tabular-nums">
                 {t('kiosk.faulted.hotline', 'Hotline hỗ trợ 24/7:')} <strong className="text-white font-sans">1900 6868</strong>
               </div>
 

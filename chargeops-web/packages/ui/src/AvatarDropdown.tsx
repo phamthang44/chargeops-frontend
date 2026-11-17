@@ -133,7 +133,6 @@ export function AvatarDropdown({
               onClick={() => setOpen(false)}
               className="flex w-full items-center gap-2.5 rounded-ctl px-2.5 py-2 text-left text-[13px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-chip transition-colors duration-100"
             >
-              <span className="text-[14px]">⚡</span>
               <span>Charger Simulator (Mô phỏng sạc)</span>
             </a>
 

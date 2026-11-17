@@ -401,7 +401,7 @@ function CashFlowSvg({
               textAnchor="end"
               fontSize="10"
               fill="currentColor"
-              className="text-muted font-mono"
+              className="text-muted tabular-nums"
             >
               {money(max * ratio)}
             </text>
@@ -473,7 +473,7 @@ function CashFlowSvg({
                 textAnchor="middle"
                 fontSize="10"
                 fill="currentColor"
-                className={`font-mono transition-colors ${
+                className={`tabular-nums transition-colors ${
                   isHovered ? 'text-owner font-bold' : 'text-muted'
                 }`}
               >
@@ -555,7 +555,7 @@ function StationRankingCard({
                       <span className="truncate font-medium text-ink text-sm">
                         {row.stationName}
                       </span>
-                      <span className="shrink-0 rounded bg-chip px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                      <span className="shrink-0 rounded bg-chip px-1.5 py-0.5 tabular-nums text-[11.5px] text-muted">
                         {row.stationCode}
                       </span>
                     </div>
@@ -578,7 +578,7 @@ function StationRankingCard({
                       <span>·</span>
                       <span className="text-warn">-{money(row.refundedVnd)}</span>
                     </div>
-                    <span className="font-mono text-[10px] text-faint">
+                    <span className="tabular-nums text-[11.5px] text-faint">
                       {t('finance.stationShare', { share: barPercent })}
                     </span>
                   </div>

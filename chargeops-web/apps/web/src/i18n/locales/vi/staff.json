@@ -205,7 +205,7 @@
         "status": "Trạng thái"
       },
       "noData": "—",
-      "phoneHiddenHint": "SĐT tài xế không nằm trong response booking vận hành (BKG-048)."
+      "phoneHiddenHint": "SĐT tài xế không nằm trong response đặt chỗ vận hành."
     }
   }
 }

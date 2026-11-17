@@ -145,7 +145,7 @@ export function OperatingHoursStep({
                     {t('pricing.steps.step2.activeSchedule', { defaultValue: 'Đang áp dụng' })}
                   </span>
                   {effectiveFrom ? (
-                    <span className="inline-flex items-center gap-1 text-[12px] text-muted font-mono">
+                    <span className="inline-flex items-center gap-1 text-[12px] text-muted tabular-nums">
                       {t('pricing.steps.step2.effectiveFrom', { defaultValue: 'Có hiệu lực từ:' })}{' '}
                       <strong className="text-ink font-semibold">{formatDateTimeVn(effectiveFrom)}</strong>
                     </span>
@@ -161,11 +161,9 @@ export function OperatingHoursStep({
 
           <div className="flex flex-col gap-1 border-t border-hairline pt-2 text-[11.5px] leading-relaxed text-muted">
             <div className="flex items-center gap-1.5 text-ink font-medium">
-              <span className="text-owner-deep shrink-0 font-bold">⚡</span>
               <span>{t('pricing.steps.step2.effectiveImmediately', { defaultValue: 'Các thay đổi sẽ có hiệu lực ngay sau khi bạn xác nhận lưu.' })}</span>
             </div>
             <div className="flex items-center gap-1.5 text-faint">
-              <span className="text-muted shrink-0">🛡️</span>
               <span>{t('pricing.steps.step2.keepExistingBookings', { defaultValue: 'Các lịch đặt đã được xác nhận trước đó vẫn giữ nguyên vẹn khung giờ và mức giá cam kết.' })}</span>
             </div>
           </div>
@@ -197,7 +195,7 @@ export function OperatingHoursStep({
                   <div className="flex items-center gap-1.5">
                     <span className="text-[13.5px] font-semibold text-ink">{dayInfo.full}</span>
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-mono font-bold ${
+                      className={`rounded px-1.5 py-0.5 text-[11.5px] tabular-nums font-bold ${
                         dayInfo.isWeekend
                           ? 'bg-warn-soft text-warn-deep'
                           : 'bg-chip text-muted'
@@ -211,7 +209,7 @@ export function OperatingHoursStep({
                 {/* Time inputs or Closed / 24-7 banner */}
                 <div className="flex-1 min-w-0">
                   {isOpen247 ? (
-                    <div className="flex h-[36px] items-center justify-center gap-2 rounded-[9px] border border-owner-border bg-owner-soft/80 px-3 text-center font-mono text-[12.5px] font-bold text-owner-deep shadow-2xs">
+                    <div className="flex h-[36px] items-center justify-center gap-2 rounded-[9px] border border-owner-border bg-owner-soft/80 px-3 text-center tabular-nums text-[12.5px] font-bold text-owner-deep shadow-2xs">
                       <IconClock size={14} className="text-owner-deep" />
                       <span>{t('pricing.steps.step2.open247Row', { defaultValue: 'Mở liên tục 24/7 (00:00 – 24:00)' })}</span>
                     </div>
@@ -255,7 +253,6 @@ export function OperatingHoursStep({
 
         {/* Footer helper note */}
         <div className="mt-1 flex items-start gap-2 rounded-[8px] bg-surface-2 p-2.5 text-[11.5px] leading-relaxed text-muted">
-          <span className="shrink-0 text-base leading-none">💡</span>
           <div>
             <b>{t('pricing.steps.step2.footerTitle', { defaultValue: 'Quy cách giờ đóng mở:' })}</b>{' '}
             {t('pricing.steps.step2.footerDescPart1', { defaultValue: 'Trạm đang mở' })}{' '}
@@ -267,7 +264,7 @@ export function OperatingHoursStep({
             {t('pricing.steps.step2.footerDescPart2', {
               defaultValue: '. Nếu giờ đóng cửa nhỏ hơn giờ mở cửa (ví dụ',
             })}{' '}
-            <span className="font-mono text-ink font-semibold">22:00 – 02:00</span>
+            <span className="tabular-nums text-ink font-semibold">22:00 – 02:00</span>
             {t('pricing.steps.step2.footerDescPart3', {
               defaultValue: '), hệ thống tự động hiểu là trạm mở xuyên qua nửa đêm sang sáng hôm sau.',
             })}

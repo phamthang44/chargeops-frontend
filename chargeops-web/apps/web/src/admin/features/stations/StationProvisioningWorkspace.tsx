@@ -183,7 +183,7 @@ export function StationProvisioningWorkspace({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-[18px] font-bold text-ink">{station.name}</h2>
-            <span className="font-mono text-[12px] font-bold text-brand">
+            <span className="tabular-nums text-[12px] font-bold text-brand">
               {station.stationCode || station.id}
             </span>
             <StatusPill tone="good" label={t('provisioning.workspace.fr14Badge')} />
@@ -198,7 +198,7 @@ export function StationProvisioningWorkspace({
             <span>·</span>
             <span>
               {t('provisioning.workspace.plannedLabel')}{' '}
-              <b className="text-ink font-mono">
+              <b className="text-ink tabular-nums">
                 {t('provisioning.workspace.plannedCount', { count: station.plannedChargePointCount ?? 0 })}
               </b>
             </span>

@@ -248,7 +248,7 @@ function BlockedBody({
               className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-2.5 text-[12px] last:border-b-0"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <span className="font-mono text-[11.5px] font-semibold text-brand">
+                <span className="tabular-nums text-[11.5px] font-semibold text-brand">
                   {b.bookingCode || b.bookingId}
                 </span>
                 <span className="truncate font-medium text-muted">
@@ -257,7 +257,7 @@ function BlockedBody({
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span className="font-mono text-[11px] text-muted">
+                <span className="tabular-nums text-[11px] text-muted">
                   {formatTimeVn(b.startAt)}–{formatTimeVn(b.endAt)}
                 </span>
                 <StatusPill
@@ -334,7 +334,7 @@ function OfflineBody({ intent, connectors, isMaintenance }: { intent: StatusInte
           {connectors.map((c) => (
             <span
               key={c.id}
-              className="rounded-full bg-chip px-2.5 py-1 font-mono text-[10.5px] font-semibold text-body"
+              className="rounded-full bg-chip px-2.5 py-1 tabular-nums text-[11.5px] font-semibold text-body"
             >
               {c.id}
             </span>
@@ -373,7 +373,7 @@ function OnlineBody({ intent, connectors }: { intent: StatusIntent; connectors: 
             <div key={c.id} className="flex items-center justify-between gap-2 text-[12px]">
               <span className="flex min-w-0 items-center gap-2">
                 <span className={`h-[6px] w-[6px] shrink-0 rounded-full ${back ? 'bg-good' : 'bg-disabled'}`} />
-                <span className="font-mono text-[11.5px] font-semibold text-body">{c.id}</span>
+                <span className="tabular-nums text-[11.5px] font-semibold text-body">{c.id}</span>
                 <span className="truncate text-muted">{c.name}</span>
               </span>
               <span className={`shrink-0 font-medium ${back ? 'text-good' : 'text-faint'}`}>

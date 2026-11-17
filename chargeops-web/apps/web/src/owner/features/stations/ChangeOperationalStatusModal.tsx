@@ -114,7 +114,7 @@ export function ChangeOperationalStatusModal({
               })}
             </div>
             <div className="mt-0.5 text-[12px] text-muted">
-              {station.name} · <span className="font-mono">{station.stationCode || station.id}</span>
+              {station.name} · <span className="tabular-nums">{station.stationCode || station.id}</span>
             </div>
           </div>
         </div>
@@ -269,7 +269,7 @@ export function ChangeOperationalStatusModal({
 
             {validationError && (
               <div className="text-[11.5px] font-semibold text-rose-600 dark:text-rose-300">
-                ⚠️ {validationError}
+                {validationError}
               </div>
             )}
           </div>

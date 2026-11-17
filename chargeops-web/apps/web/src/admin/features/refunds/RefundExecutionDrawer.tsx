@@ -238,7 +238,7 @@ export function RefundExecutionDrawer({
       title={
         <div className="flex items-center gap-2">
           <span className="font-semibold text-body">{t('refunds.drawer.title', 'Chi tiết Hoàn tiền')}</span>
-          <span className="font-mono text-[12px] font-semibold text-brand">
+          <span className="tabular-nums text-[12px] font-semibold text-brand">
             {activeRefund.refundId || activeRefund.id}
           </span>
           <button
@@ -330,7 +330,7 @@ export function RefundExecutionDrawer({
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-hairline/60 text-[12px]">
           <div>
             <span className="text-faint block">{t('refunds.drawer.bookingCode', 'Mã đơn đặt chỗ:')}</span>
-            <span className="font-mono font-medium text-body">
+            <span className="tabular-nums font-medium text-body">
               {activeRefund.bookingCode || activeRefund.bookingId}
             </span>
           </div>
@@ -545,7 +545,7 @@ export function RefundExecutionDrawer({
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.simRefPlaceholder', 'ví dụ: SIM-REF-902184')}
-                  className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 font-mono text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
+                  className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 tabular-nums text-[12px] text-body placeholder:text-faint focus:border-brand focus:outline-none"
                 />
               </div>
 
@@ -556,7 +556,7 @@ export function RefundExecutionDrawer({
                   onClick={() => setShowTestTools(!showTestTools)}
                   className="flex items-center gap-1.5 text-[11px] font-semibold text-brand hover:underline transition"
                 >
-                  <span>🧪 {showTestTools ? 'Thu gọn công cụ giả lập kiểm thử' : 'Mở công cụ giả lập lỗi (Failure Injection)'}</span>
+                  <span>{showTestTools ? 'Thu gọn công cụ giả lập kiểm thử' : 'Mở công cụ giả lập lỗi (Failure Injection)'}</span>
                   <span className="text-[10px]">{showTestTools ? '▲' : '▼'}</span>
                 </button>
 
@@ -629,7 +629,7 @@ export function RefundExecutionDrawer({
                   value={transferReference}
                   onChange={(e) => setTransferReference(e.target.value)}
                   placeholder={t('refunds.drawer.manualRefPlaceholder', 'ví dụ: FT260925987123 / VCB1982736')}
-                  className="w-full rounded-xl border border-line bg-surface px-3.5 py-2 font-mono text-[13px] font-medium text-ink placeholder:text-faint focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs transition-all"
+                  className="w-full rounded-xl border border-line bg-surface px-3.5 py-2 tabular-nums text-[13px] font-medium text-ink placeholder:text-faint focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-2xs transition-all"
                 />
                 <span className="text-[11px] text-muted mt-1 block">
                   {t(

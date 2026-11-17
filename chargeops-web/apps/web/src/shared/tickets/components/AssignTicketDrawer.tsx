@@ -124,7 +124,7 @@ export function AssignTicketDrawer({
         {/* Ticket Header info */}
           <div className="flex items-center justify-between rounded-xl bg-surface-2 p-3 text-[12px]">
           <div className="flex items-center gap-2">
-            <span className="font-mono font-bold text-brand">{ticket.ticketCode || ticket.ticketNo || `#${ticket.id.slice(0, 8)}`}</span>
+            <span className="tabular-nums font-bold text-brand">{ticket.ticketCode || ticket.ticketNo || `#${ticket.id.slice(0, 8)}`}</span>
             <span className="text-faint">·</span>
             {isPlatformTicket ? (
               <span className="inline-flex items-center gap-1 font-medium text-brand">

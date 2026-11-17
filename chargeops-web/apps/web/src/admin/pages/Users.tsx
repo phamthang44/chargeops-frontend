@@ -14,7 +14,7 @@ import {
   Card,
   EmptyState,
   FilterTabs,
-  MetricCard,
+  MetricCard, MetricStrip,
   PageHeader,
   Pagination,
   SearchInput,
@@ -217,12 +217,12 @@ export function Users() {
         <Skeleton className="h-[360px] rounded-card" />
       ) : (
         <>
-          <div className="mb-3 grid grid-cols-2 gap-[11px] md:grid-cols-4">
+          <MetricStrip className="mb-4">
             <MetricCard label={t('users.kpi.total')} value={String(summary?.totalProfiles ?? total)} accent="#5b54e8" />
             <MetricCard label={t('users.kpi.drivers')} value={String(summary?.byRole?.DRIVER ?? 0)} accent="#0d8a5a" />
             <MetricCard label={t('users.kpi.staff')} value={String(summary?.byRole?.STAFF ?? 0)} accent="#b7791f" />
             <MetricCard label={t('users.kpi.suspended')} value={String(summary?.byStatus?.SUSPENDED ?? 0)} accent="#c0392b" />
-          </div>
+          </MetricStrip>
 
           <div className="mb-3.5 flex flex-wrap items-center gap-2">
             <FilterTabs tabs={tabs} active={role} onChange={(r) => { setRole(r); setPage(0); }} accent="brand" />
@@ -335,12 +335,12 @@ function UserRow({ user, onSelect }: { user: AdminUserProfile; onSelect: () => v
       style={{ gridTemplateColumns: GRID_COLS }}
     >
       <span className="flex items-center gap-2.5">
-        <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-brand-soft font-mono text-[10px] font-semibold text-brand">
+        <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-brand-soft tabular-nums text-[11.5px] font-semibold text-brand">
           {initialsOf(user.displayName)}
         </span>
         <span className="flex min-w-0 flex-col">
           <span className="truncate font-semibold">{user.displayName}</span>
-          <span className="truncate font-mono text-[11px] text-faint">{user.email}</span>
+          <span className="truncate tabular-nums text-[11px] text-faint">{user.email}</span>
         </span>
       </span>
       <span>

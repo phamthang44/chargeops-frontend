@@ -422,7 +422,7 @@ export function OwnerDashboard() {
                             </h3>
                             <StatusPill tone={tone} label={statusLabel} />
                           </div>
-                          <p className="mt-0.5 font-mono text-xs text-muted">
+                          <p className="mt-0.5 tabular-nums text-xs text-muted">
                             {station.stationCode}
                           </p>
                         </div>
@@ -565,7 +565,7 @@ export function OwnerDashboard() {
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <strong className="block truncate font-mono text-xs font-semibold text-ink">
+                          <strong className="block truncate tabular-nums text-xs font-semibold text-ink">
                             {item.code}
                           </strong>
                           <span className="block truncate text-xs text-muted">
@@ -683,7 +683,7 @@ export function OwnerDashboard() {
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-owner" />
                       <span>{t(`status.${status}`, { defaultValue: status })}:</span>
-                      <strong className="font-mono tabular-nums text-ink">{number.format(count)}</strong>
+                      <strong className=" tabular-nums text-ink">{number.format(count)}</strong>
                     </span>
                   ))}
                 </div>
@@ -755,7 +755,7 @@ export function OwnerDashboard() {
 
                       {/* Info */}
                       <span className="min-w-0 flex-1">
-                        <strong className="block truncate font-mono text-xs font-semibold text-ink">
+                        <strong className="block truncate tabular-nums text-xs font-semibold text-ink">
                           {booking.bookingCode || booking.bookingId}
                         </strong>
                         <span className="block truncate text-xs text-muted">
@@ -964,7 +964,7 @@ function ActivityChart({
           {data.map((item) => (
             <li key={item.date} className="flex justify-between gap-2 text-[11px]">
               <span className="text-muted">{formatDate(item.date)}</span>
-              <strong className="font-mono tabular-nums text-ink">
+              <strong className=" tabular-nums text-ink">
                 {formatNumber(item.sessionsStarted)}
               </strong>
             </li>

@@ -174,7 +174,7 @@ export function NotificationCenter({
                     {t('notificationCenter.updatingCount', 'Đang cập nhật số chưa đọc')}
                   </span>
                 ) : unreadCount > 0 ? (
-                  <span className="rounded-full bg-brand/10 border border-brand/20 px-2.5 py-0.5 font-mono text-[11px] font-bold text-brand">
+                  <span className="rounded-full bg-brand/10 border border-brand/20 px-2.5 py-0.5 tabular-nums text-[11px] font-bold text-brand">
                     {t('notificationCenter.unreadCount', { count: unreadCount, defaultValue: `${unreadCount} chưa đọc` })}
                   </span>
                 ) : (
@@ -366,7 +366,7 @@ export function NotificationCenter({
                         </h4>
 
                         {item.badge && (
-                          <span className="rounded-md bg-chip px-2 py-0.5 font-mono text-[10px] font-bold text-muted border border-line">
+                          <span className="rounded-md bg-chip px-2 py-0.5 tabular-nums text-[11.5px] font-bold text-muted border border-line">
                             {item.badge}
                           </span>
                         )}
@@ -383,7 +383,7 @@ export function NotificationCenter({
                       {item.stationName && (
                         <div className="mt-2 flex items-center gap-2">
                           <span className="inline-flex items-center gap-1 rounded-md bg-chip px-2 py-0.5 text-[11px] font-medium text-muted border border-line">
-                            📍 {item.stationName}
+                            {item.stationName}
                           </span>
                         </div>
                       )}
@@ -393,7 +393,7 @@ export function NotificationCenter({
                   {/* Right: Timestamp & Actions */}
                   <div className="flex flex-col items-end gap-2.5 shrink-0">
                     {item.time && (
-                      <span className="flex items-center gap-1 font-mono text-[11px] font-medium text-ghost">
+                      <span className="flex items-center gap-1 tabular-nums text-[11px] font-medium text-ghost">
                         <IconClock size={11} />
                         {item.time}
                       </span>

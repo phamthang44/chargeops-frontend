@@ -95,6 +95,11 @@
     }
   },
   "console": {
+    "navGroup": {
+      "operations": "Vận hành",
+      "network": "Mạng lưới trạm",
+      "platform": "Nền tảng"
+    },
     "role": "Quản trị viên",
     "searchPlaceholder": "Tìm đặt chỗ, trụ, trạm, chủ trạm…",
     "nav": {
@@ -131,7 +136,7 @@
       "tickets": {
         "label": "Hỗ trợ",
         "title": "Hỗ trợ toàn nền tảng",
-        "subtitle": "Toàn bộ ticket hỗ trợ, có thể điều phối và nâng cấp."
+        "subtitle": "Toàn bộ phiếu hỗ trợ hỗ trợ, có thể điều phối và nâng cấp."
       },
       "transactions": {
         "label": "Giao dịch",
@@ -215,23 +220,23 @@
       "simulateLabel": "Mô phỏng sự kiện:",
       "simStation": "+ Đăng ký trạm",
       "simOverheat": "+ Quá nhiệt",
-      "simTicket": "+ Ticket",
-      "simLicense": "+ Hết hạn License"
+      "simTicket": "+ Phiếu hỗ trợ",
+      "simLicense": "+ Hết hạn giấy phép"
     },
     "sim": {
       "justNow": "Vừa xong",
-      "stationTitle": "📋 Hồ sơ đăng ký trạm mới ST-1020",
+      "stationTitle": "Hồ sơ đăng ký trạm mới ST-1020",
       "stationSubtitle": "Chủ trạm vừa hoàn tất gửi hồ sơ đăng ký trạm sạc tại TP. Đà Nẵng.",
       "reviewNow": "Xét duyệt ngay",
-      "overheatTitle": "🔥 BÁO ĐỘNG: Quá nhiệt Trụ #CHG-08 (74°C)",
+      "overheatTitle": "BÁO ĐỘNG: Quá nhiệt Trụ #CHG-08 (74°C)",
       "overheatSubtitle": "Trạm Tân Bình báo động nhiệt độ cao bất thường. Đề nghị ngắt điện kiểm tra!",
       "checkTech": "Kiểm tra kỹ thuật",
-      "ticketTitle": "🎟️ Khiếu nại tài xế cần hỗ trợ #TK-9944",
+      "ticketTitle": "Khiếu nại tài xế cần hỗ trợ #TK-9944",
       "ticketSubtitle": "Tài xế VinFast VF9 cần mở khóa trụ sạc khẩn cấp tại Trạm Cầu Giấy.",
       "urgent": "Khẩn cấp",
       "openTicket": "Mở chi tiết vé",
-      "licenseTitle": "🛡️ Giấy phép trạm sạc đã hết hạn",
-      "licenseSubtitle": "Gói License của Trạm Nam Từ Liêm đã hết hạn sử dụng. Trạm đã tự ngắt nhận đặt chỗ.",
+      "licenseTitle": "Giấy phép trạm sạc đã hết hạn",
+      "licenseSubtitle": "Gói giấy phép của Trạm Nam Từ Liêm đã hết hạn sử dụng. Trạm đã tự ngắt nhận đặt chỗ.",
       "viewLicenses": "Xem danh sách Giấy phép"
     },
     "mock": {
@@ -250,7 +255,7 @@
       },
       "item3": {
         "title": "Giấy phép vận hành trạm sắp hết hạn (3 trạm)",
-        "subtitle": "Các trạm sạc tại Nam Từ Liêm, Quận 7 và Hải Châu sẽ hết hạn gói License trong 7 ngày tới.",
+        "subtitle": "Các trạm sạc tại Nam Từ Liêm, Quận 7 và Hải Châu sẽ hết hạn gói giấy phép trong 7 ngày tới.",
         "time": "45 phút trước",
         "badge": "Giấy phép",
         "action": "Quản lý Giấy phép"
@@ -282,7 +287,7 @@
     "processing": "Đang xử lý…"
   },
   "issueLicenseModal": {
-    "title": "Ghi nhận & Kích hoạt License",
+    "title": "Ghi nhận & Kích hoạt giấy phép",
     "subtitle": "Ghi nhận gói subscription sau khi đã xác minh thông tin mua/thanh toán của chủ trạm ngoài nền tảng.",
     "stationInfoTitle": "Thông tin trạm sạc",
     "ownerLabel": "Chủ sở hữu",
@@ -291,12 +296,12 @@
     "planMonthlyDesc": "Hiệu lực 1 tháng lịch",
     "planYearly": "Gói Năm",
     "planYearlyDesc": "Hiệu lực 1 năm lịch",
-    "feeLabel": "Phí License đã ghi nhận (VND)",
+    "feeLabel": "Phí giấy phép đã ghi nhận (VND)",
     "errFeePositive": "Phí giấy phép phải là số không âm.",
     "errVerificationRequired": "Vui lòng xác nhận đã đối chiếu thông tin mua/thanh toán ngoài nền tảng.",
-    "noticeImmediate": "License sẽ có hiệu lực ngay sau khi kích hoạt và chuyển sang trạng thái ACTIVE.",
+    "noticeImmediate": "Giấy phép sẽ có hiệu lực ngay sau khi kích hoạt và chuyển sang trạng thái ACTIVE.",
     "noticeApproveReady": "Sau khi kích hoạt license thành công, hồ sơ trạm sẽ đủ điều kiện để phê duyệt.",
-    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gói License của chủ trạm ngoài nền tảng.",
+    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gói giấy phép của chủ trạm ngoài nền tảng.",
     "cancelBtn": "Hủy bỏ",
     "confirmBtn": "Xác nhận & kích hoạt",
     "processing": "Đang ghi nhận…"
@@ -310,7 +315,7 @@
     "chargersLabel": "Số trụ dự kiến",
     "chargersVal": "{{count}} trụ",
     "noteActive": "Duyệt hồ sơ xác nhận thông tin hành chính và giấy phép của trạm đã hợp lệ để tiếp tục cấu hình trụ sạc.",
-    "licenseCheck": "Lưu ý: Hệ thống yêu cầu trạm phải có gói Giấy phép (License) hợp lệ trước khi kích hoạt.",
+    "licenseCheck": "Lưu ý: Hệ thống yêu cầu trạm phải có gói Giấy phép hợp lệ trước khi kích hoạt.",
     "cancelBtn": "Hủy bỏ",
     "confirmBtn": "Duyệt hồ sơ",
     "processing": "Đang duyệt hồ sơ…"
@@ -367,17 +372,17 @@
   "approvals": {
     "toastApproved": "Đã duyệt hồ sơ {{name}}",
     "toastRejected": "Đã từ chối {{name}}",
-    "toastIssued": "Đã ghi nhận & kích hoạt License thành công cho {{name}}",
+    "toastIssued": "Đã ghi nhận & kích hoạt giấy phép thành công cho {{name}}",
     "error": "Không thể tải danh sách phê duyệt",
     "emptyTitle": "Hết hồ sơ chờ duyệt",
     "emptyDesc": "Tất cả trạm đăng ký đã được xử lý.",
     "table": {
       "cols": {
-        "id": "MÃ",
-        "station": "TRẠM",
+        "id": "Mã",
+        "station": "Trạm",
         "owner": "Chủ trạm",
         "city": "Thành phố",
-        "chargers": "TRỤ"
+        "chargers": "Trụ"
       }
     },
     "detail": {
@@ -396,7 +401,7 @@
       "approving": "Đang duyệt…",
       "rejectBtn": "Từ chối (cần lý do)",
       "auditHistory": "Lịch sử thay đổi trạng thái",
-      "licenseRequiredHint": "Cần cấp gói Giấy phép (License) trước khi có thể duyệt hồ sơ trạm.",
+      "licenseRequiredHint": "Cần cấp gói Giấy phép trước khi có thể duyệt hồ sơ trạm.",
       "noActiveLicense": "Chưa có license đang hiệu lực",
       "noActiveLicenseWarning": "Trạm chưa có active license",
       "noDocuments": "Chưa có tài liệu đính kèm",
@@ -446,10 +451,10 @@
     "searchFieldLabel": "Tìm trong trường",
     "table": {
       "cols": {
-        "id": "MÃ",
-        "station": "TRẠM",
+        "id": "Mã",
+        "station": "Trạm",
         "owner": "Chủ trạm",
-        "charger": "TRỤ",
+        "charger": "Trụ",
         "timeSlot": "Khung giờ",
         "amount": "Số tiền",
         "status": "Trạng thái"
@@ -460,18 +465,18 @@
 
   "licenses": {
     "title": "Giấy phép",
-    "toastRenewal": "Đã ghi nhận gia hạn License cho {{name}}",
-    "updateSuccess": "Thao tác cập nhật trạng thái License thành công.",
+    "toastRenewal": "Đã ghi nhận gia hạn giấy phép cho {{name}}",
+    "updateSuccess": "Thao tác cập nhật trạng thái giấy phép thành công.",
     "kpi": {
-      "total": "Tổng số License",
+      "total": "Tổng số giấy phép",
       "active": "Đang hoạt động",
       "renewalQueue": "Cần gia hạn / Xử lý",
-      "totalFee": "Phí License đã ghi nhận"
+      "totalFee": "Phí giấy phép đã ghi nhận"
     },
     "queue": {
       "title": "Hàng đợi gia hạn",
       "countBadge": "{{count}} trạm",
-      "desc": "Các License đang hoạt động còn ≤ 30 ngày hoặc đã hết hạn cần tạo kỳ hạn mới.",
+      "desc": "Các giấy phép đang hoạt động còn ≤ 30 ngày hoặc đã hết hạn cần tạo kỳ hạn mới.",
       "empty": "Tất cả các trạm đang hoạt động đều có hạn trên 30 ngày.",
       "defaultOwner": "Chủ trạm",
       "planMonth": "Gói Tháng",
@@ -500,29 +505,29 @@
       "expired": "Đã hết hạn"
     },
     "statusExplains": {
-      "title": "Ý nghĩa các trạng thái License & Quy định vận hành",
+      "title": "Ý nghĩa các trạng thái giấy phép & Quy định vận hành",
       "activeTitle": "Đang hoạt động (Active)",
-      "activeDesc": "Gói License đang có hiệu lực. Trạm sạc đủ điều kiện vận hành, hiển thị trên bản đồ tìm kiếm và nhận lượt đặt sạc từ tài xế.",
+      "activeDesc": "Gói giấy phép đang có hiệu lực. Trạm sạc đủ điều kiện vận hành, hiển thị trên bản đồ tìm kiếm và nhận lượt đặt sạc từ tài xế.",
       "pendingTitle": "Chờ hiệu lực (Pending)",
-      "pendingDesc": "Gói License đã ghi nhận nhưng chưa đến ngày bắt đầu kỳ hạn hoặc đang chờ kích hoạt chính thức từ Quản trị viên.",
+      "pendingDesc": "Gói giấy phép đã ghi nhận nhưng chưa đến ngày bắt đầu kỳ hạn hoặc đang chờ kích hoạt chính thức từ Quản trị viên.",
       "suspendedTitle": "Tạm ngưng (Suspended)",
       "suspendedDesc": "Tạm dừng quyền vận hành của trạm (do bảo trì, vi phạm hoặc yêu cầu chủ trạm). Trạm sẽ tạm ẩn khỏi ứng dụng tài xế.",
       "expiredTitle": "Đã hết hạn (Expired)",
-      "expiredDesc": "Kỳ hạn License đã kết thúc. Trạm tự động ngưng nhận lịch đặt mới (theo quy định LICENSE_SEARCH_VISIBILITY) cho đến khi hoàn tất gia hạn.",
+      "expiredDesc": "Kỳ hạn giấy phép đã kết thúc. Trạm tự động ngưng nhận lịch đặt mới (theo quy định LICENSE_SEARCH_VISIBILITY) cho đến khi hoàn tất gia hạn.",
       "cancelledTitle": "Đã hủy (Cancelled)",
-      "cancelledDesc": "Giấy phép đã bị hủy bỏ vĩnh viễn và không thể khôi phục. Cần cấp mới License nếu muốn mở lại trạm."
+      "cancelledDesc": "Giấy phép đã bị hủy bỏ vĩnh viễn và không thể khôi phục. Cần cấp mới giấy phép nếu muốn mở lại trạm."
     },
     "policyCard": {
-      "title": "Quy định Subscription License",
+      "title": "Quy định Subscription giấy phép",
       "offPlatform": "Ngoài nền tảng:",
       "offPlatformDesc": "Chủ trạm thanh toán mua hoặc gia hạn gói trực tiếp với đơn vị vận hành.",
       "inChargeOps": "Trong ChargeOps:",
       "inChargeOpsDesc": "Admin xác minh thông tin và ghi nhận gói để kích hoạt quyền vận hành trạm.",
       "validity": "Hiệu lực:",
-      "validityDesc": "Trạm hết hạn License sẽ tự động ngưng nhận đặt chỗ mới ({{policy}}).",
+      "validityDesc": "Trạm hết hạn giấy phép sẽ tự động ngưng nhận đặt chỗ mới ({{policy}}).",
       "totalFeeRecorded": "Tổng phí đã ghi nhận:"
     },
-    "searchPlaceholder": "Tìm mã License (LIC-...), trạm, chủ trạm…",
+    "searchPlaceholder": "Tìm mã giấy phép (LIC-...), trạm, chủ trạm…",
     "table": {
       "refresh": "Làm mới",
       "cols": {
@@ -536,20 +541,20 @@
         "fee": "Mức phí",
         "actions": "Thao tác"
       },
-      "emptyTitle": "Không tìm thấy License",
+      "emptyTitle": "Không tìm thấy giấy phép",
       "empty": "Chưa có gói giấy phép nào trong mục này.",
       "emptySearch": "Không có kết quả nào khớp với từ khóa \"{{query}}\"."
     },
     "menu": {
       "detail": "Xem chi tiết & Lịch sử",
-      "suspend": "Tạm ngưng License",
-      "reactivate": "Kích hoạt lại License",
-      "activate": "Kích hoạt License",
-      "cancel": "Hủy bỏ License"
+      "suspend": "Tạm ngưng giấy phép",
+      "reactivate": "Kích hoạt lại giấy phép",
+      "activate": "Kích hoạt giấy phép",
+      "cancel": "Hủy bỏ giấy phép"
     },
     "row": {
       "copyCode": "Sao chép mã",
-      "copiedCode": "Đã sao chép mã License",
+      "copiedCode": "Đã sao chép mã giấy phép",
       "planYearly": "Gói Năm",
       "planMonthly": "Gói Tháng",
       "daysLeft": "Còn {{days}} ngày",
@@ -559,9 +564,9 @@
       "detailBtn": "Chi tiết"
     },
     "drawer": {
-      "title": "Chi tiết License",
-      "copyCodeTitle": "Sao chép mã License",
-      "copySuccess": "Mã License",
+      "title": "Chi tiết giấy phép",
+      "copyCodeTitle": "Sao chép mã giấy phép",
+      "copySuccess": "Mã giấy phép",
       "copyUuidSuccess": "UUID kỹ thuật",
       "emptyTitle": "Không tìm thấy thông tin",
       "emptyDesc": "Giấy phép này không tồn tại hoặc đã bị xóa.",
@@ -585,51 +590,51 @@
       "recordedAt": "Ghi nhận ngày: {{date}}",
       "recordedBy": "Người ghi nhận: {{name}}",
       "systemRecorded": "Hệ thống",
-      "techId": "Technical ID (UUID):",
+      "techId": "Technical ID:",
       "copyUuidTitle": "Sao chép UUID",
       "lifecycleTitle": "Thao tác vòng đời (Lifecycle Actions)",
       "renewAction": "Gia hạn kỳ mới",
-      "activateAction": "Kích hoạt License",
-      "suspendAction": "Tạm ngưng License",
-      "reactivateAction": "Kích hoạt lại License",
-      "cancelAction": "Hủy bỏ License",
+      "activateAction": "Kích hoạt giấy phép",
+      "suspendAction": "Tạm ngưng giấy phép",
+      "reactivateAction": "Kích hoạt lại giấy phép",
+      "cancelAction": "Hủy bỏ giấy phép",
       "cancelledNote": "Giấy phép này đã bị hủy vĩnh viễn và không thể thao tác thêm.",
       "tabStatusEvents": "Nhật ký trạng thái",
-      "tabStationPeriods": "Các kỳ License của trạm",
+      "tabStationPeriods": "Các kỳ giấy phép của trạm",
       "timelineSortAsc": "Tiến trình vòng đời (Cũ → Mới):",
       "timelineSortDesc": "Nhật ký sự kiện (Mới nhất trước):",
       "toggleToDesc": "Đổi: Mới nhất trước",
       "toggleToAsc": "Đổi: Cũ → Mới (Tiến trình)",
-      "emptyStatusEvents": "Chưa có sự kiện trạng thái nào được ghi nhận cho License này.",
+      "emptyStatusEvents": "Chưa có sự kiện trạng thái nào được ghi nhận cho giấy phép này.",
       "currentState": "Hiện tại",
       "stateTransition": "Chuyển trạng thái:",
       "reason": "Lý do: ",
       "performedBy": "Người thực hiện: ",
-      "systemActor": "Hệ thống tự động (SYSTEM)",
+      "systemActor": "Hệ thống tự động",
       "adminActor": "Quản trị viên",
-      "emptyPeriods": "Trạm chưa có lịch sử các kỳ License khác.",
+      "emptyPeriods": "Trạm chưa có lịch sử các kỳ giấy phép khác.",
       "selectedPeriod": "Đang chọn",
       "periodValidity": "Hiệu lực: ",
       "periodFee": "Phí: ",
       "events": {
         "ISSUED": {
-          "title": "Cấp phát License",
-          "description": "Khởi tạo hồ sơ License ban đầu"
+          "title": "Cấp phát giấy phép",
+          "description": "Khởi tạo hồ sơ giấy phép ban đầu"
         },
         "ACTIVATED": {
           "title": "Kích hoạt vận hành",
-          "description": "License bắt đầu hiệu lực hoạt động"
+          "description": "Giấy phép bắt đầu hiệu lực hoạt động"
         },
         "SUSPENDED": {
-          "title": "Tạm ngưng License",
+          "title": "Tạm ngưng giấy phép",
           "description": "Tạm dừng quyền vận hành của trạm"
         },
         "REACTIVATED": {
-          "title": "Kích hoạt lại License",
+          "title": "Kích hoạt lại giấy phép",
           "description": "Khôi phục quyền kinh doanh"
         },
         "CANCELLED": {
-          "title": "Hủy bỏ License",
+          "title": "Hủy bỏ giấy phép",
           "description": "Hủy giấy phép vĩnh viễn"
         },
         "EXPIRED": {
@@ -639,7 +644,7 @@
       }
     },
     "historyDrawer": {
-      "title": "Lịch sử License theo trạm",
+      "title": "Lịch sử giấy phép theo trạm",
       "stationCode": "Mã trạm: ",
       "empty": "Chưa có lịch sử license cho trạm này.",
       "planYearly": "Gói Năm (1 năm)",
@@ -651,22 +656,22 @@
     },
     "actionModal": {
       "suspend": {
-        "title": "Tạm ngưng License",
-        "subtitle": "Tạm ngưng quyền vận hành của License {{code}} thuộc trạm {{station}}.",
-        "notice": "Lưu ý: Thời hạn gói License vẫn tiếp tục trôi trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường.",
+        "title": "Tạm ngưng giấy phép",
+        "subtitle": "Tạm ngưng quyền vận hành của giấy phép {{code}} thuộc trạm {{station}}.",
+        "notice": "Lưu ý: Thời hạn gói giấy phép vẫn tiếp tục trôi trong thời gian tạm ngưng. Trạm sạc sẽ tạm thời bị ẩn khỏi ứng dụng tài xế và ngưng nhận đơn đặt chỗ mới. Các phiên sạc đang diễn ra và lịch đặt chỗ đã thanh toán trước đó vẫn tiếp tục hoàn thành bình thường.",
         "confirmBtn": "Xác nhận tạm ngưng"
       },
       "activate": {
-        "title": "Kích hoạt lại License",
-        "subtitle": "Khôi phục trạng thái hoạt động cho License {{code}} thuộc trạm {{station}}.",
+        "title": "Kích hoạt lại giấy phép",
+        "subtitle": "Khôi phục trạng thái hoạt động cho giấy phép {{code}} thuộc trạm {{station}}.",
         "notice": "Thời hạn của gói tiếp tục có hiệu lực đến {{date}}. Trạm sẽ tự động hiển thị lại cho tài xế tìm kiếm và đặt chỗ nếu trạm đang ở trạng thái Hoạt động.",
         "confirmBtn": "Xác nhận kích hoạt lại"
       },
       "cancel": {
-        "title": "Hủy bỏ License (Không thể hoàn tác)",
-        "subtitle": "Chấm dứt hoàn toàn hiệu lực của License {{code}} thuộc trạm {{station}}.",
-        "notice": "CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). License này sẽ không thể khôi phục lại. Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã thanh toán trước đó vẫn được bảo toàn.",
-        "confirmBtn": "Xác nhận hủy License"
+        "title": "Hủy bỏ giấy phép (Không thể hoàn tác)",
+        "subtitle": "Chấm dứt hoàn toàn hiệu lực của giấy phép {{code}} thuộc trạm {{station}}.",
+        "notice": "CẢNH BÁO: Đây là thao tác vĩnh viễn (Terminal Action). Giấy phép này sẽ không thể khôi phục lại. Trạm sẽ ngưng nhận đơn đặt chỗ mới ngay lập tức. Các phiên sạc đã thanh toán trước đó vẫn được bảo toàn.",
+        "confirmBtn": "Xác nhận hủy giấy phép"
       },
       "presetSuggestions": "Gợi ý lý do chuẩn theo thẩm quyền vận hành:",
       "presets": {
@@ -723,14 +728,14 @@
       "all": "Tất cả loại văn bản",
       "TERMS_OF_SERVICE": "Điều khoản dịch vụ",
       "PRIVACY_POLICY": "Chính sách bảo mật",
-      "LICENSE_AGREEMENT": "Thỏa thuận License",
+      "LICENSE_AGREEMENT": "Thỏa thuận giấy phép",
       "OPERATIONAL_REGULATION": "Quy chế vận hành"
     },
     "audiences": {
       "all": "Tất cả đối tượng",
       "ALL": "Toàn hệ thống (ALL)",
-      "DRIVER": "Tài xế (DRIVER)",
-      "OWNER": "Chủ trạm (OWNER)"
+      "DRIVER": "Tài xế",
+      "OWNER": "Chủ trạm"
     },
     "statusOptions": {
       "all": "Tất cả trạng thái",
@@ -742,7 +747,7 @@
       "foundation": "Pháp lý nền tảng",
       "booking": "Đặt chỗ & Biểu giá",
       "hardware": "Vận hành & Phần cứng",
-      "license": "Thỏa thuận License"
+      "license": "Thỏa thuận giấy phép"
     },
     "table": {
       "cols": {
@@ -809,17 +814,17 @@
       "live": "Đang hoạt động"
     },
     "recordsCount": "{{count}} trụ sạc",
-    "connectorCount": "{{count}} connector",
+    "connectorCount": "{{count}} cổng sạc",
     "empty": "{{station}} chưa có trụ sạc nào. Tạo một trụ để bắt đầu cấp phát.",
-    "noConnectors": "Chưa có connector — trụ này chưa thể kích hoạt hay nhận đặt chỗ cho tới khi có ít nhất một connector.",
+    "noConnectors": "Chưa có cổng sạc — trụ này chưa thể kích hoạt hay nhận đặt chỗ cho tới khi có ít nhất một cổng sạc.",
     "activateBtn": "Kích hoạt",
     "activating": "Đang kích hoạt…",
-    "activateHint": "Cần ít nhất 1 connector",
+    "activateHint": "Cần ít nhất 1 cổng sạc",
     "activateSuccess": "{{id}} đã Hoạt động",
     "liveForDrivers": "Đã hiển thị cho tài xế",
     "flow": {
       "step1": "Tạo trụ sạc",
-      "step2": "Thêm connector (mỗi cái 1 QR)",
+      "step2": "Thêm cổng sạc (mỗi cái 1 QR)",
       "step3": "Gửi ảnh QR cho chủ trạm",
       "step4": "Kích hoạt"
     },
@@ -827,7 +832,7 @@
       "createBtn": "Trụ sạc mới",
       "createTitle": "Tạo trụ sạc",
       "createSub": "Một thiết bị vật lý mới tại {{station}}.",
-      "createHelp": "Trụ bắt đầu ở trạng thái CHƯA GÁN và bị ẩn với tài xế cho tới khi bạn thêm connector và Kích hoạt.",
+      "createHelp": "Trụ bắt đầu ở trạng thái CHƯA GÁN và bị ẩn với tài xế cho tới khi bạn thêm cổng sạc và Kích hoạt.",
       "nameLabel": "TÊN HIỂN THỊ (tùy chọn)",
       "namePlaceholder": "VD: Trụ sạc A1",
       "zoneLabel": "KHU VỰC / GỢI Ý VỊ TRÍ (tùy chọn)",
@@ -838,16 +843,16 @@
       "activating": "Đang kích hoạt…"
     },
     "connector": {
-      "addBtn": "Thêm connector",
-      "createTitle": "Thêm connector",
+      "addBtn": "Thêm cổng sạc",
+      "createTitle": "Thêm cổng sạc",
       "createSub": "Thêm vào",
       "createHelp": "Loại đầu cắm và công suất sẽ bị khoá cố định sau khi cấp phát phần cứng. Thao tác này tạo một Charger ID và một ảnh QR riêng cho cổng sạc này.",
       "connectorLabel": "Loại đầu cắm",
       "powerLabel": "CÔNG SUẤT (kW)",
       "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",
-      "displayNamePlaceholder": "VD: Connector 1 — chủ trạm đổi sau",
-      "submitBtn": "Tạo mã Connector + QR",
-      "toastSuccess": "Đã tạo Connector {{id}}"
+      "displayNamePlaceholder": "VD: Cổng sạc 1 — chủ trạm đổi sau",
+      "submitBtn": "Tạo mã Cổng sạc + QR",
+      "toastSuccess": "Đã tạo Cổng sạc {{id}}"
     },
     "status": {
       "unclaimed": "Chưa gán",
@@ -889,14 +894,14 @@
       "cpMaintDesc": "Trụ đang trong chế độ bảo dưỡng kỹ thuật tại chỗ.",
       "cpNoteTitle": "Vì sao có trụ vừa 'Đang hoạt động' vừa 'Ngoại tuyến'?",
       "cpNoteBody": "'Đang hoạt động' là phê duyệt quản trị của Admin cho phép trạm kinh doanh. 'Ngoại tuyến' là tình trạng phần cứng thực tế đang mất sóng mạng hoặc mất điện nguồn với máy chủ.",
-      "connectorSection": "2. Trạng thái Súng sạc (Connector Runtime)",
+      "connectorSection": "2. Trạng thái Súng sạc",
       "connectorSectionSub": "Khả năng phục vụ sạc của từng đầu cắm:",
       "connAvailableDesc": "Cổng sạc rảnh rỗi, sẵn sàng cắm sạc ngay hoặc nhận đặt chỗ trước.",
       "connInUseDesc": "Có xe đang cắm giữ súng và phiên sạc đang diễn ra.",
       "connOfflineDesc": "Cổng sạc bị ngắt (Chủ trạm/Nhân viên tắt bảo dưỡng hoặc gặp sự cố).",
       "connPendingDesc": "Súng sạc tự động đóng do Trụ cha chưa kích hoạt hoặc bị tạm ngưng.",
       "connRuleTitle": "Phân quyền vận hành (SRS 4.8 & BR-CHG-05):",
-      "connRuleBody": "Admin phụ trách cấp phép & niêm phong phần cứng Trụ (FR14). Chủ trạm (Owner) & Nhân viên (Staff) phụ trách bật/tắt vận hành từng Súng sạc (BR-CHG-05)."
+      "connRuleBody": "Admin phụ trách cấp phép & niêm phong phần cứng Trụ. Chủ trạm (Owner) & Nhân viên (Staff) phụ trách bật/tắt vận hành từng Súng sạc."
     },
     "tooltips": {
       "cpPending": "Cấp phép Admin: Bản nháp, đang cấu hình phần cứng và chưa mở cho tài xế.",
@@ -935,8 +940,8 @@
     },
     "workspace": {
       "backToList": "Quay lại danh sách trạm sạc",
-      "viewLicense": "Xem giấy phép License ↗",
-      "fr14Badge": "Không gian Cấp trụ (FR14)",
+      "viewLicense": "Xem giấy phép giấy phép ↗",
+      "fr14Badge": "Không gian Cấp trụ",
       "ownerLabel": "Chủ trạm:",
       "ownerFallback": "Chủ trạm",
       "plannedLabel": "Quy hoạch duyệt:",
@@ -965,7 +970,7 @@
         "connectorCountLabel": "Súng sạc:",
         "connectorUnit_one": "{{count}} Súng",
         "connectorUnit_other": "{{count}} Súng",
-        "configuring": "⚙️ Đang cấu hình phần cứng",
+        "configuring": "Đang cấu hình phần cứng",
         "hardwareLocked": "Phần cứng đã khóa",
         "historyTitle": "Xem toàn bộ lịch sử trạng thái của trụ sạc",
         "historyBtn": "Lịch sử trụ",
@@ -1022,7 +1027,7 @@
         "submitBtn": "Xác nhận tạo trụ"
       },
       "connectorForm": {
-        "codeLabel": "Mã súng sạc (Connector Code) *",
+        "codeLabel": "Mã súng sạc *",
         "codePlaceholder": "Ví dụ: C-01, C-02",
         "typeLabel": "Loại chuẩn kết nối súng *",
         "powerLabel": "Công suất sạc (kW) *",
@@ -1032,7 +1037,7 @@
         "addSubmitBtn": "Xác nhận thêm súng",
         "editTitle": "Chỉnh sửa thông số Súng sạc",
         "editCodeLabel": "Mã súng:",
-        "editNotice": "⚙️ Trụ sạc đang ở trạng thái <bold>Chờ kích hoạt (PENDING_ACTIVATION)</bold>. Admin có thể tùy chỉnh chuẩn sạc và công suất định mức trước khi kích hoạt khóa phần cứng.",
+        "editNotice": "Trụ sạc đang ở trạng thái <bold>Chờ kích hoạt</bold>. Admin có thể tùy chỉnh chuẩn sạc và công suất định mức trước khi kích hoạt khóa phần cứng.",
         "editSubmitting": "Đang lưu...",
         "editSubmitBtn": "Lưu thay đổi",
         "updateToast": "Cập nhật súng {{id}} thành công"
@@ -1090,11 +1095,11 @@
       "cols": {
         "id": "Mã GD",
         "bookingId": "Đặt chỗ",
-        "station": "TRẠM",
-        "type": "LOẠI",
+        "station": "Trạm",
+        "type": "Loại",
         "method": "P.THỨC",
         "amount": "Số tiền",
-        "date": "NGÀY",
+        "date": "Ngày",
         "txId": "Mã GD"
       },
       "empty": "Không có giao dịch nào khớp bộ lọc."
@@ -1135,10 +1140,10 @@
     },
     "tabs": {
       "all": "Tất cả hồ sơ",
-      "pending": "Đang chờ xử lý (PENDING)",
-      "succeeded": "Đã hoàn tất (SUCCEEDED)"
+      "pending": "Đang chờ xử lý",
+      "succeeded": "Đã hoàn tất"
     },
-    "searchPlaceholder": "Tìm mã refund, booking, tài xế…",
+    "searchPlaceholder": "Tìm mã hoàn tiền, đặt chỗ, tài xế…",
     "reasons": {
       "VOLUNTARY_GRACE": "Ân hạn 10 phút",
       "STATION_FAILURE": "Sự cố trạm sạc",
@@ -1241,8 +1246,8 @@
       "notice": "Bảo lưu quyền hoàn tiền khi giao dịch gián đoạn",
       "empty": "Chưa có lần thực thi nào trước đó. Khoản hoàn tiền đang ở trạng thái sơ khởi.",
       "attemptNum": "Lần #{{seq}}",
-      "triggerSystem": "🤖 Tự động hệ thống",
-      "triggerAdmin": "👤 Admin can thiệp",
+      "triggerSystem": "Tự động hệ thống",
+      "triggerAdmin": "Admin can thiệp",
       "reference": "Mã tham chiếu:",
       "copyTitle": "Sao chép",
       "errorCode": "Mã lỗi:"
@@ -1306,7 +1311,7 @@
       "totalBookings": "Tổng đặt chỗ",
       "suspendAccount": "Tạm khóa tài khoản",
       "activateAccount": "Kích hoạt tài khoản",
-      "suspendHint": "Tài khoản vẫn đăng nhập được nhưng mọi API sẽ trả AUTH_006 cho tới khi kích hoạt lại. Không thể khóa khi còn booking đang hiệu lực.",
+      "suspendHint": "Tài khoản vẫn đăng nhập được nhưng mọi API sẽ trả AUTH_006 cho tới khi kích hoạt lại. Không thể khóa khi còn đặt chỗ đang hiệu lực.",
       "roleConflict": "Vai trò mâu thuẫn — cần đồng bộ lại từ Keycloak.",
       "roleUnknown": "Vai trò chưa xác định — chưa thể suspend/resume."
     },
@@ -1320,7 +1325,7 @@
       "suspend": {
         "title": "Tạm khóa tài khoản",
         "subtitle": "Tạm khóa tài khoản của {{name}}. Mọi API sẽ trả AUTH_006 cho tới khi kích hoạt lại.",
-        "notice": "Không thể tạm khóa khi người dùng còn booking đang hiệu lực (PENDING còn hạn, CONFIRMED sắp tới, CHECKED_IN/CHARGING) hoặc vé hỗ trợ đang xử lý. Token hiện tại vẫn sống tối đa TTL rồi hết hạn.",
+        "notice": "Không thể tạm khóa khi người dùng còn đặt chỗ đang hiệu lực (PENDING còn hạn, CONFIRMED sắp tới, CHECKED_IN/CHARGING) hoặc vé hỗ trợ đang xử lý. Token hiện tại vẫn sống tối đa TTL rồi hết hạn.",
         "confirmBtn": "Xác nhận tạm khóa"
       },
       "resume": {
@@ -1345,10 +1350,10 @@
     }
   },
   "renewModal": {
-    "title": "Ghi nhận gia hạn License",
-    "subtitle": "Tạo một kỳ hạn License mới sau khi xác minh thanh toán gia hạn ngoài nền tảng.",
+    "title": "Ghi nhận gia hạn giấy phép",
+    "subtitle": "Tạo một kỳ hạn giấy phép mới sau khi xác minh thanh toán gia hạn ngoài nền tảng.",
     "currentInfoTitle": "Thông tin license hiện tại",
-    "licenseCode": "Mã License:",
+    "licenseCode": "Mã giấy phép:",
     "station": "Trạm sạc:",
     "owner": "Chủ sở hữu:",
     "currentExpiry": "Hạn hiện tại:",
@@ -1366,13 +1371,13 @@
     "yearlyDesc": "Hiệu lực 1 năm lịch · 5.000.000đ",
     "feeLabel": "Mức phí niêm yết theo gói:",
     "effectiveStartLabel": "Thời điểm bắt đầu hiệu lực mới: ",
-    "effectiveStartHint": "Thao tác tạo một License row mới trong lịch sử; không chỉnh sửa trực tiếp License hiện tại.",
-    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gia hạn gói License của chủ trạm ngoài nền tảng."
+    "effectiveStartHint": "Thao tác tạo một giấy phép row mới trong lịch sử; không chỉnh sửa trực tiếp giấy phép hiện tại.",
+    "verificationCheckbox": "Tôi đã đối chiếu và xác nhận thông tin mua/thanh toán gia hạn gói giấy phép của chủ trạm ngoài nền tảng."
   },
   "stations": {
     "copiedCode": "Đã sao chép mã trạm",
     "pageTitle": "Quản lý Trạm & Trụ Sạc",
-    "pageSubtitle": "Trung tâm giám sát danh mục trạm sạc toàn hệ thống, cấp hạ tầng trụ & súng sạc (FR14), theo dõi giấy phép và can thiệp vận hành.",
+    "pageSubtitle": "Trung tâm giám sát danh mục trạm sạc toàn hệ thống, cấp hạ tầng trụ & súng sạc, theo dõi giấy phép và can thiệp vận hành.",
     "refreshBtn": "Làm mới",
     "kpi": {
       "total": "Tổng số trạm sạc",
@@ -1416,7 +1421,7 @@
     },
     "actions": {
       "viewDetail": "Xem chi tiết",
-      "provisioning": "Cấp hạ tầng (FR14)",
+      "provisioning": "Cấp hạ tầng",
       "provisioningBtn": "Cấp trụ",
       "suspend": "Tạm ngưng vận hành",
       "reactivate": "Kích hoạt lại",
@@ -1433,7 +1438,7 @@
       "reactivateConfirm": "Xác nhận kích hoạt",
       "stationCode": "Mã trạm: {{code}} · Chủ trạm: {{owner}}",
       "suspendNotice": "Khi tạm ngưng, trạm sạc sẽ bị ẩn khỏi ứng dụng tìm kiếm của tài xế và tạm dừng mọi lượt đặt chỗ mới.",
-      "reactivateNotice": "Trạm sạc sẽ được mở lại trạng thái hoạt động công khai nếu trạm có giấy phép License còn hiệu lực.",
+      "reactivateNotice": "Trạm sạc sẽ được mở lại trạng thái hoạt động công khai nếu trạm có giấy phép giấy phép còn hiệu lực.",
       "suspendReasonLabel": "Lý do tạm ngưng vận hành *",
       "reactivateReasonLabel": "Ghi chú / Lý do kích hoạt",
       "suspendReasonHint": "Bắt buộc nhập từ 5 - 500 ký tự",
@@ -1492,14 +1497,14 @@
         "name": "Tên đại diện CPO:",
         "email": "Email tài khoản:",
         "phone": "Số điện thoại liên hệ:",
-        "uuid": "Mã định danh CPO (UUID):",
-        "licenseTitle": "Giấy phép hoạt động (Subscription License)",
-        "manageLicense": "Quản lý License ↗",
+        "uuid": "Mã định danh CPO:",
+        "licenseTitle": "Giấy phép hoạt động (Subscription giấy phép)",
+        "manageLicense": "Quản lý giấy phép ↗",
         "planYearly": "Gói Năm (12 Tháng)",
         "planMonthly": "Gói Tháng (30 Ngày)",
         "active": "Đang hiệu lực",
         "expiresAt": "Thời hạn kết thúc:",
-        "noLicense": "Trạm chưa được cấp hoặc chưa kích hoạt License."
+        "noLicense": "Trạm chưa được cấp hoặc chưa kích hoạt giấy phép."
       },
       "hardware": {
         "title": "Danh sách Trụ sạc ({{current}}/{{planned}})",
@@ -1515,7 +1520,7 @@
         "defaultActor": "Quản trị viên"
       },
       "operatingHours": "Khung giờ hoạt động",
-      "licenseStatus": "Tình trạng Giấy phép (License)",
+      "licenseStatus": "Tình trạng Giấy phép",
       "amenities": "Tiện ích xung quanh",
       "noAmenities": "Không có thông tin tiện ích",
       "hardwareSummary": "Thống kê trụ & cổng sạc",
@@ -1523,8 +1528,8 @@
       "emptyHistory": "Chưa có sự kiện trạng thái nào được ghi nhận.",
       "btnSuspend": "Tạm ngưng trạm",
       "btnReactivate": "Kích hoạt lại",
-      "btnProvisioning": "Thiết lập trụ sạc (FR14)",
-      "btnLicense": "Xem License",
+      "btnProvisioning": "Thiết lập trụ sạc",
+      "btnLicense": "Xem giấy phép",
       "closeBtn": "Đóng",
       "copyCode": "Sao chép mã trạm",
       "copied": "Đã sao chép mã trạm"
@@ -1537,7 +1542,7 @@
     },
     "title": "Quản lý từ cấm & Kiểm duyệt",
     "eyebrow": "Nền tảng kiểm duyệt",
-    "subtitle": "Quy tắc lọc từ ngữ vi phạm cho tên người dùng, tên trạm, nội dung ticket và tin nhắn hỗ trợ.",
+    "subtitle": "Quy tắc lọc từ ngữ vi phạm cho tên người dùng, tên trạm, nội dung phiếu hỗ trợ và tin nhắn hỗ trợ.",
     "seedDisabledBanner": "Các quy tắc khởi tạo từ hạt giống (Seed rules) hiện đang ở trạng thái TẮT để quản trị viên rà soát. Chỉ các quy tắc ĐANG BẬT mới được áp dụng trên gateway.",
     "cacheSyncNote": "Thay đổi có hiệu lực trong tối đa 5 giây.",
     "createBtn": "Thêm từ cấm",
@@ -1568,8 +1573,8 @@
     "scopes": {
       "DISPLAY_NAME": "Tên hiển thị",
       "STATION_NAME": "Tên trạm",
-      "TICKET_SUBJECT": "Tiêu đề ticket",
-      "TICKET_DESCRIPTION": "Mô tả ticket",
+      "TICKET_SUBJECT": "Tiêu đề phiếu hỗ trợ",
+      "TICKET_DESCRIPTION": "Mô tả phiếu hỗ trợ",
       "TICKET_MESSAGE": "Tin nhắn chat"
     },
     "matchTypes": {

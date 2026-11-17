@@ -165,7 +165,7 @@ export function ReviewEscalationModal({ open, action, pending, onClose, onSubmit
             <label className="text-[12.5px] font-semibold text-ink">
               {t('escalation.review.note')} <span className="text-bad">*</span>
             </label>
-            <span className="text-[11px] font-mono text-faint">{note.length}/2000</span>
+            <span className="text-[11px] tabular-nums text-faint">{note.length}/2000</span>
           </div>
 
           <p className="text-[11px] text-muted">

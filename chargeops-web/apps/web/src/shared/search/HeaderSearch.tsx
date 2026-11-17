@@ -417,7 +417,7 @@ export function HeaderSearch({ load, placeholder, accent = 'brand' }: { load: Gl
                             <span className="flex items-center gap-2">
                               <span className="truncate text-[13px] font-medium text-ink">{highlight(item.title)}</span>
                               {item.badge && (
-                                <span className="shrink-0 rounded-[5px] bg-chip px-1.5 py-px font-mono text-[10px] tracking-tight text-faint">
+                                <span className="shrink-0 rounded-[5px] bg-chip px-1.5 py-px tabular-nums text-[11.5px] tracking-tight text-faint">
                                   {highlight(item.badge)}
                                 </span>
                               )}

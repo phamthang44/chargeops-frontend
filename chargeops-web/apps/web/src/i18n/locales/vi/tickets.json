@@ -29,7 +29,7 @@
     "station": "Giám sát Sự cố Trạm",
     "platformHelp": "Admin tiếp nhận sự cố nền tảng về tài khoản, ứng dụng và đối soát Simulator; không có tiền cọc, ví/nạp rút hoặc queue hoàn toàn nền tảng.",
     "escalatedHelp": "Admin xem xét các yêu cầu hỗ trợ được chuyển cấp, trả về trạm để tiếp tục xử lý hoặc kết thúc support case với lý do rõ ràng.",
-    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin chỉ xem xét ticket trạm khi có yêu cầu chuyển cấp đang mở."
+    "stationHelp": "Chủ trạm và Staff trực tiếp xử lý sự cố. Admin chỉ xem xét phiếu hỗ trợ trạm khi có yêu cầu chuyển cấp đang mở."
   },
   "meta": {
     "escalatedBadge": "Chờ Admin xem xét"
@@ -59,7 +59,7 @@
     "review": {
       "returnTitle": "Trả lại trạm xử lý",
       "closeTitle": "Kết thúc xử lý hỗ trợ",
-      "returnDescription": "Yêu cầu xem xét sẽ kết thúc; trạm tiếp tục xử lý ticket và có thể ghi kết luận kỹ thuật mới.",
+      "returnDescription": "Yêu cầu xem xét sẽ kết thúc; trạm tiếp tục xử lý phiếu hỗ trợ và có thể ghi kết luận kỹ thuật mới.",
       "closeDescription": "Đóng quy trình hỗ trợ với lý do và ghi chú xử lý rõ ràng.",
       "resultLabel": "Kết quả xem xét:",
       "noteLabel": "Ghi chú biên bản:",
@@ -100,7 +100,7 @@
         "amountLabel": "Giá trị gói sạc:",
         "obligationLabel": "Nghĩa vụ hoàn tiền:",
         "succeeded": "Đã hoàn thành công",
-        "pending": "Đang xử lý (PENDING)",
+        "pending": "Đang xử lý",
         "notEstablished": "Chưa xác lập nghĩa vụ hoàn",
         "latestDecision": "Quyết định gần nhất",
         "fullRefundPill": "Hoàn đủ 100% gói",
@@ -118,7 +118,7 @@
         "reasonLabel": "Căn cứ phán quyết (Lý do giải trình)",
         "reasonPlaceholder": "Trình bày chi tiết căn cứ dựa trên biên bản kỹ thuật, log trao đổi và dữ liệu sạc của vụ việc...",
         "reasonRequired": "Vui lòng cung cấp lý do giải trình phán quyết (tối thiểu 5 ký tự).",
-        "independenceNotice": "Lưu ý: Phán quyết chính sách hoàn tiền không thay thế các thao tác đóng hồ sơ hỗ trợ (CLOSE_SUPPORT_CASE) hoặc trả case về trạm (RETURN_TO_STATION).",
+        "independenceNotice": "Lưu ý: Phán quyết chính sách hoàn tiền không thay thế các thao tác đóng hồ sơ hỗ trợ hoặc trả case về trạm.",
         "confirmBtn": "Ban hành phán quyết chính sách",
         "successToast": "Đã ban hành phán quyết chính sách hoàn tiền tranh chấp thành công!",
         "versionConflict": "Hồ sơ hoặc chuỗi quyết định đã thay đổi. Đang làm mới dữ liệu...",
@@ -126,7 +126,7 @@
         "affectedAtRequired": "Vui lòng chọn thời điểm xảy ra sự cố kỹ thuật của trạm.",
         "futureAffectedAt": "Thời điểm sự cố không thể ở tương lai.",
         "genericError": "Có lỗi xảy ra khi ban hành quyết định chính sách.",
-        "ticketBookingSub": "Phiếu: #{{ticketCode}} · Booking: {{bookingId}}",
+        "ticketBookingSub": "Phiếu: #{{ticketCode}} · Đặt chỗ: {{bookingId}}",
         "grantDesc": "Đủ căn cứ lỗi trạm. Hệ thống tự động thiết lập nghĩa vụ hoàn đủ 100% giá gói ({{amount}}).",
         "insufficientDesc": "Chưa đủ chứng cứ lỗi trạm. Ghi nhận kết quả rà soát, không sinh hoàn tiền và không hủy nghĩa vụ cũ.",
         "affectedAtHint": "Thời điểm diễn ra lỗi kỹ thuật",
@@ -189,7 +189,7 @@
       "eligibleAmount": "Số tiền đủ điều kiện hoàn",
       "obligation": "Nghĩa vụ hoàn tiền",
       "obligationNone": "Chưa xác lập nghĩa vụ hoàn",
-      "obligationPending": "Đang xử lý (PENDING)",
+      "obligationPending": "Đang xử lý",
       "obligationSucceeded": "Đã hoàn thành công",
       "needsReconciliation": "Thanh toán cần đối soát thủ công.",
       "sectionBasis": "Căn cứ & quyết định trước đó",
@@ -203,7 +203,7 @@
       "reviewBlocked": "Chưa đủ điều kiện rà soát: case phải đang mở và chính sách cho phép."
     },
     "ownerAdmission": {
-      "title": "Chủ trạm nhận trách nhiệm (BKG-056)",
+      "title": "Chủ trạm nhận trách nhiệm",
       "subtitle": "Giải quyết tranh chấp bằng cam kết hoàn đủ 100%",
       "refundEstablished": "Đã xác lập nghĩa vụ hoàn đủ 100% gói sạc",
       "refundEstablishedDesc": "Hệ thống đã ghi nhận trách nhiệm kỹ thuật và tự động xử lý hoàn tiền cho tài xế. Không cần thao tác thêm.",
@@ -342,10 +342,10 @@
   },
   "table": {
     "cols": {
-      "id": "MÃ",
+      "id": "Mã",
       "priority": "Ưu tiên",
       "content": "Nội dung",
-      "station": "TRẠM",
+      "station": "Trạm",
       "handler": "Người phụ trách",
       "status": "Trạng thái"
     },
@@ -446,11 +446,11 @@
       "title": "Chính sách bồi hoàn cọc",
       "autoGranted": "Đã có hồ sơ hoàn tiền",
       "autoGrantedBadge": "Có hồ sơ hoàn tiền",
-      "desc": "Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận ticket không phải bằng chứng đã chuyển tiền.",
+      "desc": "Xem trạng thái từng hồ sơ để biết nghĩa vụ đang chờ hay đã hoàn thành. Kết luận phiếu hỗ trợ không phải bằng chứng đã chuyển tiền.",
       "viewDetail": "Chi tiết hoàn tiền →",
       "policyNotice": "Lỗi trạm cần quyết định trách nhiệm đúng scope của Owner hoặc grant đúng case escalated của Admin; finding không tạo nghĩa vụ hay chuyển tiền."
     },
-    "loadError": "Không tải được ticket: {{message}}",
+    "loadError": "Không tải được phiếu hỗ trợ: {{message}}",
     "thread": "Luồng trao đổi & giải quyết sự cố",
     "composerPlaceholder": "Nhập phản hồi hoặc hướng dẫn xử lý…",
     "send": "Gửi",

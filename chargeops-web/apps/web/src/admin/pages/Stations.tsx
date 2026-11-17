@@ -17,7 +17,7 @@ import {
   IconRefreshCw,
   IconSearch,
   IconShield,
-  MetricCard,
+  MetricCard, MetricStrip,
   MoreMenu,
   PageHeader,
   Pagination,
@@ -214,7 +214,7 @@ export function Stations() {
         ) : (
           <>
             {/* Top KPI Metric Cards */}
-            <div className="grid grid-cols-2 gap-[13px] xl:grid-cols-4">
+            <MetricStrip>
               <MetricCard
                 label={t('stations.kpi.total', 'Tổng số trạm sạc')}
                 value={String(total)}
@@ -235,7 +235,7 @@ export function Stations() {
                 value={String(pendingCount)}
                 accent="#6366f1"
               />
-            </div>
+            </MetricStrip>
 
             {/* Filter Tabs & Search Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
@@ -458,7 +458,7 @@ function StationRow({
     >
       {/* Mã trạm */}
       <div className="flex items-center gap-1.5 min-w-0 pr-2">
-        <span className="font-mono text-[11.5px] font-bold text-brand truncate">
+        <span className="tabular-nums text-[11.5px] font-bold text-brand truncate">
           {s.stationCode || s.id}
         </span>
         <button
@@ -467,7 +467,7 @@ function StationRow({
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-faint hover:bg-chip hover:text-ink transition"
           title={t('stations.drawer.copyCode', 'Sao chép mã')}
         >
-          {copied ? <IconCheck size={12} className="text-good" /> : <span className="text-[11px] font-mono">⧉</span>}
+          {copied ? <IconCheck size={12} className="text-good" /> : <span className="text-[11px] tabular-nums">⧉</span>}
         </button>
       </div>
 
@@ -490,7 +490,7 @@ function StationRow({
         <span className="font-semibold text-ink text-[12px] truncate">
           {s.ownerDisplayName || t('stations.table.cols.host', 'Chủ trạm')}
         </span>
-        <span className="font-mono text-[10.5px] text-faint truncate">
+        <span className="tabular-nums text-[11.5px] text-faint truncate">
           {s.ownerEmail || '—'}
         </span>
       </div>
@@ -531,7 +531,7 @@ function StationRow({
       </div>
 
       {/* Ngày tạo */}
-      <div className="text-[11px] text-faint font-mono">
+      <div className="text-[11px] text-faint tabular-nums">
         {s.createdAt ? formatDateVn(s.createdAt) : '—'}
       </div>
 

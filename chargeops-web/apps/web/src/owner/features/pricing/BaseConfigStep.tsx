@@ -99,7 +99,7 @@ export function BaseConfigStep({
             <div>
               <b>{t('pricing.steps.step1.flexiblePolicyTitle', { defaultValue: 'Quy cách tính giờ linh hoạt:' })}</b>{' '}
               {t('pricing.steps.step1.flexiblePolicyPrefix', { defaultValue: 'Tài xế chọn giờ bắt đầu bất kỳ (ví dụ' })}{' '}
-              <span className="font-mono text-ink">09:51</span>).{' '}
+              <span className="tabular-nums text-ink">09:51</span>).{' '}
               {t('pricing.steps.step1.flexiblePolicyWithMin', { defaultValue: 'Với mức tối thiểu' })}{' '}
               <span className="font-semibold text-ink">
                 {minBookingDurationMin} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
@@ -109,14 +109,14 @@ export function BaseConfigStep({
                 {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
               </span>
               , {t('pricing.steps.step1.flexiblePolicySuggests', { defaultValue: 'ứng dụng đề xuất các gói sạc:' })}{' '}
-              <span className="font-mono text-owner-deep font-semibold">
+              <span className="tabular-nums text-owner-deep font-semibold">
                 {minBookingDurationMin}
                 {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'} (
                 {t('pricing.steps.step1.flexiblePolicyUntil', { defaultValue: 'đến' })}{' '}
                 {minBookingDurationMin === 30 ? '10:21' : minBookingDurationMin === 60 ? '10:51' : '11:21'})
               </span>
               {minBookingDurationMin < 180 && (
-                <span className="font-mono text-muted">
+                <span className="tabular-nums text-muted">
                   , {minBookingDurationMin + 30}
                   {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}, {minBookingDurationMin + 60}
                   {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' }) === 'phút' ? 'p' : 'm'}... (
@@ -149,7 +149,7 @@ export function BaseConfigStep({
               <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.turnaroundBufferTitle', { defaultValue: 'Thời gian giãn ca (đổi xe)' })}
               </div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+              <div className="mt-1 tabular-nums text-[14px] font-bold text-ink">
                 {SYSTEM_BOOKING_RULES.TURNAROUND_BUFFER_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
               </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
@@ -163,7 +163,7 @@ export function BaseConfigStep({
               <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.stepIncrementTitle', { defaultValue: 'Bước tăng thời gian' })}
               </div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+              <div className="mt-1 tabular-nums text-[14px] font-bold text-ink">
                 {SYSTEM_BOOKING_RULES.DURATION_STEP_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })}
               </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
@@ -177,7 +177,7 @@ export function BaseConfigStep({
               <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.maxDurationTitle', { defaultValue: 'Thời lượng sạc tối đa' })}
               </div>
-              <div className="mt-1 font-mono text-[14px] font-bold text-ink">
+              <div className="mt-1 tabular-nums text-[14px] font-bold text-ink">
                 {SYSTEM_BOOKING_RULES.MAX_BOOKING_DURATION_MINUTES} {t('pricing.steps.step1.minutesUnit', { defaultValue: 'phút' })} (3h)
               </div>
               <div className="mt-0.5 text-[10.5px] text-muted leading-tight">
@@ -211,14 +211,14 @@ export function BaseConfigStep({
             {t('pricing.steps.step1.basePriceLabel', { defaultValue: 'GIÁ SẠC CƠ BẢN' })}
           </div>
           <div className="flex h-[48px] items-center gap-[11px] rounded-[11px] border border-line px-3.5 bg-surface">
-            <span className="font-mono text-[16px] font-semibold text-faint">₫</span>
+            <span className="tabular-nums text-[16px] font-semibold text-faint">₫</span>
             <input
               value={basePriceVnd}
               onChange={(e) => onBasePrice(Number(e.target.value.replace(/\D/g, '')) || 0)}
-              className="min-w-0 flex-1 border-none bg-transparent font-mono text-[17px] font-semibold text-ink outline-none"
+              className="min-w-0 flex-1 border-none bg-transparent tabular-nums text-[17px] font-semibold text-ink outline-none"
               placeholder="3400"
             />
-            <span className="font-mono text-[11px] font-medium text-faint">/kWh</span>
+            <span className="tabular-nums text-[11px] font-medium text-faint">/kWh</span>
             <span className="shrink-0 rounded-full bg-owner-soft px-[11px] py-1 text-[10.5px] font-semibold text-owner-deep">
               {t('pricing.steps.step1.basePriceSub', { defaultValue: 'Giá gốc' })}
             </span>

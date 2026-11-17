@@ -247,7 +247,7 @@ export function Transactions() {
                     <span className="text-good font-semibold">
                       {t('transactions.metrics.netDelta', 'Thu ròng khả dụng')}
                     </span>
-                    <span className="text-faint font-mono">
+                    <span className="text-faint tabular-nums">
                       {formatVnd(s.netVnd)}
                     </span>
                   </div>
@@ -270,7 +270,7 @@ export function Transactions() {
                     <span className="text-muted font-medium">
                       {t('transactions.metrics.avgDelta', 'Mỗi phiên sạc')}
                     </span>
-                    <span className="text-faint font-mono">
+                    <span className="text-faint tabular-nums">
                       {formatVnd(s.avgVnd)}
                     </span>
                   </div>
@@ -326,13 +326,13 @@ export function Transactions() {
                               <div className="text-[12.5px] font-bold text-ink">
                                 {t(`transactions.methods.${m.method}`, m.method)}
                               </div>
-                              <div className="text-[10.5px] text-faint font-mono">
+                              <div className="text-[11.5px] text-faint tabular-nums">
                                 Gateway: {m.method}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[14px] font-extrabold text-ink font-mono">
+                            <div className="text-[14px] font-extrabold text-ink tabular-nums">
                               {m.pct}%
                             </div>
                             <div className="text-[10px] text-muted font-semibold">
@@ -452,7 +452,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
     >
       {/* Transaction ID with hover copy */}
       <div className="flex items-center gap-1.5 min-w-0 pr-2">
-        <span className="font-mono text-[11.5px] font-bold text-brand truncate">{tx.id}</span>
+        <span className="tabular-nums text-[11.5px] font-bold text-brand truncate">{tx.id}</span>
         <button
           type="button"
           onClick={() => handleCopy(tx.id)}
@@ -465,7 +465,7 @@ function TransactionRow({ tx }: { tx: Transaction }) {
 
       {/* Booking Reference */}
       <div className="min-w-0 pr-2">
-        <span className="font-mono text-[11px] text-muted truncate hover:text-ink transition cursor-pointer">
+        <span className="tabular-nums text-[11px] text-muted truncate hover:text-ink transition cursor-pointer">
           {tx.bookingId}
         </span>
       </div>
@@ -503,13 +503,13 @@ function TransactionRow({ tx }: { tx: Transaction }) {
       </div>
 
       {/* Amount with bold monospace alignment */}
-      <div className="text-right font-mono font-bold text-[13px]" style={{ color }}>
+      <div className="text-right tabular-nums font-bold text-[13px]" style={{ color }}>
         {tx.amountVnd < 0 ? '−' : '+'}
         {formatVnd(Math.abs(tx.amountVnd))}
       </div>
 
       {/* Date */}
-      <div className="text-right text-[11px] text-faint font-mono">
+      <div className="text-right text-[11px] text-faint tabular-nums">
         {formatDateVn(tx.date)}
       </div>
     </div>

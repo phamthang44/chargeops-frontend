@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { MetricCard } from '@chargeops/ui';
+import { MetricCard, MetricStrip } from '@chargeops/ui';
 import { isStationDriverEligible, type Station } from '@chargeops/api';
 
 /** Four-metric strip above the station grid. */
@@ -25,7 +25,7 @@ export function StationSummary({ stations }: { stations: Station[] }) {
   );
 
   return (
-    <div className="mb-3.5 grid grid-cols-2 gap-[11px] md:grid-cols-4">
+    <MetricStrip className="mb-4">
       <MetricCard label={t('stations.summary.total', { defaultValue: 'Tổng số trạm' })} value={String(stations.length)} accent="#5b54e8" />
       <MetricCard
         label={t('stations.summary.driverEligible', { defaultValue: 'Hiển thị với tài xế' })}
@@ -34,6 +34,6 @@ export function StationSummary({ stations }: { stations: Station[] }) {
       />
       <MetricCard label={t('stations.summary.pending', { defaultValue: 'Chờ duyệt' })} value={String(pending)} accent="#9a6b16" />
       <MetricCard label={t('stations.summary.online', { defaultValue: 'Trụ sạc Online' })} value={`${online}/${chargers}`} accent="var(--color-ink)" />
-    </div>
+    </MetricStrip>
   );
 }

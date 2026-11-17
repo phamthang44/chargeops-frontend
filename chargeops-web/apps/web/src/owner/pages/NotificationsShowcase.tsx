@@ -110,7 +110,7 @@ export function NotificationsShowcase() {
     if (type === 'overheat') {
       newNotif = {
         id,
-        title: '🔥 BÁO ĐỘNG: Quá nhiệt Trụ #CHG-05 (72°C)',
+        title: 'BÁO ĐỘNG: Quá nhiệt Trụ #CHG-05 (72°C)',
         subtitle: 'Trạm Mỹ Đình báo động nhiệt độ cao bất thường. Cần kiểm tra quạt tản nhiệt!',
         time: 'Vừa xong',
         tone: 'bad',
@@ -125,7 +125,7 @@ export function NotificationsShowcase() {
     } else if (type === 'session') {
       newNotif = {
         id,
-        title: '⚡ Phiên sạc mới hoàn tất #CHG-9990',
+        title: 'Phiên sạc mới hoàn tất #CHG-9990',
         subtitle: 'Tài xế sạc thành công 38 kWh tại Trụ #01. Doanh thu vừa cộng +190.000đ',
         time: 'Vừa xong',
         tone: 'good',
@@ -140,7 +140,7 @@ export function NotificationsShowcase() {
     } else if (type === 'ticket') {
       newNotif = {
         id,
-        title: '🎟️ Yêu cầu hỗ trợ mới #TK-9912',
+        title: 'Yêu cầu hỗ trợ mới #TK-9912',
         subtitle: 'Khách hàng yêu cầu hỗ trợ hướng dẫn sử dụng ứng dụng thanh toán QR.',
         time: 'Vừa xong',
         tone: 'warn',
@@ -154,7 +154,7 @@ export function NotificationsShowcase() {
     } else {
       newNotif = {
         id,
-        title: '⚠️ Trầm ngắt kết nối mạng OCPP',
+        title: 'Trầm ngắt kết nối mạng OCPP',
         subtitle: 'Mất tín hiệu kết nối Internet tại Trạm Nam Từ Liêm trong 3 phút qua.',
         time: 'Vừa xong',
         tone: 'bad',
@@ -199,7 +199,7 @@ export function NotificationsShowcase() {
       {/* Top Showcase Navigation Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-5">
         <div>
-          <span className="rounded-full bg-brand/10 border border-brand/20 px-3 py-1 font-mono text-[10.5px] font-extrabold text-brand uppercase tracking-wider">
+          <span className="rounded-full bg-brand/10 border border-brand/20 px-3 py-1 tabular-nums text-[11.5px] font-extrabold text-brandr">
             UI/UX Showcase & Live Design
           </span>
           <h2 className="mt-2 text-2xl font-black tracking-tight text-ink">
@@ -220,7 +220,7 @@ export function NotificationsShowcase() {
               demoView === 'center' ? 'bg-ink text-surface shadow-xs' : 'text-body hover:bg-chip',
             ].join(' ')}
           >
-            📋 Trung tâm Thông báo (Full Inbox)
+            Trung tâm Thông báo (Full Inbox)
           </button>
           <button
             type="button"
@@ -230,7 +230,7 @@ export function NotificationsShowcase() {
               demoView === 'popover' ? 'bg-ink text-surface shadow-xs' : 'text-body hover:bg-chip',
             ].join(' ')}
           >
-            🔔 Chuông Dropdown (Header Bell)
+            Chuông Dropdown (Header Bell)
           </button>
         </div>
       </div>

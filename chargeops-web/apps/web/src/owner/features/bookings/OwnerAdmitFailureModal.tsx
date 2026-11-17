@@ -219,7 +219,7 @@ export function OwnerAdmitFailureModal({
           </div>
           <div className="flex justify-between border-t border-hairline pt-2 text-brand">
             <span className="font-semibold">{t('bookings.ownerAdmitModal.refundObligationLabel', 'Nghĩa vụ hoàn lại cho khách (100%):')}</span>
-            <span className="font-mono font-bold text-[13.5px]">{formatVnd(refundAmount)}</span>
+            <span className="tabular-nums font-bold text-[13.5px]">{formatVnd(refundAmount)}</span>
           </div>
         </div>
 

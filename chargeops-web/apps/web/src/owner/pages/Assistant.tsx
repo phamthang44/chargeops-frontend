@@ -182,7 +182,7 @@ function BotMessageContent({ text }: BotMessageContentProps) {
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-muted/70">
-              <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 tabular-nums text-[11.5px] text-muted">
                 {t('assistant.thinking.badge', { defaultValue: 'Reasoning' })}
               </span>
               {showThinking ? <IconChevronUp size={13} /> : <IconChevronDown size={13} />}
@@ -683,7 +683,7 @@ export function Assistant() {
                       {c.title || 'Hội thoại'}
                     </span>
                     {formattedTime && (
-                      <span className="text-[10px] text-muted shrink-0 font-mono">
+                      <span className="text-[11.5px] text-muted shrink-0 tabular-nums">
                         {formattedTime}
                       </span>
                     )}
@@ -738,10 +738,10 @@ export function Assistant() {
                       ? conversations.find((c) => c.id === currentConversationId)?.title || t('assistant.title')
                       : t('assistant.title')}
                   </span>
-                  <span className="rounded-full bg-brand-soft px-2 py-0.5 font-mono text-[10px] font-semibold text-brand">
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 tabular-nums text-[11.5px] font-semibold text-brand">
                     v4.9 RAG
                   </span>
-                  <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[10px] font-medium text-muted uppercase">
+                  <span className="rounded-full border border-line px-2 py-0.5 tabular-nums text-[11.5px] font-medium text-muted">
                     {currentLocale}
                   </span>
                 </div>
@@ -836,7 +836,7 @@ export function Assistant() {
                                             <span>{cit.documentName || cit.documentId || `Văn bản #${idx + 1}`}</span>
                                           </div>
                                           {scorePercent != null && (
-                                            <span className="rounded bg-brand-soft px-1.5 py-0.5 font-mono text-[10.5px] font-semibold text-brand">
+                                            <span className="rounded bg-brand-soft px-1.5 py-0.5 tabular-nums text-[11.5px] font-semibold text-brand">
                                               {t('assistant.relevance', { score: scorePercent })}
                                             </span>
                                           )}
@@ -885,7 +885,7 @@ export function Assistant() {
                   <div className="flex-1">
                     <div className="text-[13px] font-semibold">{errorState.message}</div>
                     {errorState.code && (
-                      <div className="mt-0.5 font-mono text-[11px] text-rose-700/80 dark:text-rose-300/80">
+                      <div className="mt-0.5 tabular-nums text-[11px] text-rose-700/80 dark:text-rose-300/80">
                         Mã lỗi: {errorState.code} {errorState.status ? `(${errorState.status})` : ''}
                       </div>
                     )}
@@ -947,7 +947,7 @@ export function Assistant() {
                 >
                   <IconSparkles size={13} className="text-brand group-hover:text-white transition" />
                   <span>{t('assistant.promptLibrary.openBtn', { defaultValue: 'Thư viện câu hỏi & Đáp án chuẩn (21 ca)' })}</span>
-                  <span className="rounded-full bg-brand/15 px-1.5 py-0.2 font-mono text-[10px] text-brand-strong group-hover:bg-white/20 group-hover:text-white">
+                  <span className="rounded-full bg-brand/15 px-1.5 py-0.2 tabular-nums text-[11.5px] text-brand-strong group-hover:bg-white/20 group-hover:text-white">
                     21
                   </span>
                 </button>
@@ -993,7 +993,7 @@ export function Assistant() {
                   className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 pr-16 text-[13px] text-ink placeholder:text-faint focus:border-brand focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand/15 disabled:opacity-50 transition"
                 />
                 {input.length > 500 && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10.5px] text-faint">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 tabular-nums text-[11.5px] text-faint">
                     {input.length}/{MAX_QUESTION_LENGTH}
                   </span>
                 )}

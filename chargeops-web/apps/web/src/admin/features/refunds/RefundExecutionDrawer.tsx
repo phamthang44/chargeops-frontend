@@ -195,7 +195,7 @@ export function RefundExecutionDrawer({
           t('refunds.drawer.toastSuccess', {
             ref: updated.transferReference || 'N/A',
             amount: formatVnd(updated.amount),
-            defaultValue: `Hoàn tất hoàn tiền: Mã tham chiếu ${updated.transferReference || 'N/A'}. Đã ghi nhận hoàn trả ${formatVnd(updated.amount)}.`,
+            defaultValue: `Đã ghi nhận kết quả xử lý hồ sơ hoàn: Mã tham chiếu ${updated.transferReference || 'N/A'}. Số tiền ghi nhận ${formatVnd(updated.amount)}.`,
           }),
           'success',
         );
@@ -358,12 +358,12 @@ export function RefundExecutionDrawer({
             <IconShield size={16} className="text-good shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-semibold text-good block">
-                {t('refunds.drawer.graceEntitlementTitle', 'Đủ điều kiện hoàn 100% (Theo chính sách bảo vệ khách hàng)')}
+                {t('refunds.drawer.graceEntitlementTitle', 'Đủ điều kiện lập nghĩa vụ hoàn 100% giá gói')}
               </span>
               <span className="text-[11.5px] text-muted leading-relaxed block">
                 {t(
                   'refunds.drawer.graceEntitlementDesc',
-                  'Tài xế đã hủy trong 10 phút ân hạn đầu tiên. Quyền hoàn 100% là quyền lợi mặc định đã được chốt bởi chính sách. Thao tác tại đây nhằm kích hoạt kênh chi trả hoặc ghi nhận đối soát chuyển khoản ngân hàng.'
+                  'Lượt hủy đáp ứng hạn hoàn đã lưu. Thao tác tại đây chạy Simulator hoặc ghi nhận kết quả ngoài hệ thống; thành công trong demo không xác nhận giao dịch ngân hàng.'
                 )}
               </span>
             </div>
@@ -376,12 +376,12 @@ export function RefundExecutionDrawer({
             <IconBolt size={16} className="text-brand shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-semibold text-brand block">
-                {t('refunds.drawer.autoProcessingBannerTitle', 'Hệ thống đang tự động điều phối thực thi (Auto First Attempt)')}
+                {t('refunds.drawer.autoProcessingBannerTitle', 'Simulator đang xử lý lần thử hoàn đầu tiên')}
               </span>
               <span className="text-[11.5px] text-muted leading-relaxed block">
                 {t(
                   'refunds.drawer.autoProcessingBannerDesc',
-                  'Khoản hoàn tiền này thuộc chính sách tự động thực thi (AUTO_FIRST_ATTEMPT). Scheduler/worker hệ thống đang phát lệnh chi trả nền tảng. Admin không cần can thiệp trừ khi phát sinh lỗi.'
+                  'Simulator thực hiện lần thử đầu tiên cho nghĩa vụ hoàn. Nếu lần thử thất bại, nghĩa vụ vẫn ở trạng thái chờ; việc xử lý tiếp theo phụ thuộc quyền thao tác được phép. Thành công trong demo không xác nhận giao dịch ngân hàng.'
                 )}
               </span>
             </div>
@@ -532,7 +532,7 @@ export function RefundExecutionDrawer({
               <p className="text-[11.5px] text-muted leading-relaxed">
                 {t(
                   'refunds.drawer.simDesc',
-                  'Hệ thống sẽ gửi yêu cầu hoàn tiền qua adapter mô phỏng với Idempotency-Key chống trùng lặp. Kết quả hoàn thành công sẽ cập nhật thanh toán REFUNDED một lần duy nhất.'
+                  'Simulator xử lý lần thử trong môi trường demo với mã chống trùng lặp. Khi thành công, hồ sơ hoàn chuyển sang SUCCEEDED; không có giao dịch ngân hàng thật.'
                 )}
               </p>
 
@@ -672,10 +672,10 @@ export function RefundExecutionDrawer({
               {t('refunds.drawer.protectionTitle', 'Nguyên tắc vận hành & bảo vệ quyền lợi:')}
             </div>
             <p>
-              • {t('refunds.drawer.protectionPoint1', 'Mỗi giao dịch gửi đi đều kèm mã định danh bảo mật riêng biệt nhằm ngăn chặn hoàn tiền trùng lặp.')}
+              • {t('refunds.drawer.protectionPoint1', 'Mỗi lần thử dùng mã idempotency để hạn chế xử lý trùng lặp.')}
             </p>
             <p>
-              • {t('refunds.drawer.protectionPoint2', 'Đảm bảo quyền lợi khách hàng: Nếu lệnh chuyển tiền tạm thời chưa thành công, yêu cầu hoàn tiền vẫn được bảo lưu ở trạng thái Chờ xử lý. Quyền lợi của khách hàng luôn được bảo toàn.')}
+              • {t('refunds.drawer.protectionPoint2', 'Nếu lần thử thất bại, nghĩa vụ hoàn vẫn ở trạng thái chờ. Lần xử lý tiếp theo phụ thuộc quyền thao tác được cấp.')}
             </p>
           </div>
         </form>

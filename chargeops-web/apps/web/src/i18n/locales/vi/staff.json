@@ -140,7 +140,7 @@
       "connectorsSub": "{{available}} sẵn sàng",
       "offline": "Cổng ngoại tuyến",
       "offlineSub": "Cần kiểm tra ngay",
-      "allOnline": "Tất cả cổng đang hoạt động"
+      "allOnline": "Không có cổng nào đang được báo ngoại tuyến"
     }
   },
   "statusDialog": {
@@ -153,10 +153,10 @@
     "incidentBody": "Nếu thiết bị hỏng hoặc nguy hiểm cần ngắt điện ngay, kích hoạt báo cáo sự cố để chuyển cổng OFFLINE và chốt snapshot các đơn đặt chỗ.",
     "incidentBtn": "Kích hoạt Báo sự cố khẩn cấp",
     "incidentBlockedTitle": "Cổng đang có sự cố khẩn cấp chưa khắc phục",
-    "incidentBlockedBody": "Hệ thống không cho phép bật lại cổng khi còn sự cố mở (lỗi STAFF_OP_004). Vui lòng sử dụng tính năng \"Khắc phục sự cố\" để hoàn tất quy trình phục hồi trước.",
+    "incidentBlockedBody": "Không thể bật lại cổng khi sự cố vẫn đang mở. Hãy hoàn tất quy trình khắc phục sự cố trước.",
     "reasonLabel": "Lý do thay đổi trạng thái",
     "reasonPlaceholder": "Nhập chi tiết lý do (bắt buộc cho trạng thái không phải Sẵn sàng, tối thiểu 3 ký tự)...",
-    "versionNote": "Phiên bản hiện tại: v{{version}} — thao tác dùng khóa lạc quan, nếu thiết bị vừa thay đổi bạn sẽ được yêu cầu thử lại.",
+    "versionNote": "Nếu thiết bị vừa được người khác cập nhật, hãy tải lại trạng thái rồi thử lại.",
     "presets": {
       "maintenance": [
         "Bảo trì định kỳ phần hardware",
@@ -205,7 +205,7 @@
         "status": "Trạng thái"
       },
       "noData": "—",
-      "phoneHiddenHint": "SĐT tài xế không nằm trong response đặt chỗ vận hành."
+      "phoneHiddenHint": "Thông tin liên hệ của tài xế không hiển thị trong giao diện Nhân viên."
     }
   }
 }

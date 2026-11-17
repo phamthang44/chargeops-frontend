@@ -68,7 +68,7 @@ export function ServiceFailureDecisionsCard({
             : 'warn';
 
           const resultLabel = dec.result === 'FULL_REFUND'
-            ? t('bookings.serviceFailureDecisions.result.FULL_REFUND', 'Hoàn đủ 100% gói')
+            ? t('bookings.serviceFailureDecisions.result.FULL_REFUND', '100% package refund obligation')
             : dec.result === 'NO_APPLIED_PAYMENT'
             ? t('bookings.serviceFailureDecisions.result.NO_APPLIED_PAYMENT', 'Không phát sinh hoàn tiền')
             : t('bookings.serviceFailureDecisions.result.INSUFFICIENT_EVIDENCE', 'Chưa đủ căn cứ hoàn');

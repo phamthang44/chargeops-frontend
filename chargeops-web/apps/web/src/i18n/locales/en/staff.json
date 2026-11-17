@@ -140,7 +140,7 @@
       "connectorsSub": "{{available}} available",
       "offline": "Offline connectors",
       "offlineSub": "Needs attention",
-      "allOnline": "All connectors operational"
+      "allOnline": "No connectors are reported offline"
     }
   },
   "statusDialog": {
@@ -156,7 +156,7 @@
     "incidentBlockedBody": "The system does not allow bringing the connector back online while an incident is open. Please use the \"Resolve incident\" action to complete recovery first.",
     "reasonLabel": "Reason for the status change",
     "reasonPlaceholder": "Enter the reason (required for any non-Available status, min 3 characters)...",
-    "versionNote": "Current version: v{{version}} — the request uses an optimistic lock; if the equipment changed you will be asked to retry.",
+    "versionNote": "If someone else has updated this equipment, reload its status and try again.",
     "presets": {
       "maintenance": [
         "Routine hardware maintenance",
@@ -205,7 +205,7 @@
         "status": "Status"
       },
       "noData": "—",
-      "phoneHiddenHint": "Driver phone is not part of the operational booking response."
+      "phoneHiddenHint": "Driver contact details are not shown in the Staff interface."
     }
   }
 }

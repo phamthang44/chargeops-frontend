@@ -591,13 +591,13 @@ export function TicketDetailScreen() {
                   <View style={styles.resolutionHeader}>
                     <Ionicons name="cash-outline" size={20} color="#10B981" />
                     <Text style={[styles.resolutionTitle, { color: '#059669' }]}>
-                      {t('ticket.detail.refundAppliedTitle', 'Hoàn tiền đơn sạc')}
+                      {t('ticket.detail.refundAppliedTitle', 'Related refund record')}
                     </Text>
                   </View>
                   <Text style={[styles.resolutionBody, { color: themeColors.textBody }]}>
                     {t(
                       'ticket.detail.refundAppliedBody',
-                      'Khoản hoàn tiền liên quan đến phiếu này đã được ghi nhận theo chính sách đặt chỗ. Vui lòng kiểm tra mục Lịch sử đặt chỗ để biết chi tiết.'
+                      'A refund record is linked to this booking. Check its status in Booking History; this ticket does not confirm that funds were transferred.'
                     )}
                   </Text>
                 </View>

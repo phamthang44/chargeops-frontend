@@ -29,7 +29,8 @@
   "equipment": {
     "title": "Equipment to check",
     "all": "Manage equipment",
-    "empty": "All station equipment is operating normally.",
+    "empty": "No equipment needs review.",
+    "emptyDesc": "No items match the current alert filters; this does not certify hardware health.",
     "types": { "CHARGE_POINT": "Charge point", "CONNECTOR": "Connector" },
     "reasons": {
       "CHARGE_POINT_OFFLINE": "Charge point is offline",

@@ -199,7 +199,7 @@ export function OwnerAdmitFailureModal({
             <p>
               {t(
                 'bookings.ownerAdmitModal.warningDesc',
-                'Thao tác này xác nhận sự cố trạm đã ảnh hưởng đến đặt chỗ của tài xế. Hệ thống sẽ ghi nhận quyết định bất biến và lập tức xác lập nghĩa vụ hoàn đủ 100% giá gói vào tài khoản mô phỏng của tài xế mà không cần can thiệp từ quản trị viên.'
+                'This action records that a station incident affected the booking and establishes a 100% package-price refund obligation. Refund execution is tracked separately in the Simulator; this does not confirm a bank transfer.'
               )}
             </p>
           </div>

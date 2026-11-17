@@ -87,7 +87,7 @@ export function ScheduleHistoryDrawer({
               {t('pricing.history.title', { defaultValue: 'Lịch sử giờ hoạt động' })}
             </div>
             <div className="text-[11.5px] text-muted">
-              {t('pricing.history.subtitle', { defaultValue: 'Nhật ký các phiên bản giờ mở/đóng đã áp dụng cho trạm' })}
+              {t('pricing.history.subtitle', { defaultValue: 'Các phiên bản lịch mở cửa cùng mốc lưu, bắt đầu và kết thúc hiệu lực.' })}
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function ScheduleHistoryDrawer({
         <b>{t('pricing.history.calloutTitle', { defaultValue: 'Quy cách chu kỳ giờ hoạt động:' })}</b>{' '}
         {t('pricing.history.calloutDesc', {
           defaultValue:
-            'Giờ mở/đóng là lịch lặp lại hàng tuần. Khi bạn xác nhận Lưu & áp dụng ngay, phiên bản cũ sẽ chốt mốc dừng, và phiên bản mới này sẽ duy trì hiệu lực xuyên suốt các tuần cho đến lần chỉnh sửa tiếp theo.',
+            'Giờ mở/đóng lặp lại hàng tuần. Cấu hình thương mại đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam). Lịch hiện hành tiếp tục có hiệu lực đến đúng mốc đó. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.',
         })}
       </div>
 
@@ -129,6 +129,22 @@ export function ScheduleHistoryDrawer({
         <div className="flex flex-col gap-3.5">
           {history.map((item, index) => {
             const isActive = item.status === 'ACTIVE';
+            const isPending = item.status === 'PENDING';
+            const isExpired = item.status === 'EXPIRED';
+            const isCancelled = item.status === 'CANCELLED';
+            const systemName = t('common:system', { defaultValue: 'Hệ thống' });
+            const actorName = isCancelled
+              ? item.cancelledByName || systemName
+              : item.changedByName || systemName;
+            const statusLabel = isActive
+              ? t('pricing.steps.step2.activeSchedule', { defaultValue: 'Đang áp dụng' })
+              : isPending
+                ? t('pricing.history.pending', { defaultValue: 'Sắp áp dụng' })
+                : isExpired
+                  ? t('pricing.history.expired', { defaultValue: 'Đã hết hiệu lực' })
+                  : isCancelled
+                    ? t('pricing.history.cancelled', { defaultValue: 'Đã hủy trước khi có hiệu lực' })
+                    : t('pricing.history.unknownStatus', { defaultValue: 'Trạng thái chưa được hỗ trợ' });
             return (
               <div
                 key={item.scheduleId || index}
@@ -148,7 +164,7 @@ export function ScheduleHistoryDrawer({
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-[11px] font-medium text-muted border border-hairline">
-                        {t('pricing.history.expired', { defaultValue: 'Đã hết hiệu lực' })}
+                        {statusLabel}
                       </span>
                     )}
                   </div>
@@ -168,21 +184,28 @@ export function ScheduleHistoryDrawer({
                         </div>
                       </div>
                       <div>
-                        <span className="text-faint">{t('pricing.history.validityPeriod', { defaultValue: 'Thời hạn hiệu lực:' })}</span>
+                        <span className="text-faint">{t('pricing.history.validityPeriod', { defaultValue: 'Có hiệu lực đến (không bao gồm):' })}</span>
                         <div className="font-bold text-emerald-600">
-                          {t('pricing.history.activeBadge', { defaultValue: 'Đang áp dụng (Lặp lại hàng tuần)' })}
+                          {item.effectiveTo
+                            ? formatDateTimeVn(item.effectiveTo)
+                            : t('pricing.history.noScheduledEnd', { defaultValue: 'Chưa có mốc kết thúc' })}
                         </div>
                       </div>
                     </div>
                     <div className="rounded-[7px] bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-700 leading-snug">
-                      {t('pricing.history.activeHint', {
-                        defaultValue: 'Phiên bản này đang chạy và sẽ tự động lặp lại mỗi tuần cho đến khi bạn cập nhật lịch mới.',
-                      })}
+                      {item.effectiveTo
+                        ? t('pricing.history.activeHintUntil', {
+                            effectiveTo: formatDateTimeVn(item.effectiveTo),
+                            defaultValue: `Lịch lặp lại hàng tuần đến ${formatDateTimeVn(item.effectiveTo)}; phiên bản kế tiếp bắt đầu đúng mốc đó.`,
+                          })
+                        : t('pricing.history.activeHint', {
+                            defaultValue: 'Lịch này lặp lại hàng tuần đến khi có phiên bản thay thế.',
+                          })}
                     </div>
                     <div className="pt-1 border-t border-hairline flex items-center justify-between text-[11.5px]">
-                      <span className="text-muted">{t('pricing.history.updatedBy', { defaultValue: 'Người cập nhật:' })}</span>
+                      <span className="text-muted">{t('pricing.history.savedByAt', { defaultValue: 'Người lưu / lưu lúc:' })}</span>
                       <span className="font-medium text-ink">
-                        {item.changedByName || t('common:system', { defaultValue: 'Hệ thống' })}
+                        {actorName} · {formatDateTimeVn(item.changedAt)}
                       </span>
                     </div>
                   </div>
@@ -190,28 +213,64 @@ export function ScheduleHistoryDrawer({
                   <div className="flex flex-col gap-2 text-[12px]">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-faint">{t('pricing.history.appliedAt', { defaultValue: 'Bắt đầu áp dụng:' })}</span>
+                        <span className="text-faint">
+                          {isPending || isCancelled
+                            ? t('pricing.history.scheduledFrom', { defaultValue: 'Dự kiến có hiệu lực từ:' })
+                            : isExpired
+                              ? t('pricing.history.appliedAt', { defaultValue: 'Bắt đầu có hiệu lực:' })
+                              : t('pricing.history.recordedFrom', { defaultValue: 'Mốc bắt đầu ghi nhận:' })}
+                        </span>
                         <div className="font-semibold text-ink">
                           {formatDateTimeVn(item.effectiveFrom)}
                         </div>
                       </div>
                       <div>
-                        <span className="text-faint">{t('pricing.history.endedAt', { defaultValue: 'Được thay thế lúc:' })}</span>
+                        <span className="text-faint">
+                          {isPending
+                            ? t('pricing.history.currentUntil', { defaultValue: 'Lịch hiện hành có hiệu lực đến (không bao gồm):' })
+                            : isCancelled
+                              ? t('pricing.history.cancelledAt', { defaultValue: 'Đã hủy lúc:' })
+                              : isExpired
+                                ? t('pricing.history.endedAt', { defaultValue: 'Kết thúc hiệu lực (mốc này không bao gồm):' })
+                                : t('pricing.history.recordedUntil', { defaultValue: 'Mốc kết thúc ghi nhận:' })}
+                        </span>
                         <div className="font-semibold text-ink">
-                          {item.effectiveTo ? formatDateTimeVn(item.effectiveTo) : '—'}
+                          {isPending
+                            ? formatDateTimeVn(item.effectiveFrom)
+                            : isCancelled
+                              ? item.cancelledAt
+                                ? formatDateTimeVn(item.cancelledAt)
+                                : t('pricing.history.missingCancelledAt', { defaultValue: 'Không có dữ liệu hủy' })
+                              : item.effectiveTo
+                                ? formatDateTimeVn(item.effectiveTo)
+                                : t('pricing.history.missingEnd', { defaultValue: 'Không có dữ liệu kết thúc' })}
                         </div>
                       </div>
                     </div>
-                    {item.effectiveTo && (
+                    {isExpired && item.effectiveTo && (
                       <div className="text-[11px] text-muted">
-                        {t('pricing.history.duration', { defaultValue: 'Thời gian đã vận hành: ' })}
+                        {t('pricing.history.duration', { defaultValue: 'Khoảng thời gian phiên bản có hiệu lực: ' })}
                         <span className="font-semibold text-ink">{getActiveDuration(item.effectiveFrom, item.effectiveTo, t)}</span>
                       </div>
                     )}
+                    {isPending && (
+                      <div className="text-[11px] text-muted">
+                        {t('pricing.history.pendingHint', { defaultValue: 'Phiên bản này chưa được áp dụng; lịch hiện hành giữ hiệu lực đến đúng mốc trên.' })}
+                      </div>
+                    )}
+                    {isCancelled && (
+                      <div className="text-[11px] text-muted">
+                        {t('pricing.history.cancelledHint', { defaultValue: 'Phiên bản này bị hủy trước ngày dự kiến có hiệu lực nên chưa từng được áp dụng.' })}
+                      </div>
+                    )}
                     <div className="pt-1 border-t border-hairline flex items-center justify-between text-[11.5px]">
-                      <span className="text-muted">{t('pricing.history.updatedBy', { defaultValue: 'Người cập nhật:' })}</span>
+                      <span className="text-muted">
+                        {t(isCancelled ? 'pricing.history.cancelledBy' : 'pricing.history.savedBy', {
+                          defaultValue: isCancelled ? 'Người hủy:' : 'Người lưu:',
+                        })}
+                      </span>
                       <span className="font-medium text-ink">
-                        {item.changedByName || t('common:system', { defaultValue: 'Hệ thống' })}
+                        {actorName}
                       </span>
                     </div>
                   </div>

@@ -1338,11 +1338,13 @@ export interface StationScheduleHistoryItem {
   scheduleId: string;
   effectiveFrom: string;
   effectiveTo: string | null;
-  status: 'ACTIVE' | 'EXPIRED';
+  status: 'ACTIVE' | 'PENDING' | 'EXPIRED' | 'CANCELLED' | 'UNKNOWN';
   open24Hours: boolean;
   hours: OperatingHour[];
   changedByName: string;
   changedAt: string;
+  cancelledAt?: string | null;
+  cancelledByName?: string | null;
 }
 
 /* ---------- policy KB (FR15) ---------- */

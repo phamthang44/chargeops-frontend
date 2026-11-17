@@ -56,12 +56,12 @@ export function ReceiptsDrawer({ open, onClose, booking }: ReceiptsDrawerProps) 
         <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 text-[12px] text-muted">
           <div className="font-semibold text-ink flex items-center gap-1.5 mb-1">
             <IconCard size={14} className="text-brand" />
-            <span>{t('finance.receiptsDrawer.simulatorNotice', 'Chứng từ thanh toán điện tử (Payment Evidence)')}</span>
+            <span>{t('finance.receiptsDrawer.simulatorNotice', 'Simulator payment evidence')}</span>
           </div>
           <p className="leading-relaxed text-[11.5px]">
             {t(
               'finance.receiptsDrawer.simulatorNoticeDesc',
-              'Chứng từ được sinh tự động khi tài xế hoàn tất thanh toán cho phiên sạc. Gắn liền vĩnh viễn với đơn đặt chỗ để đối soát.'
+              'These records document Simulator transactions for platform reconciliation. A successful status does not confirm a real bank transfer.'
             )}
           </p>
         </div>

@@ -29,7 +29,8 @@
   "equipment": {
     "title": "Thiết bị cần kiểm tra",
     "all": "Quản lý thiết bị",
-    "empty": "Thiết bị trong trạm đang hoạt động bình thường.",
+    "empty": "Không có thiết bị cần kiểm tra.",
+    "emptyDesc": "Không có mục nào khớp bộ lọc cảnh báo hiện tại; điều này không xác nhận tình trạng phần cứng.",
     "types": { "CHARGE_POINT": "Trụ sạc", "CONNECTOR": "Đầu sạc" },
     "reasons": {
       "CHARGE_POINT_OFFLINE": "Trụ đang ngoại tuyến",

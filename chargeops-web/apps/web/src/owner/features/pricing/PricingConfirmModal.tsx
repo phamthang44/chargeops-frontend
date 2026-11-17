@@ -108,7 +108,7 @@ export function PricingConfirmModal({
             </div>
             <div className="mt-0.5 text-[12px] text-muted">
               {t('pricing.confirmModal.subtitle', {
-                defaultValue: 'Vui lòng kiểm tra lại các thông số cấu hình trước khi áp dụng cho trạm sạc.',
+                defaultValue: 'Vui lòng kiểm tra cấu hình và mốc bắt đầu có hiệu lực trước khi lưu.',
               })}
             </div>
           </div>
@@ -121,7 +121,7 @@ export function PricingConfirmModal({
             <span>{t('pricing.confirmModal.effectiveTimeLabel', { defaultValue: 'Thời điểm áp dụng:' })}</span>
           </div>
           <span className="font-bold text-ink">
-            {t('pricing.confirmModal.effectiveTimeValue', { defaultValue: 'Ngay sau khi xác nhận lưu' })}
+            {t('pricing.confirmModal.effectiveTimeValue', { defaultValue: 'Cấu hình đầu tiên có hiệu lực ngay. Các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam); cấu hình hiện tại giữ hiệu lực đến đúng mốc đó.' })}
           </span>
         </div>
 
@@ -256,7 +256,7 @@ export function PricingConfirmModal({
           <div className="mt-1 text-muted">
             {t('pricing.confirmModal.policyNoticeDesc', {
               defaultValue:
-                'Cấu hình mới chỉ áp dụng cho các lượt đặt chỗ phát sinh sau thời điểm lưu. Các lịch đặt đã được tài xế xác nhận trước đó vẫn được giữ nguyên vẹn mức giá và khung giờ cam kết ban đầu.',
+                'Lượt đặt mới dùng cấu hình có hiệu lực cho khung thời gian được chọn. Lượt đã xác nhận giữ nguyên giá và khung giờ đã chốt.',
             })}
           </div>
         </div>
@@ -275,7 +275,7 @@ export function PricingConfirmModal({
           >
             {isSaving
               ? t('pricing.saving', { defaultValue: 'Đang lưu…' })
-              : t('pricing.confirmModal.confirmBtn', { defaultValue: 'Lưu & áp dụng ngay' })}
+              : t('pricing.confirmModal.confirmBtn', { defaultValue: 'Xác nhận & Lưu' })}
           </Button>
         </div>
       </div>

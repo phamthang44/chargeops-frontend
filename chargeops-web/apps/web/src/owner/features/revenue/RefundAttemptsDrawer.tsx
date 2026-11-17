@@ -70,7 +70,11 @@ export function RefundAttemptsDrawer({
             <span className="text-[12px] text-muted">{t('finance.refunds.table.cols.status', 'Trạng thái nghĩa vụ')}:</span>
             <StatusPill
               tone={refund.status === 'SUCCEEDED' ? 'good' : refund.requiresOwnerAction ? 'bad' : 'warn'}
-              label={refund.status === 'SUCCEEDED' ? 'SUCCEEDED' : refund.requiresOwnerAction ? t('finance.refunds.statusPill.actionRequired', 'CẦN RETRY') : 'PENDING'}
+              label={refund.status === 'SUCCEEDED'
+                ? t('finance.refunds.statusPill.completed', 'Đã ghi nhận thành công theo kênh thực thi')
+                : refund.requiresOwnerAction
+                ? t('finance.refunds.statusPill.actionRequired', 'Cần thử lại')
+                : t('finance.refunds.statusPill.pending', 'Đang chờ xử lý')}
             />
           </div>
 
@@ -91,7 +95,7 @@ export function RefundAttemptsDrawer({
               <span>
                 {t(
                   'finance.attemptsDrawer.actionRequiredNotice',
-                  'Lần thử tự động qua cổng thanh toán đã thất bại. Vui lòng kiểm tra lý do lỗi và bấm "Thử lại hoàn tiền" để gửi yêu cầu mới.'
+                  'The latest refund execution attempt failed. Check the failure reason and refund record before retrying.'
                 )}
               </span>
             </div>
@@ -140,11 +144,15 @@ export function RefundAttemptsDrawer({
                     <div className="rounded-xl border border-hairline bg-surface p-3.5 shadow-2xs space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-[12.5px] text-ink">
-                          {t('finance.attemptsDrawer.attemptNo', { seq: att.sequenceNo || idx + 1, defaultValue: `Lần #${att.sequenceNo || idx + 1}` })} · {att.executionMode === 'SIMULATOR' ? t('finance.attemptsDrawer.autoMode', 'Tự động') : t('finance.attemptsDrawer.manualMode', 'Thủ công')}
+                          {t('finance.attemptsDrawer.attemptNo', { seq: att.sequenceNo || idx + 1, defaultValue: `Attempt #${att.sequenceNo || idx + 1}` })} · {att.executionMode === 'SIMULATOR' ? t('finance.attemptsDrawer.autoMode', 'Simulator channel') : t('finance.attemptsDrawer.manualMode', 'Manual record')}
                         </span>
                         <StatusPill
                           tone={isSuccess ? 'good' : isFailed ? 'bad' : 'warn'}
-                          label={att.status}
+                          label={isSuccess
+                            ? t('finance.attemptsDrawer.statusSucceeded', 'Đã ghi nhận thành công')
+                            : isFailed
+                            ? t('finance.attemptsDrawer.statusFailed', 'Lần thử không thành công')
+                            : t('finance.attemptsDrawer.statusPending', 'Đang chờ kết quả')}
                         />
                       </div>
 

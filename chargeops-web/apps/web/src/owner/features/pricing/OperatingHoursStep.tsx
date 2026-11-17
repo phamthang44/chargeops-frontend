@@ -161,7 +161,7 @@ export function OperatingHoursStep({
 
           <div className="flex flex-col gap-1 border-t border-hairline pt-2 text-[11.5px] leading-relaxed text-muted">
             <div className="flex items-center gap-1.5 text-ink font-medium">
-              <span>{t('pricing.steps.step2.effectiveImmediately', { defaultValue: 'Các thay đổi sẽ có hiệu lực ngay sau khi bạn xác nhận lưu.' })}</span>
+              <span>{t('pricing.steps.step2.effectiveImmediately', { defaultValue: 'Cấu hình thương mại đầu tiên có hiệu lực ngay. Các lần chỉnh sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam); cấu hình hiện tại tiếp tục có hiệu lực đến đúng mốc đó.' })}</span>
             </div>
             <div className="flex items-center gap-1.5 text-faint">
               <span>{t('pricing.steps.step2.keepExistingBookings', { defaultValue: 'Các lịch đặt đã được xác nhận trước đó vẫn giữ nguyên vẹn khung giờ và mức giá cam kết.' })}</span>

@@ -152,7 +152,7 @@
     "allApproved": "All approved",
     "chargersOnline": "Online chargers",
     "chargersOffline": "{{count}} offline/maintenance",
-    "allOnline": "All chargers operational",
+    "allOnline": "No stations are reported offline",
     "connectorsAvailable": "Available connectors",
     "connectorsDelta": "{{charging}} charging · {{offline}} offline",
     "sessionsToday": "Sessions today",

@@ -9,8 +9,13 @@ const MCP_ENABLED = import.meta.env.VITE_OWNER_MCP_ENABLED?.trim().toLowerCase()
 function isMcpEndpoint(value: string) {
   try {
     const url = new URL(value);
+    const isLocalDevelopmentEndpoint =
+      import.meta.env.DEV &&
+      url.protocol === 'http:' &&
+      (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+
     return (
-      url.protocol === 'https:' &&
+      (url.protocol === 'https:' || isLocalDevelopmentEndpoint) &&
       url.pathname.replace(/\/+$/, '') === '/mcp' &&
       !url.username &&
       !url.password &&
@@ -136,7 +141,7 @@ export function OwnerAgentsSetup() {
                 </a>
               </div>
 
-              <div className="mt-4 rounded-xl bg-ink p-3 text-[11.5px] text-white">
+              <div className="mt-4 rounded-xl bg-night p-3 text-[12px] text-white">
                 <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono leading-relaxed">
                   {ready ? provider.commands : placeholderCommands}
                 </pre>
@@ -148,7 +153,7 @@ export function OwnerAgentsSetup() {
                   type="button"
                   onClick={() => void copyCommands(provider.id, provider.commands)}
                   disabled={!ready}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-[11.5px] font-semibold text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-45"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-[11.5px] font-semibold text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-muted"
                 >
                   {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
                   {copied ? t('agents.copied') : t('agents.copyCommands')}

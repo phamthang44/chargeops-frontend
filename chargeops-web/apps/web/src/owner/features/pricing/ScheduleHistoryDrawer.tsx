@@ -95,11 +95,38 @@ export function ScheduleHistoryDrawer({
     >
       {/* Informational Callout */}
       <div className="rounded-[10px] border border-line bg-surface-2 p-3 text-[12px] leading-relaxed text-muted">
-        <b>{t('pricing.history.calloutTitle', { defaultValue: 'Phạm vi lịch sử và thời điểm hiệu lực:' })}</b>{' '}
-        {t('pricing.history.calloutDesc', {
-          defaultValue:
-            'Mỗi mục là một phiên bản của toàn bộ cấu hình thương mại (giá, thời lượng đặt tối thiểu, khung TOU và giờ mở/đóng). Sửa giá, thời lượng hoặc TOU cũng có thể tạo mục mới dù giờ mở/đóng không đổi. Khung lịch sử này hiện chỉ hiển thị giờ hoạt động và mốc hiệu lực, chưa cho biết trường nào đã thay đổi. Giờ mở/đóng lặp lại hàng tuần. Nếu trạm chưa có đủ giá và thời lượng đặt, lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay; các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam), còn cấu hình hiện hành có hiệu lực đến đúng mốc đó. Khoảng thời gian trên mỗi mục là thời gian phiên bản đó có hiệu lực, không phải độ dài chu kỳ tuần. Đóng trạm khẩn cấp được xử lý riêng và có hiệu lực ngay.',
-        })}
+        <b>{t('pricing.history.calloutTitle', { defaultValue: 'Hiệu lực & cách đọc lịch sử:' })}</b>
+        <ul className="mt-1.5 list-disc space-y-1 pl-4">
+          <li>
+            {t('pricing.history.calloutFirstSave', {
+              defaultValue: 'Lần lưu cấu hình đầy đủ đầu tiên có hiệu lực ngay.',
+            })}
+          </li>
+          <li>
+            {t('pricing.history.calloutLaterEdits', {
+              defaultValue:
+                'Các lần sửa sau bắt đầu lúc 00:00 thứ Hai kế tiếp (giờ Việt Nam); bản hiện tại giữ đến mốc đó.',
+            })}
+          </li>
+          <li>
+            {t('pricing.history.calloutWeeklyVersion', {
+              defaultValue:
+                'Lịch lặp hằng tuần. Mỗi phiên bản gộp giá, thời lượng tối thiểu, TOU và giờ mở/đóng.',
+            })}
+          </li>
+          <li>
+            {t('pricing.history.calloutEffectiveDuration', {
+              defaultValue:
+                'Sửa giá, thời lượng hoặc TOU cũng tạo phiên bản dù giờ không đổi. Thời lượng trên thẻ là thời gian có hiệu lực thực tế.',
+            })}
+          </li>
+          <li>
+            {t('pricing.history.calloutLimitAndEmergency', {
+              defaultValue:
+                'Lịch sử chưa cho biết trường nào đã đổi. Đóng trạm khẩn cấp có hiệu lực ngay.',
+            })}
+          </li>
+        </ul>
       </div>
 
       {isLoading ? (

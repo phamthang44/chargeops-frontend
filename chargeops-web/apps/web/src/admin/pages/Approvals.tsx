@@ -126,7 +126,7 @@ export function Approvals() {
             <div className="overflow-x-auto">
               <div className="min-w-[520px]">
                 <div
-                  className="grid bg-surface-2 px-3.5 py-[11px] text-[9.5px] font-semibold uppercase tracking-[0.05em] text-faint"
+                  className="grid bg-surface-2 px-3.5 py-[11px] text-[12px] font-medium text-muted"
                   style={{ gridTemplateColumns: '0.9fr 1.5fr 1.4fr 1fr 0.6fr' }}
                 >
                   <span>{t('approvals.table.cols.id')}</span>
@@ -266,7 +266,7 @@ function ApprovalDetail({
   return (
     <Card className="p-[17px]">
       <div className="mb-1 flex items-center justify-between">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-faint">{t('approvals.detail.title', { id: station.stationCode || station.id })}</div>
+        <div className="text-[12px] font-medium text-muted">{t('approvals.detail.title', { id: station.stationCode || station.id })}</div>
         <StatusPill tone="warn" label={t('approvals.detail.statusPending')} />
       </div>
       <div className="mt-1.5 text-[17px] font-bold">{detail?.name || station.name}</div>
@@ -290,7 +290,7 @@ function ApprovalDetail({
 
       {/* Assets / Documents */}
       <div className="mb-3.5 flex flex-col gap-2">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-faint">
+        <div className="text-[12px] font-medium text-muted">
           {t('approvals.detail.documents', { defaultValue: 'Hồ sơ & Tài liệu đính kèm' })}
           {detail?.assets?.length ? ` (${detail.assets.length})` : ''}
         </div>

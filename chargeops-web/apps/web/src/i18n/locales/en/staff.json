@@ -29,7 +29,7 @@
     },
     "nav": {
       "dashboard": {
-        "label": "Dashboard",
+        "label": "Overview",
         "title": "Operations overview",
         "subtitle": "Today's station operations."
       },

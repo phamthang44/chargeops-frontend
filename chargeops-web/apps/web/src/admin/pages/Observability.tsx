@@ -65,7 +65,7 @@ export function Observability() {
         className={`transition-all duration-300 ${
           isFullscreen
             ? 'fixed inset-0 z-50 flex flex-col bg-[#0b0c10] p-4'
-            : 'overflow-hidden rounded-2xl border border-line bg-surface shadow-xs'
+            : 'overflow-hidden rounded-card border border-line bg-surface shadow-xs'
         }`}
       >
         {/* Mission Control Action Bar */}

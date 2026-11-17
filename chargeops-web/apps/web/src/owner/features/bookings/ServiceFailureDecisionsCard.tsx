@@ -36,7 +36,7 @@ export function ServiceFailureDecisionsCard({
   if (allDecisions.length === 0) return null;
 
   return (
-    <Card className="rounded-2xl p-4 shadow-2xs">
+    <Card className="rounded-card p-4 shadow-2xs">
       <div className="mb-3.5 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-[13px] font-bold text-ink">
           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-warn-pill text-warn-deep">
@@ -117,7 +117,7 @@ export function ServiceFailureDecisionsCard({
 
               {/* Stored Reason Body */}
               <div className="rounded-lg bg-surface p-2.5 text-[11.5px] leading-relaxed text-body">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint mb-1">
+                <div className="text-[12px] font-medium text-muted mb-1">
                   {t('bookings.serviceFailureDecisions.reasonRecordedTitle', 'Nội dung lý do ghi nhận:')}
                 </div>
                 <div className="italic text-ink">"{dec.reason}"</div>

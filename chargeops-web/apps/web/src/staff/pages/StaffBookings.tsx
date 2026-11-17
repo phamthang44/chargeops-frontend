@@ -106,7 +106,7 @@ export function StaffBookings() {
 
       <section
         aria-label={t('bookings.filter.eyebrow')}
-        className="relative mb-4 rounded-2xl border border-line bg-surface px-4 pb-4 pt-3.5 shadow-2xs"
+        className="relative mb-4 rounded-card border border-line bg-surface px-4 pb-4 pt-3.5 shadow-2xs"
         style={{ animation: 'riseIn .6s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         {/* Header band — eyebrow · live count · reset island */}
@@ -197,7 +197,7 @@ export function StaffBookings() {
         <Card className="overflow-x-auto p-0">
           <div className="min-w-[860px]">
             <div
-              className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
+              className="grid bg-surface-2 px-4 py-[11px] text-[12px] font-medium text-muted"
               style={{ gridTemplateColumns: GRID }}
             >
               <span>{t('bookings.table.cols.id')}</span>

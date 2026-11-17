@@ -44,7 +44,7 @@ export function BaseConfigStep({
             </div>
           </div>
 
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
+          <div className="mb-2 text-[12px] font-medium text-muted">
             {t('pricing.steps.step1.durationLabel', { defaultValue: 'THỜI LƯỢNG ĐẶT TỐI THIỂU CHO PHÉP' })}
           </div>
           <div className="flex gap-[6px] rounded-[11px] bg-chip p-1">
@@ -133,7 +133,7 @@ export function BaseConfigStep({
         {/* Section 2: Global System Scheduling Policy (Fixed & Read-only) */}
         <div className="border-t border-hairline pt-4">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('pricing.steps.step1.systemPolicyTitle', {
                 defaultValue: 'QUY TẮC LÊN LỊCH CỐ ĐỊNH TOÀN HỆ THỐNG (SYSTEM POLICY)',
               })}
@@ -146,7 +146,7 @@ export function BaseConfigStep({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+              <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.turnaroundBufferTitle', { defaultValue: 'Thời gian giãn ca (đổi xe)' })}
               </div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">
@@ -160,7 +160,7 @@ export function BaseConfigStep({
             </div>
 
             <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+              <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.stepIncrementTitle', { defaultValue: 'Bước tăng thời gian' })}
               </div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">
@@ -174,7 +174,7 @@ export function BaseConfigStep({
             </div>
 
             <div className="rounded-[9px] border border-line bg-surface-2 p-2.5">
-              <div className="text-[10.5px] font-bold text-faint uppercase tracking-wider">
+              <div className="text-[12px] font-medium text-muted">
                 {t('pricing.steps.step1.maxDurationTitle', { defaultValue: 'Thời lượng sạc tối đa' })}
               </div>
               <div className="mt-1 font-mono text-[14px] font-bold text-ink">
@@ -207,7 +207,7 @@ export function BaseConfigStep({
             </div>
           </div>
 
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
+          <div className="mb-2 text-[12px] font-medium text-muted">
             {t('pricing.steps.step1.basePriceLabel', { defaultValue: 'GIÁ SẠC CƠ BẢN' })}
           </div>
           <div className="flex h-[48px] items-center gap-[11px] rounded-[11px] border border-line px-3.5 bg-surface">

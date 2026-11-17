@@ -50,7 +50,7 @@ export function ApproveModal({
 
       {/* Station Summary Box */}
       <div className="mt-4 rounded-[10px] bg-surface-2 p-3 text-[12px]">
-        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-faint">
+        <div className="mb-2 text-[12px] font-medium text-muted">
           {t('approveModal.stationInfoTitle', { defaultValue: 'THÔNG TIN TRẠM SẠC' })}
         </div>
         <div className="flex flex-col gap-1.5 font-medium">

@@ -100,7 +100,7 @@ export function TicketLifecycleStepper({
 
   return (
     <div
-      className={`rounded-2xl border border-line bg-surface px-4 py-4 sm:px-6 sm:py-5 shadow-xs ${className}`}
+      className={`rounded-card border border-line bg-surface px-4 py-4 sm:px-6 sm:py-5 shadow-xs ${className}`}
       aria-label={t('stepper.ariaLabel', 'Tiến trình xử lý phiếu hỗ trợ')}
     >
       {/* Desktop / Large Screen Fluid Stepper (Continuous Track Line) */}

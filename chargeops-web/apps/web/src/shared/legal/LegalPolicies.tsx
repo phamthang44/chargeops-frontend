@@ -322,11 +322,11 @@ export function LegalPolicies({
         {/* Right Main Viewer */}
         <div>
           {docLoading || !activeDoc ? (
-            <Skeleton className="h-[600px] rounded-2xl" />
+            <Skeleton className="h-[600px] rounded-card" />
           ) : (
             <div className="flex flex-col gap-4">
               {/* Document Overview Header Card */}
-              <div className="rounded-2xl border border-line bg-surface p-6 shadow-xs">
+              <div className="rounded-card border border-line bg-surface p-6 shadow-xs">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-md bg-owner-soft px-2.5 py-0.5 font-mono text-[11px] font-bold text-owner-deep">
                     <IconTag size={12} />
@@ -353,7 +353,7 @@ export function LegalPolicies({
                 </div>
 
                 {activeDoc.eyebrow && (
-                  <div className="text-[12px] font-semibold uppercase tracking-wider text-owner">
+                  <div className="text-[12px] font-medium text-owner">
                     {activeDoc.eyebrow}
                   </div>
                 )}

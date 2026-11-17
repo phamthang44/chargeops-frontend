@@ -346,7 +346,7 @@
       "priority": "PRIORITY",
       "content": "CONTENT",
       "station": "STATION",
-      "handler": "ASSIGNED STAFF",
+      "handler": "Assigned staff",
       "status": "STATUS"
     },
     "unassigned": "Pending Claim",

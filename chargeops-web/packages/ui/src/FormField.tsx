@@ -13,7 +13,7 @@ export interface FormFieldProps {
 export function FormField({ label, hint, error, required, children }: FormFieldProps) {
   return (
     <div>
-      <div className="mb-[7px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint">
+      <div className="mb-[7px] text-[12px] font-medium text-muted">
         {label} {required && <span className="text-bad">*</span>}
       </div>
       {children}

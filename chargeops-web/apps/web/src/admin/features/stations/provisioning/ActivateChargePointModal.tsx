@@ -47,7 +47,7 @@ export function ActivateChargePointModal({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-bold uppercase text-faint">
+          <label className="mb-1.5 block text-[12px] font-medium text-muted">
             {t('provisioning.workspace.activate.countLabel')}
           </label>
           <input

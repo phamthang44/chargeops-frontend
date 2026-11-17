@@ -69,7 +69,7 @@ export function IssueLicenseModal({
 
         {/* Station Summary Box */}
         <div className="mt-4 rounded-[10px] bg-surface-2 p-3 text-[12px]">
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-faint">
+          <div className="mb-2 text-[12px] font-medium text-muted">
             {t('issueLicenseModal.stationInfoTitle', { defaultValue: 'THÔNG TIN TRẠM SẠC' })}
           </div>
           <div className="flex flex-col gap-1.5 font-medium">
@@ -86,7 +86,7 @@ export function IssueLicenseModal({
 
         {/* Plan Selection */}
         <div className="mt-4 flex flex-col gap-2">
-          <label className="text-[11.5px] font-semibold uppercase tracking-wide text-faint">
+          <label className="text-[12px] font-medium text-muted">
             {t('issueLicenseModal.planLabel', { defaultValue: 'Gói subscription' })} <span className="text-bad">*</span>
           </label>
           <div className="grid grid-cols-2 gap-2.5">

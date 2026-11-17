@@ -155,7 +155,7 @@ export const StationGallery: React.FC<StationGalleryProps> = ({
                       cropMode: 'maintain_ratio',
                       quality: 80,
                     }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover transition-transform duration-300"
                   />
 
                   {/* Primary Badge */}

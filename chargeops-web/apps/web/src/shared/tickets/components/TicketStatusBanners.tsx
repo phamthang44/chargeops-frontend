@@ -49,7 +49,7 @@ export function TicketStatusBanners({
     <>
       {/* Administrative review, including its recorded outcome after completion. */}
       {escalation && (
-        <div className="flex items-start gap-3 rounded-2xl border border-brand-line bg-brand-soft/50 p-4 text-[12.5px] text-ink shadow-xs">
+        <div className="flex items-start gap-3 rounded-card border border-brand-line bg-brand-soft/50 p-4 text-[12.5px] text-ink shadow-xs">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand font-bold mt-0.5 border border-brand-line">
             <IconShieldAlert size={18} />
           </div>
@@ -170,7 +170,7 @@ export function TicketStatusBanners({
 
       {/* Contextual Supervisory Banner for Admin on Station Tickets (active only) */}
       {isAdminStationSupervisory && !isClosed && !isResolved && (
-        <div className="flex items-start gap-3 rounded-2xl border border-warn-border bg-warn-soft p-3.5 text-[12px] text-ink">
+        <div className="flex items-start gap-3 rounded-card border border-warn-border bg-warn-soft p-3.5 text-[12px] text-ink">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-pill text-warn-deep font-bold mt-0.5 border border-warn-border">
             <IconShieldAlert size={16} />
           </div>
@@ -187,7 +187,7 @@ export function TicketStatusBanners({
 
       {/* BKG-052 Resolution / Closure Policy Banner Bar */}
       {isResolved && (
-        <div className="rounded-2xl border border-warn-border bg-warn-soft p-4 shadow-xs">
+        <div className="rounded-card border border-warn-border bg-warn-soft p-4 shadow-xs">
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-warn-pill text-warn-deep border border-warn-border">
@@ -229,7 +229,7 @@ export function TicketStatusBanners({
 
       {/* Closed Banner Bar */}
       {isClosed && (
-        <div className="rounded-2xl border border-hairline bg-surface-2/70 p-4 shadow-sm">
+        <div className="rounded-card border border-hairline bg-surface-2/70 p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-chip text-muted">
               <IconLock size={17} strokeWidth={2.2} />

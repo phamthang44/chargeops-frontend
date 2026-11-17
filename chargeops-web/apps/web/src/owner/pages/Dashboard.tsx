@@ -260,7 +260,7 @@ function DashboardBody({ data }: { data: OwnerOperationsSummary }) {
       {hardware.totalConnectors > 0 && (
         <div className="mb-4 rounded-card border border-line bg-surface p-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">
+            <span className="text-[12px] font-medium text-muted">
               {t('hardwareDistribution.title', {
                 count: hardware.totalConnectors,
                 defaultValue: `Tình trạng cổng sạc hạ tầng (${hardware.totalConnectors} cổng)`,

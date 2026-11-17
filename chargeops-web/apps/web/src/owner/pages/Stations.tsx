@@ -47,6 +47,15 @@ export function Stations() {
     return (data as { items?: Station[] } | undefined)?.items ?? [];
   }, [data]);
 
+  // ?register=1 (from /owner/register) opens the registration form once, then leaves the URL clean.
+  useEffect(() => {
+    if (searchParams.get('register') !== '1') return;
+    setModalOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('register');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Handle URL query parameter ?stationId=... to auto-open station detail
   const stationIdParam = searchParams.get('stationId');
   useEffect(() => {

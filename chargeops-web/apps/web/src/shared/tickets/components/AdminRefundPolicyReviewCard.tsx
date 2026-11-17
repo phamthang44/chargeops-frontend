@@ -57,7 +57,7 @@ function Section({ index, title, children }: { index: string; title: string; chi
         <span className="rounded-md border border-brand-line bg-brand-soft px-1.5 py-[1px] font-mono text-[9.5px] font-bold text-brand">
           {index}
         </span>
-        <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{title}</h4>
+        <h4 className="text-[12px] font-medium text-muted">{title}</h4>
         <span className="h-px flex-1 bg-hairline" />
       </div>
       {children}
@@ -531,7 +531,7 @@ export function AdminRefundPolicyReviewCard({ ticket, escalation, admin, onOpenR
               </div>
 
               <div className="space-y-1.5 rounded-xl bg-surface-2 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                <p className="text-[12px] font-medium text-muted">
                   {t('escalation.dossier.conditionsTitle')}
                 </p>
                 <div className="flex flex-wrap gap-1.5">

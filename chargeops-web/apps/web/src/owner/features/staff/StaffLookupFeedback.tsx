@@ -89,7 +89,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
   // 1. In-flight Live Searching Shimmer State
   if (isSearching) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 shadow-xs animate-fadeIn">
+      <div className="flex items-center gap-3 rounded-card border border-line bg-surface p-3.5 shadow-xs animate-fadeIn">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-owner-soft text-owner">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-owner border-t-transparent" />
         </span>
@@ -128,7 +128,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
     };
 
     return (
-      <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs animate-fadeIn">
+      <div className="rounded-card border border-bad/30 bg-surface p-3.5 shadow-xs animate-fadeIn">
         {/* Header row: Icon, Category Badge, Code Chip & Retry Action */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
@@ -201,7 +201,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
     <div className="animate-fadeIn transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
       {/* ELIGIBLE */}
       {data.status === 'ELIGIBLE' && (
-        <div className="flex items-start gap-3.5 rounded-2xl border border-good/30 bg-surface p-3.5 shadow-xs min-w-0">
+        <div className="flex items-start gap-3.5 rounded-card border border-good/30 bg-surface p-3.5 shadow-xs min-w-0">
           <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-good text-[14px] font-bold text-white shadow-xs">
             {(data.displayName || data.email || 'U').charAt(0).toUpperCase()}
             <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-surface p-0.5">
@@ -230,7 +230,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* NOT_FOUND */}
       {data.status === 'NOT_FOUND' && (
-        <div className="rounded-2xl border border-warn/30 bg-surface p-3.5 shadow-xs">
+        <div className="rounded-card border border-warn/30 bg-surface p-3.5 shadow-xs">
           <div className="flex items-center gap-2.5 font-bold text-warn-deep">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
               <IconAlertCircle size={15} />
@@ -251,7 +251,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* SELF_ASSIGNMENT */}
       {data.status === 'SELF_ASSIGNMENT' && (
-        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+        <div className="rounded-card border border-bad/30 bg-surface p-3.5 shadow-xs">
           <div className="flex items-center gap-2.5 font-bold text-bad-deep">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
               <IconAlertTriangle size={15} />
@@ -266,7 +266,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* ALREADY_ASSIGNED */}
       {data.status === 'ALREADY_ASSIGNED' && (
-        <div className="rounded-2xl border border-warn/30 bg-surface p-3.5 shadow-xs">
+        <div className="rounded-card border border-warn/30 bg-surface p-3.5 shadow-xs">
           <div className="flex items-center gap-2.5 font-bold text-warn-deep">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warn-soft text-warn-deep border border-warn/20">
               <IconAlertTriangle size={15} />
@@ -281,7 +281,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* ROLE_NOT_ALLOWED */}
       {data.status === 'ROLE_NOT_ALLOWED' && (
-        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+        <div className="rounded-card border border-bad/30 bg-surface p-3.5 shadow-xs">
           <div className="flex items-center gap-2.5 font-bold text-bad-deep">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
               <IconShieldAlert size={15} />
@@ -296,7 +296,7 @@ export const StaffLookupFeedback = memo(function StaffLookupFeedback({
 
       {/* ACCOUNT_INACTIVE */}
       {data.status === 'ACCOUNT_INACTIVE' && (
-        <div className="rounded-2xl border border-bad/30 bg-surface p-3.5 shadow-xs">
+        <div className="rounded-card border border-bad/30 bg-surface p-3.5 shadow-xs">
           <div className="flex items-center gap-2.5 font-bold text-bad-deep">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-bad-soft text-bad-deep border border-bad/20">
               <IconAlertTriangle size={15} />

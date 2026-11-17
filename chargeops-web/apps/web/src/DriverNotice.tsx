@@ -17,7 +17,7 @@ export function DriverNotice() {
       }}
     >
       <div className="w-full max-w-[440px] rounded-panel border border-line bg-surface p-8 text-center shadow-[0_8px_24px_rgba(16,17,26,.06)]">
-        <span className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-[13px] bg-brand">
+        <span className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-[13px] bg-owner">
           <IconBolt size={24} strokeWidth={2.2} className="text-white" />
         </span>
         <div className="mb-2 text-[19px] font-bold">Vui lòng dùng ứng dụng di động</div>
@@ -32,7 +32,7 @@ export function DriverNotice() {
               href={getDriverAppUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-ctl bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand/90 transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-ctl bg-owner px-4 py-2 text-[13px] font-semibold text-white hover:bg-owner-strong transition-colors shadow-xs"
             >
               <span>Mở ứng dụng tài xế</span>
               <span className="text-[12px]">↗</span>

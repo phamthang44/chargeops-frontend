@@ -226,7 +226,7 @@ export function LicenseDetailDrawer({
           {/* Section 1: Overview & Financial Snapshot */}
           <div className="rounded-[10px] border border-line bg-surface-2 p-3.5">
             <div className="mb-2.5 flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+              <span className="text-[12px] font-medium text-muted">
                 {t('licenses.drawer.overviewTitle', 'Thông tin gói & Hiệu lực')}
               </span>
               <span className="rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-body">
@@ -335,7 +335,7 @@ export function LicenseDetailDrawer({
 
           {/* Section 2: Contextual Lifecycle Actions */}
           <div className="rounded-[10px] border border-line bg-surface p-3.5">
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-faint">
+            <div className="mb-2 text-[12px] font-medium text-muted">
               {t('licenses.drawer.lifecycleTitle', 'Thao tác vòng đời (Lifecycle Actions)')}
             </div>
             <div className="flex flex-wrap items-center gap-2">

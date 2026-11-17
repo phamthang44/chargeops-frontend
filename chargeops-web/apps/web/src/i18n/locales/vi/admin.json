@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "title": "Điều phối nền tảng",
-    "subtitle": "Hàng đợi điều phối hồ sơ, ticket nền tảng và các vụ việc leo thang cần xử lý.",
+    "subtitle": "Hồ sơ trạm, yêu cầu hỗ trợ và khiếu nại đang chờ Admin xử lý.",
     "generatedAt": "Dữ liệu tính đến {{time}}",
     "refresh": "Làm mới",
     "refreshing": "Đang cập nhật...",
@@ -10,27 +10,27 @@
     "error": "Không thể tải dữ liệu tổng quan",
     "retry": "Thử lại",
     "empty": "Không có dữ liệu",
-    "missingTitle": "Dashboard chưa được kết nối dữ liệu",
+    "missingTitle": "Bảng điều khiển chưa có dữ liệu",
     "missingDescription": "Endpoint tổng quan nền tảng (admin/dashboard/summary) chưa có số liệu.",
     "ops": {
-      "platformOpenTickets": "Ticket nền tảng đang mở",
-      "escalatedOpenCases": "Case trạm cần xem xét",
-      "escalatedOpenCasesHint": "Driver hoặc Owner đã yêu cầu Admin xem xét hỗ trợ.",
+      "platformOpenTickets": "Yêu cầu hỗ trợ đang mở",
+      "escalatedOpenCases": "Khiếu nại cần Admin xem xét",
+      "escalatedOpenCasesHint": "Tài xế hoặc chủ trạm đã chuyển lên Admin.",
       "escalatedBadge": "Cần xem xét",
       "openTickets": "Mở hỗ trợ"
     },
     "kpi": {
       "approvals": "Hồ sơ chờ duyệt",
-      "platformTickets": "Ticket nền tảng",
-      "escalatedCases": "Case escalation",
+      "platformTickets": "Yêu cầu hỗ trợ",
+      "escalatedCases": "Khiếu nại chuyển lên",
       "activeStations": "Trạm hoạt động",
       "clickToFocus": "Xem hàng đợi bên dưới",
       "activeStationsDelta": "+{{count}} trong tuần này",
-      "pendingApprovals": "CHỜ DUYỆT",
+      "pendingApprovals": "Chờ duyệt",
       "pendingApprovalsDelta": "{{count}} hồ sơ mới hôm nay",
-      "bookingsToday": "ĐẶT CHỖ HÔM NAY",
+      "bookingsToday": "Đặt chỗ hôm nay",
       "bookingsDelta": "+{{pct}}% so với hôm qua",
-      "revenueMonth": "DOANH THU THÁNG 6",
+      "revenueMonth": "Doanh thu tháng 6",
       "revenueDelta": "+{{pct}}% so với tháng 5"
     },
     "charts": {
@@ -53,24 +53,24 @@
     },
     "queue": {
       "pendingApprovals": "Hồ sơ trạm chờ duyệt",
-      "platformTickets": "Ticket nền tảng cần hỗ trợ",
-      "escalatedCases": "Vụ việc khiếu nại leo thang",
+      "platformTickets": "Yêu cầu hỗ trợ cần xử lý",
+      "escalatedCases": "Khiếu nại chuyển lên Admin",
       "noPendingStations": "Không có trạm chờ duyệt",
-      "noPlatformTickets": "Không có ticket nền tảng",
-      "noEscalatedCases": "Không có vụ việc leo thang",
+      "noPlatformTickets": "Không có yêu cầu hỗ trợ nào",
+      "noEscalatedCases": "Không có khiếu nại nào",
       "seeAll": "Xem tất cả →",
       "actionNeeded": "Cần xem xét"
     },
     "queues": {
       "approvals": "Hồ sơ trạm chờ duyệt",
-      "platform": "Ticket nền tảng cần hỗ trợ",
-      "escalated": "Vụ việc khiếu nại leo thang",
+      "platform": "Yêu cầu hỗ trợ cần xử lý",
+      "escalated": "Khiếu nại chuyển lên Admin",
       "emptyApprovals": "Không có hồ sơ nào đang chờ duyệt",
-      "emptyPlatform": "Không có ticket nền tảng nào cần xử lý",
-      "emptyEscalated": "Không có vụ việc leo thang nào cần xử lý",
+      "emptyPlatform": "Không có yêu cầu hỗ trợ nào cần xử lý",
+      "emptyEscalated": "Không có khiếu nại nào cần xử lý",
       "openApproval": "Mở hồ sơ",
-      "openTicket": "Mở ticket",
-      "openCase": "Mở case",
+      "openTicket": "Mở yêu cầu",
+      "openCase": "Mở khiếu nại",
       "waitingSince": "Chờ từ {{time}}",
       "waitingAge": "Chờ {{age}}",
       "unassigned": "Chưa tiếp nhận",
@@ -95,7 +95,7 @@
     }
   },
   "console": {
-    "role": "QUẢN TRỊ VIÊN",
+    "role": "Quản trị viên",
     "searchPlaceholder": "Tìm đặt chỗ, trụ, trạm, chủ trạm…",
     "nav": {
       "dashboard": {
@@ -166,7 +166,7 @@
     }
   },
   "observability": {
-    "dashboardTitle": "ChargeOps Overview",
+    "dashboardTitle": "Tổng quan ChargeOps",
     "accessHint": "Grafana xác thực riêng qua Keycloak và chỉ chấp nhận role OBSERVABILITY_ADMIN.",
     "iframeAuthHint": "Lần đầu đăng nhập Grafana, hãy chọn “Mở tab mới” để hoàn tất đăng nhập Keycloak. Trang đăng nhập auth.chargeops.online không thể hiển thị bên trong iframe. Sau đó quay lại đây và bấm “Làm mới”.",
     "openInNewTab": "Mở tab mới",
@@ -209,7 +209,7 @@
       }
     },
     "hub": {
-      "badge": "HỆ THỐNG GIÁM SÁT TOÀN NỀN TẢNG",
+      "badge": "Hệ thống giám sát toàn nền tảng",
       "title": "Trung tâm Thông báo & Cảnh báo Admin",
       "subtitle": "Theo dõi sự cố kỹ thuật theo thời gian thực, hồ sơ đăng ký trạm chờ duyệt, trạng thái giấy phép và vé hỗ trợ khẩn cấp.",
       "simulateLabel": "Mô phỏng sự kiện:",
@@ -274,7 +274,7 @@
   "rejectModal": {
     "title": "Từ chối đăng ký trạm",
     "subtitle": "Lý do sẽ được gửi tới chủ trạm {{name}} trên màn hình trạng thái đăng ký.",
-    "reasonLabel": "LÝ DO TỪ CHỐI",
+    "reasonLabel": "Lý do từ chối",
     "reasonRequired": "Cần nhập lý do từ chối.",
     "placeholder": "VD: Thiếu giấy phép kinh doanh hợp lệ…",
     "cancelBtn": "Hủy",
@@ -284,7 +284,7 @@
   "issueLicenseModal": {
     "title": "Ghi nhận & Kích hoạt License",
     "subtitle": "Ghi nhận gói subscription sau khi đã xác minh thông tin mua/thanh toán của chủ trạm ngoài nền tảng.",
-    "stationInfoTitle": "THÔNG TIN TRẠM SẠC",
+    "stationInfoTitle": "Thông tin trạm sạc",
     "ownerLabel": "Chủ sở hữu",
     "planLabel": "Gói subscription",
     "planMonthly": "Gói Tháng",
@@ -304,7 +304,7 @@
   "approveModal": {
     "title": "Xác nhận duyệt hồ sơ trạm",
     "subtitle": "Trạm sẽ được phê duyệt hành chính và cho phép tiếp tục cấu hình trụ sạc.",
-    "stationInfoTitle": "THÔNG TIN TRẠM SẠC",
+    "stationInfoTitle": "Thông tin trạm sạc",
     "ownerLabel": "Chủ sở hữu",
     "locationLabel": "Địa điểm",
     "chargersLabel": "Số trụ dự kiến",
@@ -319,8 +319,8 @@
     "editTitle": "Sửa tài liệu chính sách",
     "addTitle": "Thêm tài liệu chính sách",
     "subtitle": "Lưu xong, tài liệu được tái tạo embedding để trợ lý trả lời theo chính sách mới nhất.",
-    "categoryLabel": "DANH MỤC",
-    "contentLabel": "NỘI DUNG CHÍNH SÁCH",
+    "categoryLabel": "Danh mục",
+    "contentLabel": "Nội dung chính sách",
     "contentRequired": "Vui lòng nhập nội dung chính sách.",
     "placeholder": "Một phát biểu chính sách rõ ràng, tự chứa…",
     "cancelBtn": "Hủy",
@@ -351,11 +351,11 @@
       "connectionTypes": "Phân bổ loại kết nối"
     },
     "kpis": {
-      "revenue12m": "DOANH THU 12TH",
-      "totalBookings": "TỔNG ĐẶT CHỖ",
-      "activeStations": "TRẠM HOẠT ĐỘNG",
-      "occupancyRate": "TỶ LỆ LẤP ĐẦY",
-      "cancellationNoShow": "HỦY / NO-SHOW"
+      "revenue12m": "Doanh thu 12 tháng",
+      "totalBookings": "Tổng đặt chỗ",
+      "activeStations": "Trạm hoạt động",
+      "occupancyRate": "Tỷ lệ lấp đầy",
+      "cancellationNoShow": "Hủy / no-show"
     },
     "deltas": {
       "vsPrevious": "so với kỳ trước",
@@ -375,8 +375,8 @@
       "cols": {
         "id": "MÃ",
         "station": "TRẠM",
-        "owner": "CHỦ TRẠM",
-        "city": "THÀNH PHỐ",
+        "owner": "Chủ trạm",
+        "city": "Thành phố",
         "chargers": "TRỤ"
       }
     },
@@ -437,10 +437,10 @@
       "cancelled": "Đã hủy"
     },
     "metrics": {
-      "total": "TỔNG LƯỢT ĐẶT",
-      "completed": "HOÀN TẤT",
-      "cancelled": "ĐÃ HỦY",
-      "pending": "CHỜ THANH TOÁN"
+      "total": "Tổng lượt đặt",
+      "completed": "Hoàn tất",
+      "cancelled": "Đã hủy",
+      "pending": "Chờ thanh toán"
     },
     "placeholder": "Lọc theo mã, trạm, tài xế, trụ…",
     "searchFieldLabel": "Tìm trong trường",
@@ -448,11 +448,11 @@
       "cols": {
         "id": "MÃ",
         "station": "TRẠM",
-        "owner": "CHỦ TRẠM",
+        "owner": "Chủ trạm",
         "charger": "TRỤ",
-        "timeSlot": "KHUNG GIỜ",
-        "amount": "SỐ TIỀN",
-        "status": "TRẠNG THÁI"
+        "timeSlot": "Khung giờ",
+        "amount": "Số tiền",
+        "status": "Trạng thái"
       },
       "empty": "Không có lượt đặt nào khớp bộ lọc."
     }
@@ -526,15 +526,15 @@
     "table": {
       "refresh": "Làm mới",
       "cols": {
-        "code": "MÃ LICENSE",
-        "station": "TRẠM SẠC",
-        "owner": "CHỦ SỞ HỮU",
-        "plan": "GÓI HẠN",
-        "expiry": "HẾT HẠN",
-        "status": "TRẠNG THÁI",
-        "period": "KỲ HIỆU LỰC",
-        "fee": "MỨC PHÍ",
-        "actions": "THAO TÁC"
+        "code": "Mã giấy phép",
+        "station": "Trạm sạc",
+        "owner": "Chủ sở hữu",
+        "plan": "Gói hạn",
+        "expiry": "Hết hạn",
+        "status": "Trạng thái",
+        "period": "Kỳ hiệu lực",
+        "fee": "Mức phí",
+        "actions": "Thao tác"
       },
       "emptyTitle": "Không tìm thấy License",
       "empty": "Chưa có gói giấy phép nào trong mục này.",
@@ -702,14 +702,14 @@
     "addDocBtn": "Tạo văn bản mới",
     "error": "Không thể tải kho chính sách",
     "syncNote": "Embedding đồng bộ · cập nhật 29/06",
-    "categorySidebar": "DANH MỤC",
+    "categorySidebar": "Danh mục",
     "searchPlaceholder": "Tìm trong nội dung chính sách…",
     "empty": "Không có tài liệu nào khớp.",
     "updatedAt": "cập nhật {{date}}",
     "editBtn": "Sửa",
     "deleteBtn": "Xóa",
-    "docsLabel": "TÀI LIỆU",
-    "catsLabel": "DANH MỤC",
+    "docsLabel": "Tài liệu",
+    "catsLabel": "Danh mục",
     "pageTitle": "Kho Văn bản & Chính sách Vận hành",
     "pageSubtitle": "Cơ sở tri thức quản lý các văn bản pháp lý, chính sách đặt chỗ, hoàn tiền và quy chế nền tảng.",
     "refreshBtn": "Làm mới",
@@ -746,12 +746,12 @@
     },
     "table": {
       "cols": {
-        "title": "TIÊU ĐỀ / MÃ VĂN BẢN",
-        "type": "LOẠI VĂN BẢN",
-        "audience": "ĐỐI TƯỢNG",
-        "version": "PHIÊN BẢN / HIỆU LỰC",
-        "status": "TRẠNG THÁI",
-        "actions": "THAO TÁC"
+        "title": "Tiêu đề / mã văn bản",
+        "type": "Loại văn bản",
+        "audience": "Đối tượng",
+        "version": "Phiên bản / hiệu lực",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
       },
       "empty": "Không tìm thấy văn bản chính sách nào khớp với bộ lọc."
     },
@@ -842,7 +842,7 @@
       "createTitle": "Thêm connector",
       "createSub": "Thêm vào",
       "createHelp": "Loại đầu cắm và công suất sẽ bị khoá cố định sau khi cấp phát phần cứng. Thao tác này tạo một Charger ID và một ảnh QR riêng cho cổng sạc này.",
-      "connectorLabel": "LOẠI ĐẦU CẮM",
+      "connectorLabel": "Loại đầu cắm",
       "powerLabel": "CÔNG SUẤT (kW)",
       "displayNameLabel": "TÊN HIỂN THỊ (tùy chọn)",
       "displayNamePlaceholder": "VD: Connector 1 — chủ trạm đổi sau",
@@ -1076,40 +1076,40 @@
       "refund": "Hoàn tiền"
     },
     "kpi": {
-      "gross": "TỔNG THU",
+      "gross": "Tổng thu",
       "grossSub": "{{count}} giao dịch",
-      "refunded": "ĐÃ HOÀN",
+      "refunded": "Đã hoàn",
       "refundedSub": "{{count}} lượt hoàn",
-      "net": "DOANH THU RÒNG",
+      "net": "Doanh thu ròng",
       "netSub": "thu − hoàn",
-      "avg": "GIÁ TRỊ TB",
+      "avg": "Giá trị TB",
       "avgSub": "mỗi giao dịch"
     },
     "breakdown": "Theo phương thức",
     "table": {
       "cols": {
-        "id": "MÃ GD",
-        "bookingId": "ĐẶT CHỖ",
+        "id": "Mã GD",
+        "bookingId": "Đặt chỗ",
         "station": "TRẠM",
         "type": "LOẠI",
         "method": "P.THỨC",
-        "amount": "SỐ TIỀN",
+        "amount": "Số tiền",
         "date": "NGÀY",
-        "txId": "MÃ GD"
+        "txId": "Mã GD"
       },
       "empty": "Không có giao dịch nào khớp bộ lọc."
     },
     "metrics": {
-      "gross": "TỔNG THU",
+      "gross": "Tổng thu",
       "grossSub": "Tổng doanh thu phát sinh qua các cổng thanh toán",
       "payCountVal": "{{count}} giao dịch",
-      "refunded": "ĐÃ HOÀN TRẢ",
+      "refunded": "Đã hoàn trả",
       "refundedSub": "Hoàn tiền do hủy đơn trong ân hạn hoặc sự cố trạm",
       "refundCountVal": "{{count}} lượt hoàn",
-      "net": "DOANH THU RÒNG",
+      "net": "Doanh thu ròng",
       "netSub": "Dòng tiền thực thu sau khi khấu trừ toàn bộ hoàn trả",
       "netDelta": "Thu ròng khả dụng",
-      "avg": "GIÁ TRỊ TB / ĐƠN",
+      "avg": "Giá trị TB / đơn",
       "avgSub": "Giá trị giao dịch trung bình mỗi lượt sạc hoàn tất",
       "avgDelta": "TB mỗi giao dịch"
     },
@@ -1121,15 +1121,15 @@
   },
   "refunds": {
     "kpi": {
-      "pending": "ĐANG CHỜ XỬ LÝ (PENDING)",
+      "pending": "Đang chờ xử lý",
       "pendingDelta": "{{count}} khoản mở nghĩa vụ",
       "pendingCountLabel": "Không có khoản tồn đọng",
-      "succeeded": "ĐÃ HOÀN TẤT",
+      "succeeded": "Đã hoàn tất",
       "succeededDelta": "{{count}} hoàn tất",
       "succeededCountLabel": "Đã xử lý thành công",
-      "total": "TỔNG NGHĨA VỤ HOÀN",
+      "total": "Tổng nghĩa vụ hoàn",
       "totalDelta": "{{count}} tổng số hồ sơ",
-      "actionRequired": "CẦN CAN THIỆP (LỖI LẦN THỬ)",
+      "actionRequired": "Cần can thiệp (lỗi lần thử)",
       "actionRequiredDelta": "{{count}} lần thử thất bại",
       "actionRequiredZero": "Không có lỗi tồn đọng"
     },
@@ -1145,24 +1145,24 @@
       "EXCESS_PAYMENT": "Thanh toán thừa"
     },
     "status": {
-      "actionRequired": "CẦN CAN THIỆP",
+      "actionRequired": "Cần can thiệp",
       "failedAttemptSub": "Lỗi lần thử",
       "adminRequiredSub": "Admin đối soát",
-      "autoProcessing": "TỰ ĐỘNG XỬ LÝ",
+      "autoProcessing": "Tự động xử lý",
       "autoProcessingSub": "Hệ thống đang chạy",
       "pendingSub": "Chờ xử lý",
       "succeededSub": "Đã hoàn tất"
     },
     "table": {
       "cols": {
-        "id": "MÃ REFUND",
-        "booking": "ĐƠN ĐẶT CHỖ",
-        "station": "TRẠM SẠC",
-        "reason": "LÝ DO HOÀN",
-        "amount": "SỐ TIỀN",
-        "status": "TRẠNG THÁI",
-        "date": "NGÀY PHÁT SINH",
-        "actions": "THAO TÁC"
+        "id": "Mã hoàn tiền",
+        "booking": "Đơn đặt chỗ",
+        "station": "Trạm sạc",
+        "reason": "Lý do hoàn",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "date": "Ngày phát sinh",
+        "actions": "Thao tác"
       },
       "empty": "Không có khoản hoàn tiền nào khớp với bộ lọc.",
       "attemptsTitle": "{{count}} lần thử",
@@ -1183,10 +1183,10 @@
       "confirmManual": "Xác nhận Đã Chuyển Khoản & Đối Soát",
       "amountLabel": "Số tiền cần hoàn trả",
       "statusLabel": "Trạng thái",
-      "statusSucceeded": "ĐÃ HOÀN TẤT (SUCCEEDED)",
-      "statusFailedAttempt": "CẦN CAN THIỆP (LẦN THỬ LỖI)",
-      "statusAutoProcessing": "TỰ ĐỘNG XỬ LÝ (AUTO_FIRST_ATTEMPT)",
-      "statusPending": "ĐANG CHỜ XỬ LÝ (PENDING)",
+      "statusSucceeded": "Đã hoàn tất",
+      "statusFailedAttempt": "Cần can thiệp (lần thử lỗi)",
+      "statusAutoProcessing": "Tự động xử lý",
+      "statusPending": "Đang chờ xử lý",
       "bookingCode": "Mã đơn đặt chỗ:",
       "driverName": "Tài xế nhận hoàn:",
       "stationName": "Trạm sạc:",
@@ -1272,20 +1272,20 @@
     "toastNoop": "Trạng thái đã ở chế độ này — không có thay đổi.",
     "error": "Không thể tải danh sách người dùng",
     "kpi": {
-      "total": "TỔNG TÀI KHOẢN",
-      "drivers": "TÀI XẾ",
-      "staff": "NHÂN VIÊN",
-      "owners": "CHỦ TRẠM",
-      "suspended": "TẠM KHÓA"
+      "total": "Tổng tài khoản",
+      "drivers": "Tài xế",
+      "staff": "Nhân viên",
+      "owners": "Chủ trạm",
+      "suspended": "Tạm khóa"
     },
     "searchPlaceholder": "Tìm tên, email…",
     "table": {
       "cols": {
-        "account": "TÀI KHOẢN",
-        "role": "VAI TRÒ",
-        "joined": "THAM GIA",
-        "status": "TRẠNG THÁI",
-        "action": "HÀNH ĐỘNG"
+        "account": "Tài khoản",
+        "role": "Vai trò",
+        "joined": "Tham gia",
+        "status": "Trạng thái",
+        "action": "Hành động"
       },
       "emptyTitle": "Không tìm thấy người dùng",
       "emptyDesc": "Thử thay đổi từ khóa hoặc bộ lọc vai trò/trạng thái.",
@@ -1347,7 +1347,7 @@
   "renewModal": {
     "title": "Ghi nhận gia hạn License",
     "subtitle": "Tạo một kỳ hạn License mới sau khi xác minh thanh toán gia hạn ngoài nền tảng.",
-    "currentInfoTitle": "THÔNG TIN LICENSE HIỆN TẠI",
+    "currentInfoTitle": "Thông tin license hiện tại",
     "licenseCode": "Mã License:",
     "station": "Trạm sạc:",
     "owner": "Chủ sở hữu:",
@@ -1400,14 +1400,14 @@
     },
     "table": {
       "cols": {
-        "code": "MÃ TRẠM",
-        "nameAndAddress": "TÊN & ĐỊA CHỈ TRẠM",
-        "host": "CHỦ TRẠM (HOST)",
+        "code": "Mã trạm",
+        "nameAndAddress": "Tên & địa chỉ trạm",
+        "host": "Chủ trạm",
         "province": "TỈNH/THÀNH",
-        "chargers": "TRỤ / CỔNG SẠC",
-        "status": "TRẠNG THÁI",
-        "createdAt": "NGÀY TẠO",
-        "actions": "THAO TÁC"
+        "chargers": "Trụ / cổng sạc",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
       },
     "chargersCount": "{{chargePoints}} trụ · {{connectors}} cổng",
     "empty": "Không tìm thấy trạm sạc nào phù hợp với bộ lọc.",

@@ -8,13 +8,13 @@
   "updatedAt": "Updated at {{time}}",
   "kpi": {
     "section": "Today's operations",
-    "bookingsToday": "BOOKINGS TODAY",
+    "bookingsToday": "Bookings today",
     "bookingsTodayHint": "Based on start time today",
-    "chargingNow": "CHARGING NOW",
+    "chargingNow": "Charging now",
     "chargingNowHint": "Includes sessions started overnight",
-    "availableConnectors": "AVAILABLE CONNECTORS",
+    "availableConnectors": "Available connectors",
     "availableConnectorsHint": "On active charge points",
-    "unclaimedTickets": "UNCLAIMED REQUESTS",
+    "unclaimedTickets": "Unclaimed requests",
     "unclaimedTicketsHint": "Open or in progress"
   },
   "bookings": {

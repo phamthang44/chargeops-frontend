@@ -3,10 +3,10 @@
   "subtitle": "{{date}}",
   "subtitleFormatted": "Portfolio operations overview · {{date}}",
   "finance": {
-    "eyebrow": "PORTFOLIO CASH FLOW",
+    "eyebrow": "Portfolio cash flow",
     "title": "Receipts & Cash Flow",
     "simulatorBadge": "Simulated Data",
-    "description": "Financial analytics for the selected period and station scope (Vietnam time, UTC+7). Receipts are recognized upon payment settlement; refunds upon completion. Net receipts may be negative when refunding prior period charges.",
+    "description": "Figures use Vietnam time (UTC+7). Net income can be negative when a refund covers an earlier period.",
     "grossVnd": "Gross Receipts",
     "refundedVnd": "Total Refunds",
     "netVnd": "Net Cash Flow",
@@ -37,11 +37,11 @@
     "netNegative": "Deficit"
   },
   "hero": {
-    "eyebrow": "OWNER / OPERATIONS",
+    "eyebrow": "Owner / operations",
     "stationScope": "Viewing operations for {{station}}",
     "selectedStation": "selected station",
     "scoped": "Station filter active",
-    "liveKicker": "LIVE OPERATIONS SNAPSHOT",
+    "liveKicker": "Live operations snapshot",
     "liveStatus": "Current data",
     "now": "NOW",
     "activeStationNote": "stations currently active",

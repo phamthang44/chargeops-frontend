@@ -220,7 +220,7 @@ export function EquipmentStatusHistoryDrawer({
 
                       {/* Dimension chip if ChargePoint */}
                       {dimension && (
-                        <div className="text-[10.5px] font-semibold uppercase tracking-wider text-faint">
+                        <div className="text-[12px] font-medium text-muted">
                           {dimension === 'PROVISIONING'
                             ? t('equipmentHistory.dimension.provisioning')
                             : t('equipmentHistory.dimension.operational')}

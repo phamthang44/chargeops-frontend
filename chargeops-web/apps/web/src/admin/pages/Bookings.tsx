@@ -120,7 +120,7 @@ export function Bookings() {
             <div className="overflow-x-auto">
               <div className="min-w-[820px]">
                 <div
-                  className="grid bg-surface-2 px-4 py-[11px] text-[10px] font-semibold uppercase tracking-[0.07em] text-faint"
+                  className="grid bg-surface-2 px-4 py-[11px] text-[12px] font-medium text-muted"
                   style={{ gridTemplateColumns: GRID }}
                 >
                   <span>{t('bookings.table.cols.id')}</span>

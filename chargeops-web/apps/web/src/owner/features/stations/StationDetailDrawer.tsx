@@ -487,7 +487,7 @@ export function StationDetailDrawer({
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
               <div className="rounded-[9px] border border-line bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                <div className="text-[12px] font-medium text-muted">
                   {t('stations.drawer.metrics.plannedChargers', { defaultValue: 'Số trụ dự kiến' })}
                 </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
@@ -496,7 +496,7 @@ export function StationDetailDrawer({
               </div>
 
               <div className="rounded-[9px] border border-line bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                <div className="text-[12px] font-medium text-muted">
                   {t('stations.drawer.metrics.onlineChargers', { defaultValue: 'Trụ đang Online' })}
                 </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
@@ -505,7 +505,7 @@ export function StationDetailDrawer({
               </div>
 
               <div className="rounded-[9px] border border-line bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                <div className="text-[12px] font-medium text-muted">
                   {t('stations.drawer.metrics.bookingsToday', { defaultValue: 'Lượt đặt hôm nay' })}
                 </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">
@@ -514,7 +514,7 @@ export function StationDetailDrawer({
               </div>
 
               <div className="rounded-[9px] border border-line bg-surface p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">
+                <div className="text-[12px] font-medium text-muted">
                   {t('stations.drawer.metrics.utilization', { defaultValue: 'Tỷ lệ sử dụng' })}
                 </div>
                 <div className="mt-1 text-[18px] font-bold text-ink">

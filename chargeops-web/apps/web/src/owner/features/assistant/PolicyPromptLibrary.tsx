@@ -389,7 +389,7 @@ export function PolicyPromptLibraryModal({
       />
 
       {/* Modal Container */}
-      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-line bg-canvas shadow-2xl">
+      <div className="relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-card border border-line bg-canvas shadow-2xl">
         {/* Header */}
           <div className="flex flex-col gap-3.5 border-b border-line bg-surface/70 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center justify-between gap-3">
@@ -491,7 +491,7 @@ export function PolicyPromptLibraryModal({
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex h-full flex-col justify-between rounded-2xl border border-line bg-surface p-3.5 shadow-2xs transition-all duration-300 hover:border-brand/50 hover:shadow-xs"
+                      className="group relative flex h-full flex-col justify-between rounded-card border border-line bg-surface p-3.5 shadow-2xs transition-all duration-300 hover:border-brand/50 hover:shadow-xs"
                     >
                       <div>
                         {/* Card Top: Tag + Category + ID */}
@@ -514,7 +514,7 @@ export function PolicyPromptLibraryModal({
 
                           {/* Ground Truth Answer (Cheat Sheet - 0 Token) */}
                           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-[11.5px] leading-relaxed text-emerald-900 dark:text-emerald-300">
-                            <div className="mb-1 flex items-center gap-1 font-semibold text-[10.5px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                            <div className="mb-1 flex items-center gap-1 font-medium text-[12px] text-emerald-700 dark:text-emerald-400">
                               <IconCheck size={12} strokeWidth={2.5} />
                               <span>{isEn ? 'Ground-Truth Policy' : 'Đáp án chuẩn v4.9'}</span>
                             </div>

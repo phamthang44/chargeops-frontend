@@ -110,7 +110,7 @@ export function StationCard({
 
   return (
     <Card
-      className={`p-[18px] flex flex-col justify-between transition-shadow hover:shadow-md ${
+      className={`p-[18px] flex flex-col justify-between transition-shadow ${
         isActiveContext ? 'border-owner' : ''
       }`}
     >
@@ -295,7 +295,7 @@ export function StationCard({
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[9px] bg-canvas p-2.5">
-      <div className="text-[9px] font-semibold uppercase tracking-[0.05em] text-faint">{label}</div>
+      <div className="text-[12px] font-medium text-muted">{label}</div>
       <div className="mt-[3px] text-[17px] font-bold text-ink">{value}</div>
     </div>
   );

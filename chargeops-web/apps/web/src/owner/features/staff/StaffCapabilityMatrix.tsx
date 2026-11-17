@@ -25,7 +25,7 @@ export function StaffCapabilityMatrix() {
 
       <div className="overflow-hidden rounded-lg bg-canvas">
         <div
-          className="grid border-b border-hairline bg-surface-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-faint"
+          className="grid border-b border-hairline bg-surface-2 px-3 py-2 text-[12px] font-medium text-muted"
           style={{ gridTemplateColumns: '1fr 56px 56px' }}
         >
           <span>{t('staff.matrix.capability')}</span>

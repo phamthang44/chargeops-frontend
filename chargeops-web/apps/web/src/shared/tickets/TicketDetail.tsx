@@ -290,7 +290,7 @@ export function TicketDetail({
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-12">
         {/* Left Column: Thread & Events (8/12 Desktop, toggled on mobile) */}
         <div className={`space-y-4 lg:col-span-8 ${mobileTab === 'conversation' ? 'block' : 'hidden lg:block'}`}>
-          <Card className="overflow-hidden rounded-2xl">
+          <Card className="overflow-hidden rounded-card">
             {/* Tab navigation */}
             <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5 bg-surface-2/40">
               <div className="flex items-center gap-2">

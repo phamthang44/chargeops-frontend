@@ -102,11 +102,11 @@ export function ApiErrorCard({
   return (
     <div
       role="alert"
-      className={`group relative rounded-2xl bg-bad/5 transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-bad/35 ${className}`}
+      className={`group relative rounded-card bg-bad/5 transition-[box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-bad/35 ${className}`}
       style={{ animation: 'riseIn 560ms cubic-bezier(0.32,0.72,0,1) both' }}
     >
       <div
-        className={`rounded-2xl border border-bad/20 bg-surface/95 shadow-sm ${
+        className={`rounded-card border border-bad/20 bg-surface/95 shadow-sm ${
           compact ? 'p-3' : 'p-4 sm:p-5'
         }`}
       >

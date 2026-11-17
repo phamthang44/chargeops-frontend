@@ -228,6 +228,59 @@
       "account": "System",
       "station": "Stations"
     }
+  },
+  "dateTime": {
+    "placeholder": "Pick a date and time...",
+    "notSet": "No time selected",
+    "at": "at",
+    "clear": "Clear selection",
+    "quick": "Quick pick",
+    "presets": {
+      "now": "Now",
+      "minus15": "-15 min",
+      "minus60": "-1 hr"
+    },
+    "dialog": "Date and time picker",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time24": "Time (24h)",
+    "hours": "Hour",
+    "minutes": "Min",
+    "pickNow": "Use current time",
+    "confirm": "Confirm",
+    "emptyHint": "Please pick a date and time",
+    "monthYear": "{{month}} {{year}}",
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "weekdays": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ],
+    "days": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ]
   }
 }
-

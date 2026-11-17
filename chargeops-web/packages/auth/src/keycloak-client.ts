@@ -7,6 +7,31 @@ const KEYCLOAK_ENABLED = import.meta.env.VITE_KEYCLOAK_ENABLED === 'true';
 let keycloakClient: KeycloakInstance | null = null;
 let keycloakInitPromise: Promise<boolean> | null = null;
 
+/**
+ * keycloak-js waits forever when the silent check-sso iframe never answers (framing blocked, a stalled
+ * proxy). Past this point init rejects, so the gate shows its retry screen instead of an endless spinner.
+ */
+const INIT_TIMEOUT_MS = 20_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error(`Keycloak did not answer within ${ms / 1000}s`)),
+      ms,
+    );
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (reason: unknown) => {
+        window.clearTimeout(timer);
+        reject(reason);
+      },
+    );
+  });
+}
+
 function keycloakConfig(): { url: string; realm: string; clientId: string } {
   const localDev = import.meta.env.MODE === 'development'
     && ['localhost', '127.0.0.1'].includes(window.location.hostname);
@@ -40,14 +65,17 @@ export function initializeKeycloak(): Promise<boolean> {
   const client = getKeycloakClient();
   if (!client) return Promise.resolve(false);
 
-  keycloakInitPromise ??= client.init({
-    onLoad: 'check-sso',
-    silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-    silentCheckSsoFallback: false,
-    pkceMethod: 'S256',
-    checkLoginIframe: false,
-    locale: keycloakLocale(),
-  });
+  keycloakInitPromise ??= withTimeout(
+    client.init({
+      onLoad: 'check-sso',
+      silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+      silentCheckSsoFallback: false,
+      pkceMethod: 'S256',
+      checkLoginIframe: false,
+      locale: keycloakLocale(),
+    }),
+    INIT_TIMEOUT_MS,
+  );
 
   return keycloakInitPromise;
 }

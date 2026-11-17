@@ -343,11 +343,11 @@
   "table": {
     "cols": {
       "id": "MÃ",
-      "priority": "ƯU TIÊN",
-      "content": "NỘI DUNG",
+      "priority": "Ưu tiên",
+      "content": "Nội dung",
       "station": "TRẠM",
-      "handler": "NGƯỜI PHỤ TRÁCH",
-      "status": "TRẠNG THÁI"
+      "handler": "Người phụ trách",
+      "status": "Trạng thái"
     },
     "unassigned": "Chờ tiếp nhận",
     "refund100": "Hoàn 100%",

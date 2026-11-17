@@ -163,7 +163,7 @@ export function PlatformSwitcher() {
           {/* Header */}
           <div className="px-2.5 pt-2 pb-2.5 border-b border-line">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
+              <span className="text-[12px] font-medium text-muted">
                 {t('platformSwitcher.popoverTitle', 'Chuyển đổi góc nhìn')}
               </span>
               <span className="rounded-[4px] bg-chip px-1.5 py-0.5 text-[9.5px] font-mono font-medium text-faint">

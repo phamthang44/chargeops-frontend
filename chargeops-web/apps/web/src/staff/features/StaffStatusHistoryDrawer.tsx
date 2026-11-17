@@ -181,7 +181,7 @@ export function StaffStatusHistoryDrawer({
                         </span>
                       </div>
 
-                      <div className="text-[10.5px] font-semibold uppercase tracking-wider text-faint">
+                      <div className="text-[12px] font-medium text-muted">
                         {evt.dimension === 'CHARGE_POINT'
                           ? t('equipmentHistory.chargePointLabel', 'Trụ sạc')
                           : t('equipmentHistory.connectorLabel', 'Súng sạc')}

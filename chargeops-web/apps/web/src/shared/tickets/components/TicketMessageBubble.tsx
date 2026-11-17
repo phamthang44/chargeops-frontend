@@ -80,7 +80,7 @@ export function TicketMessageBubble({ message, accent, currentUserId }: TicketMe
             {formatDateVn(message.createdAt)} {formatTimeVn(message.createdAt)}
           </span>
         </div>
-        <div className={`rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-ink shadow-sm break-words [overflow-wrap:anywhere] whitespace-pre-wrap ${bubbleClass}`}>
+        <div className={`rounded-card border px-3.5 py-2.5 text-[13px] leading-relaxed text-ink shadow-sm break-words [overflow-wrap:anywhere] whitespace-pre-wrap ${bubbleClass}`}>
           {message.body}
         </div>
       </div>

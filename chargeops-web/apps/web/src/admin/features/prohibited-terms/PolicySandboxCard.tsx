@@ -44,7 +44,7 @@ export function PolicySandboxCard() {
   };
 
   return (
-    <Card bordered className="h-full bg-surface p-5 shadow-xs rounded-2xl flex flex-col justify-between border-line">
+    <Card bordered className="h-full bg-surface p-5 shadow-xs rounded-card flex flex-col justify-between border-line">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line/80 pb-3.5">
@@ -53,7 +53,7 @@ export function PolicySandboxCard() {
               <IconShield size={17} />
             </div>
             <div>
-              <div className="text-[10.5px] uppercase font-bold tracking-[0.15em] text-brand">
+              <div className="text-[12px] font-medium text-brand">
                 {t('prohibitedTerms.sandbox.eyebrow', 'Interactive Sandbox')}
               </div>
               <h4 className="text-[14px] font-bold text-ink">

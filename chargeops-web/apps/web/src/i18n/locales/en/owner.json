@@ -1,8 +1,8 @@
 {
   "console": {
     "role": {
-      "staff": "STATION STAFF",
-      "owner": "STATION OWNER"
+      "staff": "Station staff",
+      "owner": "Station owner"
     },
     "nav": {
       "dashboard": {
@@ -177,7 +177,7 @@
       "paymentMethod": "PAYMENT · {{method}}",
       "paymentStatus": "Payment status:",
       "collectedAmount": "Collected:",
-      "refundObligationTitle": "REFUND OBLIGATION",
+      "refundObligationTitle": "Refund obligation",
       "refundReason": "Reason: {{reason}} ({{status}})"
     },
     "ownerCancelModal": {
@@ -250,10 +250,10 @@
     },
     "contactBtn": "Contact Guest",
     "emptyState": "No bookings matched the filter.",
-    "rangeLabel": "TIME RANGE · CONTINUOUS",
+    "rangeLabel": "Time range · continuous",
     "chargerLabel": "CHARGER",
     "driverLabel": "DRIVER",
-    "snapshotLabel": "FIXED PRICE (SNAPSHOT)",
+    "snapshotLabel": "Fixed price (snapshot)",
     "rateKind": {
       "locked": "locked at booking",
       "peak": "Peak",
@@ -272,7 +272,7 @@
     "policyStationFailure": "Station technical failure (verified)",
     "refundStationFailure": "100% Refund",
     "metrics": {
-      "totalBookings": "TOTAL BOOKINGS",
+      "totalBookings": "Total bookings",
       "activeBookings": "ACTIVE",
       "activeSub": "confirmed · charging",
       "completed": "COMPLETED",
@@ -280,7 +280,7 @@
       "expired": "EXPIRED",
       "expiredSub": "payment hold lapsed",
       "noShowSub": "incl. {{count}} no-show",
-      "grossRevenue": "GROSS REVENUE",
+      "grossRevenue": "Gross revenue",
       "revenueSub": "before refunds"
     },
     "table": {
@@ -289,7 +289,7 @@
         "driver": "DRIVER",
         "station": "STATION",
         "charger": "CONNECTOR",
-        "slot": "TIME RANGE",
+        "slot": "Time range",
         "duration": "DURATION",
         "method": "METHOD",
         "amount": "AMOUNT",
@@ -410,14 +410,14 @@
       "connectorTooltip": "View connector status change history"
     },
     "panel": {
-      "editTitle": "EDIT CHARGE POINT",
+      "editTitle": "Edit charge point",
       "close": "Close",
       "identityGroup": "Identification Info",
-      "chargePointId": "CHARGE POINT ID",
+      "chargePointId": "Charge point ID",
       "idHelp": "Unique device ID — cannot be changed.",
-      "displayName": "DISPLAY NAME",
+      "displayName": "Display name",
       "namePlaceholder": "E.g. Fast Charger 60kW — Unit 1",
-      "zoneLabel": "ZONE / LOCATION HINT",
+      "zoneLabel": "Zone / location hint",
       "zonePlaceholder": "E.g. Near the entrance, row B",
       "zoneHelp": "Shown to drivers on the station detail page.",
       "statusGroup": "Equipment & Operational Status",
@@ -440,10 +440,10 @@
     "revokeToast": "Revoked {{name}}'s staff access to {{station}}",
     "assign": {
       "title": "Assign Staff Member",
-      "emailLabel": "STAFF EMAIL ADDRESS",
+      "emailLabel": "Staff email address",
       "emailPlaceholder": "staff.email@example.com",
-      "stationLabel": "ASSIGN TO STATION",
-      "noteLabel": "SHIFT / ROLE NOTE (OPTIONAL)",
+      "stationLabel": "Assign to station",
+      "noteLabel": "Shift / role note (optional)",
       "notePlaceholder": "e.g. Morning Shift (06:00 - 14:00), Maintenance Technician...",
       "noteQuickPresets": "Quick presets:",
       "presets": {
@@ -523,7 +523,7 @@
       "title": "Invite station staff",
       "body": "Enter the invitee's email. The system sends an activation link granting station staff access.",
       "bodyWithStation": "Send a staff invitation for {{station}}. The recipient activates it to gain station operations access.",
-      "emailLabel": "STAFF EMAIL",
+      "emailLabel": "Staff email",
       "emailPlaceholder": "name@example.com",
       "hint": "The recipient needs a ChargeOps account and the address must match their registered email to activate successfully.",
       "cancel": "Cancel",
@@ -627,12 +627,12 @@
       "MAINTENANCE": "Maintenance"
     },
     "stats": {
-      "chargePoints": "TOTAL CHARGERS",
-      "total": "TOTAL CONNECTORS",
+      "chargePoints": "Total chargers",
+      "total": "Total connectors",
       "available": "AVAILABLE",
-      "inuse": "IN USE",
+      "inuse": "In use",
       "offline": "OFFLINE",
-      "incidents": "ACTIVE INCIDENTS",
+      "incidents": "Active incidents",
       "needAction": "Action needed",
       "allNormal": "Normal"
     },
@@ -658,9 +658,9 @@
       "incidentBlockedTooltip": "Connector has an active incident that must be resolved before turning online",
       "incidentBtn": "Report Incident",
       "historyBtn": "History",
-      "connector": "CONNECTOR TYPE",
-      "power": "POWER CAPACITY",
-      "chargerType": "CHARGER TYPE",
+      "connector": "Connector type",
+      "power": "Power capacity",
+      "chargerType": "Charger type",
       "runtimeStatus": "STATUS",
       "qrHelp": "Affix onto this connector for drivers to scan on arrival.",
       "downloadQrBtn": "Download QR"
@@ -683,7 +683,7 @@
         "title": "Basic Config",
         "groupTitle": "Minimum booking duration & step increment",
         "groupHelp": "Drivers can choose any start time (e.g. 09:51). Duration options step by the minimum amount (e.g. 30m → ends at 10:21).",
-        "durationLabel": "MINIMUM BOOKING DURATION (DURATION)",
+        "durationLabel": "Minimum booking duration (duration)",
         "durationVal": "{{minutes}} mins",
         "lockedNotice": "(Temporarily locked)",
         "lockedTooltip": "90-minute duration has not been verified in real operations and is temporarily locked",
@@ -695,21 +695,21 @@
         "flexiblePolicySuggests": "the app suggests packages:",
         "flexiblePolicyUntil": "until",
         "flexiblePolicyMax": "max",
-        "systemPolicyTitle": "GLOBAL SYSTEM SCHEDULING RULES (SYSTEM POLICY)",
+        "systemPolicyTitle": "Global system scheduling rules (system policy)",
         "operationalStandard": "Operational standard",
-        "turnaroundBufferTitle": "TURNAROUND BUFFER (VEHICLE SWAP)",
+        "turnaroundBufferTitle": "Turnaround buffer (vehicle swap)",
         "turnaroundBufferDesc": "Rest interval after each session for departing car to unplug & exit safely.",
-        "stepIncrementTitle": "DURATION STEP INCREMENT",
+        "stepIncrementTitle": "Duration step increment",
         "stepIncrementDesc": "Incremental interval when drivers select their desired charging duration.",
-        "maxDurationTitle": "MAX CHARGING DURATION",
+        "maxDurationTitle": "Max charging duration",
         "maxDurationDesc": "Maximum limit per session to avoid long connector idle occupancy.",
         "basePriceGroupTitle": "Base Charging Price",
-        "basePriceLabel": "BASE CHARGING PRICE",
+        "basePriceLabel": "Base charging price",
         "basePriceSub": "Base price",
         "basePriceHelp": "This price applies to any hours not covered by a custom TOU rate window below.",
-        "stepLabel": "DURATION STEP INCREMENT",
-        "bufferLabel": "TURNAROUND BUFFER",
-        "maxDurationLabel": "MAX CHARGING DURATION",
+        "stepLabel": "Duration step increment",
+        "bufferLabel": "Turnaround buffer",
+        "maxDurationLabel": "Max charging duration",
         "minutesUnit": "mins"
       },
       "step2": {
@@ -750,7 +750,7 @@
         "addRule": "Add rate window",
         "noRules": "No rate windows defined — every booking uses the base price. Click Add rate window to start.",
         "deleteBtn": "Delete",
-        "vsBase": "VS. BASE PRICE",
+        "vsBase": "Vs. base price",
         "tipTitle": "Revenue Optimization Tip",
         "tipText": "Raising the rate for the 18:00 – 21:00 window could lift monthly revenue by up to 15%.",
         "timelineTitle": "24-Hour Rate Distribution Timeline",
@@ -832,9 +832,9 @@
       "title": "Add rate window",
       "editTitle": "Edit rate window",
       "subtitle": "Define a custom rate that applies to bookings falling in this window.",
-      "ruleName": "RULE NAME",
+      "ruleName": "Rule name",
       "namePlaceholder": "E.g. Evening peak",
-      "applyDays": "APPLY ON DAYS",
+      "applyDays": "Apply on days",
       "priceLabel": "PRICE (₫/kWh)",
       "from": "FROM",
       "to": "TO",
@@ -934,10 +934,10 @@
       "desc": "All revenue and refund records are reconciled directly per booking and completed charging session."
     },
     "kpis": {
-      "gross": "GROSS REVENUE",
-      "refunded": "TOTAL REFUNDS",
-      "net": "NET REVENUE",
-      "avg": "AVG. VALUE",
+      "gross": "Gross revenue",
+      "refunded": "Total refunds",
+      "net": "Net revenue",
+      "avg": "Avg. value",
       "txCount": "{{count}} transactions",
       "refundCount": "{{count}} refunds",
       "netSub": "gross − refunds",
@@ -964,7 +964,7 @@
     },
     "table": {
       "cols": {
-        "txId": "TX ID",
+        "txId": "Transaction ID",
         "bookingId": "BOOKING",
         "type": "TYPE",
         "method": "METHOD",
@@ -1004,15 +1004,15 @@
       "withdrawn": "Withdrawn"
     },
     "summary": {
-      "total": "TOTAL STATIONS",
+      "total": "Total stations",
       "active": "ACTIVATED",
       "pending": "PENDING",
-      "online": "CHARGERS ONLINE",
-      "driverEligible": "DRIVER VISIBLE"
+      "online": "Chargers online",
+      "driverEligible": "Driver visible"
     },
     "card": {
-      "bookingsToday": "BOOKINGS TODAY",
-      "chargersOnline": "CHARGERS ONLINE",
+      "bookingsToday": "Bookings today",
+      "chargersOnline": "Chargers online",
       "utilization": "UTILIZATION",
       "addressLabel": "Address",
       "licenseLabel": "License",
@@ -1049,7 +1049,7 @@
       "title": "Register New Station",
       "subtitle": "Submission remains in PENDING status until evaluated by an administrator.",
       "toastSuccess": "Submitted registration for \"{{name}}\" — pending approval",
-      "stationName": "STATION NAME",
+      "stationName": "Station name",
       "namePlaceholder": "E.g. My Dinh Station",
       "nameRequired": "Please enter a station name.",
       "nameHelp": "This name is shown to drivers searching on the map.",
@@ -1058,22 +1058,22 @@
       "addressPlaceholder": "Street number, street name, district",
       "addressHelp": "Used to pin your station accurately on the search map.",
       "city": "CITY",
-      "province": "PROVINCE / CITY",
+      "province": "Province / city",
       "provincePlaceholder": "Select province / city",
       "searchProvince": "Search province / city...",
       "ward": "WARD",
       "wardPlaceholder": "Select ward",
       "searchWard": "Search ward...",
-      "contactPhone": "CONTACT PHONE",
+      "contactPhone": "Contact phone",
       "contactPhonePlaceholder": "E.g. 0912345678",
       "contactPhoneRequired": "Please enter a valid contact phone number.",
-      "description": "DESCRIPTION (OPTIONAL)",
+      "description": "Description (optional)",
       "descriptionPlaceholder": "Location notes or access instructions",
       "latitude": "LATITUDE",
       "latitudePlaceholder": "E.g. 21.0285",
       "longitude": "LONGITUDE",
       "longitudePlaceholder": "E.g. 105.8542",
-      "plannedChargers": "EST. CHARGER COUNT",
+      "plannedChargers": "Est. charger count",
       "licenseHelp": "Business licenses are verified off-platform prior to approval (do not upload files here).",
       "cancelBtn": "Cancel",
       "submitBtn": "Submit Registration",
@@ -1109,9 +1109,9 @@
       "viewOnMaps": "View on Google Maps",
       "descriptionTitle": "Description & Access Directions",
       "metrics": {
-        "plannedChargers": "PLANNED CHARGERS",
-        "onlineChargers": "ONLINE CHARGERS",
-        "bookingsToday": "BOOKINGS TODAY",
+        "plannedChargers": "Planned chargers",
+        "onlineChargers": "Online chargers",
+        "bookingsToday": "Bookings today",
         "utilization": "UTILIZATION"
       },
       "hardware": {
@@ -1416,8 +1416,8 @@
       "incidentCode": "INCIDENT #{{code}}",
       "statusOpen": "OPEN",
       "statusRecovered": "RECOVERED",
-      "handlingPending": "AWAITING SESSION STOP (PENDING)",
-      "handlingCompleted": "SAFETY CONFIRMED",
+      "handlingPending": "Awaiting session stop (pending)",
+      "handlingCompleted": "Safety confirmed",
       "closeBtn": "Close",
       "recoverBtn": "Recover Connector",
       "fullIdLabel": "Full Identifier:",
@@ -1476,10 +1476,10 @@
   },
   "finance": {
     "kpis": {
-      "gross": "GROSS RECORDED REVENUE",
-      "refunded": "TOTAL REFUNDED",
-      "pending": "PENDING OBLIGATIONS",
-      "net": "NET RECORDED REVENUE",
+      "gross": "Gross recorded revenue",
+      "refunded": "Total refunded",
+      "pending": "Pending obligations",
+      "net": "Net recorded revenue",
       "paidBookingsSuffix": "paid bookings",
       "pendingNotice": "Processing",
       "netNotice": "Net settled"
@@ -1490,10 +1490,10 @@
       "cols": {
         "booking": "BOOKING",
         "station": "STATION",
-        "date": "DATE & TIME",
+        "date": "Date & time",
         "collected": "COLLECTED",
         "refunded": "REFUNDED",
-        "net": "NET RECORDED",
+        "net": "Net recorded",
         "refundStatus": "REFUND",
         "actions": "ACTIONS"
       },
@@ -1533,21 +1533,21 @@
         "actionRequired": "Action Required"
       },
       "kpi": {
-        "pending": "PENDING OBLIGATIONS",
+        "pending": "Pending obligations",
         "pendingNotice": "Open obligations",
-        "succeeded": "SUCCEEDED REFUNDS",
+        "succeeded": "Succeeded refunds",
         "succeededNotice": "Completed",
-        "actionRequired": "REQUIRES RETRY",
+        "actionRequired": "Requires retry",
         "needsIntervention": "Action required",
         "noErrors": "No errors",
         "failedAttemptsSuffix": "failed attempts",
-        "totalAmount": "TOTAL REFUNDED AMOUNT",
+        "totalAmount": "Total refunded amount",
         "allStationsNotice": "Across all stations"
       },
       "searchPlaceholder": "Search by refund ID, booking, station...",
       "table": {
         "cols": {
-          "id": "REFUND ID",
+          "id": "Refund ID",
           "booking": "BOOKING",
           "station": "STATION",
           "reason": "REASON",
@@ -1567,7 +1567,7 @@
         "stationUnavailable": "Station unavailable"
       },
       "statusPill": {
-        "actionRequired": "ACTION REQUIRED"
+        "actionRequired": "Action required"
       },
       "retrySuccess": "Refund retry request submitted successfully!",
       "retryError": "Could not retry refund. Please check connection and try again.",

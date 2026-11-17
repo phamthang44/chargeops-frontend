@@ -29,6 +29,7 @@ import {
   IconTag,
   IconUsers,
   IconBook,
+  IconSparkles,
   NotificationBell,
   NotificationToastStack,
   type NotificationItem,
@@ -50,6 +51,7 @@ import { formatRelativeTime } from '../shared/notifications/formatRelativeTime';
 import { Pricing } from './pages/Pricing';
 import { License } from './pages/License';
 import { Assistant } from './pages/Assistant';
+import { OwnerAgentsSetup } from './pages/OwnerAgentsSetup';
 import { LegalPolicies } from '../shared/legal/LegalPolicies';
 import { Revenue } from './pages/Revenue';
 import { Staff } from './pages/Staff';
@@ -73,6 +75,7 @@ const PAGES: Record<string, ComponentType> = {
   revenue: Revenue,
   license: License,
   assistant: Assistant,
+  agents: OwnerAgentsSetup,
   legal: () => (
     <LegalPolicies audience="OWNER" defaultSlug="station-owner-license-agreement" queryKeyPrefix="owner" />
   ),
@@ -95,6 +98,7 @@ const NAV = [
   { key: 'staff', group: 'business', icon: <IconUsers size={17} /> },
   { key: 'license', group: 'business', icon: <IconShield size={17} /> },
   { key: 'assistant', group: 'reference', icon: <IconChat size={17} /> },
+  { key: 'agents', group: 'reference', icon: <IconSparkles size={17} /> },
   { key: 'legal', group: 'reference', icon: <IconBook size={17} /> },
 ];
 

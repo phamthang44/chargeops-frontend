@@ -60,6 +60,11 @@
         "title": "Policy Assistant",
         "subtitle": "Look up cancellation, check-in, and payment regulations."
       },
+      "agents": {
+        "label": "Connect AI Agents",
+        "title": "Connect AI Agents",
+        "subtitle": "Connect Codex or Claude Code to ask about station operations."
+      },
       "legal": {
         "label": "Policies & Legal",
         "title": "Policies & Regulations",
@@ -71,6 +76,52 @@
         "subtitle": "Real-time station alerts, charging sessions, and system notices."
       }
     }
+  },
+  "agents": {
+    "title": "Connect AI Agents",
+    "subtitle": "Use your existing Codex or Claude Code subscription to ask about your charging stations.",
+    "readyTitle": "Connection instructions are available for this environment",
+    "readyDescription": "Copy the commands below. They open ChargeOps sign-in in your browser; use your Owner account.",
+    "notReadyTitle": "Connection is not enabled in this environment",
+    "notReadyDescription": "An administrator must enable MCP on the backend, configure the OAuth client in Keycloak, and add the endpoint to the console. Connection commands will appear here after setup.",
+    "howItWorksTitle": "How it works",
+    "howItWorksDescription": "The agent runs in Codex or Claude Code on your computer. ChargeOps returns operational data after you sign in and Owner access is verified; model usage comes from your agent subscription.",
+    "steps": {
+      "step1": "Use a terminal for the one-time setup on a computer with Codex or Claude Code installed.",
+      "step2": "Run the provider commands below in order.",
+      "step3": "Sign in to ChargeOps in the browser when prompted.",
+      "step4": "Return to the agent and ask about your station status."
+    },
+    "codex": {
+      "title": "Codex",
+      "description": "Run the command once; MCP configuration is shared across Codex desktop, CLI, and IDE. Sign in with your ChargeOps Owner account.",
+      "docs": "Codex docs"
+    },
+    "claude": {
+      "title": "Claude Code",
+      "description": "Use Claude Code with your Claude Pro/Max plan and sign in with your ChargeOps Owner account; no Anthropic API key is needed.",
+      "docs": "Claude Code docs"
+    },
+    "placeholderCommands": "Connection commands will appear when this environment is enabled.",
+    "runCommandsInOrder": "Run each line in order in your terminal.",
+    "copyCommands": "Copy commands",
+    "copied": "Copied",
+    "copyFailed": "Automatic copy failed. You can still select and copy the commands in this panel.",
+    "tryTitle": "Try asking the agent",
+    "tryDescription": "After chargeops shows as connected in Codex or Claude Code:",
+    "prompts": {
+      "prompt1": "Summarize the status of my stations and equipment.",
+      "prompt2": "Which stations have equipment that needs attention? Include status and update time.",
+      "prompt3": "List my stations and the number of available connectors."
+    },
+    "scopeTitle": "Permissions and data",
+    "scope": {
+      "scope1": "Read-only summary, station list, and equipment alerts for the signed-in Owner.",
+      "scope2": "No charger control, station status changes, pricing, bookings, or finance actions.",
+      "scope3": "Customer data, ticket contents, booking IDs, transactions, and payment details are not sent.",
+      "scope4": "Status reflects data stored in ChargeOps, not a live device heartbeat."
+    },
+    "connectionNote": "The ChargeOps console cannot read the token or connection state stored in Codex/Claude on your computer. Disconnect or revoke access in the agent app's MCP settings or in Keycloak."
   },
   "notifications": {
     "empty": "No new notifications.",

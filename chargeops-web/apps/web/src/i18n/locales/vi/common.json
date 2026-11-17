@@ -148,8 +148,8 @@
         "body": "Đặt chỗ {{code}}. Nghĩa vụ hoàn tiền vẫn được giữ; chưa thể coi tiền đã được hoàn."
       },
       "succeeded": {
-        "title": "Hoàn tiền đã thành công trong Simulator",
-        "body": "Đặt chỗ {{code}}. Simulator đã ghi nhận hoàn tiền thành công; đây không phải giao dịch ngân hàng thật."
+        "title": "Hồ sơ hoàn đã ghi nhận thành công",
+        "body": "Đặt chỗ {{code}}. ChargeOps ghi nhận hồ sơ hoàn ở trạng thái thành công; ứng dụng không tự xác minh giao dịch ngân hàng."
       }
     },
     "ticket": {

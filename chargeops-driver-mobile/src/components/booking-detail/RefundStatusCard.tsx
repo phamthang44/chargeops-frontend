@@ -58,7 +58,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
     if (isPending) {
       return t('bookingDetail.refundStatusProcessing', 'Hồ sơ hoàn đang chờ xử lý');
     }
-      return t('bookingDetail.refundStatusSucceeded', 'Hoàn thành công trong Simulator');
+      return t('bookingDetail.refundStatusSucceeded', 'Hồ sơ hoàn được ghi nhận thành công');
   };
 
   const getStatusBadge = () => {
@@ -68,7 +68,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
     if (isPending) {
       return t('bookingDetail.refundBadgeProcessing', 'Chờ xử lý');
     }
-    return t('bookingDetail.refundBadgeSucceeded', 'Simulator: thành công');
+    return t('bookingDetail.refundBadgeSucceeded', 'Đã ghi nhận');
   };
 
   const getStatusDesc = () => {
@@ -92,7 +92,7 @@ export function RefundStatusCard({ booking }: RefundStatusCardProps) {
     }
     return t(
       'bookingDetail.refundDescSucceeded',
-      'Yêu cầu hoàn thành công trong Simulator. Kết quả này không xác nhận có giao dịch ngân hàng thật.',
+      'ChargeOps ghi nhận hồ sơ hoàn ở trạng thái thành công; ứng dụng không tự xác minh giao dịch ngân hàng.',
     );
   };
 
